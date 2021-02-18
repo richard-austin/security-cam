@@ -38,6 +38,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-tomcat"
     compile "org.grails:grails-plugin-url-mappings"
     compile "org.grails:grails-plugin-rest"
+    compile "org.grails.plugins:gsp"
     compile "org.grails:grails-plugin-codecs"
     compile "org.grails:grails-plugin-interceptors"
     compile "org.grails:grails-plugin-services"
@@ -51,6 +52,7 @@ dependencies {
     compile "org.hibernate:hibernate-core:5.4.18.Final"
     compile "org.grails.plugins:views-json"
     compile "org.grails.plugins:views-json-templates"
+    compile 'org.grails.plugins:spring-security-core:4.0.3'
     compileOnly "io.micronaut:micronaut-inject-groovy"
     console "org.grails:grails-console"
     profile "org.grails.profiles:angular"
