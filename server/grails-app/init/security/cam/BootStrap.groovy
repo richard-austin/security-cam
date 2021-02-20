@@ -1,11 +1,16 @@
 package security.cam
 
+import com.securitycam.Role
 import com.securitycam.User
+import grails.gorm.transactions.Transactional
+
+import static com.securitycam.UserRole.*
 
 class BootStrap {
     UserService userService
     RoleService roleService
     UserRoleService userRoleService
+
 
     def init = { servletContext ->
         List<String> authorities = ['ROLE_CLIENT']

@@ -60,6 +60,7 @@ dependencies {
     runtime "com.h2database:h2"
     runtime "org.apache.tomcat:tomcat-jdbc"
     runtime "javax.xml.bind:jaxb-api:2.3.1"
+    runtime "org.apache.tomcat:tomcat-jdbc"
     testCompile "io.micronaut:micronaut-inject-groovy"
     testCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.mockito:mockito-core"
@@ -72,8 +73,8 @@ dependencies {
 bootRun {
     ignoreExitValue true
     jvmArgs(
-        '-Dspring.output.ansi.enabled=always', 
-        '-noverify', 
+        '-Dspring.output.ansi.enabled=always',
+        '-noverify',
         '-XX:TieredStopAtLevel=1',
         '-Xmx1024m')
     sourceResources sourceSets.main
@@ -85,4 +86,22 @@ tasks.withType(GroovyCompile) {
     configure(groovyOptions) {
         forkOptions.jvmArgs = ['-Xmx1024m']
     }
+}
+
+bootWar.dependsOn(':client:buildClient')
+bootWar {
+    webInf {
+        from('../client/dist/client')
+        include '**/*'
+        into('classes/public')
+    }
+}
+
+task copyDeps(type: Copy) {
+    from (configurations.compile+configurations.testCompile) {
+        //   include “.jar"
+        //      include ".so”, “*.dll”
+    }
+    into rootProject.rootDir.getAbsolutePath()+"/lib"
+//rename can be applied on the files if you want to remove the version from the jar for instance
 }

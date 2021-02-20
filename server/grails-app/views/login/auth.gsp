@@ -8,7 +8,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta name="layout" content="${gspLayout ?: 'main'}"/>
+%{--    <meta name="layout" content="${gspLayout ?: 'main'}"/>--}%
     <title><g:message code='springSecurity.login.title'/></title>
     <style type="text/css" media="screen">
     #login {
