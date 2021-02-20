@@ -110,7 +110,7 @@ environments:
         grails:
             plugin:
                 springsecurity:
-                    active: false
+                    active: true
             cors:
                 enabled: true
         dataSource:
