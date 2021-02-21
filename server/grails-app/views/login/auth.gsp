@@ -1,7 +1,9 @@
 <html>
 <head>
-    <meta name="layout" content="${gspLayout ?: 'main'}"/>
+%{--    <meta name="layout" content="${gspLayout ?: 'main'}"/>--}%
     <title><g:message code='springSecurity.login.title'/></title>
+    <link rel="stylesheet" href="<g:resource dir='assets/stylesheets' file='bootstrap.min.css'/>" />
+    <script src="<g:resource dir='assets/javascripts' file='bootstrap.js' />"></script>
 </head>
 
 <body>
