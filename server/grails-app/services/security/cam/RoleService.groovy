@@ -1,7 +1,8 @@
 package security.cam
 
-import com.securitycam.Role
+
 import grails.gorm.services.Service
+import security.cam.Role
 
 @Service(Role)
 interface RoleService {

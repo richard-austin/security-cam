@@ -1,121 +1,39 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: austinr
-  Date: 18/02/2021
-  Time: 17:50
---%>
-
-<%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-%{--    <meta name="layout" content="${gspLayout ?: 'main'}"/>--}%
+    <meta name="layout" content="${gspLayout ?: 'main'}"/>
     <title><g:message code='springSecurity.login.title'/></title>
-    <style type="text/css" media="screen">
-    #login {
-        margin: 15px 0px;
-        padding: 0px;
-        text-align: center;
-        font-family: Arial, Helvetica, sans-serif;
-    }
-    #login .inner {
-        width: 340px;
-        padding-bottom: 6px;
-        margin: 60px auto;
-        text-align: left;
-        border: 1px solid #aab;
-        background-color: #f0f0fa;
-        -moz-box-shadow: 2px 2px 2px #eee;
-        -webkit-box-shadow: 2px 2px 2px #eee;
-        -khtml-box-shadow: 2px 2px 2px #eee;
-        box-shadow: 2px 2px 2px #eee;
-    }
-    #login .inner .fheader {
-        padding: 18px 26px 14px 26px;
-        background-color: #f7f7ff;
-        margin: 0px 0 14px 0;
-        color: #2e3741;
-        font-size: 18px;
-        font-weight: bold;
-    }
-    #login .inner .cssform p {
-        clear: left;
-        margin: 0;
-        padding: 4px 0 3px 0;
-        padding-left: 105px;
-        margin-bottom: 20px;
-        height: 1%;
-    }
-    #login .inner .cssform input[type="text"] {
-        width: 75%;
-    }
-    #login .inner .cssform label {
-        font-weight: bold;
-        float: left;
-        text-align: right;
-        margin-left: -105px;
-        width: 110px;
-        padding-top: 3px;
-        padding-right: 10px;
-    }
-    #remember_me_holder {
-        padding-left: 120px;
-    }
-    #submit {
-        margin-left: 15px;
-    }
-    #remember_me_holder label {
-        float: none;
-        margin-left: 0;
-        text-align: left;
-        width: 200px
-    }
-    #login .inner .login_message {
-        padding: 6px 25px 20px 25px;
-        color: #c33;
-    }
-    #login .inner .text_ {
-        width: 75%;
-    }
-    #login .inner .chk {
-        height: 12px;
-    }
-    #passwordToggler {
-        padding: 3px 4px;
-        cursor: pointer;
-    }
-    </style>
 </head>
 
 <body>
-<div id="login">
-    <div class="inner">
-        <div class="fheader"><g:message code='springSecurity.login.header'/></div>
+<div class="row">
+    <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+        <div class="card card-signin my-5">
+            <div class="card-body">
+                <h5 class="card-title text-center">Please Login to Security Cam</h5>
+                <g:if test='${flash.message}'>
+                    <div class="alert alert-danger" role="alert">${flash.message}</div>
+                </g:if>
+                <form class="form-signin" action="${postUrl ?: '/login/authenticate'}" method="POST" id="loginForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" name="${usernameParameter ?: 'username'}" id="username" autocapitalize="none"/>
+                    </div>
 
-        <g:if test='${flash.message}'>
-            <div class="login_message">${flash.message}</div>
-        </g:if>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" name="${passwordParameter ?: 'password'}" id="password"/>
+                        <i id="passwordToggler" title="toggle password display" onclick="passwordDisplayToggle()">&#128065;</i>
+                    </div>
 
-        <form action="${postUrl ?: '/login/authenticate'}" method="POST" id="loginForm" class="cssform" autocomplete="off">
-            <p>
-                <label for="username"><g:message code='springSecurity.login.username.label'/>:</label>
-                <input type="text" class="text_" name="${usernameParameter ?: 'username'}" id="username" autocapitalize="none"/>
-            </p>
-
-            <p>
-                <label for="password"><g:message code='springSecurity.login.password.label'/>:</label>
-                <input type="password" class="text_" name="${passwordParameter ?: 'password'}" id="password"/>
-                <i id="passwordToggler" title="toggle password display" onclick="passwordDisplayToggle()">&#128065;</i>
-            </p>
-
-            <p id="remember_me_holder">
-                <input type="checkbox" class="chk" name="${rememberMeParameter ?: 'remember-me'}" id="remember_me" <g:if test='${hasCookie}'>checked="checked"</g:if>/>
-                <label for="remember_me"><g:message code='springSecurity.login.remember.me.label'/></label>
-            </p>
-
-            <p>
-                <input type="submit" id="submit" value="${message(code: 'springSecurity.login.button')}"/>
-            </p>
-        </form>
+                    <div class="form-group form-check">
+                        <label class="form-check-label">
+                            <input type="checkbox" class="form-check-input" name="${rememberMeParameter ?: 'remember-me'}" id="remember_me" <g:if test='${hasCookie}'>checked="checked"</g:if>/> Remember me
+                        </label>
+                    </div>
+                    <button id="submit" class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Sign in</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 <script type="text/javascript">

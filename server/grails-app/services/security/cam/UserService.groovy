@@ -1,7 +1,8 @@
 package security.cam
 
-import com.securitycam.User
+
 import grails.gorm.services.Service
+import security.cam.User
 
 @Service(User)
 interface UserService {

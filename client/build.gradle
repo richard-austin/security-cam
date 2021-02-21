@@ -8,19 +8,19 @@ node {
     download = false
 }
 
-task bootRun(type: YarnTask, dependsOn: 'yarn') {
+task bootRun(type: NpmTask, dependsOn: 'npmInstall') {
     group = 'application'
     description = 'Start client side server'
     args = ['run', 'start']
 }
 
-task test(type: YarnTask, dependsOn: 'yarn') {
+task test(type: NpmTask, dependsOn: 'npmInstall') {
     group = 'verification'
     description = 'Execute unit tests'
     args = ['run', 'test']
 }
 
-task integrationTest(type: YarnTask, dependsOn: 'yarn') {
+task integrationTest(type: NpmTask, dependsOn: 'npmInstall') {
     args = ['run', 'e2e']
 }
 
