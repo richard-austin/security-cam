@@ -33,7 +33,7 @@ configurations {
 }
 
 dependencies {
-    implementation 'org.projectlombok:lombok:1.18.16'
+//    implementation 'org.projectlombok:lombok:1.18.16'
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     compile 'org.grails.plugins:spring-security-core:4.0.3'
     compile "org.springframework.boot:spring-boot-starter-logging"

@@ -1,18 +1,21 @@
 package server
 
 import grails.converters.JSON
-import grails.core.GrailsApplication
 import grails.plugin.springsecurity.annotation.Secured
-import security.cam.ConfigService
+import security.cam.CamService
+import security.cam.interfaceobjects.ObjectCommandResponse
+import security.cam.enums.PassFail
 
 class CamController {
-    GrailsApplication grailsApplication
-    ConfigService configService
+    CamService camService
 
     @Secured(['ROLE_CLIENT'])
     def getCameras() {
-        def cameras = configService.getCameras() // grailsApplication.config.grails.mime.types
+        ObjectCommandResponse cameras = camService.getCameras()//  grailsApplication.config.cameras //configService.getCameras()
 
-        render cameras as JSON
+        if(cameras.status != PassFail.PASS)
+            render (status: 500, text: cameras.error)
+        else
+            render cameras.responseObject as JSON
     }
 }
