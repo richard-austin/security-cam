@@ -10,7 +10,7 @@ class GetMotionEventsCommand implements Validateable{
     GrailsApplication grailsApplication
 
     static constraints = {
-        cameraName(nullable: false, size: 1..50,
+        cameraName(nullable: true, size: 1..50,
                 validator: { cameraName, cmd ->
                     def cameraNames = cmd.grailsApplication.config.motion.cameraNames
 
@@ -18,7 +18,7 @@ class GetMotionEventsCommand implements Validateable{
                         it['name'] == cameraName
                     }
 
-                    if(result == null)
+                    if(result == null && cameraName != null)
                         return "Camera name ${cameraName} not known"
                 })
     }

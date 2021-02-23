@@ -14,7 +14,7 @@ class MotionService {
      * @param cameraName
      * @return
      */
-    def getMotionEvents(String cameraName) {
+    def getMotionEvents(GetMotionEventsCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
@@ -22,16 +22,23 @@ class MotionService {
 
             File f = new File(motionEventsDirectory)
 
-            result.responseObject = f.list()
+            // Keep only the entries for the given cameraName, or return all if it's null
+            result.responseObject = f.list(new FilenameFilter() {
+                @Override
+                boolean accept(File file, String s) {
+                    if (cmd.cameraName == null)
+                        return true
+                    else
+                        return s.startsWith(cmd.cameraName)
+                }
+            })
 
-            if(result.responseObject == null)
-            {
+            if (result.responseObject == null) {
                 result.status = PassFail.FAIL
                 result.error = "Cannot access motion events"
             }
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
