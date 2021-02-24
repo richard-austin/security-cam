@@ -18,15 +18,17 @@ export class NavComponent implements OnInit, AfterViewInit {
   constructor(private cameraSvc: CameraService) {
   }
 
+  setCamers(camera: Camera):void {
+      this.cameraSvc.setActiveLive([camera]);
+  }
+
   ngOnInit(): void {
+    this.cameras = this.cameraSvc.getCameras();
   }
 
   ngAfterViewInit(): void {
     timer(1000).subscribe(()=> {
-      this.cameras = this.cameraSvc.getCameras();
-
-      let x = this.cameras[0].uris[0].type;
-      let y = x;
     });
   }
+
 }

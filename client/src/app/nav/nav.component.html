@@ -13,7 +13,7 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <ng-container *ngFor="let camera of cameras">
-               <span *ngFor="let uri of camera.uris"  class="dropdown-item">
+               <span *ngFor="let uri of camera.uris"  class="dropdown-item" (click)="setCamers(camera)">
                  {{camera.name+" ("+(uri.type == "lo" ? "Low res)" : "HD)")}}
                </span>
             </ng-container>
