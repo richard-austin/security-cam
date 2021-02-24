@@ -156,19 +156,24 @@ cameras:
     camera1:
         name: Porch Cam
         uris:
-            - uri:
-                type: hd
-                uri: /hls/porch.m3u8
-            - uri:
-                type: lo
-                uri: /hlslo/porch.m3u8
-
+            - type: hd
+              uri: /hls/porch.m3u8
+            - type: lo
+              uri: /hlslo/porch.m3u8
+        recordings:
+            - type: hd
+              uri: /hls/master.m3u8
+            - type: lo
+              uri: /hlslo/master.m3u8
     camera2:
         name: Garage Cam
         uris:
-            - uri:
-                type: hd
-                uri: /hls2/cam2.m3u8
-            - uri:
-                type: lo
-                uri: /hls2lo/cam2.m3u8
+            - type: hd
+              uri: /hls2/cam2.m3u8
+            - type: lo
+              uri: /hls2lo/cam2.m3u8
+        recordings:
+            - type: hd
+              uri: /hls2/master.m3u8
+            - type: lo
+              uri: /hls2lo/master.m3u8
