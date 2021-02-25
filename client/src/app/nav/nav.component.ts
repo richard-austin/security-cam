@@ -1,8 +1,7 @@
 import {AfterViewInit, Component, OnInit} from '@angular/core';
-import {faCamera} from '@fortawesome/free-solid-svg-icons';
+import {faVideo} from '@fortawesome/free-solid-svg-icons';
 import {CameraService} from "../cameras/camera.service";
-import {Camera} from "../cameras/Camera";
-import {timer} from "rxjs";
+import {Camera, Uri} from "../cameras/Camera";
 
 @Component({
   selector: 'app-nav',
@@ -12,14 +11,15 @@ import {timer} from "rxjs";
 export class NavComponent implements OnInit, AfterViewInit {
 
   // Font awesome icons
-  faCamera = faCamera;
+  faCamera = faVideo;
   cameras: Camera[] = [];
 
   constructor(private cameraSvc: CameraService) {
   }
 
-  setCamers(camera: Camera):void {
-      this.cameraSvc.setActiveLive([camera]);
+  setVideoStream(uri: Uri):void {
+      this.cameraSvc.setVideoStreams([uri]);
+      window.location.href = '#/video';
   }
 
   ngOnInit(): void {
@@ -27,8 +27,6 @@ export class NavComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    timer(1000).subscribe(()=> {
-    });
   }
 
 }

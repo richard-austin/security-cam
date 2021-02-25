@@ -1,7 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
 
-// Put this here for now as a zero length styles. .... .css file results in a 404 error
-.mystyle
+body {
+  background-color: #313030 !important;
+}
+
+div.videotitle {
+  font-size: large;
+  color: #f5b3b3;
+  padding: 1.5rem;
+}
+
+video.video
 {
-  background-color: black;
+  width: 70%;
+  min-width: 400px;
+  border: 0.25rem solid darkblue;
+  border-right-color: #3939f3;
+  border-bottom-color: #3939f3;;
 }

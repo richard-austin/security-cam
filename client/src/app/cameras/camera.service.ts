@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
-import {Observable, throwError} from "rxjs";
+import {Observable, Subject, throwError} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
-import {Camera} from "./Camera";
+import {Camera, Uri} from "./Camera";
 
 @Injectable({
   providedIn: 'root'
@@ -16,10 +16,12 @@ export class CameraService {
     })
   };
 
+  private activeLiveUpdates: Subject<any> = new Subject<any>();
+
   private cameras:Camera[] =[];
 
   // List of live views currently active
-  private activeLive:Camera[] = [];
+  private activeLive:Uri[] = [];
 
   // Currently active recording
   private activeRecording!:Camera;
@@ -30,16 +32,6 @@ export class CameraService {
       // having the cameras set up configured in application.yml
       for (const i in cameras) {
         const c = cameras[i];
-        // let camera: Camera = new Camera();
-        // camera.name = c.name;
-        // c.uris.forEach((uri: any) =>
-        //   camera.uris.push(uri)
-        // );
-        // c.recordings.forEach((recording: any) =>
-        //   camera.recordings.push(recording)
-        // );
-        //
-        // camera.recordings = c.recordings;
         this.cameras.push(c);
       }
     });
@@ -49,7 +41,7 @@ export class CameraService {
   /**
    * Get details of all cameras to be shown live
    */
-  getActiveLive():Camera[]
+  getActiveLive():Uri[]
   {
     return this.activeLive;
   }
@@ -65,12 +57,18 @@ export class CameraService {
    * setActiveLive; Set the list of cameras to be shown for viewing
    * @param cameras: The set of cameras to be viewed live
    */
-  setActiveLive(cameras:Camera[]):void
+  setVideoStreams(uris:Uri[]):void
   {
-    this.activeLive = cameras;
+    this.activeLive = uris;
     this.activeRecording = new Camera();
+
+    this.activeLiveUpdates.next(uris);
   }
 
+  getActiveLiveUpdates():Observable<any>
+  {
+      return this.activeLiveUpdates.asObservable();
+  }
   /**
    * setActiveRecording: Set a camera to show recordings from
    * @param camera: The camera whose recordings are to be shown
