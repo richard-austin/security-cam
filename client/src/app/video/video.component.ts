@@ -32,7 +32,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       let uri: Uri | undefined = cam.uris.find((uri) => uri === this.uri)
       if (uri === undefined) {
         uri = cam.recordings.find((uri: Uri) => uri === this.uri);
-        this.name = "Recording from ";
+        this.name = uri !== undefined ? "Recording from " : "";
       }
 
       if (uri !== undefined) {
