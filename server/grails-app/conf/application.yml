@@ -120,6 +120,38 @@ environments:
         dataSource:
             dbCreate: create-drop
             url: jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+
+        motion:
+            motionEventsDirectory: /home/austinr/motion-log
+            cameraNames:
+                - name: PorchCam
+                - name: SideGate
+        cameras:
+            camera1:
+                name: Porch Cam
+                uris:
+                    - type: hd
+                      uri: http://192.168.0.31/live/hls/porch.m3u8
+                    - type: lo
+                      uri: http://192.168.0.31/live/hlslo/porch.m3u8
+                recordings:
+                    - type: hd
+                      uri: http://192.168.0.31/recording/hls/master.m3u8
+                    - type: lo
+                      uri: http://192.168.0.31/recording/hlslo/master.m3u8
+            camera2:
+                name: Garage Cam
+                uris:
+                    - type: hd
+                      uri: http://192.168.0.31/live/hls2/cam2.m3u8
+                    - type: lo
+                      uri: http://192.168.0.31/live/hls2lo/cam2.m3u8
+                recordings:
+                    - type: hd
+                      uri: http://192.168.0.31/recording/hls2/master.m3u8
+                    - type: lo
+                      uri: http://192.168.0.31/recording/hls2lo/master.m3u8
+
     test:
         dataSource:
             dbCreate: update
@@ -127,7 +159,7 @@ environments:
     production:
         dataSource:
             dbCreate: update
-            url: jdbc:h2:./prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+            url: jdbc:h2:/home/www-data/db/prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
             properties:
                 jmxEnabled: true
                 initialSize: 5
@@ -146,29 +178,36 @@ environments:
                 testOnReturn: false
                 jdbcInterceptors: ConnectionState
                 defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+        motion:
+            motionEventsDirectory: /home/austinr/motion-log
+            cameraNames:
+                - name: PorchCam
+                - name: SideGate
+        cameras:
+            camera1:
+                name: Porch Cam
+                uris:
+                    - type: hd
+                      uri: /live/hls/porch.m3u8
+                    - type: lo
+                      uri: /live/hlslo/porch.m3u8
+                recordings:
+                    - type: hd
+                      uri: /recording/hls/master.m3u8
+                    - type: lo
+                      uri: /recording/hlslo/master.m3u8
+            camera2:
+                name: Garage Cam
+                uris:
+                    - type: hd
+                      uri: /live/hls2/cam2.m3u8
+                    - type: lo
+                      uri: /live/hls2lo/cam2.m3u8
+                recordings:
+                    - type: hd
+                      uri: /recording/hls2/master.m3u8
+                    - type: lo
+                      uri: /recording/hls2lo/master.m3u8
 
-motion:
-    motionEventsDirectory: /home/austinr/motion-log
-    cameraNames:
-        - name: PorchCam
-        - name: SideGate
-cameras:
-    camera1:
-        name: Porch Cam
-        uris:
-            - uri:
-                type: hd
-                uri: /hls/porch.m3u8
-            - uri:
-                type: lo
-                uri: /hlslo/porch.m3u8
 
-    camera2:
-        name: Garage Cam
-        uris:
-            - uri:
-                type: hd
-                uri: /hls2/cam2.m3u8
-            - uri:
-                type: lo
-                uri: /hls2lo/cam2.m3u8
+

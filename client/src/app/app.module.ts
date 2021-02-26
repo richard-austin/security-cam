@@ -6,16 +6,22 @@ import { AppComponent } from './app.component';
 import { CamerasComponent } from './cameras/cameras.component';
 import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {BaseUrl} from "./shared/BaseUrl/BaseUrl";
+import { NavComponent } from './nav/nav.component';
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import { VideoComponent } from './video/video.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    CamerasComponent
+    CamerasComponent,
+    NavComponent,
+    VideoComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    FontAwesomeModule,
   ],
   providers: [HttpClient, BaseUrl],
   bootstrap: [AppComponent]

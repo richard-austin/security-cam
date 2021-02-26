@@ -89,7 +89,7 @@ bootRun {
     systemProperty springProfilesActive, System.getProperty(springProfilesActive)
 }
 
-//bootWar.dependsOn(':client:buildClient')
+bootWar.dependsOn(':client:buildClient')
 bootWar {
     webInf {
         from('../client/dist/client')
