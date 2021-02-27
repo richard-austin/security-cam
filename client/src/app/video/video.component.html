@@ -1,7 +1,8 @@
-<div class="row">
-  <div class="mx-auto videotitle">{{name}}</div>
+<div [style.display]="visible ? 'block' : 'none'">
+  <div class="row">
+    <div class="mx-auto videotitle">{{name}}</div>
+  </div>
+  <div class="row">
+    <video #video class="mx-auto video"></video>
+  </div>
 </div>
-<div class="row">
-  <video #video class="mx-auto video"></video>
-</div>
-

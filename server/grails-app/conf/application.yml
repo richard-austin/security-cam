@@ -179,7 +179,7 @@ environments:
                 jdbcInterceptors: ConnectionState
                 defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
         motion:
-            motionEventsDirectory: /home/austinr/motion-log
+            motionEventsDirectory: /home/pi/motion-log
             cameraNames:
                 - name: PorchCam
                 - name: SideGate

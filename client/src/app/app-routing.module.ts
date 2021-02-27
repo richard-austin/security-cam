@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {VideoComponent} from "./video/video.component";
+import {LiveContainerComponent} from "./live-container/live-container.component";
 
 const routes: Routes = [
-  {path: 'video', component: VideoComponent}
+  {path: 'live', component: LiveContainerComponent}
 ];
 
 @NgModule({

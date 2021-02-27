@@ -9,13 +9,15 @@ import {BaseUrl} from "./shared/BaseUrl/BaseUrl";
 import { NavComponent } from './nav/nav.component';
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import { VideoComponent } from './video/video.component';
+import { LiveContainerComponent } from './live-container/live-container.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CamerasComponent,
     NavComponent,
-    VideoComponent
+    VideoComponent,
+    LiveContainerComponent
   ],
   imports: [
     BrowserModule,

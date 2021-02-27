@@ -57,7 +57,7 @@ export class CameraService {
    * setActiveLive; Set the list of cameras to be shown for viewing
    * @param cameras: The set of cameras to be viewed live
    */
-  setVideoStreams(uris:Uri[]):void
+  setActiveLive(uris:Uri[]):void
   {
     this.activeLive = uris;
     this.activeRecording = new Camera();
