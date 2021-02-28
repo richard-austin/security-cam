@@ -88,6 +88,31 @@ export class CameraService {
   }
 
   /**
+   * cameraForUri: Get the camera having the given uri
+   * @param uri
+   */
+  cameraForUri(uri:Uri):Camera|undefined
+  {
+    let cameras:Camera[] = this.getCameras();
+    let retVal:Camera|undefined = undefined;
+
+    for(let i = 0; i < cameras.length; ++i)
+    {
+      let camera:Camera = cameras[i];
+      for(let j = 0; j < camera.uris.length; ++j)
+      {
+        let thisuri:Uri = camera.uris[j];
+
+        if(thisuri.uri === uri.uri) {
+          retVal = camera;
+          break;
+        }
+      }
+    }
+    return retVal;
+  }
+
+  /**
    * getCamerasConfig: Get camera set up details from the server
    * @private
    */
