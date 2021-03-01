@@ -61,6 +61,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
+  stop() {
+    this.hls.stopLoad();
+  }
+
   ngOnDestroy(): void {
     this.hls.stopLoad();
   }

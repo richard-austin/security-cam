@@ -35,7 +35,6 @@ export class CameraService {
         this.cameras.push(c);
       }
     });
-
   }
 
   /**
@@ -116,7 +115,7 @@ export class CameraService {
    * getCamerasConfig: Get camera set up details from the server
    * @private
    */
-  private getCamerasConfig():Observable<any> {
+  getCamerasConfig():Observable<any> {
     return this.http.post<{}>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));

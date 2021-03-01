@@ -1,6 +1,10 @@
 <div class="flex-item" [style.display]="visible ? 'block' : 'none'">
   <div class="row">
-    <div class="mx-auto videotitle">{{name}}</div>
+    <mat-card class="mx-auto">
+      <mat-card-title class="mat-elevation-z8">
+        {{name}}
+      </mat-card-title>
+    </mat-card>
   </div>
   <div class="row">
     <video #video class="video"></video>

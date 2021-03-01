@@ -1,6 +1,85 @@
-/* You can add global styles to this file, and also import other style files */
 
-body {
-  background-color: #313030 !important;
+@import '~@angular/material/theming';
+// @import '../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css';
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+$mat-myapp-primary: (
+  50 : #a1a1a1,
+  100 : #f0f0f0,
+  200 : #f0b3b3,
+  300 : #e99494,
+  400 : #051f12,
+  500 : #16ff0e,
+  600 : #dc5e5e,
+  700 : #d85353,
+  800 : #d34949,
+  900 : #f13a3a,
+  A100 : #ffffff,
+  A200 : #ffe2e2,
+  A400 : blueviolet,
+  A700 : #550303,
+  contrast: (
+    50 : #000000,
+    100 : #000000,
+    200 : #000000,
+    300 : #000000,
+    400 : #000000,
+    500 : #000000,
+    600 : #000000,
+    700 : #ffffff,
+    800 : #ffffff,
+    900 : #ffffff,
+    A100 : #000000,
+    A200 : #000000,
+    A400 : #000000,
+    A700 : #000000,
+  )
+);
+
+$mat-myapp-accent: (
+  50 : #fffaed,
+  100 : #fff4d1,
+  200 : #ffecb3,
+  300 : #ffe494,
+  400 : #ffdf7d,
+  500 : #ffd966,
+  600 : #ffd55e,
+  700 : #ffcf53,
+  800 : #ffca49,
+  900 : #ffc038,
+  A100 : #ffffff,
+  A200 : #ffffff,
+  A400 : #fff5e1,
+  A700 : #ffedc8,
+  contrast: (
+    50 : #000000,
+    100 : #000000,
+    200 : #000000,
+    300 : #000000,
+    400 : #000000,
+    500 : #000000,
+    600 : #000000,
+    700 : #000000,
+    800 : #000000,
+    900 : #000000,
+    A100 : #000000,
+    A200 : #000000,
+    A400 : #000000,
+    A700 : #000000,
+  )
+);
+
+$primary: mat-palette($mat-myapp-primary);
+$accent: mat-palette($mat-myapp-accent);
+
+$theme: mat-dark-theme($primary, $accent);
+
+@include angular-material-theme($theme);
+
+body{
+  background-color: #424242 !important;
 }
 
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

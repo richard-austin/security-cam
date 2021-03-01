@@ -20,18 +20,15 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
   setupVideo() {
 
-    this.videos.forEach((video) => video.visible = false);
+    this.videos.forEach((video) => {
+      video.visible = false;
+      video.stop();
+    });
     let index: number = 0;
     this.cameraSvc.getActiveLive().forEach((uri: Uri) => {
       this.timerHandle?.unsubscribe();
 
       let cam: Camera | undefined = this.cameraSvc.cameraForUri(uri)
-      //let uri: Uri = cam.uris.find((uri) => uri === this.uri) as Uri;
-      // if (uri === undefined) {
-      //   uri = cam.recordings.find((uri: Uri) => uri === this.uri) as Uri;
-      //   this.name = uri !== undefined ? "Recording from " : "";
-      // }
-
       if (uri !== undefined) {
         let video: VideoComponent | undefined = this.videos?.get(index++);
         if (video !== undefined) {
