@@ -9,6 +9,7 @@ export class Uri
 export class Camera
 {
     name: string = "";
+    motionName: string = "";
     uris: Uri[] = [];
     recordings: Uri[] = [];
 }

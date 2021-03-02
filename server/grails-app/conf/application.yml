@@ -129,6 +129,7 @@ environments:
         cameras:
             camera1:
                 name: Porch Cam
+                motionName: PorchCam
                 uris:
                     - type: hd
                       uri: http://192.168.0.31/live/hls/porch.m3u8
@@ -141,6 +142,7 @@ environments:
                       uri: http://192.168.0.31/recording/hlslo/master.m3u8
             camera2:
                 name: Garage Cam
+                motionName: SideGate
                 uris:
                     - type: hd
                       uri: http://192.168.0.31/live/hls2/cam2.m3u8
@@ -186,6 +188,7 @@ environments:
         cameras:
             camera1:
                 name: Porch Cam
+                motionName: PorchCam
                 uris:
                     - type: hd
                       uri: /live/hls/porch.m3u8
@@ -198,6 +201,7 @@ environments:
                       uri: /recording/hlslo/master.m3u8
             camera2:
                 name: Garage Cam
+                motionName: SideGate
                 uris:
                     - type: hd
                       uri: /live/hls2/cam2.m3u8

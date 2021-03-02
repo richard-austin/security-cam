@@ -20,6 +20,7 @@ import {MatCardModule} from "@angular/material/card";
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import {faCaretRight} from "@fortawesome/free-solid-svg-icons";
+import { RecordingControlComponent } from './recording-control/recording-control.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import {faCaretRight} from "@fortawesome/free-solid-svg-icons";
     NavComponent,
     VideoComponent,
     LiveContainerComponent,
-    MultiCamViewComponent
+    MultiCamViewComponent,
+    RecordingControlComponent
   ],
   imports: [
     BrowserModule,

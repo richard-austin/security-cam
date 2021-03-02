@@ -8,6 +8,16 @@ import security.cam.ValidationErrorService
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
+class MotionEvents
+{
+    MotionEvents(String[] events)
+    {
+        this.events = events
+    }
+
+    String[] events
+}
+
 class MotionController {
     MotionService motionService
     ValidationErrorService validationErrorService
@@ -23,7 +33,7 @@ class MotionController {
         if (motionEvents.status != PassFail.PASS)
             render(status: 500, text: motionEvents.error)
         else
-            render motionEvents.responseObject as String
+            render new MotionEvents(motionEvents.responseObject as String[]) as JSON
         }
     }
 }

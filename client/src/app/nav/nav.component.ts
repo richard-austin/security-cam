@@ -22,6 +22,12 @@ export class NavComponent implements OnInit, AfterViewInit {
       window.location.href = '#/live';
   }
 
+  showRecording(uri:Uri):void
+  {
+    this.cameraSvc.setActiveLive([uri]);
+    window.location.href = '#/recording';
+  }
+
   multiCamView() {
     window.location.href = '#/multicam';
   }

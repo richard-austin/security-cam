@@ -26,7 +26,7 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <ng-container *ngFor="let camera of cameras">
-               <span *ngFor="let recording of camera.recordings"  class="dropdown-item" (click)="setVideoStream(recording)">
+               <span *ngFor="let recording of camera.recordings"  class="dropdown-item" (click)="showRecording(recording)">
                  {{camera.name+" ("+(recording.type == "lo" ? "Low res)" : "HD)")}}
                </span>
           </ng-container>
