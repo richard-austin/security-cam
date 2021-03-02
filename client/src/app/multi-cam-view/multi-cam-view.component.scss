@@ -1,0 +1,40 @@
+div.flex-container {
+  display: inline-flex;
+  flex-wrap: wrap;
+}
+
+div.setting-item {
+  flex-grow: 1;
+}
+
+app-live-container.multi-display-item {
+  flex-grow: 6;
+}
+
+mat-card.camera-select
+{
+  min-width: 18rem;
+  > mat-card-content{
+    padding-left: 1rem;
+    padding-bottom: 1rem;
+    > mat-card-subtitle
+    {
+      margin-left: -1rem;
+      text-align: center;
+    }
+  }
+}
+
+mat-card-content
+{
+  padding-top: 1rem;
+}
+
+ul {
+  list-style-type: none;
+  margin-top: 4px;
+}
+
+.section {
+  margin: 12px 0;
+}

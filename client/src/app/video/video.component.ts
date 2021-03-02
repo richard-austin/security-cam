@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Camera, Uri, uriType} from "../cameras/Camera";
 import {CameraService} from "../cameras/camera.service";
 import {Subscription, timer} from "rxjs";
@@ -14,33 +14,25 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>
 
-  video!: HTMLVideoElement;
-  uri!: Uri;
-  hls = new Hls();
-  activeLiveUpdates!: Subscription;
-  name!: string;
+  private uri!:Uri;
+  name!:string;
 
-  constructor(private cameraSvc: CameraService) {
+  video!: HTMLVideoElement;
+  hls = new Hls();
+  visible: boolean = false;
+
+  constructor() {
   }
 
-  startVideo() {
-    this.uri = this.cameraSvc.getActiveLive()[0];
-    this.name = "";
+  setSource(uri:Uri, name:string):void
+  {
+      this.uri = uri;
+      this.name = name;
 
-    for (let i in this.cameraSvc.getCameras()) {
-      let cam: Camera = this.cameraSvc.getCameras()[i];
-      let uri: Uri | undefined = cam.uris.find((uri) => uri === this.uri)
-      if (uri === undefined) {
-        uri = cam.recordings.find((uri: Uri) => uri === this.uri);
-        this.name = uri !== undefined ? "Recording from " : "";
-      }
+      this.startVideo();
+  }
 
-      if (uri !== undefined) {
-        this.name += cam.name + (uri.type === uriType.hd ? " (HD)" : " (Low Res)");
-        break;
-      }
-    }
-
+  private startVideo():void {
     if (this.uri !== undefined) {
       if (Hls.isSupported()) {
         this.hls.loadSource(this.uri.uri);
@@ -67,13 +59,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     // This prevents value changed after it was checked error
     timer(10).subscribe(() => this.startVideo());
 
-    this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => this.startVideo())
+  }
 
+  stop() {
+    this.hls.stopLoad();
   }
 
   ngOnDestroy(): void {
     this.hls.stopLoad();
-    this.activeLiveUpdates?.unsubscribe();
   }
-
 }

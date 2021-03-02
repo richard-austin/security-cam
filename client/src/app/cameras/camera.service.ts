@@ -35,7 +35,6 @@ export class CameraService {
         this.cameras.push(c);
       }
     });
-
   }
 
   /**
@@ -57,7 +56,7 @@ export class CameraService {
    * setActiveLive; Set the list of cameras to be shown for viewing
    * @param cameras: The set of cameras to be viewed live
    */
-  setVideoStreams(uris:Uri[]):void
+  setActiveLive(uris:Uri[]):void
   {
     this.activeLive = uris;
     this.activeRecording = new Camera();
@@ -88,10 +87,35 @@ export class CameraService {
   }
 
   /**
+   * cameraForUri: Get the camera having the given uri
+   * @param uri
+   */
+  cameraForUri(uri:Uri):Camera|undefined
+  {
+    let cameras:Camera[] = this.getCameras();
+    let retVal:Camera|undefined = undefined;
+
+    for(let i = 0; i < cameras.length; ++i)
+    {
+      let camera:Camera = cameras[i];
+      for(let j = 0; j < camera.uris.length; ++j)
+      {
+        let thisuri:Uri = camera.uris[j];
+
+        if(thisuri.uri === uri.uri) {
+          retVal = camera;
+          break;
+        }
+      }
+    }
+    return retVal;
+  }
+
+  /**
    * getCamerasConfig: Get camera set up details from the server
    * @private
    */
-  private getCamerasConfig():Observable<any> {
+  getCamerasConfig():Observable<any> {
     return this.http.post<{}>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));

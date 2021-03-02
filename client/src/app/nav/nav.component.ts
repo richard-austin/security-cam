@@ -18,8 +18,12 @@ export class NavComponent implements OnInit, AfterViewInit {
   }
 
   setVideoStream(uri: Uri):void {
-      this.cameraSvc.setVideoStreams([uri]);
-      window.location.href = '#/video';
+      this.cameraSvc.setActiveLive([uri]);
+      window.location.href = '#/live';
+  }
+
+  multiCamView() {
+    window.location.href = '#/multicam';
   }
 
   ngOnInit(): void {
