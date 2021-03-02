@@ -1,10 +1,8 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {Camera, Uri} from "../cameras/Camera";
+import {Camera, Uri, uriType} from "../cameras/Camera";
 import {MatCheckboxChange} from "@angular/material/checkbox";
-import {LiveAnnouncerDefaultOptions} from "@angular/cdk/a11y";
 import {LiveContainerComponent} from "../live-container/live-container.component";
-import {VideoComponent} from "../video/video.component";
 
 class SelectableUri extends Uri {
   selected: boolean = false;
@@ -30,6 +28,9 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   streams: Stream[] = [];
 
+  /**
+   * setUpCameraDetails: Set up the available streams/cameras for selection by the check boxes
+   */
   setUpCameraDetails(): void {
     let cams: Camera[] = [];
 
@@ -44,15 +45,24 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
         let stream: Stream = new Stream();
         stream.name = c.name;
 
-        c.uris.forEach((u: Uri) => {
-          stream.uris.push(u as SelectableUri);
+        c?.uris.forEach((u: Uri) => {
+          let su:SelectableUri = u as SelectableUri;
+          // Select the low resolution streams by default
+          if(su.type === uriType.lo)
+            su.selected = true;
+
+          stream.uris.push(su);
         });
 
         this.streams.push(stream);
       });
+      this.showSelected();
     });
   }
 
+  /**
+   * showSelected: Display the currently selected streams..
+   */
   showSelected(): void {
     let uris: Uri[] = [];
     this.streams.forEach((s: Stream) => {
@@ -64,6 +74,13 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cameraSvc.setActiveLive(uris);
   }
 
+  /**
+   * updateCameras Respond to check box clicks to select/unselect streams. This also ensures
+   *               that only one stream (HD or Low Res) can be selected at one time
+   * @param $event: MatCheckbox change event including selected attribute
+   * @param stream: The stream on which the selection is being made
+   * @param uri: The specific uri on which the selection change is being made
+   */
   updateCameras($event: MatCheckboxChange, stream: Stream, uri: SelectableUri) {
     // Ensure all other uris in this stream are disabled, only one is to e enabled
     stream.uris.forEach((u: SelectableUri) => u.selected = false);
@@ -72,6 +89,9 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
     uri.selected = $event.checked;
   }
 
+  /**
+   * updateDisplay: Click handler for the Update button, changes the display to selected video streams
+   */
   updateDisplay() {
     this.showSelected();
   }
@@ -81,7 +101,6 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.setUpCameraDetails();
-    this.showSelected();
   }
 
   ngOnDestroy(): void {

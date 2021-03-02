@@ -1,5 +1,6 @@
 div.flex-container {
   display: inline-flex;
+  flex-wrap: wrap;
 }
 
 div.setting-item {
@@ -24,21 +25,9 @@ mat-card.camera-select
   }
 }
 
-
-
-
-
-
-
-
-
-
-.example-section {
-  margin: 12px 0;
-}
-
-.example-margin {
-  margin: 0 12px;
+mat-card-content
+{
+  padding-top: 1rem;
 }
 
 ul {
@@ -46,3 +35,6 @@ ul {
   margin-top: 4px;
 }
 
+.section {
+  margin: 12px 0;
+}
