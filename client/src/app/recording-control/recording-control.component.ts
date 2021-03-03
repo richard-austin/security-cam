@@ -64,7 +64,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
           video.visible = true;
         }
 
-        this.cameraSvc.getMotionEvents(cam.motionName).subscribe((events: LocalMotionEvents) => {
+        this.cameraSvc.getMotionEvents(cam.motionName, uri.uri).subscribe((events: LocalMotionEvents) => {
             this.motionEvents = events;
           },
           (error) => {

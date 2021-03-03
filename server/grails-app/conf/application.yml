@@ -137,9 +137,11 @@ environments:
                       uri: http://192.168.0.31/live/hlslo/porch.m3u8
                 recordings:
                     - type: hd
-                      uri: http://192.168.0.31/recording/hls/master.m3u8
+                      uri: http://localhost/recording/hls/master.m3u8
+                      masterManifest: /home/www-data/hls/master.m3u8
                     - type: lo
-                      uri: http://192.168.0.31/recording/hlslo/master.m3u8
+                      uri: http://localhost/recording/hlslo/master.m3u8
+                      masterManifest: /home/www-data/hlslo/master.m3u8
             camera2:
                 name: Garage Cam
                 motionName: SideGate
@@ -150,10 +152,11 @@ environments:
                       uri: http://192.168.0.31/live/hls2lo/cam2.m3u8
                 recordings:
                     - type: hd
-                      uri: http://192.168.0.31/recording/hls2/master.m3u8
+                      uri: http://localhost/recording/hls2/master.m3u8
+                      masterManifest: /home/www-data/hls2/master.m3u8
                     - type: lo
-                      uri: http://192.168.0.31/recording/hls2lo/master.m3u8
-
+                      uri: http://localhost/recording/hls2lo/master.m3u8
+                      masterManifest: /home/www-data/hls2lo/master.m3u8
     test:
         dataSource:
             dbCreate: update
@@ -181,7 +184,7 @@ environments:
                 jdbcInterceptors: ConnectionState
                 defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
         motion:
-            motionEventsDirectory: /home/pi/motion-log
+            motionEventsDirectory: /home/www-data/motion-log
             cameraNames:
                 - name: PorchCam
                 - name: SideGate
@@ -197,8 +200,10 @@ environments:
                 recordings:
                     - type: hd
                       uri: /recording/hls/master.m3u8
+                      masterManifest: /home/www-data/hls/master.m3u8
                     - type: lo
                       uri: /recording/hlslo/master.m3u8
+                      masterManifest: /home/www-data/hlslo/master.m3u8
             camera2:
                 name: Garage Cam
                 motionName: SideGate
@@ -210,8 +215,10 @@ environments:
                 recordings:
                     - type: hd
                       uri: /recording/hls2/master.m3u8
+                      masterManifest: /home/www-data/hls2/master.m3u8
                     - type: lo
                       uri: /recording/hls2lo/master.m3u8
+                      masterManifest: /home/www-data/hls2lo/master.m3u8
 
 
 

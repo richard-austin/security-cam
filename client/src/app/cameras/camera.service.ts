@@ -147,27 +147,12 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getMotionEvents(motionName: string): Observable<LocalMotionEvents>
+  getMotionEvents(motionName: string, uri: string): Observable<LocalMotionEvents>
   {
-    let toDateTime:(epoch:number) => string = (epoch:number):string => {
-      let a = new Date(epoch * 1000);
-      let months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      let year = a.getFullYear();
-      let month = months[a.getMonth()];
-      let date = a.getDate();
-      let hour = a.getHours();
-      let min = a.getMinutes();
-      let sec = a.getSeconds();
-
-
-      let time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-
-      return time;
-    }
     let searchString: string = 'moved-at-';
     let retVal = new LocalMotionEvents();
 
-    let name:{cameraName: string} = {cameraName: motionName};
+    let name:{cameraName: string, uri: string} = {cameraName: motionName, uri: uri};
     return this.http.post<MotionEvents>(this._baseUrl.getLink("motion", "getMotionEvents"), JSON.stringify(name), this.httpJSONOptions).pipe(
       map((value:MotionEvents) => {
         value.events.forEach((event:string) =>{

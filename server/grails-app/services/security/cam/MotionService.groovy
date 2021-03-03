@@ -8,8 +8,33 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 @Transactional
 class MotionService {
     GrailsApplication grailsApplication
+    CamService camService
 
-    /**
+    private String getMasterManifest(GetMotionEventsCommand cmd)
+    {
+        String retVal = "";
+        def cams = camService.getCameras().responseObject
+        for (cam in cams)
+        {
+            def camera = cam.value
+
+            for(recording in camera.recordings)
+            {
+                if(recording.uri == cmd.uri) {
+                    retVal = recording.masterManifest
+                    return retVal;
+                }
+            }
+        }
+        return retVal
+    }
+
+    private def getOffsetsToEvents(String masterManifest, ArrayList<Integer> eventTimes)
+    {
+
+    }
+
+     /**
      * Get the names of the motion event files
      * @param cameraName
      * @return
@@ -36,6 +61,18 @@ class MotionService {
             if (result.responseObject == null) {
                 result.status = PassFail.FAIL
                 result.error = "Cannot access motion events"
+            }
+            else
+            {
+                String manifest = getMasterManifest(cmd)
+                if(manifest == "") {
+                    result.status = PassFail.FAIL
+                    result.error = "Cannot get manifest file"
+                }
+                else
+                {
+
+                }
             }
         }
         catch (Exception ex) {
