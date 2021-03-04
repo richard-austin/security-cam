@@ -129,34 +129,43 @@ environments:
         cameras:
             camera1:
                 name: Porch Cam
+                descr: HD
+                defaultOnMultiDisplay: false
                 motionName: PorchCam
-                uris:
-                    - type: hd
-                      uri: http://192.168.0.31/live/hls/porch.m3u8
-                    - type: lo
-                      uri: http://192.168.0.31/live/hlslo/porch.m3u8
-                recordings:
-                    - type: hd
+                uri: http://192.168.0.31/live/hls/porch.m3u8
+                recording:
                       uri: http://localhost/recording/hls/master.m3u8
                       masterManifest: /home/www-data/hls/master.m3u8
-                    - type: lo
-                      uri: http://localhost/recording/hlslo/master.m3u8
-                      masterManifest: /home/www-data/hlslo/master.m3u8
+
             camera2:
+                name: Porch Cam
+                descr: Low res.
+                defaultOnMultiDisplay: true
+                motionName: PorchCam
+                uri: http://192.168.0.31/live/hlslo/porch.m3u8
+                recording:
+                    uri: http://localhost/recording/hlslo/master.m3u8
+                    masterManifest: hlslo/master.m3u8
+
+            camera3:
                 name: Garage Cam
                 motionName: SideGate
-                uris:
-                    - type: hd
-                      uri: http://192.168.0.31/live/hls2/cam2.m3u8
-                    - type: lo
-                      uri: http://192.168.0.31/live/hls2lo/cam2.m3u8
-                recordings:
-                    - type: hd
-                      uri: http://localhost/recording/hls2/master.m3u8
-                      masterManifest: /home/www-data/hls2/master.m3u8
-                    - type: lo
-                      uri: http://localhost/recording/hls2lo/master.m3u8
-                      masterManifest: /home/www-data/hls2lo/master.m3u8
+                descr: HD
+                defaultOnMultiDisplay: false
+                uri: http://192.168.0.31/live/hls2/cam2.m3u8
+                recording:
+                    uri: http://localhost/recording/hls2/master.m3u8
+                    masterManifest: /home/www-data/hls2/master.m3u8
+
+            camera4:
+                name: Garage Cam
+                motionName: SideGate
+                descr: Low res.
+                defaultOnMultiDisplay: true
+                uri: http://192.168.0.31/live/hls2lo/cam2.m3u8
+                recording:
+                    uri: http://localhost/recording/hls2lo/master.m3u8
+                    masterManifest: /home/www-data/hls2lo/master.m3u8
     test:
         dataSource:
             dbCreate: update
@@ -183,42 +192,51 @@ environments:
                 testOnReturn: false
                 jdbcInterceptors: ConnectionState
                 defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+
+        camerasHomeDirectory: /home/www-data
+
         motion:
-            motionEventsDirectory: /home/www-data/motion-log
+            motionEventsDirectory: motion-log
             cameraNames:
                 - name: PorchCam
                 - name: SideGate
         cameras:
             camera1:
                 name: Porch Cam
+                descr: HD
+                defaultOnMultiDisplay: false
                 motionName: PorchCam
-                uris:
-                    - type: hd
-                      uri: /live/hls/porch.m3u8
-                    - type: lo
-                      uri: /live/hlslo/porch.m3u8
-                recordings:
-                    - type: hd
-                      uri: /recording/hls/master.m3u8
-                      masterManifest: /home/www-data/hls/master.m3u8
-                    - type: lo
-                      uri: /recording/hlslo/master.m3u8
-                      masterManifest: /home/www-data/hlslo/master.m3u8
+                uri: /live/hls/porch.m3u8
+                recording: 
+                    uri: /recording/hls/master.m3u8
+                    masterManifest: hlslo/master.m3u8            
             camera2:
+                name: Porch Cam
+                descr: Low res.
+                defaultOnMultiDisplay: true
+                motionName: PorchCam
+                uri: /live/hlslo/porch.m3u8
+                recording:
+                      uri: /recording/hlslo/master.m3u8
+                      masterManifest: hlslo/master.m3u8
+            camera3:
                 name: Garage Cam
+                descr: HD
+                defaultOnMultiDisplay: false
                 motionName: SideGate
-                uris:
-                    - type: hd
-                      uri: /live/hls2/cam2.m3u8
-                    - type: lo
-                      uri: /live/hls2lo/cam2.m3u8
-                recordings:
-                    - type: hd
-                      uri: /recording/hls2/master.m3u8
-                      masterManifest: /home/www-data/hls2/master.m3u8
-                    - type: lo
+                uri: /live/hls2/cam2.m3u8
+                recording:
                       uri: /recording/hls2lo/master.m3u8
-                      masterManifest: /home/www-data/hls2lo/master.m3u8
+                      masterManifest: hls2lo/master.m3u8
 
+            camera4:
+                name: Garage Cam
+                descr: Low res.
+                defaultOnMultiDisplay: true
+                motionName: SideGate
+                uri: /live/hls2lo/cam2.m3u8
+                recording:
+                      uri: /recording/hls2lo/master.m3u8
+                      masterManifest: hls2lo/master.m3u8
 
 

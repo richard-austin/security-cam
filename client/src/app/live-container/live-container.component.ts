@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {Camera, Uri, uriType} from "../cameras/Camera";
-import {Subscription, timer} from "rxjs";
+import {Camera} from "../cameras/Camera";
+import {Subscription} from "rxjs";
 import {VideoComponent} from "../video/video.component";
 
 @Component({
@@ -19,20 +19,17 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   setupVideo() {
-
     this.videos.forEach((video) => {
       video.visible = false;
       video.stop();
     });
     let index: number = 0;
-    this.cameraSvc.getActiveLive().forEach((uri: Uri) => {
+    this.cameraSvc.getActiveLive().forEach((cam: Camera) => {
       this.timerHandle?.unsubscribe();
-
-      let cam: Camera | undefined = this.cameraSvc.cameraForUri(uri)
-      if (uri !== undefined) {
+      if (cam !== undefined) {
         let video: VideoComponent | undefined = this.videos?.get(index++);
         if (video !== undefined) {
-          video.setSource(uri, cam?.name + (uri.type === uriType.hd ? " (HD)" : " (Low Res)"));
+          video.setSource(cam);
           video.visible = true;
         }
       }

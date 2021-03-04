@@ -15,7 +15,7 @@
             <ul>
               <li *ngFor="let uri of stream.uris">
                 <mat-checkbox [color]="'primary'" [checked]="uri.selected"  (change)="updateCameras($event, stream,  uri)">
-                  {{uri.type == 'hd' ? "HD" : "Low Res"}}
+                  {{uri.descr}}
                 </mat-checkbox>
               </li>
             </ul>

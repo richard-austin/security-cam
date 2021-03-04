@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {faVideo} from '@fortawesome/free-solid-svg-icons';
 import {CameraService} from "../cameras/camera.service";
-import {Camera, Uri} from "../cameras/Camera";
+import {Camera} from "../cameras/Camera";
 
 @Component({
   selector: 'app-nav',
@@ -17,14 +17,14 @@ export class NavComponent implements OnInit, AfterViewInit {
   constructor(private cameraSvc: CameraService) {
   }
 
-  setVideoStream(uri: Uri):void {
-      this.cameraSvc.setActiveLive([uri]);
+  setVideoStream(cam: Camera):void {
+      this.cameraSvc.setActiveLive([cam]);
       window.location.href = '#/live';
   }
 
-  showRecording(uri:Uri):void
+  showRecording(cam:Camera):void
   {
-    this.cameraSvc.setActiveLive([uri]);
+    this.cameraSvc.setActiveLive([cam]);
     window.location.href = '#/recording';
   }
 

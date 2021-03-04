@@ -2,8 +2,8 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
-import {catchError, filter, map, tap} from "rxjs/operators";
-import {Camera, Uri} from "./Camera";
+import {catchError, map, tap} from "rxjs/operators";
+import {Camera} from "./Camera";
 
 declare let moment:any;
 
@@ -39,7 +39,7 @@ export class CameraService {
   private cameras: Camera[] = [];
 
   // List of live views currently active
-  private activeLive: Uri[] = [];
+  private activeLive: Camera[] = [];
 
   // Currently active recording
   private activeRecording!: Camera;
@@ -58,7 +58,7 @@ export class CameraService {
   /**
    * Get details of all cameras to be shown live
    */
-  getActiveLive(): Uri[] {
+  getActiveLive(): Camera[] {
     return this.activeLive;
   }
 
@@ -71,13 +71,13 @@ export class CameraService {
 
   /**
    * setActiveLive; Set the list of cameras to be shown for viewing
-   * @param cameras: The set of cameras to be viewed live
+   * @param cam: The set of cameras to be viewed live
    */
-  setActiveLive(uris: Uri[]): void {
-    this.activeLive = uris;
+  setActiveLive(cam: Camera[]): void {
+    this.activeLive = cam;
     this.activeRecording = new Camera();
 
-    this.activeLiveUpdates.next(uris);
+    this.activeLiveUpdates.next(cam);
   }
 
   getActiveLiveUpdates(): Observable<any> {
@@ -101,43 +101,6 @@ export class CameraService {
   }
 
   /**
-   * cameraForUri: Get the camera having the given uri
-   * @param uri
-   */
-  cameraForUri(uri: Uri): Camera | undefined {
-    let cameras: Camera[] = this.getCameras();
-    let retVal: Camera | undefined = undefined;
-
-    for (let i = 0; i < cameras.length; ++i) {
-      let camera: Camera = cameras[i];
-      for (let j = 0; j < camera.uris.length; ++j) {
-        let thisuri: Uri = camera.uris[j];
-
-        if (thisuri.uri === uri.uri) {
-          retVal = camera;
-          break;
-        }
-      }
-    }
-
-    // If not a live uri, try the recording uris
-    if (retVal === undefined) {
-      for (let i = 0; i < cameras.length; ++i) {
-        let camera: Camera = cameras[i];
-        for (let j = 0; j < camera.recordings.length; ++j) {
-          let thisuri: Uri = camera.recordings[j];
-
-          if (thisuri.uri === uri.uri) {
-            retVal = camera;
-            break;
-          }
-        }
-      }
-    }
-    return retVal;
-  }
-
-  /**
    * getCamerasConfig: Get camera set up details from the server
    * @private
    */
@@ -147,12 +110,12 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getMotionEvents(motionName: string, uri: string): Observable<LocalMotionEvents>
+  getMotionEvents(camera:Camera): Observable<LocalMotionEvents>
   {
     let searchString: string = 'moved-at-';
     let retVal = new LocalMotionEvents();
 
-    let name:{cameraName: string, uri: string} = {cameraName: motionName, uri: uri};
+    let name:{cameraName: string, uri: string} = {cameraName: camera.motionName, uri: camera.uri};
     return this.http.post<MotionEvents>(this._baseUrl.getLink("motion", "getMotionEvents"), JSON.stringify(name), this.httpJSONOptions).pipe(
       map((value:MotionEvents) => {
         value.events.forEach((event:string) =>{

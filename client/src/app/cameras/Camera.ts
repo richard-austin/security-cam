@@ -1,14 +1,7 @@
 
-export enum uriType {lo="lo", hd="hd"};
-
-export class Uri
+export class Recording
 {
-    type!: uriType;
-    uri!:string;
-}
-
-export class RecordingUri extends Uri
-{
+  uri: string = "";
   masterManifest: string = "";
 }
 
@@ -16,6 +9,8 @@ export class Camera
 {
     name: string = "";
     motionName: string = "";
-    uris: Uri[] = [];
-    recordings: RecordingUri[] = [];
+    descr: string = "";
+    defaultOnMultiDisplay: boolean = false;
+    uri: string = "";
+    recording: Recording = new Recording();
 }

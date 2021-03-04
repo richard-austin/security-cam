@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {VideoComponent} from "../video/video.component";
-import {Camera, Uri, uriType} from "../cameras/Camera";
+import {Camera} from "../cameras/Camera";
 import {CameraService, LocalMotionEvents, MotionEvents} from "../cameras/camera.service";
 import {Subscription} from "rxjs";
 
@@ -53,18 +53,17 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.video.visible = false;
     this.video.stop();
 
-    this.cameraSvc.getActiveLive().forEach((uri: Uri) => {
+    this.cameraSvc.getActiveLive().forEach((cam: Camera) => {
       this.timerHandle?.unsubscribe();
 
-      let cam: Camera | undefined = this.cameraSvc.cameraForUri(uri)
-      if (uri !== undefined && cam !== undefined) {
+      if (cam !== undefined) {
         let video: VideoComponent | undefined = this.video;
         if (video !== undefined) {
-          video.setSource(uri, cam.name + (uri.type === uriType.hd ? " (HD)" : " (Low Res)"));
+          video.setSource(cam, true);
           video.visible = true;
         }
 
-        this.cameraSvc.getMotionEvents(cam.motionName, uri.uri).subscribe((events: LocalMotionEvents) => {
+        this.cameraSvc.getMotionEvents(cam).subscribe((events: LocalMotionEvents) => {
             this.motionEvents = events;
           },
           (error) => {
