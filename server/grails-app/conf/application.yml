@@ -121,8 +121,10 @@ environments:
             dbCreate: create-drop
             url: jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
 
+        camerasHomeDirectory: /home/www-data
+
         motion:
-            motionEventsDirectory: /home/austinr/motion-log
+            motionEventsDirectory: motion-log
             cameraNames:
                 - name: PorchCam
                 - name: SideGate
@@ -135,7 +137,7 @@ environments:
                 uri: http://192.168.0.31/live/hls/porch.m3u8
                 recording:
                       uri: http://localhost/recording/hls/master.m3u8
-                      masterManifest: /home/www-data/hls/master.m3u8
+                      masterManifest: hls/master.m3u8
 
             camera2:
                 name: Porch Cam
@@ -155,7 +157,7 @@ environments:
                 uri: http://192.168.0.31/live/hls2/cam2.m3u8
                 recording:
                     uri: http://localhost/recording/hls2/master.m3u8
-                    masterManifest: /home/www-data/hls2/master.m3u8
+                    masterManifest: hls2/master.m3u8
 
             camera4:
                 name: Garage Cam
@@ -165,7 +167,7 @@ environments:
                 uri: http://192.168.0.31/live/hls2lo/cam2.m3u8
                 recording:
                     uri: http://localhost/recording/hls2lo/master.m3u8
-                    masterManifest: /home/www-data/hls2lo/master.m3u8
+                    masterManifest: hls2lo/master.m3u8
     test:
         dataSource:
             dbCreate: update

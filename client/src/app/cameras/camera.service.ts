@@ -115,7 +115,7 @@ export class CameraService {
     let searchString: string = 'moved-at-';
     let retVal = new LocalMotionEvents();
 
-    let name:{cameraName: string, uri: string} = {cameraName: camera.motionName, uri: camera.uri};
+    let name:{camera: Camera} = {camera: camera};
     return this.http.post<MotionEvents>(this._baseUrl.getLink("motion", "getMotionEvents"), JSON.stringify(name), this.httpJSONOptions).pipe(
       map((value:MotionEvents) => {
         value.events.forEach((event:string) =>{
