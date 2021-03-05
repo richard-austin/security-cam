@@ -21,6 +21,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import {faCaretRight} from "@fortawesome/free-solid-svg-icons";
 import { RecordingControlComponent } from './recording-control/recording-control.component';
+import {MatSelectModule} from "@angular/material/select";
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { RecordingControlComponent } from './recording-control/recording-control
     MatCheckboxModule,
     MatButtonModule,
     MatInputModule,
+    MatSelectModule,
     FormsModule
   ],
   providers: [HttpClient, BaseUrl],

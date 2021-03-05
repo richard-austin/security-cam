@@ -15,12 +15,18 @@ export class MotionEvents
     events: string[] = [];
 }
 
+export class LocalMotionEvent
+{
+  epoch!: number;
+  dateTime!: string;
+}
+
 /**
  * LocalMotionEvents: Motion events as delivered to the recordings page
  */
 export class LocalMotionEvents
 {
-  events: {epoch: number, dateTime: string}[] = [];
+  events: LocalMotionEvent[] = [];
 }
 
 @Injectable({

@@ -1,4 +1,4 @@
-package security.cam
+package security.cam.commands
 
 import grails.validation.Validateable
 

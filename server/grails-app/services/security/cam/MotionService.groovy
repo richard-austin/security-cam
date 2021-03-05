@@ -2,6 +2,7 @@ package security.cam
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import security.cam.commands.GetMotionEventsCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
@@ -11,7 +12,6 @@ import java.nio.file.Paths
 @Transactional
 class MotionService {
     GrailsApplication grailsApplication
-    CamService camService
 
     private Map<Long, Double> createTimeVsOffsetMap(GetMotionEventsCommand cmd)
     {
@@ -113,6 +113,16 @@ class MotionService {
     private Map<String, Map<Long, Double>> epochToOffsetMaps = new HashMap<String, Map<Long, Double>>()
 
     /**
+     * epochToOffsetHasEntryFor: Check if the epoch to offset map contains the given key
+     * @param motionName: The motionName key
+     * @return true if key is in map else false
+     */
+    boolean epochToOffsetHasEntryFor(String motionName)
+    {
+        return epochToOffsetMaps.containsKey(motionName)
+    }
+
+    /**
      * saveEpochToOffsetMap: Save the TreeMap of epoch times vs offset time into recording generated from the
      *                       master manifest file. Note that as the recording plays, the oldest .ts and manifest files are
      *                       deleted and  new master manifest is generated (every 2 minutes at the time of writing, so this map must
@@ -121,6 +131,7 @@ class MotionService {
      * @param motionName: The name of the motion events (containing epoch times) that will be used against this map
      * @return The map
      */
+    //TODO: try catch etc
     def saveEpochToOffsetMap(Map<Long, Double> map, String motionName)
     {
         epochToOffsetMaps[motionName] = map
@@ -133,6 +144,7 @@ class MotionService {
      * @param motionName: The name of the motion events (containing epoch times) that will be used against this map
      * @return: The offset time
      */
+    //TODO try catch etc
     Double getOffsetForEpoch(Long epoch, String motionName)
     {
         Map.Entry<Long, Double> floorEntry

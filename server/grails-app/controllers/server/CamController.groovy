@@ -7,6 +7,8 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.enums.PassFail
 
 class CamController {
+    static responseFormats = ['json', 'xml']
+
     CamService camService
 
     @Secured(['ROLE_CLIENT'])

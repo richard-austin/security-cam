@@ -1,9 +1,18 @@
 <app-video></app-video>
 
-<button (click)="stepForward()">Step Forward</button>
+<mat-form-field appearance="fill">
+  <mat-label>Motion Events</mat-label>
+  <mat-select (selectionChange)="getOffsetForEpoch($event)">
+    <mat-option *ngFor="let event of motionEvents" [value]="event.epoch">
+      {{event.dateTime}}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
 
+
+<button (click)="stepForward()">Step Forward</button>
 <button (click)="stepBack()">Step Back</button>
-<button (click)="stepTo(345)">Step To 345</button>
+<button (click)="stepTo(25959)">Step To 25959</button>
 <button (click)="pause()">Pause</button>
 <button (click)="start()">Start</button>
 <button (click)="fastForward()">Fast Forward</button>
