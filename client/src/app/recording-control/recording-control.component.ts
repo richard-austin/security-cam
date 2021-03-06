@@ -2,7 +2,7 @@ import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/c
 import {VideoComponent} from "../video/video.component";
 import {Camera} from "../cameras/Camera";
 import {CameraService, LocalMotionEvent, LocalMotionEvents, MotionEvents} from "../cameras/camera.service";
-import {Subscription} from "rxjs";
+import {Subscription, timer} from "rxjs";
 import {MatSelectChange} from "@angular/material/select";
 import {MotionService} from "../motion/motion.service";
 
@@ -55,8 +55,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.video.stop();
 
     this.cameraSvc.getActiveLive().forEach((cam: Camera) => {
-      this.timerHandle?.unsubscribe();
-
       if (cam !== undefined) {
         let video: VideoComponent | undefined = this.video;
         if (video !== undefined) {
@@ -76,7 +74,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
   getOffsetForEpoch($event: MatSelectChange) {
       let epoch: any = $event.value;
-
       let motionName:string  = this.video.camera.motionName;
       this.motionService.getTimeOffsetForEpoch(epoch, motionName).subscribe(offset => {
         this.video.video.currentTime = parseInt(offset.offset)-10;
@@ -87,16 +84,16 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   ngOnInit(): void {
+    this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => this.setupRecording());
   }
 
   ngAfterViewInit(): void {
-    this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => this.setupRecording());
-    this.setupRecording();
+    // Call with timer to avoid expression changed after it was checked error
+    this.timerHandle = timer(200).subscribe(() => this.setupRecording());
   }
 
   ngOnDestroy(): void {
     this.activeLiveUpdates?.unsubscribe();
     this.timerHandle?.unsubscribe();
   }
-
 }
