@@ -9,6 +9,8 @@ import security.cam.commands.GetOffsetForEpochCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
+import java.text.DecimalFormat
+
 class MotionEvents
 {
     MotionEvents(String[] events)
@@ -17,6 +19,35 @@ class MotionEvents
     }
 
     String[] events
+}
+
+class TimeOffset
+{
+    TimeOffset(Double timeOffset)
+    {
+        String strTOffset
+        DecimalFormat f = new DecimalFormat("##")
+        setOffset(f.format(timeOffset).toString())
+
+    }
+    String offset
+}
+
+class Recording
+{
+    String uri
+    String masterManifest
+}
+
+
+class Camera
+{
+    String name
+    String motionName
+    String descr;
+    boolean defaultOnMultiDisplay;
+    String uri
+    Recording recording
 }
 
 class MotionController {
@@ -52,7 +83,7 @@ class MotionController {
         }
         else {
             Double timeOffset = motionService.getOffsetForEpoch(cmd.epoch, cmd.motionName)
-            render(offset: timeOffset.toString())
+            render new TimeOffset(timeOffset) as JSON
         }
     }
 }

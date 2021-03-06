@@ -79,7 +79,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
       let motionName:string  = this.video.camera.motionName;
       this.motionService.getTimeOffsetForEpoch(epoch, motionName).subscribe(offset => {
-        this.video.video.currentTime = offset;
+        this.video.video.currentTime = parseInt(offset.offset)-10;
       },
       reason => {
           let x = reason;
