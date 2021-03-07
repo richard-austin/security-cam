@@ -13,10 +13,19 @@ import java.nio.file.Paths
 class MotionService {
     GrailsApplication grailsApplication
 
-    private Map<Long, Double> createTimeVsOffsetMap(GetMotionEventsCommand cmd)
+    /**
+     * createTimeVsOffsetMap: Create the lookup table which maps epoch times to offset times into the recording.
+     *                        The epoch times which form part of the motion event file names can then be used
+     *                        to seek the events in the recording
+     * @param cmd: Command object containing the camera details
+     * @return: The complete map
+     */
+    private ObjectCommandResponse createTimeVsOffsetMap(GetMotionEventsCommand cmd)
     {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
         Path pathToManifest = Paths.get(grailsApplication.config.camerasHomeDirectory as String, cmd.camera.recording.masterManifest as String)
-        Map<Long, Double> retVal = new TreeMap<Long, Double>();
+        Map<Long, Double> map = new TreeMap<Long, Double>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(pathToManifest.toString()))
 
@@ -26,9 +35,9 @@ class MotionService {
             Long lastEpoch = -1
             Integer interManifestTime = 0
             String line = reader.readLine()
+
             while (line != null)
             {
-                line = reader.readLine()
                 if(line.startsWith('#EXTINF:'))
                 {
                     // Get the seconds on the #EXTINF:
@@ -43,21 +52,24 @@ class MotionService {
                     if(epoch != lastEpoch) {
                         lastEpoch = epoch
                         interManifestTime = 0
-                        retVal.put(epoch, timeTotal)
+                        map.put(epoch, timeTotal)
                     }
                     else {
                         interManifestTime += secs
-                        retVal.put(epoch+interManifestTime, timeTotal)
+                        map.put(epoch+interManifestTime, timeTotal)
                     }
                 }
+                line = reader.readLine()
             }
             reader.close()
+            result.responseObject = map
         }
         catch(Exception ex)
         {
-// TODO Error handling and return result in ObjectCommandResponse
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
         }
-        return retVal
+        return result
     }
 
      /**
@@ -90,16 +102,14 @@ class MotionService {
             }
             else
             {
-                Map<Long, Double> manifest = createTimeVsOffsetMap(cmd)
-                if(manifest == null || manifest.size() == 0) {
-                    result.status = PassFail.FAIL
-                    result.error = "Cannot get manifest file"
+                ObjectCommandResponse resp = createTimeVsOffsetMap(cmd)
+
+                if(resp.status == PassFail.PASS) {
+                    Map<Long, Double> map = resp.responseObject as Map<Long, Double>
+                    saveEpochToOffsetMap(map, cmd.camera.motionName as String)
                 }
                 else
-                {
-                    saveEpochToOffsetMap(manifest, cmd.camera.motionName as String)
-                    getOffsetForEpoch(1614629718, cmd.camera.motionName as String)
-                }
+                    result = resp
             }
         }
         catch (Exception ex) {
@@ -110,7 +120,7 @@ class MotionService {
         return result
     }
 
-    private Map<String, Map<Long, Double>> epochToOffsetMaps = new HashMap<String, Map<Long, Double>>()
+    private Map<String, TreeMap<Long, Double>> epochToOffsetMaps = new HashMap<String, Map<Long, Double>>()
 
     /**
      * epochToOffsetHasEntryFor: Check if the epoch to offset map contains the given key
@@ -132,7 +142,7 @@ class MotionService {
      * @return The map
      */
     //TODO: try catch etc
-    def saveEpochToOffsetMap(Map<Long, Double> map, String motionName)
+    private def saveEpochToOffsetMap(Map<Long, Double> map, String motionName)
     {
         epochToOffsetMaps[motionName] = map
     }
@@ -147,15 +157,27 @@ class MotionService {
     //TODO try catch etc
     Double getOffsetForEpoch(Long epoch, String motionName)
     {
-        Map.Entry<Long, Double> floorEntry
+        Map.Entry<Long, Double> floorEntry, ceilEntry
         Double retVal = -1
         TreeMap<Long, Double> map = epochToOffsetMaps[motionName]
         if(map) {
             floorEntry = map.floorEntry(epoch)
-            if(floorEntry)
+            if(floorEntry && floorEntry.key == epoch)
                 retVal = floorEntry.value
+            else
+            {
+                ceilEntry = map.ceilingEntry(epoch)
+                if(ceilEntry && ceilEntry.key == epoch)
+                    retVal = ceilEntry.value
+                else if(floorEntry && ceilEntry)
+                {
+                    // Epoch is between the floor and ceiling key values, so do interpolation
+                    Double o1=floorEntry.value, o2 = ceilEntry.value
+                    Long e1 = floorEntry.key, e2 = ceilEntry.key
+                    retVal = (epoch - e1) * (o2-o1)/(e2-e1) + o1
+                }
+            }
         }
-
         return retVal
     }
 }

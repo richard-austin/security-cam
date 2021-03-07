@@ -17,6 +17,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   timerHandle!: Subscription;
   private activeLiveUpdates!: Subscription;
   motionEvents!: LocalMotionEvent[];
+  errorMessage!: string;
 
   constructor(private cameraSvc: CameraService, private motionService: MotionService) {
   }
@@ -66,7 +67,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
             this.motionEvents = events.events;
           },
           (error) => {
-            // Error handling
+            this.errorMessage=error;
           });
       }
     });
@@ -79,7 +80,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.video.video.currentTime = parseInt(offset.offset)-10;
       },
       reason => {
-          let x = reason;
+          this.errorMessage = reason;
       });
   }
 

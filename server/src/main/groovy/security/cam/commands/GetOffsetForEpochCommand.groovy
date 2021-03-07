@@ -12,7 +12,7 @@ class GetOffsetForEpochCommand implements Validateable{
     static constraints = {
         epoch(nullable: false,
                 validator: { epoch, cmd ->
-                    if( epoch < 100000 || epoch > Integer.MAX_VALUE)
+                    if(epoch < 100000 || epoch > Integer.MAX_VALUE)
                         return "Epoch value is invalid"
                     return
                 })
