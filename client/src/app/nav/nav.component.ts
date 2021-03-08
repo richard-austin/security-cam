@@ -1,7 +1,9 @@
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {faVideo} from '@fortawesome/free-solid-svg-icons';
 import {CameraService} from "../cameras/camera.service";
 import {Camera} from "../cameras/Camera";
+import {ErrorReportingComponent} from "../error-reporting/error-reporting.component";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-nav',
@@ -10,6 +12,7 @@ import {Camera} from "../cameras/Camera";
 })
 export class NavComponent implements OnInit, AfterViewInit {
 
+  @ViewChild(ErrorReportingComponent) errorReporting!:ErrorReportingComponent;
   // Font awesome icons
   faCamera = faVideo;
   cameras: Camera[] = [];
@@ -37,6 +40,7 @@ export class NavComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // If the camera service got any errors while getting the camera setup, then we report it here.
+    this.cameraSvc.errorEmitter.subscribe((error:HttpErrorResponse) => this.errorReporting.errorMessage = error);
   }
-
 }

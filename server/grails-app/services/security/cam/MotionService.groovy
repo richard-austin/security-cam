@@ -106,7 +106,9 @@ class MotionService {
 
                 if(resp.status == PassFail.PASS) {
                     Map<Long, Double> map = resp.responseObject as Map<Long, Double>
-                    saveEpochToOffsetMap(map, cmd.camera.motionName as String)
+                    resp = saveEpochToOffsetMap(map, cmd.camera.motionName as String)
+                    if(resp.status == PassFail.FAIL)
+                        result = resp
                 }
                 else
                     result = resp
@@ -127,9 +129,18 @@ class MotionService {
      * @param motionName: The motionName key
      * @return true if key is in map else false
      */
-    boolean epochToOffsetHasEntryFor(String motionName)
+    ObjectCommandResponse epochToOffsetHasEntryFor(String motionName)
     {
-        return epochToOffsetMaps.containsKey(motionName)
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            result.responseObject = epochToOffsetMaps.containsKey(motionName)
+        }
+        catch(Exception ex)
+        {
+            result.status = PassFail.FAIL
+            result.error = "Exception in epochToOffsetHasEntryFor: " + ex.getMessage()
+        }
+        return result
     }
 
     /**
@@ -141,10 +152,18 @@ class MotionService {
      * @param motionName: The name of the motion events (containing epoch times) that will be used against this map
      * @return The map
      */
-    //TODO: try catch etc
-    private def saveEpochToOffsetMap(Map<Long, Double> map, String motionName)
+    private ObjectCommandResponse saveEpochToOffsetMap(Map<Long, Double> map, String motionName)
     {
-        epochToOffsetMaps[motionName] = map
+        ObjectCommandResponse retVal = new ObjectCommandResponse()
+        try {
+            epochToOffsetMaps[motionName] = map as TreeMap
+        }
+        catch(Exception ex)
+        {
+            retVal.status = PassFail.FAIL
+            retVal.error = ex.getMessage()
+        }
+        return retVal  // Nothing returned in responseObject
     }
 
     /**
@@ -154,30 +173,37 @@ class MotionService {
      * @param motionName: The name of the motion events (containing epoch times) that will be used against this map
      * @return: The offset time
      */
-    //TODO try catch etc
-    Double getOffsetForEpoch(Long epoch, String motionName)
+    ObjectCommandResponse getOffsetForEpoch(Long epoch, String motionName)
     {
-        Map.Entry<Long, Double> floorEntry, ceilEntry
-        Double retVal = -1
-        TreeMap<Long, Double> map = epochToOffsetMaps[motionName]
-        if(map) {
-            floorEntry = map.floorEntry(epoch)
-            if(floorEntry && floorEntry.key == epoch)
-                retVal = floorEntry.value
-            else
-            {
-                ceilEntry = map.ceilingEntry(epoch)
-                if(ceilEntry && ceilEntry.key == epoch)
-                    retVal = ceilEntry.value
-                else if(floorEntry && ceilEntry)
-                {
-                    // Epoch is between the floor and ceiling key values, so do interpolation
-                    Double o1=floorEntry.value, o2 = ceilEntry.value
-                    Long e1 = floorEntry.key, e2 = ceilEntry.key
-                    retVal = (epoch - e1) * (o2-o1)/(e2-e1) + o1
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            Map.Entry<Long, Double> floorEntry, ceilEntry
+            Double retVal = -1
+            TreeMap<Long, Double> map = epochToOffsetMaps[motionName]
+            if (map) {
+                floorEntry = map.floorEntry(epoch)
+                if (floorEntry && floorEntry.key == epoch)
+                    retVal = floorEntry.value
+                else {
+                    ceilEntry = map.ceilingEntry(epoch)
+                    if (ceilEntry && ceilEntry.key == epoch)
+                        retVal = ceilEntry.value
+                    else if (floorEntry && ceilEntry) {
+                        // Epoch is between the floor and ceiling key values, so do interpolation
+                        Double o1 = floorEntry.value, o2 = ceilEntry.value
+                        Long e1 = floorEntry.key, e2 = ceilEntry.key
+                        retVal = (epoch - e1) * (o2 - o1) / (e2 - e1) + o1
+                    }
                 }
             }
+            result.responseObject = retVal
         }
-        return retVal
+        catch(Exception ex)
+        {
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
     }
 }

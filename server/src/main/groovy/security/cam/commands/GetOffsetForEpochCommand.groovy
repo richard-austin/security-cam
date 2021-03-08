@@ -2,6 +2,8 @@ package security.cam.commands
 
 import grails.validation.Validateable
 import security.cam.MotionService
+import security.cam.enums.PassFail
+import security.cam.interfaceobjects.ObjectCommandResponse
 
 class GetOffsetForEpochCommand implements Validateable{
     Long epoch
@@ -18,8 +20,14 @@ class GetOffsetForEpochCommand implements Validateable{
                 })
         motionName(nullable: false,
         validator: {String motionName, cmd ->
-            if(!cmd.motionService.epochToOffsetHasEntryFor(motionName))
-                return "The motion events name ${motionName} is not in the map"
+            ObjectCommandResponse resp = cmd.motionService.epochToOffsetHasEntryFor(motionName)
+            if(resp.status == PassFail.PASS)
+            {
+                if(!resp.responseObject)
+                    return "The motion events name ${motionName} is not in the map"
+            }
+            else
+                return resp.error
         })
     }
 }

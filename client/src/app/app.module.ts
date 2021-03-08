@@ -22,6 +22,7 @@ import { far } from '@fortawesome/free-regular-svg-icons';
 import {faCaretRight} from "@fortawesome/free-solid-svg-icons";
 import { RecordingControlComponent } from './recording-control/recording-control.component';
 import {MatSelectModule} from "@angular/material/select";
+import { ErrorReportingComponent } from './error-reporting/error-reporting.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import {MatSelectModule} from "@angular/material/select";
     VideoComponent,
     LiveContainerComponent,
     MultiCamViewComponent,
-    RecordingControlComponent
+    RecordingControlComponent,
+    ErrorReportingComponent
   ],
   imports: [
     BrowserModule,

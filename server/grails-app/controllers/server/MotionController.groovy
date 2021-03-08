@@ -82,8 +82,15 @@ class MotionController {
             render(status: 400, text: errorsMap as JSON)
         }
         else {
-            Double timeOffset = motionService.getOffsetForEpoch(cmd.epoch, cmd.motionName)
-            render new TimeOffset(timeOffset) as JSON
+            ObjectCommandResponse result = motionService.getOffsetForEpoch(cmd.epoch, cmd.motionName)
+
+            if(result.status == PassFail.PASS)
+            {
+                Double timeOffset = result.responseObject as Double
+                render new TimeOffset(timeOffset) as JSON
+            }
+            else
+                render (status: 500, text: result.error)
         }
     }
 }

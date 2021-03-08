@@ -5,6 +5,7 @@ import {CameraService, LocalMotionEvent, LocalMotionEvents, MotionEvents} from "
 import {Subscription, timer} from "rxjs";
 import {MatSelectChange} from "@angular/material/select";
 import {MotionService} from "../motion/motion.service";
+import {ErrorReportingComponent} from "../error-reporting/error-reporting.component";
 
 @Component({
   selector: 'app-recording-control',
@@ -13,11 +14,10 @@ import {MotionService} from "../motion/motion.service";
 })
 export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(VideoComponent) video!: VideoComponent;
-
+  @ViewChild(ErrorReportingComponent) errorReporting!: ErrorReportingComponent;
   timerHandle!: Subscription;
   private activeLiveUpdates!: Subscription;
   motionEvents!: LocalMotionEvent[];
-  errorMessage!: string;
 
   constructor(private cameraSvc: CameraService, private motionService: MotionService) {
   }
@@ -54,6 +54,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   setupRecording() {
     this.video.visible = false;
     this.video.stop();
+    this.errorReporting.dismiss();
 
     this.cameraSvc.getActiveLive().forEach((cam: Camera) => {
       if (cam !== undefined) {
@@ -67,20 +68,21 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
             this.motionEvents = events.events;
           },
           (error) => {
-            this.errorMessage=error;
+            this.errorReporting.errorMessage = error;
           });
       }
     });
   }
 
   getOffsetForEpoch($event: MatSelectChange) {
-      let epoch: any = $event.value;
-      let motionName:string  = this.video.camera.motionName;
-      this.motionService.getTimeOffsetForEpoch(epoch, motionName).subscribe(offset => {
-        this.video.video.currentTime = parseInt(offset.offset)-10;
+    this.errorReporting.dismiss();
+    let epoch: any = $event.value;
+    let motionName: string = this.video.camera.motionName;
+    this.motionService.getTimeOffsetForEpoch(epoch, motionName).subscribe(offset => {
+        this.stepTo(parseInt(offset.offset) - 10);
       },
       reason => {
-          this.errorMessage = reason;
+        this.errorReporting.errorMessage = reason;
       });
   }
 

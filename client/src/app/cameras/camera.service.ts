@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
@@ -49,6 +49,7 @@ export class CameraService {
 
   // Currently active recording
   private activeRecording!: Camera;
+  errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
 
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     this.getCamerasConfig().subscribe(cameras => {
@@ -58,7 +59,10 @@ export class CameraService {
         const c = cameras[i];
         this.cameras.push(c);
       }
-    });
+    },
+      // Error messages would be shown by the nav component
+      reason => this.errorEmitter.emit(reason)
+    );
   }
 
   /**
