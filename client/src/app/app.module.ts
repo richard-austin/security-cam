@@ -17,7 +17,15 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
 import {MatInputModule} from "@angular/material/input";
 import {MatCardModule} from "@angular/material/card";
-import { fas } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBackward,
+  faFastForward,
+  faForward,
+  faPause,
+  faPlay,
+  fas, faStepBackward,
+  faStepForward
+} from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import {faCaretRight} from "@fortawesome/free-solid-svg-icons";
 import { RecordingControlComponent } from './recording-control/recording-control.component';
@@ -56,6 +64,6 @@ export class AppModule {
   constructor(faLibrary: FaIconLibrary)
   {
       faLibrary.addIconPacks(fas, far);
-      faLibrary.addIcons(faCaretRight);
+      faLibrary.addIcons(faCaretRight, faStepForward, faStepBackward, faForward, faBackward, faFastForward, faPause, faPlay);
   }
 }

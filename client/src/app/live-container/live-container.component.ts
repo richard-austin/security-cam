@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {AfterViewInit, Component, Input, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
 import {Camera} from "../cameras/Camera";
 import {Subscription} from "rxjs";
@@ -10,6 +10,7 @@ import {VideoComponent} from "../video/video.component";
   styleUrls: ['./live-container.component.scss']
 })
 export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy {
+  @Input() multi:boolean = false;
   @ViewChildren(VideoComponent) videos!: QueryList<VideoComponent>;
 
   activeLiveUpdates!: Subscription;
@@ -20,6 +21,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
   setupVideo() {
     this.videos.forEach((video) => {
+      video.multi = this.multi ? this.multi : false;
       video.visible = false;
       video.stop();
     });

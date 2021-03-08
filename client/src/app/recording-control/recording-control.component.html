@@ -15,12 +15,12 @@
   <div>
     <app-video></app-video>
     <div class="buttons-flex-container">
-      <button (click)="stepBack()">Step Back</button>
-      <button (click)="stepForward()">Step Forward</button>
-      <button (click)="pause()">Pause</button>
-      <button (click)="start()">Start</button>
-      <button (click)="fastForward()">Fast Forward</button>
-      <button (click)="fasterForward()">Faster Forward</button>
+      <button mat-raised-button class="recording-button" (click)="stepBack()" title="Step backward 10 seconds"><fa-icon [icon]="['fas', 'backward']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="recording-button" (click)="stepForward()" title="Step forward 10 seconds"><fa-icon [icon]="['fas', 'forward']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="recording-button" (click)="pause()" title="Pause"><fa-icon [icon]="['fas', 'pause']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="recording-button" (click)="start()" title="Play (restart after pause)"><fa-icon [icon]="['fas', 'play']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="recording-button" (click)="fastForward()" title="Fast forward"><fa-icon [icon]="['fas', 'fast-forward']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="faster-forward" (click)="fasterForward()" title="Faster forward"><fa-icon [icon]="['fas', 'fast-forward']" size="lg"></fa-icon></button>
     </div>
   </div>
 </div>

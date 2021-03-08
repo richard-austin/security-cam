@@ -19,6 +19,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   hls = new Hls();
   visible: boolean = false;
   recording: boolean = false;
+  multi: boolean = false;
 
   constructor() {
   }
@@ -44,6 +45,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  stop() {
+    this.hls.stopLoad();
+  }
+
   ngOnInit(): void {
   }
 
@@ -57,10 +62,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     // This prevents value changed after it was checked error
     timer(10).subscribe(() => this.startVideo());
 
-  }
-
-  stop() {
-    this.hls.stopLoad();
   }
 
   ngOnDestroy(): void {
