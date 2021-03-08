@@ -73,7 +73,7 @@ class MotionController {
         }
     }
 
-    @Secured(['ROLE_CENT'])
+    @Secured(['ROLE_CLIENT'])
     def getTimeOffsetForEpoch(GetOffsetForEpochCommand cmd)
     {
         if(cmd.hasErrors())

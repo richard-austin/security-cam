@@ -228,8 +228,8 @@ environments:
                 motionName: SideGate
                 uri: /live/hls2/cam2.m3u8
                 recording:
-                      uri: /recording/hls2lo/master.m3u8
-                      masterManifest: hls2lo/master.m3u8
+                      uri: /recording/hls2/master.m3u8
+                      masterManifest: hls2/master.m3u8
 
             camera4:
                 name: Garage Cam
