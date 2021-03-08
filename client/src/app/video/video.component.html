@@ -2,11 +2,11 @@
   <div class="row">
     <mat-card class="mx-auto">
       <mat-card-title class="mat-elevation-z8">
-        {{name}}
+        {{camera != undefined ? (camera.name+" ("+camera.descr+")") : ""}}
       </mat-card-title>
     </mat-card>
   </div>
   <div class="row">
-    <video #video class="video"></video>
+    <video #video [ngClass]="{'multi': multi}" class="video"></video>
   </div>
 </div>

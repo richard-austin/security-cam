@@ -1,10 +1,11 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {Camera, Uri, uriType} from "../cameras/Camera";
+import {Camera} from "../cameras/Camera";
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {LiveContainerComponent} from "../live-container/live-container.component";
+import {ErrorReportingComponent} from "../error-reporting/error-reporting.component";
 
-class SelectableUri extends Uri {
+class SelectableUri extends Camera{
   selected: boolean = false;
 }
 
@@ -21,6 +22,7 @@ export class Stream {
 export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild(LiveContainerComponent) liveContainer!: LiveContainerComponent;
+  @ViewChild(ErrorReportingComponent) errorReporting!:ErrorReportingComponent;
 
   constructor(private cameraSvc: CameraService) {
     this.cameraSvc.setActiveLive([]);
@@ -35,43 +37,39 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
     let cams: Camera[] = [];
 
     this.cameraSvc.getCamerasConfig().subscribe(cameras => {
-      // Build up a cameras array which excludes the addition guff which comes from
-      // having the cameras set up configured in application.yml
+      // Build up the cameras array
       for (const i in cameras) {
         const c = cameras[i];
-        cams.push(c);
-      }
-      cams?.forEach((c: Camera) => {
-        let stream: Stream = new Stream();
-        stream.name = c.name;
+        // List camera names only once, with their available streams
+        let stream: Stream | undefined = this.streams.find((s: Stream) => s.name === c.name);
+        if (stream === undefined) {
+          stream = new Stream();
+          stream.name = c.name;
+          this.streams.push(stream);
+        }
 
-        c?.uris.forEach((u: Uri) => {
-          let su:SelectableUri = u as SelectableUri;
-          // Select the low resolution streams by default
-          if(su.type === uriType.lo)
-            su.selected = true;
+        let su: SelectableUri = c as SelectableUri;
+        su.selected = c.defaultOnMultiDisplay;
+        stream.uris.push(su);
 
-          stream.uris.push(su);
-        });
-
-        this.streams.push(stream);
-      });
+    }
       this.showSelected();
-    });
+    },
+      reason => this.errorReporting.errorMessage = reason);
   }
 
   /**
    * showSelected: Display the currently selected streams..
    */
   showSelected(): void {
-    let uris: Uri[] = [];
+    let cams: Camera[] = [];
     this.streams.forEach((s: Stream) => {
       s.uris.forEach((uri: SelectableUri) => {
         if (uri.selected)
-          uris.push(uri);
+          cams.push(uri);
       })
     });
-    this.cameraSvc.setActiveLive(uris);
+    this.cameraSvc.setActiveLive(cams);
   }
 
   /**

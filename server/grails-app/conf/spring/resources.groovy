@@ -1,4 +1,4 @@
-import security.cam.UserPasswordEncoderListener
+import security.cam.commands.UserPasswordEncoderListener
 
 // Place your Spring DSL code here
 beans = {

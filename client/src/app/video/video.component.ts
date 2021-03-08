@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Camera, Uri, uriType} from "../cameras/Camera";
+import {Camera} from "../cameras/Camera";
 import {CameraService} from "../cameras/camera.service";
 import {Subscription, timer} from "rxjs";
 
@@ -14,36 +14,39 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>
 
-  private uri!:Uri;
-  name!:string;
-
+  camera!:Camera;
   video!: HTMLVideoElement;
   hls = new Hls();
   visible: boolean = false;
+  recording: boolean = false;
+  multi: boolean = false;
 
   constructor() {
   }
 
-  setSource(uri:Uri, name:string):void
+  setSource(cam:Camera, recording:boolean = false):void
   {
-      this.uri = uri;
-      this.name = name;
-
+      this.camera = cam;
+      this.recording = recording;
       this.startVideo();
   }
 
   private startVideo():void {
-    if (this.uri !== undefined) {
+    if (this.camera !== undefined) {
       if (Hls.isSupported()) {
-        this.hls.loadSource(this.uri.uri);
+        this.hls.loadSource(this.recording ? this.camera.recording.uri : this.camera.uri);
         this.hls.attachMedia(this.video);
 
         //hls.on(Hls.Events.MANIFEST_PARSED, this.video.play());
         // this.video.play();
       } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
-        this.video.src = this.uri.uri;
+        this.video.src = this.camera.uri;
       }
     }
+  }
+
+  stop() {
+    this.hls.stopLoad();
   }
 
   ngOnInit(): void {
@@ -59,10 +62,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     // This prevents value changed after it was checked error
     timer(10).subscribe(() => this.startVideo());
 
-  }
-
-  stop() {
-    this.hls.stopLoad();
   }
 
   ngOnDestroy(): void {

@@ -1,0 +1,29 @@
+<div class="flex-container">
+  <mat-card class="events-select">
+    <mat-card-title>Select a Motion Event</mat-card-title>
+    <mat-card-content>
+      <mat-form-field appearance="fill">
+        <mat-label>Motion Events</mat-label>
+        <mat-select (selectionChange)="getOffsetForEpoch($event)">
+          <mat-option *ngFor="let event of motionEvents" [value]="event.epoch">
+            {{event.dateTime}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+  <div>
+    <app-video></app-video>
+    <div class="buttons-flex-container">
+      <button mat-raised-button class="recording-button" (click)="stepBack()" title="Step backward 10 seconds"><fa-icon [icon]="['fas', 'backward']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="recording-button" (click)="stepForward()" title="Step forward 10 seconds"><fa-icon [icon]="['fas', 'forward']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="recording-button" (click)="pause()" title="Pause"><fa-icon [icon]="['fas', 'pause']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="recording-button" (click)="start()" title="Play (restart after pause)"><fa-icon [icon]="['fas', 'play']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="recording-button" (click)="fastForward()" title="Fast forward"><fa-icon [icon]="['fas', 'fast-forward']" size="lg"></fa-icon></button>
+      <button mat-raised-button class="faster-forward" (click)="fasterForward()" title="Faster forward"><fa-icon [icon]="['fas', 'fast-forward']" size="lg"></fa-icon></button>
+    </div>
+  </div>
+</div>
+<app-error-reporting></app-error-reporting>
+
+

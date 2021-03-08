@@ -10,10 +10,16 @@ div.videotitle {
 
 video.video
 {
-  width: 700px;
+  width: 900px;
   border: 0.25rem solid darkblue;
   border-right-color: #3939f3;
   border-bottom-color: #3939f3;
   margin-left: 1.5rem;
   margin-right: 1.5rem;
+}
+
+// Smaller video size in multi display
+video.multi
+{
+    width: 700px;
 }

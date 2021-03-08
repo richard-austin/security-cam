@@ -1,15 +1,39 @@
-import { Injectable } from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
-import {catchError, tap} from "rxjs/operators";
-import {Camera, Uri} from "./Camera";
+import {catchError, map, tap} from "rxjs/operators";
+import {Camera} from "./Camera";
+
+declare let moment:any;
+
+/**
+ * MotionEvents as received from the server
+ */
+export class MotionEvents
+{
+    events: string[] = [];
+}
+
+export class LocalMotionEvent
+{
+  epoch!: number;
+  dateTime!: string;
+}
+
+/**
+ * LocalMotionEvents: Motion events as delivered to the recordings page
+ */
+export class LocalMotionEvents
+{
+  events: LocalMotionEvent[] = [];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CameraService {
-  readonly httpJSONOptions ={
+  readonly httpJSONOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'my-auth-token'
@@ -18,15 +42,16 @@ export class CameraService {
 
   private activeLiveUpdates: Subject<any> = new Subject<any>();
 
-  private cameras:Camera[] =[];
+  private cameras: Camera[] = [];
 
   // List of live views currently active
-  private activeLive:Uri[] = [];
+  private activeLive: Camera[] = [];
 
   // Currently active recording
-  private activeRecording!:Camera;
+  private activeRecording!: Camera;
+  errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
 
-  constructor(private http:HttpClient, private _baseUrl:BaseUrl) {
+  constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     this.getCamerasConfig().subscribe(cameras => {
       // Build up a cameras array which excludes the addition guff which comes from
       // having the cameras set up configured in application.yml
@@ -34,46 +59,46 @@ export class CameraService {
         const c = cameras[i];
         this.cameras.push(c);
       }
-    });
+    },
+      // Error messages would be shown by the nav component
+      reason => this.errorEmitter.emit(reason)
+    );
   }
 
   /**
    * Get details of all cameras to be shown live
    */
-  getActiveLive():Uri[]
-  {
+  getActiveLive(): Camera[] {
     return this.activeLive;
   }
 
   /**
    * getActiveRecording: Get details of the active recording
    */
-  getActiveRecording():Camera{
+  getActiveRecording(): Camera {
     return this.activeRecording;
   }
 
   /**
    * setActiveLive; Set the list of cameras to be shown for viewing
-   * @param cameras: The set of cameras to be viewed live
+   * @param cam: The set of cameras to be viewed live
    */
-  setActiveLive(uris:Uri[]):void
-  {
-    this.activeLive = uris;
+  setActiveLive(cam: Camera[]): void {
+    this.activeLive = cam;
     this.activeRecording = new Camera();
 
-    this.activeLiveUpdates.next(uris);
+    this.activeLiveUpdates.next(cam);
   }
 
-  getActiveLiveUpdates():Observable<any>
-  {
-      return this.activeLiveUpdates.asObservable();
+  getActiveLiveUpdates(): Observable<any> {
+    return this.activeLiveUpdates.asObservable();
   }
+
   /**
    * setActiveRecording: Set a camera to show recordings from
    * @param camera: The camera whose recordings are to be shown
    */
-  setActiveRecording(camera:Camera):void
-  {
+  setActiveRecording(camera: Camera): void {
     this.activeRecording = camera;
     this.activeLive = [];
   }
@@ -81,42 +106,36 @@ export class CameraService {
   /**
    * getCameras: Get details for all cameras
    */
-  public getCameras():Camera[]
-  {
-      return this.cameras;
-  }
-
-  /**
-   * cameraForUri: Get the camera having the given uri
-   * @param uri
-   */
-  cameraForUri(uri:Uri):Camera|undefined
-  {
-    let cameras:Camera[] = this.getCameras();
-    let retVal:Camera|undefined = undefined;
-
-    for(let i = 0; i < cameras.length; ++i)
-    {
-      let camera:Camera = cameras[i];
-      for(let j = 0; j < camera.uris.length; ++j)
-      {
-        let thisuri:Uri = camera.uris[j];
-
-        if(thisuri.uri === uri.uri) {
-          retVal = camera;
-          break;
-        }
-      }
-    }
-    return retVal;
+  public getCameras(): Camera[] {
+    return this.cameras;
   }
 
   /**
    * getCamerasConfig: Get camera set up details from the server
    * @private
    */
-  getCamerasConfig():Observable<any> {
-    return this.http.post<{}>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
+  getCamerasConfig(): Observable<Camera[]> {
+    return this.http.post<Camera[]>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
+      tap(),
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+
+  getMotionEvents(camera:Camera): Observable<LocalMotionEvents>
+  {
+    let searchString: string = 'moved-at-';
+    let retVal = new LocalMotionEvents();
+
+    let name:{camera: Camera} = {camera: camera};
+    return this.http.post<MotionEvents>(this._baseUrl.getLink("motion", "getMotionEvents"), JSON.stringify(name), this.httpJSONOptions).pipe(
+      map((value:MotionEvents) => {
+        value.events.forEach((event:string) =>{
+            let epochTime:number = parseInt(event.substr(event.indexOf(searchString)+searchString.length));
+            let formattedDate: string = moment(new Date(epochTime * 1000)).format('DD-MMM-YYYY HH:mm:ss');
+            retVal.events.push({epoch: epochTime, dateTime: formattedDate});
+        });
+        retVal.events.sort((a,b) => a.epoch - b.epoch);
+        return retVal;
+      }),
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

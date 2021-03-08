@@ -13,8 +13,8 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <ng-container *ngFor="let camera of cameras">
-               <span *ngFor="let uri of camera.uris"  class="dropdown-item" (click)="setVideoStream(uri)">
-                 {{camera.name+" ("+(uri.type == "lo" ? "Low res)" : "HD)")}}
+               <span class="dropdown-item" (click)="setVideoStream(camera)">
+                 {{camera.name+" ("+camera.descr+")"}}
                </span>
             </ng-container>
             <span class="dropdown-item" (click)="multiCamView()">Multi Camera View</span>
@@ -26,17 +26,13 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <ng-container *ngFor="let camera of cameras">
-               <span *ngFor="let recording of camera.recordings"  class="dropdown-item" (click)="setVideoStream(recording)">
-                 {{camera.name+" ("+(recording.type == "lo" ? "Low res)" : "HD)")}}
+               <span class="dropdown-item" (click)="showRecording(camera)">
+                 {{camera.name+" ("+camera.descr+")"}}
                </span>
           </ng-container>
         </div>
       </li>
-
     </ul>
-<!--    <form class="form-inline my-2 my-lg-0">-->
-<!--      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">-->
-<!--      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>-->
-<!--    </form>-->
   </div>
 </nav>
+<app-error-reporting></app-error-reporting>
