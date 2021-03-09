@@ -10,7 +10,12 @@ div.videotitle {
 
 video.video
 {
-  width: 900px;
+  @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px){
+    width: 700px;
+  }
+  @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
+    width: 900px;
+  }
   border: 0.25rem solid darkblue;
   border-right-color: #3939f3;
   border-bottom-color: #3939f3;
@@ -21,5 +26,5 @@ video.video
 // Smaller video size in multi display
 video.multi
 {
-    width: 700px;
+    max-width: 700px;
 }
