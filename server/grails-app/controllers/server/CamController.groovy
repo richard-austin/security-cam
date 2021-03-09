@@ -13,7 +13,7 @@ class CamController {
 
     @Secured(['ROLE_CLIENT'])
     def getCameras() {
-        ObjectCommandResponse cameras = camService.getCameras()//  grailsApplication.config.cameras //configService.getCameras()
+        ObjectCommandResponse cameras = camService.getCameras()
 
         if(cameras.status != PassFail.PASS)
             render (status: 500, text: cameras.error)

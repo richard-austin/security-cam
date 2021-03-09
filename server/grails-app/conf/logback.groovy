@@ -1,3 +1,4 @@
+import ch.qos.logback.core.util.FileSize
 import grails.util.BuildSettings
 import grails.util.Environment
 import org.springframework.boot.logging.logback.ColorConverter
@@ -34,4 +35,23 @@ if (Environment.isDevelopmentMode() && targetDir != null) {
     }
     logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false)
 }
+
+appender("camLogAppender", RollingFileAppender) {
+
+    def path = "/home/www-data/logs/"
+    file = "${path}security-cam.log"
+    encoder(PatternLayoutEncoder) {
+        pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} [%thread] - %M:%L - %msg%n"
+    }
+
+    rollingPolicy(SizeAndTimeBasedRollingPolicy) {
+        FileNamePattern = "${path}security-cam.log-%d{yyyy-MM-dd}.%i"
+        maxHistory = 10
+        totalSizeCap = new FileSize(3000000000)
+        MaxFileSize = new FileSize(10000000)
+    }
+}
+
+logger('CAM', DEBUG, ['camLogAppender'], true)
+
 root(ERROR, ['STDOUT'])

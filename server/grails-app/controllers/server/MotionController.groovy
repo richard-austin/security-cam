@@ -2,6 +2,7 @@ package server
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import security.cam.LogService
 import security.cam.commands.GetMotionEventsCommand
 import security.cam.MotionService
 import security.cam.ValidationErrorService
@@ -52,7 +53,7 @@ class Camera
 
 class MotionController {
     static responseFormats = ['json', 'xml']
-
+    LogService logService
     MotionService motionService
     ValidationErrorService validationErrorService
 
@@ -62,14 +63,19 @@ class MotionController {
 
         if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors, 'getMotionEvents')
+            logService.cam.error "getMotionEvents Validation error: "+cmd.errors.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {
             ObjectCommandResponse motionEvents = motionService.getMotionEvents(cmd)
 
-        if (motionEvents.status != PassFail.PASS)
-            render(status: 500, text: motionEvents.error)
-        else
-            render new MotionEvents(motionEvents.responseObject as String[]) as JSON
+            if (motionEvents.status != PassFail.PASS) {
+                logService.cam.error("getMotionEvents "+motionEvents.error)
+                render(status: 500, text: motionEvents.error)
+            }
+            else {
+                logService.cam.info("getMotionEvents success")
+                render new MotionEvents(motionEvents.responseObject as String[]) as JSON
+            }
         }
     }
 
@@ -86,6 +92,7 @@ class MotionController {
 
             if(result.status == PassFail.PASS)
             {
+
                 Double timeOffset = result.responseObject as Double
                 render new TimeOffset(timeOffset) as JSON
             }
