@@ -8,6 +8,7 @@ import security.cam.enums.PassFail
 @Transactional
 class CamService {
     GrailsApplication grailsApplication
+    LogService logService
 
     def getCameras() {
         ObjectCommandResponse response = new ObjectCommandResponse()
@@ -16,6 +17,7 @@ class CamService {
         }
         catch(Exception ex)
         {
+            logService.cam.error("Exception in getCameras: "+ex.getMessage())
             response.status = PassFail.FAIL
             response.error = ex.getMessage()
         }

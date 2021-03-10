@@ -2,6 +2,8 @@ package server
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.validation.ValidationErrors
+import security.cam.LogService
 import security.cam.commands.GetMotionEventsCommand
 import security.cam.MotionService
 import security.cam.ValidationErrorService
@@ -52,7 +54,7 @@ class Camera
 
 class MotionController {
     static responseFormats = ['json', 'xml']
-
+    LogService logService
     MotionService motionService
     ValidationErrorService validationErrorService
 
@@ -62,14 +64,18 @@ class MotionController {
 
         if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors, 'getMotionEvents')
+            logService.cam.error "getMotionEvents: Validation error: "+errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {
             ObjectCommandResponse motionEvents = motionService.getMotionEvents(cmd)
 
-        if (motionEvents.status != PassFail.PASS)
-            render(status: 500, text: motionEvents.error)
-        else
-            render new MotionEvents(motionEvents.responseObject as String[]) as JSON
+            if (motionEvents.status != PassFail.PASS) {
+                render(status: 500, text: motionEvents.error)
+            }
+            else {
+                logService.cam.info("getMotionEvents: success")
+                render new MotionEvents(motionEvents.responseObject as String[]) as JSON
+            }
         }
     }
 
@@ -78,19 +84,22 @@ class MotionController {
     {
         if(cmd.hasErrors())
         {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors, 'getTimeOffsetForEpoch')
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'getTimeOffsetForEpoch')
             render(status: 400, text: errorsMap as JSON)
+            logService.cam.error "getTimeOffsetForEpoch: Validation error: "+errorsMap.toString()
         }
         else {
             ObjectCommandResponse result = motionService.getOffsetForEpoch(cmd.epoch, cmd.motionName)
 
             if(result.status == PassFail.PASS)
             {
+                logService.cam.info("getTimeOffsetForEpoch: success")
                 Double timeOffset = result.responseObject as Double
                 render new TimeOffset(timeOffset) as JSON
             }
-            else
-                render (status: 500, text: result.error)
+            else {
+                render(status: 500, text: result.error)
+            }
         }
     }
 }

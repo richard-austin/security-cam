@@ -12,6 +12,7 @@ import java.nio.file.Paths
 @Transactional
 class MotionService {
     GrailsApplication grailsApplication
+    LogService logService
 
     /**
      * createTimeVsOffsetMap: Create the lookup table which maps epoch times to offset times into the recording.
@@ -22,6 +23,8 @@ class MotionService {
      */
     private ObjectCommandResponse createTimeVsOffsetMap(GetMotionEventsCommand cmd)
     {
+        logService.cam.debug("start createTimeVsOffsetMap: (timing check)")
+
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         Path pathToManifest = Paths.get(grailsApplication.config.camerasHomeDirectory as String, cmd.camera.recording.masterManifest as String)
@@ -63,12 +66,16 @@ class MotionService {
             }
             reader.close()
             result.responseObject = map
+            logService.cam.debug("createTimeVsOffsetMap: success")
         }
         catch(Exception ex)
         {
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
+            logService.cam.error("Exception in createTimeVsOffsetMap: "+result.error)
         }
+        logService.cam.debug("finishing createTimeVsOffsetMap: (timing check)")
+
         return result
     }
 
@@ -99,6 +106,7 @@ class MotionService {
             if (result.responseObject == null) {
                 result.status = PassFail.FAIL
                 result.error = "Cannot access motion events"
+                logService.cam.error("Error in getMotionEvents: "+result.error)
             }
             else
             {
@@ -107,14 +115,19 @@ class MotionService {
                 if(resp.status == PassFail.PASS) {
                     Map<Long, Double> map = resp.responseObject as Map<Long, Double>
                     resp = saveEpochToOffsetMap(map, cmd.camera.motionName as String)
-                    if(resp.status == PassFail.FAIL)
+                    if(resp.status == PassFail.FAIL) {
+                        logService.cam.error("Exception in getMotionEvents: "+resp.error)
                         result = resp
+                    }
                 }
-                else
+                else {
+                    logService.cam.error("Exception in getMotionEvents: "+resp.error)
                     result = resp
+                }
             }
         }
         catch (Exception ex) {
+            logService.cam.error("Exception in getMotionEvents: "+ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
@@ -137,6 +150,7 @@ class MotionService {
         }
         catch(Exception ex)
         {
+            logService.cam.error("Exception in epochToOffsetHasEntryFor: "+ex.getMessage())
             result.status = PassFail.FAIL
             result.error = "Exception in epochToOffsetHasEntryFor: " + ex.getMessage()
         }
@@ -160,6 +174,7 @@ class MotionService {
         }
         catch(Exception ex)
         {
+            logService.cam.error("Exception in saveEpochToOffsetMap: "+ex.getMessage())
             retVal.status = PassFail.FAIL
             retVal.error = ex.getMessage()
         }
@@ -176,24 +191,32 @@ class MotionService {
     ObjectCommandResponse getOffsetForEpoch(Long epoch, String motionName)
     {
         ObjectCommandResponse result = new ObjectCommandResponse()
-
+        logService.cam.debug("start getOffsetForEpoch: (timing check)")
         try {
             Map.Entry<Long, Double> floorEntry, ceilEntry
             Double retVal = -1
             TreeMap<Long, Double> map = epochToOffsetMaps[motionName]
             if (map) {
                 floorEntry = map.floorEntry(epoch)
-                if (floorEntry && floorEntry.key == epoch)
+                if (floorEntry && floorEntry.key == epoch) {
+                    logService.cam.debug("getOffsetForEpoch: using floor entry ("+epoch.toString()+":"+floorEntry.value.toString())
                     retVal = floorEntry.value
+                }
                 else {
                     ceilEntry = map.ceilingEntry(epoch)
-                    if (ceilEntry && ceilEntry.key == epoch)
+                    if (ceilEntry && ceilEntry.key == epoch) {
+                        logService.cam.debug("getOffsetForEpoch: using ceiling entry ("+epoch.toString()+":"+ceilEntry.value.toString())
                         retVal = ceilEntry.value
+                    }
                     else if (floorEntry && ceilEntry) {
                         // Epoch is between the floor and ceiling key values, so do interpolation
                         Double o1 = floorEntry.value, o2 = ceilEntry.value
                         Long e1 = floorEntry.key, e2 = ceilEntry.key
                         retVal = (epoch - e1) * (o2 - o1) / (e2 - e1) + o1
+                        logService.cam.debug("getOffsetForEpoch: epoch is between floor and ceiling values (epoch="+epoch.toString()+":\n"+
+                                "floor="+floorEntry.value+"\n"+
+                                "ceiling="+ceilEntry.value.toString()+"\n"+
+                                "interpolated="+retVal)
                     }
                 }
             }
@@ -201,9 +224,11 @@ class MotionService {
         }
         catch(Exception ex)
         {
+            logService.cam.error("Exception in getOffsetForEpoch: "+ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
+        logService.cam.debug("finished getOffsetForEpoch: (timing check)")
         return result
     }
 }
