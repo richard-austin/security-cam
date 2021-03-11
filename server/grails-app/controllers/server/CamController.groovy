@@ -13,6 +13,10 @@ class CamController {
     CamService camService
     LogService logService
 
+    /**
+     * getCameras: Get all cameras defined in the application.yml file
+     * @return
+     */
     @Secured(['ROLE_CLIENT'])
     def getCameras() {
         ObjectCommandResponse cameras = camService.getCameras()

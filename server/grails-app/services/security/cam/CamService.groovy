@@ -10,6 +10,10 @@ class CamService {
     GrailsApplication grailsApplication
     LogService logService
 
+    /**
+     * getCameras: Get all cameras defined in the application.yml file
+     * @return
+     */
     def getCameras() {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
