@@ -58,6 +58,11 @@ class MotionController {
     MotionService motionService
     ValidationErrorService validationErrorService
 
+    /**
+     * getMotionEvents: Get the motion events for the given camera.
+     * @param cmd: camera: Camera to get motion events for
+     * @return
+     */
     @Secured(['ROLE_CLIENT'])
     def getMotionEvents(GetMotionEventsCommand cmd) {
         response.contentType = "application/json"
@@ -79,6 +84,12 @@ class MotionController {
         }
     }
 
+    /**
+     * getTimeOffsetForEpoch: Get the time offset in seconds into a recording from the given epoch time
+     * @param cmd:  motionName: Identifies the recording as known to the motion process
+     *              epoch: The epoch time to obtain the time offset for.
+     * @return
+     */
     @Secured(['ROLE_CLIENT'])
     def getTimeOffsetForEpoch(GetOffsetForEpochCommand cmd)
     {

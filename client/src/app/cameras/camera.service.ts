@@ -82,12 +82,15 @@ export class CameraService {
   /**
    * setActiveLive; Set the list of cameras to be shown for viewing
    * @param cam: The set of cameras to be viewed live
+   * @param sendNotification: Send notification of to subscribed processes (such as recording page) if true.
+   *                          (defaulted to true)
    */
-  setActiveLive(cam: Camera[]): void {
+  setActiveLive(cam: Camera[], sendNotification:boolean = true): void {
     this.activeLive = cam;
     this.activeRecording = new Camera();
 
-    this.activeLiveUpdates.next(cam);
+    if(sendNotification)
+      this.activeLiveUpdates.next(cam);
   }
 
   getActiveLiveUpdates(): Observable<any> {
