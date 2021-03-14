@@ -10,9 +10,9 @@ grails:
             events: false
 info:
     app:
-        name: '@info.app.name@'
-        version: '@info.app.version@'
-        grailsVersion: '@info.app.grailsVersion@'
+        name: 'server'
+        version: '0.1'
+        grailsVersion: '4.0.7'
 spring:
     jmx:
         unique-names: true
@@ -134,7 +134,7 @@ environments:
                 descr: HD
                 defaultOnMultiDisplay: false
                 motionName: PorchCam
-                uri: http://192.168.0.31/live/hls/porch.m3u8
+                uri: http://192.168.0.29/live/hls/porch.m3u8
                 recording:
                       uri: http://localhost/recording/hls/master.m3u8
                       masterManifest: hls/master.m3u8
@@ -144,7 +144,7 @@ environments:
                 descr: Low res.
                 defaultOnMultiDisplay: true
                 motionName: PorchCam
-                uri: http://192.168.0.31/live/hlslo/porch.m3u8
+                uri: http://192.168.0.29/live/hlslo/porch.m3u8
                 recording:
                     uri: http://localhost/recording/hlslo/master.m3u8
                     masterManifest: hlslo/master.m3u8
@@ -154,7 +154,7 @@ environments:
                 motionName: SideGate
                 descr: HD
                 defaultOnMultiDisplay: false
-                uri: http://192.168.0.31/live/hls2/cam2.m3u8
+                uri: http://192.168.0.29/live/hls2/cam2.m3u8
                 recording:
                     uri: http://localhost/recording/hls2/master.m3u8
                     masterManifest: hls2/master.m3u8
@@ -164,10 +164,29 @@ environments:
                 motionName: SideGate
                 descr: Low res.
                 defaultOnMultiDisplay: true
-                uri: http://192.168.0.31/live/hls2lo/cam2.m3u8
+                uri: http://192.168.0.29/live/hls2lo/cam2.m3u8
                 recording:
                     uri: http://localhost/recording/hls2lo/master.m3u8
                     masterManifest: hls2lo/master.m3u8
+            camera5:
+                name: Garden Cam
+                motionName: Garden
+                descr: HD
+                defaultOnMultiDisplay: false
+                uri: http://192.168.0.29/live/hls2/cam2.m3u8
+                recording:
+                    uri: http://localhost/recording/hls3/master.m3u8
+                    masterManifest: hls3/master.m3u8
+
+            camera6:
+                name: Garden Cam
+                motionName: Garden
+                descr: Low res.
+                defaultOnMultiDisplay: true
+                uri: http://192.168.0.29/live/hls3lo/cam2.m3u8
+                recording:
+                    uri: http://localhost/recording/hls3lo/master.m3u8
+                    masterManifest: hls3lo/master.m3u8
     test:
         dataSource:
             dbCreate: update
@@ -240,5 +259,25 @@ environments:
                 recording:
                       uri: /recording/hls2lo/master.m3u8
                       masterManifest: hls2lo/master.m3u8
+
+            camera5:
+                name: Garden Cam
+                descr: HD
+                defaultOnMultiDisplay: false
+                motionName: Garden
+                uri: /live/hls3/cam3.m3u8
+                recording:
+                    uri: /recording/hls3/master.m3u8
+                    masterManifest: hls3/master.m3u8
+
+            camera6:
+                name: Garden Cam
+                descr: Low res.
+                defaultOnMultiDisplay: true
+                motionName: Garden
+                uri: /live/hls3lo/cam3.m3u8
+                recording:
+                    uri: /recording/hls3lo/master.m3u8
+                    masterManifest: hls3lo/master.m3u8
 
 
