@@ -142,8 +142,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.cameraSvc.getMotionEvents(cam).subscribe((events: LocalMotionEvents) => {
             this.motionEvents = events.events;
             // If there was an epoch time in the URL parameters, shift the recording to that time
-            if(this.paramEpoch !== -1)
-              this.getOffsetForEpoch({value: this.paramEpoch});
+            // if(this.paramEpoch !== -1)
+            //   this.getOffsetForEpoch({value: this.paramEpoch});
           },
           (error) => {
             this.errorReporting.errorMessage = error;
@@ -151,26 +151,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       }
       else
         this.setValidInput(false);
-  }
-
-  /**
-   * getOffsetForEpoch: From an epoch time, representing an absolute date/time, calculate the time offset into the
-   *                    currently shown recording at which this date/time is shown.
-   * @param $event: Either :-
-   *                    An Angular Material select box change event containing the selected date/time (given as epoch)
-   *                Or :-
-   *
-   */
-  getOffsetForEpoch($event: MatSelectChange | {value: number} ) {
-    this.errorReporting.dismiss();
-    let epoch: any = $event.value;
-    let motionName: string = this.video.camera.motionName;
-    this.motionService.getTimeOffsetForEpoch(epoch, motionName).subscribe(offset => {
-        this.stepTo(parseInt(offset.offset) - 10);
-      },
-      reason => {
-        this.errorReporting.errorMessage = reason;
-      });
   }
 
   /**

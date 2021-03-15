@@ -38,7 +38,7 @@ class TimeOffset
 class Recording
 {
     String uri
-    String masterManifest
+    String location
 }
 
 
@@ -80,36 +80,6 @@ class MotionController {
             else {
                 logService.cam.info("getMotionEvents: success")
                 render new MotionEvents(motionEvents.responseObject as String[]) as JSON
-            }
-        }
-    }
-
-    /**
-     * getTimeOffsetForEpoch: Get the time offset in seconds into a recording from the given epoch time
-     * @param cmd:  motionName: Identifies the recording as known to the motion process
-     *              epoch: The epoch time to obtain the time offset for.
-     * @return
-     */
-    @Secured(['ROLE_CLIENT'])
-    def getTimeOffsetForEpoch(GetOffsetForEpochCommand cmd)
-    {
-        if(cmd.hasErrors())
-        {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'getTimeOffsetForEpoch')
-            render(status: 400, text: errorsMap as JSON)
-            logService.cam.error "getTimeOffsetForEpoch: Validation error: "+errorsMap.toString()
-        }
-        else {
-            ObjectCommandResponse result = motionService.getOffsetForEpoch(cmd.epoch, cmd.motionName)
-
-            if(result.status == PassFail.PASS)
-            {
-                logService.cam.info("getTimeOffsetForEpoch: success")
-                Double timeOffset = result.responseObject as Double
-                render new TimeOffset(timeOffset) as JSON
-            }
-            else {
-                render(status: 500, text: result.error)
             }
         }
     }

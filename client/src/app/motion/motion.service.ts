@@ -17,11 +17,4 @@ export class MotionService {
 
 
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) { }
-
-  getTimeOffsetForEpoch(epoch: number, motionName: string): Observable<any> {
-    let params: {epoch: string, motionName: string} = {epoch: epoch.toString(), motionName: motionName};
-    return this.http.post<number>(this._baseUrl.getLink("motion", "getTimeOffsetForEpoch"), JSON.stringify(params), this.httpJSONOptions).pipe(
-      tap(),
-      catchError((err: HttpErrorResponse) => throwError(err)));
-  }
 }

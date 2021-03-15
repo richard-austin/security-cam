@@ -10,7 +10,7 @@ class GetMotionEventsCommand implements Validateable{
         camera(nullable: false,
             validator: { camera, cmd ->
                 if( camera.name == null || camera.name == "")
-                    return "Camera name is null"
+                    return "No camera was specified to find motion events for"
                 return
             })
         }

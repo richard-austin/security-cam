@@ -14,71 +14,6 @@ class MotionService {
     GrailsApplication grailsApplication
     LogService logService
 
-    /**
-     * createTimeVsOffsetMap: Create the lookup table which maps epoch times to offset times into the recording.
-     *                        The epoch times which form part of the motion event file names can then be used
-     *                        to seek the events in the recording
-     * @param cmd: Command object containing the camera details
-     * @return: The complete map
-     */
-    private ObjectCommandResponse createTimeVsOffsetMap(GetMotionEventsCommand cmd)
-    {
-        logService.cam.debug("start createTimeVsOffsetMap: (timing check)")
-
-        ObjectCommandResponse result = new ObjectCommandResponse()
-
-        Path pathToManifest = Paths.get(grailsApplication.config.camerasHomeDirectory as String, cmd.camera.recording.masterManifest as String)
-        Map<Long, Double> map = new TreeMap<Long, Double>();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(pathToManifest.toString()))
-
-            Double timeTotal = 0
-            Long epoch
-
-            Long lastEpoch = -1
-            Integer interManifestTime = 0
-            String line = reader.readLine()
-
-            while (line != null)
-            {
-                if(line.startsWith('#EXTINF:'))
-                {
-                    // Get the seconds on the #EXTINF:
-                    String strSecs = line.substring('#EXTINF:'.length(), line.length()-1)
-                    Double secs = Double.parseDouble(strSecs)
-                    timeTotal += secs
-
-                    // Get the epoch time from the .ts file name
-                    line = reader.readLine()
-                    String strEpoch = line.substring(line.lastIndexOf('-')+1, line.lastIndexOf('_'))
-                    epoch = Long.parseLong(strEpoch)
-                    if(epoch != lastEpoch) {
-                        lastEpoch = epoch
-                        interManifestTime = 0
-                        map.put(epoch, timeTotal)
-                    }
-                    else {
-                        interManifestTime += secs
-                        map.put(epoch+interManifestTime, timeTotal)
-                    }
-                }
-                line = reader.readLine()
-            }
-            reader.close()
-            result.responseObject = map
-            logService.cam.debug("createTimeVsOffsetMap: success")
-        }
-        catch(Exception ex)
-        {
-            result.status = PassFail.FAIL
-            result.error = ex.getMessage()
-            logService.cam.error("Exception in createTimeVsOffsetMap: "+result.error)
-        }
-        logService.cam.debug("finishing createTimeVsOffsetMap: (timing check)")
-
-        return result
-    }
-
      /**
      * Get the names of the motion event files
      * @param cameraName
@@ -89,17 +24,14 @@ class MotionService {
 
         try {
             def baseDir = grailsApplication.config.camerasHomeDirectory
-            Path motionEventsDirectory = Paths.get(baseDir as String, grailsApplication.config.motion.motionEventsDirectory as String)
+            Path motionEventsDirectory = Paths.get(baseDir as String, cmd.camera.recording.location as String)
             File f = new File(motionEventsDirectory.toString())
 
             // Keep only the entries for the given cameraName, or return all if it's null
             result.responseObject = f.list(new FilenameFilter() {
                 @Override
                 boolean accept(File file, String s) {
-                    if (cmd.camera.name == null)
-                        return true
-                    else
-                        return s.startsWith(cmd.camera.motionName as String)
+                    return s.endsWith('.m3u8')
                 }
             })
 
@@ -107,23 +39,6 @@ class MotionService {
                 result.status = PassFail.FAIL
                 result.error = "Cannot access motion events"
                 logService.cam.error("Error in getMotionEvents: "+result.error)
-            }
-            else
-            {
-                ObjectCommandResponse resp = createTimeVsOffsetMap(cmd)
-
-                if(resp.status == PassFail.PASS) {
-                    Map<Long, Double> map = resp.responseObject as Map<Long, Double>
-                    resp = saveEpochToOffsetMap(map, cmd.camera.motionName as String)
-                    if(resp.status == PassFail.FAIL) {
-                        logService.cam.error("Exception in getMotionEvents: "+resp.error)
-                        result = resp
-                    }
-                }
-                else {
-                    logService.cam.error("Exception in getMotionEvents: "+resp.error)
-                    result = resp
-                }
             }
         }
         catch (Exception ex) {
