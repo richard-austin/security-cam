@@ -22,6 +22,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   motionEvents!: LocalMotionEvent[];
   validInput: boolean = false;
   private paramEpoch: number = -1;
+  private camera!: Camera;
 
   constructor(private route:ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService) {
   }
@@ -127,20 +128,26 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     // Check for motionName and epoch time as URL parameters, use them if present and valid
     //  These are given in the URL in email motion sensing alerts to enable you to navigate straight to
     //  the relevant part of the recording.
-    this.checkForUrlParameters();
+//    this.checkForUrlParameters();
     // Check for selected camera (recording) from the nav bar menu, or URL parameters
     let cam: Camera = this.cameraSvc.getActiveLive()[0];
     // If camera (recording) available, then load that video to the page
       if (cam !== undefined) {
+        this.camera = cam;
         let video: VideoComponent | undefined = this.video;
         if (video !== undefined) {
-          video.setSource(cam, true);
-          video.visible = true;
-          this.setValidInput(true);
+        //   video.setSource(cam);
+           video.visible = true;
+           this.setValidInput(true);
         }
         // Get the motion events for this camera (by motionName)
         this.cameraSvc.getMotionEvents(cam).subscribe((events: LocalMotionEvents) => {
             this.motionEvents = events.events;
+            let manifest: string | undefined = this.motionEvents && this.motionEvents.length > 0 ? this.motionEvents[this.motionEvents.length-1].manifest : undefined;
+
+            if(manifest) {
+              this.video.setSource(cam, manifest);
+            }
             // If there was an epoch time in the URL parameters, shift the recording to that time
             // if(this.paramEpoch !== -1)
             //   this.getOffsetForEpoch({value: this.paramEpoch});
@@ -167,6 +174,10 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       });
     }
     this.validInput = inputValid;
+  }
+
+  showMotionEvent($event: MatSelectChange) {
+      this.video.setSource(this.camera, $event.value);
   }
 
   ngOnInit(): void {

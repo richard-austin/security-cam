@@ -17,6 +17,7 @@ export class MotionEvents
 
 export class LocalMotionEvent
 {
+  manifest!: string;
   epoch!: number;
   dateTime!: string;
 }
@@ -125,16 +126,19 @@ export class CameraService {
 
   getMotionEvents(camera:Camera): Observable<LocalMotionEvents>
   {
-    let searchString: string = 'moved-at-';
+    let epochStartDelim: string = '-';
+    let epochEndDelim: string = '_';
     let retVal = new LocalMotionEvents();
 
     let name:{camera: Camera} = {camera: camera};
     return this.http.post<MotionEvents>(this._baseUrl.getLink("motion", "getMotionEvents"), JSON.stringify(name), this.httpJSONOptions).pipe(
       map((value:MotionEvents) => {
         value.events.forEach((event:string) =>{
-            let epochTime:number = parseInt(event.substr(event.indexOf(searchString)+searchString.length));
+            let startIndex: number = event.lastIndexOf(epochStartDelim);
+            let endIndex: number =event.lastIndexOf(epochEndDelim);
+            let epochTime:number = parseInt(event.substr(startIndex+1, endIndex-startIndex));
             let formattedDate: string = moment(new Date(epochTime * 1000)).format('DD-MMM-YYYY HH:mm:ss');
-            retVal.events.push({epoch: epochTime, dateTime: formattedDate});
+            retVal.events.push({manifest: event, epoch: epochTime, dateTime: formattedDate});
         });
         retVal.events.sort((a,b) => a.epoch - b.epoch);
         return retVal;

@@ -4,8 +4,8 @@
     <mat-card-content>
       <mat-form-field appearance="fill">
         <mat-label>Motion Events</mat-label>
-        <mat-select (selectionChange)="getOffsetForEpoch($event)">
-          <mat-option *ngFor="let event of motionEvents" [value]="event.epoch">
+        <mat-select (selectionChange)="showMotionEvent($event)">
+          <mat-option *ngFor="let event of motionEvents" [value]="event.manifest">
             {{event.dateTime}}
           </mat-option>
         </mat-select>
