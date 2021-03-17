@@ -4,10 +4,10 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
 import security.cam.LogService
+import security.cam.commands.DeleteRecordingCommand
 import security.cam.commands.GetMotionEventsCommand
 import security.cam.MotionService
 import security.cam.ValidationErrorService
-import security.cam.commands.GetOffsetForEpochCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
@@ -80,6 +80,35 @@ class MotionController {
             else {
                 logService.cam.info("getMotionEvents: success")
                 render new MotionEvents(motionEvents.responseObject as String[]) as JSON
+            }
+        }
+    }
+
+    /**
+     * deleteRecording: Delete al the files comprising a motion event recording
+     * @param cmd: fileName The name of any one of the files in the recording to be deleted
+     *                      All the files will be deleted.
+     */
+    @Secured(['ROLE_CLIENT'])
+    def deleteRecording(DeleteRecordingCommand cmd)
+    {
+        ObjectCommandResponse result
+
+        if(cmd.hasErrors())
+        {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors, 'deleteRecording')
+            logService.cam.error "deleteRecording: Validation error: "+errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else
+        {
+            result = motionService.deleteRecording(cmd)
+            if (result.status != PassFail.PASS) {
+                render(status: 500, text: result.error)
+            }
+            else {
+                logService.cam.info("deleteRecording: success")
+                render ""
             }
         }
     }

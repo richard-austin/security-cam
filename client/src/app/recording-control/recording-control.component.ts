@@ -22,9 +22,15 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   motionEvents!: LocalMotionEvent[];
   validInput: boolean = false;
   private paramEpoch: number = -1;
-  private camera!: Camera;
+  camera!: Camera;
+  visible: boolean = false;
+  noVideo: boolean = false;
 
-  constructor(private route:ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService) {
+  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService) {
+  }
+
+  returnToStart() {
+    this.video.video.currentTime = 0;
   }
 
   /**
@@ -85,28 +91,25 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    *                        parameters were valid, otherwise -1. The parameters are supported to enable sending
    *                        links in motion event warning emails which will go straight to the event in the recording.
    */
-  checkForUrlParameters() : void
-  {
+  checkForUrlParameters(): void {
     let motionName: string;
     let epoch: number;
     this.route.params.subscribe(params => {
       motionName = params.motionName;
-      if(/^[0-9]{10}$/.test(params.epoch)) {
+      if (/^[0-9]{10}$/.test(params.epoch)) {
         epoch = parseInt(params.epoch);
-        let cameras:Camera[] = this.cameraSvc.getCameras();
+        let cameras: Camera[] = this.cameraSvc.getCameras();
 
-        if(!cameras)
-        {
-          this.cameraSvc.getCamerasConfig().subscribe((cams) =>{
+        if (!cameras) {
+          this.cameraSvc.getCamerasConfig().subscribe((cams) => {
             for (const i in cams) {
               const c = cameras[i];
               cameras.push(c);
             }
           });
         }
-        let cam:Camera|undefined = cameras.find((camera:Camera) => camera.motionName === motionName && camera.defaultOnMultiDisplay);
-        if(cam)
-        {
+        let cam: Camera | undefined = cameras.find((camera: Camera) => camera.motionName === motionName && camera.defaultOnMultiDisplay);
+        if (cam) {
           this.cameraSvc.setActiveLive([cam], false);
           this.paramEpoch = epoch;
         }
@@ -122,9 +125,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    *                 point of interest.
    */
   setupRecording() {
-    this.video.visible = false;
-    this.video.stop();
     this.errorReporting.dismiss();
+    this.visible = this.noVideo = false;
     // Check for motionName and epoch time as URL parameters, use them if present and valid
     //  These are given in the URL in email motion sensing alerts to enable you to navigate straight to
     //  the relevant part of the recording.
@@ -132,22 +134,26 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     // Check for selected camera (recording) from the nav bar menu, or URL parameters
     let cam: Camera = this.cameraSvc.getActiveLive()[0];
     // If camera (recording) available, then load that video to the page
-      if (cam !== undefined) {
-        this.camera = cam;
-        let video: VideoComponent | undefined = this.video;
-        if (video !== undefined) {
+    if (cam !== undefined) {
+      this.camera = cam;
+      let video: VideoComponent | undefined = this.video;
+      if (video !== undefined) {
+        this.video.visible = true;  // Still hidden by enclosing div
+        this.video.stop();
         //   video.setSource(cam);
-           video.visible = true;
-           this.setValidInput(true);
-        }
         // Get the motion events for this camera (by motionName)
         this.cameraSvc.getMotionEvents(cam).subscribe((events: LocalMotionEvents) => {
             this.motionEvents = events.events;
-            let manifest: string | undefined = this.motionEvents && this.motionEvents.length > 0 ? this.motionEvents[this.motionEvents.length-1].manifest : undefined;
+            let manifest: string | undefined = this.motionEvents && this.motionEvents.length > 0 ? this.motionEvents[this.motionEvents.length - 1].manifest : undefined;
 
-            if(manifest) {
+            if (manifest) {
               this.video.setSource(cam, manifest);
+
+              this.visible = true;
+              this.setValidInput(true);
             }
+            else
+              this.noVideo = true;
             // If there was an epoch time in the URL parameters, shift the recording to that time
             // if(this.paramEpoch !== -1)
             //   this.getOffsetForEpoch({value: this.paramEpoch});
@@ -156,16 +162,16 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
             this.errorReporting.errorMessage = error;
           });
       }
-      else
-        this.setValidInput(false);
+    } else
+      this.setValidInput(false);
   }
 
   /**
    * setValidInput: Called after checking for a valid recording for this component.
    *                Hides the camera controls and displays an error message if inputValid is false.
    */
-  setValidInput(inputValid:boolean):void {
-    if(!inputValid) {
+  setValidInput(inputValid: boolean): void {
+    if (!inputValid) {
       this.errorReporting.errorMessage = new HttpErrorResponse({
         error: "No recording has been specified",
         status: 0,
@@ -177,7 +183,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   showMotionEvent($event: MatSelectChange) {
-      this.video.setSource(this.camera, $event.value);
+    this.video.setSource(this.camera, $event.value);
   }
 
   ngOnInit(): void {

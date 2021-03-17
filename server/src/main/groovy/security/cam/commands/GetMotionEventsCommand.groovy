@@ -3,7 +3,7 @@ package security.cam.commands
 import grails.validation.Validateable
 import server.Camera
 
-class GetMotionEventsCommand implements Validateable{
+class GetMotionEventsCommand{
     Camera camera
 
     static constraints = {

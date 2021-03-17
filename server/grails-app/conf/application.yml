@@ -134,7 +134,7 @@ environments:
                 descr: HD
                 defaultOnMultiDisplay: false
                 motionName: PorchCam
-                uri: http://172.24.15.146/live/hls/porch.m3u8
+                uri: http://localhost/live/hls/porch.m3u8
                 recording:
                       uri: http://localhost/recording/hls/
                       location: hls
@@ -144,7 +144,7 @@ environments:
                 descr: Low res.
                 defaultOnMultiDisplay: true
                 motionName: PorchCam
-                uri: http://172.24.15.146/live/hlslo/porch.m3u8
+                uri: http://localhost/live/hlslo/porch.m3u8
                 recording:
                     uri: http://localhost/recording/hlslo/
                     location: hlslo
@@ -154,7 +154,7 @@ environments:
                 motionName: SideGate
                 descr: HD
                 defaultOnMultiDisplay: false
-                uri: http://172.24.15.146/live/hls2/cam2.m3u8
+                uri: http://localhost/live/hls2/cam2.m3u8
                 recording:
                     uri: http://localhost/recording/hls2/
                     location: hls2
@@ -164,7 +164,7 @@ environments:
                 motionName: SideGate
                 descr: Low res.
                 defaultOnMultiDisplay: true
-                uri: http://172.24.15.146/live/hls2lo/cam2.m3u8
+                uri: http://localhost/live/hls2lo/cam2.m3u8
                 recording:
                     uri: http://localhost/recording/hls2lo/
                     location: hls2lo
@@ -174,7 +174,7 @@ environments:
                 motionName: Garden
                 descr: HD
                 defaultOnMultiDisplay: false
-                uri: http://172.24.15.146/live/hls3/cam3.m3u8
+                uri: http://localhost/live/hls3/cam3.m3u8
                 recording:
                     uri: http://localhost/recording/hls3/
                     location: hls3
@@ -184,7 +184,7 @@ environments:
                 motionName: Garden
                 descr: Low res.
                 defaultOnMultiDisplay: true
-                uri: http://172.24.15.146/live/hls3lo/cam3.m3u8
+                uri: http://localhost/live/hls3lo/cam3.m3u8
                 recording:
                     uri: http://localhost/recording/hls3lo/
                     location: hls3lo

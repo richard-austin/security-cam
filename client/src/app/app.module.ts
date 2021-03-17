@@ -18,7 +18,7 @@ import {MatButtonModule} from "@angular/material/button";
 import {MatInputModule} from "@angular/material/input";
 import {MatCardModule} from "@angular/material/card";
 import {
-  faBackward,
+  faBackward, faFastBackward,
   faFastForward,
   faForward,
   faPause,
@@ -64,6 +64,6 @@ export class AppModule {
   constructor(faLibrary: FaIconLibrary)
   {
       faLibrary.addIconPacks(fas, far);
-      faLibrary.addIcons(faCaretRight, faStepForward, faStepBackward, faForward, faBackward, faFastForward, faPause, faPlay);
+      faLibrary.addIcons(faCaretRight, faFastBackward, faStepForward, faStepBackward, faForward, faBackward, faFastForward, faPause, faPlay);
   }
 }

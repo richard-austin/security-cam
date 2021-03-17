@@ -1,4 +1,4 @@
-<div [ngStyle]="!validInput ? {'display': 'none'} : {}" class="flex-container">
+<div  [ngClass]="{'no-display': !visible}" class="flex-container">
   <mat-card class="events-select">
     <mat-card-title>Select a Motion Event</mat-card-title>
     <mat-card-content>
@@ -15,6 +15,7 @@
   <div>
     <app-video></app-video>
     <div class="buttons-flex-container">
+      <button mat-raised-button class="recording-button" (click)="returnToStart()" title="Go back to the start of the recording"><fa-icon [icon]="['fas', 'fast-backward']" size="lg"></fa-icon></button>
       <button mat-raised-button class="recording-button" (click)="stepBack()" title="Step backward 10 seconds"><fa-icon [icon]="['fas', 'backward']" size="lg"></fa-icon></button>
       <button mat-raised-button class="recording-button" (click)="stepForward()" title="Step forward 10 seconds"><fa-icon [icon]="['fas', 'forward']" size="lg"></fa-icon></button>
       <button mat-raised-button class="recording-button" (click)="pause()" title="Pause"><fa-icon [icon]="['fas', 'pause']" size="lg"></fa-icon></button>
@@ -24,6 +25,7 @@
     </div>
   </div>
 </div>
+<div class="alert-warning no-video" [ngClass]="{'no-display': !noVideo}">No Video Clips Available For {{camera?.name}} ({{camera?.descr}})</div>
 <app-error-reporting></app-error-reporting>
 
 

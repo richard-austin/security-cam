@@ -2,6 +2,7 @@ package security.cam
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import security.cam.commands.DeleteRecordingCommand
 import security.cam.commands.GetMotionEventsCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -47,6 +48,42 @@ class MotionService {
             result.error = ex.getMessage()
         }
 
+        return result
+    }
+
+    /**
+     * deleteRecording: Delete all the files in the set for a recording
+     * @param cmd: camera: The camera which the recording to be deleted is from
+     *             fileName: The name of one of the files in the recording
+     * @return
+     */
+    ObjectCommandResponse deleteRecording(DeleteRecordingCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try
+        {
+            File[] files = cmd.folder.listFiles(new FilenameFilter() {
+                @Override
+                boolean accept(File file, String name) {
+                    return name.matches('*'+cmd.epoch+'*')
+                }
+            })
+
+            for(File file : files)
+            {
+                if(!file.delete())
+                {
+                    result.status = PassFail.FAIL
+                    result.error = "Could not delete one or more files, see the logs for details"
+                    logService.cam.error("Could not delete file ${file.getAbsolutePath()}")
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in getMotionEvents: "+ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
         return result
     }
 }
