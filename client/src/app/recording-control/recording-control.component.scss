@@ -47,3 +47,14 @@ div.no-video {
   -webkit-box-shadow: 5px 5px 14px 5px #000000;
   box-shadow: 5px 5px 14px 5px #000000;
 }
+
+div.delete-button-set
+{
+    > div
+    {
+        button{
+          margin-top: 0.4rem;
+          margin-right: 0.4rem;
+        }
+    }
+}

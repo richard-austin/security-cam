@@ -1,0 +1,16 @@
+<mat-card *ngIf="error || success" [ngClass]="{'error-card': error, 'success-card': success}" class="mat-elevation-z8">
+  <div *ngIf="success">
+    Success: {{success}}
+  </div>
+  <div *ngIf="error?.status ==400">
+    <div>Validation Error: {{error?.status}}</div>
+    <div *ngFor="let validationError of validationErrors">
+      {{validationError}}
+    </div>
+  </div>
+  <div *ngIf="!success && error?.status != 400">
+    <div>Error status: {{error?.status}}</div>
+    <div>{{error?.error}}</div>
+  </div>
+  <button mat-flat-button class="dismiss-button" (click)="dismiss()">Dismiss</button>
+</mat-card>

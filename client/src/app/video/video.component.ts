@@ -20,11 +20,17 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   visible: boolean = false;
   recording: boolean = false;
   recordingUri: string = "";
+  manifest: string = "";
   multi: boolean = false;
 
   constructor() {
   }
 
+  /**
+   * setSource: Set up to play the given manifest file and display the camera details
+   * @param cam: The camera
+   * @param manifest: The manifest file
+   */
   setSource(cam:Camera, manifest:string=""):void
   {
       this.camera = cam;
@@ -35,9 +41,22 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.recordingUri+='/';
 
       this.recordingUri+=manifest;
+      this.manifest = manifest;   // Save the manifest file name so it can be returned by getManifest
       this.startVideo();
   }
 
+  /**
+   * Get the currently selected recording manifest file
+   */
+  getManifest():string
+  {
+      return this.manifest;
+  }
+
+  /**
+   * startVideo: Start the video (assumes appropriate uri and camera is set up).
+   * @private
+   */
   private startVideo():void {
     if (this.camera !== undefined) {
       if (Hls.isSupported()) {

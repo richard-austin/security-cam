@@ -3,6 +3,13 @@ mat-card.error-card{
   background-color: #cd2525;
   width: fit-content;
 }
+
+mat-card.success-card {
+  margin: 1rem;
+  background-color: #048b00;
+  width: fit-content;
+}
+
 button.dismiss-button
 {
   margin-top: 1rem;

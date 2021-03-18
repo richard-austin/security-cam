@@ -2,9 +2,6 @@ package security.cam.commands
 
 import grails.core.GrailsApplication
 import grails.validation.Validateable
-import security.cam.CamService
-import security.cam.enums.PassFail
-import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
 
 import java.nio.file.Path
@@ -28,9 +25,10 @@ class DeleteRecordingCommand  implements Validateable{
                     if (camera.name == null || camera.name == "")
                         return "No camera was specified for which to delete a recording"
 
-                    String baseDir = grailsApplication.config.camerasHomeDirectory
+                    String baseDir = cmd.grailsApplication.config.camerasHomeDirectory
                     Path recordingsDirectory = Paths.get(baseDir as String, cmd.camera.recording.location as String)
-                    folder = new File(recordingsDirectory.toString())
+                    cmd.folder = new File(recordingsDirectory.toString())
+                    return
                 })
 
         fileName(nullable: false, blank: false,
@@ -41,7 +39,7 @@ class DeleteRecordingCommand  implements Validateable{
                     Integer usIndex = fileName.lastIndexOf('_')
                     if(dashIndex == -1 || usIndex == -1 || dashIndex > usIndex)
                         return "${fileName} is not a valid recording file name"
-                    cmd.epoch = fileName.substring(dashIndex+1, usIndex-1)
+                    cmd.epoch = fileName.substring(dashIndex+1, usIndex)
                     if(!cmd.epoch.matches(/^[0-9]{10}$/))
                         return "${fileName} is not a valid recording file name, it does not contain a valid epoch time"
                  })

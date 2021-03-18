@@ -7,6 +7,8 @@ import security.cam.commands.GetMotionEventsCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
+import java.nio.file.AccessDeniedException
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -64,26 +66,26 @@ class MotionService {
             File[] files = cmd.folder.listFiles(new FilenameFilter() {
                 @Override
                 boolean accept(File file, String name) {
-                    return name.matches('*'+cmd.epoch+'*')
+                    return name.matches('.+'+cmd.epoch+'.+')
                 }
             })
 
             for(File file : files)
-            {
-                if(!file.delete())
-                {
-                    result.status = PassFail.FAIL
-                    result.error = "Could not delete one or more files, see the logs for details"
-                    logService.cam.error("Could not delete file ${file.getAbsolutePath()}")
-                }
-            }
+                Files.delete(file.toPath())
+        }
+        catch(AccessDeniedException ex)
+        {
+            logService.cam.error("Access denied exception in getMotionEvents: "+ ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = "Cannot delete " + ex.getMessage() +", access denied"
         }
         catch(Exception ex)
         {
-            logService.cam.error("Exception in getMotionEvents: "+ex.getMessage())
+            logService.cam.error("Exception in getMotionEvents: "+ex.getCause()+ ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
+
         return result
     }
 }
