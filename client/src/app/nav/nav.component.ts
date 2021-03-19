@@ -16,6 +16,7 @@ export class NavComponent implements OnInit, AfterViewInit {
   // Font awesome icons
   faCamera = faVideo;
   cameras: Camera[] = [];
+  confirmLogout: boolean = false;
 
   constructor(private cameraSvc: CameraService) {
   }
@@ -35,6 +36,18 @@ export class NavComponent implements OnInit, AfterViewInit {
     window.location.href = '#/multicam';
   }
 
+  confirmLogoff():void
+  {
+    this.confirmLogout = true;
+  }
+
+  logOff(logoff:boolean):void {
+    this.confirmLogout = false;
+
+    if(logoff)
+      window.location.href = 'logoff';
+  }
+
   ngOnInit(): void {
     this.cameras = this.cameraSvc.getCameras();
   }
@@ -43,4 +56,5 @@ export class NavComponent implements OnInit, AfterViewInit {
     // If the camera service got any errors while getting the camera setup, then we report it here.
     this.cameraSvc.errorEmitter.subscribe((error:HttpErrorResponse) => this.errorReporting.errorMessage = error);
   }
+
 }
