@@ -5,7 +5,6 @@ import {Observable, Subject, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
 import {Camera} from "./Camera";
 
-declare let moment:any;
 
 /**
  * MotionEvents as received from the server
@@ -17,6 +16,7 @@ export class MotionEvents
 
 export class LocalMotionEvent
 {
+  manifest!: string;
   epoch!: number;
   dateTime!: string;
 }
@@ -119,26 +119,6 @@ export class CameraService {
    */
   getCamerasConfig(): Observable<Camera[]> {
     return this.http.post<Camera[]>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
-      tap(),
-      catchError((err: HttpErrorResponse) => throwError(err)));
-  }
-
-  getMotionEvents(camera:Camera): Observable<LocalMotionEvents>
-  {
-    let searchString: string = 'moved-at-';
-    let retVal = new LocalMotionEvents();
-
-    let name:{camera: Camera} = {camera: camera};
-    return this.http.post<MotionEvents>(this._baseUrl.getLink("motion", "getMotionEvents"), JSON.stringify(name), this.httpJSONOptions).pipe(
-      map((value:MotionEvents) => {
-        value.events.forEach((event:string) =>{
-            let epochTime:number = parseInt(event.substr(event.indexOf(searchString)+searchString.length));
-            let formattedDate: string = moment(new Date(epochTime * 1000)).format('DD-MMM-YYYY HH:mm:ss');
-            retVal.events.push({epoch: epochTime, dateTime: formattedDate});
-        });
-        retVal.events.sort((a,b) => a.epoch - b.epoch);
-        return retVal;
-      }),
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

@@ -1,20 +1,33 @@
-<div [ngStyle]="!validInput ? {'display': 'none'} : {}" class="flex-container">
+<div  [ngClass]="{'no-display': !visible}" class="flex-container">
   <mat-card class="events-select">
     <mat-card-title>Select a Motion Event</mat-card-title>
     <mat-card-content>
       <mat-form-field appearance="fill">
         <mat-label>Motion Events</mat-label>
-        <mat-select (selectionChange)="getOffsetForEpoch($event)">
-          <mat-option *ngFor="let event of motionEvents" [value]="event.epoch">
+        <mat-select #selector (selectionChange)="showMotionEvent($event)">
+          <mat-option *ngFor="let event of motionEvents" [value]="event">
             {{event.dateTime}}
           </mat-option>
         </mat-select>
       </mat-form-field>
+      <div [ngSwitch]="confirmDelete" class="delete-button-set">
+        <div *ngSwitchCase="false">
+          <button mat-stroked-button class="btn btn-sm btn-danger" (click)="confirmDelete=true" title="Delete the currently selected recording">Delete This Recording</button>
+        </div>
+        <div *ngSwitchCase="true">
+          Delete {{selector.value.dateTime}},
+          <div>are you sure?</div>
+          <button mat-stroked-button class="btn btn-sm btn-danger" (click)="confirmDelete=false;deleteRecording()" title="Delete the currently selected recording">Confirm</button>
+          <button mat-stroked-button class="btn btn-sm btn-secondary" (click)="confirmDelete=false" title="Do not delete the recording">Cancel</button>
+        </div>
+      </div>
+
     </mat-card-content>
   </mat-card>
   <div>
     <app-video></app-video>
     <div class="buttons-flex-container">
+      <button mat-raised-button class="recording-button" (click)="returnToStart()" title="Go back to the start of the recording"><fa-icon [icon]="['fas', 'fast-backward']" size="lg"></fa-icon></button>
       <button mat-raised-button class="recording-button" (click)="stepBack()" title="Step backward 10 seconds"><fa-icon [icon]="['fas', 'backward']" size="lg"></fa-icon></button>
       <button mat-raised-button class="recording-button" (click)="stepForward()" title="Step forward 10 seconds"><fa-icon [icon]="['fas', 'forward']" size="lg"></fa-icon></button>
       <button mat-raised-button class="recording-button" (click)="pause()" title="Pause"><fa-icon [icon]="['fas', 'pause']" size="lg"></fa-icon></button>
@@ -24,6 +37,7 @@
     </div>
   </div>
 </div>
-<app-error-reporting></app-error-reporting>
+<div class="alert-warning no-video" [ngClass]="{'no-display': !noVideo}">No Video Clips Available For {{camera?.name}} ({{camera?.descr}})</div>
+<app-reporting></app-reporting>
 
 

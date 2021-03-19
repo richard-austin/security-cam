@@ -1,16 +1,14 @@
-div.flex-container
-{
+div.flex-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
- }
+}
 
-.events-select{
+.events-select {
   height: fit-content;
 }
 
-div.buttons-flex-container
-{
+div.buttons-flex-container {
   display: flex;
   flex-wrap: nowrap;
   width: available;
@@ -18,21 +16,45 @@ div.buttons-flex-container
   margin-top: 0.8rem;
 }
 
-div[class="alert-danger"]
-{
+div[class="alert-danger"] {
   padding: 0.3rem;
-    text-align: center;
+  text-align: center;
 }
 
-button.faster-forward{
+button.faster-forward {
   background-color: #e3e3e3;
   color: #ff0000;
   margin: 0.3rem;
 }
 
-button.recording-button
-{
+button.recording-button {
   background-color: #e3e3e3;
   color: #000000;
   margin: 0.3rem;
+}
+
+div.no-display {
+  display: none;
+}
+
+div.no-video {
+  position: relative;
+  width: fit-content;
+  padding: 3rem;
+  margin-left: auto;
+  margin-right: auto;
+  top: 20%;
+  -webkit-box-shadow: 5px 5px 14px 5px #000000;
+  box-shadow: 5px 5px 14px 5px #000000;
+}
+
+div.delete-button-set
+{
+    > div
+    {
+        button{
+          margin-top: 0.4rem;
+          margin-right: 0.4rem;
+        }
+    }
 }

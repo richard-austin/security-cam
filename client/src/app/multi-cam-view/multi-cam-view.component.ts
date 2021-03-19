@@ -3,7 +3,7 @@ import {CameraService} from "../cameras/camera.service";
 import {Camera} from "../cameras/Camera";
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {LiveContainerComponent} from "../live-container/live-container.component";
-import {ErrorReportingComponent} from "../error-reporting/error-reporting.component";
+import {ReportingComponent} from "../reporting/reporting.component";
 
 class SelectableUri extends Camera{
   selected: boolean = false;
@@ -22,7 +22,7 @@ export class Stream {
 export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild(LiveContainerComponent) liveContainer!: LiveContainerComponent;
-  @ViewChild(ErrorReportingComponent) errorReporting!:ErrorReportingComponent;
+  @ViewChild(ReportingComponent) errorReporting!:ReportingComponent;
 
   constructor(private cameraSvc: CameraService) {
     this.cameraSvc.setActiveLive([]);
