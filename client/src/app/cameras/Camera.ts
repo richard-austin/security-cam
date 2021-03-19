@@ -2,7 +2,6 @@
 export class Recording
 {
   uri: string = "";
-  masterManifest: string = "";
 }
 
 export class Camera

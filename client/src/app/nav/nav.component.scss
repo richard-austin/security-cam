@@ -1,0 +1,21 @@
+div.confirm-logout {
+  margin-top: 1rem;
+  width: fit-content;
+  padding: 1rem;
+  -webkit-box-shadow: 5px 5px 15px 10px rgba(0,0,0,0.89);
+  box-shadow: 5px 5px 15px 10px rgba(0,0,0,0.89);
+
+  > div:nth-child(2) {
+    width: 100%;
+    display: inline-flex;
+    margin-top: 0.5rem;
+
+    > button:first-child {
+      margin-right: 0.3rem;
+      margin-left: auto;
+    }
+    > button:nth-child(2) {
+      margin-right: auto;
+    }
+  }
+}

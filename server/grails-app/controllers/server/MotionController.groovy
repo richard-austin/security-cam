@@ -4,10 +4,10 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
 import security.cam.LogService
+import security.cam.commands.DeleteRecordingCommand
 import security.cam.commands.GetMotionEventsCommand
 import security.cam.MotionService
 import security.cam.ValidationErrorService
-import security.cam.commands.GetOffsetForEpochCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
@@ -38,7 +38,7 @@ class TimeOffset
 class Recording
 {
     String uri
-    String masterManifest
+    String location
 }
 
 
@@ -85,31 +85,30 @@ class MotionController {
     }
 
     /**
-     * getTimeOffsetForEpoch: Get the time offset in seconds into a recording from the given epoch time
-     * @param cmd:  motionName: Identifies the recording as known to the motion process
-     *              epoch: The epoch time to obtain the time offset for.
-     * @return
+     * deleteRecording: Delete al the files comprising a motion event recording
+     * @param cmd: fileName The name of any one of the files in the recording to be deleted
+     *                      All the files will be deleted.
      */
     @Secured(['ROLE_CLIENT'])
-    def getTimeOffsetForEpoch(GetOffsetForEpochCommand cmd)
+    def deleteRecording(DeleteRecordingCommand cmd)
     {
+        ObjectCommandResponse result
+
         if(cmd.hasErrors())
         {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'getTimeOffsetForEpoch')
+            def errorsMap = validationErrorService.commandErrors(cmd.errors, 'deleteRecording')
+            logService.cam.error "deleteRecording: Validation error: "+errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
-            logService.cam.error "getTimeOffsetForEpoch: Validation error: "+errorsMap.toString()
         }
-        else {
-            ObjectCommandResponse result = motionService.getOffsetForEpoch(cmd.epoch, cmd.motionName)
-
-            if(result.status == PassFail.PASS)
-            {
-                logService.cam.info("getTimeOffsetForEpoch: success")
-                Double timeOffset = result.responseObject as Double
-                render new TimeOffset(timeOffset) as JSON
+        else
+        {
+            result = motionService.deleteRecording(cmd)
+            if (result.status != PassFail.PASS) {
+                render(status: 500, text: result.error)
             }
             else {
-                render(status: 500, text: result.error)
+                logService.cam.info("deleteRecording: success")
+                render ""
             }
         }
     }

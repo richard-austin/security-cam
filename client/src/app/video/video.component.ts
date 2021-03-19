@@ -19,22 +19,48 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   hls = new Hls();
   visible: boolean = false;
   recording: boolean = false;
+  recordingUri: string = "";
+  manifest: string = "";
   multi: boolean = false;
 
   constructor() {
   }
 
-  setSource(cam:Camera, recording:boolean = false):void
+  /**
+   * setSource: Set up to play the given manifest file and display the camera details
+   * @param cam: The camera
+   * @param manifest: The manifest file
+   */
+  setSource(cam:Camera, manifest:string=""):void
   {
       this.camera = cam;
-      this.recording = recording;
+      this.recording = manifest !== "";
+      this.recordingUri = cam.recording.uri;
+
+      if(this.recordingUri[this.recordingUri.length-1] !== '/')
+        this.recordingUri+='/';
+
+      this.recordingUri+=manifest;
+      this.manifest = manifest;   // Save the manifest file name so it can be returned by getManifest
       this.startVideo();
   }
 
+  /**
+   * Get the currently selected recording manifest file
+   */
+  getManifest():string
+  {
+      return this.manifest;
+  }
+
+  /**
+   * startVideo: Start the video (assumes appropriate uri and camera is set up).
+   * @private
+   */
   private startVideo():void {
     if (this.camera !== undefined) {
       if (Hls.isSupported()) {
-        this.hls.loadSource(this.recording ? this.camera.recording.uri : this.camera.uri);
+        this.hls.loadSource(this.recording ? this.recordingUri : this.camera.uri);
         this.hls.attachMedia(this.video);
 
         //hls.on(Hls.Events.MANIFEST_PARSED, this.video.play());

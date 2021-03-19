@@ -18,7 +18,7 @@ import {MatButtonModule} from "@angular/material/button";
 import {MatInputModule} from "@angular/material/input";
 import {MatCardModule} from "@angular/material/card";
 import {
-  faBackward,
+  faBackward, faFastBackward,
   faFastForward,
   faForward,
   faPause,
@@ -30,7 +30,7 @@ import { far } from '@fortawesome/free-regular-svg-icons';
 import {faCaretRight} from "@fortawesome/free-solid-svg-icons";
 import { RecordingControlComponent } from './recording-control/recording-control.component';
 import {MatSelectModule} from "@angular/material/select";
-import { ErrorReportingComponent } from './error-reporting/error-reporting.component';
+import { ReportingComponent } from './reporting/reporting.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +41,7 @@ import { ErrorReportingComponent } from './error-reporting/error-reporting.compo
     LiveContainerComponent,
     MultiCamViewComponent,
     RecordingControlComponent,
-    ErrorReportingComponent
+    ReportingComponent
   ],
   imports: [
     BrowserModule,
@@ -64,6 +64,6 @@ export class AppModule {
   constructor(faLibrary: FaIconLibrary)
   {
       faLibrary.addIconPacks(fas, far);
-      faLibrary.addIcons(faCaretRight, faStepForward, faStepBackward, faForward, faBackward, faFastForward, faPause, faPlay);
+      faLibrary.addIcons(faCaretRight, faFastBackward, faStepForward, faStepBackward, faForward, faBackward, faFastForward, faPause, faPlay);
   }
 }
