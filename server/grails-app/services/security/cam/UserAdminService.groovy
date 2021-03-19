@@ -2,14 +2,11 @@ package security.cam
 
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import security.cam.commands.ResetPasswordCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
-import java.security.Principal
-
-@Transactional
+@Transactional()
 class UserAdminService {
     SpringSecurityService springSecurityService
     LogService logService
@@ -17,13 +14,12 @@ class UserAdminService {
     ObjectCommandResponse resetPassword(ResetPasswordCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder()
-
-            Principal principal = springSecurityService.getPrincipal() as Principal
-            String userName = principal.getName()
+            def principal = springSecurityService.getPrincipal()
+            String userName = principal.getUsername()
 
             User user = User.findByUsername(userName)
             user.setPassword(cmd.getNewPassword())
+            user.save()
         }
         catch(Exception ex)
         {

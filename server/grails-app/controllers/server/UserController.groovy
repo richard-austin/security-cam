@@ -33,7 +33,7 @@ class UserController {
             }
             else {
                 logService.cam.info("changePassword: success")
-                render "" as JSON
+                render ""
             }
         }
      }
