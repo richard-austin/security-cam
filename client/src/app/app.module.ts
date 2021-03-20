@@ -31,6 +31,7 @@ import {faCaretRight} from "@fortawesome/free-solid-svg-icons";
 import { RecordingControlComponent } from './recording-control/recording-control.component';
 import {MatSelectModule} from "@angular/material/select";
 import { ReportingComponent } from './reporting/reporting.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { ReportingComponent } from './reporting/reporting.component';
     LiveContainerComponent,
     MultiCamViewComponent,
     RecordingControlComponent,
-    ReportingComponent
+    ReportingComponent,
+    ChangePasswordComponent
   ],
   imports: [
     BrowserModule,

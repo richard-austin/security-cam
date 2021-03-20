@@ -1,6 +1,9 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#/"><fa-icon [icon]="faCamera">"></fa-icon></a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+  <a class="navbar-brand" href="#/">
+    <fa-icon [icon]="faCamera">"></fa-icon>
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
@@ -8,26 +11,28 @@
     <ul class="navbar-nav mr-auto">
 
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="cameraDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="#" id="cameraDropdown" role="button" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
           Select Camera
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <ng-container *ngFor="let camera of cameras">
+          <ng-container *ngFor="let camera of cameras">
                <span class="dropdown-item" (click)="setVideoStream(camera)">
-                 {{camera.name+" ("+camera.descr+")"}}
+                 {{camera.name + " (" + camera.descr + ")"}}
                </span>
-            </ng-container>
-            <span class="dropdown-item" (click)="multiCamView()">Multi Camera View</span>
+          </ng-container>
+          <span class="dropdown-item" (click)="multiCamView()">Multi Camera View</span>
         </div>
       </li>
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="recordingDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="#" id="recordingDropdown" role="button" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
           Select Recording
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <ng-container *ngFor="let camera of cameras">
                <span class="dropdown-item" (click)="showRecording(camera)">
-                 {{camera.name+" ("+camera.descr+")"}}
+                 {{camera.name + " (" + camera.descr + ")"}}
                </span>
           </ng-container>
         </div>
@@ -35,13 +40,15 @@
     </ul>
     <ul class="navbar-nav ml-auto">
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+           aria-expanded="false">
           User Functions
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
            <span class="dropdown-item" (click)="confirmLogoff()">
-             Log off
+             Log Off
            </span>
+          <span class="dropdown-item" (click)="changePassword()">Change Password</span>
         </div>
       </li>
     </ul>
@@ -52,8 +59,8 @@
     Logout from Security Cam, Are you sure?
   </div>
   <div>
-    <button mat-button class="btn btn-sm btn-warning"(click)="logOff(true)">Confirm</button>
-    <button mat-button class="btn btn-sm btn-secondary"(click)="logOff(false)">Cancel</button>
+    <button mat-button class="btn btn-sm btn-warning" (click)="logOff(true)">Confirm</button>
+    <button mat-button class="btn btn-sm btn-secondary" (click)="logOff(false)">Cancel</button>
   </div>
 </div>
 <app-reporting></app-reporting>
