@@ -32,6 +32,8 @@ import { RecordingControlComponent } from './recording-control/recording-control
 import {MatSelectModule} from "@angular/material/select";
 import { ReportingComponent } from './reporting/reporting.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import {MatIconModule} from "@angular/material/icon";
+import {MatFormFieldModule} from "@angular/material/form-field";
 
 @NgModule({
   declarations: [
@@ -43,7 +45,7 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
     MultiCamViewComponent,
     RecordingControlComponent,
     ReportingComponent,
-    ChangePasswordComponent
+    ChangePasswordComponent,
   ],
   imports: [
     BrowserModule,
@@ -53,9 +55,11 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
     BrowserAnimationsModule,
     MatCardModule,
     ReactiveFormsModule,
+    MatFormFieldModule,
     MatCheckboxModule,
     MatButtonModule,
     MatInputModule,
+    MatIconModule,
     MatSelectModule,
     FormsModule
   ],

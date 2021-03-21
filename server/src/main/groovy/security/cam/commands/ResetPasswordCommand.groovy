@@ -10,7 +10,7 @@ import security.cam.User
 class ResetPasswordCommand implements Validateable{
     String oldPassword
     String newPassword
-    String newPasswordRepeated
+    String confirmNewPassword
     SpringSecurityService springSecurityService
     def authenticationManager
 
@@ -39,8 +39,8 @@ class ResetPasswordCommand implements Validateable{
                 return "New password contains invalid characters or is too long (must be <= 64 characters)"
         })
 
-        newPasswordRepeated(validator: {newPasswordRepeated, cmd ->
-            if(newPasswordRepeated != cmd.newPassword)
+        confirmNewPassword(validator: {confirmNewPassword, cmd ->
+            if(confirmNewPassword != cmd.newPassword)
                 return "New passwords do not match"
         })
     }
