@@ -10,6 +10,10 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
+      <div>
+        <mat-label>Show Motion Recording</mat-label>
+        <mat-checkbox (change)="setIsMotion($event.checked)" #cbShowMotionRecording></mat-checkbox>
+      </div>
       <div [ngSwitch]="confirmDelete" class="delete-button-set">
         <div *ngSwitchCase="false">
           <button mat-stroked-button class="btn btn-sm btn-danger" (click)="confirmDelete=true" title="Delete the currently selected recording">Delete This Recording</button>

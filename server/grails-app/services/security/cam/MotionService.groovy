@@ -27,7 +27,13 @@ class MotionService {
 
         try {
             def baseDir = grailsApplication.config.camerasHomeDirectory
-            Path motionEventsDirectory = Paths.get(baseDir as String, cmd.camera.recording.location as String)
+
+            // Determine whether to get motion events for the main recordings or the motion recordings.
+            String location = cmd.eventsForMotionRecording ?
+                              cmd.camera.recording.motionLocation :
+                              cmd.camera.recording.location
+
+            Path motionEventsDirectory = Paths.get(baseDir as String, location)
             File f = new File(motionEventsDirectory.toString())
 
             // Keep only the entries for the given cameraName, or return all if it's null

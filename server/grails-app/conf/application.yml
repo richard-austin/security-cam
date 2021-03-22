@@ -148,6 +148,8 @@ environments:
                 recording:
                     uri: http://localhost/recording/hlslo/
                     location: hlslo
+                    motionUri: http://localhost/recording/motion-hlslo/
+                    motionLocation: motion-hlslo
 
             camera3:
                 name: Garage Cam
@@ -168,6 +170,8 @@ environments:
                 recording:
                     uri: http://localhost/recording/hls2lo/
                     location: hls2lo
+                    motionUri: http://localhost/recording/motion-hls2lo/
+                    motionLocation: motion-hls2lo
 
             camera5:
                 name: Garden Cam
@@ -188,6 +192,8 @@ environments:
                 recording:
                     uri: http://localhost/recording/hls3lo/
                     location: hls3lo
+                    motionUri: http://localhost/recording/motion-hls3lo/
+                    motionLocation: motion-hls3lo
     test:
         dataSource:
             dbCreate: update
@@ -229,7 +235,7 @@ environments:
                 defaultOnMultiDisplay: false
                 motionName: PorchCam
                 uri: /live/hls/porch.m3u8
-                recording: 
+                recording:
                     uri: /recording/hls/
                     location: hls
 
@@ -242,6 +248,8 @@ environments:
                 recording:
                       uri: /recording/hlslo/
                       location: hlslo
+                      motionUri: /recording/motion-hlslo/
+                      motionLocation: motion-hlslo
 
             camera3:
                 name: Garage Cam
@@ -260,8 +268,10 @@ environments:
                 motionName: SideGate
                 uri: /live/hls2lo/cam2.m3u8
                 recording:
-                      uri: /recording/hls2lo/
-                      location: hls2lo
+                    uri: /recording/hls2lo/
+                    location: hls2lo
+                    motionUri: /recording/motion-hls2lo/
+                    motionLocation: motion-hls2lo
 
             camera5:
                 name: Garden Cam
@@ -282,3 +292,5 @@ environments:
                 recording:
                     uri: /recording/hls3lo/
                     location: hls3lo
+                    motionUri: /recording/motion-hls3lo/
+                    motionLocation: motion-hls3lo
