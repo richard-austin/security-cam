@@ -10,7 +10,7 @@
   </div>
   <div *ngIf="!success && error?.status != 400">
     <div>Error status: {{error?.status}}</div>
-    <div>{{error?.error}}</div>
+    <div>{{isHTML(error?.error) ? error?.message : error?.error}}</div>
   </div>
   <button mat-flat-button class="dismiss-button" (click)="dismiss()">Dismiss</button>
 </mat-card>
