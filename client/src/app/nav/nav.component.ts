@@ -32,6 +32,10 @@ export class NavComponent implements OnInit, AfterViewInit {
     window.location.href = '#/recording';
   }
 
+  changePassword() {
+    window.location.href = '#/changepassword';
+  }
+
   multiCamView() {
     window.location.href = '#/multicam';
   }
@@ -56,5 +60,4 @@ export class NavComponent implements OnInit, AfterViewInit {
     // If the camera service got any errors while getting the camera setup, then we report it here.
     this.cameraSvc.errorEmitter.subscribe((error:HttpErrorResponse) => this.errorReporting.errorMessage = error);
   }
-
 }

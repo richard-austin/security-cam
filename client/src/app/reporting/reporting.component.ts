@@ -15,8 +15,18 @@ export class ReportingComponent implements OnInit {
   {
   }
 
+  /**
+   * isHTML: Returns true if string is html
+   * @param str
+   */
+  isHTML(str:string): boolean {
+    let doc = new DOMParser().parseFromString(str, "text/html");
+    return Array.from(doc.body.childNodes).some(node => node.nodeType === 1);
+  }
+
   set errorMessage(error: HttpErrorResponse)
   {
+
     this.success = undefined;
     this.error = error;
     this.validationErrors = [];
