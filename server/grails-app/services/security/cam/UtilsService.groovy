@@ -9,8 +9,8 @@ class UtilsService {
     LogService logService
 
     /**
-     *
-     * @return
+     *getTemperature: Get the core temperature (Raspberry pi only). This is called at intervals to keep the session alive
+     * @return: The temperature as a string. On non Raspberry pi systems an error is returned.
      */
     def getTemperature() {
         ObjectCommandResponse result = new ObjectCommandResponse()

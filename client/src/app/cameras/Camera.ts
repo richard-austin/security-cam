@@ -2,6 +2,9 @@
 export class Recording
 {
   uri: string = "";
+  location: string = "";
+  motionUri: string = "";
+  motionLocation: string = "";
 }
 
 export class Camera
