@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {VideoComponent} from "../video/video.component";
 import {Camera} from "../cameras/Camera";
-import {CameraService, LocalMotionEvent, LocalMotionEvents, MotionEvents} from "../cameras/camera.service";
+import {CameraService, LocalMotionEvent, LocalMotionEvents} from "../cameras/camera.service";
 import {Subscription, timer} from "rxjs";
 import {MatSelectChange} from "@angular/material/select";
 import {MotionService} from "../motion/motion.service";
@@ -9,7 +9,7 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
 import {MatSelect} from "@angular/material/select/select";
-import {MatCheckbox, MatCheckboxChange} from "@angular/material/checkbox";
+import {MatCheckbox} from "@angular/material/checkbox";
 
 @Component({
   selector: 'app-recording-control',
@@ -134,6 +134,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   setupRecording() {
     this.reporting.dismiss();
     this.visible = this.noVideo = false;
+
     // Check for motionName and epoch time as URL parameters, use them if present and valid
     //  These are given in the URL in email motion sensing alerts to enable you to navigate straight to
     //  the relevant part of the recording.
@@ -200,14 +201,11 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    */
   showMotionEvent($event: MatSelectChange) {
     this.manifest = $event.value.manifest;
-    this.video.setSource(this.camera, $event.value.manifest);
+    this.video.setSource(this.camera, $event.value.manifest, this.showMotionRecording);
   }
 
   /**
-   * deleteRecording: Delete the set of files comprising a recording
-   * @param camera: The camera from which the recording was made.
-   * @param manifest: The manifest (or any of the .ts files) which form part of the recording
-   *                  to be removed.
+   * deleteRecording: Delete the set of files comprising the current recording
    */
   deleteRecording() {
     this.motionService.deleteRecording(this.camera, this.manifest).subscribe(() => {
@@ -232,7 +230,11 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     // Call with timer to avoid expression changed after it was checked error
     this.timerHandle = timer(100).subscribe(() => {
       this.setupRecording()
-      this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => this.setupRecording());
+      this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => {
+        this.showMotionRecording = false;
+        this.cbShowMotionRecording.checked = false;
+        this.setupRecording();
+      });
     });
   }
 
