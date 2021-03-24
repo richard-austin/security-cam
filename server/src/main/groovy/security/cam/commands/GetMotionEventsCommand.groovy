@@ -5,7 +5,6 @@ import server.Camera
 
 class GetMotionEventsCommand implements Validateable {
     Camera camera
-    boolean eventsForMotionRecording
 
     static constraints = {
         camera(nullable: false,
@@ -14,7 +13,5 @@ class GetMotionEventsCommand implements Validateable {
                     return "No camera was specified to find motion events for"
                 return
             })
-
-        eventsForMotionRecording(nullable: false)
     }
 }

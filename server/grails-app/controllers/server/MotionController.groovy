@@ -39,8 +39,6 @@ class Recording
 {
     String uri
     String location
-    String motionUri
-    String motionLocation
 }
 
 class Camera
