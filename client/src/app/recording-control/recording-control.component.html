@@ -10,10 +10,6 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-      <div>
-        <mat-checkbox [disabled]="camera?.recording?.motionUri==undefined" (change)="setIsMotion($event.checked)" #cbShowMotionRecording
-        [title]="showMotionRecording ? 'Click to show the nginx recordings' : 'Click to show the motion recordings'">{{showMotionRecording ? 'Show nginx recordings' : 'Show Motion Recordings'}} </mat-checkbox>
-      </div>
       <div [ngSwitch]="confirmDelete" class="delete-button-set">
         <div *ngSwitchCase="false">
           <button mat-stroked-button class="btn btn-sm btn-danger" (click)="confirmDelete=true" title="Delete the currently selected recording">Delete This Recording</button>
@@ -23,9 +19,6 @@
           <div>are you sure?</div>
           <button mat-stroked-button class="btn btn-sm btn-danger" (click)="confirmDelete=false;deleteRecording()" title="Delete the currently selected recording">Confirm</button>
           <button mat-stroked-button class="btn btn-sm btn-secondary" (click)="confirmDelete=false" title="Do not delete the recording">Cancel</button>
-        </div>
-        <div class="recording-indicator">
-          Recorded by {{showMotionRecording ? "Motion" : "nginx"}}
         </div>
       </div>
 

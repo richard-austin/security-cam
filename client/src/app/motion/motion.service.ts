@@ -31,13 +31,13 @@ export class MotionService {
    *                  to an array of manifest file name, epoch time and formatted date/time
    * @param camera: The camera we want the motion event files for
    */
-  getMotionEvents(camera:Camera, eventsForMotionRecording: boolean): Observable<LocalMotionEvents>
+  getMotionEvents(camera:Camera): Observable<LocalMotionEvents>
   {
     let epochStartDelim: string = '-';
     let epochEndDelim: string = '_';
     let retVal = new LocalMotionEvents();
 
-    let name:{camera: Camera, eventsForMotionRecording: boolean} = {camera: camera, eventsForMotionRecording:eventsForMotionRecording};
+    let name:{camera: Camera} = {camera: camera};
     return this.http.post<MotionEvents>(this._baseUrl.getLink("motion", "getMotionEvents"), JSON.stringify(name), this.httpJSONOptions).pipe(
       map((value:MotionEvents) => {
         value.events.forEach((event:string) =>{
