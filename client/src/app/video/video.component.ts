@@ -31,11 +31,11 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param cam: The camera
    * @param manifest: The manifest file
    */
-  setSource(cam:Camera, manifest:string="", showMotionRecording:boolean = false):void
+  setSource(cam:Camera, manifest:string=""):void
   {
       this.camera = cam;
       this.recording = manifest !== "";
-      this.recordingUri = showMotionRecording ? cam.recording.motionUri : cam.recording.uri;
+      this.recordingUri = cam.recording.uri;
 
       if(this.recordingUri[this.recordingUri.length-1] !== '/')
         this.recordingUri+='/';

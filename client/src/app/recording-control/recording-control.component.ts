@@ -20,7 +20,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   @ViewChild(VideoComponent) video!: VideoComponent;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @ViewChild('selector') selector!:MatSelect;
-  @ViewChild('cbShowMotionRecording') cbShowMotionRecording!:MatCheckbox;
   timerHandle!: Subscription;
   private activeLiveUpdates!: Subscription;
   motionEvents!: LocalMotionEvent[];
@@ -31,7 +30,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   visible: boolean = false;
   noVideo: boolean = false;
   confirmDelete: boolean = false;
-  showMotionRecording: boolean = false;
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService) {
   }
@@ -150,7 +148,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.video.stop();
 
         // Get the motion events for this camera (by motionName)
-        this.motionService.getMotionEvents(cam, this.showMotionRecording).subscribe((events: LocalMotionEvents) => {
+        this.motionService.getMotionEvents(cam).subscribe((events: LocalMotionEvents) => {
             this.motionEvents = events.events;
             // Get the latest recording in the set
             let motionEvent: LocalMotionEvent | undefined = this.motionEvents && this.motionEvents.length > 0 ? this.motionEvents[this.motionEvents.length - 1] : undefined;
@@ -160,7 +158,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
               // Give the video object the manifest of the latest recording
               if (this.manifest) {
-                this.video.setSource(cam, this.manifest, this.showMotionRecording);
+                this.video.setSource(cam, this.manifest);
 
                 this.visible = true;
                 this.setValidInput(true);
@@ -201,7 +199,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    */
   showMotionEvent($event: MatSelectChange) {
     this.manifest = $event.value.manifest;
-    this.video.setSource(this.camera, $event.value.manifest, this.showMotionRecording);
+    this.video.setSource(this.camera, $event.value.manifest);
   }
 
   /**
@@ -218,11 +216,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     )
   }
 
-  setIsMotion(checked: boolean) {
-    this.showMotionRecording = checked;
-    this.setupRecording();
-  }
-
   ngOnInit(): void {
   }
 
@@ -231,8 +224,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.timerHandle = timer(100).subscribe(() => {
       this.setupRecording()
       this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => {
-        this.showMotionRecording = false;
-        this.cbShowMotionRecording.checked = false;
         this.setupRecording();
       });
     });
@@ -243,5 +234,4 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.activeLiveUpdates?.unsubscribe();
     this.timerHandle?.unsubscribe();
   }
-
 }
