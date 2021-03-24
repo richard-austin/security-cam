@@ -1,7 +1,7 @@
 # security-cam
 CCTV Security cam project not using a cloud service. Run on Raspberry pi
 
-## Set up the www-dta home directory
+## Set up the www-data home directory
 The project requires that the nginx user (www-data) has the home directory /home/www-data owned ny www-data.
 
 This directory has the following structure:-
