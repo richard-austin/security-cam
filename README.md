@@ -6,22 +6,22 @@ The project requires that the nginx user (www-data) has the home directory /home
 
 This directory has the following structure:-
 
-www-data/
-├── db
-├── hls
-├── hls2
-├── hls3
-├── live
-│   ├── hls
-│   ├── hls2
-│   ├── hls2lo
-│   ├── hls3
-│   ├── hls3lo
-│   └── hlslo
-├── logs
-├── motion-hls2lo
-├── motion-hls3lo
-├── motion-hlslo
+www-data/  
+├── db  
+├── hls  
+├── hls2  
+├── hls3  
+├── live  
+│   ├── hls  
+│   ├── hls2  
+│   ├── hls2lo  
+│   ├── hls3  
+│   ├── hls3lo  
+│   └── hlslo  
+├── logs  
+├── motion-hls2lo  
+├── motion-hls3lo  
+├── motion-hlslo  
 └── motion-log
 
 A new group, security-cam, should be added, then the users tomcat and www-data added to that group. 
