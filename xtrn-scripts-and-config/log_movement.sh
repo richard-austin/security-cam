@@ -9,18 +9,4 @@ start () {
 	echo -e $result >> $log_file
 }
 
-stop ()
-{
-	echo "`date +%d-%M-%Y" "%T`: curl \"http://localhost:8083/control/record/stop?app=${FIELDS[1]}&name=${FIELDS[2]}&rec=${FIELDS[3]}\"" >> $log_file
-	result=`curl "http://localhost:8083/control/record/stop?app=${FIELDS[1]}&name=${FIELDS[2]}&rec=${FIELDS[3]}"`
-}
-
-
-while :
-do
-	start
-	[[ $result == "" ]] || break
-	sleep 1
-	stop
-	sleep 1
-done
+start

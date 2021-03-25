@@ -10,10 +10,4 @@ stop ()
 	echo -e $result >> $log_file
 }
 
-
-while :
-do
-	stop
-	[[ $result == "" ]] || break
-	sleep 1
-done
+stop
