@@ -2,7 +2,7 @@
 CCTV Security cam project not using a cloud service. Run on Raspberry pi
 
 ## Set up the www-data home directory
-The project requires that the nginx user (www-data) has the home directory /home/www-data owned ny www-data.
+The project requires that the nginx user (www-data) has a "home" directory /home/www-data owned ny www-data.
 
 This directory has the following structure:-
 
@@ -32,3 +32,8 @@ The security-cam group is then given group access to www-data and it's subdirect
  sudo usermod -a -G security-cam www-data  
  sudo chmod -R 775 /home/www-data/  
  sudo chgrp -R security-cam /home/www-data/  
+ 
+ # Tomcat using vcgencmd measure_temp
+  To execute the getTemperature API call, Tomcat needs to be able to call vcgencmd measure_temp which requires it to be in the video group.
+ 
+ sudo usermod -aG video tomcat
