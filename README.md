@@ -30,5 +30,5 @@ The security-cam group is then given group access to www-data and it's subdirect
  sudo groupadd security-cam  
  sudo usermod -a -G security-cam tomcat  
  sudo usermod -a -G security-cam www-data  
- sudo chgrp -R security-cam /home/www-data/  
  sudo chmod -R 775 /home/www-data/  
+ sudo chgrp -R security-cam /home/www-data/  
