@@ -10,7 +10,7 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-      <div [ngSwitch]="confirmDelete" class="delete-button-set">
+      <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
         <div *ngSwitchCase="false">
           <button mat-stroked-button class="btn btn-sm btn-danger" (click)="confirmDelete=true" title="Delete the currently selected recording">Delete This Recording</button>
         </div>
@@ -21,7 +21,12 @@
           <button mat-stroked-button class="btn btn-sm btn-secondary" (click)="confirmDelete=false" title="Do not delete the recording">Cancel</button>
         </div>
       </div>
-
+      <div *ngIf="!confirmDelete && !downloading" class="download-button">
+        <button mat-stroked-button class="btn btn-sm btn-light" (click)="downloadRecording()">Download Recording</button>
+      </div>
+      <div *ngIf="downloading">
+        <fa-icon class="fa-spin" [icon]="['fas', 'spinner']" [spin]="true" [size]="'lg'"></fa-icon> Please wait..
+      </div>
     </mat-card-content>
   </mat-card>
   <div>
