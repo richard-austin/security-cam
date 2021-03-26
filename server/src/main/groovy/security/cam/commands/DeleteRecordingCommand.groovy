@@ -10,7 +10,7 @@ import java.nio.file.Paths
 class DeleteRecordingCommand  implements Validateable{
     GrailsApplication grailsApplication
     Camera camera   // The camera that the files are recordings from
-    String fileName  // The name of one of the fies in the recording
+    String fileName  // The name of one of the files in the recording
 
     // Not restful argument, this is set up by the validator as the
     //  wildcard for matching all the files in the recording

@@ -27,6 +27,7 @@
     "@fortawesome/free-regular-svg-icons": "^5.15.2",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "bootstrap": "^4.6.0",
+    "file-saver": "^2.0.5",
     "hls.js": "^0.14.17",
     "jquery": "^3.5.1",
     "moment": "^2.29.1",

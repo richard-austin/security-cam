@@ -10,6 +10,7 @@ export class ReportingComponent implements OnInit {
   error: HttpErrorResponse | undefined;
   success: string | undefined;
   validationErrors!:string[];
+  showMessageInError:boolean = true;
 
   constructor()
   {
@@ -35,6 +36,10 @@ export class ReportingComponent implements OnInit {
       {
         for(const key of Object.keys(error.error))
           this.validationErrors.push(key + ': ' + error.error[key]);
+      }
+      else if(error.error !== typeof(String))
+      {
+        this.showMessageInError=false;
       }
   }
 

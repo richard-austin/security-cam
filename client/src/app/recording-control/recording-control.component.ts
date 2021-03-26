@@ -11,6 +11,8 @@ import {ActivatedRoute} from "@angular/router";
 import {MatSelect} from "@angular/material/select/select";
 import {MatCheckbox} from "@angular/material/checkbox";
 
+declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
+
 @Component({
   selector: 'app-recording-control',
   templateUrl: './recording-control.component.html',
@@ -30,6 +32,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   visible: boolean = false;
   noVideo: boolean = false;
   confirmDelete: boolean = false;
+  downloading: boolean = false;
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService) {
   }
@@ -214,6 +217,20 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.reporting.errorMessage = reason;
       }
     )
+  }
+
+  async downloadRecording()
+  {
+    try {
+      this.downloading = true;
+      let blob: Blob = await this.motionService.downloadRecording(this.camera, this.manifest);
+      saveAs(blob, this.manifest.replace('.m3u8', '.mp4'))
+    }
+    catch(error)
+    {
+      this.reporting.errorMessage = error;
+    }
+    this.downloading = false;
   }
 
   ngOnInit(): void {

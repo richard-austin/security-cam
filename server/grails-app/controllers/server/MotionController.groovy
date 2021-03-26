@@ -5,28 +5,26 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
 import security.cam.LogService
 import security.cam.commands.DeleteRecordingCommand
+import security.cam.commands.DownloadRecordingCommand
 import security.cam.commands.GetMotionEventsCommand
 import security.cam.MotionService
 import security.cam.ValidationErrorService
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
+import java.nio.file.Files
 import java.text.DecimalFormat
 
-class MotionEvents
-{
-    MotionEvents(String[] events)
-    {
+class MotionEvents {
+    MotionEvents(String[] events) {
         this.events = events
     }
 
     String[] events
 }
 
-class TimeOffset
-{
-    TimeOffset(Double timeOffset)
-    {
+class TimeOffset {
+    TimeOffset(Double timeOffset) {
         String strTOffset
         DecimalFormat f = new DecimalFormat("##")
         setOffset(f.format(timeOffset).toString())
@@ -35,14 +33,12 @@ class TimeOffset
     String offset
 }
 
-class Recording
-{
+class Recording {
     String uri
     String location
 }
 
-class Camera
-{
+class Camera {
     String name
     String motionName
     String descr;
@@ -59,7 +55,7 @@ class MotionController {
 
     /**
      * getMotionEvents: Get the motion events for the given camera.
-     * @param cmd: camera: Camera to get motion events for
+     * @param cmd : camera: Camera to get motion events for
      * @return
      */
     @Secured(['ROLE_CLIENT'])
@@ -68,15 +64,14 @@ class MotionController {
 
         if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors, 'getMotionEvents')
-            logService.cam.error "getMotionEvents: Validation error: "+errorsMap.toString()
+            logService.cam.error "getMotionEvents: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {
             ObjectCommandResponse motionEvents = motionService.getMotionEvents(cmd)
 
             if (motionEvents.status != PassFail.PASS) {
                 render(status: 500, text: motionEvents.error)
-            }
-            else {
+            } else {
                 logService.cam.info("getMotionEvents: success")
                 render new MotionEvents(motionEvents.responseObject as String[]) as JSON
             }
@@ -84,28 +79,67 @@ class MotionController {
     }
 
     /**
+     * downloadRecording: API call for downloading recordings
+     * @param cmd: manifest: The manifest file name.
+     *             camera: The camera the recording is from
+     * @return: Binary stream for the .mp4 file
+     */
+    @Secured(['ROLE_CLIENT'])
+    def downloadRecording(DownloadRecordingCommand cmd) {
+        ObjectCommandResponse result
+
+        if (cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors, 'downloadRecording')
+            logService.cam.error "downloadRecording: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        } else {
+            try {
+                result = motionService.downloadRecording(cmd)
+                if (result.status == PassFail.FAIL) {
+                    def jsonObj = [
+                            text       : "Error in downloadRecording",
+                            description: result.error
+                    ]
+                    logService.cam.error "MotionController.downloadNamedPatternsFile() ${result.error}"
+                    render(status: 400, contentType: "application/json") { jsonObj }
+                } else {
+                    File recordingFile = result.responseObject as File
+
+                    String fileName = recordingFile.getName()
+                    def fis = new FileInputStream(recordingFile)
+                    Files.delete(recordingFile.toPath())
+                    response.contentType = 'application/octet-stream'
+                    response.setHeader "Content-disposition", "attachment;filename=${fileName}"
+                    render(file: fis, fileName: fileName, contentType: '*/*')
+                    fis.close()
+                }
+            }
+            catch(Exception ex)
+            {
+                logService.cam.error "MotionController.downloadNamedPatternsFile() "+ex.getMessage()
+                render(status: 500, contentType: "application/json") { text: ex.getMessage() }
+            }
+        }
+    }
+
+    /**
      * deleteRecording: Delete al the files comprising a motion event recording
-     * @param cmd: fileName The name of any one of the files in the recording to be deleted
+     * @param cmd : fileName The name of any one of the files in the recording to be deleted
      *                      All the files will be deleted.
      */
     @Secured(['ROLE_CLIENT'])
-    def deleteRecording(DeleteRecordingCommand cmd)
-    {
+    def deleteRecording(DeleteRecordingCommand cmd) {
         ObjectCommandResponse result
 
-        if(cmd.hasErrors())
-        {
+        if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors, 'deleteRecording')
-            logService.cam.error "deleteRecording: Validation error: "+errorsMap.toString()
+            logService.cam.error "deleteRecording: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
-        }
-        else
-        {
+        } else {
             result = motionService.deleteRecording(cmd)
             if (result.status != PassFail.PASS) {
                 render(status: 500, text: result.error)
-            }
-            else {
+            } else {
                 logService.cam.info("deleteRecording: success")
                 render ""
             }
