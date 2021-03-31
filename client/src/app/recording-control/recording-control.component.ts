@@ -165,12 +165,13 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
                 this.visible = true;
                 this.setValidInput(true);
-              } else
-                this.noVideo = true;
+              }
               // If there was an epoch time in the URL parameters, shift the recording to that time
               // if(this.paramEpoch !== -1)
               //   this.getOffsetForEpoch({value: this.paramEpoch});
             }
+            else
+              this.noVideo = true;
           },
           (error) => {
             this.reporting.errorMessage = error;
