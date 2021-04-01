@@ -56,31 +56,37 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       window.location.href = 'logoff';
   }
 
+  private getTemperature():void
+  {
+    this.utilsService.getTemperature().subscribe((tmp) => {
+        let temperature: string = tmp.temp;
+        let idx1: number = temperature.indexOf('=');
+        let idx2: number = temperature.lastIndexOf('\'');
+        if (idx1 !== -1 && idx2 !== -1) {
+          let strTemp: string = temperature.substr(idx1 + 1, idx2 - idx1);
+          this.temperature = parseFloat(strTemp);
+          this.noTemperature = false;
+          if (this.temperature < 50)
+            this.tempAlertClass = 'alert-success';
+          else if (this.temperature < 70)
+            this.tempAlertClass = 'alert-warning';
+          else
+            this.tempAlertClass = 'alert-danger'
+        } else
+          this.noTemperature = true;
+      },
+      () => {
+        this.noTemperature = true;
+      });
+  }
   ngOnInit(): void {
     this.cameras = this.cameraSvc.getCameras();
-    // Gets the core temperature (Raspberry pi only), and prevents the session from timing out
-    this.pingHandle = interval(60000).subscribe(() =>
-      this.utilsService.getTemperature().subscribe((tmp) => {
-         let temperature: string = tmp.temp;
-          let idx1: number = temperature.indexOf('=');
-          let idx2: number = temperature.lastIndexOf('\'');
-          if (idx1 !== -1 && idx2 !== -1) {
-            let strTemp: string = temperature.substr(idx1 + 1, idx2 - idx1);
-            this.temperature = parseFloat(strTemp);
-            this.noTemperature = false;
-            if (this.temperature < 50)
-              this.tempAlertClass = 'alert-success';
-            else if (this.temperature < 70)
-              this.tempAlertClass = 'alert-warning';
-            else
-              this.tempAlertClass = 'alert-danger'
-          } else
-            this.noTemperature = true;
-        },
-        () => {
-          this.noTemperature = true;
-        })
-    );
+    // Get the initial core temperature
+    this.getTemperature();
+    // Gets the core temperature every minute (Raspberry pi only), and prevents the session from timing out
+    this.pingHandle = interval(60000).subscribe(() => {
+      this.getTemperature();
+    });
   }
 
   ngAfterViewInit(): void {
