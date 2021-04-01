@@ -4,6 +4,11 @@ import {BaseUrl} from "./BaseUrl/BaseUrl";
 import {Observable, throwError} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
 
+export class Temperature
+{
+   temp: string = "";
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -17,9 +22,9 @@ export class UtilsService {
 
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) { }
 
-  getTemperature():Observable<string>
+  getTemperature():Observable<Temperature>
   {
-    return this.http.post<string>(this._baseUrl.getLink("utils", "getTemperature"), '', this.httpJSONOptions).pipe(
+    return this.http.post<Temperature>(this._baseUrl.getLink("utils", "getTemperature"), '', this.httpJSONOptions).pipe(
       tap(),
       catchError((err:HttpErrorResponse) => throwError(err))
     );

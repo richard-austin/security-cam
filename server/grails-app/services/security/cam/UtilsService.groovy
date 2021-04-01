@@ -4,6 +4,16 @@ import grails.gorm.transactions.Transactional
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
+class Temperature
+{
+    Temperature(String temp)
+    {
+        this.temp = temp
+    }
+
+    String temp
+}
+
 @Transactional
 class UtilsService {
     LogService logService
@@ -19,7 +29,7 @@ class UtilsService {
         p.waitFor()
 
         BufferedReader reader =
-                new BufferedReader(new InputStreamReader(p.getInputStream()));
+                new BufferedReader(new InputStreamReader(p.getInputStream()))
         StringBuffer sb = new StringBuffer()
         String line
         while ((line = reader.readLine()) != null) {
@@ -36,7 +46,8 @@ class UtilsService {
     def getTemperature() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            result.responseObject = executeLinuxCommand("vcgencmd measure_temp")
+            Temperature temp  = new Temperature(executeLinuxCommand("vcgencmd measure_temp"))
+            result.responseObject = temp
         }
         catch(Exception ex)
         {

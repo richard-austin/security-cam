@@ -2,7 +2,6 @@ package server
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import grails.validation.ValidationErrors
 import security.cam.LogService
 import security.cam.commands.DeleteRecordingCommand
 import security.cam.commands.DownloadRecordingCommand
@@ -23,16 +22,6 @@ class MotionEvents {
     String[] events
 }
 
-class TimeOffset {
-    TimeOffset(Double timeOffset) {
-        String strTOffset
-        DecimalFormat f = new DecimalFormat("##")
-        setOffset(f.format(timeOffset).toString())
-
-    }
-    String offset
-}
-
 class Recording {
     String uri
     String location
@@ -41,8 +30,8 @@ class Recording {
 class Camera {
     String name
     String motionName
-    String descr;
-    boolean defaultOnMultiDisplay;
+    String descr
+    boolean defaultOnMultiDisplay
     String uri
     Recording recording
 }
