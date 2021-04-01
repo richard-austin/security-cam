@@ -1,5 +1,6 @@
 package server
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import security.cam.UtilsService
 import security.cam.enums.PassFail
@@ -18,6 +19,6 @@ class UtilsController {
         if(response.status != PassFail.PASS)
             render(status: 500, text: response.error)
         else
-            render response.responseObject
+            render response.responseObject as JSON
     }
 }
