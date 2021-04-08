@@ -91,13 +91,20 @@ bootRun {
     systemProperty springProfilesActive, System.getProperty(springProfilesActive)
 }
 
+bootWar.dependsOn(':server:setVersion')
 bootWar.dependsOn(':client:buildClient')
+
 bootWar {
     webInf {
         from('../client/dist/client')
         include '**/*'
         into('classes/public')
     }
+}
+
+task setVersion(type: Exec) {
+    workingDir "$projectDir"
+    commandLine './setVersion.sh'
 }
 
 tasks.withType(GroovyCompile) {

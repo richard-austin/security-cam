@@ -11,7 +11,7 @@ grails:
 info:
     app:
         name: 'server'
-        version: '0.1'
+        version: '1.0.2-5-g244c5cd 08-04-2021-15:58:09'
         grailsVersion: '4.0.7'
 spring:
     jmx:
