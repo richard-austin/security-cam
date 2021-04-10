@@ -34,6 +34,7 @@ import { ReportingComponent } from './reporting/reporting.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import {MatIconModule} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
+import { AboutComponent } from './about/about.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import {MatFormFieldModule} from "@angular/material/form-field";
     RecordingControlComponent,
     ReportingComponent,
     ChangePasswordComponent,
+    AboutComponent,
   ],
   imports: [
     BrowserModule,

@@ -32,7 +32,14 @@ The security-cam group is then given group access to www-data and it's subdirect
  sudo usermod -a -G security-cam www-data  
  sudo chmod -R 775 /home/www-data/  
  sudo chgrp -R security-cam /home/www-data/  
- 
+
+ ## The following files are placed at /home/www-data
++ log_movement.sh 
++ end_log_movement.sh
++ processrecordings.sh
++ processmotionrecordings.sh
++ garage_cam_mask.pgm
++ porch_cam_mask.pgm 
  ## Tomcat using vcgencmd measure_temp
   To execute the getTemperature API call, Tomcat needs to be able to call vcgencmd measure_temp which requires it to be in the video group.
  

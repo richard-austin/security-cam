@@ -42,7 +42,7 @@
     </ul>
 <!--    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>-->
     <ul class="navbar-nav ml-auto">
-      <li class="nav-item dropdown">
+      <li class="nav-item dropdown" style="margin-right: 2.5rem;">
         <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
            aria-expanded="false">
           User Functions
@@ -52,6 +52,7 @@
              Log Off
            </span>
           <span class="dropdown-item" (click)="changePassword()">Change Password</span>
+          <span class="dropdown-item" (click)="about()">About Security Cam</span>
         </div>
       </li>
     </ul>
