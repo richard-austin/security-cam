@@ -9,6 +9,11 @@ export class Temperature
    temp: string = "";
 }
 
+export class Version
+{
+  version: string = "";
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -25,6 +30,14 @@ export class UtilsService {
   getTemperature():Observable<Temperature>
   {
     return this.http.post<Temperature>(this._baseUrl.getLink("utils", "getTemperature"), '', this.httpJSONOptions).pipe(
+      tap(),
+      catchError((err:HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  getVersion():Observable<Version>
+  {
+    return this.http.post<Version>(this._baseUrl.getLink("utils", "getVersion"), '', this.httpJSONOptions).pipe(
       tap(),
       catchError((err:HttpErrorResponse) => throwError(err))
     );

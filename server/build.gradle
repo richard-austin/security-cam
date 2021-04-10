@@ -91,7 +91,7 @@ bootRun {
     systemProperty springProfilesActive, System.getProperty(springProfilesActive)
 }
 
-bootWar.dependsOn(':server:setVersion')
+assetCompile.dependsOn(':server:setVersion')
 bootWar.dependsOn(':client:buildClient')
 
 bootWar {

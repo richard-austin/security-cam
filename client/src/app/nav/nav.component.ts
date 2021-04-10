@@ -56,6 +56,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       window.location.href = 'logoff';
   }
 
+  about() {
+    window.location.href = '#/about';
+  }
+
   private getTemperature():void
   {
     this.utilsService.getTemperature().subscribe((tmp) => {

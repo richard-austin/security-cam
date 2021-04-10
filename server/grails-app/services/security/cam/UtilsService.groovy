@@ -1,9 +1,13 @@
 package security.cam
 
+import asset.pipeline.grails.AssetResourceLocator
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import org.springframework.core.io.Resource
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
+
+import java.nio.charset.StandardCharsets
 
 class Temperature
 {
@@ -28,6 +32,7 @@ class Version
 @Transactional
 class UtilsService {
     LogService logService
+    AssetResourceLocator assetResourceLocator
     GrailsApplication grailsApplication
 
     /**
@@ -78,7 +83,9 @@ class UtilsService {
     def getVersion() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            Version ver = new Version(grailsApplication.config.info.app.securityCamVersion)
+            Resource verRes = assetResourceLocator.findResourceForURI('./version.txt')
+            String verStr = new String(verRes?.getInputStream()?.bytes, StandardCharsets.UTF_8)
+            Version ver = new Version(verStr)
             result.responseObject =  ver
         }
         catch(Exception ex)

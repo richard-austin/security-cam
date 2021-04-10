@@ -10,3 +10,4 @@ out/
 .project
 .settings
 .classpath
+/grails-app/assets/version/version.txt
