@@ -10,7 +10,7 @@ grails:
             events: false
 info:
     app:
-        name: 'Security Cam'
+        applicationName: 'Security Cam'
         securityCamVersion: '1'
         grailsVersion: '4.0.7'
 spring:
