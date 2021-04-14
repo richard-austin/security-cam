@@ -35,4 +35,16 @@ class UtilsController {
         else
             render response.responseObject as JSON
     }
+
+    /**
+     * setIP: Set the file myip to contain our current public ip address.
+     * @return: Our public ip address
+     */
+    @Secured(['ROLE_CLIENT'])
+    def setIP()
+    {
+        ObjectCommandResponse response
+        response = utilsService.setIP()
+        render response.responseObject as JSON
+    }
 }
