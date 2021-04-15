@@ -15,7 +15,7 @@ Hi Richard,
 
 I have detected a change of Virgin Media broadband IP address, this is now ${current_ip}.
 
-Please go to the web application at the new address and use the Set IP option to stop these emails continuing to be sent.
+Please go to the web application at the new address and use the "Save Current Public IP" option  on the General menu to stop these emails continuing to be sent.
 
 Thanks
 

@@ -35,6 +35,7 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
 import {MatIconModule} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import { AboutComponent } from './about/about.component';
+import { SetIpComponent } from './set-ip/set-ip.component';
 
 @NgModule({
   declarations: [
@@ -48,6 +49,7 @@ import { AboutComponent } from './about/about.component';
     ReportingComponent,
     ChangePasswordComponent,
     AboutComponent,
+    SetIpComponent,
   ],
   imports: [
     BrowserModule,

@@ -14,6 +14,11 @@ export class Version
   version: string = "";
 }
 
+export class MyIp
+{
+  myIp: string = "";
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -38,6 +43,14 @@ export class UtilsService {
   getVersion():Observable<Version>
   {
     return this.http.post<Version>(this._baseUrl.getLink("utils", "getVersion"), '', this.httpJSONOptions).pipe(
+      tap(),
+      catchError((err:HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  setIp():Observable<MyIp>
+  {
+    return this.http.post<MyIp>(this._baseUrl.getLink("utils", "setIP"), '', this.httpJSONOptions).pipe(
       tap(),
       catchError((err:HttpErrorResponse) => throwError(err))
     );

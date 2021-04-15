@@ -1,0 +1,12 @@
+.ip-box-container
+{
+  margin-top: 1rem;
+  display: inline-flex;
+  width: 100%;
+  >mat-card
+  {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

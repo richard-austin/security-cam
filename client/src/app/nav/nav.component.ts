@@ -83,6 +83,15 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.noTemperature = true;
       });
   }
+
+  setIp() {
+    window.location.href = '#/setip';
+  }
+
+  drawdownCalc() {
+    window.location.href = 'dc';
+  }
+
   ngOnInit(): void {
     this.cameras = this.cameraSvc.getCameras();
     // Get the initial core temperature
