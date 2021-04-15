@@ -1,3 +1,5 @@
+#!/bin/bash
+
 read -r last_ip < /home/www-data/myip
 
 echo "Last IP = ${last_ip}"

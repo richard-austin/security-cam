@@ -11,3 +11,5 @@ stop ()
 }
 
 stop
+
+/home/www-data/check_ip_not_changed.sh

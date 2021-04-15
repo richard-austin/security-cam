@@ -7,8 +7,14 @@ import org.springframework.core.io.Resource
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 import java.nio.charset.StandardCharsets
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.GroupPrincipal
+import java.nio.file.attribute.PosixFileAttributeView
+import java.nio.file.attribute.UserPrincipalLookupService
 
 class Temperature {
     Temperature(String temp) {
@@ -120,9 +126,16 @@ class UtilsService {
             writer.close()
             s.close()
             is.close()
-
             result.responseObject = new MyIP(myIp)
-        }
+
+            // Make the myip file a member of the security-cam group
+            String secCam = "security-cam"
+            UserPrincipalLookupService lookupService = FileSystems.getDefault()
+                    .getUserPrincipalLookupService()
+            GroupPrincipal group = lookupService.lookupPrincipalByGroupName(secCam)
+            Files.getFileAttributeView(myipFile, PosixFileAttributeView.class,
+                    LinkOption.NOFOLLOW_LINKS).setGroup(group)
+         }
         catch (IOException e) {
             logService.cam.error"Exception in getMyIP: " + e.getMessage()
             result.status = PassFail.FAIL
