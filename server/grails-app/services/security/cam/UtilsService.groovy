@@ -6,27 +6,39 @@ import grails.gorm.transactions.Transactional
 import org.springframework.core.io.Resource
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
-
 import java.nio.charset.StandardCharsets
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.attribute.GroupPrincipal
+import java.nio.file.attribute.PosixFileAttributeView
+import java.nio.file.attribute.UserPrincipalLookupService
 
-class Temperature
-{
-    Temperature(String temp)
-    {
+class Temperature {
+    Temperature(String temp) {
         this.temp = temp
     }
 
     String temp
 }
 
-class Version
-{
-    Version(String version)
-    {
+class Version {
+    Version(String version) {
         this.version = version
     }
 
     String version
+}
+
+class MyIP {
+    MyIP(String myIp)
+    {
+        this.myIp = myIp
+    }
+
+    String myIp
 }
 
 @Transactional
@@ -40,8 +52,7 @@ class UtilsService {
      * @param command the command and its parameters as a string
      * @return: The returned value
      */
-    String executeLinuxCommand(String command)
-    {
+    String executeLinuxCommand(String command) {
         Process p = Runtime.getRuntime().exec(command)
         p.waitFor()
 
@@ -57,18 +68,17 @@ class UtilsService {
     }
 
     /**
-     *getTemperature: Get the core temperature (Raspberry pi only). This is called at intervals to keep the session alive
+     * getTemperature: Get the core temperature (Raspberry pi only). This is called at intervals to keep the session alive
      * @return: The temperature as a string. On non Raspberry pi systems an error is returned.
      */
     def getTemperature() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            Temperature temp  = new Temperature(executeLinuxCommand("vcgencmd measure_temp"))
+            Temperature temp = new Temperature(executeLinuxCommand("vcgencmd measure_temp"))
             result.responseObject = temp
         }
-        catch(Exception ex)
-        {
-            logService.cam.error("Exception in getTemperature: "+ex.getCause()+ ' ' + ex.getMessage())
+        catch (Exception ex) {
+            logService.cam.error("Exception in getTemperature: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
@@ -86,13 +96,50 @@ class UtilsService {
             Resource verRes = assetResourceLocator.findResourceForURI('./version.txt')
             String verStr = new String(verRes?.getInputStream()?.bytes, StandardCharsets.UTF_8)
             Version ver = new Version(verStr)
-            result.responseObject =  ver
+            result.responseObject = ver
         }
-        catch(Exception ex)
-        {
-            logService.cam.error("Exception in getVersion: "+ex.getCause()+ ' ' + ex.getMessage())
+        catch (Exception ex) {
+            logService.cam.error("Exception in getVersion: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    /**
+     * setIP: Set the file myip to contain our current public ip address.
+     * @return: Our public ip address
+     */
+    ObjectCommandResponse setIP() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            InputStream is = new URL("https://api.ipify.org").openStream()
+            Scanner s = new Scanner(is, "UTF-8").useDelimiter("\\A")
+
+            String baseDir = grailsApplication.config.camerasHomeDirectory
+            Path myipFile = Paths.get(baseDir as String, 'myip')
+
+            String myIp = s.next()
+            //Write the ip address to the file
+            BufferedWriter writer = new BufferedWriter(new FileWriter(myipFile.toString()))
+            writer.write(myIp)
+            writer.close()
+            s.close()
+            is.close()
+            result.responseObject = new MyIP(myIp)
+
+            // Make the myip file a member of the security-cam group
+            String secCam = "security-cam"
+            UserPrincipalLookupService lookupService = FileSystems.getDefault()
+                    .getUserPrincipalLookupService()
+            GroupPrincipal group = lookupService.lookupPrincipalByGroupName(secCam)
+            Files.getFileAttributeView(myipFile, PosixFileAttributeView.class,
+                    LinkOption.NOFOLLOW_LINKS).setGroup(group)
+         }
+        catch (IOException e) {
+            logService.cam.error"Exception in getMyIP: " + e.getMessage()
+            result.status = PassFail.FAIL
+            result.error = e.getMessage()
         }
         return result
     }
