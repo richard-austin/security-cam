@@ -92,10 +92,6 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = 'dc';
   }
 
-  tomcatManager() {
-    window.location.href = 'manager/html';
-  }
-
   ngOnInit(): void {
     this.cameras = this.cameraSvc.getCameras();
     // Get the initial core temperature
