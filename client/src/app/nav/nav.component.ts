@@ -6,6 +6,7 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {interval, Subscription} from "rxjs";
 import {UtilsService} from "../shared/utils.service";
+import {UserIdleService} from "angular-user-idle";
 
 @Component({
   selector: 'app-nav',
@@ -24,7 +25,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   noTemperature: boolean = true;
   tempAlertClass!: string;
 
-  constructor(private cameraSvc: CameraService, private utilsService: UtilsService) {
+  constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService) {
   }
 
   setVideoStream(cam: Camera): void {
