@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Camera} from "../cameras/Camera";
-import {CameraService} from "../cameras/camera.service";
-import {Subscription, timer} from "rxjs";
+import {timer} from "rxjs";
+import {UserIdleService} from "angular-user-idle";
 
 declare let Hls: any;
 
@@ -22,8 +22,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   recordingUri: string = "";
   manifest: string = "";
   multi: boolean = false;
+  private isFullscreenNow: boolean = false;
 
-  constructor() {
+  constructor(private userIdle: UserIdleService) {
   }
 
   /**
@@ -85,6 +86,15 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.video.muted = true;
     this.video.controls = true;
 
+    // Stop the idle timeout if the video is being viewed full screen
+    this.video.addEventListener('webkitfullscreenchange', () => {
+      this.isFullscreenNow = document.fullscreenElement !== null
+      if(this.isFullscreenNow)
+        this.userIdle.stopWatching();
+      else
+        this.userIdle.startWatching();
+    });
+
     // This prevents value changed after it was checked error
     timer(10).subscribe(() => this.startVideo());
 
@@ -92,5 +102,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.hls.stopLoad();
+
+    // Ensure idle timeout is started again when we leave this. It should never be true here
+    //  as we need to come out of full screen mode to exit the component.
+    if(this.isFullscreenNow)
+      this.userIdle.startWatching();
   }
 }
