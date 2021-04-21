@@ -4,6 +4,7 @@ import {Camera} from "../cameras/Camera";
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {LiveContainerComponent} from "../live-container/live-container.component";
 import {ReportingComponent} from "../reporting/reporting.component";
+import {UserIdleService} from "angular-user-idle";
 
 class SelectableUri extends Camera{
   selected: boolean = false;
@@ -24,7 +25,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(LiveContainerComponent) liveContainer!: LiveContainerComponent;
   @ViewChild(ReportingComponent) errorReporting!:ReportingComponent;
 
-  constructor(private cameraSvc: CameraService) {
+  constructor(private cameraSvc: CameraService, private userIdle: UserIdleService) {
     this.cameraSvc.setActiveLive([]);
   }
 
@@ -34,8 +35,6 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    * setUpCameraDetails: Set up the available streams/cameras for selection by the check boxes
    */
   setUpCameraDetails(): void {
-    let cams: Camera[] = [];
-
     this.cameraSvc.getCamerasConfig().subscribe(cameras => {
       // Build up the cameras array
       for (const i in cameras) {
@@ -95,6 +94,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.userIdle.stopWatching();
   }
 
   ngAfterViewInit(): void {
@@ -102,6 +102,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.userIdle.startWatching();
     //   this.liveContainer?.videos.forEach((video:VideoComponent) => video.stop());
   }
 }
