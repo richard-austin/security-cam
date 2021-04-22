@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "./BaseUrl/BaseUrl";
-import {Observable, throwError} from "rxjs";
+import {Observable, Subject, throwError} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
 
 export class Temperature
@@ -19,6 +19,27 @@ export class MyIp
   myIp: string = "";
 }
 
+export enum messageType {idleTimeoutStatus}
+
+export abstract class Message
+{
+  protected constructor(messageType:messageType) {
+
+    this.messageType=messageType;
+  }
+  messageType!: messageType;
+}
+
+export class IdleTimeoutStatusMessage extends Message
+{
+  constructor(active: boolean) {
+    super(messageType.idleTimeoutStatus);
+    this.active=active;
+  }
+
+  active: boolean = true;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -29,6 +50,8 @@ export class UtilsService {
       'Authorization': 'my-auth-token'
     })
   };
+
+  private _messaging:Subject<any> = new Subject<any>();
 
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) { }
 
@@ -54,5 +77,14 @@ export class UtilsService {
       tap(),
       catchError((err:HttpErrorResponse) => throwError(err))
     );
+  }
+
+  sendMessage(message:Message)
+  {
+    this._messaging.next(message);
+  }
+
+  getMessages(): Observable<Message> {
+    return this._messaging.asObservable();
   }
 }

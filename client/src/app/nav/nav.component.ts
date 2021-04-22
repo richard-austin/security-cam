@@ -5,7 +5,7 @@ import {Camera} from "../cameras/Camera";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {Subscription} from "rxjs";
-import {UtilsService} from "../shared/utils.service";
+import {IdleTimeoutStatusMessage, Message, messageType, UtilsService} from "../shared/utils.service";
 import {UserIdleService} from "angular-user-idle";
 import {MatDialog} from "@angular/material/dialog";
 import {IdleTimeoutModalComponent} from "../idle-timeout-modal/idle-timeout-modal.component";
@@ -30,6 +30,8 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   noTemperature: boolean = true;
   tempAlertClass!: string;
   idleTimeoutDialogRef!: MatDialogRef<IdleTimeoutModalComponent>;
+  private idleTimeoutActive: boolean = true;
+  private messageSubscription!: Subscription;
 
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
   }
@@ -107,6 +109,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
    //     width: '450px',
         data: {idle: idle, remainingSecs: remainingSecs}
       });
+
        // this.idleTimeoutDialogRef.afterClosed().subscribe(res => {
        // });
     }
@@ -126,11 +129,23 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     //Start watching for user inactivity.
     this.userIdle.startWatching();
 
+    this.messageSubscription = this.utilsService.getMessages().subscribe((message:Message) => {
+      if(message.messageType === messageType.idleTimeoutStatus)
+      {
+        let itos: IdleTimeoutStatusMessage = message as IdleTimeoutStatusMessage;
+        this.idleTimeoutActive = itos.active;
+    //    console.log("idle active = "+this.idleTimeoutActive)
+      }
+    })
     // Start watching when user idle is starting.
     this.timerHandle = this.userIdle.onTimerStart().subscribe((count) =>{
-      let config: UserIdleConfig = this.userIdle.getConfigValue();
-      // @ts-ignore
-      this.openIdleTimeoutDialog(config.idle, config.timeout, count);
+      if(this.idleTimeoutActive) {
+        let config: UserIdleConfig = this.userIdle.getConfigValue();
+        // @ts-ignore
+        this.openIdleTimeoutDialog(config.idle, config.timeout, count);
+      }
+      else
+        this.userIdle.resetTimer();
     });
 
     // Log off when time is up.
@@ -152,5 +167,6 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.pingHandle.unsubscribe();
     this.timerHandle.unsubscribe();
+    this.messageSubscription.unsubscribe();
   }
 }

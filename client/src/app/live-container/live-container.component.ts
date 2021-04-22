@@ -3,6 +3,7 @@ import {CameraService} from "../cameras/camera.service";
 import {Camera} from "../cameras/Camera";
 import {Subscription} from "rxjs";
 import {VideoComponent} from "../video/video.component";
+import {IdleTimeoutStatusMessage, UtilsService} from "../shared/utils.service";
 
 @Component({
   selector: 'app-live-container',
@@ -10,13 +11,13 @@ import {VideoComponent} from "../video/video.component";
   styleUrls: ['./live-container.component.scss']
 })
 export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() multi:boolean = false;
+  @Input() multi: boolean = false;
   @ViewChildren(VideoComponent) videos!: QueryList<VideoComponent>;
 
   activeLiveUpdates!: Subscription;
   timerHandle!: Subscription;
 
-  constructor(private cameraSvc: CameraService) {
+  constructor(private cameraSvc: CameraService, private utilsService:UtilsService) {
   }
 
   setupVideo() {
@@ -39,8 +40,8 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngOnInit(): void {
-    // Disable idle timeout on live view
-    //this.userIdle.stopWatching();
+    // Disable the user idle service
+    this.utilsService.sendMessage(new IdleTimeoutStatusMessage(false));
   }
 
   ngAfterViewInit(): void {
@@ -51,6 +52,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   ngOnDestroy(): void {
     this.activeLiveUpdates?.unsubscribe();
     this.timerHandle?.unsubscribe();
-//    this.userIdle.startWatching();  // Start idle timeout again once we have finished
+    // Re-enable the user idle service
+    this.utilsService.sendMessage(new IdleTimeoutStatusMessage(true));
   }
 }
