@@ -2,7 +2,6 @@ import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/c
 import {CameraService} from "../cameras/camera.service";
 import {Camera} from "../cameras/Camera";
 import {MatCheckboxChange} from "@angular/material/checkbox";
-import {LiveContainerComponent} from "../live-container/live-container.component";
 import {ReportingComponent} from "../reporting/reporting.component";
 
 class SelectableUri extends Camera{
@@ -21,7 +20,6 @@ export class Stream {
 })
 export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @ViewChild(LiveContainerComponent) liveContainer!: LiveContainerComponent;
   @ViewChild(ReportingComponent) errorReporting!:ReportingComponent;
 
   constructor(private cameraSvc: CameraService) {
@@ -34,8 +32,6 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    * setUpCameraDetails: Set up the available streams/cameras for selection by the check boxes
    */
   setUpCameraDetails(): void {
-    let cams: Camera[] = [];
-
     this.cameraSvc.getCamerasConfig().subscribe(cameras => {
       // Build up the cameras array
       for (const i in cameras) {
@@ -102,6 +98,5 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    //   this.liveContainer?.videos.forEach((video:VideoComponent) => video.stop());
   }
 }
