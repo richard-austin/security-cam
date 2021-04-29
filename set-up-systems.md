@@ -1,5 +1,5 @@
 # Contents
-` `TOC \o "1-3" \h \z \u [Install nginx and mod-rmtp	 PAGEREF _Toc66375166 \h 1](#_Toc66375166)
+[Install nginx and mod-rmtp	 PAGEREF _Toc66375166 \h 1](#_Toc66375166)
 
 [Set up processrecordings.sh containing this	 PAGEREF _Toc66375167 \h 4](#_Toc66375167)
 
