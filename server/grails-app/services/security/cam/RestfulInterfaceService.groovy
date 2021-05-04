@@ -1,64 +1,19 @@
 package security.cam
 
-import groovy.json.JsonException
-import groovy.json.JsonSlurper
 import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.RestfulResponse
 
 import javax.net.ssl.*
-import java.security.KeyStore
-import java.security.SecureRandom
-import java.security.cert.CertificateException
-import java.security.cert.X509Certificate
+
+class CameraParams
+{
+	public def storage = [:]
+	def propertyMissing(String name, value) { storage[name] = value }
+	def propertyMissing(String name) { storage[name] }
+}
 
 class RestfulInterfaceService {
 	LogService logService
-
-	boolean initialised = false
-
-	void initialise()
-	{
-		if(!initialised) {
-//			// Create a trust manager that does not validate certificate chains
-//			TrustManager[] trustAllCerts = [new X509TrustManager() {
-//				@Override
-//				void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-//				}
-//
-//				@Override
-//				void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-//				}
-//
-//				@Override
-//				X509Certificate[] getAcceptedIssuers() {
-//					return null
-//				}
-//			}
-//			]
-
-//			KeyStore keyStore = KeyStore.getInstance("JKS")
-//			keyStore.load(new FileInputStream(systemPropertiesService.RESTFUL_KEYSTORE_PATH), systemPropertiesService.RESTFUL_KEYSTORE_PASSWORD.toCharArray())
-//
-//			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SUNX509")
-//			kmf.init(keyStore, systemPropertiesService.RESTFUL_KEY_PASSWORD.toCharArray())
-//			KeyManager[] keyManagers = kmf.getKeyManagers()
-//			SSLContext sc = SSLContext.getInstance("TLS")
-//
-//			sc.init(keyManagers, trustAllCerts, new SecureRandom())
-//
-//			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
-			initialised = true
-			// Create all-trusting host name verifier
-			HostnameVerifier allHostsValid = new HostnameVerifier() {
-				boolean verify(String hostname, SSLSession session) {
-					return true
-				}
-			}
-
-			// Install the all-trusting host verifier
-			HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
-		}
-	}
 
 	/**
 	* Attempt to send a RESTFul request to a given host to perform a service
@@ -75,13 +30,10 @@ class RestfulInterfaceService {
 		result.responseCode = -1
 		result.errorMsg = null
 
-		initialise()
-
 		HttpURLConnection conn = null
 		InputStream is = null
 		Reader inp = null
 		String url = buildURL(address, uri, params)
-		//String jsonParams = buildJSON(params)
 
 		try {
 			String username ="admin"
@@ -98,10 +50,6 @@ class RestfulInterfaceService {
 			conn.setDoOutput(true)
 			conn.setConnectTimeout(6 * 1000)
 			conn.setReadTimeout(6 * 1000)
-
-//			OutputStream os = conn.getOutputStream()
-//			byte[] byteParams = jsonParams.getBytes()
-//			os.write(byteParams)
 
 			result.responseCode = conn.getResponseCode()
 
@@ -126,12 +74,12 @@ class RestfulInterfaceService {
 			// if the response was good, de-serialise the JSON payload into the response object
 			if (result.responseCode == HttpURLConnection.HTTP_OK) {
 				result.status = RestfulResponseStatusEnum.PASS
-				result.responseObject = out.toString()
+				result.responseObject = createMap(out.toString())
 			}
 			else {
 				logService.cam.error("API [${uri}] request failed to [${address}]. Error message: ${out.toString()}")
 				result.status = RestfulResponseStatusEnum.ERROR_RESPONSE
-				result.responseCode = conn.getResponseCode()
+				result.responseCode = 500 //conn.getResponseCode()
 				result.errorMsg = RestfulResponseStatusEnum.ERROR_RESPONSE.toString()
 			}
 		}
@@ -154,13 +102,13 @@ class RestfulInterfaceService {
 		}
 		catch (IOException e) {
 			logService.cam.error(e.getMessage())
-			result.responseCode = conn.getResponseCode()
+			result.responseCode = 500 //conn.getResponseCode()
 			result.status = RestfulResponseStatusEnum.ERROR_RESPONSE
 			result.errorMsg = RestfulResponseStatusEnum.ERROR_RESPONSE.toString()
 		}
 		catch (Exception e) {
 			logService.cam.error(e.getMessage())
-			result.responseCode = conn.getResponseCode()
+			result.responseCode = 500 //conn.getResponseCode()
 			result.status = RestfulResponseStatusEnum.FAIL
 			result.errorMsg = RestfulResponseStatusEnum.FAIL.toString()
 		}
@@ -177,6 +125,29 @@ class RestfulInterfaceService {
 			conn.disconnect()
 		}
 		return result
+	}
+
+	/**
+	 * createMap: Create an object from the list of data returned by the cameras which can be returned as
+	 *             JSON to the client
+	 * @param valueList: List of data returned from the camera, i.e: -
+	 *                   var show_0="1"; var place_0="1"; var format_0="0"; var type_0="0"; var x_0="976";
+	 * @return: map of attributes and their values.
+	 */
+	private static def createMap(String valueList)
+	{
+		CameraParams cp = new CameraParams()
+		String[] params = valueList.split("\r\n")
+		params.each {val ->
+		    String thisVal = val.replace("var ", "")
+			String attr, attrValue
+			attr = thisVal.substring(0, thisVal.indexOf("="))
+			attrValue = thisVal.substring(thisVal.indexOf("\"")+1, thisVal.indexOf("\"", thisVal.indexOf("\"")+1))
+
+			cp[attr]=attrValue
+		}
+
+		return cp.storage
 	}
 
    /**

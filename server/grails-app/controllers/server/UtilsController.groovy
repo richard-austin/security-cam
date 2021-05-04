@@ -2,15 +2,22 @@ package server
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.validation.ValidationErrors
+import security.cam.LogService
 import security.cam.RestfulInterfaceService
 import security.cam.UtilsService
+import security.cam.ValidationErrorService
+import security.cam.commands.CameraParamsCommand
 import security.cam.enums.PassFail
+import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.interfaceobjects.RestfulResponse
 
 class UtilsController {
     UtilsService utilsService
     RestfulInterfaceService restfulInterfaceService
+    LogService logService
+    ValidationErrorService validationErrorService
 
     /**
      * getTemperature: Get the core temperature (Raspberry pi only). This is called at intervals to keep the session alive
@@ -52,11 +59,29 @@ class UtilsController {
     }
 
     @Secured(['ROLE_CLIENT'])
-    def cameraOp()
+    def cameraParams(CameraParamsCommand cmd)
     {
-        RestfulResponse response =
-        restfulInterfaceService.sendRequest('192.168.0.30', 'web/cgi-bin/hi3510/param.cgi', 'cmd=getinfrared')
+        ObjectCommandResponse result =  new ObjectCommandResponse()
+        if(cmd.hasErrors())
+        {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'cameraParams')
+            logService.cam.error "cameraParams: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else
+        {
+            RestfulResponse response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params)
+            //restfulInterfaceService.sendRequest('192.168.0.30', 'web/cgi-bin/hi3510/param.cgi', 'cmd=getinfrared&cmd=getserverinfo')
 
-        def x = response
+            if(response.status != RestfulResponseStatusEnum.PASS)
+            {
+                result.status = PassFail.FAIL
+                result.error = response.errorMsg
+                result.userError = response.userError
+                render(status: 500, text: result)
+            }
+            else
+                render response.responseObject as JSON
+        }
     }
 }
