@@ -6,6 +6,7 @@ import {RecordingControlComponent} from "./recording-control/recording-control.c
 import {ChangePasswordComponent} from "./change-password/change-password.component";
 import {AboutComponent} from "./about/about.component";
 import {SetIpComponent} from "./set-ip/set-ip.component";
+import {CameraParamsComponent} from "./camera-params/camera-params.component";
 
 const routes: Routes = [
   {path: 'live', component: LiveContainerComponent},
@@ -13,7 +14,8 @@ const routes: Routes = [
   {path: 'multicam', component: MultiCamViewComponent},
   {path: 'changepassword', component: ChangePasswordComponent},
   {path: 'about', component: AboutComponent},
-  {path: 'setip', component: SetIpComponent}
+  {path: 'setip', component: SetIpComponent},
+  {path: 'cameraparams', component: CameraParamsComponent}
 ];
 
 @NgModule({
