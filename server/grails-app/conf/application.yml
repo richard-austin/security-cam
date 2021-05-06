@@ -196,6 +196,9 @@ environments:
                     uri: http://localhost/recording/motion-hls3lo/
                     location: motion-hls3lo
 
+        camerasAdminUserName: admin
+        camerasAdminPassword: R@nc1dTapsB0ttom
+
     test:
         dataSource:
             dbCreate: update
@@ -296,3 +299,6 @@ environments:
                 recording:
                     uri: /recording/motion-hls3lo/
                     location: motion-hls3lo
+
+        camerasAdminUserName: admin
+        camerasAdminPassword: R@nc1dTapsB0ttom

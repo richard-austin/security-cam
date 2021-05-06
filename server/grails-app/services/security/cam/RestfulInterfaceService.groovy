@@ -1,5 +1,6 @@
 package security.cam
 
+import grails.core.GrailsApplication
 import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.RestfulResponse
 
@@ -15,6 +16,7 @@ class CameraParams {
 
 class RestfulInterfaceService {
     LogService logService
+    GrailsApplication grailsApplication
 
     /**
      * Attempt to send a RESTFul request to a given host to perform a service
@@ -37,8 +39,8 @@ class RestfulInterfaceService {
         String url = buildURL(address, uri, isPOST ? null : params)
 
         try {
-            String username = "admin"
-            String password = "R@nc1dTapsB0ttom"
+            String username = grailsApplication.config.camerasAdminUserName
+            String password = grailsApplication.config.camerasAdminPassword
             String userPass = "${username}:${password}"
             String basicAuth = "Basic " + userPass.bytes.encodeBase64().toString()
             URL u = new URL(url)
