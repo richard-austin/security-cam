@@ -1,1 +1,48 @@
-<p>camera-params works!</p>
+<div class="camera-params-container">
+  <mat-card class="mat-elevation-z8">
+    <mat-card-title>View/Set Parameters</mat-card-title>
+    <mat-card-subtitle>{{cam?.name}}</mat-card-subtitle>
+
+    <mat-card-content>
+      <!--      <form (ngSubmit)="$event.preventDefault(); formSubmitted()" [formGroup]="cameraParamsForm">-->
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Infra Red Status</mat-label>
+          <mat-select #irselector (selectionChange)="setSelectedIRStatus($event)">
+            <mat-option value="auto">
+              Auto
+            </mat-option>
+            <mat-option value="on">
+              On
+            </mat-option>
+            <mat-option value="off">
+              Off
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field disabled="true">
+          <mat-label>Start Date</mat-label>
+          <input matInput type="text" formControlName="startDate" #startDate
+                 placeholder="Start Date">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <mat-label>Software Version</mat-label>
+          <input matInput type="text" formControlName="startDate" #softVersion
+                 placeholder="Software Version">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <mat-label>Model</mat-label>
+          <input matInput type="text" formControlName="startDate" #model
+                 placeholder="Model">
+        </mat-form-field>
+      </div>
+      <!--      </form>-->
+    </mat-card-content>
+  </mat-card>
+</div>

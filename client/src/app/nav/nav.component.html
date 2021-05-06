@@ -39,6 +39,19 @@
           </ng-container>
         </div>
       </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="camControlDropdown" role="button" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
+          Camera Control
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <ng-container *ngFor="let camera of cameras">
+               <span *ngIf="camera.address!=undefined&&camera.controlUri!=undefined" class="dropdown-item" (click)="cameraControl(camera)">
+                 {{camera.name}}
+               </span>
+          </ng-container>
+        </div>
+      </li>
     </ul>
 <!--    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>-->
     <ul class="navbar-nav ml-auto">

@@ -46,6 +46,11 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/recording';
   }
 
+  cameraControl(cam: Camera) {
+    this.cameraSvc.setActiveLive([cam]);
+    window.location.href = '#/cameraparams';
+  }
+
   changePassword() {
     window.location.href = '#/changepassword';
   }
