@@ -89,6 +89,15 @@ export class UtilsService {
     );
   }
 
+  setCameraParams(address:string, uri:string, infraredstat:string):Observable<CameraParams>
+  {
+    let cameraParams:{address:string, uri:string, infraredstat:string} = {address:address, uri:uri, infraredstat:infraredstat};
+    return this.http.post<CameraParams>(this._baseUrl.getLink("utils", "setCameraParams"), JSON.stringify(cameraParams), this.httpJSONOptions).pipe(
+      tap(),
+      catchError((err:HttpErrorResponse) => throwError(err))
+    );
+  }
+
   sendMessage(message:Message)
   {
     this._messaging.next(message);

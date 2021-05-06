@@ -3,8 +3,8 @@ import {UtilsService} from "../shared/utils.service";
 import {CameraService} from "../cameras/camera.service";
 import {Camera, CameraParams} from "../cameras/Camera";
 import {Subscription} from "rxjs";
-import {MatSelectChange} from "@angular/material/select";
 import {MatSelect} from "@angular/material/select/select";
+import {ReportingComponent} from "../reporting/reporting.component";
 
 @Component({
   selector: 'app-camera-params',
@@ -17,6 +17,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('startDate') startDate!:ElementRef<HTMLInputElement>;
   @ViewChild('softVersion') softVersion!:ElementRef<HTMLInputElement>;
   @ViewChild('model') model!:ElementRef<HTMLInputElement>;
+  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
 
   constructor(private utils:UtilsService, private cameraSvc:CameraService) { }
 
@@ -25,6 +26,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   cameraParamsForm: any;
 
   private setCamera() {
+    this.reporting.dismiss();
     this.cam = this.cameraSvc.getActiveLive()[0];
     if(this.cam && this.cam.address!==undefined&&this.cam.controlUri!==undefined) {
       this.utils.cameraParams(this.cam.address, this.cam.controlUri, "cmd=getinfrared&cmd=getserverinfo").subscribe(
@@ -43,6 +45,18 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  updateParams() {
+    this.reporting.dismiss();
+    this.utils.setCameraParams(this.cam.address, this.cam.controlUri, this.irselector.value).subscribe(() =>
+      {
+          this.reporting.successMessage = "Update Successful"
+          this.cameraParams.infraredstat=this.irselector.value;   // Update the locally stored value
+      },
+      reason =>
+        this.reporting.errorMessage = reason
+    );
+  }
+
   ngOnInit(): void {
   }
 
@@ -53,13 +67,5 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.activeLiveUpdates.unsubscribe();
-  }
-
-  formSubmitted() {
-
-  }
-
-  setSelectedIRStatus($event: MatSelectChange) {
-
   }
 }

@@ -21,6 +21,6 @@ class CameraParamsCommand implements Validateable{
                     return
                 })
         uri(nullable: false, matches: 'web/cgi-bin/hi3510/param.cgi')
-        params(nullable: false)
+        params(nullable: true)
     }
 }

@@ -8,14 +8,14 @@
       <div>
         <mat-form-field appearance="fill">
           <mat-label>Infra Red Status</mat-label>
-          <mat-select #irselector (selectionChange)="setSelectedIRStatus($event)">
+          <mat-select #irselector>
             <mat-option value="auto">
               Auto
             </mat-option>
-            <mat-option value="on">
+            <mat-option value="open">
               On
             </mat-option>
-            <mat-option value="off">
+            <mat-option value="close">
               Off
             </mat-option>
           </mat-select>
@@ -42,7 +42,11 @@
                  placeholder="Model">
         </mat-form-field>
       </div>
+      <div class="button-container">
+        <button mat-raised-button (click)="updateParams()" [disabled]="irselector.value==cameraParams?.infraredstat" color="warn">Update</button>
+      </div>
       <!--      </form>-->
     </mat-card-content>
   </mat-card>
 </div>
+<app-reporting></app-reporting>

@@ -8,6 +8,7 @@ import security.cam.RestfulInterfaceService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
+import security.cam.commands.SetCameraParamsCommand
 import security.cam.enums.PassFail
 import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -71,7 +72,6 @@ class UtilsController {
         else
         {
             RestfulResponse response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params)
-            //restfulInterfaceService.sendRequest('192.168.0.30', 'web/cgi-bin/hi3510/param.cgi', 'cmd=getinfrared&cmd=getserverinfo')
 
             if(response.status != RestfulResponseStatusEnum.PASS)
             {
@@ -79,6 +79,33 @@ class UtilsController {
                 result.error = response.errorMsg
                 result.userError = response.userError
                 render(status: 500, text: result)
+            }
+            else
+                render response.responseObject as JSON
+        }
+    }
+
+    @Secured(['ROLE_CLIENT'])
+    def setCameraParams(SetCameraParamsCommand cmd)
+    {
+        ObjectCommandResponse result =  new ObjectCommandResponse()
+        if(cmd.hasErrors())
+        {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'cameraParams')
+            logService.cam.error "setCameraParams: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else
+        {
+            RestfulResponse response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params, true)
+
+            if(response.status != RestfulResponseStatusEnum.PASS)
+            {
+                logService.cam.error "setCameraParams: error: " + response.errorMsg
+                result.status = PassFail.FAIL
+                result.error = response.errorMsg
+                result.userError = response.userError
+                render(status: 500, result as JSON)
             }
             else
                 render response.responseObject as JSON
