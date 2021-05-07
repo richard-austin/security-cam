@@ -9,5 +9,9 @@ div.camera-params-container
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
+    >mat-card-content >div >button
+    {
+      margin-top: 0.5rem;
+    }
   }
 }
