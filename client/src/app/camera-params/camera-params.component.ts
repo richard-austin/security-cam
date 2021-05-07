@@ -13,15 +13,16 @@ import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/form
 })
 export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   private activeLiveUpdates!: Subscription;
-  irselector!:AbstractControl;
+  irselector!: AbstractControl;
   cameraName!: AbstractControl;
-  dateFormat!:AbstractControl;
-  startDate!:AbstractControl;
-  softVersion!:AbstractControl;
-  model!:AbstractControl;
+  dateFormat!: AbstractControl;
+  startDate!: AbstractControl;
+  softVersion!: AbstractControl;
+  model!: AbstractControl;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
 
-  constructor(private utils:UtilsService, private cameraSvc:CameraService) { }
+  constructor(private utils: UtilsService, private cameraSvc: CameraService) {
+  }
 
   cameraParams!: CameraParams;
   cam!: Camera;
@@ -30,9 +31,9 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private setCamera() {
     this.reporting.dismiss();
-    this.downloading=true;
+    this.downloading = true;
     this.cam = this.cameraSvc.getActiveLive()[0];
-    if(this.cam && this.cam.address!==undefined&&this.cam.controlUri!==undefined) {
+    if (this.cam && this.cam.address !== undefined && this.cam.controlUri !== undefined) {
       this.utils.cameraParams(this.cam.address, this.cam.controlUri, "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1").subscribe(
         result => {
           this.downloading = false;
@@ -60,11 +61,13 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   updateParams() {
     this.reporting.dismiss();
     this.downloading = true;
-    this.utils.setCameraParams(this.cam.address, this.cam.controlUri, this.irselector.value, this.cameraName.value).subscribe(() =>
-      {
+    this.utils.setCameraParams(this.cam.address, this.cam.controlUri, this.irselector.value, this.cameraName.value).subscribe(() => {
         this.downloading = false;
-          this.reporting.successMessage = "Update Successful"
-          this.cameraParams.infraredstat=this.irselector.value;   // Update the locally stored value
+        this.reporting.successMessage = "Update Successful"
+
+        // Update the locally stored values
+        this.cameraParams.infraredstat = this.irselector.value;
+        this.cameraParams.name_1 = this.cameraName.value;
       },
       reason => {
         this.downloading = false;
@@ -73,13 +76,12 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  hasError = (controlName: string, errorName: string):boolean =>{
+  hasError = (controlName: string, errorName: string): boolean => {
     return this.camControlFormGroup.controls[controlName].hasError(errorName);
   }
 
-  anyInvalid(): boolean
-  {
-     return this.irselector.invalid || this.cameraName.invalid;
+  anyInvalid(): boolean {
+    return this.irselector.invalid || this.cameraName.invalid;
   }
 
   ngOnInit(): void {
@@ -110,8 +112,8 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   anyChanged() {
-    return this.irselector?.value!==this.cameraParams?.infraredstat
-    || this.cameraName?.value !== this.cameraParams?.name_1
-    || this.dateFormat?.value !== this.cameraParams?.name_0;
+    return this.irselector?.value !== this.cameraParams?.infraredstat
+      || this.cameraName?.value !== this.cameraParams?.name_1
+      || this.dateFormat?.value !== this.cameraParams?.name_0;
   }
 }
