@@ -39,6 +39,7 @@ import { SetIpComponent } from './set-ip/set-ip.component';
 import {UserIdleModule} from "angular-user-idle";
 import {MatDialogModule} from "@angular/material/dialog";
 import { IdleTimeoutModalComponent } from './idle-timeout-modal/idle-timeout-modal.component';
+import { CameraParamsComponent } from './camera-params/camera-params.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { IdleTimeoutModalComponent } from './idle-timeout-modal/idle-timeout-mod
     AboutComponent,
     SetIpComponent,
     IdleTimeoutModalComponent,
+    CameraParamsComponent,
   ],
   imports: [
     BrowserModule,

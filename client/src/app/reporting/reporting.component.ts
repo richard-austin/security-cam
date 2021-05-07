@@ -1,5 +1,5 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
+import {Component, OnInit} from '@angular/core';
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-reporting',
@@ -27,7 +27,6 @@ export class ReportingComponent implements OnInit {
 
   set errorMessage(error: HttpErrorResponse)
   {
-
     this.success = undefined;
     this.error = error;
     this.validationErrors = [];

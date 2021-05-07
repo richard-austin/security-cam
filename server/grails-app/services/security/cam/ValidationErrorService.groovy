@@ -52,9 +52,6 @@ class ValidationErrorService {
             else if (errorCode.equals('wrong.state')) {
                 errorMsg += " is not in the correct state for this action. "
             }
-            else if (errorCode.equals('duplicate')) {
-                errorMsg += 'A record with that '+fieldName + ' already exists in the fleet. Please choose another '+fieldName+'. '
-            }
             else
                errorMsg += errorCode
 

@@ -1,4 +1,17 @@
 
+export class CameraParams
+{
+    hardVersion!: string;
+    infraredstat!: string;
+    name_0!: string;
+    name_1!: string;
+    model!: string;
+    name!: string;
+    softVersion!: string;
+    startdate!: string;
+    webVersion!: string;
+}
+
 export class Recording
 {
   uri: string = "";
@@ -12,5 +25,7 @@ export class Camera
     descr: string = "";
     defaultOnMultiDisplay: boolean = false;
     uri: string = "";
+    address: string="";
+    controlUri: string="";
     recording: Recording = new Recording();
 }

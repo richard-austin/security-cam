@@ -2,6 +2,7 @@ package server
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.validation.ValidationErrors
 import security.cam.LogService
 import security.cam.commands.DeleteRecordingCommand
 import security.cam.commands.DownloadRecordingCommand
@@ -33,6 +34,8 @@ class Camera {
     String descr
     boolean defaultOnMultiDisplay
     String uri
+    String address
+    String controlUri
     Recording recording
 }
 
@@ -52,7 +55,7 @@ class MotionController {
         response.contentType = "application/json"
 
         if (cmd.hasErrors()) {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors, 'getMotionEvents')
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'getMotionEvents')
             logService.cam.error "getMotionEvents: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {
@@ -78,7 +81,7 @@ class MotionController {
         ObjectCommandResponse result
 
         if (cmd.hasErrors()) {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors, 'downloadRecording')
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'downloadRecording')
             logService.cam.error "downloadRecording: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {
@@ -121,7 +124,7 @@ class MotionController {
         ObjectCommandResponse result
 
         if (cmd.hasErrors()) {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors, 'deleteRecording')
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'deleteRecording')
             logService.cam.error "deleteRecording: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {

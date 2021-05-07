@@ -135,6 +135,8 @@ environments:
                 defaultOnMultiDisplay: false
                 motionName: PorchCam
                 uri: http://localhost/live/hls/porch.m3u8
+                address: 192.168.0.30
+                controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
                       uri: http://localhost/recording/hls/
                       location: hls
@@ -155,6 +157,8 @@ environments:
                 descr: HD
                 defaultOnMultiDisplay: false
                 uri: http://localhost/live/hls2/cam2.m3u8
+                address: 192.168.0.34
+                controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
                     uri: http://localhost/recording/hls2/
                     location: hls2
@@ -175,6 +179,9 @@ environments:
                 descr: HD
                 defaultOnMultiDisplay: false
                 uri: http://localhost/live/hls3/cam3.m3u8
+                address: 192.168.0.35
+                controlUri: web/cgi-bin/hi3510/param.cgi
+
                 recording:
                     uri: http://localhost/recording/hls3/
                     location: hls3
@@ -188,6 +195,9 @@ environments:
                 recording:
                     uri: http://localhost/recording/motion-hls3lo/
                     location: motion-hls3lo
+
+        camerasAdminUserName: admin
+        camerasAdminPassword: R@nc1dTapsB0ttom
 
     test:
         dataSource:
@@ -230,6 +240,8 @@ environments:
                 defaultOnMultiDisplay: false
                 motionName: PorchCam
                 uri: /live/hls/porch.m3u8
+                address: 192.168.0.30
+                controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
                     uri: /recording/hls/
                     location: hls
@@ -250,6 +262,8 @@ environments:
                 defaultOnMultiDisplay: false
                 motionName: SideGate
                 uri: /live/hls2/cam2.m3u8
+                address: 192.168.0.34
+                controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
                       uri: /recording/hls2/
                       location: hls2
@@ -270,6 +284,8 @@ environments:
                 defaultOnMultiDisplay: false
                 motionName: Garden
                 uri: /live/hls3/cam3.m3u8
+                address: 192.168.0.35
+                controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
                     uri: /recording/hls3/
                     location: hls3
@@ -283,3 +299,6 @@ environments:
                 recording:
                     uri: /recording/motion-hls3lo/
                     location: motion-hls3lo
+
+        camerasAdminUserName: admin
+        camerasAdminPassword: R@nc1dTapsB0ttom

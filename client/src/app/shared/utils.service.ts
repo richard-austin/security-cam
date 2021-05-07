@@ -3,6 +3,7 @@ import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "./BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
+import {CameraParams} from "../cameras/Camera";
 
 export class Temperature
 {
@@ -74,6 +75,24 @@ export class UtilsService {
   setIp():Observable<MyIp>
   {
     return this.http.post<MyIp>(this._baseUrl.getLink("utils", "setIP"), '', this.httpJSONOptions).pipe(
+      tap(),
+      catchError((err:HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  cameraParams(address:string, uri:string, params:string):Observable<CameraParams>
+  {
+    let cameraParams:{address:string, uri:string, params:string} = {address:address, uri:uri, params:params};
+    return this.http.post<CameraParams>(this._baseUrl.getLink("utils", "cameraParams"), JSON.stringify(cameraParams), this.httpJSONOptions).pipe(
+      tap(),
+      catchError((err:HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  setCameraParams(address:string, uri:string, infraredstat:string, cameraName: string):Observable<CameraParams>
+  {
+    let cameraParams:{address:string, uri:string, infraredstat:string, cameraName:string} = {address:address, uri:uri, infraredstat:infraredstat, cameraName: cameraName};
+    return this.http.post<CameraParams>(this._baseUrl.getLink("utils", "setCameraParams"), JSON.stringify(cameraParams), this.httpJSONOptions).pipe(
       tap(),
       catchError((err:HttpErrorResponse) => throwError(err))
     );
