@@ -89,9 +89,9 @@ export class UtilsService {
     );
   }
 
-  setCameraParams(address:string, uri:string, infraredstat:string):Observable<CameraParams>
+  setCameraParams(address:string, uri:string, infraredstat:string, cameraName: string):Observable<CameraParams>
   {
-    let cameraParams:{address:string, uri:string, infraredstat:string} = {address:address, uri:uri, infraredstat:infraredstat};
+    let cameraParams:{address:string, uri:string, infraredstat:string, cameraName:string} = {address:address, uri:uri, infraredstat:infraredstat, cameraName: cameraName};
     return this.http.post<CameraParams>(this._baseUrl.getLink("utils", "setCameraParams"), JSON.stringify(cameraParams), this.httpJSONOptions).pipe(
       tap(),
       catchError((err:HttpErrorResponse) => throwError(err))

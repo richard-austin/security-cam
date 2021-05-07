@@ -6,7 +6,7 @@
     <mat-card-content>
       <!--      <form (ngSubmit)="$event.preventDefault(); formSubmitted()" [formGroup]="cameraParamsForm">-->
       <div>
-        <mat-form-field appearance="fill">
+        <mat-form-field appearance="legacy">
           <mat-label>Infra Red Status</mat-label>
           <mat-select #irselector>
             <mat-option value="auto">
@@ -22,14 +22,28 @@
         </mat-form-field>
       </div>
       <div>
-        <mat-form-field disabled="true">
+        <mat-form-field appearance="standard">
+          <mat-label>Camera Name</mat-label>
+          <input matInput type="text" formControlName="cameraName" #cameraName
+                 placeholder="Start Date">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="legacy">
+          <mat-label>Date Format</mat-label>
+          <input matInput type="text" formControlName="dateFormat" #dateFormat
+                 placeholder="Start Date">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="legacy">
           <mat-label>Start Date</mat-label>
           <input matInput type="text" formControlName="startDate" #startDate
                  placeholder="Start Date">
         </mat-form-field>
       </div>
       <div>
-        <mat-form-field>
+        <mat-form-field appearance="legacy">
           <mat-label>Software Version</mat-label>
           <input matInput type="text" formControlName="startDate" #softVersion
                  placeholder="Software Version">
@@ -43,7 +57,7 @@
         </mat-form-field>
       </div>
       <div class="button-container">
-        <button mat-raised-button (click)="updateParams()" [disabled]="irselector.value==cameraParams?.infraredstat" color="warn">Update</button>
+        <button mat-raised-button (click)="updateParams()" [disabled]="!anyChanged()" color="warn">Update</button>
       </div>
       <!--      </form>-->
     </mat-card-content>

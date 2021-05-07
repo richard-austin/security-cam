@@ -4,8 +4,6 @@ import grails.core.GrailsApplication
 import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.RestfulResponse
 
-import javax.net.ssl.*
-
 class CameraParams {
     public def storage = [:]
 

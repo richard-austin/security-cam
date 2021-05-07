@@ -14,6 +14,8 @@ import {ReportingComponent} from "../reporting/reporting.component";
 export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   private activeLiveUpdates!: Subscription;
   @ViewChild('irselector') irselector!:MatSelect;
+  @ViewChild('cameraName') cameraName!: ElementRef<HTMLInputElement>;
+  @ViewChild('dateFormat') dateFormat!: ElementRef<HTMLInputElement>;
   @ViewChild('startDate') startDate!:ElementRef<HTMLInputElement>;
   @ViewChild('softVersion') softVersion!:ElementRef<HTMLInputElement>;
   @ViewChild('model') model!:ElementRef<HTMLInputElement>;
@@ -29,12 +31,15 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.reporting.dismiss();
     this.cam = this.cameraSvc.getActiveLive()[0];
     if(this.cam && this.cam.address!==undefined&&this.cam.controlUri!==undefined) {
-      this.utils.cameraParams(this.cam.address, this.cam.controlUri, "cmd=getinfrared&cmd=getserverinfo").subscribe(
+      this.utils.cameraParams(this.cam.address, this.cam.controlUri, "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1").subscribe(
         result => {
           this.cameraParams = result;
           // Show the current IR setting
           this.irselector.writeValue(this.cameraParams.infraredstat);
           this.startDate.nativeElement.value = this.cameraParams.startdate;
+          this.cameraName.nativeElement.value = this.cameraParams.name_1;
+          this.dateFormat.nativeElement.value = this.cameraParams.name_0;
+          this.dateFormat.nativeElement.disabled = true; // Disable this one until I have suitable regex for validation
           this.startDate.nativeElement.disabled = true;
           this.softVersion.nativeElement.value = this.cameraParams.softVersion;
           this.softVersion.nativeElement.disabled = true;
@@ -47,7 +52,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateParams() {
     this.reporting.dismiss();
-    this.utils.setCameraParams(this.cam.address, this.cam.controlUri, this.irselector.value).subscribe(() =>
+    this.utils.setCameraParams(this.cam.address, this.cam.controlUri, this.irselector.value, this.cameraName.nativeElement.value).subscribe(() =>
       {
           this.reporting.successMessage = "Update Successful"
           this.cameraParams.infraredstat=this.irselector.value;   // Update the locally stored value
@@ -67,5 +72,11 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.activeLiveUpdates.unsubscribe();
+  }
+
+  anyChanged() {
+    return this.irselector?.value!==this.cameraParams?.infraredstat
+    || this.cameraName?.nativeElement?.value !== this.cameraParams?.name_1
+    || this.dateFormat?.nativeElement.value !== this.cameraParams?.name_0;
   }
 }

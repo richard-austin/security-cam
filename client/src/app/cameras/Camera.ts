@@ -3,6 +3,8 @@ export class CameraParams
 {
     hardVersion!: string;
     infraredstat!: string;
+    name_0!: string;
+    name_1!: string;
     model!: string;
     name!: string;
     softVersion!: string;
