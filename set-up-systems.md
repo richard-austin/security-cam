@@ -844,5 +844,6 @@ It should appear page as given below if your installation is successful.
    1. Delete the ubuntu directory on the SSD boot partition (this will prevent ubuntu options appearing on the F9 boot options menu.
 1. Remove mmx64.efi* from the /efi/boot directory.
 1. Remove shimx64.efi and mmx64.efi* from the /efi/ubuntu directory.
-* It may be best to keep shimx86.efi in each case because there was a problem booting in which shimx86.efi was not found after an attempted install of a system library which required a temporary change to secure boot.
+
+\* It may be best to keep shimx86.efi in each case because there was a problem booting in which shimx86.efi was not found after an attempted install of a system library which required a temporary change to secure boot.
 
