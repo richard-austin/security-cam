@@ -27,6 +27,8 @@
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
+              "src/error400.html",
+              "src/errorElse.html",
               "src/favicon.ico",
               "src/assets"
             ],
@@ -60,8 +62,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "2.5mb"
+                  "maximumWarning": "2.5mb",
+                  "maximumError": "3.0mb"
                 },
                 {
                   "type": "anyComponentStyle",
