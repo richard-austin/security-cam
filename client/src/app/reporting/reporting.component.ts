@@ -36,7 +36,7 @@ export class ReportingComponent implements OnInit {
         for(const key of Object.keys(error.error))
           this.validationErrors.push(key + ': ' + error.error[key]);
       }
-      else if(error.error !== typeof(String))
+      else if(typeof (error.error) !== 'string')
       {
         this.showMessageInError=false;
       }
