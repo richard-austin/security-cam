@@ -24,8 +24,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   timerHandle!: Subscription;
   private activeLiveUpdates!: Subscription;
   motionEvents!: LocalMotionEvent[];
-  validInput: boolean = false;
-  private paramEpoch: number = -1;
   camera!: Camera;
   manifest: string = "";
   visible: boolean = false;
@@ -92,39 +90,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   /**
-   * checkForUrlParameters: Check for parameters on the URL. There can be motionName and epoch. If there are, and
-   *                        these are valid, then set the active live to the camera with the given motion name and
-   *                        which is set as the default for multi display. The epoch value is returned if the
-   *                        parameters were valid, otherwise -1. The parameters are supported to enable sending
-   *                        links in motion event warning emails which will go straight to the event in the recording.
-   */
-  checkForUrlParameters(): void {
-    let motionName: string;
-    let epoch: number;
-    this.route.params.subscribe(params => {
-      motionName = params.motionName;
-      if (/^[0-9]{10}$/.test(params.epoch)) {
-        epoch = parseInt(params.epoch);
-        let cameras: Camera[] = this.cameraSvc.getCameras();
-
-        if (!cameras) {
-          this.cameraSvc.getCamerasConfig().subscribe((cams) => {
-            for (const i in cams) {
-              const c = cameras[i];
-              cameras.push(c);
-            }
-          });
-        }
-        let cam: Camera | undefined = cameras.find((camera: Camera) => camera.motionName === motionName && camera.defaultOnMultiDisplay);
-        if (cam) {
-          this.cameraSvc.setActiveLive([cam], false);
-          this.paramEpoch = epoch;
-        }
-      }
-    });
-  }
-
-  /**
    * setupRecording: Display the recording from the camera details returned from getActiveLive. This will have either
    *                 been selected from the navbar menu, or derived from the motionName given as a URL parameter.
    *                 In the latter case, an epoch time will also be given as the point to set the video time to. The
@@ -138,7 +103,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     // Check for motionName and epoch time as URL parameters, use them if present and valid
     //  These are given in the URL in email motion sensing alerts to enable you to navigate straight to
     //  the relevant part of the recording.
-//    this.checkForUrlParameters();
+    //    this.checkForUrlParameters();
     // Check for selected camera (recording) from the nav bar menu, or URL parameters
     let cam: Camera = this.cameraSvc.getActiveLive()[0];
     // If camera (recording) available, then load that video to the page
@@ -163,7 +128,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
                 this.video.setSource(cam, this.manifest);
 
                 this.visible = true;
-                this.setValidInput(true);
+                this.showInvalidInput(true);
               }
             }
             else
@@ -174,14 +139,14 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
           });
       }
     } else
-      this.setValidInput(false);
+      this.showInvalidInput(false);
   }
 
   /**
-   * setValidInput: Called after checking for a valid recording for this component.
-   *                Hides the camera controls and displays an error message if inputValid is false.
+   * showInvalidInput: Called after checking for a valid recording for this component.
+   *                   Shows No Recording message if inputValid is false.
    */
-  setValidInput(inputValid: boolean): void {
+  showInvalidInput(inputValid: boolean): void {
     if (!inputValid) {
       this.reporting.errorMessage = new HttpErrorResponse({
         error: "No recording has been specified",
@@ -190,7 +155,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         url: undefined
       });
     }
-    this.validInput = inputValid;
   }
 
   /**

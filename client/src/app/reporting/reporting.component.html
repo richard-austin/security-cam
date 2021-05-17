@@ -9,7 +9,7 @@
     </div>
   </div>
   <div *ngIf="!success && error?.status != 400">
-    <div>Error status: {{error?.status}}</div>
+    <div *ngIf="error?.status != 0">Error status: {{error?.status}}</div>
     <div *ngIf="showMessageInError">{{isHTML(error?.error) ? error?.message : error?.error}}</div>
     <div *ngIf="!showMessageInError">See logs for more information</div>
   </div>
