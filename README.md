@@ -40,6 +40,9 @@ The security-cam group is then given group access to www-data and it's subdirect
 + processmotionrecordings.sh
 + garage_cam_mask.pgm
 + porch_cam_mask.pgm 
+
+*/etc/security_cam is owned by www-data:www-data*
+
  ## Tomcat using vcgencmd measure_temp
   To execute the getTemperature API call, Tomcat needs to be able to call vcgencmd measure_temp which requires it to be in the video group.
  
