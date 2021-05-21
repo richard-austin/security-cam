@@ -1,23 +1,42 @@
 #!/bin/bash
 
+# Ensure the services are stopped if present
+systemctl stop nginx
+systemctl stop tomcat
+
 # Install Java and tomcat
 # apt update
 # apt install default-jdk
 useradd -r -m -U -d /opt/tomcat -s /bin/false tomcat
 mkdir /opt/tomcat
 tar xf /tmp/apache-tomcat-9*.tar.gz -C /opt/tomcat
-ln -s /opt/tomcat/apache-tomcat-9.0.27 /opt/tomcat/latest
+ln -s /opt/tomcat/apache-tomcat-9.0.46 /opt/tomcat/latest
 
 chown -RH tomcat: /opt/tomcat/latest
 sh -c 'chmod +x /opt/tomcat/latest/bin/*.sh'
+chown -R tomcat:tomcat /opt/tomcat 
 TOMCAT_SERVICE_FILE=/tmp/tomcat-service
 
 cat $TOMCAT_SERVICE_FILE > /etc/systemd/system/tomcat.service
 
-systemctl daemon-reload
-systemctl enable tomcat
+#Install precompiled nginx with libnginx-mod-rtmp
+tar -xvf /tmp/nginx-1.21.0.tar --strip-components=2 -C /usr/local/
+NGINX_SERVICE_FILE=/tmp/nginx.service
+cat $NGINX_SERVICE_FILE > /etc/systemd/system/nginx.service
+
 sudo usermod -a -G video tomcat
 
+systemctl daemon-reload
+systemctl unmask tomcat
+systemctl unmask nginx
+systemctl enable tomcat
+systemctl enable nginx
 rm /tmp/apache-tomcat-9*.tar.gz
 rm /tmp/server.xml
 rm $TOMCAT_SERVICE_FILE
+rm /tmp/nginx-1.21.0.tar 
+rm $NGINX_SERVICE_FILE
+
+# Start the services
+systemctl start nginx
+systemctl start tomcat
