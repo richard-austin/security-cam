@@ -1,10 +1,2 @@
-systemctl stop nginx
-systemctl stop tomcat
-
-rm -r /usr/local/nginx
-rm -r /opt/tomcat/latest  # Remove the symlink
-rm -r /opt/tomcat
-
-rm /etc/systemd/system/tomcat.service
-rm /etc/systemd/system/nginx.service
-systemctl daemon-reload
+#systemctl stop nginx
+#systemctl stop tomcat

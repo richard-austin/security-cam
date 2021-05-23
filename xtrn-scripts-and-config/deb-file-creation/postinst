@@ -1,42 +1,26 @@
 #!/bin/bash
 
-# Ensure the services are stopped if present
-systemctl stop nginx
-systemctl stop tomcat
+cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
+cp /tmp/server.xml /etc/tomcat9
 
-# Install Java and tomcat
-# apt update
-# apt install default-jdk
-useradd -r -m -U -d /opt/tomcat -s /bin/false tomcat
-mkdir /opt/tomcat
-tar xf /tmp/apache-tomcat-9*.tar.gz -C /opt/tomcat
-ln -s /opt/tomcat/apache-tomcat-9.0.46 /opt/tomcat/latest
+rm -r /tmp/motion.conf /tmp/conf.d
 
-chown -RH tomcat: /opt/tomcat/latest
-sh -c 'chmod +x /opt/tomcat/latest/bin/*.sh'
-chown -R tomcat:tomcat /opt/tomcat 
-TOMCAT_SERVICE_FILE=/tmp/tomcat-service
+usermod -a -G video tomcat
 
-cat $TOMCAT_SERVICE_FILE > /etc/systemd/system/tomcat.service
+chown -R www-data:www-data /home/www-data
 
-#Install precompiled nginx with libnginx-mod-rtmp
-tar -xvf /tmp/nginx-1.21.0.tar --strip-components=2 -C /usr/local/
-NGINX_SERVICE_FILE=/tmp/nginx.service
-cat $NGINX_SERVICE_FILE > /etc/systemd/system/nginx.service
+#A new group, security-cam, is added, then the users tomcat and www-data added to that group. 
+# The security-cam group is then given group access to www-data and it's subdirectories. The user and group permissions are then set up.
 
-sudo usermod -a -G video tomcat
-
-systemctl daemon-reload
-systemctl unmask tomcat
-systemctl unmask nginx
-systemctl enable tomcat
-systemctl enable nginx
-rm /tmp/apache-tomcat-9*.tar.gz
-rm /tmp/server.xml
-rm $TOMCAT_SERVICE_FILE
-rm /tmp/nginx-1.21.0.tar 
-rm $NGINX_SERVICE_FILE
+groupadd security-cam  
+usermod -a -G security-cam tomcat  
+usermod -a -G security-cam www-data  
+chmod -R 775 /home/www-data/  
+chgrp -R security-cam /home/www-data/  
+chown www-data:adm /var/log/motion
 
 # Start the services
-systemctl start nginx
-systemctl start tomcat
+deb-systemd-invoke enable nginx.service
+deb-systemd-invoke start nginx.service
+deb-systemd-invoke enable tomcat9.service
+deb-systemd-invoke start tomcat9.service
