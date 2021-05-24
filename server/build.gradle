@@ -107,6 +107,13 @@ task setVersion(type: Exec) {
     commandLine './setVersion.sh'
 }
 
+task buildDebFile(type: Exec) {
+    workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
+    commandLine './create-deb.sh'
+}
+
+buildDebFile.dependsOn(':server:assemble')
+
 tasks.withType(GroovyCompile) {
     configure(groovyOptions) {
         forkOptions.jvmArgs = ['-Xmx1024m']

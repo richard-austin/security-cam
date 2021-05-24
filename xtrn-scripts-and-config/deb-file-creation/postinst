@@ -1,13 +1,16 @@
 #!/bin/bash
 
 cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
-cp /tmp/server.xml /etc/tomcat9
+mv /tmp/server.xml /etc/tomcat9/server.xml
+mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
+rm -r /var/lib/tomcat9/webapps/ROOT
 
-rm -r /tmp/motion.conf /tmp/conf.d
+rm -r /tmp/conf.d /tmp/motion.conf
 
 usermod -a -G video tomcat
 
 chown -R www-data:www-data /home/www-data
+chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
 
 #A new group, security-cam, is added, then the users tomcat and www-data added to that group. 
 # The security-cam group is then given group access to www-data and it's subdirectories. The user and group permissions are then set up.

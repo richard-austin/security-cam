@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-export VERSION=2.0.1
+export VERSION=$(< ../../server/grails-app/assets/version/version.txt)
 
-rm -r security-cam_${VERSION}_arm64
+rm -r security-cam_*_arm64
 
 mkdir -p security-cam_${VERSION}_arm64/etc/security-cam
 cp ../log_movement.sh ../end_log_movement.sh ../processmotionrecordings.sh \
@@ -33,6 +33,8 @@ mkdir -p security-cam_${VERSION}_arm64/tmp
 
 cp -r ../motion.conf ../conf.d security-cam_${VERSION}_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml security-cam_${VERSION}_arm64/tmp
+
+cp ../../server/build/libs/server-0.1.war security-cam_${VERSION}_arm64/tmp
 
 cat << EOF > security-cam_${VERSION}_arm64/DEBIAN/control
 Package: security-cam

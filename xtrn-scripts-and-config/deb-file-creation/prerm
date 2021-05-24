@@ -1,2 +1,6 @@
-#systemctl stop nginx
-#systemctl stop tomcat
+deb-systemd-invoke disable nginx.service
+deb-systemd-invoke stop nginx.service
+deb-systemd-invoke disable tomcat9.service
+deb-systemd-invoke stop tomcat9.service
+
+groupdel security-cam
