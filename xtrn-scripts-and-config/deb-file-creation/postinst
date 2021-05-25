@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
+cp /tmp/nginx.conf /etc/nginx
 mv /tmp/server.xml /etc/tomcat9/server.xml
 mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
 rm -r /var/lib/tomcat9/webapps/ROOT
@@ -23,7 +24,9 @@ chgrp -R security-cam /home/www-data/
 chown www-data:adm /var/log/motion
 
 # Start the services
-deb-systemd-invoke enable nginx.service
-deb-systemd-invoke start nginx.service
+deb-systemd-invoke stop motion   ## It will be run under nginx
+deb-systemd-invoke disable motion
 deb-systemd-invoke enable tomcat9.service
 deb-systemd-invoke start tomcat9.service
+deb-systemd-invoke enable nginx.service
+deb-systemd-invoke start nginx.service
