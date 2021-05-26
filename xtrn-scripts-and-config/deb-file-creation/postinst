@@ -1,0 +1,39 @@
+#!/bin/bash
+
+cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
+mv /tmp/nginx.conf /etc/nginx
+mv /tmp/ntp.conf /etc
+mv /tmp/server.xml /etc/tomcat9/server.xml
+mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
+mv /tmp/install-cert.sh /home/www-data/
+rm -r /var/lib/tomcat9/webapps/ROOT
+
+rm -r /tmp/conf.d /tmp/motion.conf
+
+usermod -a -G video tomcat
+
+chown -R www-data:www-data /home/www-data
+chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
+chown root:root /home/www-data/install-cert.sh
+
+#A new group, security-cam, is added, then the users tomcat and www-data added to that group. 
+# The security-cam group is then given group access to www-data and it's subdirectories. The user and group permissions are then set up.
+
+groupadd security-cam  
+usermod -a -G security-cam tomcat  
+usermod -a -G security-cam www-data  
+chmod -R 775 /home/www-data/  
+chgrp -R security-cam /home/www-data/  
+chown www-data:adm /var/log/motion
+
+# Start the services
+deb-systemd-invoke stop motion   ## It will be run under nginx
+deb-systemd-invoke disable motion
+deb-systemd-invoke enable tomcat9.service
+deb-systemd-invoke start tomcat9.service
+deb-systemd-invoke enable nginx.service
+deb-systemd-invoke stop nginx.service  # On initial install, the certificate won't be present so
+                                       # stop nginx as it can't work till that is set up.
+
+echo "To add or update the site key/certificate, run sudo install-cert.sh at www-root."
+echo "Use sudo systemctl start nginx to run nginx."

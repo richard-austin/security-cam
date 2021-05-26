@@ -33,9 +33,22 @@
 
 
 # Install nginx and mod-rmtp
-`  `sudo apt install nginx
+ #### This didn't work with Ubuntu 21.04 (the rtmp module was not active in nginx)
+sudo apt install nginx
+sudo apt install libnginx-mod-rtmp
+#### So I used the following to build it
+sudo apt update
+sudo apt install build-essential git
+sudo apt install libpcre3-dev libssl-dev zlib1g-dev
+cd /path/to/build/dir
+git clone https://github.com/arut/nginx-rtmp-module.git
+git clone https://github.com/nginx/nginx.git
+cd nginx
+./auto/configure --add-module=../nginx-rtmp-module
+make
+sudo make install
 
-`  `sudo apt install libnginx-mod-rtmp
+Make install puts it at /usr/local/nginx
 
 austinr@ubunturdp:~$ sudo cat /etc/nginx/nginx.conf
 
