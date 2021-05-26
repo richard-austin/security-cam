@@ -31,15 +31,15 @@ mkdir -p security-cam_${VERSION}_arm64/var/log/motion
 
 mkdir -p security-cam_${VERSION}_arm64/tmp
 
-cp -r ../motion.conf ../conf.d ../nginx.conf security-cam_${VERSION}_arm64/tmp
+cp -r ../motion.conf ../conf.d ../nginx.conf ../ntp.conf security-cam_${VERSION}_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml security-cam_${VERSION}_arm64/tmp
-
+cp ../install-cert.sh security-cam_${VERSION}_arm64/tmp
 cp ../../server/build/libs/server-0.1.war security-cam_${VERSION}_arm64/tmp
 
 cat << EOF > security-cam_${VERSION}_arm64/DEBIAN/control
 Package: security-cam
 Version: $VERSION
-Architecture: armhf
+Architecture: arm64
 Maintainer: Richard Austin <richard.david.austin@gmail.com>
 Description: A security camera system accessed through a secure web based interface.
 Depends: openjdk-11-jre-headless (>=11.0.11), openjdk-11-jre-headless (<< 12.0.0),
@@ -48,7 +48,7 @@ Depends: openjdk-11-jre-headless (>=11.0.11), openjdk-11-jre-headless (<< 12.0.0
  nginx (>=1.18.0), nginx(<=1.20.9),
  libnginx-mod-rtmp (>=1.18.0), libnginx-mod-rtmp (<=1.20.9),
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
- libraspberrypi-bin
+ libraspberrypi-bin, ntp
 EOF
 
 dpkg-deb --build --root-owner-group security-cam_${VERSION}_arm64
