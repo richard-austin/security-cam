@@ -3,7 +3,8 @@
 cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/ntp.conf /etc
-mv /tmp/server.xml /etc/tomcat9/server.xml
+mv /tmp/server.xml /etc/tomcat9/
+mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
 mv /tmp/install-cert.sh /home/www-data/
 rm -r /var/lib/tomcat9/webapps/ROOT
@@ -14,6 +15,10 @@ usermod -a -G video tomcat
 
 chown -R www-data:www-data /home/www-data
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
+chmod 640 /etc/tomcat9/tomcat-users.xml
+chown root:tomcat /etc/tomcat9/tomcat-users.xml
+chmod 640 /etc/tomcat9/server.xml
+chown root:tomcat /etc/tomcat9/server.xml
 chown root:root /home/www-data/install-cert.sh
 
 #A new group, security-cam, is added, then the users tomcat and www-data added to that group. 
