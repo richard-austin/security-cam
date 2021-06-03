@@ -29,6 +29,7 @@
     "angular-user-idle": "^2.2.5",
     "bootstrap": "^4.6.0",
     "file-saver": "^2.0.5",
+    "flv.js": "^1.5.0",
     "hls.js": "^0.14.17",
     "jquery": "^3.5.1",
     "moment": "^2.29.1",

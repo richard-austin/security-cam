@@ -204,6 +204,13 @@ environments:
             dbCreate: update
             url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     production:
+        grails:
+            plugin:
+                springsecurity:
+                    active: false
+            cors:
+                enabled: true
+
         dataSource:
             dbCreate: update
             url: jdbc:h2:/home/www-data/db/prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
@@ -239,7 +246,7 @@ environments:
                 descr: HD
                 defaultOnMultiDisplay: false
                 motionName: PorchCam
-                uri: /live/hls/porch.m3u8
+                uri: /live/live/porch.flv
                 address: 192.168.0.30
                 controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
@@ -251,7 +258,7 @@ environments:
                 descr: Low res.
                 defaultOnMultiDisplay: true
                 motionName: PorchCam
-                uri: /live/hlslo/porch.m3u8
+                uri: /live/live/porch.flv
                 recording:
                       uri: /recording/motion-hlslo/
                       location: motion-hlslo
@@ -261,7 +268,7 @@ environments:
                 descr: HD
                 defaultOnMultiDisplay: false
                 motionName: SideGate
-                uri: /live/hls2/cam2.m3u8
+                uri: /live/live2/cam2.flv
                 address: 192.168.0.34
                 controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
@@ -273,7 +280,7 @@ environments:
                 descr: Low res.
                 defaultOnMultiDisplay: true
                 motionName: SideGate
-                uri: /live/hls2lo/cam2.m3u8
+                uri: /live/live2/cam2.flv
                 recording:
                     uri: /recording/motion-hls2lo/
                     location: motion-hls2lo
@@ -283,7 +290,7 @@ environments:
                 descr: HD
                 defaultOnMultiDisplay: false
                 motionName: Garden
-                uri: /live/hls3/cam3.m3u8
+                uri: /live/live3/cam3.flv
                 address: 192.168.0.35
                 controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
@@ -295,7 +302,7 @@ environments:
                 descr: Low res.
                 defaultOnMultiDisplay: true
                 motionName: Garden
-                uri: /live/hls3lo/cam3.m3u8
+                uri: /live/live3/cam3.flv
                 recording:
                     uri: /recording/motion-hls3lo/
                     location: motion-hls3lo

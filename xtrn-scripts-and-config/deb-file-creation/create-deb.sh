@@ -5,13 +5,15 @@ export VERSION=$(< ../../server/grails-app/assets/version/version.txt)
 
 rm -r security-cam_*_arm64
 
-mkdir -p security-cam_${VERSION}_arm64/etc/security-cam
+mkdir -p security-cam_${VERSION}_arm64/etc/security-cam/
 cp ../log_movement.sh ../end_log_movement.sh ../processmotionrecordings.sh \
  ../processrecordings.sh ../porch_cam_mask.pgm ../garage_cam_mask.pgm ../ffmpeg_with_logging.sh \
  security-cam_${VERSION}_arm64/etc/security-cam
 
+tar -xvf nms.tar --directory security-cam_${VERSION}_arm64/etc/security-cam
+
 mkdir -p security-cam_${VERSION}_arm64/DEBIAN
-cp postinst prerm security-cam_${VERSION}_arm64/DEBIAN
+cp preinst postinst prerm security-cam_${VERSION}_arm64/DEBIAN
 
 mkdir -p security-cam_${VERSION}_arm64/home/www-data/hls
 mkdir security-cam_${VERSION}_arm64/home/www-data/hls2
@@ -49,7 +51,8 @@ Depends: openjdk-11-jre-headless (>=11.0.11), openjdk-11-jre-headless (<< 12.0.0
  libnginx-mod-rtmp (>=1.18.0), libnginx-mod-rtmp (<=1.20.9),
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
  tomcat9-admin (>=9.0.43-1), tomcat9-admin (<= 10.0.0),
- libraspberrypi-bin, ntp
+ libraspberrypi-bin, ntp,
+ nodejs
 EOF
 
 dpkg-deb --build --root-owner-group security-cam_${VERSION}_arm64
