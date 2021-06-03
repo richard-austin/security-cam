@@ -17,7 +17,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   camera!:Camera;
   video!: HTMLVideoElement;
   hls = new Hls();
-  flvPlayer: any = undefined;
+  flvPlayer: any = null;
   visible: boolean = false;
   recording: boolean = false;
   recordingUri: string = "";
@@ -78,9 +78,16 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     {
       if(this.camera !== undefined && flvjs.isSupported())
       {
+        this.stop();
+        let getUrl = window.location;
+        let baseUrl = getUrl .protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
         this.flvPlayer = flvjs.createPlayer({
           type: 'flv',
-          url: this.camera.uri
+          isLive: true,
+          url: baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
+              .replace('https', 'wss') // Change https to wss
+              .replace('http', 'ws')  // or change http to ws
+              +this.camera.uri
         });
         this.flvPlayer.attachMediaElement(this.video);
         this.flvPlayer.load();
@@ -92,10 +99,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   stop() {
     if(!this.isFlv)
       this.hls.stopLoad();
-    else if(this.flvPlayer !== undefined)
+    else if(this.flvPlayer !== null)
     {
+      this.flvPlayer.pause();
       this.flvPlayer.unload();
-    //  this.flvPlayer.close();
+      this.flvPlayer.detachMediaElement();
+      this.flvPlayer.destroy();
+      this.flvPlayer = null;
     }
   }
 
@@ -124,17 +134,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // This prevents value changed after it was checked error
     timer(10).subscribe(() => this.startVideo());
-
   }
 
   ngOnDestroy(): void {
-    if(!this.isFlv)
-      this.hls.stopLoad();
-    else if(this.flvPlayer !== undefined) {
-      this.flvPlayer.unload();
-      //this.flvPlayer.close();
-    }
-
+    this.stop();
     // // Ensure idle timeout is started again when we leave this. It should never be true here
     // //  as we need to come out of full screen mode to exit the component.
     // if(this.isFullscreenNow)
