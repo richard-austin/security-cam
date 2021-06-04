@@ -207,9 +207,9 @@ environments:
         grails:
             plugin:
                 springsecurity:
-                    active: false
+                    active: true
             cors:
-                enabled: true
+                enabled: false
 
         dataSource:
             dbCreate: update
@@ -258,7 +258,7 @@ environments:
                 descr: Low res.
                 defaultOnMultiDisplay: true
                 motionName: PorchCam
-                uri: /live/live/porch.flv
+                uri: /live/livelo/porch.flv
                 recording:
                       uri: /recording/motion-hlslo/
                       location: motion-hlslo
@@ -280,7 +280,7 @@ environments:
                 descr: Low res.
                 defaultOnMultiDisplay: true
                 motionName: SideGate
-                uri: /live/live2/cam2.flv
+                uri: /live/live2lo/cam2.flv
                 recording:
                     uri: /recording/motion-hls2lo/
                     location: motion-hls2lo
@@ -302,7 +302,7 @@ environments:
                 descr: Low res.
                 defaultOnMultiDisplay: true
                 motionName: Garden
-                uri: /live/live3/cam3.flv
+                uri: /live/live3lo/cam3.flv
                 recording:
                     uri: /recording/motion-hls3lo/
                     location: motion-hls3lo
