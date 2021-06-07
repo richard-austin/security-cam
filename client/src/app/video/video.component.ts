@@ -3,7 +3,7 @@ import {Camera} from "../cameras/Camera";
 import {timer} from "rxjs";
 
 declare let Hls: any;
-declare let flvjs: any;
+declare let mpegts: any;
 
 @Component({
   selector: 'app-video',
@@ -24,7 +24,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   manifest: string = "";
   multi: boolean = false;
 //  private isFullscreenNow: boolean = false;
-
 
   constructor() {
   }
@@ -76,22 +75,27 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     else
     {
-      if(this.camera !== undefined && flvjs.isSupported())
+      if(this.camera !== undefined && mpegts.isSupported())
       {
         this.stop();
         let getUrl = window.location;
         let baseUrl = getUrl .protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
-        this.flvPlayer = flvjs.createPlayer({
+        this.flvPlayer = mpegts.createPlayer({
           type: 'flv',
           isLive: true,
           url: baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
               .replace('https', 'wss') // Change https to wss
               .replace('http', 'ws')  // or change http to ws
               +this.camera.uri
+        },
+        {
+          liveBufferLatencyChasing: false,
+          enableStashBuffer: true,
+          enableWorker: true,
         });
-        this.flvPlayer.attachMediaElement(this.video);
-        this.flvPlayer.load();
-        this.flvPlayer.play();
+         this.flvPlayer.attachMediaElement(this.video)
+         this.flvPlayer.load();
+         this.flvPlayer.play();
       }
     }
   }
