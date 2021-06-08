@@ -16,7 +16,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() isFlv: boolean = false;
   camera!:Camera;
   video!: HTMLVideoElement;
-  hls = new Hls();
+  hls:any = null;
   flvPlayer: any = null;
   visible: boolean = false;
   recording: boolean = false;
@@ -63,6 +63,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     if(!this.isFlv) {
       if (this.camera !== undefined) {
         if (Hls.isSupported()) {
+          this.hls = new Hls()
           this.hls.loadSource(this.recording ? this.recordingUri : this.camera.uri);
           this.hls.attachMedia(this.video);
 
@@ -101,8 +102,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   stop() {
-    if(!this.isFlv)
+    if(!this.isFlv && this.hls !== null) {
+      this.video.pause();
       this.hls.stopLoad();
+      this.hls.detachMedia();
+      this.hls.destroy();
+      this.hls = null;
+    }
     else if(this.flvPlayer !== null)
     {
       this.flvPlayer.pause();

@@ -36,7 +36,7 @@
               "src/styles.scss",
               "./node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
-            "scripts": ["./node_modules/hls.js/dist/hls.min.js",
+            "scripts": ["./node_modules/hls.js/dist/hls.light.min.js",
                         "./node_modules/mpegts.js/dist/mpegts.js",
                         "./node_modules/jquery/dist/jquery.min.js",
                         "./node_modules/bootstrap/dist/js/bootstrap.min.js",
@@ -113,7 +113,7 @@
               "src/styles.scss",
               "./node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
-            "scripts": ["./node_modules/hls.js/dist/hls.min.js",
+            "scripts": ["./node_modules/hls.js/dist/hls.light.min.js",
               "./node_modules/mpegts.js/dist/mpegts.js",
               "./node_modules/jquery/dist/jquery.min.js",
               "./node_modules/bootstrap/dist/js/bootstrap.min.js",
