@@ -1,3 +1,5 @@
+#!/bin/bash
+
 deb-systemd-invoke disable nginx.service
 deb-systemd-invoke stop nginx.service
 deb-systemd-invoke disable tomcat9.service

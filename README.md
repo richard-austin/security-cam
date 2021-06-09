@@ -34,9 +34,8 @@ The security-cam group is then given group access to www-data and it's subdirect
  sudo chgrp -R security-cam /home/www-data/  
 
  ## The following files are placed at /etc/security-cam
-+ log_movement.sh 
-+ end_log_movement.sh
-+ processrecordings.sh
++ start_hd_recording.sh 
++ end_hd_recording.sh
 + processmotionrecordings.sh
 + garage_cam_mask.pgm
 + porch_cam_mask.pgm 

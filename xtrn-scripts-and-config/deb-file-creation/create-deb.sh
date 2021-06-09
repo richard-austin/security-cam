@@ -5,38 +5,42 @@ export VERSION=$(< ../../server/grails-app/assets/version/version.txt)
 
 rm -r security-cam_*_arm64
 
-mkdir -p security-cam_${VERSION}_arm64/etc/security-cam
-cp ../log_movement.sh ../end_log_movement.sh ../processmotionrecordings.sh \
- ../processrecordings.sh ../porch_cam_mask.pgm ../garage_cam_mask.pgm ../ffmpeg_with_logging.sh \
- security-cam_${VERSION}_arm64/etc/security-cam
+mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/htop
 
-mkdir -p security-cam_${VERSION}_arm64/DEBIAN
-cp postinst prerm security-cam_${VERSION}_arm64/DEBIAN
+cp ../start_hd_recording.sh ../end_hd_recording.sh ../processmotionrecordings.sh \
+ ../porch_cam_mask.pgm ../garage_cam_mask.pgm ../ffmpeg_with_logging.sh \
+ security-cam_"${VERSION}"_arm64/etc/security-cam
 
-mkdir -p security-cam_${VERSION}_arm64/home/www-data/hls
-mkdir security-cam_${VERSION}_arm64/home/www-data/hls2
-mkdir security-cam_${VERSION}_arm64/home/www-data/hls3
-mkdir -p security-cam_${VERSION}_arm64/home/www-data/live/hls
-mkdir security-cam_${VERSION}_arm64/home/www-data/live/hls2
-mkdir security-cam_${VERSION}_arm64/home/www-data/live/hls2lo
-mkdir security-cam_${VERSION}_arm64/home/www-data/live/hls3
-mkdir security-cam_${VERSION}_arm64/home/www-data/live/hls3lo
-mkdir security-cam_${VERSION}_arm64/home/www-data/live/hlslo
-mkdir security-cam_${VERSION}_arm64/home/www-data/logs
-mkdir security-cam_${VERSION}_arm64/home/www-data/motion-hls2lo
-mkdir security-cam_${VERSION}_arm64/home/www-data/motion-hls3lo
-mkdir security-cam_${VERSION}_arm64/home/www-data/motion-hlslo
-mkdir security-cam_${VERSION}_arm64/home/www-data/motion-log
-mkdir -p security-cam_${VERSION}_arm64/var/log/motion
+tar -xvf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 
-mkdir -p security-cam_${VERSION}_arm64/tmp
+mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
+cp preinst postinst prerm security-cam_"${VERSION}"_arm64/DEBIAN
 
-cp -r ../motion.conf ../conf.d ../nginx.conf ../ntp.conf security-cam_${VERSION}_arm64/tmp
-cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_${VERSION}_arm64/tmp
-cp ../install-cert.sh security-cam_${VERSION}_arm64/tmp
-cp ../../server/build/libs/server-0.1.war security-cam_${VERSION}_arm64/tmp
+mkdir -p security-cam_"${VERSION}"_arm64/home/www-data/hls
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/recording-pids
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/hls2
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/hls3
+mkdir -p security-cam_"${VERSION}"_arm64/home/www-data/live/hls
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hls2
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hls2lo
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hls3
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hls3lo
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hlslo
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/logs
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/motion-hls2lo
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/motion-hls3lo
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/motion-hlslo
+mkdir security-cam_"${VERSION}"_arm64/home/www-data/motion-log
+mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 
-cat << EOF > security-cam_${VERSION}_arm64/DEBIAN/control
+mkdir -p security-cam_"${VERSION}"_arm64/tmp
+
+cp -r ../motion.conf ../conf.d ../nginx.conf ../ntp.conf security-cam_"${VERSION}"_arm64/tmp
+cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
+cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
+cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
+
+cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
 Package: security-cam
 Version: $VERSION
 Architecture: arm64
@@ -49,7 +53,8 @@ Depends: openjdk-11-jre-headless (>=11.0.11), openjdk-11-jre-headless (<< 12.0.0
  libnginx-mod-rtmp (>=1.18.0), libnginx-mod-rtmp (<=1.20.9),
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
  tomcat9-admin (>=9.0.43-1), tomcat9-admin (<= 10.0.0),
- libraspberrypi-bin, ntp
+ libraspberrypi-bin, ntp,
+ nodejs
 EOF
 
-dpkg-deb --build --root-owner-group security-cam_${VERSION}_arm64
+dpkg-deb --build --root-owner-group security-cam_"${VERSION}"_arm64
