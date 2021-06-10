@@ -26,15 +26,16 @@ chown root:root /home/www-data/install-cert.sh
 
 groupadd security-cam  
 usermod -a -G security-cam tomcat  
-usermod -a -G security-cam www-data  
-chmod -R 775 /home/www-data/  
+usermod -a -G security-cam www-data
+# Give directories only permission 775
+find /home/www-data -type d -print0 | xargs -0 chmod 775
 chgrp -R security-cam /home/www-data/  
 chown www-data:adm /var/log/motion
 
 # Start the services
 deb-systemd-invoke stop motion   ## It will be run under nginx
 deb-systemd-invoke disable motion
-deb-systemd-invoke daemon-reload
+systemctl daemon-reload
 deb-systemd-invoke enable tomcat9.service
 deb-systemd-invoke start tomcat9.service
 deb-systemd-invoke enable nginx.service

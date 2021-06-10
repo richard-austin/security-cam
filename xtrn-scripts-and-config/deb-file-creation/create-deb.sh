@@ -14,7 +14,7 @@ cp ../start_hd_recording.sh ../end_hd_recording.sh ../processmotionrecordings.sh
 tar -xvf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
-cp preinst postinst prerm security-cam_"${VERSION}"_arm64/DEBIAN
+cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
 mkdir -p security-cam_"${VERSION}"_arm64/home/www-data/hls
 mkdir security-cam_"${VERSION}"_arm64/home/www-data/recording-pids

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# This will clear out the set p for sc_processes service
+systemctl daemon-reload
