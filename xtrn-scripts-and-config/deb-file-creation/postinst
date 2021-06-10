@@ -34,11 +34,16 @@ chown www-data:adm /var/log/motion
 # Start the services
 deb-systemd-invoke stop motion   ## It will be run under nginx
 deb-systemd-invoke disable motion
+deb-systemd-invoke daemon-reload
 deb-systemd-invoke enable tomcat9.service
 deb-systemd-invoke start tomcat9.service
 deb-systemd-invoke enable nginx.service
 deb-systemd-invoke stop nginx.service  # On initial install, the certificate won't be present so
                                        # stop nginx as it can't work till that is set up.
+
+# This runs the node media server, motion and the ffmpeg instances
+deb-systemd-invoke enable sc_processes.service
+deb-systemd-invoke start sc_processes.service
 
 echo "To add or update the site key/certificate, run sudo install-cert.sh at www-root."
 echo "Use sudo systemctl start nginx to run nginx."

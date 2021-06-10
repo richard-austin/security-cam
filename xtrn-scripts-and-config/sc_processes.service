@@ -1,0 +1,11 @@
+[Unit]
+Description=Security Cam Process Monitor
+
+[Service]
+ExecStart=/etc/security-cam/sc_processes.sh
+# Security
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target
