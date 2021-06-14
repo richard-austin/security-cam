@@ -14,7 +14,7 @@ cp ../start_hd_recording.sh ../end_hd_recording.sh ../processmotionrecordings.sh
 tar -xvf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
-cp preinst postinst prerm security-cam_"${VERSION}"_arm64/DEBIAN
+cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
 mkdir -p security-cam_"${VERSION}"_arm64/home/www-data/hls
 mkdir security-cam_"${VERSION}"_arm64/home/www-data/recording-pids
@@ -37,7 +37,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
-cp -r ../motion.conf ../conf.d ../nginx.conf ../ntp.conf security-cam_"${VERSION}"_arm64/tmp
+cp -r ../motion.conf ../conf.d ../nginx.conf ../chrony.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
@@ -55,7 +55,7 @@ Depends: openjdk-11-jre-headless (>=11.0.11), openjdk-11-jre-headless (<< 12.0.0
  nginx (>=1.18.0), nginx(<=1.20.9),
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
  tomcat9-admin (>=9.0.43-1), tomcat9-admin (<= 10.0.0),
- libraspberrypi-bin, ntp,
+ libraspberrypi-bin, chrony,
  nodejs
 EOF
 
