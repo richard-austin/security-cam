@@ -103,7 +103,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   drawdownCalc() {
-    window.location.href = 'dc';
+    window.location.href = '#/dc';
   }
 
   openIdleTimeoutDialog(idle:number, timeout:number, count:number): void {

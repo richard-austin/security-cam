@@ -40,6 +40,7 @@ import {UserIdleModule} from "angular-user-idle";
 import {MatDialogModule} from "@angular/material/dialog";
 import { IdleTimeoutModalComponent } from './idle-timeout-modal/idle-timeout-modal.component';
 import { CameraParamsComponent } from './camera-params/camera-params.component';
+import { DrawdownCalcContainerComponent } from './drawdown-calc-container/drawdown-calc-container.component';
 
 @NgModule({
   declarations: [
@@ -56,6 +57,7 @@ import { CameraParamsComponent } from './camera-params/camera-params.component';
     SetIpComponent,
     IdleTimeoutModalComponent,
     CameraParamsComponent,
+    DrawdownCalcContainerComponent,
   ],
   imports: [
     BrowserModule,
