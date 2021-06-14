@@ -6,7 +6,6 @@ mv /tmp/chrony.conf /etc/chrony
 mv /tmp/server.xml /etc/tomcat9/
 mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
-mv /tmp/install-cert.sh /home/www-data/
 rm -r /var/lib/tomcat9/webapps/ROOT
 
 rm -r /tmp/conf.d /tmp/motion.conf
@@ -19,7 +18,6 @@ chmod 640 /etc/tomcat9/tomcat-users.xml
 chown root:tomcat /etc/tomcat9/tomcat-users.xml
 chmod 640 /etc/tomcat9/server.xml
 chown root:tomcat /etc/tomcat9/server.xml
-chown root:root /home/www-data/install-cert.sh
 
 #A new group, security-cam, is added, then the users tomcat and www-data added to that group. 
 # The security-cam group is then given group access to www-data and it's subdirectories. The user and group permissions are then set up.
@@ -31,6 +29,10 @@ usermod -a -G security-cam www-data
 find /home/www-data -type d -print0 | xargs -0 chmod 775
 # Give files permission 664
 find /home/www-data -type f -print0 | xargs -0 chmod 664
+
+# Copy install-cert.sh with executable attribs unaffected by previous command
+mv /tmp/install-cert.sh /home/www-data/
+chown root:root /home/www-data/install-cert.sh
 
 chgrp -R security-cam /home/www-data/  
 chown www-data:adm /var/log/motion
