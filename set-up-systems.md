@@ -622,14 +622,14 @@ motion
 
 Configs are at /etc/motion/motion.conf
 
-# Install ntp server
+# Install ntp server (Chrony)
 As the cameras are blocked from accessing the internet, they cannot set their time from their default ntp server so running a local one on the pi and pointing the cameras at that solves the problem.
 
 sudo apt update
 
-sudo apt install ntp
+sudo apt install chrony
 
-A suitable pool of ntp servers can be set in /etc/ntp.conf if required
+A suitable pool of ntp servers can be set in /etc/chrony/chrony.conf if required
 
 # Install Tomcat
 

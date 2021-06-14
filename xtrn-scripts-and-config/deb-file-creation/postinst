@@ -2,7 +2,7 @@
 
 cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
 mv /tmp/nginx.conf /etc/nginx
-mv /tmp/ntp.conf /etc
+mv /tmp/chrony.conf /etc/chrony
 mv /tmp/server.xml /etc/tomcat9/
 mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
@@ -24,11 +24,14 @@ chown root:root /home/www-data/install-cert.sh
 #A new group, security-cam, is added, then the users tomcat and www-data added to that group. 
 # The security-cam group is then given group access to www-data and it's subdirectories. The user and group permissions are then set up.
 
-groupadd security-cam  
+groupadd security-cam
 usermod -a -G security-cam tomcat  
 usermod -a -G security-cam www-data
 # Give directories only permission 775
 find /home/www-data -type d -print0 | xargs -0 chmod 775
+# Give files permission 664
+find /home/www-data -type f -print0 | xargs -0 chmod 664
+
 chgrp -R security-cam /home/www-data/  
 chown www-data:adm /var/log/motion
 
@@ -40,7 +43,12 @@ deb-systemd-invoke enable tomcat9.service
 deb-systemd-invoke start tomcat9.service
 deb-systemd-invoke enable nginx.service
 deb-systemd-invoke stop nginx.service  # On initial install, the certificate won't be present so
-                                       # stop nginx as it can't work till that is set up.
+                                       # stop
+                                       # nginx as it can't work till that is set up.
+
+# Let chrony use the updated conf file
+deb-systemd-invoke stop chrony
+deb-systemd-invoke start chrony
 
 # This runs the node media server, motion and the ffmpeg instances
 deb-systemd-invoke enable sc_processes.service
