@@ -111,7 +111,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     let remainingSecs: number = timeout-count;
      if(remainingSecs === timeout-1) {
      this.idleTimeoutDialogRef = this.dialog.open(IdleTimeoutModalComponent, {
-   //     width: '450px',
+      //  width: '450px',
         data: {idle: idle, remainingSecs: remainingSecs}
       });
 
@@ -133,6 +133,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     //Start watching for user inactivity.
     this.userIdle.startWatching();
+    this.userIdle.resetTimer();
 
     this.messageSubscription = this.utilsService.getMessages().subscribe((message:Message) => {
       if(message.messageType === messageType.idleTimeoutStatus)
