@@ -1,6 +1,6 @@
 #!/bin/bash
 
-log_dir=/home/www-data/logs/
+log_dir=/home/security-cam/logs/
 
 run_ffmpeg() {
   while true; do

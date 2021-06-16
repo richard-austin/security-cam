@@ -2,3 +2,5 @@
 
 # This will clear out the unit file refs for sc_processes service
 systemctl daemon-reload
+userdel sec-cam
+groupdel security-cam
