@@ -16,21 +16,15 @@ tar -xvf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
-mkdir -p security-cam_"${VERSION}"_arm64/home/www-data/hls
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/recording-pids
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/hls2
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/hls3
-mkdir -p security-cam_"${VERSION}"_arm64/home/www-data/live/hls
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hls2
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hls2lo
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hls3
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hls3lo
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/live/hlslo
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/logs
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/motion-hls2lo
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/motion-hls3lo
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/motion-hlslo
-mkdir security-cam_"${VERSION}"_arm64/home/www-data/motion-log
+mkdir -p security-cam_"${VERSION}"_arm64/home/security-cam/hls
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/recording-pids
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/hls2
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/hls3
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/logs
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-hls2lo
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-hls3lo
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-hlslo
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 
 mkdir -p security-cam_"${VERSION}"_arm64/tmp

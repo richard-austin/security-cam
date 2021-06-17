@@ -10,32 +10,34 @@ rm -r /var/lib/tomcat9/webapps/ROOT
 
 rm -r /tmp/conf.d /tmp/motion.conf
 
+useradd sec-cam
+groupadd security-cam
 usermod -a -G video tomcat
+usermod -a -G security-cam tomcat
+usermod -a -G security-cam sec-cam
+usermod -a -G security-cam www-data
 
-chown -R www-data:www-data /home/www-data
+chown -R sec-cam:security-cam /home/security-cam
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
 chmod 640 /etc/tomcat9/tomcat-users.xml
 chown root:tomcat /etc/tomcat9/tomcat-users.xml
 chmod 640 /etc/tomcat9/server.xml
 chown root:tomcat /etc/tomcat9/server.xml
 
-#A new group, security-cam, is added, then the users tomcat and www-data added to that group. 
-# The security-cam group is then given group access to www-data and it's subdirectories. The user and group permissions are then set up.
+#A new group, security-cam, is added, then the users tomcat and sec-cam added to that group.
+# The security-cam group is then given group access to sec-cam and it's subdirectories. The user and group permissions are then set up.
 
-groupadd security-cam
-usermod -a -G security-cam tomcat  
-usermod -a -G security-cam www-data
 # Give directories only permission 775
-find /home/www-data -type d -print0 | xargs -0 chmod 775
+find /home/security-cam -type d -print0 | xargs -0 chmod 775
 # Give files permission 664
-find /home/www-data -type f -print0 | xargs -0 chmod 664
+find /home/security-cam -type f -print0 | xargs -0 chmod 664
 
 # Copy install-cert.sh with executable attribs unaffected by previous command
-mv /tmp/install-cert.sh /home/www-data/
-chown root:root /home/www-data/install-cert.sh
+mv /tmp/install-cert.sh /home/security-cam/
+chown root:root /home/security-cam/install-cert.sh
 
-chgrp -R security-cam /home/www-data/  
-chown www-data:adm /var/log/motion
+chgrp -R security-cam /home/security-cam/
+chown sec-cam:adm /var/log/motion
 
 # Start the services
 deb-systemd-invoke stop motion   ## It will be run under nginx
