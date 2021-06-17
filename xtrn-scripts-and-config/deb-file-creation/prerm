@@ -6,5 +6,3 @@ deb-systemd-invoke disable tomcat9.service
 deb-systemd-invoke stop tomcat9.service
 deb-systemd-invoke disable sc_processes.service
 deb-systemd-invoke stop sc_processes.service
-
-groupdel security-cam
