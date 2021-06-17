@@ -1,8 +1,9 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Camera} from "../cameras/Camera";
 import {timer} from "rxjs";
 
 declare let Hls: any;
+declare let mpegts: any;
 
 @Component({
   selector: 'app-video',
@@ -12,10 +13,11 @@ declare let Hls: any;
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>
-
+  @Input() isFlv: boolean = false;
   camera!:Camera;
   video!: HTMLVideoElement;
-  hls = new Hls();
+  hls:any = null;
+  flvPlayer: any = null;
   visible: boolean = false;
   recording: boolean = false;
   recordingUri: string = "";
@@ -58,21 +60,63 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * @private
    */
   private startVideo():void {
-    if (this.camera !== undefined) {
-      if (Hls.isSupported()) {
-        this.hls.loadSource(this.recording ? this.recordingUri : this.camera.uri);
-        this.hls.attachMedia(this.video);
+    if(!this.isFlv) {
+      if (this.camera !== undefined) {
+        if (Hls.isSupported()) {
+          this.hls = new Hls()
+          this.hls.loadSource(this.recording ? this.recordingUri : this.camera.uri);
+          this.hls.attachMedia(this.video);
 
-        //hls.on(Hls.Events.MANIFEST_PARSED, this.video.play());
-        // this.video.play();
-      } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
-        this.video.src = this.camera.uri;
+          //hls.on(Hls.Events.MANIFEST_PARSED, this.video.play());
+          // this.video.play();
+        } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
+          this.video.src = this.camera.uri;
+        }
+      }
+    }
+    else
+    {
+      if(this.camera !== undefined && mpegts.isSupported())
+      {
+        this.stop();
+        let getUrl = window.location;
+        let baseUrl = getUrl .protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+        this.flvPlayer = mpegts.createPlayer({
+          type: 'flv',
+          isLive: true,
+          url: baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
+              .replace('https', 'wss') // Change https to wss
+              .replace('http', 'ws')  // or change http to ws
+              +this.camera.uri
+        },
+        {
+          liveBufferLatencyChasing: false,
+          enableStashBuffer: true,
+          enableWorker: true,
+        });
+         this.flvPlayer.attachMediaElement(this.video)
+         this.flvPlayer.load();
+         this.flvPlayer.play();
       }
     }
   }
 
   stop() {
-    this.hls.stopLoad();
+    if(!this.isFlv && this.hls !== null) {
+      this.video.pause();
+      this.hls.stopLoad();
+      this.hls.detachMedia();
+      this.hls.destroy();
+      this.hls = null;
+    }
+    else if(this.flvPlayer !== null)
+    {
+      this.flvPlayer.pause();
+      this.flvPlayer.unload();
+      this.flvPlayer.detachMediaElement();
+      this.flvPlayer.destroy();
+      this.flvPlayer = null;
+    }
   }
 
   // private fullScreenListener:() =>void = ():void => {
@@ -100,12 +144,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // This prevents value changed after it was checked error
     timer(10).subscribe(() => this.startVideo());
-
   }
 
   ngOnDestroy(): void {
-    this.hls.stopLoad();
-
+    this.stop();
     // // Ensure idle timeout is started again when we leave this. It should never be true here
     // //  as we need to come out of full screen mode to exit the component.
     // if(this.isFullscreenNow)

@@ -2,43 +2,61 @@
 
 cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
 mv /tmp/nginx.conf /etc/nginx
-mv /tmp/ntp.conf /etc
+mv /tmp/chrony.conf /etc/chrony
 mv /tmp/server.xml /etc/tomcat9/
 mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
-mv /tmp/install-cert.sh /home/www-data/
 rm -r /var/lib/tomcat9/webapps/ROOT
 
 rm -r /tmp/conf.d /tmp/motion.conf
 
+useradd sec-cam
+groupadd security-cam
 usermod -a -G video tomcat
+usermod -a -G security-cam tomcat
+usermod -a -G security-cam sec-cam
+usermod -a -G security-cam www-data
 
-chown -R www-data:www-data /home/www-data
+chown -R sec-cam:security-cam /home/security-cam
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
 chmod 640 /etc/tomcat9/tomcat-users.xml
 chown root:tomcat /etc/tomcat9/tomcat-users.xml
 chmod 640 /etc/tomcat9/server.xml
 chown root:tomcat /etc/tomcat9/server.xml
-chown root:root /home/www-data/install-cert.sh
 
-#A new group, security-cam, is added, then the users tomcat and www-data added to that group. 
-# The security-cam group is then given group access to www-data and it's subdirectories. The user and group permissions are then set up.
+#A new group, security-cam, is added, then the users tomcat and sec-cam added to that group.
+# The security-cam group is then given group access to sec-cam and it's subdirectories. The user and group permissions are then set up.
 
-groupadd security-cam  
-usermod -a -G security-cam tomcat  
-usermod -a -G security-cam www-data  
-chmod -R 775 /home/www-data/  
-chgrp -R security-cam /home/www-data/  
-chown www-data:adm /var/log/motion
+# Give directories only permission 775
+find /home/security-cam -type d -print0 | xargs -0 chmod 775
+# Give files permission 664
+find /home/security-cam -type f -print0 | xargs -0 chmod 664
+
+# Copy install-cert.sh with executable attribs unaffected by previous command
+mv /tmp/install-cert.sh /home/security-cam/
+chown root:root /home/security-cam/install-cert.sh
+
+chgrp -R security-cam /home/security-cam/
+chown sec-cam:adm /var/log/motion
 
 # Start the services
 deb-systemd-invoke stop motion   ## It will be run under nginx
 deb-systemd-invoke disable motion
+systemctl daemon-reload
 deb-systemd-invoke enable tomcat9.service
 deb-systemd-invoke start tomcat9.service
 deb-systemd-invoke enable nginx.service
 deb-systemd-invoke stop nginx.service  # On initial install, the certificate won't be present so
-                                       # stop nginx as it can't work till that is set up.
+                                       # stop
+                                       # nginx as it can't work till that is set up.
+
+# Let chrony use the updated conf file
+deb-systemd-invoke stop chrony
+deb-systemd-invoke start chrony
+
+# This runs the node media server, motion and the ffmpeg instances
+deb-systemd-invoke enable sc_processes.service
+deb-systemd-invoke start sc_processes.service
 
 echo "To add or update the site key/certificate, run sudo install-cert.sh at www-root."
 echo "Use sudo systemctl start nginx to run nginx."

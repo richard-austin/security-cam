@@ -1,6 +1,6 @@
 #!/bin/bash
 
-read -r last_ip < /home/www-data/myip
+read -r last_ip < /home/security-cam/myip
 
 echo "Last IP = ${last_ip}"
 
@@ -8,7 +8,7 @@ current_ip=`curl -s 'https://api.ipify.org/?format=json' | python3 -c "import sy
 echo "Current IP = ${current_ip}"
 
 if [ $current_ip != $last_ip ]; then
-	cat <<EOT > /home/www-data/changed_ip_email.txt
+	cat <<EOT > /home/security-cam/changed_ip_email.txt
 From: "Raspberry pi" <rdaustin@virginmedia.com>
 To: "Richard Austin" richard.david.austin@gmail.com>
 Subject: Change of public IP address
@@ -30,11 +30,11 @@ curl --ssl-reqd \
   --user 'rdaustin@virginmedia.com:DC10plus' \
   --mail-from 'rdaustin@virginmedia.com' \
   --mail-rcpt 'richard.david.austin@gmail.com' \
-  --upload-file /home/www-data/changed_ip_email.txt
+  --upload-file /home/security-cam/changed_ip_email.txt
 fi
 
 # The myip file will now be updated with an API call. That way notifications will continue to
 #  be sent until the user responds on the new IP address. As IP changes are mst likely to be accompanied by
 #  some sort of outage, this method is more likely to get an email through than sending just one close to an outage
 #  then resetting straight away.
-# echo $current_ip > /home/www-data/myip
+# echo $current_ip > /home/security-cam/myip

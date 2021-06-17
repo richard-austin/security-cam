@@ -7,6 +7,7 @@ import {ChangePasswordComponent} from "./change-password/change-password.compone
 import {AboutComponent} from "./about/about.component";
 import {SetIpComponent} from "./set-ip/set-ip.component";
 import {CameraParamsComponent} from "./camera-params/camera-params.component";
+import {DrawdownCalcContainerComponent} from "./drawdown-calc-container/drawdown-calc-container.component";
 
 const routes: Routes = [
   {path: 'live', component: LiveContainerComponent},
@@ -15,7 +16,8 @@ const routes: Routes = [
   {path: 'changepassword', component: ChangePasswordComponent},
   {path: 'about', component: AboutComponent},
   {path: 'setip', component: SetIpComponent},
-  {path: 'cameraparams', component: CameraParamsComponent}
+  {path: 'cameraparams', component: CameraParamsComponent},
+  {path: 'dc', component: DrawdownCalcContainerComponent}
 ];
 
 @NgModule({
