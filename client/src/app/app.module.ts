@@ -15,6 +15,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {MatInputModule} from "@angular/material/input";
 import {MatCardModule} from "@angular/material/card";
 import {
@@ -70,6 +71,7 @@ import { DrawdownCalcContainerComponent } from './drawdown-calc-container/drawdo
     MatFormFieldModule,
     MatCheckboxModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatInputModule,
     MatIconModule,
     MatSelectModule,

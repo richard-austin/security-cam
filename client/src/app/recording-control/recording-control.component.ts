@@ -30,6 +30,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   noVideo: boolean = false;
   confirmDelete: boolean = false;
   downloading: boolean = false;
+  paused: boolean = true;
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService) {
   }
@@ -67,11 +68,16 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.video.video.pause();
   }
 
+  private _start()
+  {
+    this?.video?.video.play();
+  }
+
   /**
    * start: Start playback if stopped or set normal playback rate.
    */
   start(): void {
-    this.video.video.play();
+    this._start();
     this.video.video.playbackRate = 1;
   }
 
@@ -79,6 +85,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    * fastForward: Set normal playback rate X 4
    */
   fastForward() {
+    this._start();
     this.video.video.playbackRate = 4;
   }
 
@@ -86,6 +93,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    * fasterForward: Set normal playback rate X 10
    */
   fasterForward(): void {
+    this._start();
     this.video.video.playbackRate = 10;
   }
 
@@ -111,8 +119,10 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       this.camera = cam;
       let video: VideoComponent | undefined = this.video;
       if (video !== undefined) {
-        this.video.visible = true;  // Still hidden by enclosing div
-        this.video.stop();
+        this.setUpVideoEventHandlers();
+
+        video.visible = true;  // Still hidden by enclosing div
+        video.stop();
 
         // Get the motion events for this camera (by motionName)
         this.motionService.getMotionEvents(cam).subscribe((events: LocalMotionEvents) => {
@@ -192,6 +202,22 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       this.reporting.errorMessage = error;
     }
     this.downloading = false;
+  }
+
+  private setUpVideoEventHandlers() {
+      if(this?.video?.video)
+      {
+        let video:HTMLVideoElement = this.video.video;
+
+        video.onpause = () => {
+          this.paused = true;
+        }
+
+        video.onplay = () =>
+        {
+          this.paused = false;
+        }
+      }
   }
 
   ngOnInit(): void {
