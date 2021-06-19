@@ -25,6 +25,18 @@ fa-icon.faster-forward {
   color: #f34d4d;
 }
 
+button.recording-button {
+  min-width: 0;
+  border-right: .2px solid #646363;
+  border-radius: 0;
+  padding-left: 13px;
+  padding-right: 13px;
+}
+
+fa-icon.recording-button {
+    color: #ffffff;
+}
+
 div.no-display {
   display: none;
 }

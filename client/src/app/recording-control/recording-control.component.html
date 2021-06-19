@@ -40,17 +40,17 @@
   <div>
     <app-video></app-video>
     <div class="buttons-flex-container">
-      <mat-button-toggle-group aria-label="Font Style" name="fontStyle">
-        <mat-button-toggle (click)="returnToStart()"
-                           title="Go back to the start of the recording">
-          <fa-icon [icon]="['fas', 'fast-backward']" size="lg"></fa-icon>
-        </mat-button-toggle>
-        <mat-button-toggle (click)="stepBack()" title="Step backward 10 seconds">
-          <fa-icon [icon]="['fas', 'backward']" size="lg"></fa-icon>
-        </mat-button-toggle>
-        <mat-button-toggle (click)="stepForward()" title="Step forward 10 seconds">
-          <fa-icon [icon]="['fas', 'forward']" size="lg"></fa-icon>
-        </mat-button-toggle>
+      <mat-button-toggle-group aria-label="Playback control" name="playbackControl">
+        <button mat-stroked-button class="recording-button" (click)="returnToStart()"
+                title="Go back to the start of the recording">
+          <fa-icon class="recording-button" [icon]="['fas', 'fast-backward']" size="lg"></fa-icon>
+        </button>
+        <button mat-stroked-button class="recording-button" (click)="stepBack()" title="Step backward 10 seconds">
+          <fa-icon class="recording-button" [icon]="['fas', 'backward']" size="lg"></fa-icon>
+        </button>
+        <button mat-stroked-button class="recording-button" (click)="stepForward()" title="Step forward 10 seconds">
+          <fa-icon class="recording-button" [icon]="['fas', 'forward']" size="lg"></fa-icon>
+        </button>
         <mat-button-toggle (click)="paused ? start() : pause()" [title]="paused ? 'Play' : 'Pause'">
           <fa-icon *ngIf="!paused" [icon]="['fas', 'pause']" size="lg"></fa-icon>
           <fa-icon *ngIf="paused" [icon]="['fas', 'play']" size="lg"></fa-icon>
