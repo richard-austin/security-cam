@@ -6,11 +6,11 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {Subscription} from "rxjs";
 import {IdleTimeoutStatusMessage, Message, messageType, UtilsService} from "../shared/utils.service";
-import {UserIdleService} from "angular-user-idle";
 import {MatDialog} from "@angular/material/dialog";
 import {IdleTimeoutModalComponent} from "../idle-timeout-modal/idle-timeout-modal.component";
-import {UserIdleConfig} from "angular-user-idle/lib/angular-user-idle.config";
 import {MatDialogRef} from "@angular/material/dialog/dialog-ref";
+import {UserIdleConfig} from "../angular-user-idle/angular-user-idle.config";
+import {UserIdleService} from "../angular-user-idle/angular-user-idle.service";
 
 @Component({
   selector: 'app-nav',
@@ -74,8 +74,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/about';
   }
 
-  private getTemperature():void
-  {
+  private getTemperature(): void {
     this.utilsService.getTemperature().subscribe((tmp) => {
         let temperature: string = tmp.temp;
         let idx1: number = temperature.indexOf('=');
@@ -106,21 +105,19 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/dc';
   }
 
-  openIdleTimeoutDialog(idle:number, timeout:number, count:number): void {
-    let data:any = {};
-    let remainingSecs: number = timeout-count;
-     if(remainingSecs === timeout-1) {
-     this.idleTimeoutDialogRef = this.dialog.open(IdleTimeoutModalComponent, {
-      //  width: '450px',
+  openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
+    let data: any = {};
+    let remainingSecs: number = timeout - count;
+    if (remainingSecs === timeout - 1) {
+      this.idleTimeoutDialogRef = this.dialog.open(IdleTimeoutModalComponent, {
+        //  width: '450px',
         data: {idle: idle, remainingSecs: remainingSecs}
       });
 
-       // this.idleTimeoutDialogRef.afterClosed().subscribe(res => {
-       // });
-    }
-    else
-    {
-      data =  this.idleTimeoutDialogRef.componentInstance.data;
+      // this.idleTimeoutDialogRef.afterClosed().subscribe(res => {
+      // });
+    } else {
+      data = this.idleTimeoutDialogRef.componentInstance.data;
       data.idle = idle;
       data.remainingSecs = remainingSecs;
     }
@@ -135,28 +132,25 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userIdle.startWatching();
     this.userIdle.resetTimer();
 
-    this.messageSubscription = this.utilsService.getMessages().subscribe((message:Message) => {
-      if(message.messageType === messageType.idleTimeoutStatus)
-      {
+    this.messageSubscription = this.utilsService.getMessages().subscribe((message: Message) => {
+      if (message.messageType === messageType.idleTimeoutStatus) {
         let itos: IdleTimeoutStatusMessage = message as IdleTimeoutStatusMessage;
         this.idleTimeoutActive = itos.active;
-    //    console.log("idle active = "+this.idleTimeoutActive)
+        //    console.log("idle active = "+this.idleTimeoutActive)
       }
     })
     // Start watching when user idle is starting.
-    this.timerHandle = this.userIdle.onTimerStart().subscribe((count) =>{
-      if(this.idleTimeoutActive) {
+    this.timerHandle = this.userIdle.onTimerStart().subscribe((count: number) => {
+      if (this.idleTimeoutActive) {
         let config: UserIdleConfig = this.userIdle.getConfigValue();
         // @ts-ignore
         this.openIdleTimeoutDialog(config.idle, config.timeout, count);
-      }
-      else
+      } else
         this.userIdle.resetTimer();
     });
 
     // Log off when time is up.
-    this.userIdle.onTimeout().subscribe(() =>
-    {
+    this.userIdle.onTimeout().subscribe(() => {
       this.idleTimeoutDialogRef.close();
       window.location.href = 'logoff';
     });

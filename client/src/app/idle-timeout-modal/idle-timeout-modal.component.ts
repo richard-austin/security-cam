@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {UserIdleService} from "angular-user-idle";
+import {UserIdleService} from "../angular-user-idle/angular-user-idle.service";
 
 @Component({
   selector: 'app-idle-timeout-modal',
