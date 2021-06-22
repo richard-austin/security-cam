@@ -37,11 +37,11 @@ import {MatIconModule} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import { AboutComponent } from './about/about.component';
 import { SetIpComponent } from './set-ip/set-ip.component';
-import {UserIdleModule} from "angular-user-idle";
 import {MatDialogModule} from "@angular/material/dialog";
 import { IdleTimeoutModalComponent } from './idle-timeout-modal/idle-timeout-modal.component';
 import { CameraParamsComponent } from './camera-params/camera-params.component';
 import { DrawdownCalcContainerComponent } from './drawdown-calc-container/drawdown-calc-container.component';
+import {UserIdleModule} from "./angular-user-idle/angular-user-idle.module";
 
 @NgModule({
   declarations: [
