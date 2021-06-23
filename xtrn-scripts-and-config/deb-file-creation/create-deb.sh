@@ -11,7 +11,7 @@ cp ../start_hd_recording.sh ../end_hd_recording.sh ../processmotionrecordings.sh
  ../porch_cam_mask.pgm ../garage_cam_mask.pgm ../sc_processes.sh \
  security-cam_"${VERSION}"_arm64/etc/security-cam
 
-tar -xvf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
+tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
