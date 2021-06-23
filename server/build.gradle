@@ -35,48 +35,48 @@ configurations {
 dependencies {
 //    implementation 'org.projectlombok:lombok:1.18.16'
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-    compile 'org.grails.plugins:spring-security-core:4.0.3'
-    compile "org.springframework.boot:spring-boot-starter-logging"
-    compile "org.springframework.boot:spring-boot-autoconfigure"
-    compile "org.grails:grails-core"
-    compile "org.springframework.boot:spring-boot-starter-actuator"
-    compile "org.springframework.boot:spring-boot-starter-tomcat"
-    compile "org.grails:grails-web-boot"
-    compile "org.grails:grails-logging"
-    compile "org.grails:grails-plugin-rest"
-    compile "org.grails:grails-plugin-databinding"
-    compile "org.grails:grails-plugin-i18n"
-    compile "org.grails:grails-plugin-services"
-    compile "org.grails:grails-plugin-url-mappings"
-    compile "org.grails:grails-plugin-interceptors"
-    compile "org.grails.plugins:cache"
-    compile "org.grails.plugins:async"
-    compile "org.grails.plugins:scaffolding"
-    compile "org.grails.plugins:events"
-    compile "org.grails.plugins:hibernate5"
-    compile "org.hibernate:hibernate-core:5.4.18.Final"
+    implementation 'org.grails.plugins:spring-security-core:4.0.3'
+    implementation "org.springframework.boot:spring-boot-starter-logging"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation "org.grails:grails-core"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat"
+    implementation "org.grails:grails-web-boot"
+    implementation "org.grails:grails-logging"
+    implementation "org.grails:grails-plugin-rest"
+    implementation "org.grails:grails-plugin-databinding"
+    implementation "org.grails:grails-plugin-i18n"
+    implementation "org.grails:grails-plugin-services"
+    implementation "org.grails:grails-plugin-url-mappings"
+    implementation "org.grails:grails-plugin-interceptors"
+    implementation "org.grails.plugins:cache"
+    implementation "org.grails.plugins:async"
+    implementation "org.grails.plugins:scaffolding"
+    implementation "org.grails.plugins:events"
+    implementation "org.grails.plugins:hibernate5"
+    implementation "org.hibernate:hibernate-core:5.4.18.Final"
     compile "org.grails.plugins:gsp"
-    compile 'commons-io:commons-io:2.8.0'
+    implementation 'commons-io:commons-io:2.8.0'
     compileOnly "io.micronaut:micronaut-inject-groovy"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     console "org.grails:grails-console"
     profile "org.grails.profiles:web"
-    runtime "org.glassfish.web:el-impl:2.1.2-b03"
-    runtime "com.h2database:h2"
-    runtime "org.apache.tomcat:tomcat-jdbc"
+    runtimeOnly "org.glassfish.web:el-impl:2.1.2-b03"
+    runtimeOnly "com.h2database:h2"
+    runtimeOnly "org.apache.tomcat:tomcat-jdbc"
 
-    runtime "javax.xml.bind:jaxb-api:2.3.1"
-    runtime "com.bertramlabs.plugins:asset-pipeline-grails:3.2.4"
-    testCompile "io.micronaut:micronaut-inject-groovy"
-    testCompile "org.grails:grails-gorm-testing-support"
-    testCompile "org.mockito:mockito-core"
-    testCompile "org.grails:grails-web-testing-support"
-    testCompile "org.grails.plugins:geb"
-    testCompile "org.seleniumhq.selenium:selenium-remote-driver:3.14.0"
-    testCompile "org.seleniumhq.selenium:selenium-api:3.14.0"
-    testCompile "org.seleniumhq.selenium:selenium-support:3.14.0"
-    testRuntime "org.seleniumhq.selenium:selenium-chrome-driver:3.14.0"
-    testRuntime "org.seleniumhq.selenium:selenium-firefox-driver:3.14.0"
+    runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
+    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:3.2.4"
+    testCompileOnly "io.micronaut:micronaut-inject-groovy"
+    testCompileOnly "org.grails:grails-gorm-testing-support"
+    testCompileOnly "org.mockito:mockito-core"
+    testCompileOnly "org.grails:grails-web-testing-support"
+    testCompileOnly "org.grails.plugins:geb"
+    testCompileOnly "org.seleniumhq.selenium:selenium-remote-driver:3.14.0"
+    testCompileOnly "org.seleniumhq.selenium:selenium-api:3.14.0"
+    testCompileOnly "org.seleniumhq.selenium:selenium-support:3.14.0"
+    testRuntimeOnly "org.seleniumhq.selenium:selenium-chrome-driver:3.14.0"
+    testRuntimeOnly "org.seleniumhq.selenium:selenium-firefox-driver:3.14.0"
 }
 
 bootRun {
@@ -107,12 +107,10 @@ task setVersion(type: Exec) {
     commandLine './setVersion.sh'
 }
 
-task buildDebFile(type: Exec) {
+task buildDebFile(type: Exec, dependsOn: [':server:assemble']) {
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'
 }
-
-buildDebFile.dependsOn(':server:assemble')
 
 tasks.withType(GroovyCompile) {
     configure(groovyOptions) {
