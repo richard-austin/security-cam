@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {VideoComponent} from "../video/video.component";
 import {Camera} from "../cameras/Camera";
 import {CameraService, LocalMotionEvent, LocalMotionEvents} from "../cameras/camera.service";
@@ -9,6 +9,7 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
 import {MatSelect} from "@angular/material/select/select";
+import {MatButtonToggle} from "@angular/material/button-toggle";
 
 declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
 
@@ -21,6 +22,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   @ViewChild(VideoComponent) video!: VideoComponent;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @ViewChild('selector') selector!:MatSelect;
+  @ViewChild('recordingButtonGroup') recordingButtonGroup!:ElementRef<MatButtonToggle>;
   timerHandle!: Subscription;
   private activeLiveUpdates!: Subscription;
   motionEvents!: LocalMotionEvent[];
@@ -31,6 +33,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   confirmDelete: boolean = false;
   downloading: boolean = false;
   paused: boolean = true;
+  selectedPlaybackMode: string ="startPause";
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService) {
   }
@@ -123,6 +126,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
         video.visible = true;  // Still hidden by enclosing div
         video.stop();
+        this.selectedPlaybackMode = 'startPause';
 
         // Get the motion events for this camera (by motionName)
         this.motionService.getMotionEvents(cam).subscribe((events: LocalMotionEvents) => {
@@ -173,6 +177,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    */
   showMotionEvent($event: MatSelectChange) {
     this.manifest = $event.value.manifest;
+    this.selectedPlaybackMode = 'startPause';
     this.video.setSource(this.camera, $event.value.manifest);
   }
 

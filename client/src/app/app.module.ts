@@ -42,6 +42,10 @@ import { IdleTimeoutModalComponent } from './idle-timeout-modal/idle-timeout-mod
 import { CameraParamsComponent } from './camera-params/camera-params.component';
 import { DrawdownCalcContainerComponent } from './drawdown-calc-container/drawdown-calc-container.component';
 import {UserIdleModule} from "./angular-user-idle/angular-user-idle.module";
+import {MatToolbarModule} from "@angular/material/toolbar";
+import {MatMenuModule} from "@angular/material/menu";
+import {MatSidenavModule} from "@angular/material/sidenav";
+import {MatListModule} from "@angular/material/list";
 
 @NgModule({
   declarations: [
@@ -76,6 +80,11 @@ import {UserIdleModule} from "./angular-user-idle/angular-user-idle.module";
     MatIconModule,
     MatSelectModule,
     MatDialogModule,
+    MatToolbarModule,
+    MatMenuModule,
+    MatIconModule,
+    MatListModule,
+    MatSidenavModule,
     FormsModule,
     // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
     // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)

@@ -40,7 +40,7 @@
   <div>
     <app-video></app-video>
     <div class="buttons-flex-container">
-      <mat-button-toggle-group aria-label="Playback control" name="playbackControl">
+      <mat-button-toggle-group aria-label="Playback control" name="playbackControl" [(ngModel)]="selectedPlaybackMode">
         <button mat-stroked-button class="recording-button" (click)="returnToStart()"
                 title="Go back to the start of the recording">
           <fa-icon class="recording-button" [icon]="['fas', 'fast-backward']" size="lg"></fa-icon>
@@ -51,14 +51,14 @@
         <button mat-stroked-button class="recording-button" (click)="stepForward()" title="Step forward 10 seconds">
           <fa-icon class="recording-button" [icon]="['fas', 'forward']" size="lg"></fa-icon>
         </button>
-        <mat-button-toggle (click)="paused ? start() : pause()" [title]="paused ? 'Play' : 'Pause'">
+        <mat-button-toggle (click)="paused ? start() : pause()" [title]="paused ? 'Play' : 'Pause'" value="startPause">
           <fa-icon *ngIf="!paused" [icon]="['fas', 'pause']" size="lg"></fa-icon>
           <fa-icon *ngIf="paused" [icon]="['fas', 'play']" size="lg"></fa-icon>
         </mat-button-toggle>
-        <mat-button-toggle (click)="fastForward()" title="Fast forward">
+        <mat-button-toggle (click)="fastForward()" title="Fast forward" value="fastForward">
           <fa-icon [icon]="['fas', 'fast-forward']" size="lg"></fa-icon>
         </mat-button-toggle>
-        <mat-button-toggle (click)="fasterForward()" title="Faster forward">
+        <mat-button-toggle (click)="fasterForward()" title="Faster forward" value="fasterForward">
           <fa-icon class="faster-forward" [icon]="['fas', 'fast-forward']" size="lg"></fa-icon>
         </mat-button-toggle>
       </mat-button-toggle-group>
