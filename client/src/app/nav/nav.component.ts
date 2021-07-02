@@ -123,6 +123,21 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  toggleMenu() {
+    let navbarCollapse:HTMLDivElement = this.navbarCollapse.nativeElement;
+    let style:string | null = navbarCollapse.getAttribute('style')
+
+    if(style === null || style === 'max-height: 0')
+      navbarCollapse.setAttribute('style', 'max-height: 200px');
+    else
+      navbarCollapse.setAttribute('style', 'max-height: 0');
+  }
+
+  menuClosed() {
+    let navbarCollapse:HTMLDivElement = this.navbarCollapse.nativeElement;
+    navbarCollapse.setAttribute('style', 'max-height: 0');
+  }
+
   ngOnInit(): void {
     this.cameras = this.cameraSvc.getCameras();
     // Get the initial core temperature
@@ -159,17 +174,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pingHandle = this.userIdle.ping$.subscribe(() => this.getTemperature());
   }
 
-  toggleMenu() {
-    let navbarCollapse:HTMLDivElement = this.navbarCollapse.nativeElement;
-    let style:string | null = navbarCollapse.getAttribute('style')
-
-    if(style === null || style === 'max-height: 0')
-      navbarCollapse.setAttribute('style', 'max-height: 200px');
-    else
-      navbarCollapse.setAttribute('style', 'max-height: 0');
-  }
-
-  ngAfterViewInit(): void {
+   ngAfterViewInit(): void {
     // If the camera service got any errors while getting the camera setup, then we report it here.
     this.cameraSvc.errorEmitter.subscribe((error: HttpErrorResponse) => this.errorReporting.errorMessage = error);
   }
@@ -179,5 +184,4 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.timerHandle.unsubscribe();
     this.messageSubscription.unsubscribe();
   }
-
 }

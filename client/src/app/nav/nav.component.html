@@ -19,7 +19,7 @@
       </button>
       <mat-menu #menuSelectCamera="matMenu">
         <ng-container *ngFor="let camera of cameras">
-          <button mat-menu-item (click)="setVideoStream(camera)">
+          <button mat-menu-item (click)="setVideoStream(camera);menuClosed()">
             {{camera.name + " (" + camera.descr + ")"}}
           </button>
         </ng-container>
@@ -31,7 +31,7 @@
       <button mat-button [matMenuTriggerFor]="menuSelectRecording">Select Recording</button>
       <mat-menu #menuSelectRecording="matMenu">
         <ng-container *ngFor="let camera of cameras">
-          <button mat-menu-item (click)="showRecording(camera)">
+          <button mat-menu-item (click)="showRecording(camera);menuClosed()">
             {{camera.name + " (" + camera.descr + ")"}}
           </button>
         </ng-container>
@@ -43,7 +43,7 @@
       <mat-menu #menuCameraSettings="matMenu">
         <ng-container *ngFor="let camera of cameras">
           <button *ngIf="camera.address!=undefined&&camera.controlUri!=undefined" mat-menu-item
-                  (click)="cameraControl(camera)">
+                  (click)="cameraControl(camera);menuClosed()">
             {{camera.name}}
           </button>
         </ng-container>
@@ -54,13 +54,13 @@
     <div>
       <button mat-button [matMenuTriggerFor]="menuGeneral">General</button>
       <mat-menu #menuGeneral="matMenu">
-        <button mat-menu-item (click)="confirmLogoff()">Log Off</button>
-        <button mat-menu-item (click)="changePassword()">Change Password</button>
+        <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
+        <button mat-menu-item (click)="changePassword();menuClosed()">Change Password</button>
         <div class="dropdown-divider"></div>
-        <button mat-menu-item (click)="setIp()">Save Current Public IP</button>
-        <button mat-menu-item (click)="drawdownCalc()">Pension Drawdown Calculator</button>
+        <button mat-menu-item (click)="setIp();menuClosed()">Save Current Public IP</button>
+        <button mat-menu-item (click)="drawdownCalc();menuClosed()">Pension Drawdown Calculator</button>
         <div class="dropdown-divider"></div>
-        <button mat-menu-item (click)="about()">About Security Cam</button>
+        <button mat-menu-item (click)="about();menuClosed()">About Security Cam</button>
       </mat-menu>
     </div>
   </div>
