@@ -47,6 +47,7 @@ $mat-myapp-accent: (
   700 : #ffcf53,
   800 : #ffca49,
   900 : #ffc038,
+  950 : #f68130,
   A100 : #ffffff,
   A200 : #ffffff,
   A400 : #fff5e1,
@@ -78,8 +79,21 @@ $theme: mat-dark-theme($primary, $accent);
 
 body{
   background-color: #424242 !important;
+//  margin: 0;
 }
 
+.alert-success {
+   background-color: #c0e2c0;
+ }
+
+.alert-warning {
+  background-color: #fff0d5;
+  color: #3d1d0e;
+}
+
+.alert-danger {
+  background-color: #ffa2a2;
+}
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

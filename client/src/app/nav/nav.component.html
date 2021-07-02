@@ -1,77 +1,78 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a mat-icon-button class="navbar-brand" href="#">
-    <fa-icon [icon]="faCamera">"></fa-icon>
+<div class="sec-cam-navbar">
+  <a mat-icon-button href="#">
+    <mat-icon>videocam</mat-icon>
   </a>
-  <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>
 
-  <button mat-button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+  <div>
+    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass">Core Temp: {{temperature}} °C</div>
+  </div>
+
+  <button mat-button class="navbar-toggler" type="button" (click)="toggleMenu()"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <mat-icon>menu</mat-icon>
   </button>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item dropdown">
-        <button mat-button [matMenuTriggerFor]="menuSelectCamera" id="cameraDropdown">
-          Select Camera
-        </button>
-        <mat-menu #menuSelectCamera="matMenu">
-          <ng-container *ngFor="let camera of cameras">
-            <button mat-menu-item (click)="setVideoStream(camera)">
-              {{camera.name + " (" + camera.descr + ")"}}
-            </button>
-          </ng-container>
-          <button mat-menu-item (click)="multiCamView()">Multi Camera View</button>
-        </mat-menu>
-      </li>
+  <div #navbarCollapse class="collapse" id="navbarSupportedContent">
+    <div>
+      <button mat-button [matMenuTriggerFor]="menuSelectCamera" id="cameraDropdown">
+        Select Camera
+      </button>
+      <mat-menu #menuSelectCamera="matMenu">
+        <ng-container *ngFor="let camera of cameras">
+          <button mat-menu-item (click)="setVideoStream(camera)">
+            {{camera.name + " (" + camera.descr + ")"}}
+          </button>
+        </ng-container>
+        <button mat-menu-item (click)="multiCamView()">Multi Camera View</button>
+      </mat-menu>
+    </div>
 
-      <li>
-        <button mat-button [matMenuTriggerFor]="menuSelectRecording">Select Recording</button>
-        <mat-menu #menuSelectRecording="matMenu">
-          <ng-container *ngFor="let camera of cameras">
-            <button mat-menu-item (click)="showRecording(camera)">
-              {{camera.name + " (" + camera.descr + ")"}}
-            </button>
-          </ng-container>
-        </mat-menu>
-      </li>
+    <div>
+      <button mat-button [matMenuTriggerFor]="menuSelectRecording">Select Recording</button>
+      <mat-menu #menuSelectRecording="matMenu">
+        <ng-container *ngFor="let camera of cameras">
+          <button mat-menu-item (click)="showRecording(camera)">
+            {{camera.name + " (" + camera.descr + ")"}}
+          </button>
+        </ng-container>
+      </mat-menu>
+    </div>
 
-      <li>
-        <button mat-button [matMenuTriggerFor]="menuCameraSettings">Camera Settings</button>
-        <mat-menu #menuCameraSettings="matMenu">
-          <ng-container *ngFor="let camera of cameras">
-            <button *ngIf="camera.address!=undefined&&camera.controlUri!=undefined" mat-menu-item
-                    (click)="cameraControl(camera)">
-              {{camera.name}}
-            </button>
-          </ng-container>
-        </mat-menu>
-      </li>
-    </ul>
+    <div>
+      <button mat-button [matMenuTriggerFor]="menuCameraSettings">Camera Settings</button>
+      <mat-menu #menuCameraSettings="matMenu">
+        <ng-container *ngFor="let camera of cameras">
+          <button *ngIf="camera.address!=undefined&&camera.controlUri!=undefined" mat-menu-item
+                  (click)="cameraControl(camera)">
+            {{camera.name}}
+          </button>
+        </ng-container>
+      </mat-menu>
+    </div>
 
-    <!--    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>-->
-
-    <button mat-button [matMenuTriggerFor]="menuGeneral">General</button>
-    <mat-menu #menuGeneral="matMenu">
-      <button mat-menu-item (click)="confirmLogoff()">Log Off</button>
-      <button mat-menu-item (click)="changePassword()">Change Password</button>
-      <div class="dropdown-divider"></div>
-      <button mat-menu-item (click)="setIp()">Save Current Public IP</button>
-      <button mat-menu-item (click)="drawdownCalc()">Pension Drawdown Calculator</button>
-      <div class="dropdown-divider"></div>
-      <button mat-menu-item (click)="about()">About Security Cam</button>
-    </mat-menu>
-  </div>
-</nav>
-<div class="confirm-logout alert-warning mx-auto" *ngIf="confirmLogout">
-  <div>
-    Logout from Security Cam, Are you sure?
-  </div>
-  <div>
-    <button mat-button class="btn btn-sm btn-warning" (click)="logOff(true)">Confirm</button>
-    <button mat-button class="btn btn-sm btn-secondary" (click)="logOff(false)">Cancel</button>
+  <!--    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>-->
+    <div>
+      <button mat-button [matMenuTriggerFor]="menuGeneral">General</button>
+      <mat-menu #menuGeneral="matMenu">
+        <button mat-menu-item (click)="confirmLogoff()">Log Off</button>
+        <button mat-menu-item (click)="changePassword()">Change Password</button>
+        <div class="dropdown-divider"></div>
+        <button mat-menu-item (click)="setIp()">Save Current Public IP</button>
+        <button mat-menu-item (click)="drawdownCalc()">Pension Drawdown Calculator</button>
+        <div class="dropdown-divider"></div>
+        <button mat-menu-item (click)="about()">About Security Cam</button>
+      </mat-menu>
+    </div>
   </div>
 </div>
-
-
+<mat-card class="mat-elevation-z8 confirm-logout alert-warning" *ngIf="confirmLogout">
+  <mat-card-subtitle class="alert-warning">
+    Logout from Security Cam, Are you sure?
+  </mat-card-subtitle>
+  <mat-card-content>
+    <button mat-flat-button color="warn" (click)="logOff(true)">Confirm</button>
+    <button mat-flat-button color="accent" (click)="logOff(false)">Cancel</button>
+  </mat-card-content>
+</mat-card>
+<router-outlet></router-outlet>
 <app-reporting></app-reporting>

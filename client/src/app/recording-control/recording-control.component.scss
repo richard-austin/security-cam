@@ -1,3 +1,6 @@
+@use "sass:map";
+@import "../../styles.scss";
+
 div.flex-container {
   display: flex;
   flex-wrap: wrap;
@@ -21,7 +24,7 @@ div[class="alert-danger"] {
   text-align: center;
 }
 
-fa-icon.faster-forward {
+mat-icon.faster-forward {
   color: #f34d4d;
 }
 
@@ -33,7 +36,7 @@ button.recording-button {
   padding-right: 13px;
 }
 
-fa-icon.recording-button {
+mat-icon.recording-button {
     color: #ffffff;
 }
 
@@ -50,6 +53,8 @@ div.no-video {
   top: 20%;
   -webkit-box-shadow: 5px 5px 14px 5px #000000;
   box-shadow: 5px 5px 14px 5px #000000;
+  background-color: map.get($mat-myapp-accent, 950);
+  color: black;
 }
 
 div.delete-button-set
