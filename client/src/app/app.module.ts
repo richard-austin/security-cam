@@ -15,7 +15,6 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
-import {MatInputModule} from "@angular/material/input";
 import {MatCardModule} from "@angular/material/card";
 import { RecordingControlComponent } from './recording-control/recording-control.component';
 import {MatSelectModule} from "@angular/material/select";
@@ -31,9 +30,9 @@ import { CameraParamsComponent } from './camera-params/camera-params.component';
 import { DrawdownCalcContainerComponent } from './drawdown-calc-container/drawdown-calc-container.component';
 import {UserIdleModule} from "./angular-user-idle/angular-user-idle.module";
 import {MatMenuModule} from "@angular/material/menu";
-import {MatListModule} from "@angular/material/list";
 import { LayoutModule } from '@angular/cdk/layout';
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {MatInputModule} from "@angular/material/input";
 
 @NgModule({
   declarations: [
@@ -63,7 +62,7 @@ import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
     MatCheckboxModule,
     MatButtonModule,
     MatButtonToggleModule,
-//    MatInputModule,
+    MatInputModule,
     MatIconModule,
     MatSelectModule,
     MatDialogModule,
