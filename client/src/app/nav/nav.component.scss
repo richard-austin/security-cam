@@ -4,9 +4,6 @@ mat-card.confirm-logout {
   padding: 1rem;
   margin-left: auto;
   margin-right: auto;
-//  background-color: map.get($mat-myapp-accent, 950);
-//  color: map.get(map.get($mat-myapp-accent, contrast), 50);
-
   > mat-card-content {
     margin-top: 0.5rem;
 
@@ -34,13 +31,7 @@ div.general {
   // Temperature indicator
   > div:nth-child(2) {
     display: inline-block;
-    @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px){
-      width: 75%;
-    }
     > div {
-      margin-left: auto;
-      margin-right: auto;
-
       transform: scale(0.75);
       width: fit-content;
       padding: 0.25rem;
