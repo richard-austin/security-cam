@@ -37,7 +37,6 @@
             ],
             "scripts": ["./node_modules/hls.js/dist/hls.light.min.js",
                         "./node_modules/mpegts.js/dist/mpegts.js",
-                        "./node_modules/jquery/dist/jquery.min.js",
                          "./node_modules/moment/min/moment.min.js",
                         "./node_modules/file-saver/dist/FileSaver.min.js"
             ],
@@ -112,7 +111,6 @@
             ],
             "scripts": ["./node_modules/hls.js/dist/hls.light.min.js",
               "./node_modules/mpegts.js/dist/mpegts.js",
-              "./node_modules/jquery/dist/jquery.min.js",
               "./node_modules/moment/min/moment.min.js"
             ]
           }
