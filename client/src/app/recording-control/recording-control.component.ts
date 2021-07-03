@@ -57,14 +57,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   /**
-   * stepTo: Step to the given number of seconds into the recording
-   * @param time: Seconds from recording start to go to
-   */
-  stepTo(time: number) {
-    this.video.video.currentTime = time;
-  }
-
-  /**
    * pause: Pause playback
    */
   pause(): void {

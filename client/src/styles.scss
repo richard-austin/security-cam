@@ -1,4 +1,3 @@
-
 @import '~@angular/material/theming';
 // @import '../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css';
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
@@ -77,23 +76,71 @@ $theme: mat-dark-theme($primary, $accent);
 
 @include angular-material-theme($theme);
 
-body{
+body {
   background-color: #424242 !important;
-//  margin: 0;
+  //  margin: 0;
+}
+
+@mixin alert {
+ // position: relative;
+  width: fit-content;
+  padding: 3rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 4rem;
+  top: 5%;
+  -webkit-box-shadow: 5px 5px 14px 5px #000000;
+  box-shadow: 5px 5px 14px 5px #000000;
 }
 
 .alert-success {
-   background-color: #c0e2c0;
- }
+  @include alert;
+  background-color: #00c900;
+  color: black;
+}
 
 .alert-warning {
-  background-color: #fff0d5;
-  color: #3d1d0e;
+  @include alert;
+  background-color: #efd782;
+  color: black;
 }
 
 .alert-danger {
-  background-color: #ffa2a2;
+  @include alert;
+  background-color: #fa4848;
+  color: black;
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.btn-danger {
+  background-color: darkred;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #3939f3;
+  color: white;
+}
+
+.btn-light {
+  background-color: #d5d055;
+  color: black;
+}
+
+.btn-warning {
+  background-color: #c98403;
+  color: black;
+}
+
+.btn-default {
+  background-color: gray;
+  color: black;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}

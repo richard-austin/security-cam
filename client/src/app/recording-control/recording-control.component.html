@@ -12,7 +12,7 @@
       </mat-form-field>
       <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
         <div *ngSwitchCase="false">
-          <button (click)="confirmDelete=true" class="btn btn-sm btn-danger" mat-stroked-button
+          <button (click)="confirmDelete=true" class="btn-danger" mat-stroked-button
                   title="Delete the currently selected recording">Delete This Recording
           </button>
         </div>
@@ -22,18 +22,18 @@
           <button (click)="confirmDelete=false;deleteRecording()" class="btn btn-sm btn-danger" mat-stroked-button
                   title="Delete the currently selected recording">Confirm
           </button>
-          <button (click)="confirmDelete=false" class="btn btn-sm btn-secondary" mat-stroked-button
+          <button (click)="confirmDelete=false" class="btn-default" mat-stroked-button
                   title="Do not delete the recording">Cancel
           </button>
         </div>
       </div>
       <div *ngIf="!confirmDelete && !downloading" class="download-button">
-        <button (click)="downloadRecording()" class="btn btn-sm btn-light" mat-stroked-button>Download Recording
+        <button (click)="downloadRecording()" class="btn-light" mat-stroked-button>Download Recording
         </button>
       </div>
       <div *ngIf="downloading">
-        <mat-spinner></mat-spinner>
-        Please wait..
+        <mat-spinner [diameter]="25"></mat-spinner>
+        <span>Please wait..</span>
       </div>
     </mat-card-content>
   </mat-card>
@@ -65,7 +65,8 @@
     </div>
   </div>
 </div>
-<div [ngClass]="{'no-display': !noVideo}" class="no-video">No Video Clips Available For {{camera?.name}}
+<br>
+<div [ngClass]="{'no-display': !noVideo}" class="alert-warning">No Video Clips Available For {{camera?.name}}
   ({{camera?.descr}})
 </div>
 <app-reporting></app-reporting>

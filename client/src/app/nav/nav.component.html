@@ -66,12 +66,12 @@
   </div>
 </div>
 <mat-card class="mat-elevation-z8 confirm-logout alert-warning" *ngIf="confirmLogout">
-  <mat-card-subtitle class="alert-warning">
+  <mat-card-subtitle style="color: inherit">
     Logout from Security Cam, Are you sure?
   </mat-card-subtitle>
   <mat-card-content>
-    <button mat-flat-button color="warn" (click)="logOff(true)">Confirm</button>
-    <button mat-flat-button color="accent" (click)="logOff(false)">Cancel</button>
+    <button mat-flat-button class="btn-warning" (click)="logOff(true)">Confirm</button>
+    <button mat-flat-button class="btn-default" (click)="logOff(false)">Cancel</button>
   </mat-card-content>
 </mat-card>
 <router-outlet></router-outlet>
