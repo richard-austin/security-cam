@@ -93,22 +93,46 @@ body {
   box-shadow: 5px 5px 14px 5px #000000;
 }
 
-.alert-success {
-  @include alert;
+@mixin success {
   background-color: #00c900;
   color: black;
 }
 
-.alert-warning {
-  @include alert;
+@mixin warning {
   background-color: #efd782;
   color: black;
 }
 
-.alert-danger {
-  @include alert;
+@mixin danger {
   background-color: #fa4848;
   color: black;
+}
+
+.success{
+  @include success;
+}
+
+.warning {
+  @include warning;
+}
+
+.danger {
+  @include danger;
+}
+
+.alert-success {
+  @include alert;
+  @include success;
+}
+
+.alert-warning {
+  @include alert;
+  @include warning;
+}
+
+.alert-danger {
+  @include alert;
+  @include danger;
 }
 
 .btn-danger {

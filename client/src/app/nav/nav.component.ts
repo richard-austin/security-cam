@@ -83,11 +83,11 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
           this.temperature = parseFloat(strTemp);
           this.noTemperature = false;
           if (this.temperature < 50)
-            this.tempAlertClass = 'alert-success';
+            this.tempAlertClass = 'success';
           else if (this.temperature < 70)
-            this.tempAlertClass = 'alert-warning';
+            this.tempAlertClass = 'warning';
           else
-            this.tempAlertClass = 'alert-danger'
+            this.tempAlertClass = 'danger'
         } else
           this.noTemperature = false;
       },
