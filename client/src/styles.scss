@@ -160,6 +160,14 @@ body {
   color: black;
 }
 
+mat-card-content.wait-box {
+  >span {
+    margin-left: 1rem;
+    margin-bottom: auto;
+    margin-top:auto;
+  }
+}
+
 html, body {
   height: 100%;
 }

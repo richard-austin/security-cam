@@ -31,10 +31,10 @@
         <button (click)="downloadRecording()" class="btn-light" mat-stroked-button>Download Recording
         </button>
       </div>
-      <div *ngIf="downloading">
-        <mat-spinner [diameter]="25"></mat-spinner>
-        <span>Please wait..</span>
-      </div>
+    </mat-card-content>
+    <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
+      <mat-spinner [diameter]="25"></mat-spinner>
+      <span>Please wait..</span>
     </mat-card-content>
   </mat-card>
   <div>
