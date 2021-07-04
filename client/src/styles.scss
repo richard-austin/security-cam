@@ -94,18 +94,18 @@ body {
 }
 
 @mixin success {
-  background-color: #00c900;
-  color: black;
+  color: #155724;
+  background-color: #d4edda;
 }
 
 @mixin warning {
-  background-color: #efd782;
-  color: black;
+  color: #856404;
+  background-color: #fff3cd;
 }
 
 @mixin danger {
-  background-color: #fa4848;
-  color: black;
+  color: #721c24;
+  background-color: #f8d7da;
 }
 
 .success{
