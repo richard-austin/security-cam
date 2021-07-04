@@ -1,5 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {faVideo} from '@fortawesome/free-solid-svg-icons';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
 import {Camera} from "../cameras/Camera";
 import {ReportingComponent} from "../reporting/reporting.component";
@@ -20,8 +19,8 @@ import {UserIdleService} from "../angular-user-idle/angular-user-idle.service";
 export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
-  // Font awesome icons
-  faCamera = faVideo;
+  @ViewChild('navbarCollapse') navbarCollapse!:ElementRef<HTMLDivElement>;
+
   cameras: Camera[] = [];
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
@@ -84,16 +83,17 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
           this.temperature = parseFloat(strTemp);
           this.noTemperature = false;
           if (this.temperature < 50)
-            this.tempAlertClass = 'alert-success';
+            this.tempAlertClass = 'success';
           else if (this.temperature < 70)
-            this.tempAlertClass = 'alert-warning';
+            this.tempAlertClass = 'warning';
           else
-            this.tempAlertClass = 'alert-danger'
+            this.tempAlertClass = 'danger'
         } else
-          this.noTemperature = true;
+          this.noTemperature = false;
       },
       () => {
         this.noTemperature = true;
+        this.tempAlertClass = 'alert-danger';
       });
   }
 
@@ -121,6 +121,21 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       data.idle = idle;
       data.remainingSecs = remainingSecs;
     }
+  }
+
+  toggleMenu() {
+    let navbarCollapse:HTMLDivElement = this.navbarCollapse.nativeElement;
+    let style:string | null = navbarCollapse.getAttribute('style')
+
+    if(style === null || style === 'max-height: 0')
+      navbarCollapse.setAttribute('style', 'max-height: 200px');
+    else
+      navbarCollapse.setAttribute('style', 'max-height: 0');
+  }
+
+  menuClosed() {
+    let navbarCollapse:HTMLDivElement = this.navbarCollapse.nativeElement;
+    navbarCollapse.setAttribute('style', 'max-height: 0');
   }
 
   ngOnInit(): void {
@@ -159,7 +174,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pingHandle = this.userIdle.ping$.subscribe(() => this.getTemperature());
   }
 
-  ngAfterViewInit(): void {
+   ngAfterViewInit(): void {
     // If the camera service got any errors while getting the camera setup, then we report it here.
     this.cameraSvc.errorEmitter.subscribe((error: HttpErrorResponse) => this.errorReporting.errorMessage = error);
   }

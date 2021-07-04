@@ -4,7 +4,6 @@
   <p>The Session Will Time Out in {{data.remainingSecs}} seconds</p>
 </div>
 <div mat-dialog-actions>
-  <button mat-flat-button [color]="'primary'" (click)="onClose()">Close Session</button>
-  <button mat-flat-button [color]="'accent'" (click)="onContinue()">Continue Session</button>
+  <button mat-flat-button class="btn-danger" (click)="onClose()">Close Session</button>
+  <button mat-flat-button class="btn-light" (click)="onContinue()">Continue Session</button>
 </div>
-

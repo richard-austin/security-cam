@@ -93,7 +93,7 @@ class MotionController {
                             description: result.error
                     ]
                     logService.cam.error "MotionController.downloadNamedPatternsFile() ${result.error}"
-                    render(status: 400, contentType: "application/json") { jsonObj }
+                    render(status: 400, text: jsonObj as JSON)
                 } else {
                     File recordingFile = result.responseObject as File
 

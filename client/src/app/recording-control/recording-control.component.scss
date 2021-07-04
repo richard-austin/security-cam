@@ -21,7 +21,7 @@ div[class="alert-danger"] {
   text-align: center;
 }
 
-fa-icon.faster-forward {
+mat-icon.faster-forward {
   color: #f34d4d;
 }
 
@@ -33,23 +33,12 @@ button.recording-button {
   padding-right: 13px;
 }
 
-fa-icon.recording-button {
+mat-icon.recording-button {
     color: #ffffff;
 }
 
 div.no-display {
   display: none;
-}
-
-div.no-video {
-  position: relative;
-  width: fit-content;
-  padding: 3rem;
-  margin-left: auto;
-  margin-right: auto;
-  top: 20%;
-  -webkit-box-shadow: 5px 5px 14px 5px #000000;
-  box-shadow: 5px 5px 14px 5px #000000;
 }
 
 div.delete-button-set
