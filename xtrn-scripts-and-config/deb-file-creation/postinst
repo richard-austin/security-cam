@@ -2,6 +2,7 @@
 
 cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
 mv /tmp/nginx.conf /etc/nginx
+mv /tmp/ssmtp.conf /etc/ssmtp
 mv /tmp/chrony.conf /etc/chrony
 mv /tmp/server.xml /etc/tomcat9/
 mv /tmp/tomcat-users.xml /etc/tomcat9
@@ -23,6 +24,8 @@ chmod 640 /etc/tomcat9/tomcat-users.xml
 chown root:tomcat /etc/tomcat9/tomcat-users.xml
 chmod 640 /etc/tomcat9/server.xml
 chown root:tomcat /etc/tomcat9/server.xml
+chown root:mail /etc/ssmtp/ssmtp.conf
+chmod 640 /etc/ssmtp/ssmtp.conf
 
 #A new group, security-cam, is added, then the users tomcat and sec-cam added to that group.
 # The security-cam group is then given group access to sec-cam and it's subdirectories. The user and group permissions are then set up.

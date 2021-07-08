@@ -31,7 +31,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
-cp -r ../motion.conf ../conf.d ../nginx.conf ../chrony.conf security-cam_"${VERSION}"_arm64/tmp
+cp -r ../motion.conf ../conf.d ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
@@ -50,7 +50,7 @@ Depends: openjdk-11-jre-headless (>=11.0.11), openjdk-11-jre-headless (<< 12.0.0
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
  tomcat9-admin (>=9.0.43-1), tomcat9-admin (<= 10.0.0),
  libraspberrypi-bin, chrony,
- nodejs
+ nodejs, ssmtp
 EOF
 
 dpkg-deb --build --root-owner-group security-cam_"${VERSION}"_arm64
