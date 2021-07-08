@@ -21,8 +21,8 @@ declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
 export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(VideoComponent) video!: VideoComponent;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @ViewChild('selector') selector!:MatSelect;
-  @ViewChild('recordingButtonGroup') recordingButtonGroup!:ElementRef<MatButtonToggle>;
+  @ViewChild('selector') selector!: MatSelect;
+  @ViewChild('recordingButtonGroup') recordingButtonGroup!: ElementRef<MatButtonToggle>;
   timerHandle!: Subscription;
   private activeLiveUpdates!: Subscription;
   motionEvents!: LocalMotionEvent[];
@@ -33,7 +33,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   confirmDelete: boolean = false;
   downloading: boolean = false;
   paused: boolean = true;
-  selectedPlaybackMode: string ="startPause";
+  selectedPlaybackMode: string = "startPause";
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService) {
   }
@@ -63,8 +63,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.video.video.pause();
   }
 
-  private _start()
-  {
+  private _start() {
     this?.video?.video.play();
   }
 
@@ -136,8 +135,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
                 this.visible = true;
                 this.showInvalidInput(true);
               }
-            }
-            else
+            } else
               this.noVideo = true;
           },
           (error) => {
@@ -187,34 +185,33 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     )
   }
 
-  async downloadRecording()
-  {
+  async downloadRecording() {
     try {
       this.downloading = true;
       let blob: Blob = await this.motionService.downloadRecording(this.camera, this.manifest);
       saveAs(blob, this.manifest.replace('.m3u8', '.mp4'))
-    }
-    catch(error)
-    {
-      this.reporting.errorMessage = error;
+    } catch (error) {
+      let reader: FileReader = new FileReader();
+      reader.onload = () => {
+        this.reporting.errorMessage = new HttpErrorResponse({error: JSON.parse(reader.result as string), status: error.status});
+      }
+      reader.readAsText(error.error);
     }
     this.downloading = false;
   }
 
   private setUpVideoEventHandlers() {
-      if(this?.video?.video)
-      {
-        let video:HTMLVideoElement = this.video.video;
+    if (this?.video?.video) {
+      let video: HTMLVideoElement = this.video.video;
 
-        video.onpause = () => {
-          this.paused = true;
-        }
-
-        video.onplay = () =>
-        {
-          this.paused = false;
-        }
+      video.onpause = () => {
+        this.paused = true;
       }
+
+      video.onplay = () => {
+        this.paused = false;
+      }
+    }
   }
 
   ngOnInit(): void {
