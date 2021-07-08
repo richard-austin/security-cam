@@ -12,23 +12,23 @@
       </mat-form-field>
       <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
         <div *ngSwitchCase="false">
-          <button (click)="confirmDelete=true" class="btn-danger" mat-stroked-button
+          <button (click)="confirmDelete=true" class="btn-danger" mat-flat-button
                   title="Delete the currently selected recording">Delete This Recording
           </button>
         </div>
         <div *ngSwitchCase="true">
           Delete {{selector.value.dateTime}},
           <div>are you sure?</div>
-          <button (click)="confirmDelete=false;deleteRecording()" class="btn btn-sm btn-danger" mat-stroked-button
+          <button (click)="confirmDelete=false;deleteRecording()" class="btn-danger" mat-flat-button
                   title="Delete the currently selected recording">Confirm
           </button>
-          <button (click)="confirmDelete=false" class="btn-default" mat-stroked-button
+          <button (click)="confirmDelete=false" class="btn-default" mat-flat-button
                   title="Do not delete the recording">Cancel
           </button>
         </div>
       </div>
       <div *ngIf="!confirmDelete && !downloading" class="download-button">
-        <button (click)="downloadRecording()" class="btn-light" mat-stroked-button>Download Recording
+        <button (click)="downloadRecording()" class="btn-light" mat-flat-button>Download Recording
         </button>
       </div>
     </mat-card-content>
