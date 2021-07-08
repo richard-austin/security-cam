@@ -1,16 +1,15 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {faVideo} from '@fortawesome/free-solid-svg-icons';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
 import {Camera} from "../cameras/Camera";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {Subscription} from "rxjs";
 import {IdleTimeoutStatusMessage, Message, messageType, UtilsService} from "../shared/utils.service";
-import {UserIdleService} from "angular-user-idle";
 import {MatDialog} from "@angular/material/dialog";
 import {IdleTimeoutModalComponent} from "../idle-timeout-modal/idle-timeout-modal.component";
-import {UserIdleConfig} from "angular-user-idle/lib/angular-user-idle.config";
 import {MatDialogRef} from "@angular/material/dialog/dialog-ref";
+import {UserIdleConfig} from "../angular-user-idle/angular-user-idle.config";
+import {UserIdleService} from "../angular-user-idle/angular-user-idle.service";
 
 @Component({
   selector: 'app-nav',
@@ -20,8 +19,8 @@ import {MatDialogRef} from "@angular/material/dialog/dialog-ref";
 export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
-  // Font awesome icons
-  faCamera = faVideo;
+  @ViewChild('navbarCollapse') navbarCollapse!:ElementRef<HTMLDivElement>;
+
   cameras: Camera[] = [];
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
@@ -74,8 +73,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/about';
   }
 
-  private getTemperature():void
-  {
+  private getTemperature(): void {
     this.utilsService.getTemperature().subscribe((tmp) => {
         let temperature: string = tmp.temp;
         let idx1: number = temperature.indexOf('=');
@@ -85,16 +83,17 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
           this.temperature = parseFloat(strTemp);
           this.noTemperature = false;
           if (this.temperature < 50)
-            this.tempAlertClass = 'alert-success';
+            this.tempAlertClass = 'success';
           else if (this.temperature < 70)
-            this.tempAlertClass = 'alert-warning';
+            this.tempAlertClass = 'warning';
           else
-            this.tempAlertClass = 'alert-danger'
+            this.tempAlertClass = 'danger'
         } else
-          this.noTemperature = true;
+          this.noTemperature = false;
       },
       () => {
         this.noTemperature = true;
+        this.tempAlertClass = 'alert-danger';
       });
   }
 
@@ -106,24 +105,37 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/dc';
   }
 
-  openIdleTimeoutDialog(idle:number, timeout:number, count:number): void {
-    let data:any = {};
-    let remainingSecs: number = timeout-count;
-     if(remainingSecs === timeout-1) {
-     this.idleTimeoutDialogRef = this.dialog.open(IdleTimeoutModalComponent, {
-      //  width: '450px',
+  openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
+    let data: any = {};
+    let remainingSecs: number = timeout - count;
+    if (remainingSecs === timeout - 1) {
+      this.idleTimeoutDialogRef = this.dialog.open(IdleTimeoutModalComponent, {
+        //  width: '450px',
         data: {idle: idle, remainingSecs: remainingSecs}
       });
 
-       // this.idleTimeoutDialogRef.afterClosed().subscribe(res => {
-       // });
-    }
-    else
-    {
-      data =  this.idleTimeoutDialogRef.componentInstance.data;
+      // this.idleTimeoutDialogRef.afterClosed().subscribe(res => {
+      // });
+    } else {
+      data = this.idleTimeoutDialogRef.componentInstance.data;
       data.idle = idle;
       data.remainingSecs = remainingSecs;
     }
+  }
+
+  toggleMenu() {
+    let navbarCollapse:HTMLDivElement = this.navbarCollapse.nativeElement;
+    let style:string | null = navbarCollapse.getAttribute('style')
+
+    if(style === null || style === 'max-height: 0')
+      navbarCollapse.setAttribute('style', 'max-height: 200px');
+    else
+      navbarCollapse.setAttribute('style', 'max-height: 0');
+  }
+
+  menuClosed() {
+    let navbarCollapse:HTMLDivElement = this.navbarCollapse.nativeElement;
+    navbarCollapse.setAttribute('style', 'max-height: 0');
   }
 
   ngOnInit(): void {
@@ -135,28 +147,25 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userIdle.startWatching();
     this.userIdle.resetTimer();
 
-    this.messageSubscription = this.utilsService.getMessages().subscribe((message:Message) => {
-      if(message.messageType === messageType.idleTimeoutStatus)
-      {
+    this.messageSubscription = this.utilsService.getMessages().subscribe((message: Message) => {
+      if (message.messageType === messageType.idleTimeoutStatus) {
         let itos: IdleTimeoutStatusMessage = message as IdleTimeoutStatusMessage;
         this.idleTimeoutActive = itos.active;
-    //    console.log("idle active = "+this.idleTimeoutActive)
+        //    console.log("idle active = "+this.idleTimeoutActive)
       }
     })
     // Start watching when user idle is starting.
-    this.timerHandle = this.userIdle.onTimerStart().subscribe((count) =>{
-      if(this.idleTimeoutActive) {
+    this.timerHandle = this.userIdle.onTimerStart().subscribe((count: number) => {
+      if (this.idleTimeoutActive) {
         let config: UserIdleConfig = this.userIdle.getConfigValue();
         // @ts-ignore
         this.openIdleTimeoutDialog(config.idle, config.timeout, count);
-      }
-      else
+      } else
         this.userIdle.resetTimer();
     });
 
     // Log off when time is up.
-    this.userIdle.onTimeout().subscribe(() =>
-    {
+    this.userIdle.onTimeout().subscribe(() => {
       this.idleTimeoutDialogRef.close();
       window.location.href = 'logoff';
     });
@@ -165,7 +174,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pingHandle = this.userIdle.ping$.subscribe(() => this.getTemperature());
   }
 
-  ngAfterViewInit(): void {
+   ngAfterViewInit(): void {
     // If the camera service got any errors while getting the camera setup, then we report it here.
     this.cameraSvc.errorEmitter.subscribe((error: HttpErrorResponse) => this.errorReporting.errorMessage = error);
   }

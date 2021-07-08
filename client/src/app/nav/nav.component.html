@@ -1,87 +1,78 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">
-    <fa-icon [icon]="faCamera">"></fa-icon>
+<div class="sec-cam-navbar">
+  <a mat-icon-button href="#">
+    <mat-icon>videocam</mat-icon>
   </a>
-  <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>
 
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+  <div>
+    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass">Core Temp: {{temperature}} °C</div>
+  </div>
+
+  <button mat-button class="navbar-toggler" type="button" (click)="toggleMenu()"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <mat-icon>menu</mat-icon>
   </button>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
+  <div #navbarCollapse class="collapse" id="navbarSupportedContent">
+    <div>
+      <button mat-button [matMenuTriggerFor]="menuSelectCamera" id="cameraDropdown">
+        Select Camera
+      </button>
+      <mat-menu #menuSelectCamera="matMenu">
+        <ng-container *ngFor="let camera of cameras">
+          <button mat-menu-item (click)="setVideoStream(camera);menuClosed()">
+            {{camera.name + " (" + camera.descr + ")"}}
+          </button>
+        </ng-container>
+        <button mat-menu-item (click)="multiCamView()">Multi Camera View</button>
+      </mat-menu>
+    </div>
 
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="cameraDropdown" role="button" data-toggle="dropdown"
-           aria-haspopup="true" aria-expanded="false">
-          Select Camera
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <ng-container *ngFor="let camera of cameras">
-               <span class="dropdown-item" (click)="setVideoStream(camera)">
-                 {{camera.name + " (" + camera.descr + ")"}}
-               </span>
-          </ng-container>
-          <span class="dropdown-item" (click)="multiCamView()">Multi Camera View</span>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="recordingDropdown" role="button" data-toggle="dropdown"
-           aria-haspopup="true" aria-expanded="false">
-          Select Recording
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <ng-container *ngFor="let camera of cameras">
-               <span class="dropdown-item" (click)="showRecording(camera)">
-                 {{camera.name + " (" + camera.descr + ")"}}
-               </span>
-          </ng-container>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="camControlDropdown" role="button" data-toggle="dropdown"
-           aria-haspopup="true" aria-expanded="false">
-          Camera Control
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <ng-container *ngFor="let camera of cameras">
-               <span *ngIf="camera.address!=undefined&&camera.controlUri!=undefined" class="dropdown-item" (click)="cameraControl(camera)">
-                 {{camera.name}}
-               </span>
-          </ng-container>
-        </div>
-      </li>
-    </ul>
-<!--    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>-->
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
-           aria-expanded="false">
-          General
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown" style="left: -160px;">
-           <span class="dropdown-item" (click)="confirmLogoff()">
-             Log Off
-           </span>
-          <span class="dropdown-item" (click)="changePassword()">Change Password</span>
-          <div class="dropdown-divider"></div>
-          <span class="dropdown-item" (click)="setIp()">Save Current Public IP</span>
-          <span class="dropdown-item" (click)="drawdownCalc()">Pension Drawdown Calculator</span>
-          <div class="dropdown-divider"></div>
-          <span class="dropdown-item" (click)="about()">About Security Cam</span>
-        </div>
-      </li>
-    </ul>
-  </div>
-</nav>
-<div class="confirm-logout alert-warning mx-auto" *ngIf="confirmLogout">
-  <div>
-    Logout from Security Cam, Are you sure?
-  </div>
-  <div>
-    <button mat-button class="btn btn-sm btn-warning" (click)="logOff(true)">Confirm</button>
-    <button mat-button class="btn btn-sm btn-secondary" (click)="logOff(false)">Cancel</button>
+    <div>
+      <button mat-button [matMenuTriggerFor]="menuSelectRecording">Select Recording</button>
+      <mat-menu #menuSelectRecording="matMenu">
+        <ng-container *ngFor="let camera of cameras">
+          <button mat-menu-item (click)="showRecording(camera);menuClosed()">
+            {{camera.name + " (" + camera.descr + ")"}}
+          </button>
+        </ng-container>
+      </mat-menu>
+    </div>
+
+    <div>
+      <button mat-button [matMenuTriggerFor]="menuCameraSettings">Camera Settings</button>
+      <mat-menu #menuCameraSettings="matMenu">
+        <ng-container *ngFor="let camera of cameras">
+          <button *ngIf="camera.address!=undefined&&camera.controlUri!=undefined" mat-menu-item
+                  (click)="cameraControl(camera);menuClosed()">
+            {{camera.name}}
+          </button>
+        </ng-container>
+      </mat-menu>
+    </div>
+
+  <!--    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>-->
+    <div>
+      <button mat-button [matMenuTriggerFor]="menuGeneral">General</button>
+      <mat-menu #menuGeneral="matMenu">
+        <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
+        <button mat-menu-item (click)="changePassword();menuClosed()">Change Password</button>
+        <div class="dropdown-divider"></div>
+        <button mat-menu-item (click)="setIp();menuClosed()">Save Current Public IP</button>
+        <button mat-menu-item (click)="drawdownCalc();menuClosed()">Pension Drawdown Calculator</button>
+        <div class="dropdown-divider"></div>
+        <button mat-menu-item (click)="about();menuClosed()">About Security Cam</button>
+      </mat-menu>
+    </div>
   </div>
 </div>
+<mat-card class="mat-elevation-z8 confirm-logout alert-warning" *ngIf="confirmLogout">
+  <mat-card-subtitle style="color: inherit">
+    Logout from Security Cam, Are you sure?
+  </mat-card-subtitle>
+  <mat-card-content>
+    <button mat-flat-button class="btn-warning" (click)="logOff(true)">Confirm</button>
+    <button mat-flat-button class="btn-default" (click)="logOff(false)">Cancel</button>
+  </mat-card-content>
+</mat-card>
+<router-outlet></router-outlet>
 <app-reporting></app-reporting>

@@ -1,33 +1,79 @@
-div.confirm-logout {
+mat-card.confirm-logout {
   margin-top: 1rem;
-  width: fit-content;
+  width: 17rem;
   padding: 1rem;
-  -webkit-box-shadow: 5px 5px 15px 10px rgba(0,0,0,0.89);
-  box-shadow: 5px 5px 15px 10px rgba(0,0,0,0.89);
-
-  > div:nth-child(2) {
-    width: 100%;
-    display: inline-flex;
+  margin-left: auto;
+  margin-right: auto;
+  > mat-card-content {
     margin-top: 0.5rem;
 
-    > button:first-child {
-      margin-right: 0.3rem;
-      margin-left: auto;
-    }
     > button:nth-child(2) {
-      margin-right: auto;
+     float: right;
     }
   }
 }
 
-div.temp {
-  transform: scale(0.75);
-  width: fit-content;
-  padding: 0.25rem;
-  border: black solid 0.1rem;
-  border-radius: 1rem;
+
+div.general {
+  margin-left: auto;
 }
 
-.dropdown-item {
-  cursor: default;
+.sec-cam-navbar {
+  width: 100%;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  background-color: #e5e1e1;
+  // Home icon (videocam)
+  > a {
+    color: #2d2d2d;
+  }
+
+  // Temperature indicator
+  > div:nth-child(2) {
+    display: inline-block;
+    > div {
+      transform: scale(0.75);
+      width: fit-content;
+      padding: 0.25rem;
+      border: black solid 0.1rem;
+      border-radius: 1rem;
+    }
+  }
+
+  // Navbar collapse button
+  > button:nth-child(3) {
+    @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
+      display: none;
+    }
+    display: inline;
+    float: right;
+  }
+
+  // The menus
+  > div:nth-child(4) {
+    @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
+      display: inline;
+      > div {
+        display: inline;
+      }:nth-child(4)
+      {
+        float: right;
+      }
+    }
+  }
+}
+
+.collapse {
+
+  @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px){
+    max-height: 0;
+    overflow-y: hidden;
+    transition: max-height 1s ease-out;
+  }
+  width: 100%;
+  margin-right: 1rem;
+}
+
+.navbar-toggler {
+  order: 10;
 }
