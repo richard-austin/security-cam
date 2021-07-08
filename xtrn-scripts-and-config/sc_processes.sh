@@ -3,20 +3,19 @@
 log_dir=/home/security-cam/logs/
 read_ip() {
     read -r last_ip </home/security-cam/myip
+    #echo "Last IP = ${last_ip}"
+
+    current_ip=$(curl -s 'https://api.ipify.org/?format=json' | python3 -c "import sys, json; print(json.load(sys.stdin)['ip'])")
+    #echo "Current IP = ${current_ip}"
+
+    # The myip file is updated when the user uses the Save Current IP option in the web application
+    #  in response to the email sent here
 }
 
 run_check_ip_not_changed() {
   while true; do
     sleep 15m
     read_ip
-
-    echo "Last IP = ${last_ip}"
-
-    current_ip=$(curl -s 'https://api.ipify.org/?format=json' | python3 -c "import sys, json; print(json.load(sys.stdin)['ip'])")
-    echo "Current IP = ${current_ip}"
-
-    # The myip file is updated when the user uses the Save Current IP option in the web application
-    #  in response to the email sent here
 
     while [ "$current_ip" != "$last_ip" ]; do
       ## Send the email with the ssmtp command
