@@ -84,7 +84,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.flvPlayer = mpegts.createPlayer({
           type: 'flv',
           isLive: true,
-          url: baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
+          url: this.camera.uri.startsWith('http:') || this.camera.uri.startsWith('https:')
+            ?  // Absolute url
+            this.camera.uri
+              .replace('https', 'wss') // Change https to wss
+              .replace('http', 'ws')  // or change http to ws
+            :  // Relative uri
+            baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
               .replace('https', 'wss') // Change https to wss
               .replace('http', 'ws')  // or change http to ws
               +this.camera.uri

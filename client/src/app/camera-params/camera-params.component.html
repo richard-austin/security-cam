@@ -2,9 +2,9 @@
   <mat-card class="mat-elevation-z8">
     <mat-card-title>View/Set Parameters</mat-card-title>
     <mat-card-subtitle>{{cam?.name}}</mat-card-subtitle>
-    <mat-card-content *ngIf="downloading">
-      <fa-icon class="fa-spin" [icon]="['fas', 'spinner']" [spin]="true" [size]="'lg'"></fa-icon>
-      Please wait..
+    <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
+      <mat-spinner [diameter]="25"></mat-spinner>
+      <span>Please wait..</span>
     </mat-card-content>
     <mat-card-content [ngStyle]="downloading ? {display: 'none'} : {display: 'block'}">
       <div [formGroup]="camControlFormGroup">
@@ -72,7 +72,7 @@
          </div>
       </div>
       <div class="button-container">
-        <button mat-raised-button (click)="updateParams()" [disabled]="!anyChanged() || anyInvalid()" color="warn">Update</button>
+        <button mat-flat-button (click)="updateParams()" [disabled]="!anyChanged() || anyInvalid()" class="btn-warning">Update</button>
       </div>
     </mat-card-content>
   </mat-card>

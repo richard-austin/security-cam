@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {VideoComponent} from "../video/video.component";
 import {Camera} from "../cameras/Camera";
 import {CameraService, LocalMotionEvent, LocalMotionEvents} from "../cameras/camera.service";
@@ -9,6 +9,7 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
 import {MatSelect} from "@angular/material/select/select";
+import {MatButtonToggle} from "@angular/material/button-toggle";
 
 declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
 
@@ -20,7 +21,8 @@ declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
 export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(VideoComponent) video!: VideoComponent;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @ViewChild('selector') selector!:MatSelect;
+  @ViewChild('selector') selector!: MatSelect;
+  @ViewChild('recordingButtonGroup') recordingButtonGroup!: ElementRef<MatButtonToggle>;
   timerHandle!: Subscription;
   private activeLiveUpdates!: Subscription;
   motionEvents!: LocalMotionEvent[];
@@ -30,6 +32,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   noVideo: boolean = false;
   confirmDelete: boolean = false;
   downloading: boolean = false;
+  paused: boolean = true;
+  selectedPlaybackMode: string = "startPause";
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService) {
   }
@@ -53,25 +57,21 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   /**
-   * stepTo: Step to the given number of seconds into the recording
-   * @param time: Seconds from recording start to go to
-   */
-  stepTo(time: number) {
-    this.video.video.currentTime = time;
-  }
-
-  /**
    * pause: Pause playback
    */
   pause(): void {
     this.video.video.pause();
   }
 
+  private _start() {
+    this?.video?.video.play();
+  }
+
   /**
    * start: Start playback if stopped or set normal playback rate.
    */
   start(): void {
-    this.video.video.play();
+    this._start();
     this.video.video.playbackRate = 1;
   }
 
@@ -79,6 +79,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    * fastForward: Set normal playback rate X 4
    */
   fastForward() {
+    this._start();
     this.video.video.playbackRate = 4;
   }
 
@@ -86,6 +87,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    * fasterForward: Set normal playback rate X 10
    */
   fasterForward(): void {
+    this._start();
     this.video.video.playbackRate = 10;
   }
 
@@ -111,8 +113,11 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       this.camera = cam;
       let video: VideoComponent | undefined = this.video;
       if (video !== undefined) {
-        this.video.visible = true;  // Still hidden by enclosing div
-        this.video.stop();
+        this.setUpVideoEventHandlers();
+
+        video.visible = true;  // Still hidden by enclosing div
+        video.stop();
+        this.selectedPlaybackMode = 'startPause';
 
         // Get the motion events for this camera (by motionName)
         this.motionService.getMotionEvents(cam).subscribe((events: LocalMotionEvents) => {
@@ -130,8 +135,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
                 this.visible = true;
                 this.showInvalidInput(true);
               }
-            }
-            else
+            } else
               this.noVideo = true;
           },
           (error) => {
@@ -163,6 +167,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    */
   showMotionEvent($event: MatSelectChange) {
     this.manifest = $event.value.manifest;
+    this.selectedPlaybackMode = 'startPause';
     this.video.setSource(this.camera, $event.value.manifest);
   }
 
@@ -180,18 +185,33 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     )
   }
 
-  async downloadRecording()
-  {
+  async downloadRecording() {
     try {
       this.downloading = true;
       let blob: Blob = await this.motionService.downloadRecording(this.camera, this.manifest);
       saveAs(blob, this.manifest.replace('.m3u8', '.mp4'))
-    }
-    catch(error)
-    {
-      this.reporting.errorMessage = error;
+    } catch (error) {
+      let reader: FileReader = new FileReader();
+      reader.onload = () => {
+        this.reporting.errorMessage = new HttpErrorResponse({error: JSON.parse(reader.result as string), status: error.status});
+      }
+      reader.readAsText(error.error);
     }
     this.downloading = false;
+  }
+
+  private setUpVideoEventHandlers() {
+    if (this?.video?.video) {
+      let video: HTMLVideoElement = this.video.video;
+
+      video.onpause = () => {
+        this.paused = true;
+      }
+
+      video.onplay = () => {
+        this.paused = false;
+      }
+    }
   }
 
   ngOnInit(): void {

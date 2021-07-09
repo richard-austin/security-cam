@@ -1,4 +1,4 @@
-<div  [ngClass]="{'no-display': !visible}" class="flex-container">
+<div [ngClass]="{'no-display': !visible}" class="flex-container">
   <mat-card class="events-select">
     <mat-card-title>Select a Motion Event</mat-card-title>
     <mat-card-content>
@@ -12,37 +12,63 @@
       </mat-form-field>
       <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
         <div *ngSwitchCase="false">
-          <button mat-stroked-button class="btn btn-sm btn-danger" (click)="confirmDelete=true" title="Delete the currently selected recording">Delete This Recording</button>
+          <button (click)="confirmDelete=true" class="btn-danger" mat-flat-button
+                  title="Delete the currently selected recording">Delete This Recording
+          </button>
         </div>
         <div *ngSwitchCase="true">
           Delete {{selector.value.dateTime}},
           <div>are you sure?</div>
-          <button mat-stroked-button class="btn btn-sm btn-danger" (click)="confirmDelete=false;deleteRecording()" title="Delete the currently selected recording">Confirm</button>
-          <button mat-stroked-button class="btn btn-sm btn-secondary" (click)="confirmDelete=false" title="Do not delete the recording">Cancel</button>
+          <button (click)="confirmDelete=false;deleteRecording()" class="btn-danger" mat-flat-button
+                  title="Delete the currently selected recording">Confirm
+          </button>
+          <button (click)="confirmDelete=false" class="btn-default" mat-flat-button
+                  title="Do not delete the recording">Cancel
+          </button>
         </div>
       </div>
       <div *ngIf="!confirmDelete && !downloading" class="download-button">
-        <button mat-stroked-button class="btn btn-sm btn-light" (click)="downloadRecording()">Download Recording</button>
+        <button (click)="downloadRecording()" class="btn-light" mat-flat-button>Download Recording
+        </button>
       </div>
-      <div *ngIf="downloading">
-        <fa-icon class="fa-spin" [icon]="['fas', 'spinner']" [spin]="true" [size]="'lg'"></fa-icon> Please wait..
-      </div>
+    </mat-card-content>
+    <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
+      <mat-spinner [diameter]="25"></mat-spinner>
+      <span>Please wait..</span>
     </mat-card-content>
   </mat-card>
   <div>
     <app-video></app-video>
     <div class="buttons-flex-container">
-      <button mat-raised-button class="recording-button" (click)="returnToStart()" title="Go back to the start of the recording"><fa-icon [icon]="['fas', 'fast-backward']" size="lg"></fa-icon></button>
-      <button mat-raised-button class="recording-button" (click)="stepBack()" title="Step backward 10 seconds"><fa-icon [icon]="['fas', 'backward']" size="lg"></fa-icon></button>
-      <button mat-raised-button class="recording-button" (click)="stepForward()" title="Step forward 10 seconds"><fa-icon [icon]="['fas', 'forward']" size="lg"></fa-icon></button>
-      <button mat-raised-button class="recording-button" (click)="pause()" title="Pause"><fa-icon [icon]="['fas', 'pause']" size="lg"></fa-icon></button>
-      <button mat-raised-button class="recording-button" (click)="start()" title="Play (restart after pause)"><fa-icon [icon]="['fas', 'play']" size="lg"></fa-icon></button>
-      <button mat-raised-button class="recording-button" (click)="fastForward()" title="Fast forward"><fa-icon [icon]="['fas', 'fast-forward']" size="lg"></fa-icon></button>
-      <button mat-raised-button class="faster-forward" (click)="fasterForward()" title="Faster forward"><fa-icon [icon]="['fas', 'fast-forward']" size="lg"></fa-icon></button>
+      <mat-button-toggle-group aria-label="Playback control" name="playbackControl" [(ngModel)]="selectedPlaybackMode">
+        <button mat-stroked-button class="recording-button" (click)="returnToStart()"
+                title="Go back to the start of the recording">
+          <mat-icon class="recording-button">fast_rewind</mat-icon>
+        </button>
+        <button mat-stroked-button class="recording-button" (click)="stepBack()" title="Step backward 10 seconds">
+          <mat-icon class="recording-button">settings_backup_restore</mat-icon>
+        </button>
+        <button mat-stroked-button class="recording-button" (click)="stepForward()" title="Step forward 10 seconds">
+          <mat-icon class="recording-button">forward_10</mat-icon>
+        </button>
+        <mat-button-toggle (click)="paused ? start() : pause()" [title]="paused ? 'Play' : 'Pause'" value="startPause">
+          <mat-icon *ngIf="!paused">pause</mat-icon>
+          <mat-icon *ngIf="paused">play_arrow</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle (click)="fastForward()" title="Fast forward" value="fastForward">
+          <mat-icon>fast_forward</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle (click)="fasterForward()" title="Faster forward" value="fasterForward">
+          <mat-icon class="faster-forward">fast_forward</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
     </div>
   </div>
 </div>
-<div class="alert-warning no-video" [ngClass]="{'no-display': !noVideo}">No Video Clips Available For {{camera?.name}} ({{camera?.descr}})</div>
+<br>
+<div [ngClass]="{'no-display': !noVideo}" class="alert-warning">No Video Clips Available For {{camera?.name}}
+  ({{camera?.descr}})
+</div>
 <app-reporting></app-reporting>
 
 
