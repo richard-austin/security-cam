@@ -2,8 +2,8 @@
 @include mat.core;
 
 
-$sec-cam-primary: mat.define-palette(mat.$blue-palette);
-$sec-cam-accent: mat.define-palette(mat.$green-palette);
+$sec-cam-primary: mat.define-palette(mat.$green-palette);
+$sec-cam-accent: mat.define-palette(mat.$blue-palette);
 $sec-cam-warn: mat.define-palette(mat.$deep-orange-palette);
 
 
