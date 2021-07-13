@@ -1,22 +1,37 @@
 @use '~@angular/material' as mat;
 @include mat.core;
 
-
-$sec-cam-primary: mat.define-palette(mat.$green-palette);
+$sec-cam-primary: mat.define-palette(mat.$light-green-palette);
 $sec-cam-accent: mat.define-palette(mat.$blue-palette);
-$sec-cam-warn: mat.define-palette(mat.$deep-orange-palette);
+$sec-cam-warn: mat.define-palette(mat.$deep-orange-palette, 500);
+$sec-cam-secondary: mat.define-palette(mat.$green-palette, 600);
+
+$success-background: mat.get-color-from-palette($sec-cam-secondary, 100);
+$danger-background: mat.get-color-from-palette($sec-cam-warn, 200);
+$warn-background: mat.get-color-from-palette($sec-cam-warn, 100);
+
+$success-colour: mat.get-color-from-palette($sec-cam-secondary, 900);
+$danger-colour:  mat.get-color-from-palette($sec-cam-warn, 900);
+$warn-colour: mat.get-color-from-palette($sec-cam-warn, 800);
 
 
-$theme: mat.define-dark-theme((color: (primary: $sec-cam-primary, accent: $sec-cam-accent, warn: $sec-cam-warn)));
-$custom-background-color: #424242;
-$background: map-get($theme, background);
+$theme: mat.define-light-theme((color: (primary: $sec-cam-primary, secondary: $sec-cam-secondary, accent: $sec-cam-accent, warn: $sec-cam-warn, background: $sec-cam-accent)));
+
+$mat-theme-background: map-get($theme, background);
+$background-colour: mat.get-color-from-palette($mat-theme-background, background);
 
 @include mat.all-component-themes($theme);
 
 body {
-  background-color: $custom-background-color !important;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: $background-colour;
   //  margin: 0;
 }
+html, body {
+  height: 100%;
+}
+
 
 @mixin alert {
  // position: relative;
@@ -31,18 +46,18 @@ body {
 }
 
 @mixin success {
-  color: #155724;
-  background-color: #d4edda;
+  color: $success-colour;
+  background-color: $success-background;
 }
 
 @mixin warning {
-  color: #856404;
-  background-color: #fff3cd;
+  color: $warn-colour;
+  background-color: $warn-background;
 }
 
 @mixin danger {
-  color: #721c24;
-  background-color: #f8d7da;
+  color: $danger-colour;
+  background-color: $danger-background;
 }
 
 .success{
@@ -72,7 +87,7 @@ body {
   @include danger;
 }
 
-.btn-danger {
+.mat-danger {
   background-color: darkred;
   color: white;
 }
@@ -103,15 +118,6 @@ mat-card-content.wait-box {
     margin-bottom: auto;
     margin-top:auto;
   }
-}
-
-html, body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
 //@mixin success {
