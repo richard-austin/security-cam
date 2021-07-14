@@ -12,7 +12,7 @@
       </mat-form-field>
       <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
         <div *ngSwitchCase="false">
-          <button (click)="confirmDelete=true" color="warn" mat-flat-button
+          <button (click)="confirmDelete=true" color="warning" mat-flat-button
                   title="Delete the currently selected recording">Delete This Recording
           </button>
         </div>
@@ -22,13 +22,13 @@
           <button (click)="confirmDelete=false;deleteRecording()" color="danger" mat-flat-button
                   title="Delete the currently selected recording">Confirm
           </button>
-          <button (click)="confirmDelete=false" class="btn-default" mat-flat-button
+          <button (click)="confirmDelete=false" color="default" mat-flat-button
                   title="Do not delete the recording">Cancel
           </button>
         </div>
       </div>
       <div *ngIf="!confirmDelete && !downloading" class="download-button">
-        <button (click)="downloadRecording()" class="btn-light" mat-flat-button>Download Recording
+        <button (click)="downloadRecording()" color="light" mat-flat-button>Download Recording
         </button>
       </div>
     </mat-card-content>
