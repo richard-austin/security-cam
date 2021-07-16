@@ -13,5 +13,5 @@
     <div *ngIf="showMessageInError">{{isHTML(error?.error) ? error?.message : error?.error}}</div>
     <div *ngIf="!showMessageInError">See logs for more information</div>
   </div>
-  <button mat-flat-button class="dismiss-button btn-default" (click)="dismiss()">Dismiss</button>
+  <button mat-flat-button class="dismiss-button" color="default" (click)="dismiss()">Dismiss</button>
 </mat-card>

@@ -25,16 +25,15 @@ mat-icon.faster-forward {
   color: #f34d4d;
 }
 
-button.recording-button {
-  min-width: 0;
-  border-right: .2px solid #646363;
-  border-radius: 0;
-  padding-left: 13px;
-  padding-right: 13px;
-}
-
-mat-icon.recording-button {
-    color: #ffffff;
+mat-card.recording-buttons {
+  padding: 0.4rem;
+  > mat-button-toggle-group > button{
+    min-width: 0;
+    border-right: .2px solid #646363;
+    border-radius: 0;
+    padding-left: 13px;
+    padding-right: 13px;
+  }
 }
 
 div.no-display {
