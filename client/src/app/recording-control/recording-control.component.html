@@ -1,5 +1,5 @@
 <div [ngClass]="{'no-display': !visible}" class="flex-container">
-  <mat-card class="events-select mat-elevation-z8">
+  <mat-card class="events-select mat-elevation-z8 hide-background">
     <mat-card-title>Select a Motion Event</mat-card-title>
     <mat-card-content>
       <mat-form-field appearance="fill">
@@ -40,7 +40,7 @@
   <div>
     <app-video></app-video>
     <div class="buttons-flex-container">
-      <mat-card class="recording-buttons">
+      <mat-card class="recording-buttons hide-background mat-elevation-z8">
         <mat-button-toggle-group aria-label="Playback control" name="playbackControl"
                                  [(ngModel)]="selectedPlaybackMode">
           <button mat-button (click)="returnToStart()"
