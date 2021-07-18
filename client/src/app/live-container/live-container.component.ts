@@ -67,7 +67,8 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngAfterViewInit(): void {
     this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => this.setupVideo());
-    this.setupVideo();
+    if(!this.multi)
+      this.setupVideo();
   }
 
   ngOnDestroy(): void {
