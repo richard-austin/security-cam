@@ -134,11 +134,11 @@ environments:
                 descr: HD
                 defaultOnMultiDisplay: false
                 motionName: PorchCam
-                uri: http://localhost/live/hls/porch.m3u8
-                address: 192.168.0.30
+                uri: http://localhost:8009/live/porch.flv
+                address: 192.168.0.45
                 controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
-                      uri: http://localhost/recording/hls/
+                      uri: http://localhost:8084/recording/hls/
                       location: hls
 
             camera2:
@@ -146,9 +146,9 @@ environments:
                 descr: Low res.
                 defaultOnMultiDisplay: true
                 motionName: PorchCam
-                uri: http://localhost/live/hlslo/porch.m3u8
+                uri: http://localhost:8009/livelo/porch.flv
                 recording:
-                    uri: http://localhost/recording/motion-hlslo/
+                    uri: http://localhost:8084/recording/motion-hlslo/
                     location: motion-hlslo
 
             camera3:
@@ -156,11 +156,11 @@ environments:
                 motionName: SideGate
                 descr: HD
                 defaultOnMultiDisplay: false
-                uri: http://localhost/live/hls2/cam2.m3u8
+                uri: http://localhost:8009/live2/cam2.flv
                 address: 192.168.0.34
                 controlUri: web/cgi-bin/hi3510/param.cgi
                 recording:
-                    uri: http://localhost/recording/hls2/
+                    uri: http://localhost:8084/recording/hls2/
                     location: hls2
 
             camera4:
@@ -168,9 +168,9 @@ environments:
                 motionName: SideGate
                 descr: Low res.
                 defaultOnMultiDisplay: true
-                uri: http://localhost/live/hls2lo/cam2.m3u8
+                uri: http://localhost:8009/live2lo/cam2.flv
                 recording:
-                    uri: http://localhost/recording/motion-hls2lo/
+                    uri: http://localhost:8084/recording/motion-hls2lo/
                     location: motion-hls2lo
 
             camera5:
@@ -178,12 +178,12 @@ environments:
                 motionName: Garden
                 descr: HD
                 defaultOnMultiDisplay: false
-                uri: http://localhost/live/hls3/cam3.m3u8
+                uri: http://localhost:8009/live3/cam3.flv
                 address: 192.168.0.35
                 controlUri: web/cgi-bin/hi3510/param.cgi
 
                 recording:
-                    uri: http://localhost/recording/hls3/
+                    uri: http://localhost:8084/recording/hls3/
                     location: hls3
 
             camera6:
@@ -191,9 +191,9 @@ environments:
                 motionName: Garden
                 descr: Low res.
                 defaultOnMultiDisplay: true
-                uri: http://localhost/live/hls3lo/cam3.m3u8
+                uri: http://localhost:8009/live3lo/cam3.flv
                 recording:
-                    uri: http://localhost/recording/motion-hls3lo/
+                    uri: http://localhost:8084/recording/motion-hls3lo/
                     location: motion-hls3lo
 
         camerasAdminUserName: admin

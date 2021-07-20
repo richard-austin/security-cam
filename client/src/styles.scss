@@ -1,85 +1,143 @@
+@use '~@angular/material' as mat;
+@include mat.core;
 
-@import '~@angular/material/theming';
-// @import '../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css';
-@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+// Basic colours used in theme
+$sec-cam-primary: mat.define-palette(mat.$light-green-palette);
+$sec-cam-accent: mat.define-palette(mat.$blue-palette);
+$sec-cam-warn: mat.define-palette(mat.$orange-palette);
 
-$mat-myapp-primary: (
-  50 : #a1a1a1,
-  100 : #f0f0f0,
-  200 : #f0b3b3,
-  300 : #e99494,
-  400 : #051f12,
-  500 : #16ff0e,
-  600 : #dc5e5e,
-  700 : #d85353,
-  800 : #d34949,
-  900 : #f13a3a,
-  A100 : #ffffff,
-  A200 : #ffe2e2,
-  A400 : blueviolet,
-  A700 : #550303,
-  contrast: (
-    50 : #000000,
-    100 : #000000,
-    200 : #000000,
-    300 : #000000,
-    400 : #000000,
-    500 : #000000,
-    600 : #000000,
-    700 : #ffffff,
-    800 : #ffffff,
-    900 : #ffffff,
-    A100 : #000000,
-    A200 : #000000,
-    A400 : #000000,
-    A700 : #000000,
-  )
-);
+// Colours used for buttons and alter boxes.
+$sec-cam-danger: mat.define-palette(mat.$red-palette);
+$sec-cam-secondary: mat.define-palette(mat.$green-palette, 600);
+$sec-cam-light: mat.define-palette(mat.$yellow-palette, 400);
+$sec-cam-grey: mat.define-palette(mat.$grey-palette);
 
-$mat-myapp-accent: (
-  50 : #fffaed,
-  100 : #fff4d1,
-  200 : #ffecb3,
-  300 : #ffe494,
-  400 : #ffdf7d,
-  500 : #ffd966,
-  600 : #ffd55e,
-  700 : #ffcf53,
-  800 : #ffca49,
-  900 : #ffc038,
-  A100 : #ffffff,
-  A200 : #ffffff,
-  A400 : #fff5e1,
-  A700 : #ffedc8,
-  contrast: (
-    50 : #000000,
-    100 : #000000,
-    200 : #000000,
-    300 : #000000,
-    400 : #000000,
-    500 : #000000,
-    600 : #000000,
-    700 : #000000,
-    800 : #000000,
-    900 : #000000,
-    A100 : #000000,
-    A200 : #000000,
-    A400 : #000000,
-    A700 : #000000,
-  )
-);
+// All the following are defined from the sec-cam- group above
+$success-background: mat.get-color-from-palette($sec-cam-secondary, 100);
+$danger-background: mat.get-color-from-palette($sec-cam-danger, 200);
+$warn-background: mat.get-color-from-palette($sec-cam-warn, 100);
 
-$primary: mat-palette($mat-myapp-primary);
-$accent: mat-palette($mat-myapp-accent);
+$success-colour: mat.get-contrast-color-from-palette($sec-cam-secondary, 400);
+$danger-colour:  mat.get-contrast-color-from-palette($sec-cam-danger, 400);
+$warn-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
 
-$theme: mat-dark-theme($primary, $accent);
+$light-button-bkgnd: mat.get-color-from-palette($sec-cam-light, 400);
+$danger-button-bkgnd: mat.get-color-from-palette($sec-cam-danger, A700);
+$warn-button-bkgnd: mat.get-color-from-palette($sec-cam-warn,A400);
+$secondary-button-bkgnd: mat.get-color-from-palette($sec-cam-accent, 900);
+$default-button-bkgnd: mat.get-color-from-palette($sec-cam-grey, 500);
 
-@include angular-material-theme($theme);
+$light-button-colour: mat.get-contrast-color-from-palette($sec-cam-light, 900);
+$danger-button-colour: mat.get-contrast-color-from-palette($sec-cam-danger, 900);
+$warn-button-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
+$secondary-button-colour: mat.get-contrast-color-from-palette($sec-cam-accent, 500);
+$default-button-colour: mat.get-contrast-color-from-palette($sec-cam-grey, 500);
 
-body{
-  background-color: #424242 !important;
+$theme: mat.define-dark-theme((color: (primary: $sec-cam-primary, secondary: $sec-cam-secondary, accent: $sec-cam-accent, warn: $sec-cam-warn)));
+
+$mat-theme-background: map-get($theme, background);
+$background-colour: mat.get-color-from-palette($mat-theme-background, background);
+
+@include mat.all-component-themes($theme);
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: $background-colour;
+  //  margin: 0;
+}
+html, body {
+  height: 100%;
 }
 
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+@mixin alert {
+ // position: relative;
+  width: fit-content;
+  padding: 3rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 4rem;
+  top: 5%;
+  -webkit-box-shadow: 5px 5px 14px 5px #000000;
+  box-shadow: 5px 5px 14px 5px #000000;
+}
+
+@mixin success {
+  color: $success-colour;
+  background-color: $success-background;
+}
+
+@mixin warning {
+  color: $warn-colour;
+  background-color: $warn-background;
+}
+
+@mixin danger {
+  color: $danger-colour;
+  background-color: $danger-background;
+}
+
+.success{
+  @include success;
+}
+
+.warning {
+  @include warning;
+}
+
+.danger {
+  @include danger;
+}
+
+.alert-success {
+  @include alert;
+  @include success;
+}
+
+.alert-warning {
+  @include alert;
+  @include warning;
+}
+
+.alert-danger {
+  @include alert;
+  @include danger;
+}
+
+.mat-danger {
+  background-color: $danger-button-bkgnd;
+  color: $danger-button-colour;
+}
+
+.mat-secondary {
+  background-color: $secondary-button-bkgnd;
+  color: $secondary-button-colour;
+}
+
+.mat-light {
+  background-color: $light-button-bkgnd;
+  color: $light-button-colour;
+}
+
+.mat-warning {
+  background-color: $warn-button-bkgnd;
+  color: $warn-button-colour;
+}
+
+.mat-default {
+  background-color: $default-button-bkgnd;
+  color: $default-button-colour;
+}
+
+mat-card-content.wait-box {
+  >span {
+    margin-left: 1rem;
+    margin-bottom: auto;
+    margin-top:auto;
+  }
+}
+
+mat-card.hide-background {
+  background-color: transparent;
+}

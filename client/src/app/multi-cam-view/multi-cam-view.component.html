@@ -1,28 +1,27 @@
 <div class="flex-container">
   <div class="settings_item">
-    <mat-card class="camera-select">
-      <mat-card-title class="mat-elevation-z8">
+    <mat-card class="camera-select mat-elevation-z8 hide-background">
+      <mat-card-title>
         Select Cameras to View
       </mat-card-title>
-      <mat-card-content class="mat-elevation-z8">
+      <mat-card-content>
         <ng-container *ngFor="let stream of streams">
           <section class="section">
           <span>
-            <fa-icon [icon]="['fas', 'caret-right']" size="lg"></fa-icon>
+            <mat-icon>arrow_right</mat-icon>
             {{stream.name}}
           </span>
-            <span>
             <ul>
               <li *ngFor="let uri of stream.uris">
-                <mat-checkbox [color]="'primary'" [checked]="uri.selected"  (change)="updateCameras($event, stream,  uri)">
+                <mat-checkbox [color]="'primary'" [checked]="uri.selected"
+                              (change)="updateCameras($event, stream,  uri)">
                   {{uri.descr}}
                 </mat-checkbox>
               </li>
             </ul>
-          </span>
           </section>
         </ng-container>
-        <button mat-flat-button [color]="'accent'" (click)="updateDisplay()" [disabled]="false">Update</button>
+        <button mat-flat-button color="light" (click)="updateDisplay()" [disabled]="false">Update</button>
       </mat-card-content>
     </mat-card>
   </div>
