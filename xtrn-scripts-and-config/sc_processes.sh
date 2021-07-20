@@ -1,12 +1,18 @@
 #!/bin/bash
 
 log_dir=/home/security-cam/logs/
+ipV4RegEx="^([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))$"
+
 read_ip() {
     read -r last_ip </home/security-cam/myip
-    #echo "Last IP = ${last_ip}"
 
-    current_ip=$(curl -s 'https://api.ipify.org/?format=json' | python3 -c "import sys, json; print(json.load(sys.stdin)['ip'])")
-    #echo "Current IP = ${current_ip}"
+    current_reading=$(curl -s 'https://api.ipify.org/?format=json' | python3 -c "import sys, json; print(json.load(sys.stdin)['ip'])")
+
+    if [[ $current_reading =~ $ipV4RegEx  ]]; then
+      current_ip=$current_reading
+    else
+      echo "$(date +%d-%m-%Y" "%T): Bad reading (${current_reading}) from https://api.ipify.org" >>"${log_dir}ipify_$(date +%Y%m%d)".log
+    fi
 
     # The myip file is updated when the user uses the Save Current IP option in the web application
     #  in response to the email sent here
