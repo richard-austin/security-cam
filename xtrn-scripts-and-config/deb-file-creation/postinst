@@ -19,7 +19,7 @@ usermod -a -G security-cam sec-cam
 usermod -a -G security-cam www-data
 
 chown -R sec-cam:security-cam /home/security-cam
-chown tomcat:tomcat /home/security-cam/logs/security-cam*.log  # To prevent access denied errors on first starting tomcat
+chown tomcat:security-cam /home/security-cam/logs/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
 chmod 640 /etc/tomcat9/tomcat-users.xml
 chown root:tomcat /etc/tomcat9/tomcat-users.xml
