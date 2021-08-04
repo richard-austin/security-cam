@@ -103,11 +103,15 @@ bootWar {
 }
 
 task setVersion(type: Exec) {
+    group = 'build'
+    description = 'Sets the version.txt file with the current version from git describe'
     workingDir "$projectDir"
-    commandLine './setVersion.sh'
+    executable "sh"
+    args = ['-c',  'mkdir -p grails-app/assets/version && git describe --tags --dirty | tr -d \'\\n\' > grails-app/assets/version/version.txt']
 }
 
 task buildDebFile(type: Exec, dependsOn: [':server:assemble']) {
+    group = 'build'
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'
 }
