@@ -25,6 +25,32 @@ repositories {
     maven { url "https://repo.grails.org/grails/core" }
 }
 
+//group 'security.cam.onvif'
+//
+//ext {
+//    bintrayRepo = 'ONVIF-Java'
+//    bintrayName = 'ONVIF-Java'
+//
+//    publishedGroupId = 'security.cam.onvif'
+//    libraryName = 'ONVIF-Java'
+//    artifact = 'onvif'
+//
+//    libraryDescription = 'A Java client library to discover, control and manage ONVIF-supported devices.'
+//
+//    siteUrl = 'https://github.com/RootSoft/ONVIF-Java'
+//    gitUrl = 'https://github.com/RootSoft/ONVIF-Java.git'
+//
+//    libraryVersion = '1.0.2'
+//
+//    developerId = 'tomasverhelst'
+//    developerName = 'Tomas Verhelst'
+//    developerEmail = 'tve@teletask.be'
+//
+//    licenseName = 'The Apache Software License, Version 2.0'
+//    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//    allLicenses = ["Apache-2.0"]
+//}
+
 configurations {
     developmentOnly
     runtimeClasspath {
@@ -56,6 +82,7 @@ dependencies {
     implementation "org.grails.plugins:hibernate5"
     implementation "org.hibernate:hibernate-core:5.4.18.Final"
     compile "org.grails.plugins:gsp"
+
     implementation 'commons-io:commons-io:2.8.0'
     compileOnly "io.micronaut:micronaut-inject-groovy"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
@@ -77,6 +104,21 @@ dependencies {
     testCompileOnly "org.seleniumhq.selenium:selenium-support:3.14.0"
     testRuntimeOnly "org.seleniumhq.selenium:selenium-chrome-driver:3.14.0"
     testRuntimeOnly "org.seleniumhq.selenium:selenium-firefox-driver:3.14.0"
+
+    // Onvif dependencies
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    //Annotations
+    compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
+
+    //XML parser
+    compile group: 'net.sf.kxml', name: 'kxml2', version: '2.3.0'
+
+    //OkHttp
+    compile 'com.squareup.okhttp3:okhttp:3.11.0'
+
+    //OkHttp Digest
+    compile 'com.burgstaller:okhttp-digest:1.18'
 }
 
 bootRun {
@@ -92,7 +134,7 @@ bootRun {
 }
 
 assetCompile.dependsOn(':server:setVersion')
-bootWar.dependsOn(':client:buildClient')
+//bootWar.dependsOn(':client:buildClient')
 
 bootWar {
     webInf {
