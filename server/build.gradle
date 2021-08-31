@@ -134,7 +134,7 @@ bootRun {
 }
 
 assetCompile.dependsOn(':server:setVersion')
-//bootWar.dependsOn(':client:buildClient')
+bootWar.dependsOn(':client:buildClient')
 
 bootWar {
     webInf {
