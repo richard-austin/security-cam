@@ -37,18 +37,18 @@ class OnvifController {
                 for (Device device : devices) {
                     device.setHostName(device.getHostName()+ ':8080')
                     System.out.println("Devices found: " + device.getHostName());
-                    onvifManager.setOnvifResponseListener(new OnvifResponseListener() {
-                        @Override
-                        void onResponse(OnvifDevice onvifDevice, OnvifResponse response) {
-                            System.out.println("Response received: ");
-                        }
-
-                        @Override
-                        void onError(OnvifDevice onvifDevice, int errorCode, String errorMessage) {
-                            System.out.println("Error received: ");
-
-                        }
-                    });
+//                    onvifManager.setOnvifResponseListener(new OnvifResponseListener() {
+//                        @Override
+//                        void onResponse(OnvifDevice onvifDevice, OnvifResponse response) {
+//                            System.out.println("Response received: ");
+//                        }
+//
+//                        @Override
+//                        void onError(OnvifDevice onvifDevice, int errorCode, String errorMessage) {
+//                            System.out.println("Error received: ");
+//
+//                        }
+//                    });
 
                     OnvifDevice ovDevice = new OnvifDevice(device.getHostName(), '', '')
                     onvifManager.getMediaProfiles(ovDevice, new OnvifMediaProfilesListener() {
