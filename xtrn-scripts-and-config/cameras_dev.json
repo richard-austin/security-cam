@@ -1,0 +1,74 @@
+{
+  "camera1": {
+    "name": "Porch Cam",
+    "descr": "HD",
+    "defaultOnMultiDisplay": false,
+    "motionName": "PorchCam",
+    "uri": "http://localhost:8009/live/porch.flv",
+    "address": "192.168.0.45",
+    "controlUri": "web/cgi-bin/hi3510/param.cgi",
+    "recording": {
+      "uri": "http://localhost:8084/recording/hls/",
+      "location": "hls"
+    }
+  },
+  "camera2": {
+    "name": "Porch Cam",
+    "descr": "Low res.",
+    "defaultOnMultiDisplay": true,
+    "motionName": "PorchCam",
+    "uri": "http://localhost:8009/livelo/porch.flv",
+    "recording": {
+      "uri": "http://localhost:8084/recording/motion-hlslo/",
+      "location": "motion-hlslo"
+    }
+  },
+  "camera3": {
+    "name": "Garage Cam",
+    "motionName": "SideGate",
+    "descr": "HD",
+    "defaultOnMultiDisplay": false,
+    "uri": "http://localhost:8009/live2/cam2.flv",
+    "address": "192.168.0.34",
+    "controlUri": "web/cgi-bin/hi3510/param.cgi",
+    "recording": {
+      "uri": "http://localhost:8084/recording/hls2/",
+      "location": "hls2"
+    }
+  },
+  "camera4": {
+    "name": "Garage Cam",
+    "motionName": "SideGate",
+    "descr": "Low res.",
+    "defaultOnMultiDisplay": true,
+    "uri": "http://localhost:8009/live2lo/cam2.flv",
+    "recording": {
+      "uri": "http://localhost:8084/recording/motion-hls2lo/",
+      "location": "motion-hls2lo"
+    }
+  },
+  "camera5": {
+    "name": "Garden Cam",
+    "motionName": "Garden",
+    "descr": "HD",
+    "defaultOnMultiDisplay": false,
+    "uri": "http://localhost:8009/live3/cam3.flv",
+    "address": "192.168.0.35",
+    "controlUri": "web/cgi-bin/hi3510/param.cgi",
+    "recording": {
+      "uri": "http://localhost:8084/recording/hls3/",
+      "location": "hls3"
+    }
+  },
+  "camera6": {
+    "name": "Garden Cam",
+    "motionName": "Garden",
+    "descr": "Low res.",
+    "defaultOnMultiDisplay": true,
+    "uri": "http://localhost:8009/live3lo/cam3.flv",
+    "recording": {
+      "uri": "http://localhost:8084/recording/motion-hls3lo/",
+      "location": "motion-hls3lo"
+    }
+  }
+}
