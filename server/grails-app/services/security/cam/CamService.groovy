@@ -4,7 +4,7 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.apache.commons.io.IOUtils
-import org.grails.web.json.JSONObject
+import org.apache.tomcat.util.json.JSONParser
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.enums.PassFail
 
@@ -24,15 +24,15 @@ class CamService {
             FileInputStream fis
 
             if(Environment.current.name == 'development')
-                fis = new FileInputStream("/home/security-cam/cameras_dev.json");
+                fis = new FileInputStream("/home/security-cam/cameras_dev.json")
             else if(Environment.current.name == 'production')
                 fis = new FileInputStream("/home/security-cam/cameras.json")
             else
                 throw new Exception('Unknown environment, expecting production or development')
 
-            String data = IOUtils.toString(fis, "UTF-8");
-            JSONObject obj = new JSONObject(data)
-
+            String data = IOUtils.toString(fis, "UTF-8")
+            JSONParser parser = new JSONParser(data)
+            Object obj = parser.parse()
             result.setResponseObject(obj)
         }
         catch (Exception ex) {

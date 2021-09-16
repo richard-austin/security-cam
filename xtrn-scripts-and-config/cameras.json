@@ -1,76 +1,74 @@
 {
-  "cameras": {
-    "camera1": {
-      "name": "Porch Cam",
-      "descr": "HD",
-      "defaultOnMultiDisplay": false,
-      "motionName": "PorchCam",
-      "uri": "/live/live/porch.flv",
-      "address": "192.168.0.30",
-      "controlUri": "web/cgi-bin/hi3510/param.cgi",
-      "recording": {
-        "uri": "/recording/hls/",
-        "location": "hls"
-      }
-    },
-    "camera2": {
-      "name": "Porch Cam",
-      "descr": "Low res.",
-      "defaultOnMultiDisplay": true,
-      "motionName": "PorchCam",
-      "uri": "/live/livelo/porch.flv",
-      "recording": {
-        "uri": "/recording/motion-hlslo/",
-        "location": "motion-hlslo"
-      }
-    },
-    "camera3": {
-      "name": "Garage Cam",
-      "descr": "HD",
-      "defaultOnMultiDisplay": false,
-      "motionName": "SideGate",
-      "uri": "/live/live2/cam2.flv",
-      "address": "192.168.0.34",
-      "controlUri": "web/cgi-bin/hi3510/param.cgi",
-      "recording": {
-        "uri": "/recording/hls2/",
-        "location": "hls2"
-      }
-    },
-    "camera4": {
-      "name": "Garage Cam",
-      "descr": "Low res.",
-      "defaultOnMultiDisplay": true,
-      "motionName": "SideGate",
-      "uri": "/live/live2lo/cam2.flv",
-      "recording": {
-        "uri": "/recording/motion-hls2lo/",
-        "location": "motion-hls2lo"
-      }
-    },
-    "camera5": {
-      "name": "Garden Cam",
-      "descr": "HD",
-      "defaultOnMultiDisplay": false,
-      "motionName": "Garden",
-      "uri": "/live/live3/cam3.flv",
-      "address": "192.168.0.35",
-      "controlUri": "web/cgi-bin/hi3510/param.cgi",
-      "recording": {
-        "uri": "/recording/hls3/",
-        "location": "hls3"
-      }
-    },
-    "camera6": {
-      "name": "Garden Cam",
-      "descr": "Low res.",
-      "defaultOnMultiDisplay": true,
-      "motionName": "Garden",
-      "uri": "/live/live3lo/cam3.flv",
-      "recording": {
-        "uri": "/recording/motion-hls3lo/",
-        "location": "motion-hls3lo"
-      }
+  "camera1": {
+    "name": "Porch Cam",
+    "descr": "HD",
+    "defaultOnMultiDisplay": false,
+    "motionName": "PorchCam",
+    "uri": "/live/live/porch.flv",
+    "address": "192.168.0.30",
+    "controlUri": "web/cgi-bin/hi3510/param.cgi",
+    "recording": {
+      "uri": "/recording/hls/",
+      "location": "hls"
+    }
+  },
+  "camera2": {
+    "name": "Porch Cam",
+    "descr": "Low res.",
+    "defaultOnMultiDisplay": true,
+    "motionName": "PorchCam",
+    "uri": "/live/livelo/porch.flv",
+    "recording": {
+      "uri": "/recording/motion-hlslo/",
+      "location": "motion-hlslo"
+    }
+  },
+  "camera3": {
+    "name": "Garage Cam",
+    "descr": "HD",
+    "defaultOnMultiDisplay": false,
+    "motionName": "SideGate",
+    "uri": "/live/live2/cam2.flv",
+    "address": "192.168.0.34",
+    "controlUri": "web/cgi-bin/hi3510/param.cgi",
+    "recording": {
+      "uri": "/recording/hls2/",
+      "location": "hls2"
+    }
+  },
+  "camera4": {
+    "name": "Garage Cam",
+    "descr": "Low res.",
+    "defaultOnMultiDisplay": true,
+    "motionName": "SideGate",
+    "uri": "/live/live2lo/cam2.flv",
+    "recording": {
+      "uri": "/recording/motion-hls2lo/",
+      "location": "motion-hls2lo"
+    }
+  },
+  "camera5": {
+    "name": "Garden Cam",
+    "descr": "HD",
+    "defaultOnMultiDisplay": false,
+    "motionName": "Garden",
+    "uri": "/live/live3/cam3.flv",
+    "address": "192.168.0.35",
+    "controlUri": "web/cgi-bin/hi3510/param.cgi",
+    "recording": {
+      "uri": "/recording/hls3/",
+      "location": "hls3"
+    }
+  },
+  "camera6": {
+    "name": "Garden Cam",
+    "descr": "Low res.",
+    "defaultOnMultiDisplay": true,
+    "motionName": "Garden",
+    "uri": "/live/live3lo/cam3.flv",
+    "recording": {
+      "uri": "/recording/motion-hls3lo/",
+      "location": "motion-hls3lo"
     }
   }
 }
