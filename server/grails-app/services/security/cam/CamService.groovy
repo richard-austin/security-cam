@@ -2,6 +2,9 @@ package security.cam
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import grails.util.Environment
+import org.apache.commons.io.IOUtils
+import org.apache.tomcat.util.json.JSONParser
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.enums.PassFail
 
@@ -15,16 +18,29 @@ class CamService {
      * @return
      */
     def getCameras() {
-        ObjectCommandResponse response = new ObjectCommandResponse()
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
         try {
-            response.responseObject = grailsApplication.config.cameras
+            FileInputStream fis
+
+            if(Environment.current.name == 'development')
+                fis = new FileInputStream("/home/security-cam/cameras_dev.json")
+            else if(Environment.current.name == 'production')
+                fis = new FileInputStream("/home/security-cam/cameras.json")
+            else
+                throw new Exception('Unknown environment, expecting production or development')
+
+            String data = IOUtils.toString(fis, "UTF-8")
+            JSONParser parser = new JSONParser(data)
+            Object obj = parser.parse()
+            result.setResponseObject(obj)
         }
-        catch(Exception ex)
-        {
-            logService.cam.error("Exception in getCameras: "+ex.getMessage())
-            response.status = PassFail.FAIL
-            response.error = ex.getMessage()
+        catch (Exception ex) {
+            logService.cam.error "Exception in parse: " + ex.getMessage()
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
         }
-        return response
+
+        return result
     }
 }

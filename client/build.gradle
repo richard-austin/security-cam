@@ -3,9 +3,9 @@ plugins {
 }
 
 node {
-    version = '10.19.0'
+    version = '16.8.0'
     yarnVersion = '1.5.1'
-    download = false
+    download = true
 }
 
 task bootRun(type: NpmTask, dependsOn: 'npmInstall') {

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
+cp /tmp/motion.conf /etc/motion
+cp -r /tmp/conf.d /home/security-cam/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/ssmtp.conf /etc/ssmtp
 mv /tmp/chrony.conf /etc/chrony
