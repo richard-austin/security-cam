@@ -18,6 +18,20 @@ read_ip() {
     #  in response to the email sent here
 }
 
+kill_descendant_processes() {
+    local pid="$1"
+    local and_self="${2:-false}"
+    if children="$(pgrep -P "$pid")"; then
+        for child in $children; do
+            kill_descendant_processes "$child" true
+        done
+    fi
+    if [[ "$and_self" == true ]]; then
+      echo "kill $pid"
+        kill -TERM "$pid"
+    fi
+}
+
 run_check_ip_not_changed() {
   while true; do
     sleep 15m
@@ -78,4 +92,5 @@ run_ffmpeg rtsp://192.168.0.35:554/11 live3 cam3 &
 run_ffmpeg rtsp://192.168.0.35:554/12 live3lo cam3 &
 run_check_ip_not_changed &
 
+trap "kill_descendant_processes $$" INT EXIT
 wait
