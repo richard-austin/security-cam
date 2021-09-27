@@ -92,5 +92,5 @@ run_ffmpeg rtsp://192.168.0.35:554/11 live3 cam3 &
 run_ffmpeg rtsp://192.168.0.35:554/12 live3lo cam3 &
 run_check_ip_not_changed &
 
-trap "kill_descendant_processes $$" INT EXIT
+trap "kill_descendant_processes $$" INT EXIT TERM
 wait
