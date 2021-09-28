@@ -1,6 +1,7 @@
 package security.cam
 
 import grails.gorm.transactions.Transactional
+import grails.util.Environment
 
 import javax.annotation.PreDestroy
 
@@ -19,7 +20,11 @@ class Sc_processesService {
             Process p = Runtime.getRuntime().exec("killall sc_processes.sh")
             p.waitFor()
 
-            p = Runtime.getRuntime().exec("/home/richard/security-cam/xtrn-scripts-and-config/sc_processes.sh")
+            if(Environment.current.name == 'development')
+                p = Runtime.getRuntime().exec("../xtrn-scripts-and-config/sc_processes.sh")
+            else if(Environment.current.name == 'production')
+                p = Runtime.getRuntime().exec("/etc/security-cam/sc_processes.sh")
+
             pid = p.pid()
         }
     }
