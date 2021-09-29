@@ -26,7 +26,7 @@ class CamService {
             if(Environment.current.name == 'development')
                 fis = new FileInputStream("../xtrn-scripts-and-config/cameras_dev.json")
             else if(Environment.current.name == 'production')
-                fis = new FileInputStream("/etc/security-cam/cameras.json")
+                fis = new FileInputStream("/home/security-cam/cameras.json")
             else
                 throw new Exception('Unknown environment, expecting production or development')
 

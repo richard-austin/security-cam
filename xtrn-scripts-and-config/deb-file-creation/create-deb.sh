@@ -27,7 +27,7 @@ mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-hlslo
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
-cp ../cameras.json security-cam_"${VERSION}"_arm64/etc/security-cam
+cp ../cameras.json security-cam_"${VERSION}"_arm64/home/security-cam/
 
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
