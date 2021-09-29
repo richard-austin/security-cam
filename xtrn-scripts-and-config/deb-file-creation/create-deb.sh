@@ -27,7 +27,7 @@ mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-hlslo
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
-cp ../cameras.json security-cam_"${VERSION}"_arm64/home/security-cam
+cp ../cameras.json security-cam_"${VERSION}"_arm64/etc/security-cam
 
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
@@ -37,7 +37,7 @@ cp -r ../motion/motion.conf ../motion/conf.d ../nginx.conf ../chrony.conf ../ssm
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
-cp ../sc_processes.service security-cam_"${VERSION}"_arm64/lib/systemd/system
+#cp ../sc_processes.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 
 cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
 Package: security-cam

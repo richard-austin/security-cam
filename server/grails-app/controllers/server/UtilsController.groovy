@@ -5,6 +5,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
+import security.cam.Sc_processesService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
@@ -110,5 +111,18 @@ class UtilsController {
             else
                 render response.responseObject as JSON
         }
+    }
+
+    Sc_processesService sc_processesService
+    @Secured(['ROLE_CLIENT'])
+    def startProcs()
+    {
+        sc_processesService.startProcesses()
+    }
+
+    @Secured(['ROLE_CLIENT'])
+    def stopProcs()
+    {
+        sc_processesService.stopProcesses()
     }
 }

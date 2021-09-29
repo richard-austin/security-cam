@@ -68,6 +68,6 @@ deb-systemd-invoke stop chrony
 deb-systemd-invoke start chrony
 
 # This runs the node media server, motion and the ffmpeg instances
-deb-systemd-invoke enable sc_processes.service
-deb-systemd-invoke start sc_processes.service
+# deb-systemd-invoke enable sc_processes.service
+# deb-systemd-invoke start sc_processes.service
 
