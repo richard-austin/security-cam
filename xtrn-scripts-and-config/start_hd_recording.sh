@@ -14,5 +14,6 @@ start () {
 
 start
 
+# cat cameras.json | python3 -c "import sys, json; print(json.load(sys.stdin)['camera1']['uri'])"
 wait
 

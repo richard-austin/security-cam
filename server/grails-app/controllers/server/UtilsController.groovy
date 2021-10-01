@@ -3,6 +3,7 @@ package server
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
+import security.cam.ConfigurationUpdateService
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
 import security.cam.Sc_processesService
@@ -124,5 +125,13 @@ class UtilsController {
     def stopProcs()
     {
         sc_processesService.stopProcesses()
+    }
+
+    ConfigurationUpdateService configurationUpdateService
+
+    @Secured(['ROLE_CLIENT'])
+    def test()
+    {
+        configurationUpdateService.serviceMethod()
     }
 }

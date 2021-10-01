@@ -30,10 +30,15 @@ class Recording {
 
 class Camera {
     String name
-    String motionName
     String descr
     boolean defaultOnMultiDisplay
+    String motionName
+    String netcam_uri
     String uri
+    boolean used_in_motion_sensing
+    Integer video_width
+    Integer video_height
+    String mask_file
     String address
     String controlUri
     Recording recording

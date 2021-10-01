@@ -21,10 +21,15 @@ export class Recording
 export class Camera
 {
     name: string = "";
-    motionName: string = "";
     descr: string = "";
     defaultOnMultiDisplay: boolean = false;
+    motionName: string = "";
+    netcam_uri: string = "";
     uri: string = "";
+    used_in_motion_sensing: boolean = false;
+    video_width: number = 0;
+    video_height: number = 0;
+    mask_file: string = "";
     address: string="";
     controlUri: string="";
     recording: Recording = new Recording();

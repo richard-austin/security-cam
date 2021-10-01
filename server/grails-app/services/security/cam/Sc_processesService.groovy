@@ -20,10 +20,10 @@ class Sc_processesService {
             Process p = Runtime.getRuntime().exec("killall sc_processes.sh")
             p.waitFor()
 
-            if(Environment.current.name == 'development')
-                p = Runtime.getRuntime().exec("../xtrn-scripts-and-config/sc_processes.sh")
-            else if(Environment.current.name == 'production')
-                p = Runtime.getRuntime().exec("/etc/security-cam/sc_processes.sh")
+//            if(Environment.current.name == 'development')
+//                p = Runtime.getRuntime().exec("../xtrn-scripts-and-config/sc_processes.sh")
+//            else if(Environment.current.name == 'production')
+//                p = Runtime.getRuntime().exec("/etc/security-cam/sc_processes.sh")
 
             pid = p.pid()
         }
