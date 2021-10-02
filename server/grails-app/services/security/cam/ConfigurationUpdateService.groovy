@@ -20,7 +20,7 @@ class ConfigurationUpdateService {
             int camId = 100
             jsonObj.each { it ->
                 Camera cam = it.value
-                if(cam.used_in_motion_sensing) {
+                if(cam.motion != null) {
                     String conf =
 """
 # /home/security-cam/motion/conf.d/${it.key}.conf
@@ -35,7 +35,7 @@ class ConfigurationUpdateService {
 #  Normally only the lower definition stream would be connected to motion to keep CPU utilisation 
 #  low, and this information enables motion to trigger a recording on the HD stream using the
 #  the start_hd_recording.sh script
-camera_name ${it.key}
+camera_name ${cam.motion.trigger_recording_on}
 
 # Mask to exclude public areas
 mask_file $cam.mask_file
@@ -70,7 +70,7 @@ movie_extpipe_use off
 movie_passthrough on
 ; movie_codec mp4
 """
-                    FileWriter writer = new FileWriter("/home/security-cam/motion/conf.d/${it.key}TMP.conf")
+                    FileWriter writer = new FileWriter("/home/security-cam/motion/conf.d/${it.key}.conf")
                     writer.write(conf)
                     writer.close()
                 }

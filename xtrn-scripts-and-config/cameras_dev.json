@@ -3,11 +3,9 @@
     "name": "Porch Cam",
     "descr": "HD",
     "defaultOnMultiDisplay": false,
-    "motionName": "PorchCam",
-    "netcam_uri": "rtsp://192.168.0.30:554/11",
+    "netcam_uri": "rtsp://192.168.0.45:554/11",
     "uri": "http://localhost:8009/live/cam1.flv",
-    "used_in_motion_sensing": false,
-    "mask_file": "",
+    "motion": null,
     "address": "192.168.0.45",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
     "recording": {
@@ -19,11 +17,13 @@
     "name": "Porch Cam",
     "descr": "Low res.",
     "defaultOnMultiDisplay": true,
-    "motionName": "PorchCam",
-    "netcam_uri": "rtsp://192.168.0.30:554/12",
+    "netcam_uri": "rtsp://192.168.0.45:554/12",
     "uri": "http://localhost:8009/livelo/cam2.flv",
-    "used_in_motion_sensing": true,
-    "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
+    "motion": {
+      "name": "PorchCam",
+      "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
+      "trigger_recording_on": "camera1"
+    },
     "video_width": 640,
     "video_height": 352,
     "recording": {

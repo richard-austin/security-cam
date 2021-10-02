@@ -28,14 +28,21 @@ class Recording {
     String location
 }
 
+class Motion {
+    String name  // Motion name
+    String mask_file  // Mask file which defines area used in motion sensing
+    String trigger_recording_on  // The name of the camera stream on which recordings will be triggered following
+                                  // Motion events on this camera stream (usually another stream on the same physical
+                                  // camera).
+}
+
 class Camera {
     String name
     String descr
     boolean defaultOnMultiDisplay
-    String motionName
     String netcam_uri
     String uri
-    boolean used_in_motion_sensing
+    Motion motion
     Integer video_width
     Integer video_height
     String mask_file
