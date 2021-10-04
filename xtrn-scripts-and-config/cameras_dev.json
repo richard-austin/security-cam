@@ -1,29 +1,32 @@
 {
   "camera1": {
-    "name": "Porch Cam",
+    "name": "Test Cam",
     "descr": "HD",
     "defaultOnMultiDisplay": false,
     "netcam_uri": "rtsp://192.168.0.45:554/11",
-    "uri": "http://localhost:8009/live/cam1.flv",
+    "uri": "http://localhost:8009/nms/cam1.flv",
     "motion": null,
     "address": "192.168.0.45",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
+    "video_width": 1920,
+    "video_height": 1080,
     "recording": {
       "uri": "http://localhost:8084/recording/cam1/",
       "location": "cam1"
     }
   },
   "camera2": {
-    "name": "Porch Cam",
+    "name": "Test Cam",
     "descr": "Low res.",
     "defaultOnMultiDisplay": true,
     "netcam_uri": "rtsp://192.168.0.45:554/12",
-    "uri": "http://localhost:8009/livelo/cam2.flv",
+    "uri": "http://localhost:8009/nms/cam2.flv",
     "motion": {
       "name": "PorchCam",
       "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
       "trigger_recording_on": "camera1"
     },
+    "address": "192.168.0.45",
     "video_width": 640,
     "video_height": 352,
     "recording": {
