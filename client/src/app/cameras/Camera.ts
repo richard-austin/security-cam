@@ -32,6 +32,7 @@ export class Camera
     defaultOnMultiDisplay: boolean = false;
     netcam_uri: string = "";
     uri: string = "";
+    nms_uri: string = "";
     motion!: Motion;
     video_width: number = 0;
     video_height: number = 0;

@@ -3,10 +3,10 @@
 log_file=/home/security-cam/motion-log/motionevents-$(date +%Y%m%d).log
 
 if [[ -f /home/security-cam/cameras_dev.json ]]; then
-  URI=$(python3 -c "import sys, json; print(json.load(sys.stdin)['$1']['nms-uri'])" < /home/security-cam/cameras_dev.json)
+  URI=$(python3 -c "import sys, json; print(json.load(sys.stdin)['$1']['nms_uri'])" < /home/security-cam/cameras_dev.json)
   LOCATION=$(python3 -c "import sys, json; print(json.load(sys.stdin)['$1']['recording']['location'])" < /home/security-cam/cameras_dev.json)
 else
-  URI=$(python3 -c "import sys, json; print(json.load(sys.stdin)['$1']['nms-uri'])" < /home/security-cam/cameras.json)
+  URI=$(python3 -c "import sys, json; print(json.load(sys.stdin)['$1']['nms_uri'])" < /home/security-cam/cameras.json)
   LOCATION=$(python3 -c "import sys, json; print(json.load(sys.stdin)['$1']['recording']['location'])" < /home/security-cam/cameras.json)
 fi
 

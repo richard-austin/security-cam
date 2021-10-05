@@ -42,6 +42,7 @@ class Camera {
     boolean defaultOnMultiDisplay
     String netcam_uri
     String uri
+    String nms_uri
     Motion motion
     Integer video_width
     Integer video_height
