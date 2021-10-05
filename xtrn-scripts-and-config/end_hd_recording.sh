@@ -1,7 +1,12 @@
 #!/bin/bash
 
 log_file=/home/security-cam/motion-log/motionevents-$(date +%Y%m%d).log
-LOCATION=$(python3 -c "import sys, json; print(json.load(sys.stdin)['camera1']['recording']['location'])" < /home/security-cam/cameras.json)
+
+if [[ -f /home/security-cam/cameras_dev.json ]]; then
+  LOCATION=$(python3 -c "import sys, json; print(json.load(sys.stdin)['$1']['recording']['location'])" < /home/security-cam/cameras_dev.json)
+else
+  LOCATION=$(python3 -c "import sys, json; print(json.load(sys.stdin)['$1']['recording']['location'])" < /home/security-cam/cameras.json)
+fi
 
 stop() {
   PID=$(</home/security-cam/recording-pids/"$LOCATION".pid)
@@ -10,3 +15,4 @@ stop() {
 }
 
 stop
+
