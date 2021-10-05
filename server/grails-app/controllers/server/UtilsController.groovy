@@ -118,20 +118,33 @@ class UtilsController {
     @Secured(['ROLE_CLIENT'])
     def startProcs()
     {
-        sc_processesService.startProcesses()
+        ObjectCommandResponse response = sc_processesService.startProcesses()
+        if(response.status != PassFail.PASS)
+            render (status: 500, text: response.error)
+        else
+            render "success"
     }
 
     @Secured(['ROLE_CLIENT'])
     def stopProcs()
     {
-        sc_processesService.stopProcesses()
+        ObjectCommandResponse response = sc_processesService.stopProcesses()
+        if(response.status != PassFail.PASS)
+            render (status: 500, text: response.error)
+        else
+            render "success"
+
     }
 
     ConfigurationUpdateService configurationUpdateService
 
     @Secured(['ROLE_CLIENT'])
-    def test()
+    def generateConfigs()
     {
-        configurationUpdateService.serviceMethod()
+        ObjectCommandResponse response = configurationUpdateService.parseConfig()
+        if(response.status != PassFail.PASS)
+            render (status: 500, text: response.error)
+        else
+            render "success"
     }
 }

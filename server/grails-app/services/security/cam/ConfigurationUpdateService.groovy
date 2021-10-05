@@ -1,6 +1,8 @@
 package security.cam
 
+import grails.converters.JSON
 import grails.gorm.transactions.Transactional
+import org.apache.commons.io.FileUtils
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
@@ -10,10 +12,13 @@ class ConfigurationUpdateService {
     CamService camService
     LogService logService
 
-    def serviceMethod() {
+    def parseConfig() {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try
         {
+            // Clear out the existing motion config files before we regenerate them.
+            FileUtils.cleanDirectory(new File("/home/security-cam/motion/conf.d"))
+
             response = camService.getCameras()
 
             Map<String, Camera> jsonObj = response.responseObject as Map<String, Camera>
@@ -38,7 +43,7 @@ class ConfigurationUpdateService {
 camera_name ${cam.motion.trigger_recording_on}
 
 # Mask to exclude public areas
-mask_file $cam.mask_file
+${cam.motion?.mask_file ? "mask_file $cam.motion.mask_file" : "; mask_file"}
 
 # Numeric identifier for the camera.
 camera_id ${++camId}
@@ -78,9 +83,11 @@ movie_passthrough on
         }
         catch (Exception ex)
         {
-            logService.cam.error "Exception in parse: " + ex.getMessage()
+            logService.cam.error "Exception in config parser: " + ex.getMessage()
             response.status = PassFail.FAIL
             response.error = ex.getMessage()
         }
+
+        return response
     }
 }
