@@ -6,6 +6,7 @@ import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
 import javax.annotation.PreDestroy
+import java.util.concurrent.TimeUnit
 
 @Transactional
 class Sc_processesService {
@@ -30,6 +31,7 @@ class Sc_processesService {
                 else if (Environment.current.name == 'production')
                     p = Runtime.getRuntime().exec("/etc/security-cam/sc_processes.sh")
 
+                p.waitFor(100, TimeUnit.MILLISECONDS)
                 pid = p.pid()
             }
         }
@@ -38,6 +40,7 @@ class Sc_processesService {
             logService.cam.error "Exception in startProcesses: " + ex.getMessage()
             response.status = PassFail.FAIL
             response.error = ex.getMessage()
+            pid = null
         }
         return response
     }
@@ -47,6 +50,7 @@ class Sc_processesService {
     {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
+            logService.cam.debug"stopProcessses: pid = " + pid + ": kill -INT ${pid}"
             if (pid != null) {
                 Process p = Runtime.getRuntime().exec("kill -INT ${pid}")
                 p.waitFor()
