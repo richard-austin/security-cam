@@ -5,7 +5,7 @@
     "defaultOnMultiDisplay": false,
     "netcam_uri": "rtsp://192.168.0.45:554/11",
     "uri": "/live/nms/cam1.flv",
-    "nms_uri": "http://localhost:8009/nms/cam1.flv",
+    "nms_uri": "rtmp://localhost:1935/nms/cam1",
     "motion": null,
     "address": "192.168.0.45",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
@@ -22,7 +22,7 @@
     "defaultOnMultiDisplay": true,
     "netcam_uri": "rtsp://192.168.0.45:554/12",
     "uri": "/live/nms/cam2.flv",
-    "nms_uri": "http://localhost:8009/nms/cam2.flv",
+    "nms_uri": "rtmp://localhost:1935/nms/cam2",
     "motion": {
       "name": "PorchCam",
       "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
