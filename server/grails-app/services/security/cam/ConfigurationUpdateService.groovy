@@ -23,6 +23,7 @@ class ConfigurationUpdateService {
 
             Map<String, Camera> jsonObj = response.responseObject as Map<String, Camera>
             int camId = 100
+            int camNum = 1
             jsonObj.each { it ->
                 Camera cam = it.value
                 if(cam.motion != null) {
@@ -65,7 +66,7 @@ text_left $cam.name
 target_dir /home/security-cam/$cam.recording.location
 
 # File name(without extension) for movies relative to target directory
-movie_filename ${camId-100 < 10 ? "cam0" : "cam"}${camId-100}_%t-%v-%s
+movie_filename ${camNum < 10 ? "cam0" : "cam"}${camNum}_%t-%v-%s
 
 framerate 3
 
@@ -79,6 +80,7 @@ movie_passthrough on
                     writer.write(conf)
                     writer.close()
                 }
+                ++camNum
             }
         }
         catch (Exception ex)
