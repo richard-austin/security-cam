@@ -27,7 +27,6 @@ kill_descendant_processes() {
         done
     fi
     if [[ "$and_self" == true ]]; then
-      echo "kill $pid"
         kill -TERM "$pid"
     fi
 }
@@ -84,13 +83,13 @@ run_motion() {
 
 run_nms &
 run_motion &
-run_ffmpeg rtsp://192.168.0.30:554/11 live porch &
-run_ffmpeg rtsp://192.168.0.30:554/12 livelo porch &
-run_ffmpeg rtsp://192.168.0.34:554/11 live2 cam2 &
-run_ffmpeg rtsp://192.168.0.34:554/12 live2lo cam2 &
-run_ffmpeg rtsp://192.168.0.35:554/11 live3 cam3 &
-run_ffmpeg rtsp://192.168.0.35:554/12 live3lo cam3 &
+run_ffmpeg rtsp://192.168.0.45:554/11 nms cam1 &
+run_ffmpeg rtsp://192.168.0.45:554/12 nms cam2 &
+#run_ffmpeg rtsp://192.168.0.34:554/11 live2 cam2 &
+#run_ffmpeg rtsp://192.168.0.34:554/12 live2lo cam2 &
+#run_ffmpeg rtsp://192.168.0.35:554/11 live3 cam3 &
+#run_ffmpeg rtsp://192.168.0.35:554/12 live3lo cam3 &
 run_check_ip_not_changed &
 
-trap "kill_descendant_processes $$" INT EXIT TERM
+trap 'kill_descendant_processes $$' INT EXIT TERM
 wait
