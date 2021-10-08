@@ -141,7 +141,7 @@ class UtilsController {
     @Secured(['ROLE_CLIENT'])
     def generateConfigs()
     {
-        ObjectCommandResponse response = configurationUpdateService.parseConfig()
+        ObjectCommandResponse response = configurationUpdateService.generateConfigs()
         if(response.status != PassFail.PASS)
             render (status: 500, text: response.error)
         else
