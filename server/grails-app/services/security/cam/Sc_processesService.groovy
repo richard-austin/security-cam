@@ -16,6 +16,7 @@ class Sc_processesService {
     {
     }
 
+    Process p
     Long pid = null
 
     def startProcesses() {
@@ -23,13 +24,13 @@ class Sc_processesService {
         try {
             if (pid == null) {
                 // There should be no processes running at this point, run killall to make sure they are all off
-                Process p = Runtime.getRuntime().exec("killall sc_processes.sh")
+                p = Runtime.getRuntime().exec("killall sc_processes.sh")
                 p.waitFor()
 
                 if (Environment.current.name == 'development')
                     p = Runtime.getRuntime().exec("../xtrn-scripts-and-config/sc_processes.sh")
                 else if (Environment.current.name == 'production')
-                    p = Runtime.getRuntime().exec("/etc/security-cam/sc_processes.sh")
+                    p = Runtime.getRuntime().exec("/home/security-cam/sc_processes.sh")
 
                 p.waitFor(100, TimeUnit.MILLISECONDS)
                 pid = p.pid()
@@ -55,6 +56,16 @@ class Sc_processesService {
                 Process p = Runtime.getRuntime().exec("kill -INT ${pid}")
                 p.waitFor()
                 pid = null
+
+                int retryCount = 200
+
+                while(isRunning())
+                {
+                    if(--retryCount <= 0)
+                        throw new Exception("Unable to stop sc_processes service")
+
+                    Thread.sleep(20)
+                }
             }
         }
         catch(Exception ex)
@@ -65,4 +76,12 @@ class Sc_processesService {
         }
         return response
     }
-}
+
+    boolean isRunning() {
+        try {
+            p.exitValue()
+            return false;
+        } catch (ignored) {
+            return true
+        }
+    }}

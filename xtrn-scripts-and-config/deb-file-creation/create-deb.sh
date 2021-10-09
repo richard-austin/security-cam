@@ -8,7 +8,7 @@ rm -r security-cam_*_arm64
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam
 
 cp ../start_hd_recording.sh ../end_hd_recording.sh ../processmotionrecordings.sh \
- ../porch_cam_mask.pgm ../garage_cam_mask.pgm ../sc_processes.sh \
+ ../porch_cam_mask.pgm ../garage_cam_mask.pgm \
  security-cam_"${VERSION}"_arm64/etc/security-cam
 
 tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
@@ -43,7 +43,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
 cp -r ../motion/motion.conf ../motion/conf.d ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
-cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
+cp ../install-cert.sh ../sc_processes.sh security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
 #cp ../sc_processes.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 
