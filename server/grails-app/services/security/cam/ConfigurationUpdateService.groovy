@@ -1,8 +1,8 @@
 package security.cam
 
 import grails.gorm.transactions.Transactional
+import grails.util.Environment
 import org.apache.commons.io.FileUtils
-import org.apache.tools.ant.taskdefs.Sleep
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
@@ -215,7 +215,13 @@ run_check_ip_not_changed &
 trap 'kill_descendant_processes \$\$' INT EXIT TERM
 wait
 """
-        FileWriter writer = new FileWriter("/home/security-cam/sc_processes.sh") //TODO: Must change these hard coded references to configured ones.
+        String path = ""  //TODO: Must change these hard coded references to configured ones.
+        if (Environment.current.name == 'development')
+            path = "../xtrn-scripts-and-config/sc_processes.sh"
+        else if (Environment.current.name == 'production')
+            path = "/etc/security-cam/sc_processes.sh"
+
+        FileWriter writer = new FileWriter(path)
         writer.write(scProcsTxt)
         writer.close()
 
