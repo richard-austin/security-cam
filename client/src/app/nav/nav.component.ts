@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {Camera} from "../cameras/Camera";
+import {Camera, CameraStream} from "../cameras/Camera";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {Subscription} from "rxjs";
@@ -21,7 +21,8 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
   @ViewChild('navbarCollapse') navbarCollapse!:ElementRef<HTMLDivElement>;
 
-  cameras: Camera[] = [];
+  cameraStreams: CameraStream[] = [];
+  uniqueCameras: CameraStream[] = [];
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
   timerHandle!: Subscription;
@@ -35,18 +36,18 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
   }
 
-  setVideoStream(cam: Camera): void {
-    this.cameraSvc.setActiveLive([cam]);
+  setVideoStream(camStream: CameraStream): void {
+    this.cameraSvc.setActiveLive([camStream]);
     window.location.href = '#/live';
   }
 
-  showRecording(cam: Camera): void {
-    this.cameraSvc.setActiveLive([cam]);
+  showRecording(camStream: CameraStream): void {
+    this.cameraSvc.setActiveLive([camStream]);
     window.location.href = '#/recording';
   }
 
-  cameraControl(cam: Camera) {
-    this.cameraSvc.setActiveLive([cam]);
+  cameraControl(camStream: CameraStream) {
+    this.cameraSvc.setActiveLive([camStream]);
     window.location.href = '#/cameraparams';
   }
 
@@ -139,7 +140,17 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.cameras = this.cameraSvc.getCameras();
+    this.cameraStreams = this.cameraSvc.getCameraStreams();
+
+    // //Make an array of camera streams with only one instance for each camera.
+    // for(const i in this.cameraStreams) {
+    //   let cs: CameraStream = this.cameraStreams[i];
+    //   let p = this.uniqueCameras.find(it => it.camera.name === cs.camera.name);
+    //
+    //   if(this.uniqueCameras.find(it => it.camera.name === cs.camera.name) === undefined)
+    //     this.uniqueCameras.push(cs);
+    // }
+
     // Get the initial core temperature
     this.getTemperature();
 

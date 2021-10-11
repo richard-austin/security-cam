@@ -1,21 +1,19 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
-import {Observable, Subject, throwError} from "rxjs";
+import {Observable, pipe, Subject, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
-import {Camera} from "./Camera";
+import {Camera, CameraStream, Stream} from "./Camera";
 
 
 /**
  * MotionEvents as received from the server
  */
-export class MotionEvents
-{
-    events: string[] = [];
+export class MotionEvents {
+  events: string[] = [];
 }
 
-export class LocalMotionEvent
-{
+export class LocalMotionEvent {
   manifest!: string;
   epoch!: number;
   dateTime!: string;
@@ -24,8 +22,7 @@ export class LocalMotionEvent
 /**
  * LocalMotionEvents: Motion events as delivered to the recordings page
  */
-export class LocalMotionEvents
-{
+export class LocalMotionEvents {
   events: LocalMotionEvent[] = [];
 }
 
@@ -42,33 +39,33 @@ export class CameraService {
 
   private activeLiveUpdates: Subject<any> = new Subject<any>();
 
-  private cameras: Camera[] = [];
+  private cameraStreams: CameraStream[] = [];
 
   // List of live views currently active
-  private activeLive: Camera[] = [];
+  private activeLive: CameraStream[] = [];
 
   // Currently active recording
   private activeRecording!: Camera;
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
 
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
-    this.getCamerasConfig().subscribe(cameras => {
-      // Build up a cameras array which excludes the addition guff which comes from
-      // having the cameras set up configured in application.yml
-      for (const i in cameras) {
-        const c = cameras[i];
-        this.cameras.push(c);
-      }
-    },
+    this.loadCameraStreams().subscribe(cameraStreams => {
+        // Build up a cameraStreams array which excludes the addition guff which comes from
+        // having the cameraStreams set up configured in application.yml
+        for (const i in cameraStreams) {
+          const c = cameraStreams[i];
+          this.cameraStreams.push(c);
+        }
+      },
       // Error messages would be shown by the nav component
       reason => this.errorEmitter.emit(reason)
     );
   }
 
   /**
-   * Get details of all cameras to be shown live
+   * Get details of all cameraStreams to be shown live
    */
-  getActiveLive(): Camera[] {
+  getActiveLive(): CameraStream[] {
     return this.activeLive;
   }
 
@@ -80,16 +77,16 @@ export class CameraService {
   }
 
   /**
-   * setActiveLive; Set the list of cameras to be shown for viewing
-   * @param cam: The set of cameras to be viewed live
+   * setActiveLive; Set the list of cameraStreams to be shown for viewing
+   * @param cam: The set of cameraStreams to be viewed live
    * @param sendNotification: Send notification of to subscribed processes (such as recording page) if true.
    *                          (defaulted to true)
    */
-  setActiveLive(cam: Camera[], sendNotification:boolean = true): void {
+  setActiveLive(cam: CameraStream[], sendNotification: boolean = true): void {
     this.activeLive = cam;
     this.activeRecording = new Camera();
 
-    if(sendNotification)
+    if (sendNotification)
       this.activeLiveUpdates.next(cam);
   }
 
@@ -107,19 +104,57 @@ export class CameraService {
   }
 
   /**
-   * getCameras: Get details for all cameras
+   * getCameraStreams: Get details for all cameraStreams
    */
-  public getCameras(): Camera[] {
-    return this.cameras;
+  public getCameraStreams(): CameraStream[] {
+    return this.cameraStreams;
   }
 
   /**
-   * getCamerasConfig: Get camera set up details from the server
+   * loadCameras: Get camera set up details from the server
    * @private
    */
-  getCamerasConfig(): Observable<Camera[]> {
+  loadCameras(): Observable<Camera[]> {
     return this.http.post<Camera[]>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
-      tap(),
+      map((cams: Camera[]) => {
+        let cameras: Camera[] = [];
+
+        for (let i in cams) {
+          let cam: Camera = cams[i];
+          for (const j in cam.streams) {
+            // @ts-ignore
+            cam.streams[j].selected = cam.streams[j].defaultOnMultiDisplay;
+          }
+          cameras.push(cam); // Make into a normal array so ngFor can work
+        }
+        return cameras;
+      }),
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+
+  /**
+   * loadCameraStreams: Get camera streams from the server
+   */
+  loadCameraStreams(): Observable<CameraStream[]> {
+    return this.http.post<Camera[]>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
+      map((cams: Camera[]) => {
+        let cameraStreams: CameraStream[] = [];
+
+        for (const i in cams) {
+          let cam: Camera = cams[i];
+
+          for (const j in cam.streams) {
+            let cs = new CameraStream();
+            cs.camera = cam;
+
+            // @ts-ignore   // Ignore "Element implicitly has an 'any' type because type 'Map ' has no index signature"
+            cs.stream = cam.streams[j] as Stream;
+            cs.stream.selected = cs.stream.defaultOnMultiDisplay;
+            cameraStreams.push(cs);
+          }
+        }
+        return cameraStreams;
+      }),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 }

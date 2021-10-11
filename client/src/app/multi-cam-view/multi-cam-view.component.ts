@@ -1,17 +1,8 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {Camera} from "../cameras/Camera";
+import {Camera, CameraStream, Stream} from "../cameras/Camera";
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {ReportingComponent} from "../reporting/reporting.component";
-
-class SelectableUri extends Camera{
-  selected: boolean = false;
-}
-
-export class Stream {
-  uris: SelectableUri[] = [];
-  name: string = "";
-}
 
 @Component({
   selector: 'app-multi-cam-view',
@@ -20,37 +11,22 @@ export class Stream {
 })
 export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @ViewChild(ReportingComponent) errorReporting!:ReportingComponent;
+  @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
 
   constructor(private cameraSvc: CameraService) {
     this.cameraSvc.setActiveLive([]);
   }
 
-  streams: Stream[] = [];
+  cameras: Camera[] = [];
 
   /**
    * setUpCameraDetails: Set up the available streams/cameras for selection by the check boxes
    */
   setUpCameraDetails(): void {
-    this.cameraSvc.getCamerasConfig().subscribe(cameras => {
-      // Build up the cameras array
-      for (const i in cameras) {
-        const c = cameras[i];
-        // List camera names only once, with their available streams
-        let stream: Stream | undefined = this.streams.find((s: Stream) => s.name === c.name);
-        if (stream === undefined) {
-          stream = new Stream();
-          stream.name = c.name;
-          this.streams.push(stream);
-        }
-
-        let su: SelectableUri = c as SelectableUri;
-        su.selected = c.defaultOnMultiDisplay;
-        stream.uris.push(su);
-
-    }
-      this.showSelected();
-    },
+    this.cameraSvc.loadCameras().subscribe(cameras => {
+        this.cameras = cameras;
+        this.showSelected();
+      },
       reason => this.errorReporting.errorMessage = reason);
   }
 
@@ -58,13 +34,20 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    * showSelected: Display the currently selected streams..
    */
   showSelected(): void {
-    let cams: Camera[] = [];
-    this.streams.forEach((s: Stream) => {
-      s.uris.forEach((uri: SelectableUri) => {
-        if (uri.selected)
-          cams.push(uri);
-      })
-    });
+    let cams: CameraStream[] = [];
+    for (const i in this.cameras) {
+      let c: Camera = this.cameras[i];
+      for (const j in c.streams) {
+        // @ts-ignore
+        let s: Stream = c.streams[j];
+        if (s.selected) {
+          let cs: CameraStream = new CameraStream();
+          cs.camera = c;
+          cs.stream = s;
+          cams.push(cs);
+        }
+      }
+    }
     this.cameraSvc.setActiveLive(cams);
   }
 
@@ -72,15 +55,16 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    * updateCameras Respond to check box clicks to select/unselect streams. This also ensures
    *               that only one stream (HD or Low Res) can be selected at one time
    * @param $event: MatCheckbox change event including selected attribute
+   * @param camera: The current camera the stream is on
    * @param stream: The stream on which the selection is being made
-   * @param uri: The specific uri on which the selection change is being made
    */
-  updateCameras($event: MatCheckboxChange, stream: Stream, uri: SelectableUri) {
-    // Ensure all other uris in this stream are disabled, only one is to e enabled
-    stream.uris.forEach((u: SelectableUri) => u.selected = false);
-
+  updateCameras($event: MatCheckboxChange, camera: Camera, stream: Stream) {
+    // Ensure all other streams on this camera are disabled, only one is to be enabled
+    for (const i in camera.streams) { // @ts-ignore
+      camera.streams[i].selected = false;
+    }
     // now select/unselect this one
-    uri.selected = $event.checked;
+    stream.selected = $event.checked;
   }
 
   /**

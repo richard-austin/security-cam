@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {VideoComponent} from "../video/video.component";
-import {Camera} from "../cameras/Camera";
+import {Camera, CameraStream} from "../cameras/Camera";
 import {CameraService, LocalMotionEvent, LocalMotionEvents} from "../cameras/camera.service";
 import {Subscription, timer} from "rxjs";
 import {MatSelectChange} from "@angular/material/select";
@@ -26,7 +26,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   timerHandle!: Subscription;
   private activeLiveUpdates!: Subscription;
   motionEvents!: LocalMotionEvent[];
-  camera!: Camera;
+  cs!: CameraStream;
   manifest: string = "";
   visible: boolean = false;
   noVideo: boolean = false;
@@ -107,10 +107,10 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     //  the relevant part of the recording.
     //    this.checkForUrlParameters();
     // Check for selected camera (recording) from the nav bar menu, or URL parameters
-    let cam: Camera = this.cameraSvc.getActiveLive()[0];
+    let cs: CameraStream = this.cameraSvc.getActiveLive()[0];
     // If camera (recording) available, then load that video to the page
-    if (cam !== undefined) {
-      this.camera = cam;
+    if (cs !== undefined) {
+      this.cs = cs;
       let video: VideoComponent | undefined = this.video;
       if (video !== undefined) {
         this.setUpVideoEventHandlers();
@@ -120,7 +120,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.selectedPlaybackMode = 'startPause';
 
         // Get the motion events for this camera (by motionName)
-        this.motionService.getMotionEvents(cam).subscribe((events: LocalMotionEvents) => {
+        this.motionService.getMotionEvents(cs).subscribe((events: LocalMotionEvents) => {
             this.motionEvents = events.events;
             // Get the latest recording in the set
             let motionEvent: LocalMotionEvent | undefined = this.motionEvents && this.motionEvents.length > 0 ? this.motionEvents[this.motionEvents.length - 1] : undefined;
@@ -130,7 +130,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
               // Give the video object the manifest of the latest recording
               if (this.manifest) {
-                this.video.setSource(cam, this.manifest);
+                this.video.setSource(cs, this.manifest);
 
                 this.visible = true;
                 this.showInvalidInput(true);
@@ -168,14 +168,14 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   showMotionEvent($event: MatSelectChange) {
     this.manifest = $event.value.manifest;
     this.selectedPlaybackMode = 'startPause';
-    this.video.setSource(this.camera, $event.value.manifest);
+    this.video.setSource(this.cs, $event.value.manifest);
   }
 
   /**
    * deleteRecording: Delete the set of files comprising the current recording
    */
   deleteRecording() {
-    this.motionService.deleteRecording(this.camera, this.manifest).subscribe(() => {
+    this.motionService.deleteRecording(this.cs.stream, this.manifest).subscribe(() => {
         this.reporting.successMessage = "Recording " + this.selector.value.dateTime + " deleted";
         timer(2000).subscribe(() => this.setupRecording());  // Show the new latest recording
       },
@@ -188,7 +188,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   async downloadRecording() {
     try {
       this.downloading = true;
-      let blob: Blob = await this.motionService.downloadRecording(this.camera, this.manifest);
+      let blob: Blob = await this.motionService.downloadRecording(this.cs.stream, this.manifest);
       saveAs(blob, this.manifest.replace('.m3u8', '.mp4'))
     } catch (error) {
       let reader: FileReader = new FileReader();

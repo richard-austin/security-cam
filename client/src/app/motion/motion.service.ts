@@ -3,7 +3,7 @@ import {Observable, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
-import {Camera} from "../cameras/Camera";
+import {Camera, Stream, CameraStream} from "../cameras/Camera";
 import {LocalMotionEvents, MotionEvents} from "../cameras/camera.service";
 
 declare let moment: any;
@@ -19,23 +19,22 @@ export class MotionService {
     })
   };
 
-
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
 
   }
 
 
   /**
-   * getMotionEvents: Get the list of .m3u8 manifest files of the recordings for this camera. Convert these
+   * getMotionEvents: Get the list of .m3u8 manifest files of the recordings for this cameraStream. Convert these
    *                  to an array of manifest file name, epoch time and formatted date/time
-   * @param camera: The camera we want the motion event files for
+   * @param camStream: The CameraStream for which to get the motion events.
    */
-  getMotionEvents(camera: Camera): Observable<LocalMotionEvents> {
+  getMotionEvents(camStream: CameraStream): Observable<LocalMotionEvents> {
     let epochStartDelim: string = '-';
     let epochEndDelim: string = '_';
     let retVal = new LocalMotionEvents();
 
-    let name: { camera: Camera } = {camera: camera};
+    let name: { cam: Camera, stream: Stream } = {cam: camStream.camera, stream: camStream.stream};
     return this.http.post<MotionEvents>(this._baseUrl.getLink("motion", "getMotionEvents"), JSON.stringify(name), this.httpJSONOptions).pipe(
       map((value: MotionEvents) => {
         value.events.forEach((event: string) => {
@@ -54,11 +53,11 @@ export class MotionService {
 
   /**
    * downloadRecording: Download a .mp4 file for the recording whose manifest file name is provided
-   * @param camera:   The camera that the recordings are from.
+   * @param stream:   The stream that the recordings are from.
    * @param manifest: The manifest file for the recording from which the .mp4 file will be created and downloaded
    */
-  async downloadRecording(camera: Camera, manifest: string) {
-    let recording: { camera: Camera, manifest: string } = {camera: camera, manifest: manifest};
+  async downloadRecording(stream: Stream, manifest: string) {
+    let recording: { stream: Stream, manifest: string } = {stream: stream, manifest: manifest};
     return this.http.post(this._baseUrl.getLink("motion", "downloadRecording"), JSON.stringify(recording),
       {
         headers: new HttpHeaders({
@@ -75,11 +74,11 @@ export class MotionService {
 
   /**
    * deleteRecording: Delete all the files for the recording of which fileNme is one of the files
-   * @param camera:   The camera that the recordings are from.
-   * @param fileName
+   * @param stream: Camera stream
+   * @param fileName: Name of the file to be deleted for the camera stream
    */
-  deleteRecording(camera: Camera, fileName: string): Observable<void> {
-    let recording: { camera: Camera, fileName: string } = {camera: camera, fileName: fileName};
+  deleteRecording(stream: Stream, fileName: string): Observable<void> {
+    let recording: { stream: Stream, fileName: string } = {stream: stream, fileName: fileName};
     return this.http.post<void>(this._baseUrl.getLink("motion", "deleteRecording"), JSON.stringify(recording), this.httpJSONOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err))
