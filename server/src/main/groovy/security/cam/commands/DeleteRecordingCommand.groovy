@@ -2,14 +2,14 @@ package security.cam.commands
 
 import grails.core.GrailsApplication
 import grails.validation.Validateable
-import server.Camera
+import server.Stream
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
 class DeleteRecordingCommand  implements Validateable{
     GrailsApplication grailsApplication
-    Camera camera   // The camera that the files are recordings from
+    Stream stream   // The camera that the files are recordings from
     String fileName  // The name of one of the files in the recording
 
     // Not restful argument, this is set up by the validator as the
@@ -20,13 +20,13 @@ class DeleteRecordingCommand  implements Validateable{
     File folder
 
     static constraints = {
-        camera(nullable: false,
+        stream(nullable: false,
                 validator: { camera, cmd ->
                     if (camera.name == null || camera.name == "")
                         return "No camera was specified for which to delete a recording"
 
                     String baseDir = cmd.grailsApplication.config.camerasHomeDirectory
-                    Path recordingsDirectory = Paths.get(baseDir as String, cmd.camera.recording.location as String)
+                    Path recordingsDirectory = Paths.get(baseDir as String, cmd.stream.recording.location as String)
                     cmd.folder = new File(recordingsDirectory.toString())
                     return
                 })

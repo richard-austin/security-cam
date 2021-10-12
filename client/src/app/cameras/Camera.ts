@@ -25,18 +25,28 @@ export class Recording
   location: string = "";
 }
 
+export class Stream {
+  descr: string = "";
+  defaultOnMultiDisplay: boolean = false;
+  selected: boolean = false;
+  netcam_uri: string = "";
+  uri: string = "";
+  nms_uri: string = "";
+  motion!: Motion;
+  video_width: number = 0;
+  video_height: number = 0;
+  recording: Recording = new Recording();
+}
 export class Camera
 {
     name: string = "";
-    descr: string = "";
-    defaultOnMultiDisplay: boolean = false;
-    netcam_uri: string = "";
-    uri: string = "";
-    nms_uri: string = "";
-    motion!: Motion;
-    video_width: number = 0;
-    video_height: number = 0;
     address: string="";
     controlUri: string="";
-    recording: Recording = new Recording();
+    streams: Map<string, Stream> = new Map<string, Stream>();
+}
+
+export class CameraStream
+{
+    camera: Camera = new Camera();
+    stream: Stream = new Stream();
 }
