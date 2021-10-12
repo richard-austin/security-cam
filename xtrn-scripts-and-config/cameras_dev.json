@@ -27,7 +27,7 @@
         "motion": {
           "name": "PorchCam",
           "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
-          "trigger_recording_on": "camera1"
+          "trigger_recording_on": "camera1.stream1"
         },
         "video_width": 640,
         "video_height": 352,
