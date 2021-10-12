@@ -1,8 +1,8 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
-import {Observable, pipe, Subject, throwError} from "rxjs";
-import {catchError, map, tap} from "rxjs/operators";
+import {Observable, Subject, throwError} from "rxjs";
+import {catchError, map} from "rxjs/operators";
 import {Camera, CameraStream, Stream} from "./Camera";
 
 
@@ -40,6 +40,7 @@ export class CameraService {
   private activeLiveUpdates: Subject<any> = new Subject<any>();
 
   private cameraStreams: CameraStream[] = [];
+  private uniqueCameras: CameraStream[] = [];
 
   // List of live views currently active
   private activeLive: CameraStream[] = [];
@@ -55,6 +56,9 @@ export class CameraService {
         for (const i in cameraStreams) {
           const c = cameraStreams[i];
           this.cameraStreams.push(c);
+
+          if(!this.uniqueCameras.find((cs:CameraStream) => {return cs.camera.name === c.camera.name}))
+            this.uniqueCameras.push(c);
         }
       },
       // Error messages would be shown by the nav component
@@ -108,6 +112,15 @@ export class CameraService {
    */
   public getCameraStreams(): CameraStream[] {
     return this.cameraStreams;
+  }
+
+  /**
+   * getUniqueCameras: Returns a list of cameraStreams where there is only a single instance of each
+   *                   camera (i.e. not appearing twice when there are two streams for that camera as in getCameraStreams
+   */
+  public getUniqueCameras() : CameraStream[]
+  {
+    return this.uniqueCameras;
   }
 
   /**

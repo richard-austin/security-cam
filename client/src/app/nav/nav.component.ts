@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {Camera, CameraStream} from "../cameras/Camera";
+import {CameraStream} from "../cameras/Camera";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {Subscription} from "rxjs";
@@ -21,8 +21,8 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
   @ViewChild('navbarCollapse') navbarCollapse!:ElementRef<HTMLDivElement>;
 
-  cameraStreams: CameraStream[] = [];
-  uniqueCameras: CameraStream[] = [];
+  cameraStreams: CameraStream[] = []; // All camera streams
+  uniqueCameras: CameraStream[] = []; // Only one instance of each camera regardless of the number of streams it has.
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
   timerHandle!: Subscription;
@@ -141,15 +141,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.cameraStreams = this.cameraSvc.getCameraStreams();
-
-    // //Make an array of camera streams with only one instance for each camera.
-    // for(const i in this.cameraStreams) {
-    //   let cs: CameraStream = this.cameraStreams[i];
-    //   let p = this.uniqueCameras.find(it => it.camera.name === cs.camera.name);
-    //
-    //   if(this.uniqueCameras.find(it => it.camera.name === cs.camera.name) === undefined)
-    //     this.uniqueCameras.push(cs);
-    // }
+    this.uniqueCameras = this.cameraSvc.getUniqueCameras()
 
     // Get the initial core temperature
     this.getTemperature();
