@@ -106,6 +106,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/dc';
   }
 
+  configSetup() {
+    window.location.href = '#/configsetup';
+  }
+
   openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
     let data: any = {};
     let remainingSecs: number = timeout - count;

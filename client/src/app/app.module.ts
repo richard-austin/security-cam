@@ -33,6 +33,9 @@ import {MatMenuModule} from "@angular/material/menu";
 import { LayoutModule } from '@angular/cdk/layout';
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {MatInputModule} from "@angular/material/input";
+import { ConfigSetupComponent } from './config-setup/config-setup.component';
+import {MatTableModule} from "@angular/material/table";
+import {MatSortModule} from "@angular/material/sort";
 
 @NgModule({
   declarations: [
@@ -50,6 +53,7 @@ import {MatInputModule} from "@angular/material/input";
     IdleTimeoutModalComponent,
     CameraParamsComponent,
     DrawdownCalcContainerComponent,
+    ConfigSetupComponent,
   ],
   imports: [
     BrowserModule,
@@ -74,7 +78,9 @@ import {MatInputModule} from "@angular/material/input";
     // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
     // and `ping` is 6q0 (1 minutes).
     UserIdleModule.forRoot({idle: 600, timeout: 60, ping: 60}),
-    LayoutModule
+    LayoutModule,
+    MatTableModule,
+    MatSortModule
   ],
   providers: [HttpClient, BaseUrl],
   bootstrap: [AppComponent],

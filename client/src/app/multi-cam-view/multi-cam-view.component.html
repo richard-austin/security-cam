@@ -12,10 +12,10 @@
             {{cam.name}}
           </span>
             <ul>
-              <li *ngFor="let strm of cam.streams | keyvalue">
-                <mat-checkbox [color]="'primary'" [checked]="strm.value.selected"
-                              (change)="updateCameras($event, cam,  strm.value)">
-                  {{strm.value.descr}}
+              <li *ngFor="let strm of cam.streams">
+                <mat-checkbox [color]="'primary'" [checked]="strm.selected"
+                              (change)="updateCameras($event, cam,  strm)">
+                  {{strm.descr}}
                 </mat-checkbox>
               </li>
             </ul>

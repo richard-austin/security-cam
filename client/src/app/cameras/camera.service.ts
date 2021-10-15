@@ -134,10 +134,9 @@ export class CameraService {
 
         for (let i in cams) {
           let cam: Camera = cams[i];
-          for (const j in cam.streams) {
-            // @ts-ignore
-            cam.streams[j].selected = cam.streams[j].defaultOnMultiDisplay;
-          }
+          cam.streams.forEach((stream: Stream)=> {
+            stream.selected = stream.defaultOnMultiDisplay;
+          })
           cameras.push(cam); // Make into a normal array so ngFor can work
         }
         return cameras;
@@ -156,15 +155,14 @@ export class CameraService {
         for (const i in cams) {
           let cam: Camera = cams[i];
 
-          for (const j in cam.streams) {
+          cam.streams.forEach((stream: Stream) => {
             let cs = new CameraStream();
             cs.camera = cam;
 
-            // @ts-ignore   // Ignore "Element implicitly has an 'any' type because type 'Map ' has no index signature"
-            cs.stream = cam.streams[j] as Stream;
+            cs.stream = stream;
             cs.stream.selected = cs.stream.defaultOnMultiDisplay;
             cameraStreams.push(cs);
-          }
+          })
         }
         return cameraStreams;
       }),

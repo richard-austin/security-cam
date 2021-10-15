@@ -42,7 +42,7 @@ export class Camera
     name: string = "";
     address: string="";
     controlUri: string="";
-    streams: Map<string, Stream> = new Map<string, Stream>();
+    streams: Stream[] = [];
 }
 
 export class CameraStream
