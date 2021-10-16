@@ -25,10 +25,10 @@ export interface Data {
 export class ConfigSetupComponent implements OnInit, AfterViewInit {
   @ViewChild('errorReporting') errorReporting!: ReportingComponent;
   downloading: boolean = true;
-  cameras:Camera[] = [];
+  cameras:Map<string, Camera> = new Map<string, Camera>();
   displayedColumns = ['name', 'address', 'controlUri'];
   expandedElement!:Camera | null; //: PeriodicElement | null;
-  streamColumns = ['descr', 'netcam_uri', 'uri'];
+  streamColumns = ['descr', 'netcam_uri', 'uri', 'nms_uri', 'video_width', 'video_height'];
 
   constructor(private cameraSvc: CameraService) {
   }

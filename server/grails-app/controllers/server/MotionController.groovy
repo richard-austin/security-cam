@@ -53,7 +53,7 @@ class Camera {
     String name
     String address
     String controlUri
-    Stream[] streams
+    Map<String, Stream> streams
 }
 
 class MotionController {

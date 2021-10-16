@@ -127,20 +127,26 @@ export class CameraService {
    * loadCameras: Get camera set up details from the server
    * @private
    */
-  loadCameras(): Observable<Camera[]> {
-    return this.http.post<Camera[]>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
-      map((cams: Camera[]) => {
-        let cameras: Camera[] = [];
+  loadCameras(): Observable<Map<string, Camera>> {
+    return this.http.post<Map<string, Camera>>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
+      map((cams: any) => {
+        let cameras: Map<string, Camera> =new Map<string, Camera>();
 
-        for (let i in cams) {
-          let cam: Camera = cams[i];
-          cam.streams.forEach((stream: Stream)=> {
+        for (let key in cams) {
+          let cam: Camera = cams[key];
+          let streams:Map<string, Stream> = new Map<string, Stream>();
+          for (let j in cam.streams) {
+            // @ts-ignore
+            let stream:Stream =  cam.streams[j] as Stream;
             stream.selected = stream.defaultOnMultiDisplay;
-          })
-          cameras.push(cam); // Make into a normal array so ngFor can work
+            streams.set(j, stream);
+          }
+          cam.streams = streams;  //Make the streams object into a map
+          cameras.set(key, cam);
         }
         return cameras;
-      }),
+      }
+      ),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
@@ -148,21 +154,27 @@ export class CameraService {
    * loadCameraStreams: Get camera streams from the server
    */
   loadCameraStreams(): Observable<CameraStream[]> {
-    return this.http.post<Camera[]>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
-      map((cams: Camera[]) => {
+    return this.http.post<Map<string, Camera>>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
+      map((cams: any) => {
         let cameraStreams: CameraStream[] = [];
 
-        for (const i in cams) {
-          let cam: Camera = cams[i];
+        for (let i in cams) {
+          let cam: Camera = cams[i] as Camera;
 
-          cam.streams.forEach((stream: Stream) => {
-            let cs = new CameraStream();
-            cs.camera = cam;
+          if(cam) {
+            let streams:Map<string, Stream> = new Map<string, Stream>();
+            for (const j in cam.streams) {
+              let cs = new CameraStream();
+              cs.camera = cam;
 
-            cs.stream = stream;
-            cs.stream.selected = cs.stream.defaultOnMultiDisplay;
-            cameraStreams.push(cs);
-          })
+              // @ts-ignore   // Ignore "Element implicitly has an 'any' type because type 'Map ' has no index signature"
+              cs.stream = cam.streams[j];
+              streams.set(j, cs.stream);
+              cs.stream.selected = cs.stream.defaultOnMultiDisplay;
+              cameraStreams.push(cs);
+            }
+            cam.streams = streams;  // Make the streams object into a map
+          }
         }
         return cameraStreams;
       }),

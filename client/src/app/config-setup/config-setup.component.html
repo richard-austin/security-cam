@@ -10,33 +10,45 @@
   </mat-card-content>
   <mat-card-content *ngIf="!downloading">
     <table mat-table
-           [dataSource]="cameras" multiTemplateDataRows
+           [dataSource]="cameras | keyvalue" multiTemplateDataRows
            class="mat-elevation-z8">
       <ng-container matColumnDef="{{column}}" *ngFor="let column of displayedColumns">
         <th mat-header-cell *matHeaderCellDef> {{column}} </th>
-        <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+        <td mat-cell *matCellDef="let element"> {{element.value[column]}} </td>
       </ng-container>
 
-      <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
-      <ng-container matColumnDef="expandedDetail">
+      <!-- Expanded Streams Column - The streams row is made up of this one column that spans across all columns -->
+      <ng-container matColumnDef="expandedStreamDetail">
         <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
-          <div class="example-element-detail" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-            <mat-table [dataSource]="element.streams" class="streams-info">
-              <ng-container matColumnDef="descr">
-                <mat-header-cell *matHeaderCellDef> Descr.</mat-header-cell>
-                <mat-cell *matCellDef="let stream"> {{stream.descr}} </mat-cell>
+          <div class="example-element-detail" [@detailExpand]="element.value == expandedElement ? 'expanded' : 'collapsed'">
+            <table mat-table [dataSource]="element.value.streams | keyvalue" class="streams-info">
+              <ng-container  matColumnDef="descr">
+                <td style="width: 20%"  *matHeaderCellDef> Descr.</td>
+                <td style="width: 20%"  mat-cell *matCellDef="let stream"> {{stream.value.descr}} </td>
               </ng-container>
               <ng-container matColumnDef="netcam_uri">
-                <mat-header-cell *matHeaderCellDef> Netcam URI.</mat-header-cell>
-                <mat-cell *matCellDef="let stream"> {{stream.netcam_uri}} </mat-cell>
+                <td *matHeaderCellDef> Netcam URI.</td>
+                <td mat-cell *matCellDef="let stream"> {{stream.value.netcam_uri}} </td>
               </ng-container>
               <ng-container matColumnDef="uri">
-                <mat-header-cell *matHeaderCellDef> URI.</mat-header-cell>
-                <mat-cell *matCellDef="let stream"> {{stream.uri}} </mat-cell>
+                <td *matHeaderCellDef> URI.</td>
+                <td mat-cell *matCellDef="let stream"> {{stream.value.uri}} </td>
               </ng-container>
-              <mat-header-row *matHeaderRowDef="streamColumns"></mat-header-row>
-              <mat-row *matRowDef="let stream; columns: streamColumns" (click)="toggle(element)"></mat-row>
-            </mat-table>
+              <ng-container matColumnDef="nms_uri">
+                <td *matHeaderCellDef> NMS URI.</td>
+                <td mat-cell *matCellDef="let stream"> {{stream.value.nms_uri}} </td>
+              </ng-container>
+              <ng-container matColumnDef="video_width">
+                <td *matHeaderCellDef> Video Width</td>
+                <td mat-cell *matCellDef="let stream"> {{stream.value.video_width}} </td>
+              </ng-container>
+              <ng-container matColumnDef="video_height">
+                <td  *matHeaderCellDef> Video Height</td>
+                <td mat-cell *matCellDef="let stream"> {{stream.value.video_height}} </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="streamColumns"></tr>
+              <tr mat-row *matRowDef="let stream; columns: streamColumns" (click)="toggle(element)"></tr>
+            </table>
           </div>
          </td>
       </ng-container>
@@ -44,11 +56,11 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let element; columns: displayedColumns;"
           class="example-element-row"
-          [class.example-expanded-row]="expandedElement === element"
-          (click)="expandedElement = expandedElement === element ? null : element">
+          [class.example-expanded-row]="expandedElement === element.value"
+          (click)="expandedElement = expandedElement === element.value ? null : element.value">
       </tr>
 
-      <tr mat-row *matRowDef="let e; columns: ['expandedDetail']" class="example-detail-row">
+      <tr mat-row *matRowDef="let e; columns: ['expandedStreamDetail']" class="example-detail-row">
       </tr>
     </table>
   </mat-card-content>

@@ -3,8 +3,8 @@
     "name": "Test Cam",
     "address": "192.168.0.45",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
-    "streams": [
-      {
+    "streams": {
+      "stream1": {
         "descr": "HD",
         "defaultOnMultiDisplay": false,
         "netcam_uri": "rtsp://192.168.0.45:554/11",
@@ -18,7 +18,7 @@
           "location": "cam1"
         }
       },
-      {
+      "stream2": {
         "descr": "Low res.",
         "defaultOnMultiDisplay": true,
         "netcam_uri": "rtsp://192.168.0.45:554/12",
@@ -36,14 +36,14 @@
           "location": "motion-cam2"
         }
       }
-    ]
+    }
   },
   "camera2": {
     "name": "Test Cam 2",
     "address": "192.168.0.46",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
-    "streams": [
-      {
+    "streams": {
+      "stream1": {
         "descr": "HD",
         "defaultOnMultiDisplay": false,
         "netcam_uri": "rtsp://192.168.0.46:554/11",
@@ -57,7 +57,7 @@
           "location": "cam1"
         }
       },
-      {
+      "stream2": {
         "descr": "Low res.",
         "defaultOnMultiDisplay": true,
         "netcam_uri": "rtsp://192.168.0.46:554/12",
@@ -75,6 +75,6 @@
           "location": "motion-cam4"
         }
       }
-    ]
+    }
   }
 }
