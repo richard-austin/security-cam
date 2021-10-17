@@ -41,10 +41,10 @@
     <div>
       <button mat-button [matMenuTriggerFor]="menuCameraSettings">Camera Settings</button>
       <mat-menu #menuCameraSettings="matMenu">
-        <ng-container *ngFor="let cam of uniqueCameras">
-          <button *ngIf="cam.camera.address!=undefined&&cam.camera.controlUri!=undefined" mat-menu-item
+        <ng-container *ngFor="let cam of cameras">
+          <button *ngIf="cam.address!=undefined&&cam.controlUri!=undefined" mat-menu-item
                   (click)="cameraControl(cam);menuClosed()">
-            {{cam.camera.name}}
+            {{cam.name}}
           </button>
         </ng-container>
       </mat-menu>

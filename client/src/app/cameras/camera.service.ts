@@ -40,7 +40,7 @@ export class CameraService {
   private activeLiveUpdates: Subject<any> = new Subject<any>();
 
   private cameraStreams: CameraStream[] = [];
-  private uniqueCameras: CameraStream[] = [];
+  private cameras: Camera[] = [];
 
   // List of live views currently active
   private activeLive: CameraStream[] = [];
@@ -57,8 +57,8 @@ export class CameraService {
           const c = cameraStreams[i];
           this.cameraStreams.push(c);
 
-          if(!this.uniqueCameras.find((cs:CameraStream) => {return cs.camera.name === c.camera.name}))
-            this.uniqueCameras.push(c);
+          if(!this.cameras.find((cs:Camera) => {return cs.name === c.camera.name}))
+            this.cameras.push(c.camera);
         }
       },
       // Error messages would be shown by the nav component
@@ -115,12 +115,11 @@ export class CameraService {
   }
 
   /**
-   * getUniqueCameras: Returns a list of cameraStreams where there is only a single instance of each
-   *                   camera (i.e. not appearing twice when there are two streams for that camera as in getCameraStreams
+   * getCameras: Returns an array of cameras
    */
-  public getUniqueCameras() : CameraStream[]
+  public getCameras() : Camera[]
   {
-    return this.uniqueCameras;
+    return this.cameras;
   }
 
   /**
