@@ -88,9 +88,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           },{updateOn: "blur"});
         });
 
-        let camSetupFormGroup = new FormGroup({
-          cameraName: new FormControl('', [Validators.required, Validators.maxLength(25)]),
-        });
         this.controls = new FormArray(toGroups)
       },
       reason => this.errorReporting.errorMessage = reason);
