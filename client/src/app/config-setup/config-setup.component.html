@@ -15,22 +15,22 @@
 
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Name.</th>
-        <td mat-cell *matCellDef="let element; let i = dataIndex">
-          <mat-form-field appearance="legacy">
-            <input matInput type="text" [formControl]="getControl(i, 'name')"
-                   placeholder="Camera Name" (blur)="updateField(i, 'name')">
+        <td mat-cell *matCellDef="let element; let i = dataIndex" [width]="250">
+          <mat-form-field appearance="legacy" [style.width.px]="230">
+            <input matInput type="text" autocomplete="off" maxlength="25" [formControl]="getControl(i, 'name')"
+                   placeholder="Camera Name" appEditableOnBlur [index]="i" [field]="'name'">
             <mat-hint>Change camera name if required</mat-hint>
           </mat-form-field>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="address">
-        <th mat-header-cell *matHeaderCellDef>Control URI.</th>
+        <th mat-header-cell *matHeaderCellDef>Address.</th>
         <td mat-cell *matCellDef="let element"> {{element.value.address}} </td>
       </ng-container>
 
       <ng-container matColumnDef="controlUri">
-        <th mat-header-cell *matHeaderCellDef>Address.</th>
+        <th mat-header-cell *matHeaderCellDef>Control URI.</th>
         <td mat-cell *matCellDef="let element"> {{element.value.controlUri}} </td>
       </ng-container>
 

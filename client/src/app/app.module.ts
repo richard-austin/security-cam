@@ -36,6 +36,7 @@ import {MatInputModule} from "@angular/material/input";
 import { ConfigSetupComponent } from './config-setup/config-setup.component';
 import {MatTableModule} from "@angular/material/table";
 import {MatSortModule} from "@angular/material/sort";
+import { EditableOnBlurDirective } from './config-setup/editable-on-blur.directive';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import {MatSortModule} from "@angular/material/sort";
     CameraParamsComponent,
     DrawdownCalcContainerComponent,
     ConfigSetupComponent,
+    EditableOnBlurDirective,
   ],
   imports: [
     BrowserModule,
