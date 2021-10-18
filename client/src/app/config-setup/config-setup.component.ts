@@ -23,14 +23,29 @@ export interface Data {
       state('expanded', style({height: '*'})),
       transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
     ]),
+    trigger('openClose', [
+      // ...
+      state('open', style({
+        transform: 'rotate(90deg)'
+      })),
+      state('closed', style({
+        transform: 'rotate(0deg)'
+      })),
+      transition('open => closed', [
+        animate('.2s')
+      ]),
+      transition('closed => open', [
+        animate('.2s')
+      ]),
+    ])
   ],
 })
 export class ConfigSetupComponent implements OnInit, AfterViewInit {
   @ViewChild('errorReporting') errorReporting!: ReportingComponent;
   downloading: boolean = true;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  displayedColumns = ['name', 'address', 'controlUri'];
-  expandedElement!: Camera | null; //: PeriodicElement | null;
+  displayedColumns = ['expand', 'name', 'address1', 'controlUri'];
+  expandedElement!: Camera | null;
   streamColumns = ['descr', 'netcam_uri', 'uri', 'nms_uri', 'video_width', 'video_height'];
 //  camSetupFormGroup!: FormGroup;
   controls!: FormArray;
@@ -83,29 +98,36 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /**
+   * setUpTableFormControlsAssociate a FormControl with each editable field on the table
+   */
+  setUpTableFormControls(): void
+  {
+    this.list$ = new BehaviorSubject<Camera[]>(Array.from(this.cameras.values()));
+    let index: number = 0;
+    const toCameraGroups = this.list$.value.map(camera => {
+      let list$: BehaviorSubject<Stream[]> = new BehaviorSubject<Stream[]>(Array.from(camera.streams.values()));
+      const toStreamGroups = list$.value.map((stream: Stream) => {
+        return new FormGroup({
+          descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
+        }, {updateOn: "blur"});
+      });
+      this.streamControls[index++] = new FormArray(toStreamGroups);
+
+      return new FormGroup({
+        name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
+      }, {updateOn: "blur"});
+    });
+
+    this.controls = new FormArray(toCameraGroups);
+  }
+
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the check boxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
         this.cameras = cameras;
         this.downloading = false;
-        this.list$ = new BehaviorSubject<Camera[]>(Array.from(this.cameras.values()));
-
-        let index: number = 0;
-        const toCameraGroups = this.list$.value.map(camera => {
-          let list$: BehaviorSubject<Stream[]> = new BehaviorSubject<Stream[]>(Array.from(camera.streams.values()));
-          const toStreamGroups = list$.value.map((stream: Stream) => {
-            return new FormGroup({
-              descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
-            }, {updateOn: "blur"});
-          });
-          this.streamControls[index++] = new FormArray(toStreamGroups);
-
-          return new FormGroup({
-            name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
-          }, {updateOn: "blur"});
-        });
-
-        this.controls = new FormArray(toCameraGroups)
+        this.setUpTableFormControls();
       },
       reason => this.errorReporting.errorMessage = reason);
   }
