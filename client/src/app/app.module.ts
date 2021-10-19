@@ -37,6 +37,7 @@ import { ConfigSetupComponent } from './config-setup/config-setup.component';
 import {MatTableModule} from "@angular/material/table";
 import {MatSortModule} from "@angular/material/sort";
 import { EditableOnBlurDirective } from './config-setup/editable-on-blur.directive';
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @NgModule({
   declarations: [
@@ -57,33 +58,34 @@ import { EditableOnBlurDirective } from './config-setup/editable-on-blur.directi
     ConfigSetupComponent,
     EditableOnBlurDirective,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    MatCardModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatCheckboxModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatInputModule,
-    MatIconModule,
-    MatSelectModule,
-    MatDialogModule,
-    MatMenuModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    FormsModule,
-    // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
-    // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
-    // and `ping` is 6q0 (1 minutes).
-    UserIdleModule.forRoot({idle: 600, timeout: 60, ping: 60}),
-    LayoutModule,
-    MatTableModule,
-    MatSortModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+        MatCardModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatCheckboxModule,
+        MatButtonModule,
+        MatButtonToggleModule,
+        MatInputModule,
+        MatIconModule,
+        MatSelectModule,
+        MatDialogModule,
+        MatMenuModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        FormsModule,
+        // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
+        // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
+        // and `ping` is 6q0 (1 minutes).
+        UserIdleModule.forRoot({idle: 600, timeout: 60, ping: 60}),
+        LayoutModule,
+        MatTableModule,
+        MatSortModule,
+        MatTooltipModule
+    ],
   providers: [HttpClient, BaseUrl],
   bootstrap: [AppComponent],
   entryComponents: [IdleTimeoutModalComponent]

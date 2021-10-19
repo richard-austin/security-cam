@@ -14,11 +14,11 @@ tr.example-detail-row {
 }
 
 tr.example-element-row.example-expanded-row:hover {
-  background: dimgrey;
+  background: darkblue;
 }
 
 tr.example-element-row:not(.example-expanded-row):hover {
-  background: dimgrey;
+  background: darkblue;
 }
 
 tr.example-element-row:not(.example-expanded-row):active {
@@ -61,10 +61,10 @@ tr.example-element-row:not(.example-expanded-row):active {
 {
   min-width: 500px;
   margin-bottom: 1rem;
+  background-color: #1e1b3d;
 }
 
 .expand{
   position: relative;
   font-size: xx-large;
 }
-

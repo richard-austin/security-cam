@@ -44,9 +44,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   @ViewChild('errorReporting') errorReporting!: ReportingComponent;
   downloading: boolean = true;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  displayedColumns = ['expand', 'name', 'address1', 'controlUri'];
+  displayedColumns = ['delete', 'expand', 'name', 'address1', 'controlUri'];
   expandedElement!: Camera | null;
-  streamColumns = ['descr', 'netcam_uri', 'uri', 'nms_uri', 'video_width', 'video_height'];
+  streamColumns = ['delete', 'descr', 'netcam_uri', 'uri', 'nms_uri', 'video_width', 'video_height'];
 //  camSetupFormGroup!: FormGroup;
   controls!: FormArray;
   streamControls: FormArray[] = [];
@@ -99,10 +99,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * setUpTableFormControlsAssociate a FormControl with each editable field on the table
+   * setUpTableFormControls: Associate a FormControl with each editable field on the table
    */
-  setUpTableFormControls(): void
-  {
+  setUpTableFormControls(): void {
     this.list$ = new BehaviorSubject<Camera[]>(Array.from(this.cameras.values()));
     let index: number = 0;
     const toCameraGroups = this.list$.value.map(camera => {
@@ -110,6 +109,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       const toStreamGroups = list$.value.map((stream: Stream) => {
         return new FormGroup({
           descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
+          netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.maxLength(40)]),
         }, {updateOn: "blur"});
       });
       this.streamControls[index++] = new FormArray(toStreamGroups);
@@ -120,6 +120,63 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     });
 
     this.controls = new FormArray(toCameraGroups);
+  }
+
+  /**
+   * deleteCamera: Delete a camera from the cameras.map
+   * @param key: The key of the map entry to be deleted
+   */
+  deleteCamera(key: string): boolean
+  {
+    let retVal: boolean = Array.from(this.cameras.keys()).find(k => k === key) !== undefined;
+    this.cameras.delete(key);
+    this.cameras = this.fixKeyNames(this.cameras) as Map<string, Camera>;
+    this.setUpTableFormControls();
+    return retVal;
+  }
+
+  /**
+   * deleteStream: Delete a stream from the streams.map
+   * @param cameraKey
+   * @param streamKey
+   */
+  deleteStream(cameraKey: string, streamKey: string): boolean
+  {
+    let retVal: boolean = false;
+
+    let cam:Camera = this.cameras.get(cameraKey) as Camera;
+    if(cam !== undefined)
+    {
+      retVal = Array.from(cam.streams.keys()).find(k => k === streamKey) !== undefined;
+      if(retVal)
+      cam.streams.delete(streamKey);
+      cam.streams = this.fixKeyNames(cam.streams) as Map<string, Stream>;
+    }
+    this.setUpTableFormControls();
+    return retVal;
+  }
+
+  /**
+   * fixKeyNames: Fix the key names in the cameras or streams maps so they follow the sequence
+   *              camera1, camera2 or stream1, stream 2 etc. This is run after deleting an iyem
+   *              from the map.
+   */
+  fixKeyNames(map:Map<string, Camera | Stream>):Map<string, Camera | Stream>
+  {
+    let index: number = 1;
+    let baseName: string;
+
+    if((map.size) > 0 && (map.values().next().value).streams !== undefined)
+      baseName = 'camera';
+    else
+      baseName= 'stream';
+    let retVal: Map<string, Camera | Stream> = new Map<string, Camera | Stream>();
+
+    map.forEach((value:Camera| Stream) => {
+      let newKey = baseName+index++;
+      retVal.set(newKey, value);
+    })
+    return retVal;
   }
 
   ngOnInit(): void {
@@ -135,7 +192,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
   }
 
-  toggle(el: {key: string, value:Camera}) {
+  toggle(el: { key: string, value: Camera }) {
     this.expandedElement = this.expandedElement === el.value ? null : el.value;
   }
 }
