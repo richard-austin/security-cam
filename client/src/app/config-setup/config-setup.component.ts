@@ -1,10 +1,12 @@
 import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera, Stream} from "../cameras/Camera";
+import {Camera, Stream, Motion} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {BehaviorSubject} from 'rxjs';
+import {MatCheckboxChange} from "@angular/material/checkbox";
+import {MatSelectChange} from '@angular/material/select/select';
 
 export interface Data {
   name: string;
@@ -46,7 +48,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   cameras: Map<string, Camera> = new Map<string, Camera>();
   displayedColumns = ['delete', 'expand', 'name', 'address1', 'controlUri'];
   expandedElement!: Camera | null;
-  streamColumns = ['delete', 'descr', 'netcam_uri', 'uri', 'nms_uri', 'video_width', 'video_height'];
+  streamColumns = ['stream_id', 'delete', 'descr', 'netcam_uri', 'uri', 'nms_uri', 'motion', 'trigger_recording_on', 'video_width', 'video_height'];
 //  camSetupFormGroup!: FormGroup;
   controls!: FormArray;
   streamControls: FormArray[] = [];
@@ -97,6 +99,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       this.updateStream(camIndex, streamIndex, field, control.value);
     }
   }
+  compareTriggerRecordingOn(v1:string, v2:string):boolean{
+    return v1===v2;
+  }
 
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
@@ -110,10 +115,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         return new FormGroup({
           descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
           netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.maxLength(40)]),
+          motion: new FormControl(stream.motion),
+          trigger_recording_on: new FormControl(stream?.motion?.trigger_recording_on)
         }, {updateOn: "blur"});
       });
       this.streamControls[index++] = new FormArray(toStreamGroups);
-
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
       }, {updateOn: "blur"});
@@ -126,8 +132,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    * deleteCamera: Delete a camera from the cameras.map
    * @param key: The key of the map entry to be deleted
    */
-  deleteCamera(key: string): boolean
-  {
+  deleteCamera(key: string): boolean {
     let retVal: boolean = Array.from(this.cameras.keys()).find(k => k === key) !== undefined;
     this.cameras.delete(key);
     this.cameras = this.fixKeyNames(this.cameras) as Map<string, Camera>;
@@ -140,16 +145,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    * @param cameraKey
    * @param streamKey
    */
-  deleteStream(cameraKey: string, streamKey: string): boolean
-  {
+  deleteStream(cameraKey: string, streamKey: string): boolean {
     let retVal: boolean = false;
 
-    let cam:Camera = this.cameras.get(cameraKey) as Camera;
-    if(cam !== undefined)
-    {
+    let cam: Camera = this.cameras.get(cameraKey) as Camera;
+    if (cam !== undefined) {
       retVal = Array.from(cam.streams.keys()).find(k => k === streamKey) !== undefined;
-      if(retVal)
-      cam.streams.delete(streamKey);
+      if (retVal)
+        cam.streams.delete(streamKey);
       cam.streams = this.fixKeyNames(cam.streams) as Map<string, Stream>;
     }
     this.setUpTableFormControls();
@@ -161,13 +164,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    *              camera1, camera2 or stream1, stream 2 etc. This is run after deleting an iyem
    *              from the map.
    */
-  fixKeyNames(map:Map<string, Camera | Stream>):Map<string, Camera | Stream>
-  {
+  fixKeyNames(map: Map<string, Camera | Stream>): Map<string, Camera | Stream> {
     let index: number = 1;
     let baseName: string;
     let streamNum: number | undefined = undefined;
 
-    if((map.size) > 0 && (map.values().next().value).streams !== undefined)
+    if ((map.size) > 0 && (map.values().next().value).streams !== undefined)
       baseName = 'camera';
     else {
       baseName = 'stream';
@@ -175,24 +177,50 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
     let retVal: Map<string, Camera | Stream> = new Map<string, Camera | Stream>();
 
-    map.forEach((value:Camera| Stream) => {
-      let newKey = baseName+index++;
+    map.forEach((value: Camera | Stream) => {
+      let newKey = baseName + index++;
       retVal.set(newKey, value);
-      if(streamNum !== undefined)
-      {
+      if (streamNum !== undefined) {
         if ((value instanceof Stream) && isDevMode()) {
-          value.nms_uri = "http://localhost:8009/nms/stream"+streamNum;
-          value.uri = "http://localhost:8009/nms/stream"+streamNum++ +".flv";
-        }
-        else if((value instanceof Stream))
-        {
-          value.nms_uri = "http://localhost:8009/nms/stream"+streamNum;
-          value.uri = "/live/nms/stream"+streamNum++ +".flv";
-
+          value.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
+          value.uri = "http://localhost:8009/nms/stream" + streamNum++ + ".flv";
+        } else if ((value instanceof Stream)) {
+          value.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
+          value.uri = "/live/nms/stream" + streamNum++ + ".flv";
         }
       }
     })
     return retVal;
+  }
+
+  toggle(el: { key: string, value: Camera }) {
+    this.expandedElement = this.expandedElement === el.value ? null : el.value;
+  }
+
+  /**
+   * setMotionStatus: Enable/disable motion sensing on the stream according to the checkbox state.
+   * @param $event: MatCheckboxChange event
+   * @param stream: The stream
+   * @param cam: The  parent camera
+   */
+  setMotionStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
+    if (stream.motion === null) {
+      // Set all to null before setting this one as only one is allowed to be selected.
+      cam.streams.forEach((stream: Stream) => {
+        // @ts-ignore
+        stream.motion = null
+      })
+      stream.motion = new Motion();
+      stream.motion.trigger_recording_on = '';
+    } else { // @ts-ignore
+      stream.motion = null;
+    }
+    this.setUpTableFormControls();
+  }
+
+  setRecordingTrigger($event: MatSelectChange, stream: Stream) {
+    if(stream?.motion !== null)
+      stream.motion.trigger_recording_on = $event.value;
   }
 
   ngOnInit(): void {
@@ -206,9 +234,5 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-  }
-
-  toggle(el: { key: string, value: Camera }) {
-    this.expandedElement = this.expandedElement === el.value ? null : el.value;
   }
 }

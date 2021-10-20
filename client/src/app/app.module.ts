@@ -38,6 +38,7 @@ import {MatTableModule} from "@angular/material/table";
 import {MatSortModule} from "@angular/material/sort";
 import { EditableOnBlurDirective } from './config-setup/editable-on-blur.directive';
 import {MatTooltipModule} from "@angular/material/tooltip";
+import { ExcludeOwnStreamPipe } from './config-setup/exclude-own-stream.pipe';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import {MatTooltipModule} from "@angular/material/tooltip";
     DrawdownCalcContainerComponent,
     ConfigSetupComponent,
     EditableOnBlurDirective,
+    ExcludeOwnStreamPipe,
   ],
     imports: [
         BrowserModule,

@@ -13,7 +13,7 @@
            [dataSource]="cameras | keyvalue" multiTemplateDataRows
            class="mat-elevation-z8">
 
-      <ng-container matColumnDef="delete">
+       <ng-container matColumnDef="delete">
         <th mat-header-cell *matHeaderCellDef>Delete</th>
         <td mat-cell *matCellDef="let cam" (click)="deleteCamera(cam.key)" [width]="50">
           <button mat-icon-button matTooltip="Delete this camera" matTooltipClass="tooltip">
@@ -25,9 +25,11 @@
       <ng-container matColumnDef="expand">
         <th mat-header-cell *matHeaderCellDef>Expand</th>
         <td mat-cell *matCellDef="let cam" (click)="toggle(cam)" [width]="50">
-          <button mat-icon-button matTooltip="{{expandedElement == cam.value ? 'Hide' : 'Show'}} the streams for this camera"
+          <button mat-icon-button
+                  matTooltip="{{expandedElement == cam.value ? 'Hide' : 'Show'}} the streams for this camera"
                   matTooltipClass="tooltip">
-            <mat-icon class="expand" [@openClose]="expandedElement == cam.value ? 'open' : 'closed'">arrow_right</mat-icon>
+            <mat-icon class="expand" [@openClose]="expandedElement == cam.value ? 'open' : 'closed'">arrow_right
+            </mat-icon>
           </button>
         </td>
       </ng-container>
@@ -59,6 +61,10 @@
           <div class="example-element-detail mat-elevation-z10"
                [@detailExpand]="cam.value == expandedElement ? 'expanded' : 'collapsed'">
             <table mat-table [dataSource]="cam.value.streams | keyvalue" class="streams-info mat-elevation-z10">
+              <ng-container matColumnDef="stream_id">
+                <th mat-header-cell *matHeaderCellDef>Stream ID</th>
+                <td mat-cell *matCellDef="let stream">{{stream.key}}</td>
+              </ng-container>
               <ng-container matColumnDef="delete">
                 <th mat-header-cell *matHeaderCellDef>Delete</th>
                 <td mat-cell *matCellDef="let stream" (click)="deleteStream(cam.key, stream.key)" [width]="50">
@@ -75,7 +81,6 @@
                            [formControl]="getStreamControl(camIndex, streamIndex, 'descr')"
                            placeholder="Stream Description" appEditableOnBlur [camIndex]="camIndex"
                            [streamIndex]="streamIndex" [field]="'descr'">
-                    <!--                    <mat-hint>Change stream name if required</mat-hint>-->
                   </mat-form-field>
                 </td>
               </ng-container>
@@ -87,7 +92,6 @@
                            [formControl]="getStreamControl(camIndex, streamIndex, 'netcam_uri')"
                            placeholder="Netcam URI" appEditableOnBlur [camIndex]="camIndex"
                            [streamIndex]="streamIndex" [field]="'netcam_uri'">
-                    <!--                    <mat-hint>Change stream name if required</mat-hint>-->
                   </mat-form-field>
 
                 </td>
@@ -99,6 +103,29 @@
               <ng-container matColumnDef="nms_uri">
                 <th mat-header-cell *matHeaderCellDef> NMS URI.</th>
                 <td mat-cell *matCellDef="let stream"> {{stream.value.nms_uri}} </td>
+              </ng-container>
+              <ng-container matColumnDef="motion">
+                <th mat-header-cell *matHeaderCellDef>Motion Sensing</th>
+                <td mat-cell *matCellDef="let stream; let streamIndex = index">
+                  <mat-checkbox [formControl]="getStreamControl(camIndex, streamIndex, 'motion')" [color]="'primary'" [checked]="stream.value.motion != null"
+                                (change)="setMotionStatus($event, stream.value,  cam.value)">
+                    {{'Motion'}}
+                  </mat-checkbox>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="trigger_recording_on">
+                <th mat-header-cell *matHeaderCellDef>Trigger Recording On</th>
+                <td mat-cell *matCellDef="let stream; let streamIndex = index">
+                  <mat-select [compareWith]="compareTriggerRecordingOn" [formControl]="getStreamControl(camIndex, streamIndex, 'trigger_recording_on')" (selectionChange)="setRecordingTrigger($event, stream.value)"
+                              [disabled]="stream.value.motion == null">
+                    <mat-option [value]="''">
+                      None
+                    </mat-option>
+                    <mat-option *ngFor="let camStream of cam.value.streams | keyvalue | excludeOwnStream:stream.key" [value]="cam.key+'.'+camStream.key">
+                        {{camStream.key}}
+                    </mat-option>
+                  </mat-select>
+                </td>
               </ng-container>
               <ng-container matColumnDef="video_width">
                 <th mat-header-cell *matHeaderCellDef> Video Width</th>
