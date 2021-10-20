@@ -25,7 +25,6 @@
         "uri": "http://localhost:8009/nms/cam2.flv",
         "nms_uri": "rtmp://localhost:1935/nms/cam2",
         "motion": {
-          "name": "PorchCam",
           "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
           "trigger_recording_on": "camera1.stream1"
         },
@@ -64,7 +63,6 @@
         "uri": "http://localhost:8009/nms/cam4.flv",
         "nms_uri": "rtmp://localhost:1935/nms/cam4",
         "motion": {
-          "name": "PorchCam",
           "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
           "trigger_recording_on": "camera2.stream1"
         },

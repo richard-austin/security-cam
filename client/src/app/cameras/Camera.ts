@@ -12,7 +12,6 @@ export class CameraParams
     webVersion!: string;
 }
 class Motion {
-  name!: string;  // Motion name
   mask_file!:string;  // Mask file which defines area used in motion sensing
   trigger_recording_on!: string;  // The name of the camera stream on which recordings will be triggered following
                                   // Motion events on this camera stream (usually another stream on the same physical
