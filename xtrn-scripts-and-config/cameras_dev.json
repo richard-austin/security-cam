@@ -8,22 +8,22 @@
         "descr": "HD",
         "defaultOnMultiDisplay": false,
         "netcam_uri": "rtsp://192.168.0.45:554/11",
-        "uri": "http://localhost:8009/nms/cam1.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/cam1",
+        "uri": "http://localhost:8009/nms/stream1.flv",
+        "nms_uri": "rtmp://localhost:1935/nms/stream1",
         "motion": null,
         "video_width": 1920,
         "video_height": 1080,
         "recording": {
-          "uri": "http://localhost:8084/recording/cam1/",
-          "location": "cam1"
+          "uri": "http://localhost:8084/recording/stream1/",
+          "location": "stream1"
         }
       },
       "stream2": {
         "descr": "Low res.",
         "defaultOnMultiDisplay": true,
         "netcam_uri": "rtsp://192.168.0.45:554/12",
-        "uri": "http://localhost:8009/nms/cam2.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/cam2",
+        "uri": "http://localhost:8009/nms/stream2.flv",
+        "nms_uri": "rtmp://localhost:1935/nms/stream2",
         "motion": {
           "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
           "trigger_recording_on": "camera1.stream1"
@@ -31,8 +31,8 @@
         "video_width": 640,
         "video_height": 352,
         "recording": {
-          "uri": "http://localhost:8084/recording/motion-cam2/",
-          "location": "motion-cam2"
+          "uri": "http://localhost:8084/recording/motion-stream2/",
+          "location": "motion-stream2"
         }
       }
     }
@@ -46,22 +46,22 @@
         "descr": "HD",
         "defaultOnMultiDisplay": false,
         "netcam_uri": "rtsp://192.168.0.46:554/11",
-        "uri": "http://localhost:8009/nms/cam3.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/cam3",
+        "uri": "http://localhost:8009/nms/stream3.flv",
+        "nms_uri": "rtmp://localhost:1935/nms/stream3",
         "motion": null,
         "video_width": 1920,
         "video_height": 1080,
         "recording": {
-          "uri": "http://localhost:8084/recording/cam3/",
-          "location": "cam1"
+          "uri": "http://localhost:8084/recording/stream3/",
+          "location": "stream3"
         }
       },
       "stream2": {
         "descr": "Low res.",
         "defaultOnMultiDisplay": true,
         "netcam_uri": "rtsp://192.168.0.46:554/12",
-        "uri": "http://localhost:8009/nms/cam4.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/cam4",
+        "uri": "http://localhost:8009/nms/stream4.flv",
+        "nms_uri": "rtmp://localhost:1935/nms/stream4",
         "motion": {
           "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
           "trigger_recording_on": "camera2.stream1"
@@ -69,8 +69,8 @@
         "video_width": 640,
         "video_height": 352,
         "recording": {
-          "uri": "http://localhost:8084/recording/motion-cam4/",
-          "location": "motion-cam4"
+          "uri": "http://localhost:8084/recording/motion-stream4/",
+          "location": "motion-stream4"
         }
       }
     }

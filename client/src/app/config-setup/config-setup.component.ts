@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -165,16 +165,32 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   {
     let index: number = 1;
     let baseName: string;
+    let streamNum: number | undefined = undefined;
 
     if((map.size) > 0 && (map.values().next().value).streams !== undefined)
       baseName = 'camera';
-    else
-      baseName= 'stream';
+    else {
+      baseName = 'stream';
+      streamNum = 1;
+    }
     let retVal: Map<string, Camera | Stream> = new Map<string, Camera | Stream>();
 
     map.forEach((value:Camera| Stream) => {
       let newKey = baseName+index++;
       retVal.set(newKey, value);
+      if(streamNum !== undefined)
+      {
+        if ((value instanceof Stream) && isDevMode()) {
+          value.nms_uri = "http://localhost:8009/nms/stream"+streamNum;
+          value.uri = "http://localhost:8009/nms/stream"+streamNum++ +".flv";
+        }
+        else if((value instanceof Stream))
+        {
+          value.nms_uri = "http://localhost:8009/nms/stream"+streamNum;
+          value.uri = "/live/nms/stream"+streamNum++ +".flv";
+
+        }
+      }
     })
     return retVal;
   }
