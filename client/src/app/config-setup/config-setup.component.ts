@@ -48,7 +48,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   cameras: Map<string, Camera> = new Map<string, Camera>();
   displayedColumns = ['delete', 'expand', 'name', 'address1', 'controlUri'];
   expandedElement!: Camera | null;
-  streamColumns = ['stream_id', 'delete', 'descr', 'netcam_uri', 'uri', 'nms_uri', 'motion', 'trigger_recording_on', 'video_width', 'video_height'];
+  streamColumns = ['stream_id', 'delete', 'descr', 'netcam_uri', 'uri', 'nms_uri', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
 //  camSetupFormGroup!: FormGroup;
   controls!: FormArray;
   streamControls: FormArray[] = [];
@@ -116,7 +116,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
           netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.maxLength(40)]),
           motion: new FormControl(stream.motion),
-          trigger_recording_on: new FormControl(stream?.motion?.trigger_recording_on)
+          trigger_recording_on: new FormControl(stream?.motion?.trigger_recording_on),
+          mask_file: new FormControl(stream?.motion?.mask_file, [Validators.maxLength(25)])
         }, {updateOn: "blur"});
       });
       this.streamControls[index++] = new FormArray(toStreamGroups);
@@ -135,7 +136,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   deleteCamera(key: string): boolean {
     let retVal: boolean = Array.from(this.cameras.keys()).find(k => k === key) !== undefined;
     this.cameras.delete(key);
-    this.cameras = this.fixKeyNames(this.cameras) as Map<string, Camera>;
+    this.cameras = this.fixKeysAndStreamNumbers(this.cameras) as Map<string, Camera>;
     this.setUpTableFormControls();
     return retVal;
   }
@@ -153,43 +154,44 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       retVal = Array.from(cam.streams.keys()).find(k => k === streamKey) !== undefined;
       if (retVal)
         cam.streams.delete(streamKey);
-      cam.streams = this.fixKeyNames(cam.streams) as Map<string, Stream>;
+      this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     }
     this.setUpTableFormControls();
     return retVal;
   }
 
   /**
-   * fixKeyNames: Fix the key names in the cameras or streams maps so they follow the sequence
-   *              camera1, camera2 or stream1, stream 2 etc. This is run after deleting an iyem
-   *              from the map.
+   * fixKeysAndStreamNumbers: Fix the key names in the cameras and streams maps so they follow the sequence
+   *                          camera1, camera2 or stream1, stream 2 etc. This is run after deleting an item
+   *                          from the map. Also number the live streams and recording uri's logically
    */
-  fixKeyNames(map: Map<string, Camera | Stream>): Map<string, Camera | Stream> {
-    let index: number = 1;
+  fixKeysAndStreamNumbers(map: Map<string, Camera>): Map<string, Camera> {
+    let camNum: number = 1;
     let baseName: string;
-    let streamNum: number | undefined = undefined;
+    let streamNum: number = 1;
+    let retVal: Map<string, Camera> = new Map<string, Camera>();
 
-    if ((map.size) > 0 && (map.values().next().value).streams !== undefined)
-      baseName = 'camera';
-    else {
-      baseName = 'stream';
-      streamNum = 1;
-    }
-    let retVal: Map<string, Camera | Stream> = new Map<string, Camera | Stream>();
-
-    map.forEach((value: Camera | Stream) => {
-      let newKey = baseName + index++;
-      retVal.set(newKey, value);
-      if (streamNum !== undefined) {
-        if ((value instanceof Stream) && isDevMode()) {
-          value.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
-          value.uri = "http://localhost:8009/nms/stream" + streamNum++ + ".flv";
-        } else if ((value instanceof Stream)) {
-          value.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
-          value.uri = "/live/nms/stream" + streamNum++ + ".flv";
+    map.forEach((camera: Camera) => {
+      let streamMap:Map<string, Stream> = new Map<string, Stream>();
+      let streamKeyNum: number = 1;
+      camera.streams.forEach((stream) =>{
+        if (isDevMode()) {
+          stream.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
+          stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
+        } else if (baseName === 'stream') {
+          stream.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
+          stream.uri = "/live/nms/stream" + streamNum + ".flv";
         }
-      }
+        streamMap.set('stream'+streamKeyNum, stream);
+        ++streamNum;
+        ++streamKeyNum;
+      })
+      camera.streams = streamMap;
+      let newKey = 'camera' + camNum;
+      retVal.set(newKey, camera);
+      ++camNum;
     })
+  //  this.setUpTableFormControls();
     return retVal;
   }
 
@@ -215,6 +217,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     } else { // @ts-ignore
       stream.motion = null;
     }
+    // Ensure that the trigger_recording_on setting is shown
     this.setUpTableFormControls();
   }
 

@@ -68,3 +68,7 @@ tr.example-element-row:not(.example-expanded-row):active {
   position: relative;
   font-size: xx-large;
 }
+
+td, th{
+  padding-left: 1rem !important;
+}
