@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera, Stream, Motion} from "../cameras/Camera";
+import {Camera, Stream, Motion, Recording} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
@@ -167,20 +167,69 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    */
   fixKeysAndStreamNumbers(map: Map<string, Camera>): Map<string, Camera> {
     let camNum: number = 1;
-    let baseName: string;
-    let streamNum: number = 1;
+    let streamNum: number = 1;  // Absolute (not local to camera) number to identify stream number
+                                // for recording and live URL's
     let retVal: Map<string, Camera> = new Map<string, Camera>();
-
+    let absoluteStreamNo: number = 1;  // Absolute number to be set in the stream object
     map.forEach((camera: Camera) => {
       let streamMap:Map<string, Stream> = new Map<string, Stream>();
       let streamKeyNum: number = 1;
+
+      // First clear the recording objects in all the streams as we will set them up in the stream processing which follows.
+      // Also set the absolute stream number
+      camera.streams.forEach((stream:Stream) =>
+       {
+        // @ts-ignore
+        stream.recording=null
+         stream.absolute_num = absoluteStreamNo++;
+      });
+      // Process the streams
       camera.streams.forEach((stream) =>{
-        if (isDevMode()) {
+        if (isDevMode()) {  // Development mode
           stream.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
           stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
-        } else if (baseName === 'stream') {
+
+          if(stream.motion !== null)
+          {
+            stream.recording = new Recording();
+            stream.recording.uri = 'http://localhost:8084/recording/stream'+streamNum+'/';
+            stream.recording.location = 'stream'+streamNum;
+            if(stream.motion.trigger_recording_on !== '')
+            {
+              let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
+              if(recStreamKey.length === 2)
+              {
+                // Get the key of the stream on which recordings are to be triggered
+                let recStream:Stream = camera.streams.get(recStreamKey[1]) as Stream;
+                // Set up the recording
+                recStream.recording = new Recording();
+                recStream.recording.uri='http://localhost:8084/recording/stream'+recStream.absolute_num+'/';
+                recStream.recording.location = 'stream'+recStream.absolute_num;
+              }
+            }
+          }
+        } else {  // Production mode
           stream.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
+          if(stream.motion !== null)
+          {
+            stream.recording = new Recording();
+            stream.recording.uri = '/recording/stream'+streamNum+'/';
+            stream.recording.location = 'stream'+streamNum;
+            if(stream.motion.trigger_recording_on !== '')
+            {
+              let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
+              if(recStreamKey.length === 2)  // Should have a camera and stream number
+              {
+                // Get the key of the stream on which recordings are to be triggered
+                let recStream:Stream = camera.streams.get(recStreamKey[1]) as Stream;
+                // Set up the recording
+                recStream.recording = new Recording();
+                recStream.recording.uri='/recording/stream'+recStream.absolute_num+'/';
+                recStream.recording.location = 'stream'+recStream.absolute_num;
+              }
+            }
+          }
         }
         streamMap.set('stream'+streamKeyNum, stream);
         ++streamNum;
@@ -210,20 +259,29 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       // Set all to null before setting this one as only one is allowed to be selected.
       cam.streams.forEach((stream: Stream) => {
         // @ts-ignore
-        stream.motion = null
+        stream.motion = null;
+        // @ts-ignore
+        stream.recording= null;
       })
       stream.motion = new Motion();
       stream.motion.trigger_recording_on = '';
-    } else { // @ts-ignore
+    } else {
+      // @ts-ignore
       stream.motion = null;
+      // @ts-ignore
+      stream.recording = null;
     }
+    this.cameras=this.fixKeysAndStreamNumbers(this.cameras);
     // Ensure that the trigger_recording_on setting is shown
     this.setUpTableFormControls();
   }
 
   setRecordingTrigger($event: MatSelectChange, stream: Stream) {
     if(stream?.motion !== null)
+    {
       stream.motion.trigger_recording_on = $event.value;
+      this.cameras=this.fixKeysAndStreamNumbers(this.cameras);
+    }
   }
 
   ngOnInit(): void {
