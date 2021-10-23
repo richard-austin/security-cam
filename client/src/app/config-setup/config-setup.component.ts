@@ -129,10 +129,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
-  compareTriggerRecordingOn(v1: string, v2: string): boolean {
-    return v1 === v2;
-  }
-
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
    */
@@ -148,14 +144,15 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       const toStreamGroups = list$.value.map((stream: Stream) => {
         if (stream.motion) {
           motionFormGroup = new FormGroup({
-            // motion: new FormControl(stream.motion, [Validators.nullValidator]),
+            motion: new FormControl(stream.motion, [Validators.nullValidator]),
             trigger_recording_on: new FormControl(stream.motion?.trigger_recording_on),
-            mask_file: new FormControl(stream.motion?.mask_file, [Validators.maxLength(15)])
+            mask_file: new FormControl(stream.motion?.mask_file, [Validators.maxLength(55)])
           }, {updateOn: "change"});
 
         }
 
         return new FormGroup({
+          trigger_recording_on: new FormControl(stream.descr, [Validators.nullValidator]),
           descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
           netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.maxLength(40)]),
         }, {updateOn: "change"});
@@ -373,5 +370,4 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
   }
-
 }
