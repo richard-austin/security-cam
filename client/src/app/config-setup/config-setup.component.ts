@@ -3,7 +3,7 @@ import {CameraService} from '../cameras/camera.service';
 import {Camera, Stream, Motion, Recording} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {BehaviorSubject} from 'rxjs';
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {MatSelectChange} from '@angular/material/select/select';
@@ -46,12 +46,16 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   @ViewChild('errorReporting') errorReporting!: ReportingComponent;
   downloading: boolean = true;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  displayedColumns = ['delete', 'expand', 'name', 'address1', 'controlUri'];
+  cameraColumns = ['delete', 'expand', 'name', 'address1', 'controlUri'];
+  cameraFooterColumns = ['buttons'];
+
   expandedElement!: Camera | null;
   streamColumns = ['stream_id', 'delete', 'descr', 'netcam_uri', 'uri', 'nms_uri', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
+  streamFooterColumns = ['buttons']
 //  camSetupFormGroup!: FormGroup;
-  controls!: FormArray;
+  camControls!: FormArray;
   streamControls: FormArray[] = [];
+  motionControls: FormGroup[] | null[] = [];
 
   list$!: BehaviorSubject<Camera[]>;
 
@@ -59,7 +63,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   getCamControl(index: number, fieldName: string): FormControl {
-    return this.controls.at(index).get(fieldName) as FormControl;
+    return this.camControls.at(index).get(fieldName) as FormControl;
   }
 
   updateCam(index: number, field: string, value: any) {
@@ -83,12 +87,30 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     return this.streamControls[camIndex].at(streamIndex).get(fieldName) as FormControl;
   }
 
+  getMotionControl(camIndex: number, fieldName: string): FormControl {
+    let motionControl:FormGroup | null = this.motionControls[camIndex]
+    if(motionControl !== null)
+      return motionControl.controls[fieldName] as FormControl;
+
+    return new FormControl();
+  }
+
   updateStream(camIndex: number, streamIndex: number, field: string, value: any) {
     Array.from(  // Streams
       Array.from( // Cameras
         this.cameras.values())[camIndex].streams.values()).forEach((stream: Stream, i) => {
       if (i === streamIndex) { // @ts-ignore
         stream[field] = value;
+      }
+    });
+  }
+
+  updateMotion(camIndex: number, streamIndex: number, field: string, value: any) {
+    Array.from(  // Streams
+      Array.from( // Cameras
+        this.cameras.values())[camIndex].streams.values()).forEach((stream: Stream, i) => {
+      if (i === streamIndex) { // @ts-ignore
+        stream?.motion[field] = value;
       }
     });
   }
@@ -100,6 +122,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
+  updateMotionField(camIndex: number, streamIndex: number, field: string) {
+    const control = this.getMotionControl(camIndex, field);
+    if (control?.valid) {
+      this.updateMotion(camIndex, streamIndex, field, control.value);
+    }
+  }
+
   compareTriggerRecordingOn(v1: string, v2: string): boolean {
     return v1 === v2;
   }
@@ -108,27 +137,40 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
    */
   setUpTableFormControls(): void {
+    this.streamControls = [];
+    this.motionControls = [];
+
     this.list$ = new BehaviorSubject<Camera[]>(Array.from(this.cameras.values()));
     let index: number = 0;
     const toCameraGroups = this.list$.value.map(camera => {
       let list$: BehaviorSubject<Stream[]> = new BehaviorSubject<Stream[]>(Array.from(camera.streams.values()));
+      let motionFormGroup: FormGroup | null = null;
       const toStreamGroups = list$.value.map((stream: Stream) => {
+        if (stream.motion) {
+          motionFormGroup = new FormGroup({
+            // motion: new FormControl(stream.motion, [Validators.nullValidator]),
+            trigger_recording_on: new FormControl(stream.motion?.trigger_recording_on),
+            mask_file: new FormControl(stream.motion?.mask_file, [Validators.maxLength(15)])
+          }, {updateOn: "change"});
+
+        }
+
         return new FormGroup({
           descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
           netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.maxLength(40)]),
-          motion: new FormControl(stream.motion),
-          trigger_recording_on: new FormControl(stream?.motion?.trigger_recording_on),
-          mask_file: new FormControl(stream?.motion?.mask_file, [Validators.maxLength(25)])
-        }, {updateOn: "blur"});
+        }, {updateOn: "change"});
       });
+
+      this.motionControls[index] = motionFormGroup;
       this.streamControls[index++] = new FormArray(toStreamGroups);
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
-      }, {updateOn: "blur"});
+      }, {updateOn: "change"});
     });
 
-    this.controls = new FormArray(toCameraGroups);
+    this.camControls = new FormArray(toCameraGroups);
   }
+
 
   /**
    * deleteCamera: Delete a camera from the cameras.map
@@ -278,6 +320,47 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
+  addCamera() {
+    this.cameras.set('anyname', new Camera())
+    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+    this.setUpTableFormControls();
+  }
+
+  addStream(cam: Camera) {
+    cam.streams.set('anyname', new Stream())
+    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+    this.setUpTableFormControls();
+  }
+
+  anyInvalid(): boolean {
+    let retVal: boolean = false;
+
+    this.camControls.controls.forEach((camControlFormGroup: AbstractControl) => {
+      if (camControlFormGroup.invalid)
+        retVal = true;
+    })
+
+    if (retVal)
+      return retVal;
+
+    for (let streamFormArrayKey in this.streamControls) {
+      this.streamControls[streamFormArrayKey].controls.forEach((streamControlFormGroup: AbstractControl) => {
+        if (streamControlFormGroup.invalid)
+          retVal = true;
+      })
+    }
+
+    if (retVal)
+      return retVal;
+
+    for (let motionFormArrayKey in this.motionControls) {
+      if (this.motionControls[motionFormArrayKey]?.invalid)
+        retVal = true;
+    }
+
+    return retVal;
+  }
+
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the check boxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
@@ -290,4 +373,5 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
   }
+
 }

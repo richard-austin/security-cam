@@ -72,3 +72,17 @@ tr.example-element-row:not(.example-expanded-row):active {
 td, th{
   padding-left: 1rem !important;
 }
+
+.bottom-buttons-bar{
+  margin-top: 1rem;
+  height: 3rem;
+
+  >button{
+    // Centre vertically
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  width: 100%;
+  //margin-right: 160px;
+  min-width: 1675px;
+}

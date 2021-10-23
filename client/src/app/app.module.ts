@@ -36,7 +36,6 @@ import {MatInputModule} from "@angular/material/input";
 import { ConfigSetupComponent } from './config-setup/config-setup.component';
 import {MatTableModule} from "@angular/material/table";
 import {MatSortModule} from "@angular/material/sort";
-import { EditableOnBlurDirective } from './config-setup/editable-on-blur.directive';
 import {MatTooltipModule} from "@angular/material/tooltip";
 import { ExcludeOwnStreamPipe } from './config-setup/exclude-own-stream.pipe';
 
@@ -57,7 +56,6 @@ import { ExcludeOwnStreamPipe } from './config-setup/exclude-own-stream.pipe';
     CameraParamsComponent,
     DrawdownCalcContainerComponent,
     ConfigSetupComponent,
-    EditableOnBlurDirective,
     ExcludeOwnStreamPipe,
   ],
     imports: [
