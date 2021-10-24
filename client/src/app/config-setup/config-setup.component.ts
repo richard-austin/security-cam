@@ -1,18 +1,64 @@
 import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera, Stream, Motion, Recording} from "../cameras/Camera";
+import {Camera, Motion, Recording, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {AbstractControl, FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
+import {
+  AbstractControl,
+  FormArray,
+  FormControl,
+  FormGroup,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from "@angular/forms";
 import {BehaviorSubject} from 'rxjs';
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {MatSelectChange} from '@angular/material/select/select';
 
-export interface Data {
-  name: string;
-  address: string;
-  controlUri: string;
-  another: string;
+export function isValidIP(): ValidatorFn {
+  return (control:AbstractControl) : ValidationErrors | null => {
+
+    const value = control.value;
+
+    if (!value) {
+      return null;
+    }
+
+    const addressValid = /\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/.test(value);
+
+    return !addressValid ? {address:true}: null;
+  }
+}
+
+export function isValidNetCamURI(): ValidatorFn {
+  return (control:AbstractControl) : ValidationErrors | null => {
+
+    const value = control.value;
+
+    if (!value) {
+      return null;
+    }
+
+    const uriValid = RegExp('\\b((rtsp):\\/\\/[-\\w]+(\\.\\w[-\\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\\.)+(?: com\\b|edu\\b|biz\\b|gov\\b|in(?:t|fo)\\b|mil\\b|net\\b|org\\b|[a-z][a-z]\\b))(\\\\:\\d+)?(\\/[^.!,?;"\'<>()\\[\\]{}\\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"\'<>()\\[\\]{}\\s\x7F-\xFF]+)*)?').test(value);
+
+    return !uriValid ? {netcam_uri:true}: null;
+  }
+}
+
+export function isValidMaskFilePath(): ValidatorFn {
+  return (control:AbstractControl) : ValidationErrors | null => {
+
+    const value = control.value;
+
+    if (!value) {
+      return null;
+    }
+
+    const pathValid = RegExp('^((?!.*\/\/.*)(?!.*\/ .*)\/{1}([^\\\\(){}:\*\?<>\|\"\'])+\.(pgm))$').test(value);
+
+    return !pathValid ? {mask_file:true}: null;
+  }
 }
 
 @Component({
@@ -145,13 +191,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         if (stream.motion) {
           motionFormGroup = new FormGroup({
             trigger_recording_on: new FormControl(stream.motion?.trigger_recording_on),
-            mask_file: new FormControl(stream.motion?.mask_file, [Validators.maxLength(55)])
+            mask_file: new FormControl(stream.motion?.mask_file, [isValidMaskFilePath(), Validators.maxLength(55)])
           }, {updateOn: "change"});
         }
 
         return new FormGroup({
           descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
-          netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.maxLength(40)]),
+          netcam_uri: new FormControl(stream.netcam_uri, [isValidNetCamURI()]),
           video_width: new FormControl(stream.video_width, [Validators.required, Validators.min(90), Validators.max(5000)]),
           video_height: new FormControl(stream.video_height, [Validators.required, Validators.min(90), Validators.max(3000)]),
         }, {updateOn: "change"});
@@ -161,7 +207,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       this.streamControls[index++] = new FormArray(toStreamGroups);
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
-        address: new FormControl(camera.address, [Validators.maxLength(15)]),
+        address: new FormControl(camera.address, [isValidIP()]),
         controlUri: new FormControl(camera.controlUri, [Validators.maxLength(55)]),
       }, {updateOn: "change"});
     });
