@@ -144,11 +144,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       const toStreamGroups = list$.value.map((stream: Stream) => {
         if (stream.motion) {
           motionFormGroup = new FormGroup({
-            motion: new FormControl(stream.motion, [Validators.nullValidator]),
             trigger_recording_on: new FormControl(stream.motion?.trigger_recording_on),
             mask_file: new FormControl(stream.motion?.mask_file, [Validators.maxLength(55)])
           }, {updateOn: "change"});
-
         }
 
         return new FormGroup({
@@ -192,8 +190,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let cam: Camera = this.cameras.get(cameraKey) as Camera;
     if (cam !== undefined) {
       retVal = Array.from(cam.streams.keys()).find(k => k === streamKey) !== undefined;
-      if (retVal)
+      if (retVal) {
         cam.streams.delete(streamKey);
+        cam.streams.forEach((stream) => {
+          if(stream.motion)
+            stream.motion.trigger_recording_on = '';  // Set all recording triggers to 'None' as the the stream keys may be renumbered
+        })
+      }
       this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     }
     this.setUpTableFormControls();
@@ -238,9 +241,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
                 // Get the key of the stream on which recordings are to be triggered
                 let recStream: Stream = camera.streams.get(recStreamKey[1]) as Stream;
                 // Set up the recording
-                recStream.recording = new Recording();
-                recStream.recording.uri = 'http://localhost:8084/recording/stream' + recStream.absolute_num + '/';
-                recStream.recording.location = 'stream' + recStream.absolute_num;
+                if(recStream !== undefined) {
+                  recStream.recording = new Recording();
+                  recStream.recording.uri = 'http://localhost:8084/recording/stream' + recStream.absolute_num + '/';
+                  recStream.recording.location = 'stream' + recStream.absolute_num;
+                }
               }
             }
           }
@@ -258,10 +263,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
                 // Get the key of the stream on which recordings are to be triggered
                 let recStream: Stream = camera.streams.get(recStreamKey[1]) as Stream;
                 // Set up the recording
-                recStream.recording = new Recording();
-                recStream.recording.uri = '/recording/stream' + recStream.absolute_num + '/';
-                recStream.recording.location = 'stream' + recStream.absolute_num;
-              }
+                if(recStream !== undefined) {
+                  recStream.recording = new Recording();
+                  recStream.recording.uri = '/recording/stream' + recStream.absolute_num + '/';
+                  recStream.recording.location = 'stream' + recStream.absolute_num;
+                }
+               }
             }
           }
         }
