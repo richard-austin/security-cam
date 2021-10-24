@@ -46,11 +46,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   @ViewChild('errorReporting') errorReporting!: ReportingComponent;
   downloading: boolean = true;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['delete', 'expand', 'name', 'address1', 'controlUri'];
+  cameraColumns = ['delete', 'expand', 'name', 'address', 'controlUri'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
-  streamColumns = ['stream_id', 'delete', 'descr', 'netcam_uri', 'uri', 'nms_uri', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
+  streamColumns = ['stream_id', 'delete', 'descr', 'netcam_uri', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
   streamFooterColumns = ['buttons']
 //  camSetupFormGroup!: FormGroup;
   camControls!: FormArray;
@@ -150,9 +150,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         }
 
         return new FormGroup({
-          trigger_recording_on: new FormControl(stream.descr, [Validators.nullValidator]),
           descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
           netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.maxLength(40)]),
+          video_width: new FormControl(stream.video_width, [Validators.required, Validators.min(90), Validators.max(5000)]),
+          video_height: new FormControl(stream.video_height, [Validators.required, Validators.min(90), Validators.max(3000)]),
         }, {updateOn: "change"});
       });
 
@@ -160,6 +161,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       this.streamControls[index++] = new FormArray(toStreamGroups);
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
+        address: new FormControl(camera.address, [Validators.maxLength(15)]),
+        controlUri: new FormControl(camera.controlUri, [Validators.maxLength(55)]),
       }, {updateOn: "change"});
     });
 
