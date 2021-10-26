@@ -12,6 +12,7 @@ export class CameraParams
     webVersion!: string;
 }
 export class Motion {
+  enabled: boolean = false;
   mask_file:string = '';  // Mask file which defines area used in motion sensing
   trigger_recording_on: string ='';  // The name of the camera stream on which recordings will be triggered following
                                      // Motion events on this camera stream (usually another stream on the same physical
@@ -31,7 +32,7 @@ export class Stream {
   netcam_uri: string = "";
   uri: string = "";
   nms_uri: string = "";
-  motion: Motion | null = null;
+  motion: Motion = new Motion();
   video_width: number = 0;
   video_height: number = 0;
   recording: Recording = new Recording();

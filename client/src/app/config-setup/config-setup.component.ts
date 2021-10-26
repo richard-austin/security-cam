@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera, Motion, Recording, Stream} from "../cameras/Camera";
+import {Camera, Recording, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {
@@ -90,6 +90,7 @@ export function isValidMaskFilePath(): ValidatorFn {
 })
 export class ConfigSetupComponent implements OnInit, AfterViewInit {
   @ViewChild('errorReporting') errorReporting!: ReportingComponent;
+
   downloading: boolean = true;
   cameras: Map<string, Camera> = new Map<string, Camera>();
   cameraColumns = ['delete', 'expand', 'name', 'address', 'controlUri'];
@@ -124,9 +125,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   updateCamField(index: number, field: string) {
     const control = this.getCamControl(index, field);
-    if (control.valid) {
+    if (control) {
       this.updateCam(index, field, control.value);
-    }
+     }
+    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+    this.setUpTableFormControls();
   }
 
   getStreamControl(camIndex: number, streamIndex: number, fieldName: string): FormControl {
@@ -159,20 +162,17 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   updateStreamField(camIndex: number, streamIndex: number, field: string) {
     const control = this.getStreamControl(camIndex, streamIndex, field);
-    if (control.valid) {
+    if (control) {
       this.updateStream(camIndex, streamIndex, field, control.value);
     }
   }
 
   updateMotionField(camIndex: number, streamIndex: number, field: string) {
     const control = this.getMotionControl(camIndex, streamIndex, field);
-    if (control?.valid) {
+    if (control) {
       this.updateMotion(camIndex, streamIndex, field, control.value);
     }
   }
-
-  private readonly none = '';
-  private readonly noMaskFile = '';
 
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
@@ -190,24 +190,16 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         return new FormGroup({
           descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
           netcam_uri: new FormControl(stream.netcam_uri, [isValidNetCamURI()]),
-          video_width: new FormControl({
-            value: stream.video_width,
-            disabled: stream.motion === null
-          }, [Validators.required, Validators.min(90), Validators.max(5000)]),
-          video_height: new FormControl({
-            value: stream.video_height,
-            disabled: stream.motion === null
-          }, [Validators.required, Validators.min(90), Validators.max(3000)]),
+          video_width: new FormControl({value: stream.video_width, disabled: !stream.motion?.enabled}, [Validators.required, Validators.min(90), Validators.max(5000)]),
+          video_height: new FormControl({value: stream.video_height, disabled: !stream.motion?.enabled}, [Validators.required, Validators.min(90), Validators.max(3000)]),
         }, {updateOn: "change"});
       });
 
       const toMotionGroups = list$.value.map((stream: Stream) => {
         return new FormGroup({
-          trigger_recording_on: new FormControl(stream.motion ? stream.motion.trigger_recording_on : this.none, [Validators.nullValidator]),
-          mask_file: new FormControl({
-            value: stream.motion ? stream.motion.mask_file : this.noMaskFile,
-            disabled: stream.motion === null
-          }, [isValidMaskFilePath(), Validators.maxLength(55)])
+        //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
+          trigger_recording_on: new FormControl({value: stream.motion.trigger_recording_on, disabled: !stream.motion.enabled} , [Validators.nullValidator]),
+          mask_file: new FormControl({value: stream.motion.mask_file, disabled: !stream.motion.enabled}, [isValidMaskFilePath(), Validators.maxLength(55)])
         }, {updateOn: "change"});
       });
 
@@ -216,7 +208,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
         address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [isValidIP()]),
-        controlUri: new FormControl(camera.controlUri, [Validators.maxLength(55)]),
+        controlUri: new FormControl({value: camera.controlUri, disabled: camera.name===''}, [Validators.maxLength(55)]),
       }, {updateOn: "change"});
     });
 
@@ -249,7 +241,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       if (retVal) {
         cam.streams.delete(streamKey);
         cam.streams.forEach((stream) => {
-          if (stream.motion)
+          if (stream.motion.enabled)
             stream.motion.trigger_recording_on = '';  // Set all recording triggers to 'None' as the the stream keys may be renumbered
         })
       }
@@ -287,7 +279,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
           stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
 
-          if (stream.motion !== null) {
+          if (stream.motion.enabled) {
             stream.recording = new Recording();
             stream.recording.uri = 'http://localhost:8084/recording/stream' + streamNum + '/';
             stream.recording.location = 'stream' + streamNum;
@@ -308,7 +300,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         } else {  // Production mode
           stream.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
-          if (stream.motion !== null) {
+          if (stream.motion.enabled) {
             stream.recording = new Recording();
             stream.recording.uri = '/recording/stream' + streamNum + '/';
             stream.recording.location = 'stream' + streamNum;
@@ -352,26 +344,24 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    * @param cam: The  parent camera
    */
   setMotionStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
-    if (stream.motion === null) {
+
+    if ($event.checked) {
       // Set all to null before setting this one as only one is allowed to be selected.
       cam.streams.forEach((stream: Stream) => {
-        // @ts-ignore
-        stream.motion = null;
+        stream.motion.enabled = false;
         // @ts-ignore
         stream.recording = null;
+        stream.motion.trigger_recording_on = '';
       })
-      stream.motion = new Motion();
-      stream.motion.trigger_recording_on = '';
-    } else {
-      // @ts-ignore
-      stream.motion = null;
+     } else {
       // @ts-ignore
       stream.recording = null;
     }
 
-    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
-    // Ensure that the trigger_recording_on setting is shown
+    stream.motion.enabled = $event.checked;
+  //  this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
 
+    // Ensure that the trigger_recording_on setting is shown
     this.setUpTableFormControls();
   }
 
