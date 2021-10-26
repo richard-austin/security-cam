@@ -93,7 +93,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   downloading: boolean = true;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['delete', 'expand', 'name', 'address', 'controlUri'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'address', 'controlUri'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -127,7 +127,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     const control = this.getCamControl(index, field);
     if (control) {
       this.updateCam(index, field, control.value);
-     }
+    }
     this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     this.setUpTableFormControls();
   }
@@ -190,16 +190,28 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         return new FormGroup({
           descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
           netcam_uri: new FormControl(stream.netcam_uri, [isValidNetCamURI()]),
-          video_width: new FormControl({value: stream.video_width, disabled: !stream.motion?.enabled}, [Validators.required, Validators.min(90), Validators.max(5000)]),
-          video_height: new FormControl({value: stream.video_height, disabled: !stream.motion?.enabled}, [Validators.required, Validators.min(90), Validators.max(3000)]),
+          video_width: new FormControl({
+            value: stream.video_width,
+            disabled: !stream.motion?.enabled
+          }, [Validators.required, Validators.min(90), Validators.max(5000)]),
+          video_height: new FormControl({
+            value: stream.video_height,
+            disabled: !stream.motion?.enabled
+          }, [Validators.required, Validators.min(90), Validators.max(3000)]),
         }, {updateOn: "change"});
       });
 
       const toMotionGroups = list$.value.map((stream: Stream) => {
         return new FormGroup({
-        //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
-          trigger_recording_on: new FormControl({value: stream.motion.trigger_recording_on, disabled: !stream.motion.enabled} , [Validators.nullValidator]),
-          mask_file: new FormControl({value: stream.motion.mask_file, disabled: !stream.motion.enabled}, [isValidMaskFilePath(), Validators.maxLength(55)])
+          //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
+          trigger_recording_on: new FormControl({
+            value: stream.motion.trigger_recording_on,
+            disabled: !stream.motion.enabled
+          }, [Validators.nullValidator]),
+          mask_file: new FormControl({
+            value: stream.motion.mask_file,
+            disabled: !stream.motion.enabled
+          }, [isValidMaskFilePath(), Validators.maxLength(55)])
         }, {updateOn: "change"});
       });
 
@@ -208,7 +220,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
         address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [isValidIP()]),
-        controlUri: new FormControl({value: camera.controlUri, disabled: camera.name===''}, [Validators.maxLength(55)]),
+        controlUri: new FormControl({
+          value: camera.controlUri,
+          disabled: camera.name === ''
+        }, [Validators.maxLength(55)]),
       }, {updateOn: "change"});
     });
 
@@ -276,7 +291,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       // Process the streams
       camera.streams.forEach((stream) => {
         if (isDevMode()) {  // Development mode
-          stream.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
+          stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
 
           if (stream.motion.enabled) {
@@ -298,7 +313,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             }
           }
         } else {  // Production mode
-          stream.nms_uri = "http://localhost:8009/nms/stream" + streamNum;
+          stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
           if (stream.motion.enabled) {
             stream.recording = new Recording();
@@ -353,13 +368,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         stream.recording = null;
         stream.motion.trigger_recording_on = '';
       })
-     } else {
+    } else {
       // @ts-ignore
       stream.recording = null;
     }
 
     stream.motion.enabled = $event.checked;
-  //  this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+    //  this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
 
     // Ensure that the trigger_recording_on setting is shown
     this.setUpTableFormControls();
@@ -413,6 +428,34 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     return retVal;
   }
 
+  commitConfig() {
+    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+    let cams: Map<string, Camera> = new Map(this.cameras);
+    // First convert the map to JSON
+    let jsonObj: {} = {};
+
+    cams.forEach((cam, key: string) => {
+      let newCam: Camera = JSON.parse(JSON.stringify(cam))
+      let jsonStreams: {} = {};
+      cam.streams.forEach((strValue, strKey: string) => {
+        let newStream: Stream = JSON.parse(JSON.stringify(strValue))
+        // @ts-ignore
+        delete newStream.selected;
+        // @ts-ignore
+        delete newStream.absolute_num;
+        // @ts-ignore
+        jsonStreams[strKey] = newStream;
+      })
+      // @ts-ignore
+      newCam.streams = jsonStreams;
+      // @ts-ignore
+      jsonObj[key] = newCam;
+    })
+
+    let x = JSON.stringify(jsonObj);
+    let y = x;
+  }
+
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the check boxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
@@ -425,4 +468,5 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
   }
+
 }
