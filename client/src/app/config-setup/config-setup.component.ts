@@ -89,7 +89,7 @@ export function isValidMaskFilePath(): ValidatorFn {
   ],
 })
 export class ConfigSetupComponent implements OnInit, AfterViewInit {
-  @ViewChild('errorReporting') errorReporting!: ReportingComponent;
+  @ViewChild('errorReporting') reporting!: ReportingComponent;
 
   downloading: boolean = true;
   cameras: Map<string, Camera> = new Map<string, Camera>();
@@ -453,8 +453,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       jsonObj[key] = newCam;
     })
 
-    let x = JSON.stringify(jsonObj);
-    let y = x;
+    this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(result => {
+        this.reporting.successMessage = result;
+      },
+      reason => this.reporting.errorMessage = reason
+    )
   }
 
   /**
@@ -475,7 +478,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         this.downloading = false;
         this.setUpTableFormControls();
       },
-      reason => this.errorReporting.errorMessage = reason);
+      reason => this.reporting.errorMessage = reason);
   }
 
   ngAfterViewInit(): void {

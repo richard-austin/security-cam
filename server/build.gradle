@@ -81,6 +81,7 @@ dependencies {
     implementation "org.grails.plugins:events"
     implementation "org.grails.plugins:hibernate5"
     implementation "org.hibernate:hibernate-core:5.4.18.Final"
+    implementation 'com.google.code.gson:gson:2.8.7'
     compile "org.grails.plugins:gsp"
 
     implementation 'commons-io:commons-io:2.8.0'

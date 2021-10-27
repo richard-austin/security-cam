@@ -179,4 +179,10 @@ export class CameraService {
       }),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
+
+  updateCameras(camerasJON: string): Observable<string>
+  {
+    let cameras = {camerasJSON: camerasJON};
+    return this.http.post<string>(this._baseUrl.getLink("cam", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe();
+  }
 }
