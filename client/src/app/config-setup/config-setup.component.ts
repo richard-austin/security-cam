@@ -22,9 +22,9 @@ export function isValidIP(): ValidatorFn {
     const value = control.value;
 
     if (!value) {
-      return null;
+      return {address: true};
     }
-
+    // Camera IP address is required if control URI is defined.
     const addressValid = /\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/.test(value);
 
     return !addressValid ? {address: true} : null;
@@ -105,6 +105,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   motionControls: FormArray[] = [];
 
   list$!: BehaviorSubject<Camera[]>;
+  confirmSave: boolean = false;
+  confirmNew: boolean = false;
 
   constructor(private cameraSvc: CameraService) {
   }
@@ -188,7 +190,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
       const toStreamGroups = list$.value.map((stream: Stream) => {
         return new FormGroup({
-          descr: new FormControl(stream.descr, [Validators.required, Validators.maxLength(25)]),
+          descr: new FormControl({value: stream.descr, disabled: false}, [Validators.required, Validators.maxLength(25)]),
           netcam_uri: new FormControl(stream.netcam_uri, [isValidNetCamURI()]),
           video_width: new FormControl({
             value: stream.video_width,
@@ -222,13 +224,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [isValidIP()]),
         controlUri: new FormControl({
           value: camera.controlUri,
-          disabled: camera.name === ''
+          disabled: false
         }, [Validators.maxLength(55)]),
       }, {updateOn: "change"});
     });
 
     this.camControls = new FormArray(toCameraGroups);
-  }
+   }
 
   /**
    * deleteCamera: Delete a camera from the cameras.map
@@ -359,7 +361,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    * @param cam: The  parent camera
    */
   setMotionStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
-
     if ($event.checked) {
       // Set all to null before setting this one as only one is allowed to be selected.
       cam.streams.forEach((stream: Stream) => {
@@ -454,6 +455,17 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
     let x = JSON.stringify(jsonObj);
     let y = x;
+  }
+
+  /**
+   * createNew: Start new configuration with a single camera and stream
+   */
+  createNew() {
+      this.cameras = new Map<string, Camera>();
+      this.cameras.set('camera1', new Camera());
+      this.cameras.get('camera1')?.streams.set('stream1', new Stream());
+      this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+      this.setUpTableFormControls();
   }
 
   ngOnInit(): void {

@@ -134,3 +134,15 @@ td, th{
 .mat-column-video_width {
   width: 4%;
 }
+
+.confirm-group{
+  >span{
+    background: #d9a11a;
+    color: black;
+    padding: 0.9rem;
+    border-radius: 1rem;
+  }
+  >button{
+    margin-left: 0.5rem;
+  }
+}
