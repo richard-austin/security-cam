@@ -40,6 +40,8 @@ class CamController {
     @Secured(['ROLE_CLIENT'])
     def updateCameras(UpdateCamerasCommand cmd)
     {
+        ObjectCommandResponse result
+
         if(cmd.hasErrors())
         {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'updateCameras')
@@ -47,12 +49,8 @@ class CamController {
             render(status: 400, text: errorsMap as JSON)
         }
         else {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create()
-            JsonElement je = JsonParser.parseString(cmd.camerasJSON)
-            String prettyJsonString = gson.toJson(je)
-
-            def x = prettyJsonString
-            render (status: 200, text: "")
+            result = camService.updateCameras(cmd)
+            render result.responseObject as JSON
         }
     }
 }

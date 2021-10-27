@@ -2,7 +2,7 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
-import {catchError, map} from "rxjs/operators";
+import {catchError, map, tap} from "rxjs/operators";
 import {Camera, CameraStream, Stream} from "./Camera";
 
 
@@ -122,28 +122,34 @@ export class CameraService {
     return this.cameras;
   }
 
+  convertCamsObjectToMap(cams:Object):Map<string, Camera>
+  {
+    let cameras: Map<string, Camera> =new Map<string, Camera>();
+
+    for (let key in cams) {
+      // @ts-ignore
+      let cam: Camera = cams[key];
+      let streams:Map<string, Stream> = new Map<string, Stream>();
+      for (let j in cam.streams) {
+        // @ts-ignore
+        let stream:Stream =  cam.streams[j] as Stream;
+        stream.selected = stream.defaultOnMultiDisplay;
+        streams.set(j, stream);
+      }
+      cam.streams = streams;  //Make the streams object into a map
+      cameras.set(key, cam);
+    }
+    return cameras;
+  }
+
   /**
    * loadCameras: Get camera set up details from the server
    * @private
    */
   loadCameras(): Observable<Map<string, Camera>> {
     return this.http.post<Map<string, Camera>>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
-      map((cams: any) => {
-        let cameras: Map<string, Camera> =new Map<string, Camera>();
-
-        for (let key in cams) {
-          let cam: Camera = cams[key];
-          let streams:Map<string, Stream> = new Map<string, Stream>();
-          for (let j in cam.streams) {
-            // @ts-ignore
-            let stream:Stream =  cam.streams[j] as Stream;
-            stream.selected = stream.defaultOnMultiDisplay;
-            streams.set(j, stream);
-          }
-          cam.streams = streams;  //Make the streams object into a map
-          cameras.set(key, cam);
-        }
-        return cameras;
+      map((cams: Object) => {
+        return this.convertCamsObjectToMap(cams);
       }
       ),
       catchError((err: HttpErrorResponse) => throwError(err)));
@@ -180,9 +186,20 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  updateCameras(camerasJON: string): Observable<string>
+  updateCameras(camerasJON: string): Observable<Map<string, Camera>>
   {
     let cameras = {camerasJSON: camerasJON};
-    return this.http.post<string>(this._baseUrl.getLink("cam", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe();
+    return this.http.post<Map<string, Camera>>(this._baseUrl.getLink("cam", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe(
+      map(cams =>{
+        return this.convertCamsObjectToMap(cams);
+      }),
+    tap((cams:Map<string, Camera>) => {
+      this.cameras = [];
+
+      cams.forEach((cam: Camera) => {
+        this.cameras.push(cam);
+      });
+    })
+    );
   }
 }

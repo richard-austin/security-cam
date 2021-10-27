@@ -454,7 +454,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     })
 
     this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(result => {
-        this.reporting.successMessage = result;
+        this.reporting.successMessage = "Update Cameras Successful!";
+        this.cameras=result;
       },
       reason => this.reporting.errorMessage = reason
     )

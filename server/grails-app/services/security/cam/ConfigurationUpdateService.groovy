@@ -71,7 +71,7 @@ class ConfigurationUpdateService {
             Camera cam = it.value
             cam.streams.each { streamIt ->
                 Stream stream = streamIt.value
-                if (stream.motion != null) {
+                if (stream.motion.enabled) {
                     String motionConf =
                             """
 # /home/security-cam/motion/conf.d/${it.key}.conf
@@ -89,7 +89,7 @@ class ConfigurationUpdateService {
 camera_name ${stream.motion.trigger_recording_on}
 
 # Mask to exclude public areas
-${stream.motion?.mask_file ? "mask_file $stream.motion.mask_file" : "; mask_file"}
+${stream.motion.mask_file ? "mask_file $stream.motion.mask_file" : "; mask_file"}
 
 # Numeric identifier for the camera.
 camera_id ${++camId}
