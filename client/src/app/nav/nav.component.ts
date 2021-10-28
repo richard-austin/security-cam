@@ -181,6 +181,11 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Gets the core temperature every minute (Raspberry pi only), and keeps the session alive
     this.pingHandle = this.userIdle.ping$.subscribe(() => this.getTemperature());
+
+    this.cameraSvc.getConfigUpdates().subscribe(() => {
+      this.cameraStreams = this.cameraSvc.getCameraStreams();
+      this.cameras = this.cameraSvc.getCameras()
+    });
   }
 
    ngAfterViewInit(): void {

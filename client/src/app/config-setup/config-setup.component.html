@@ -24,9 +24,10 @@
 
       <ng-container matColumnDef="delete">
         <th mat-header-cell *matHeaderCellDef>Delete</th>
-        <td mat-cell *matCellDef="let cam" (click)="deleteCamera(cam.key)">
+        <td mat-cell *matCellDef="let cam">
           <button mat-icon-button matTooltip="Delete {{cam.key}}" matTooltipClass="tooltip"
-          [disabled]="cameras.size <= 1 || confirmSave || confirmNew">
+                  [disabled]="cameras.size <= 1 || confirmSave || confirmNew"
+                  (click)="deleteCamera(cam.key)">
             <mat-icon>delete</mat-icon>
           </button>
         </td>
@@ -105,9 +106,10 @@
               </ng-container>
               <ng-container matColumnDef="delete">
                 <th mat-header-cell *matHeaderCellDef>Delete</th>
-                <td mat-cell *matCellDef="let stream" (click)="deleteStream(cam.key, stream.key)" [width]="50">
+                <td mat-cell *matCellDef="let stream" [width]="50">
                   <button mat-icon-button matTooltip="Delete this stream" matTooltipClass="tooltip"
-                          [disabled]="(cam.value.streams.size <= 1) || confirmSave || confirmNew">
+                          [disabled]="(cam.value.streams.size <= 1) || confirmSave || confirmNew"
+                          (click)="deleteStream(cam.key, stream.key)">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </td>

@@ -1,4 +1,4 @@
-<mat-card *ngIf="error || success" [ngClass]="{'alert-danger': error, 'alert-success': success}" class="mat-elevation-z8">
+<mat-card *ngIf="error || success" [ngClass]="{'alert-danger': error, 'alert-success': success}" class="reporting mat-elevation-z8">
   <div *ngIf="success">
     Success: {{success}}
   </div>
@@ -10,7 +10,7 @@
   </div>
   <div *ngIf="!success && error?.status != 400">
     <div *ngIf="error?.status != 0">Error status: {{error?.status}}</div>
-    <div *ngIf="showMessageInError">{{isHTML(error?.error) ? error?.message : error?.error}}</div>
+    <div *ngIf="showMessageInError">{{error?.error}}</div>
     <div *ngIf="!showMessageInError">See logs for more information</div>
   </div>
   <button mat-flat-button class="dismiss-button" color="default" (click)="dismiss()">Dismiss</button>

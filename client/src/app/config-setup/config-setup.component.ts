@@ -190,7 +190,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
       const toStreamGroups = list$.value.map((stream: Stream) => {
         return new FormGroup({
-          descr: new FormControl({value: stream.descr, disabled: false}, [Validators.required, Validators.maxLength(25)]),
+          descr: new FormControl({
+            value: stream.descr,
+            disabled: false
+          }, [Validators.required, Validators.maxLength(25)]),
           netcam_uri: new FormControl(stream.netcam_uri, [isValidNetCamURI()]),
           video_width: new FormControl({
             value: stream.video_width,
@@ -230,7 +233,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     });
 
     this.camControls = new FormArray(toCameraGroups);
-   }
+  }
 
   /**
    * deleteCamera: Delete a camera from the cameras.map
@@ -296,21 +299,19 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
 
-          if (stream.motion.enabled) {
-            stream.recording = new Recording();
-            stream.recording.uri = 'http://localhost:8084/recording/stream' + streamNum + '/';
-            stream.recording.location = 'stream' + streamNum;
-            if (stream.motion.trigger_recording_on !== '') {
-              let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
-              if (recStreamKey.length === 2) {
-                // Get the key of the stream on which recordings are to be triggered
-                let recStream: Stream = camera.streams.get(recStreamKey[1]) as Stream;
-                // Set up the recording
-                if (recStream !== undefined) {
-                  recStream.recording = new Recording();
-                  recStream.recording.uri = 'http://localhost:8084/recording/stream' + recStream.absolute_num + '/';
-                  recStream.recording.location = 'stream' + recStream.absolute_num;
-                }
+          stream.recording = new Recording();
+          stream.recording.uri = 'http://localhost:8084/recording/stream' + streamNum + '/';
+          stream.recording.location = 'stream' + streamNum;
+          if (stream.motion.trigger_recording_on !== '') {
+            let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
+            if (recStreamKey.length === 2) {
+              // Get the key of the stream on which recordings are to be triggered
+              let recStream: Stream = camera.streams.get(recStreamKey[1]) as Stream;
+              // Set up the recording
+              if (recStream !== undefined) {
+                recStream.recording = new Recording();
+                recStream.recording.uri = 'http://localhost:8084/recording/stream' + recStream.absolute_num + '/';
+                recStream.recording.location = 'stream' + recStream.absolute_num;
               }
             }
           }
@@ -455,7 +456,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
     this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(result => {
         this.reporting.successMessage = "Update Cameras Successful!";
-        this.cameras=result;
+        this.cameras = result;
+        this.cameraSvc.configUpdated();  // Tell nav component to reload the camera data
       },
       reason => this.reporting.errorMessage = reason
     )
@@ -465,11 +467,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    * createNew: Start new configuration with a single camera and stream
    */
   createNew() {
-      this.cameras = new Map<string, Camera>();
-      this.cameras.set('camera1', new Camera());
-      this.cameras.get('camera1')?.streams.set('stream1', new Stream());
-      this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
-      this.setUpTableFormControls();
+    this.cameras = new Map<string, Camera>();
+    this.cameras.set('camera1', new Camera());
+    this.cameras.get('camera1')?.streams.set('stream1', new Stream());
+    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+    this.setUpTableFormControls();
   }
 
   ngOnInit(): void {
@@ -479,10 +481,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         this.downloading = false;
         this.setUpTableFormControls();
       },
-      reason => this.reporting.errorMessage = reason);
+      reason => {
+        this.createNew();
+        this.reporting.errorMessage = reason;
+        this.downloading = false;
+      })
   }
 
   ngAfterViewInit(): void {
   }
-
 }

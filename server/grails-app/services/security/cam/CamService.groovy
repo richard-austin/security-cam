@@ -8,8 +8,9 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.apache.commons.io.IOUtils
-import org.apache.tomcat.util.json.JSONParser
+import org.grails.core.exceptions.GrailsException
 import org.grails.web.json.JSONObject
+import org.grails.web.json.parser.JSONParser
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.enums.PassFail
@@ -39,14 +40,16 @@ class CamService {
                 throw new Exception('Unknown environment, expecting production or development')
 
             String data = IOUtils.toString(fis, "UTF-8")
-            JSONParser parser = new JSONParser(data)
+            InputStream is = new ByteArrayInputStream(data.getBytes())
+            JSONParser parser = new JSONParser(is)
+
             Object obj = parser.parse()
             result.setResponseObject(obj)
         }
-        catch (Exception ex) {
+        catch (Throwable ex) {
             logService.cam.error "Exception in getCameras -> parse: " + ex.getMessage()
             result.status = PassFail.FAIL
-            result.error = ex.getMessage()
+            result.error = "The config file is corrupt, empty or does not exist. You can create a new config file using the Configure Camera Setup option under the General menu.   ....   " + ex.getMessage()
         }
 
         return result
