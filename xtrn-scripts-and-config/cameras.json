@@ -1,40 +1,47 @@
 {
   "camera1": {
-    "name": "Test Cam",
-    "address": "192.168.0.45",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
+    "address": "192.168.0.45",
     "streams": {
       "stream1": {
         "descr": "HD",
+        "video_height": 1080,
+        "motion": {
+          "trigger_recording_on": "",
+          "mask_file": "",
+          "enabled": false
+        },
+        "video_width": 1920,
+        "recording": {
+          "location": "stream1",
+          "uri": "/recording/stream1/",
+          "enabled": true
+        },
         "defaultOnMultiDisplay": false,
         "netcam_uri": "rtsp://192.168.0.45:554/11",
-        "uri": "/live/nms/cam1.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/cam1",
-        "motion": null,
-        "video_width": 1920,
-        "video_height": 1080,
-        "recording": {
-          "uri": "/recording/cam1/",
-          "location": "cam1"
-        }
+        "uri": "/live/nms/stream1.flv",
+        "nms_uri": "rtmp://localhost:1935/nms/stream1"
       },
       "stream2": {
-        "descr": "Low res.",
-        "defaultOnMultiDisplay": true,
-        "netcam_uri": "rtsp://192.168.0.45:554/12",
-        "uri": "/live/nms/cam2.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/cam2",
+        "descr": "Normal",
+        "video_height": 352,
         "motion": {
-          "mask_file": "/etc/security-cam/porch_cam_mask.pgm",
-          "trigger_recording_on": "camera1.stream1"
+          "trigger_recording_on": "camera1.stream1",
+          "mask_file": "",
+          "enabled": true
         },
         "video_width": 640,
-        "video_height": 352,
         "recording": {
-          "uri": "/recording/motion-cam2/",
-          "location": "motion-cam2"
-        }
+          "location": "stream2",
+          "uri": "/recording/stream2/",
+          "enabled": true
+        },
+        "defaultOnMultiDisplay": true,
+        "netcam_uri": "rtsp://192.168.0.45:554/12",
+        "uri": "/live/nms/stream2.flv",
+        "nms_uri": "rtmp://localhost:1935/nms/stream2"
       }
-    }
+    },
+    "name": "Test Cam"
   }
 }
