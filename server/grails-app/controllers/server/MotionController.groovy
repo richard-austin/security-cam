@@ -24,6 +24,7 @@ class MotionEvents {
 }
 
 class Recording {
+    boolean enabled
     String uri
     String location
 }

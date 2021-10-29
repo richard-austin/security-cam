@@ -1,63 +1,47 @@
 {
   "camera1": {
-    "controlUri": "",
-    "address": "",
+    "controlUri": "web/cgi-bin/hi3510/param.cgi",
+    "address": "192.168.0.45",
     "streams": {
       "stream1": {
-        "descr": "Normal",
-        "video_height": 352,
-        "motion": {
-          "trigger_recording_on": "",
-          "mask_file": "",
-          "enabled": true
-        },
-        "video_width": 640,
-        "recording": {
-          "uri": "http://localhost:8084/recording/stream1/",
-          "location": "stream1"
-        },
-        "defaultOnMultiDisplay": false,
-        "netcam_uri": "rtsp://192.168.0.45:554/12",
-        "uri": "http://localhost:8009/nms/stream1.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/stream1"
-      },
-      "stream2": {
         "descr": "HD",
-        "video_height": 0,
+        "video_height": 1080,
         "motion": {
           "trigger_recording_on": "",
           "mask_file": "",
           "enabled": false
         },
-        "video_width": 0,
+        "video_width": 1920,
         "recording": {
-          "uri": "http://localhost:8084/recording/stream2/",
-          "location": "stream2"
+          "location": "stream1",
+          "uri": "http://localhost:8084/recording/stream1/",
+          "enabled": true
         },
         "defaultOnMultiDisplay": false,
         "netcam_uri": "rtsp://192.168.0.45:554/11",
+        "uri": "http://localhost:8009/nms/stream1.flv",
+        "nms_uri": "rtmp://localhost:1935/nms/stream1"
+      },
+      "stream2": {
+        "descr": "Normal",
+        "video_height": 352,
+        "motion": {
+          "trigger_recording_on": "camera1.stream1",
+          "mask_file": "",
+          "enabled": true
+        },
+        "video_width": 640,
+        "recording": {
+          "location": "stream2",
+          "uri": "http://localhost:8084/recording/stream2/",
+          "enabled": true
+        },
+        "defaultOnMultiDisplay": false,
+        "netcam_uri": "rtsp://192.168.0.45:554/12",
         "uri": "http://localhost:8009/nms/stream2.flv",
         "nms_uri": "rtmp://localhost:1935/nms/stream2"
-      },
-      "stream3": {
-        "descr": "HD2",
-        "defaultOnMultiDisplay": false,
-        "netcam_uri": "rtsp://192.168.0.45:554/11",
-        "uri": "http://localhost:8009/nms/stream3.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/stream3",
-        "motion": {
-          "enabled": false,
-          "mask_file": "",
-          "trigger_recording_on": ""
-        },
-        "video_width": 0,
-        "video_height": 0,
-        "recording": {
-          "uri": "http://localhost:8084/recording/stream3/",
-          "location": "stream3"
-        }
       }
     },
-    "name": "Camera 1"
+    "name": "Test Cam"
   }
 }

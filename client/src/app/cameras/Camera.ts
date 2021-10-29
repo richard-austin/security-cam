@@ -21,6 +21,7 @@ export class Motion {
 
 export class Recording
 {
+  enabled: boolean = false
   uri: string = "";
   location: string = "";
 }

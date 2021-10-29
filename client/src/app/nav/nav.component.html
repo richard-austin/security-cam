@@ -19,7 +19,7 @@
       </button>
       <mat-menu #menuSelectCamera="matMenu">
         <ng-container *ngFor="let cs of cameraStreams">
-          <button mat-menu-item (click)="setVideoStream(cs);menuClosed()">
+          <button  mat-menu-item (click)="setVideoStream(cs);menuClosed()">
             {{cs.camera.name + " (" + cs.stream.descr + ")"}}
           </button>
         </ng-container>
@@ -31,7 +31,7 @@
       <button mat-button [matMenuTriggerFor]="menuSelectRecording">Select Recording</button>
       <mat-menu #menuSelectRecording="matMenu">
         <ng-container *ngFor="let cs of cameraStreams">
-          <button mat-menu-item (click)="showRecording(cs);menuClosed()">
+          <button mat-menu-item (click)="showRecording(cs);menuClosed()" *ngIf="cs.stream.recording.enabled">
             {{cs.camera.name + " (" + cs.stream.descr + ")"}}
           </button>
         </ng-container>
@@ -42,7 +42,7 @@
       <button mat-button [matMenuTriggerFor]="menuCameraSettings">Camera Settings</button>
       <mat-menu #menuCameraSettings="matMenu">
         <ng-container *ngFor="let cam of cameras">
-          <button *ngIf="cam.address!=undefined&&cam.controlUri!=undefined" mat-menu-item
+          <button *ngIf="cam.address!=''&&cam.controlUri!=''" mat-menu-item
                   (click)="cameraControl(cam);menuClosed()">
             {{cam.name}}
           </button>

@@ -82,9 +82,8 @@ run_motion() {
 
 run_nms &
 run_motion &
-run_ffmpeg "rtsp://192.168.0.45:554/12" "rtmp://localhost:1935/nms/stream1" "Camera_1_Normal" &
-run_ffmpeg "rtsp://192.168.0.45:554/11" "rtmp://localhost:1935/nms/stream2" "Camera_1_HD" &
-run_ffmpeg "rtsp://192.168.0.45:554/11" "rtmp://localhost:1935/nms/stream3" "Camera_1_HD2" &
+run_ffmpeg "rtsp://192.168.0.45:554/11" "rtmp://localhost:1935/nms/stream1" "Test_Cam_HD" &
+run_ffmpeg "rtsp://192.168.0.45:554/12" "rtmp://localhost:1935/nms/stream2" "Test_Cam_Normal" &
 
 run_check_ip_not_changed &
 

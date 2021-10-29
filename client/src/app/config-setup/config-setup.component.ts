@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera, Recording, Stream} from "../cameras/Camera";
+import {Camera, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {
@@ -290,7 +290,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       // Also set the absolute stream number
       camera.streams.forEach((stream: Stream) => {
         // @ts-ignore
-        stream.recording = null
+        stream.recording.enabled = false
         stream.absolute_num = absoluteStreamNo++;
       });
       // Process the streams
@@ -299,19 +299,22 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
 
-          stream.recording = new Recording();
-          stream.recording.uri = 'http://localhost:8084/recording/stream' + streamNum + '/';
-          stream.recording.location = 'stream' + streamNum;
-          if (stream.motion.trigger_recording_on !== '') {
-            let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
-            if (recStreamKey.length === 2) {
-              // Get the key of the stream on which recordings are to be triggered
-              let recStream: Stream = camera.streams.get(recStreamKey[1]) as Stream;
-              // Set up the recording
-              if (recStream !== undefined) {
-                recStream.recording = new Recording();
-                recStream.recording.uri = 'http://localhost:8084/recording/stream' + recStream.absolute_num + '/';
-                recStream.recording.location = 'stream' + recStream.absolute_num;
+          if (stream.motion.enabled) {
+           // stream.recording = new Recording();
+            stream.recording.enabled = true;
+            stream.recording.uri = 'http://localhost:8084/recording/stream' + streamNum + '/';
+            stream.recording.location = 'stream' + streamNum;
+            if (stream.motion.trigger_recording_on !== '') {
+              let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
+              if (recStreamKey.length === 2) {
+                // Get the key of the stream on which recordings are to be triggered
+                let recStream: Stream = camera.streams.get(recStreamKey[1]) as Stream;
+                // Set up the recording
+                if (recStream !== undefined) {
+                  recStream.recording.enabled = true;
+                  recStream.recording.uri = 'http://localhost:8084/recording/stream' + recStream.absolute_num + '/';
+                  recStream.recording.location = 'stream' + recStream.absolute_num;
+                }
               }
             }
           }
@@ -319,7 +322,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
           if (stream.motion.enabled) {
-            stream.recording = new Recording();
+           // stream.recording = new Recording();
+            stream.recording.enabled = true
             stream.recording.uri = '/recording/stream' + streamNum + '/';
             stream.recording.location = 'stream' + streamNum;
             if (stream.motion.trigger_recording_on !== '') {
@@ -330,7 +334,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
                 let recStream: Stream = camera.streams.get(recStreamKey[1]) as Stream;
                 // Set up the recording
                 if (recStream !== undefined) {
-                  recStream.recording = new Recording();
+                  recStream.recording.enabled = true;
                   recStream.recording.uri = '/recording/stream' + recStream.absolute_num + '/';
                   recStream.recording.location = 'stream' + recStream.absolute_num;
                 }
@@ -363,16 +367,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    */
   setMotionStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
     if ($event.checked) {
-      // Set all to null before setting this one as only one is allowed to be selected.
+      // Set all to disabled before setting this one as only one is allowed to be selected.
       cam.streams.forEach((stream: Stream) => {
         stream.motion.enabled = false;
-        // @ts-ignore
-        stream.recording = null;
+        stream.recording.enabled = false;
         stream.motion.trigger_recording_on = '';
       })
     } else {
-      // @ts-ignore
-      stream.recording = null;
+      stream.recording.enabled = false;
     }
 
     stream.motion.enabled = $event.checked;
@@ -383,7 +385,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   setRecordingTrigger($event: MatSelectChange, stream: Stream) {
-    if (stream?.motion !== null) {
+    if (stream.motion.enabled) {
       stream.motion.trigger_recording_on = $event.value;
       this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     }
