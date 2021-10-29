@@ -251,7 +251,7 @@
                   matTooltip="Start a new configuration"
                   matTooltipClass="tooltip"
                   *ngIf="!confirmNew">
-            <mat-icon>create</mat-icon>
+            <mat-icon>note</mat-icon>
           </button>
           <button [disabled]="anyInvalid() || confirmNew" mat-icon-button (click)="confirmSave=true"
                   matTooltip="Commit the configuration"
