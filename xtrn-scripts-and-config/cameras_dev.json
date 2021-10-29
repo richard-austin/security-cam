@@ -7,9 +7,9 @@
         "descr": "HD",
         "video_height": 1080,
         "motion": {
-          "trigger_recording_on": "",
+          "trigger_recording_on": "camera1.stream2",
           "mask_file": "",
-          "enabled": false
+          "enabled": true
         },
         "video_width": 1920,
         "recording": {
@@ -26,9 +26,9 @@
         "descr": "Normal",
         "video_height": 352,
         "motion": {
-          "trigger_recording_on": "camera1.stream1",
+          "trigger_recording_on": "",
           "mask_file": "",
-          "enabled": true
+          "enabled": false
         },
         "video_width": 640,
         "recording": {
@@ -36,7 +36,7 @@
           "uri": "http://localhost:8084/recording/stream2/",
           "enabled": true
         },
-        "defaultOnMultiDisplay": false,
+        "defaultOnMultiDisplay": true,
         "netcam_uri": "rtsp://192.168.0.45:554/12",
         "uri": "http://localhost:8009/nms/stream2.flv",
         "nms_uri": "rtmp://localhost:1935/nms/stream2"

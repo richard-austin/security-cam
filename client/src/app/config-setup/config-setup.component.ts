@@ -97,7 +97,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
-  streamColumns = ['stream_id', 'delete', 'descr', 'netcam_uri', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
+  streamColumns = ['stream_id', 'delete', 'descr', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
   streamFooterColumns = ['buttons']
 //  camSetupFormGroup!: FormGroup;
   camControls!: FormArray;
@@ -259,8 +259,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     if (cam !== undefined) {
       retVal = Array.from(cam.streams.keys()).find(k => k === streamKey) !== undefined;
       if (retVal) {
+        let enableFirstAsMultiDisplayDefault: boolean = (cam.streams.get(streamKey) as Stream).defaultOnMultiDisplay;
         cam.streams.delete(streamKey);
         cam.streams.forEach((stream) => {
+          // Ensure we don't land up with none selected as default stream to show on multi cameras display
+          if(enableFirstAsMultiDisplayDefault) {
+            stream.defaultOnMultiDisplay = enableFirstAsMultiDisplayDefault;
+            enableFirstAsMultiDisplayDefault = false;
+          }
           if (stream.motion.enabled)
             stream.motion.trigger_recording_on = '';  // Set all recording triggers to 'None' as the the stream keys may be renumbered
         })
@@ -384,6 +390,20 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     this.setUpTableFormControls();
   }
 
+  setDefaultOnMultiDisplayStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
+    if ($event.checked) {   // Should only ever be checked as we disable the checkbox when it is checked to
+                             // always retain one stream set as the default
+      // First clear the flag on all streams
+      cam.streams.forEach((stream: Stream) => {
+          stream.defaultOnMultiDisplay = false;
+      });
+      // Now set the selected one
+      stream.defaultOnMultiDisplay = true;
+    }
+    else
+      $event.source.checked = true;
+  }
+
   setRecordingTrigger($event: MatSelectChange, stream: Stream) {
     if (stream.motion.enabled) {
       stream.motion.trigger_recording_on = $event.value;
@@ -392,7 +412,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   addCamera() {
-    this.cameras.set('anyname', new Camera())
+    let newCamera: Camera = new Camera();
+    let newStream: Stream = new Stream();
+    newStream.defaultOnMultiDisplay = true; // Set the first stream defined for the camera to be
+                                            // the multi cam display default
+    newCamera.streams.set('stream1', newStream);
+    this.cameras.set('anyname', newCamera);
     this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     this.setUpTableFormControls();
   }
@@ -471,7 +496,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   createNew() {
     this.cameras = new Map<string, Camera>();
     this.cameras.set('camera1', new Camera());
-    this.cameras.get('camera1')?.streams.set('stream1', new Stream());
+    let stream1:Stream = new Stream();
+    stream1.defaultOnMultiDisplay = true;  // There must always be just one default on multi display so set it on the only stream.
+    this.cameras.get('camera1')?.streams.set('stream1',stream1);
     this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     this.setUpTableFormControls();
   }
