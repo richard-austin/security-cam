@@ -15,6 +15,7 @@ import {
 import {BehaviorSubject} from 'rxjs';
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {MatSelectChange} from '@angular/material/select/select';
+import {HttpErrorResponse} from "@angular/common/http";
 
 export function isValidIP(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -510,9 +511,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         this.downloading = false;
         this.setUpTableFormControls();
       },
-      reason => {
+      () => {
         this.createNew();
-        this.reporting.errorMessage = reason;
+        this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
         this.downloading = false;
       })
   }
