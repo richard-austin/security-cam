@@ -25,13 +25,9 @@ mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream4
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream5
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream6
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream7
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-stream1
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-stream2
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-stream3
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-stream4
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-stream5
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-stream6
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-stream7
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream8
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream9
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream10
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/logs
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion

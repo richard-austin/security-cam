@@ -57,12 +57,13 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param stream: The stream on which the selection is being made
    */
   updateCameras($event: MatCheckboxChange, camera: Camera, stream: Stream) {
-    // Ensure all other streams on this camera are disabled, only one is to be enabled
+    // Ensure all other streams on this camera are deselected, only one is to be selected
     camera.streams.forEach((stream:Stream) => {
       stream.selected = false;
     })
-    // now select/unselect this one
-    stream.selected = $event.checked;
+
+    // Now select this one. If the checkbox was clicked when checked, make sure it doesn't go unchecked (leaving all unchecked)
+    $event.source.checked = stream.selected = true;
   }
 
   /**

@@ -103,8 +103,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 //  camSetupFormGroup!: FormGroup;
   camControls!: FormArray;
   streamControls: FormArray[] = [];
-  motionControls: FormArray[] = [];
-
   list$!: BehaviorSubject<Camera[]>;
   confirmSave: boolean = false;
   confirmNew: boolean = false;
@@ -139,26 +137,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     return this.streamControls[camIndex].at(streamIndex).get(fieldName) as FormControl;
   }
 
-  getMotionControl(camIndex: number, streamIndex: number, fieldName: string): FormControl {
-    return this.motionControls[camIndex].at(streamIndex).get(fieldName) as FormControl;
-  }
-
   updateStream(camIndex: number, streamIndex: number, field: string, value: any) {
     Array.from(  // Streams
       Array.from( // Cameras
         this.cameras.values())[camIndex].streams.values()).forEach((stream: Stream, i) => {
       if (i === streamIndex) { // @ts-ignore
         stream[field] = value;
-      }
-    });
-  }
-
-  updateMotion(camIndex: number, streamIndex: number, field: string, value: any) {
-    Array.from(  // Streams
-      Array.from( // Cameras
-        this.cameras.values())[camIndex].streams.values()).forEach((stream: Stream, i) => {
-      if (i === streamIndex) { // @ts-ignore
-        stream?.motion[field] = value;
       }
     });
   }
@@ -170,32 +154,22 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
-  updateMotionField(camIndex: number, streamIndex: number, field: string) {
-    const control = this.getMotionControl(camIndex, streamIndex, field);
-    if (control) {
-      this.updateMotion(camIndex, streamIndex, field, control.value);
-    }
-  }
-
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
    */
   setUpTableFormControls(): void {
     this.streamControls = [];
-    this.motionControls = [];
-
     this.list$ = new BehaviorSubject<Camera[]>(Array.from(this.cameras.values()));
-    let index: number = 0;
     const toCameraGroups = this.list$.value.map(camera => {
-      let list$: BehaviorSubject<Stream[]> = new BehaviorSubject<Stream[]>(Array.from(camera.streams.values()));
+      let streamList$:BehaviorSubject<Stream[]> = new BehaviorSubject<Stream[]>(Array.from(camera.streams.values()));
 
-      const toStreamGroups = list$.value.map((stream: Stream) => {
+      const toStreamGroups = streamList$.value.map((stream: Stream) => {
         return new FormGroup({
           descr: new FormControl({
             value: stream.descr,
             disabled: false
           }, [Validators.required, Validators.maxLength(25)]),
-          netcam_uri: new FormControl(stream.netcam_uri, [isValidNetCamURI()]),
+          netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, isValidNetCamURI()]),
           video_width: new FormControl({
             value: stream.video_width,
             disabled: !stream.motion?.enabled
@@ -204,11 +178,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             value: stream.video_height,
             disabled: !stream.motion?.enabled
           }, [Validators.required, Validators.min(90), Validators.max(3000)]),
-        }, {updateOn: "change"});
-      });
-
-      const toMotionGroups = list$.value.map((stream: Stream) => {
-        return new FormGroup({
           //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
           trigger_recording_on: new FormControl({
             value: stream.motion.trigger_recording_on,
@@ -221,8 +190,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         }, {updateOn: "change"});
       });
 
-      this.motionControls[index] = new FormArray(toMotionGroups);
-      this.streamControls[index++] = new FormArray(toStreamGroups);
+      this.streamControls.push(new FormArray(toStreamGroups));
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
         address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [isValidIP()]),
@@ -264,7 +232,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         cam.streams.delete(streamKey);
         cam.streams.forEach((stream) => {
           // Ensure we don't land up with none selected as default stream to show on multi cameras display
-          if(enableFirstAsMultiDisplayDefault) {
+          if (enableFirstAsMultiDisplayDefault) {
             stream.defaultOnMultiDisplay = enableFirstAsMultiDisplayDefault;
             enableFirstAsMultiDisplayDefault = false;
           }
@@ -287,10 +255,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let camNum: number = 1;
     let streamNum: number = 1;  // Absolute (not local to camera) number to identify stream number
                                 // for recording and live URL's
-    let retVal: Map<string, Camera> = new Map<string, Camera>();
     let absoluteStreamNo: number = 1;  // Absolute number to be set in the stream object
     map.forEach((camera: Camera) => {
-      let streamMap: Map<string, Stream> = new Map<string, Stream>();
       let streamKeyNum: number = 1;
 
       // First clear the recording objects in all the streams as we will set them up in the stream processing which follows.
@@ -307,7 +273,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
 
           if (stream.motion.enabled) {
-           // stream.recording = new Recording();
+            // stream.recording = new Recording();
             stream.recording.enabled = true;
             stream.recording.uri = 'http://localhost:8084/recording/stream' + streamNum + '/';
             stream.recording.location = 'stream' + streamNum;
@@ -329,7 +295,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
           if (stream.motion.enabled) {
-           // stream.recording = new Recording();
+            // stream.recording = new Recording();
             stream.recording.enabled = true
             stream.recording.uri = '/recording/stream' + streamNum + '/';
             stream.recording.location = 'stream' + streamNum;
@@ -349,17 +315,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             }
           }
         }
-        streamMap.set('stream' + streamKeyNum, stream);
         ++streamNum;
         ++streamKeyNum;
       })
-      camera.streams = streamMap;
-      let newKey = 'camera' + camNum;
-      retVal.set(newKey, camera);
       ++camNum;
     })
-    //  this.setUpTableFormControls();
-    return retVal;
+    return map;
   }
 
   toggle(el: { key: string, value: Camera }) {
@@ -393,15 +354,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   setDefaultOnMultiDisplayStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
     if ($event.checked) {   // Should only ever be checked as we disable the checkbox when it is checked to
-                             // always retain one stream set as the default
+      // always retain one stream set as the default
       // First clear the flag on all streams
       cam.streams.forEach((stream: Stream) => {
-          stream.defaultOnMultiDisplay = false;
+        stream.defaultOnMultiDisplay = false;
       });
       // Now set the selected one
       stream.defaultOnMultiDisplay = true;
-    }
-    else
+    } else
       $event.source.checked = true;
   }
 
@@ -418,13 +378,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     newStream.defaultOnMultiDisplay = true; // Set the first stream defined for the camera to be
                                             // the multi cam display default
     newCamera.streams.set('stream1', newStream);
-    this.cameras.set('anyname', newCamera);
+    this.cameras.set('camera'+(this.cameras.size+1), newCamera);
     this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     this.setUpTableFormControls();
   }
 
   addStream(cam: Camera) {
-    cam.streams.set('anyname', new Stream())
+    cam.streams.set('stream'+(cam.streams.size+1), new Stream())
     this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     this.setUpTableFormControls();
   }
@@ -433,6 +393,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let retVal: boolean = false;
 
     this.camControls.controls.forEach((camControlFormGroup: AbstractControl) => {
+      camControlFormGroup.markAllAsTouched();  // Ensure camera form controls highlight immediately if invalid
       if (camControlFormGroup.invalid)
         retVal = true;
     })
@@ -442,24 +403,16 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
     for (let streamFormArrayKey in this.streamControls) {
       this.streamControls[streamFormArrayKey].controls.forEach((streamControlFormGroup: AbstractControl) => {
+        streamControlFormGroup.markAllAsTouched();  // Ensure stream form controls highlight immediately if invalid
         if (streamControlFormGroup.invalid)
           retVal = true;
       })
     }
 
-    if (retVal)
-      return retVal;
-
-    for (let motionFormArrayKey in this.motionControls) {
-      if (this.motionControls[motionFormArrayKey]?.invalid)
-        retVal = true;
-    }
-
-    return retVal;
+     return retVal;
   }
 
   commitConfig() {
-    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     let cams: Map<string, Camera> = new Map(this.cameras);
     // First convert the map to JSON
     let jsonObj: {} = {};
@@ -485,6 +438,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(result => {
         this.reporting.successMessage = "Update Cameras Successful!";
         this.cameras = result;
+        this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+        this.setUpTableFormControls();
         this.cameraSvc.configUpdated();  // Tell nav component to reload the camera data
       },
       reason => this.reporting.errorMessage = reason
@@ -497,11 +452,22 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   createNew() {
     this.cameras = new Map<string, Camera>();
     this.cameras.set('camera1', new Camera());
-    let stream1:Stream = new Stream();
+    let stream1: Stream = new Stream();
     stream1.defaultOnMultiDisplay = true;  // There must always be just one default on multi display so set it on the only stream.
-    this.cameras.get('camera1')?.streams.set('stream1',stream1);
+    this.cameras.get('camera1')?.streams.set('stream1', stream1);
     this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     this.setUpTableFormControls();
+  }
+
+  totalNumberOfStreams(): number {
+    let totalStreams = 0;
+    this.cameras.forEach((cam: Camera) => {
+      cam.streams.forEach((stream: Stream) => {
+        if (stream.recording.enabled)
+          ++totalStreams;
+      })
+    })
+    return totalStreams;
   }
 
   ngOnInit(): void {
