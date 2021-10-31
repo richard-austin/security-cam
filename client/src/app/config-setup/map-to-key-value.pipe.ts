@@ -13,6 +13,11 @@ class KV implements KeyValue<string, any>
   value: any;
 }
 
+/**
+ * MapToKeyValuePipe: Used in place of the keyvalue pipe to perform the same function without changing the sort order.
+ *                    If the sort order is changed by the pipe, the screen form controls will not correspond to the
+ *                    form control objects in camControls and streamControls.
+ */
 @Pipe({
   name: 'mapToKeyValue'
 })
