@@ -43,57 +43,5 @@
       }
     },
     "name": "Test Cam"
-  },
-  "camera2": {
-    "name": "C2",
-    "address": "",
-    "controlUri": "",
-    "streams": {
-      "stream1": {
-        "descr": "HD",
-        "defaultOnMultiDisplay": true,
-        "netcam_uri": "rtsp://192.168.0.30:554/12",
-        "uri": "http://localhost:8009/nms/stream3.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/stream3",
-        "motion": {
-          "enabled": false,
-          "mask_file": "",
-          "trigger_recording_on": ""
-        },
-        "video_width": 0,
-        "video_height": 0,
-        "recording": {
-          "enabled": false,
-          "uri": "",
-          "location": ""
-        }
-      }
-    }
-  },
-  "camera3": {
-    "name": "C3",
-    "address": "",
-    "controlUri": "",
-    "streams": {
-      "stream1": {
-        "descr": "HD",
-        "defaultOnMultiDisplay": true,
-        "netcam_uri": "rtsp://192.168.0.45:554/12",
-        "uri": "http://localhost:8009/nms/stream4.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/stream4",
-        "motion": {
-          "enabled": false,
-          "mask_file": "",
-          "trigger_recording_on": ""
-        },
-        "video_width": 0,
-        "video_height": 0,
-        "recording": {
-          "enabled": false,
-          "uri": "",
-          "location": ""
-        }
-      }
-    }
   }
 }

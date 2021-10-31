@@ -129,8 +129,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     if (control) {
       this.updateCam(index, field, control.value);
     }
-    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
-    this.setUpTableFormControls();
+    // this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+    // this.setUpTableFormControls();
   }
 
   getStreamControl(camIndex: number, streamIndex: number, fieldName: string): FormControl {
@@ -200,8 +200,19 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         }, [Validators.maxLength(55)]),
       }, {updateOn: "change"});
     });
-
     this.camControls = new FormArray(toCameraGroups);
+
+    // Ensure camera form controls highlight immediately if invalid
+    for (let i = 0; i < this.camControls.length; ++i) {
+      this.camControls.at(i).markAllAsTouched();
+    }
+
+    // Ensure stream form controls highlight immediately if invalid
+    this.streamControls.forEach((fa: FormArray) => {
+      for (let i = 0; i < fa.length; ++i) {
+        fa.at(i).markAllAsTouched();
+      }
+    })
   }
 
   /**
@@ -255,8 +266,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let camNum: number = 1;
     let streamNum: number = 1;  // Absolute (not local to camera) number to identify stream number
                                 // for recording and live URL's
+    let retVal: Map<string, Camera> = new Map<string, Camera>();
     let absoluteStreamNo: number = 1;  // Absolute number to be set in the stream object
     map.forEach((camera: Camera) => {
+      let streamMap: Map<string, Stream> = new Map<string, Stream>();
       let streamKeyNum: number = 1;
 
       // First clear the recording objects in all the streams as we will set them up in the stream processing which follows.
@@ -271,6 +284,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         if (isDevMode()) {  // Development mode
           stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
+          if(stream.netcam_uri==='')
+            stream.netcam_uri ='rtsp://';
 
           if (stream.motion.enabled) {
             // stream.recording = new Recording();
@@ -294,6 +309,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         } else {  // Production mode
           stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
+          if(stream.netcam_uri==='')
+            stream.netcam_uri ='rtsp://';
           if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true
@@ -315,12 +332,17 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             }
           }
         }
+        streamMap.set('stream' + streamKeyNum, stream);
         ++streamNum;
         ++streamKeyNum;
       })
+      camera.streams = streamMap;
+      let newKey = 'camera' + camNum;
+      retVal.set(newKey, camera);
       ++camNum;
     })
-    return map;
+    //  this.setUpTableFormControls();
+    return retVal;
   }
 
   toggle(el: { key: string, value: Camera }) {
@@ -368,7 +390,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   setRecordingTrigger($event: MatSelectChange, stream: Stream) {
     if (stream.motion.enabled) {
       stream.motion.trigger_recording_on = $event.value;
-      this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+//      this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
     }
   }
 
@@ -393,8 +415,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let retVal: boolean = false;
 
     this.camControls.controls.forEach((camControlFormGroup: AbstractControl) => {
-      camControlFormGroup.markAllAsTouched();  // Ensure camera form controls highlight immediately if invalid
-      if (camControlFormGroup.invalid)
+       if (camControlFormGroup.invalid)
         retVal = true;
     })
 
@@ -403,8 +424,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
     for (let streamFormArrayKey in this.streamControls) {
       this.streamControls[streamFormArrayKey].controls.forEach((streamControlFormGroup: AbstractControl) => {
-        streamControlFormGroup.markAllAsTouched();  // Ensure stream form controls highlight immediately if invalid
-        if (streamControlFormGroup.invalid)
+       if (streamControlFormGroup.invalid)
           retVal = true;
       })
     }
@@ -437,8 +457,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
     this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(result => {
         this.reporting.successMessage = "Update Cameras Successful!";
-        this.cameras = result;
-        this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+        this.cameras = this.fixKeysAndStreamNumbers(result);
         this.setUpTableFormControls();
         this.cameraSvc.configUpdated();  // Tell nav component to reload the camera data
       },
@@ -473,10 +492,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the check boxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
-        this.cameras = cameras;
-        this.downloading = false;
+        this.cameras=this.fixKeysAndStreamNumbers(cameras)
         this.setUpTableFormControls();
-      },
+        this.downloading = false;
+        },
       () => {
         this.createNew();
         this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
