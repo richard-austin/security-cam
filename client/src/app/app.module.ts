@@ -39,6 +39,7 @@ import {MatSortModule} from "@angular/material/sort";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import { ExcludeOwnStreamPipe } from './config-setup/exclude-own-stream.pipe';
 import { DisableControlDirective } from './config-setup/disable-control.directive';
+import { MapToKeyValuePipe } from './config-setup/map-to-key-value.pipe';
 
 @NgModule({
   declarations: [
@@ -58,7 +59,8 @@ import { DisableControlDirective } from './config-setup/disable-control.directiv
     DrawdownCalcContainerComponent,
     ConfigSetupComponent,
     ExcludeOwnStreamPipe,
-    DisableControlDirective
+    DisableControlDirective,
+    MapToKeyValuePipe
   ],
     imports: [
         BrowserModule,

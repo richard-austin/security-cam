@@ -8,7 +8,6 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.apache.commons.io.IOUtils
-import org.grails.web.json.parser.JSONParser
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.enums.PassFail
@@ -40,10 +39,6 @@ class CamService {
             String data = IOUtils.toString(fis, "UTF-8")
             Gson gson2 = new Gson()
             Object obj = gson2.fromJson(data, Object.class)
-//            InputStream is = new ByteArrayInputStream(data.getBytes())
-//            JSONParser parser = new JSONParser(is)
-//
-//            Object obj = parser.parse()
 
             result.setResponseObject(obj)
         }
