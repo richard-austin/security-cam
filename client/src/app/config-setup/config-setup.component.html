@@ -190,7 +190,7 @@
                            [formControl]="getStreamControl(camIndex, streamIndex, 'mask_file')"
                            matTooltip="Path to a mask file image. This is a .pgm file where motion detection is disabled hades of grey attenuate motion detection sensitivity."
                            matTooltipClass="tooltip"
-                           placeholder="Mask file path" (blur)="updateStreamField(camIndex, streamIndex, 'mask_file')">
+                           placeholder="Mask file path" (blur)="updateMotionField(camIndex, streamIndex, 'mask_file')">
                   </mat-form-field>
                 </td>
               </ng-container>

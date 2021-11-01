@@ -152,6 +152,24 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
+  updateMotion(camIndex: number, streamIndex: number, field: string, value: any) {
+    Array.from(  // Streams
+      Array.from( // Cameras
+        this.cameras.values())[camIndex].streams.values()).forEach((stream: Stream, i) => {
+      if (i === streamIndex) { // @ts-ignore
+        stream['motion'][field] = value;
+      }
+    });
+  }
+
+  updateMotionField(camIndex: number, streamIndex: number, field: string) {
+    const control = this.getStreamControl(camIndex, streamIndex, field);
+    if (control) {
+      this.updateMotion(camIndex, streamIndex, field, control.value);
+    }
+  }
+
+
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
    */
@@ -350,8 +368,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         }
       })
     })
-    this.setUpTableFormControls();
+
     this.cameras = retVal;
+    this.setUpTableFormControls();
   }
 
   toggle(el: { key: string, value: Camera }) {
