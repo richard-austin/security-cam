@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {CameraStream} from "../cameras/Camera";
+import {Camera, CameraStream} from "../cameras/Camera";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {Subscription} from "rxjs";
@@ -22,7 +22,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('navbarCollapse') navbarCollapse!:ElementRef<HTMLDivElement>;
 
   cameraStreams: CameraStream[] = []; // All camera streams
-  uniqueCameras: CameraStream[] = []; // Only one instance of each camera regardless of the number of streams it has.
+  cameras: Camera[] = [];
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
   timerHandle!: Subscription;
@@ -46,8 +46,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/recording';
   }
 
-  cameraControl(camStream: CameraStream) {
-    this.cameraSvc.setActiveLive([camStream]);
+  cameraControl(cam: Camera) {
+    let cs:CameraStream = new CameraStream();
+    cs.camera=cam;
+    this.cameraSvc.setActiveLive([cs]);
     window.location.href = '#/cameraparams';
   }
 
@@ -106,6 +108,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/dc';
   }
 
+  configSetup() {
+    window.location.href = '#/configsetup';
+  }
+
   openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
     let data: any = {};
     let remainingSecs: number = timeout - count;
@@ -141,7 +147,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.cameraStreams = this.cameraSvc.getCameraStreams();
-    this.uniqueCameras = this.cameraSvc.getUniqueCameras()
+    this.cameras = this.cameraSvc.getCameras()
 
     // Get the initial core temperature
     this.getTemperature();
@@ -175,6 +181,11 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Gets the core temperature every minute (Raspberry pi only), and keeps the session alive
     this.pingHandle = this.userIdle.ping$.subscribe(() => this.getTemperature());
+
+    this.cameraSvc.getConfigUpdates().subscribe(() => {
+      this.cameraStreams = this.cameraSvc.getCameraStreams();
+      this.cameras = this.cameraSvc.getCameras()
+    });
   }
 
    ngAfterViewInit(): void {

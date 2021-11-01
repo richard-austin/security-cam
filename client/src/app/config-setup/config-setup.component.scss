@@ -1,0 +1,152 @@
+mat-card-content.wait-box {
+  >span {
+    margin-left: 1rem;
+    margin-bottom: auto;
+    margin-top:auto;
+  }
+}
+table {
+  width: 100%;
+}
+
+tr.example-detail-row {
+  height: 0;
+}
+
+tr.example-element-row.example-expanded-row:hover {
+  background: darkblue;
+}
+
+tr.example-element-row:not(.example-expanded-row):hover {
+  background: darkblue;
+}
+
+tr.example-element-row:not(.example-expanded-row):active {
+  background: grey;
+}
+
+.example-element-row td {
+  border-bottom-width: 0;
+}
+
+.example-element-detail {
+  overflow: hidden;
+  display: flex;
+}
+
+.example-element-diagram {
+  min-width: 80px;
+  border: 2px solid black;
+  padding: 8px;
+  font-weight: lighter;
+  margin: 8px 0;
+  height: 104px;
+}
+
+.example-element-symbol {
+  font-weight: bold;
+  font-size: 40px;
+  line-height: normal;
+}
+
+.example-element-description {
+  padding: 16px;
+}
+
+.example-element-description-attribution {
+  opacity: 0.5;
+}
+
+.streams-info
+{
+  min-width: 500px;
+  margin-bottom: 1rem;
+  background-color: #1e1b3d;
+}
+
+.expand{
+  position: relative;
+  font-size: xx-large;
+}
+
+td, th{
+  padding-left: 1rem !important;
+}
+
+.bottom-buttons-bar{
+  margin-top: 1rem;
+  height: 3rem;
+
+  >button{
+    // Centre vertically
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  width: 100%;
+  //margin-right: 160px;
+  min-width: 1675px;
+}
+.mat-column-camera_id{
+  width: 4%;
+}
+.mat-column-delete {
+  width: 4%;
+}
+.mat-column-expand {
+  width: 4%;
+}
+.mat-column-name {
+  width: 12%;
+}
+
+.mat-column-controlUri {
+  width: 10%;
+}
+
+.mat-column-address {
+  width: 68%;
+}
+
+.mat-column-stream_id{
+  width:5%;
+}
+
+.mat-column-descr {
+  width: 12%;
+}
+
+.mat-column-netcam_uri{
+  width: 12%;
+}
+
+.mat-column-defaultOnMultiDisplay {
+  width: 5%;
+}
+
+.mat-column-motion {
+  width: 6%;
+}
+
+.mat-column-trigger_recording_on {
+  width: 6%;
+}
+
+.mat-column-mask_file {
+  width: 15%;
+}
+
+.mat-column-video_width {
+  width: 4%;
+}
+
+.confirm-group{
+  >span{
+    background: #d9a11a;
+    color: black;
+    padding: 0.9rem;
+    border-radius: 1rem;
+  }
+  >button{
+    margin-left: 0.5rem;
+  }
+}

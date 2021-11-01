@@ -18,20 +18,16 @@ cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
 mkdir -p security-cam_"${VERSION}"_arm64/home/security-cam/recording-pids
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/cam1
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/cam2
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/cam3
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/cam4
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/cam5
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/cam6
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/cam7
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-cam1
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-cam2
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-cam3
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-cam4
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-cam5
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-cam6
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-cam7
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream1
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream2
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream3
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream4
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream5
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream6
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream7
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream8
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream9
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream10
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/logs
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion

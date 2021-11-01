@@ -19,7 +19,7 @@
       </button>
       <mat-menu #menuSelectCamera="matMenu">
         <ng-container *ngFor="let cs of cameraStreams">
-          <button mat-menu-item (click)="setVideoStream(cs);menuClosed()">
+          <button  mat-menu-item (click)="setVideoStream(cs);menuClosed()">
             {{cs.camera.name + " (" + cs.stream.descr + ")"}}
           </button>
         </ng-container>
@@ -31,7 +31,7 @@
       <button mat-button [matMenuTriggerFor]="menuSelectRecording">Select Recording</button>
       <mat-menu #menuSelectRecording="matMenu">
         <ng-container *ngFor="let cs of cameraStreams">
-          <button mat-menu-item (click)="showRecording(cs);menuClosed()">
+          <button mat-menu-item (click)="showRecording(cs);menuClosed()" *ngIf="cs.stream.recording.enabled">
             {{cs.camera.name + " (" + cs.stream.descr + ")"}}
           </button>
         </ng-container>
@@ -41,10 +41,10 @@
     <div>
       <button mat-button [matMenuTriggerFor]="menuCameraSettings">Camera Settings</button>
       <mat-menu #menuCameraSettings="matMenu">
-        <ng-container *ngFor="let cam of uniqueCameras">
-          <button *ngIf="cam.camera.address!=undefined&&cam.camera.controlUri!=undefined" mat-menu-item
+        <ng-container *ngFor="let cam of cameras">
+          <button *ngIf="cam.address!=''&&cam.controlUri!=''" mat-menu-item
                   (click)="cameraControl(cam);menuClosed()">
-            {{cam.camera.name}}
+            {{cam.name}}
           </button>
         </ng-container>
       </mat-menu>
@@ -54,6 +54,7 @@
     <div>
       <button mat-button [matMenuTriggerFor]="menuGeneral">General</button>
       <mat-menu #menuGeneral="matMenu">
+        <button mat-menu-item (click)="configSetup();menuClosed()">Configure Camera Setup</button>
         <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
         <button mat-menu-item (click)="changePassword();menuClosed()">Change Password</button>
         <div class="dropdown-divider"></div>

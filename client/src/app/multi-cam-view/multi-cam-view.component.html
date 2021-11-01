@@ -5,16 +5,16 @@
         Select Cameras to View
       </mat-card-title>
       <mat-card-content>
-        <ng-container *ngFor="let cam of cameras">
+        <ng-container *ngFor="let cam of cameras | keyvalue">
           <section class="section">
           <span>
             <mat-icon>arrow_right</mat-icon>
-            {{cam.name}}
+            {{cam.value.name}}
           </span>
             <ul>
-              <li *ngFor="let strm of cam.streams | keyvalue">
+              <li *ngFor="let strm of cam.value.streams | keyvalue">
                 <mat-checkbox [color]="'primary'" [checked]="strm.value.selected"
-                              (change)="updateCameras($event, cam,  strm.value)">
+                              (change)="updateCameras($event, cam.value,  strm.value)">
                   {{strm.value.descr}}
                 </mat-checkbox>
               </li>

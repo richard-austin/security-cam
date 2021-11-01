@@ -2,7 +2,7 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
-import {catchError, map} from "rxjs/operators";
+import {catchError, map, tap} from "rxjs/operators";
 import {Camera, CameraStream, Stream} from "./Camera";
 
 
@@ -38,9 +38,10 @@ export class CameraService {
   };
 
   private activeLiveUpdates: Subject<any> = new Subject<any>();
+  private configUpdates: Subject<void> = new Subject();
 
   private cameraStreams: CameraStream[] = [];
-  private uniqueCameras: CameraStream[] = [];
+  private cameras: Camera[] = [];
 
   // List of live views currently active
   private activeLive: CameraStream[] = [];
@@ -57,8 +58,10 @@ export class CameraService {
           const c = cameraStreams[i];
           this.cameraStreams.push(c);
 
-          if(!this.uniqueCameras.find((cs:CameraStream) => {return cs.camera.name === c.camera.name}))
-            this.uniqueCameras.push(c);
+          if (!this.cameras.find((cs: Camera) => {
+            return cs.name === c.camera.name
+          }))
+            this.cameras.push(c.camera);
         }
       },
       // Error messages would be shown by the nav component
@@ -99,6 +102,20 @@ export class CameraService {
   }
 
   /**
+   * configUpdated: Send message to the nav component when the camera configuration has changed.
+   */
+  configUpdated(): void {
+    this.configUpdates.next()
+  }
+
+  /**
+   * getConfigUpdates: nave component subscribes to this to be notified of camera configuration changes.
+   */
+  getConfigUpdates(): Observable<any> {
+    return this.configUpdates.asObservable();
+  }
+
+  /**
    * setActiveRecording: Set a camera to show recordings from
    * @param camera: The camera whose recordings are to be shown
    */
@@ -115,59 +132,95 @@ export class CameraService {
   }
 
   /**
-   * getUniqueCameras: Returns a list of cameraStreams where there is only a single instance of each
-   *                   camera (i.e. not appearing twice when there are two streams for that camera as in getCameraStreams
+   * getCameras: Returns an array of cameras
    */
-  public getUniqueCameras() : CameraStream[]
-  {
-    return this.uniqueCameras;
+  public getCameras(): Camera[] {
+    return this.cameras;
+  }
+
+  private static convertCamsObjectToMap(cams: Object): Map<string, Camera> {
+    let cameras: Map<string, Camera> = new Map<string, Camera>();
+
+    for (let key in cams) {
+      // @ts-ignore
+      let cam: Camera = cams[key];
+      let streams: Map<string, Stream> = new Map<string, Stream>();
+      for (let j in cam.streams) {
+        // @ts-ignore
+        let stream: Stream = cam.streams[j] as Stream;
+        stream.selected = stream.defaultOnMultiDisplay;
+        streams.set(j, stream);
+      }
+      cam.streams = streams;  //Make the streams object into a map
+      cameras.set(key, cam);
+    }
+    return cameras;
+  }
+
+  private static createCameraStreams(cams: Object): CameraStream[] {
+    let cameraStreams: CameraStream[] = [];
+
+    for (let i in cams) {
+      // @ts-ignore
+      let cam: Camera = cams[i] as Camera;
+
+      if (cam) {
+        let streams: Map<string, Stream> = new Map<string, Stream>();
+        for (const j in cam.streams) {
+          let cs = new CameraStream();
+          cs.camera = cam;
+
+          // @ts-ignore   // Ignore "Element implicitly has an 'any' type because type 'Map ' has no index signature"
+          cs.stream = cam.streams[j];
+          streams.set(j, cs.stream);
+          cs.stream.selected = cs.stream.defaultOnMultiDisplay;
+          cameraStreams.push(cs);
+        }
+       // cam.streams = streams;  // Make the streams object into a map
+      }
+    }
+    return cameraStreams;
   }
 
   /**
    * loadCameras: Get camera set up details from the server
    * @private
    */
-  loadCameras(): Observable<Camera[]> {
-    return this.http.post<Camera[]>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
-      map((cams: Camera[]) => {
-        let cameras: Camera[] = [];
-
-        for (let i in cams) {
-          let cam: Camera = cams[i];
-          for (const j in cam.streams) {
-            // @ts-ignore
-            cam.streams[j].selected = cam.streams[j].defaultOnMultiDisplay;
-          }
-          cameras.push(cam); // Make into a normal array so ngFor can work
+  loadCameras():Observable<Map<string, Camera>> {
+    return this.http.post<Map<string, Camera>>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
+      map((cams: Object) => {
+          return CameraService.convertCamsObjectToMap(cams);
         }
-        return cameras;
-      }),
+      ),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
   /**
    * loadCameraStreams: Get camera streams from the server
    */
-  loadCameraStreams(): Observable<CameraStream[]> {
-    return this.http.post<Camera[]>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
-      map((cams: Camera[]) => {
-        let cameraStreams: CameraStream[] = [];
-
-        for (const i in cams) {
-          let cam: Camera = cams[i];
-
-          for (const j in cam.streams) {
-            let cs = new CameraStream();
-            cs.camera = cam;
-
-            // @ts-ignore   // Ignore "Element implicitly has an 'any' type because type 'Map ' has no index signature"
-            cs.stream = cam.streams[j] as Stream;
-            cs.stream.selected = cs.stream.defaultOnMultiDisplay;
-            cameraStreams.push(cs);
-          }
-        }
-        return cameraStreams;
+  loadCameraStreams():Observable<CameraStream[]> {
+    return this.http.post<Map<string, Camera>>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
+      map((cams: any) => {
+        return CameraService.createCameraStreams(cams);
       }),
       catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+
+  updateCameras(camerasJON: string):
+    Observable<Map<string, Camera>> {
+    let cameras = {camerasJSON: camerasJON};
+    return this.http.post<any>(this._baseUrl.getLink("cam", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe(
+      tap((cams ) => {
+        this.cameras = [];
+
+        for(const key in cams)
+          this.cameras.push(cams[key] as Camera);
+
+        this.cameraStreams = CameraService.createCameraStreams(cams);
+      }),
+      map(cams => {
+        return CameraService.convertCamsObjectToMap(cams);
+      })
+    );
   }
 }

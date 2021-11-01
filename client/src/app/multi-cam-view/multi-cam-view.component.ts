@@ -17,7 +17,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cameraSvc.setActiveLive([]);
   }
 
-  cameras: Camera[] = [];
+  cameras: Map<string, Camera> = new Map<string, Camera>();
 
   /**
    * setUpCameraDetails: Set up the available streams/cameras for selection by the check boxes
@@ -35,19 +35,17 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   showSelected(): void {
     let cams: CameraStream[] = [];
-    for (const i in this.cameras) {
-      let c: Camera = this.cameras[i];
-      for (const j in c.streams) {
-        // @ts-ignore
-        let s: Stream = c.streams[j];
-        if (s.selected) {
+
+    this.cameras.forEach((c:Camera) => {
+      c.streams.forEach((stream) => {
+        if (stream.selected) {
           let cs: CameraStream = new CameraStream();
           cs.camera = c;
-          cs.stream = s;
+          cs.stream = stream;
           cams.push(cs);
         }
-      }
-    }
+      })
+    })
     this.cameraSvc.setActiveLive(cams);
   }
 
@@ -59,12 +57,13 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param stream: The stream on which the selection is being made
    */
   updateCameras($event: MatCheckboxChange, camera: Camera, stream: Stream) {
-    // Ensure all other streams on this camera are disabled, only one is to be enabled
-    for (const i in camera.streams) { // @ts-ignore
-      camera.streams[i].selected = false;
-    }
-    // now select/unselect this one
-    stream.selected = $event.checked;
+    // Ensure all other streams on this camera are deselected, only one is to be selected
+    camera.streams.forEach((stream:Stream) => {
+      stream.selected = false;
+    })
+
+    // Now select this one. If the checkbox was clicked when checked, make sure it doesn't go unchecked (leaving all unchecked)
+    $event.source.checked = stream.selected = true;
   }
 
   /**
