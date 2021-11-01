@@ -94,7 +94,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   downloading: boolean = true;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'address', 'controlUri'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -129,8 +129,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     if (control) {
       this.updateCam(index, field, control.value);
     }
-    // this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
-    // this.setUpTableFormControls();
   }
 
   getStreamControl(camIndex: number, streamIndex: number, fieldName: string): FormControl {
@@ -161,7 +159,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     this.streamControls = [];
     this.list$ = new BehaviorSubject<Camera[]>(Array.from(this.cameras.values()));
     const toCameraGroups = this.list$.value.map(camera => {
-      let streamList$:BehaviorSubject<Stream[]> = new BehaviorSubject<Stream[]>(Array.from(camera.streams.values()));
+      let streamList$: BehaviorSubject<Stream[]> = new BehaviorSubject<Stream[]>(Array.from(camera.streams.values()));
 
       const toStreamGroups = streamList$.value.map((stream: Stream) => {
         return new FormGroup({
@@ -222,8 +220,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   deleteCamera(key: string): boolean {
     let retVal: boolean = Array.from(this.cameras.keys()).find(k => k === key) !== undefined;
     this.cameras.delete(key);
-    this.cameras = this.fixKeysAndStreamNumbers(this.cameras) as Map<string, Camera>;
-    this.setUpTableFormControls();
+    this.FixUpCamerasData();
     return retVal;
   }
 
@@ -251,41 +248,40 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             stream.motion.trigger_recording_on = '';  // Set all recording triggers to 'None' as the the stream keys may be renumbered
         })
       }
-      this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+      this.FixUpCamerasData();
     }
-    this.setUpTableFormControls();
     return retVal;
   }
 
   /**
-   * fixKeysAndStreamNumbers: Fix the key names in the cameras and streams maps so they follow the sequence
-   *                          camera1, camera2 or stream1, stream 2 etc. This is run after deleting an item
-   *                          from the map. Also number the live streams and recording uri's logically
+   * FixUpCamerasData: Fix the key names in the cameras and streams maps so they follow the sequence
+   *                   camera1, camera2 or stream1, stream 2 etc. This is run after deleting an item
+   *                   from the map. Also number the live streams and recording uri's logically
    */
-  fixKeysAndStreamNumbers(map: Map<string, Camera>): Map<string, Camera> {
+  FixUpCamerasData(): void {
     let camNum: number = 1;
     let streamNum: number = 1;  // Absolute (not local to camera) number to identify stream number
                                 // for recording and live URL's
     let retVal: Map<string, Camera> = new Map<string, Camera>();
     let absoluteStreamNo: number = 1;  // Absolute number to be set in the stream object
-    map.forEach((camera: Camera) => {
+    this.cameras.forEach((camera: Camera) => {
       let streamMap: Map<string, Stream> = new Map<string, Stream>();
       let streamKeyNum: number = 1;
 
       // First clear the recording objects in all the streams as we will set them up in the stream processing which follows.
       // Also set the absolute stream number
       camera.streams.forEach((stream: Stream) => {
-        // @ts-ignore
         stream.recording.enabled = false
         stream.absolute_num = absoluteStreamNo++;
+
       });
       // Process the streams
       camera.streams.forEach((stream) => {
         if (isDevMode()) {  // Development mode
           stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
-          if(stream.netcam_uri==='')
-            stream.netcam_uri ='rtsp://';
+          if (stream.netcam_uri === '')
+            stream.netcam_uri = 'rtsp://';
 
           if (stream.motion.enabled) {
             // stream.recording = new Recording();
@@ -309,8 +305,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         } else {  // Production mode
           stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
-          if(stream.netcam_uri==='')
-            stream.netcam_uri ='rtsp://';
+          if (stream.netcam_uri === '')
+            stream.netcam_uri = 'rtsp://';
           if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true
@@ -341,8 +337,21 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       retVal.set(newKey, camera);
       ++camNum;
     })
-    //  this.setUpTableFormControls();
-    return retVal;
+
+    // Renumber trigger_recording_on references so that the camera number is always the same as the camera key
+    // Deleting a camera other than the last will cause the camera keys not to tie up with any previously set
+    // reference in trigger_recording_on.
+    retVal.forEach((camera:Camera, camKey:string) => {
+      camera.streams.forEach((stream:Stream) => {
+        if (stream.motion.trigger_recording_on !== '') {
+          let fields: string[] = stream.motion.trigger_recording_on.split('.');
+          fields[0] = camKey;
+          stream.motion.trigger_recording_on = fields[0] + '.' + fields[1];
+        }
+      })
+    })
+    this.setUpTableFormControls();
+    this.cameras = retVal;
   }
 
   toggle(el: { key: string, value: Camera }) {
@@ -368,10 +377,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
 
     stream.motion.enabled = $event.checked;
-    //  this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
-
     // Ensure that the trigger_recording_on setting is shown
-    this.setUpTableFormControls();
+    this.FixUpCamerasData();
   }
 
   setDefaultOnMultiDisplayStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
@@ -390,7 +397,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   setRecordingTrigger($event: MatSelectChange, stream: Stream) {
     if (stream.motion.enabled) {
       stream.motion.trigger_recording_on = $event.value;
-//      this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
+      this.FixUpCamerasData();
     }
   }
 
@@ -400,22 +407,20 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     newStream.defaultOnMultiDisplay = true; // Set the first stream defined for the camera to be
                                             // the multi cam display default
     newCamera.streams.set('stream1', newStream);
-    this.cameras.set('camera'+(this.cameras.size+1), newCamera);
-    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
-    this.setUpTableFormControls();
+    this.cameras.set('camera' + (this.cameras.size + 1), newCamera);
+    this.FixUpCamerasData();
   }
 
   addStream(cam: Camera) {
-    cam.streams.set('stream'+(cam.streams.size+1), new Stream())
-    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
-    this.setUpTableFormControls();
+    cam.streams.set('stream' + (cam.streams.size + 1), new Stream())
+    this.FixUpCamerasData();
   }
 
   anyInvalid(): boolean {
     let retVal: boolean = false;
 
     this.camControls.controls.forEach((camControlFormGroup: AbstractControl) => {
-       if (camControlFormGroup.invalid)
+      if (camControlFormGroup.invalid)
         retVal = true;
     })
 
@@ -424,15 +429,16 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
     for (let streamFormArrayKey in this.streamControls) {
       this.streamControls[streamFormArrayKey].controls.forEach((streamControlFormGroup: AbstractControl) => {
-       if (streamControlFormGroup.invalid)
+        if (streamControlFormGroup.invalid)
           retVal = true;
       })
     }
 
-     return retVal;
+    return retVal;
   }
 
   commitConfig() {
+    this.FixUpCamerasData();
     let cams: Map<string, Camera> = new Map(this.cameras);
     // First convert the map to JSON
     let jsonObj: {} = {};
@@ -455,10 +461,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       jsonObj[key] = newCam;
     })
 
-    this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(result => {
+    this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(() => {
         this.reporting.successMessage = "Update Cameras Successful!";
-        this.cameras = this.fixKeysAndStreamNumbers(result);
-        this.setUpTableFormControls();
+        this.FixUpCamerasData();
         this.cameraSvc.configUpdated();  // Tell nav component to reload the camera data
       },
       reason => this.reporting.errorMessage = reason
@@ -474,8 +479,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let stream1: Stream = new Stream();
     stream1.defaultOnMultiDisplay = true;  // There must always be just one default on multi display so set it on the only stream.
     this.cameras.get('camera1')?.streams.set('stream1', stream1);
-    this.cameras = this.fixKeysAndStreamNumbers(this.cameras);
-    this.setUpTableFormControls();
+    this.FixUpCamerasData();
   }
 
   totalNumberOfStreams(): number {
@@ -492,10 +496,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the check boxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
-        this.cameras=this.fixKeysAndStreamNumbers(cameras)
-        this.setUpTableFormControls();
+        this.cameras = cameras;
+        this.FixUpCamerasData()
         this.downloading = false;
-        },
+      },
       () => {
         this.createNew();
         this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});

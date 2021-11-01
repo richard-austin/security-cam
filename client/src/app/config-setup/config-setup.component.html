@@ -58,18 +58,6 @@
         </td>
       </ng-container>
 
-      <ng-container matColumnDef="address">
-        <th mat-header-cell *matHeaderCellDef>Address.</th>
-        <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-form-field appearance="legacy" [style.width.px]="180">
-            <input matInput type="text" autocomplete="off" maxlength="15" [formControl]="getCamControl(i, 'address')"
-                   matTooltip="The IP address of {{cam.key}}. This is required if the ControlURI is set to anything other than 'None'."
-                   matTooltipClass="tooltip"
-                   placeholder="Camera IP Address" (change)="updateCamField(i, 'address')">
-          </mat-form-field>
-        </td>
-      </ng-container>
-
       <ng-container matColumnDef="controlUri">
         <th mat-header-cell *matHeaderCellDef>Control URI.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
@@ -87,6 +75,18 @@
                 For SV3C Cameras
               </mat-option>
             </mat-select>
+          </mat-form-field>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="address">
+        <th mat-header-cell *matHeaderCellDef>Address.</th>
+        <td mat-cell *matCellDef="let cam; let i = dataIndex">
+          <mat-form-field appearance="legacy" [style.width.px]="180">
+            <input matInput type="text" autocomplete="off" maxlength="15" [formControl]="getCamControl(i, 'address')"
+                   matTooltip="The IP address of {{cam.key}}. This is required if the ControlURI is set to anything other than 'None'."
+                   matTooltipClass="tooltip"
+                   placeholder="Camera IP Address" (change)="updateCamField(i, 'address')">
           </mat-form-field>
         </td>
       </ng-container>
