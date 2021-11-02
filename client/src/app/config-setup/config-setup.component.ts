@@ -93,6 +93,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
 
   downloading: boolean = true;
+  updating: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
   cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address'];
   cameraFooterColumns = ['buttons'];
@@ -416,7 +417,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   setRecordingTrigger($event: MatSelectChange, stream: Stream) {
     if (stream.motion.enabled) {
       stream.motion.trigger_recording_on = $event.value;
-      this.FixUpCamerasData();
+     // this.FixUpCamerasData();
     }
   }
 
@@ -457,6 +458,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   commitConfig() {
+    this.updating = true;
     this.FixUpCamerasData();
     let cams: Map<string, Camera> = new Map(this.cameras);
     // First convert the map to JSON
@@ -482,10 +484,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
     this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(() => {
         this.reporting.successMessage = "Update Cameras Successful!";
-        this.FixUpCamerasData();
         this.cameraSvc.configUpdated();  // Tell nav component to reload the camera data
+      this.updating = false;
       },
-      reason => this.reporting.errorMessage = reason
+      reason => {
+      this.reporting.errorMessage = reason
+        this.updating = false;
+      }
     )
   }
 

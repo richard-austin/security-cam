@@ -8,7 +8,11 @@
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Loading, Please wait..</span>
   </mat-card-content>
-  <mat-card-content *ngIf="!downloading">
+  <mat-card-content class="wait-box mat-form-field-flex" *ngIf="updating">
+    <mat-spinner [diameter]="25"></mat-spinner>
+    <span>Updating Cameras Data, Please wait..</span>
+  </mat-card-content>
+  <mat-card-content *ngIf="!downloading  && !updating">
     <table mat-table
            [dataSource]="cameras | mapToKeyValue" multiTemplateDataRows
            class="mat-elevation-z8">

@@ -84,12 +84,6 @@ run_nms &
 run_motion &
 run_ffmpeg "rtsp://192.168.0.45:554/11" "rtmp://localhost:1935/nms/stream1" "Test_Cam_HD" &
 run_ffmpeg "rtsp://192.168.0.45:554/12" "rtmp://localhost:1935/nms/stream2" "Test_Cam_Normal" &
-run_ffmpeg "rtsp://192.168.0.30:554/11" "rtmp://localhost:1935/nms/stream3" "Porch_HD" &
-run_ffmpeg "rtsp://192.168.0.30:554/12" "rtmp://localhost:1935/nms/stream4" "Porch_Normal" &
-run_ffmpeg "rtsp://192.168.0.35:554/11" "rtmp://localhost:1935/nms/stream5" "Garden_HD" &
-run_ffmpeg "rtsp://192.168.0.35:554/12" "rtmp://localhost:1935/nms/stream6" "Garden_Normal_res" &
-run_ffmpeg "rtsp://192.168.0.34:554/11" "rtmp://localhost:1935/nms/stream7" "Garage_HD" &
-run_ffmpeg "rtsp://192.168.0.34:554/12" "rtmp://localhost:1935/nms/stream8" "Garage_Normal" &
 
 run_check_ip_not_changed &
 
