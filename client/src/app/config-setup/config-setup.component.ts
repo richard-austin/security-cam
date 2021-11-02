@@ -56,7 +56,7 @@ export function isValidMaskFileName(): ValidatorFn {
       return null;
     }
 
-    const pathValid = RegExp('^[a-z|A-Z|0-9|-|_]+.pgm$').test(value);
+    const pathValid = RegExp('^[a-zA-Z0-9-_]+.pgm$').test(value);
 
     return !pathValid ? {mask_file: true} : null;
   }
