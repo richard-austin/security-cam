@@ -528,14 +528,23 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
       let control: FormControl = this.getStreamControl(camIndex, streamIndex, 'mask_file');
       control.setValue(stream.motion.mask_file);
-      // Upload file to server
-      this.cameraSvc.uploadFile(fileUploadInput.files[0])
-        .subscribe(() => {
-          this.reporting.successMessage = stream.motion.mask_file+' uploaded successfully'
-          },
-          (reason) => {
-            this.reporting.errorMessage = reason
-          });
+      if(control.valid) {
+        // Upload file to server
+        this.cameraSvc.uploadFile(fileUploadInput.files[0])
+          .subscribe(() => {
+              this.reporting.successMessage = stream.motion.mask_file + ' uploaded successfully'
+            },
+            (reason) => {
+              this.reporting.errorMessage = reason
+            });
+      }
+      else
+        this.reporting.errorMessage = new HttpErrorResponse({
+          error: "The file " + stream.motion.mask_file + " is not a valid mask file",
+          status: 0,
+          statusText: "",
+          url: undefined
+        });
 
       // Clear the input so that selecting the same file again still triggers an onchange event
       fileUploadInput.value = '';
