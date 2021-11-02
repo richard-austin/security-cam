@@ -178,8 +178,9 @@
                       <mat-option [value]="''">
                         None
                       </mat-option>
-                      <mat-option *ngFor="let camStream of cam.value.streams | mapToKeyValue | excludeOwnStream:stream.key"
-                                  [value]="cam.key+'.'+camStream.key">
+                      <mat-option
+                        *ngFor="let camStream of cam.value.streams | mapToKeyValue | excludeOwnStream:stream.key"
+                        [value]="cam.key+'.'+camStream.key">
                         {{camStream.key}}
                       </mat-option>
                     </mat-select>
@@ -189,13 +190,25 @@
               <ng-container matColumnDef="mask_file">
                 <th mat-header-cell *matHeaderCellDef> Mask File</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
-                  <mat-form-field appearance="legacy" [style.width.px]="280">
-                    <input matInput type="text" autocomplete="off" maxlength="75"
-                           [formControl]="getStreamControl(camIndex, streamIndex, 'mask_file')"
-                           matTooltip="Path to a mask file image. This is a .pgm file where motion detection is disabled hades of grey attenuate motion detection sensitivity."
-                           matTooltipClass="tooltip"
-                           placeholder="Mask file path" (blur)="updateMotionField(camIndex, streamIndex, 'mask_file')">
+                  <mat-form-field appearance="legacy" [style.width.px]="220">
+                    <input style="position: absolute" hidden #fileInput type="file" (change)="uploadFile($event, camIndex, streamIndex)"/>
+                    <div class="file-upload">
+                      <button type="button" mat-icon-button (click)="fileInput.click()"
+                              [disabled]="!stream.value.motion.enabled"
+                              matTooltip="Select a mask file to upload. This is a .pgm file where motion detection is disabled where the image is black, shades of grey attenuate motion detection sensitivity, and white areas allow full motion detection sensitivity."
+                              matTooltipClass="tooltip">
+
+                        <mat-icon>file_upload</mat-icon>
+                      </button>
+                      <input matInput type="text" readonly
+                             [formControl]="getStreamControl(camIndex, streamIndex, 'mask_file')">
+                    </div>
                   </mat-form-field>
+                  <!--                    <input matInput type="text" autocomplete="off" maxlength="75"-->
+                  <!--                           [formControl]="getStreamControl(camIndex, streamIndex, 'mask_file')"-->
+                  <!--                           matTooltip="Path to a mask file image. This is a .pgm file where motion detection is disabled hades of grey attenuate motion detection sensitivity."-->
+                  <!--                           matTooltipClass="tooltip"-->
+                  <!--                           placeholder="Mask file path" (blur)="updateMotionField(camIndex, streamIndex, 'mask_file')">-->
                 </td>
               </ng-container>
               <ng-container matColumnDef="video_width">
@@ -226,7 +239,8 @@
               <!-- Streams table Footer with the control buttons -->
               <ng-container matColumnDef="buttons">
                 <td mat-footer-cell *matFooterCellDef>
-                  <button [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 10" mat-icon-button style
+                  <button [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 10"
+                          mat-icon-button style
                           (click)="addStream(cam.value)"
                           matTooltip="Add another stream for {{cam.key}}."
                           matTooltipClass="tooltip">
@@ -246,7 +260,8 @@
       <!-- Cameras table Footer with the control buttons -->
       <ng-container matColumnDef="buttons">
         <td mat-footer-cell [attr.colspan]="cameraColumns.length" *matFooterCellDef>
-          <button [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 10" mat-icon-button (click)="addCamera()"
+          <button [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 10" mat-icon-button
+                  (click)="addCamera()"
                   matTooltip="Add another camera."
                   matTooltipClass="tooltip">
             <mat-icon>add</mat-icon>

@@ -4,11 +4,13 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import grails.converters.JSON
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.apache.commons.io.IOUtils
 import security.cam.commands.UpdateCamerasCommand
+import security.cam.commands.UploadMaskFileCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.enums.PassFail
 
@@ -86,6 +88,22 @@ class CamService {
         catch(Exception ex)
         {
             logService.cam.error "Exception in updateCameras: " + ex.getMessage()
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    def uploadMaskFile(UploadMaskFileCommand cmd) {
+
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            File file
+            file = new File("/home/security-cam/motion/"+ cmd.maskFile.originalFilename) // TODO: Get hard coded paths like this from config
+            cmd.maskFile.transferTo(file)
+        }
+        catch (Exception ex) { // Some other type of exception
+            logService.cam.error "CamController.uploadMaskFile() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }

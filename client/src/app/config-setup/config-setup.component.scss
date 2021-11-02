@@ -1,10 +1,11 @@
 mat-card-content.wait-box {
-  >span {
+  > span {
     margin-left: 1rem;
     margin-bottom: auto;
-    margin-top:auto;
+    margin-top: auto;
   }
 }
+
 table {
   width: 100%;
 }
@@ -57,44 +58,48 @@ tr.example-element-row:not(.example-expanded-row):active {
   opacity: 0.5;
 }
 
-.streams-info
-{
+.streams-info {
   min-width: 500px;
   margin-bottom: 1rem;
   background-color: #1e1b3d;
 }
 
-.expand{
+.expand {
   position: relative;
   font-size: xx-large;
 }
 
-td, th{
+td, th {
   padding-left: 1rem !important;
 }
 
-.bottom-buttons-bar{
+.bottom-buttons-bar {
   margin-top: 1rem;
   height: 3rem;
 
-  >button{
+  > button {
     // Centre vertically
     top: 50%;
     transform: translateY(-50%);
   }
+
   width: 100%;
   //margin-right: 160px;
   min-width: 1675px;
 }
-.mat-column-camera_id{
+
+.mat-column-camera_id {
   width: 4%;
 }
+
 .mat-column-delete {
   width: 4%;
 }
+
 .mat-column-expand {
   width: 4%;
 }
+
 .mat-column-name {
   width: 12%;
 }
@@ -107,15 +112,15 @@ td, th{
   width: 68%;
 }
 
-.mat-column-stream_id{
-  width:5%;
+.mat-column-stream_id {
+  width: 5%;
 }
 
 .mat-column-descr {
   width: 12%;
 }
 
-.mat-column-netcam_uri{
+.mat-column-netcam_uri {
   width: 12%;
 }
 
@@ -132,21 +137,39 @@ td, th{
 }
 
 .mat-column-mask_file {
-  width: 15%;
+  width: 11%;
 }
 
 .mat-column-video_width {
   width: 4%;
 }
 
-.confirm-group{
-  >span{
+.confirm-group {
+  > span {
     background: #d9a11a;
     color: black;
     padding: 0.9rem;
     border-radius: 1rem;
   }
-  >button{
+
+  > button {
     margin-left: 0.5rem;
+  }
+}
+
+.file-upload {
+  position: relative;
+    display: flex;
+  > input {
+    position: relative;
+    left: 2.0rem;
+    font-style: italic;
+    cursor: default;
+  }
+  > button {
+    position: absolute;
+    left: -0.5rem;
+    top: -1rem;
+
   }
 }

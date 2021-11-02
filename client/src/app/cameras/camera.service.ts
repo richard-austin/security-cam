@@ -37,6 +37,12 @@ export class CameraService {
     })
   };
 
+  readonly httpUploadOptions = {
+    headers: new HttpHeaders({
+      'Authorization': 'my-auth-token'
+    })
+  };
+
   private activeLiveUpdates: Subject<any> = new Subject<any>();
   private configUpdates: Subject<void> = new Subject();
 
@@ -176,7 +182,7 @@ export class CameraService {
           cs.stream.selected = cs.stream.defaultOnMultiDisplay;
           cameraStreams.push(cs);
         }
-       // cam.streams = streams;  // Make the streams object into a map
+        // cam.streams = streams;  // Make the streams object into a map
       }
     }
     return cameraStreams;
@@ -186,7 +192,7 @@ export class CameraService {
    * loadCameras: Get camera set up details from the server
    * @private
    */
-  loadCameras():Observable<Map<string, Camera>> {
+  loadCameras(): Observable<Map<string, Camera>> {
     return this.http.post<Map<string, Camera>>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
       map((cams: Object) => {
           return CameraService.convertCamsObjectToMap(cams);
@@ -198,7 +204,7 @@ export class CameraService {
   /**
    * loadCameraStreams: Get camera streams from the server
    */
-  loadCameraStreams():Observable<CameraStream[]> {
+  loadCameraStreams(): Observable<CameraStream[]> {
     return this.http.post<Map<string, Camera>>(this._baseUrl.getLink("cam", "getCameras"), '', this.httpJSONOptions).pipe(
       map((cams: any) => {
         return CameraService.createCameraStreams(cams);
@@ -210,10 +216,10 @@ export class CameraService {
     Observable<Map<string, Camera>> {
     let cameras = {camerasJSON: camerasJON};
     return this.http.post<any>(this._baseUrl.getLink("cam", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe(
-      tap((cams ) => {
+      tap((cams) => {
         this.cameras = [];
 
-        for(const key in cams)
+        for (const key in cams)
           this.cameras.push(cams[key] as Camera);
 
         this.cameraStreams = CameraService.createCameraStreams(cams);
@@ -222,5 +228,20 @@ export class CameraService {
         return CameraService.convertCamsObjectToMap(cams);
       })
     );
+  }
+
+  uploadFile(uploadFile: any): Observable<any> {
+    const formData: FormData = new FormData();
+    formData.append('maskFile', uploadFile);
+    return this.http.post<any>(this._baseUrl.getLink("cam", "uploadMaskFile"), formData, this.httpUploadOptions).pipe(
+      /*      map((event) => {
+            switch (event.type) {
+              case HttpEventType.UploadProgress:
+                const progress = Math.round(100 * event.loaded / event.total);
+                return { status: 'progress', message: progress };
+            }
+          }),*/
+      tap(),
+      catchError((err: HttpErrorResponse) => throwError(err)));
   }
 }

@@ -47,7 +47,7 @@ export function isValidNetCamURI(): ValidatorFn {
   }
 }
 
-export function isValidMaskFilePath(): ValidatorFn {
+export function isValidMaskFileName(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
 
     const value = control.value;
@@ -56,7 +56,7 @@ export function isValidMaskFilePath(): ValidatorFn {
       return null;
     }
 
-    const pathValid = RegExp('^((?!.*\/\/.*)(?!.*\/ .*)\/{1}([^\\\\(){}:\*\?<>\|\"\'])+\.(pgm))$').test(value);
+    const pathValid = RegExp('^[a-z|A-Z|0-9|-|_]+.pgm$').test(value);
 
     return !pathValid ? {mask_file: true} : null;
   }
@@ -203,7 +203,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           mask_file: new FormControl({
             value: stream.motion.mask_file,
             disabled: !stream.motion.enabled
-          }, [isValidMaskFilePath(), Validators.maxLength(55)])
+          }, [isValidMaskFileName(), Validators.maxLength(55)])
         }, {updateOn: "change"});
       });
 
@@ -360,8 +360,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     // Renumber trigger_recording_on references so that the camera number is always the same as the camera key
     // Deleting a camera other than the last will cause the camera keys not to tie up with any previously set
     // reference in trigger_recording_on.
-    retVal.forEach((camera:Camera, camKey:string) => {
-      camera.streams.forEach((stream:Stream) => {
+    retVal.forEach((camera: Camera, camKey: string) => {
+      camera.streams.forEach((stream: Stream) => {
         if (stream.motion.trigger_recording_on !== '') {
           let fields: string[] = stream.motion.trigger_recording_on.split('.');
           fields[0] = camKey;
@@ -417,7 +417,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   setRecordingTrigger($event: MatSelectChange, stream: Stream) {
     if (stream.motion.enabled) {
       stream.motion.trigger_recording_on = $event.value;
-     // this.FixUpCamerasData();
+      // this.FixUpCamerasData();
     }
   }
 
@@ -485,10 +485,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(() => {
         this.reporting.successMessage = "Update Cameras Successful!";
         this.cameraSvc.configUpdated();  // Tell nav component to reload the camera data
-      this.updating = false;
+        this.updating = false;
       },
       reason => {
-      this.reporting.errorMessage = reason
+        this.reporting.errorMessage = reason
         this.updating = false;
       }
     )
@@ -515,6 +515,31 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       })
     })
     return totalStreams;
+  }
+
+  uploadFile($event: Event, camIndex: number, streamIndex: number) {
+    let fileUploadInput: HTMLInputElement = $event.target as HTMLInputElement;
+    if (fileUploadInput.files && fileUploadInput.files.length > 0) {
+      let stream: Stream = Array.from(  // Streams
+        Array.from( // Cameras
+          this.cameras.values())[camIndex].streams.values())[streamIndex];
+
+      stream.motion.mask_file = fileUploadInput.files[0].name;
+
+      let control: FormControl = this.getStreamControl(camIndex, streamIndex, 'mask_file');
+      control.setValue(stream.motion.mask_file);
+      // Upload file to server
+      this.cameraSvc.uploadFile(fileUploadInput.files[0])
+        .subscribe(() => {
+          this.reporting.successMessage = stream.motion.mask_file+' uploaded successfully'
+          },
+          (reason) => {
+            this.reporting.errorMessage = reason
+          });
+
+      // Clear the input so that selecting the same file again still triggers an onchange event
+      fileUploadInput.value = '';
+    }
   }
 
   ngOnInit(): void {
