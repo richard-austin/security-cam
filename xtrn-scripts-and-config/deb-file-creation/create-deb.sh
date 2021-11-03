@@ -31,7 +31,6 @@ mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream10
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/logs
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
-cp ../cameras.json security-cam_"${VERSION}"_arm64/home/security-cam/
 
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
@@ -39,7 +38,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
 cp -r ../motion/motion.conf ../motion/conf.d ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
-cp ../install-cert.sh ../sc_processes.sh security-cam_"${VERSION}"_arm64/tmp
+cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
 #cp ../sc_processes.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 

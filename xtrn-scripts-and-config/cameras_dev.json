@@ -27,7 +27,7 @@
         "video_height": 352,
         "motion": {
           "trigger_recording_on": "",
-          "mask_file": "porch_cam_mask.pgm",
+          "mask_file": "",
           "enabled": true
         },
         "video_width": 640,
@@ -44,31 +44,5 @@
       }
     },
     "name": "Test Cam"
-  },
-  "camera2": {
-    "name": "C2",
-    "address": "",
-    "controlUri": "",
-    "streams": {
-      "stream1": {
-        "descr": "S1",
-        "defaultOnMultiDisplay": true,
-        "netcam_uri": "rtsp://192.168.0.30:554/11",
-        "uri": "http://localhost:8009/nms/stream3.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/stream3",
-        "motion": {
-          "enabled": true,
-          "mask_file": "",
-          "trigger_recording_on": ""
-        },
-        "video_width": 1920,
-        "video_height": 1080,
-        "recording": {
-          "enabled": true,
-          "uri": "http://localhost:8084/recording/stream3/",
-          "location": "stream3"
-        }
-      }
-    }
   }
 }
