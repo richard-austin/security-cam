@@ -259,5 +259,11 @@ wait
         writer.write(scProcsTxt)
         writer.close()
 
+        // Make the file executable
+        File sc_procs = new File(path)
+        if(sc_procs.exists())
+            sc_procs.setExecutable(true)
+        else
+            throw new Exception("Main script file does not exist")
     }
 }
