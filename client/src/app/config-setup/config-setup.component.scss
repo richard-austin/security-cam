@@ -174,13 +174,17 @@ td, th {
     top: -1rem;
   }
 
+  > input {
+    width: 11rem;
+  }
+
   > button:nth-of-type(2) {
     position: absolute;
     mat-icon {
       font-size: medium;
     }
     right: -0.9rem;
-    top: -1rem;
+    top: -0.85rem;
     &:enabled {
       color: red;
     }
