@@ -4,13 +4,17 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import com.google.gson.internal.LinkedTreeMap
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.apache.commons.io.IOUtils
 import security.cam.commands.UpdateCamerasCommand
+import security.cam.commands.UploadMaskFileCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.enums.PassFail
+import server.Camera
+import server.Stream
 
 @Transactional
 class CamService {
@@ -51,6 +55,33 @@ class CamService {
         return result
     }
 
+    static private def removeUnusedMaskFiles(LinkedTreeMap<String, Camera> jsonObj)
+    {
+        Set<String> mask_files = new HashSet<String>()
+
+        // Make a set of file names which are in use
+        for(Map.Entry<String, Camera> cam: jsonObj.entrySet())
+            for(Map.Entry<String, Stream> stream: cam.value.streams)
+                if(stream.value.motion.enabled && stream.value.motion.mask_file != "")
+                    mask_files.add(stream.value.motion.mask_file)
+
+        // Get the .pgm files in the motion directory
+        File directory = new File("/home/security-cam/motion")  // TODO: Get these hard coded paths from config
+        File[] files = directory.listFiles(new FilenameFilter() {
+            @Override
+            boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".pgm")
+            }
+        })
+
+        // Remove .pgm files not in the data set
+        for(File file: files)
+        {
+            if(!mask_files.contains(file.name))
+                file.delete()
+        }
+    }
+
     def updateCameras(UpdateCamerasCommand cmd)
     {
         ObjectCommandResponse result = new ObjectCommandResponse()
@@ -79,13 +110,31 @@ class CamService {
             sc_processesService.startProcesses()
 
             Gson gson2 = new Gson()
-            Object obj = gson2.fromJson(prettyJsonString, Object.class)
+            LinkedTreeMap<String, Camera> obj = gson2.fromJson(prettyJsonString, Object.class) as LinkedTreeMap<String, Camera>
+
+            removeUnusedMaskFiles(obj)
 
             result.setResponseObject(obj)
         }
         catch(Exception ex)
         {
             logService.cam.error "Exception in updateCameras: " + ex.getMessage()
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    def uploadMaskFile(UploadMaskFileCommand cmd) {
+
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            File file
+            file = new File("/home/security-cam/motion/"+ cmd.maskFile.originalFilename) // TODO: Get hard coded paths like this from config
+            cmd.maskFile.transferTo(file)
+        }
+        catch (Exception ex) { // Some other type of exception
+            logService.cam.error "CamController.uploadMaskFile() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }

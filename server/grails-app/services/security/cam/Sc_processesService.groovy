@@ -57,7 +57,7 @@ class Sc_processesService {
                 p.waitFor()
                 pid = null
 
-                int retryCount = 200
+                int retryCount = 400
 
                 while(isRunning())
                 {
@@ -80,7 +80,7 @@ class Sc_processesService {
     boolean isRunning() {
         try {
             p.exitValue()
-            return false;
+            return false
         } catch (ignored) {
             return true
         }

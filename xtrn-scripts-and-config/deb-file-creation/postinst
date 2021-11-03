@@ -20,7 +20,6 @@ usermod -a -G security-cam sec-cam
 usermod -a -G security-cam www-data
 
 chown -R sec-cam:security-cam /home/security-cam
-chmod 470 /home/security-cam/sc_processes.sh
 
 chown tomcat:security-cam /home/security-cam/logs/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
@@ -38,9 +37,12 @@ chmod 640 /etc/ssmtp/ssmtp.conf
 find /home/security-cam -type d -print0 | xargs -0 chmod 775
 # Give files permission 664
 find /home/security-cam -type f -print0 | xargs -0 chmod 664
+# Make sure sc_processes.sh is executable if present and set ownership to tomcat
+chmod +x /home/security-cam/sc_processes.sh || true
+chown tomcat:tomcat /home/security-cam/sc_processes.sh || true
 
 # Copy install-cert.sh and sc_processes.sh with executable attribs unaffected by previous command
-mv /tmp/install-cert.sh /tmp/sc_processes.sh /home/security-cam/
+mv /tmp/install-cert.sh /home/security-cam/
 chown root:root /home/security-cam/install-cert.sh
 
 chgrp -R security-cam /home/security-cam/
