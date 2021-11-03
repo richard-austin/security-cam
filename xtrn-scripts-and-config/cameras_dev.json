@@ -27,7 +27,7 @@
         "video_height": 352,
         "motion": {
           "trigger_recording_on": "camera1.stream1",
-          "mask_file": "garage_cam_mask.pgm",
+          "mask_file": "porch_cam_mask.pgm",
           "enabled": true
         },
         "video_width": 640,

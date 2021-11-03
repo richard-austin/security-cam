@@ -159,17 +159,31 @@ td, th {
 
 .file-upload {
   position: relative;
-    display: flex;
+  display: flex;
+
   > input {
     position: relative;
     left: 2.0rem;
     font-style: italic;
     cursor: default;
   }
-  > button {
+
+  > button:first-of-type {
     position: absolute;
     left: -0.5rem;
     top: -1rem;
+  }
 
+  > button:nth-of-type(2) {
+    position: absolute;
+    mat-icon {
+      font-size: medium;
+    }
+    right: -0.9rem;
+    top: -1rem;
+    &:enabled {
+      color: red;
+    }
   }
 }
+

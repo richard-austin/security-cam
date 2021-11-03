@@ -202,13 +202,16 @@
                       </button>
                       <input matInput type="text" readonly
                              [formControl]="getStreamControl(camIndex, streamIndex, 'mask_file')">
+                      <button type="button" mat-icon-button
+                              (click)="stream.value.motion.mask_file='';
+                              getStreamControl(camIndex, streamIndex, 'mask_file').setValue('')"
+                              [disabled]="!stream.value.motion.enabled"
+                              matTooltip="Click to clear this field (no mask file)"
+                              matTooltipClass="tooltip">
+                        <mat-icon>close</mat-icon>
+                      </button>
                     </div>
                   </mat-form-field>
-                  <!--                    <input matInput type="text" autocomplete="off" maxlength="75"-->
-                  <!--                           [formControl]="getStreamControl(camIndex, streamIndex, 'mask_file')"-->
-                  <!--                           matTooltip="Path to a mask file image. This is a .pgm file where motion detection is disabled hades of grey attenuate motion detection sensitivity."-->
-                  <!--                           matTooltipClass="tooltip"-->
-                  <!--                           placeholder="Mask file path" (blur)="updateMotionField(camIndex, streamIndex, 'mask_file')">-->
                 </td>
               </ng-container>
               <ng-container matColumnDef="video_width">
