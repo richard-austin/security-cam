@@ -230,17 +230,10 @@ export class CameraService {
     );
   }
 
-  uploadFile(uploadFile: any): Observable<any> {
+  uploadMaskFile(uploadFile: any): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('maskFile', uploadFile);
     return this.http.post<any>(this._baseUrl.getLink("cam", "uploadMaskFile"), formData, this.httpUploadOptions).pipe(
-      /*      map((event) => {
-            switch (event.type) {
-              case HttpEventType.UploadProgress:
-                const progress = Math.round(100 * event.loaded / event.total);
-                return { status: 'progress', message: progress };
-            }
-          }),*/
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

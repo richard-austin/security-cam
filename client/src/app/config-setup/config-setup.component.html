@@ -191,7 +191,7 @@
                 <th mat-header-cell *matHeaderCellDef> Mask File</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
                   <mat-form-field appearance="legacy" [style.width.px]="220">
-                    <input style="position: absolute" hidden #fileInput type="file" (change)="uploadFile($event, camIndex, streamIndex)"/>
+                    <input style="position: absolute" hidden #fileInput type="file" (change)="uploadMaskFile($event, cam.key, camIndex, streamIndex)"/>
                     <div class="file-upload">
                       <button type="button" mat-icon-button (click)="fileInput.click()"
                               [disabled]="!stream.value.motion.enabled"

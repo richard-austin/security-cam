@@ -47,7 +47,7 @@ export function isValidNetCamURI(): ValidatorFn {
   }
 }
 
-export function isValidMaskFileName(): ValidatorFn {
+export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
 
     const value = control.value;
@@ -56,9 +56,24 @@ export function isValidMaskFileName(): ValidatorFn {
       return null;
     }
 
-    const pathValid = RegExp('^[a-zA-Z0-9-_]+.pgm$').test(value);
+    let allFiles:Set<string> = new Set<string>();
+    let duplicateMaskFile: boolean = false;
 
-    return !pathValid ? {mask_file: true} : null;
+    const fileNameValid = RegExp('^[a-zA-Z0-9-_]+.pgm$').test(value);
+    // Check that no file name is being used by more than one camera
+    cameras.forEach((cam:Camera) => {
+      cam.streams.forEach((stream:Stream) => {
+        if(stream.motion.enabled) {
+          if (allFiles.has(stream.motion.mask_file))
+            duplicateMaskFile = true;
+          else
+            allFiles.add(stream.motion.mask_file);
+        }
+      })
+    })
+
+
+    return !fileNameValid || duplicateMaskFile ? {mask_file: !fileNameValid, duplicate: duplicateMaskFile} : null;
   }
 }
 
@@ -203,7 +218,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           mask_file: new FormControl({
             value: stream.motion.mask_file,
             disabled: !stream.motion.enabled
-          }, [isValidMaskFileName(), Validators.maxLength(55)])
+          }, [isValidMaskFileName(this.cameras), Validators.maxLength(55)])
         }, {updateOn: "change"});
       });
 
@@ -459,6 +474,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   commitConfig() {
     this.updating = true;
+    this.reporting.dismiss();
     this.FixUpCamerasData();
     let cams: Map<string, Camera> = new Map(this.cameras);
     // First convert the map to JSON
@@ -517,7 +533,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     return totalStreams;
   }
 
-  uploadFile($event: Event, camIndex: number, streamIndex: number) {
+  uploadMaskFile($event: Event, camKey:string, camIndex: number, streamIndex: number) {
     let fileUploadInput: HTMLInputElement = $event.target as HTMLInputElement;
     if (fileUploadInput.files && fileUploadInput.files.length > 0) {
       let stream: Stream = Array.from(  // Streams
@@ -530,7 +546,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       control.setValue(stream.motion.mask_file);
       if(control.valid) {
         // Upload file to server
-        this.cameraSvc.uploadFile(fileUploadInput.files[0])
+        this.cameraSvc.uploadMaskFile(fileUploadInput.files[0])
           .subscribe(() => {
               this.reporting.successMessage = stream.motion.mask_file + ' uploaded successfully'
             },
@@ -540,7 +556,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       }
       else
         this.reporting.errorMessage = new HttpErrorResponse({
-          error: "The file " + stream.motion.mask_file + " is not a valid mask file",
+          error: "The file " + stream.motion.mask_file + (control.errors?.mask_file ? " is not a valid mask file"
+              : control.errors?.duplicate ? " is used with more than one stream"
+              : " has an unspecified error"),
           status: 0,
           statusText: "",
           url: undefined
