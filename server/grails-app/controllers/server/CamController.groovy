@@ -11,8 +11,11 @@ import security.cam.CamService
 import security.cam.LogService
 import security.cam.ValidationErrorService
 import security.cam.commands.UpdateCamerasCommand
+import security.cam.commands.UploadMaskFileCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.enums.PassFail
+
+import java.nio.file.Path
 
 class CamController {
     static responseFormats = ['json', 'xml']
@@ -53,4 +56,25 @@ class CamController {
             render result.responseObject as JSON
         }
     }
+
+    @Secured(['ROLE_CLIENT'])
+    def uploadMaskFile(UploadMaskFileCommand cmd) {
+        logService.cam.debug "CamController.uploadMaskFile() called"
+        ObjectCommandResponse result
+
+        // Check for Command Object validation errors
+        if (cmd.hasErrors()) {
+            //cmd.errors.each { println it }
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "uploadMaskFile")
+            render(status: 400, text: (errorsMap as JSON))
+        }
+        else {
+            result = camService.uploadMaskFile(cmd)
+            if(result.status == PassFail.PASS)
+                render (status: 200, text: [])
+            else
+                render (status: 500, text: result.error)
+        }
+    }
+
 }
