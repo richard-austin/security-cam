@@ -63,7 +63,7 @@ export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
     // Check that no file name is being used by more than one camera
     cameras.forEach((cam:Camera) => {
       cam.streams.forEach((stream:Stream) => {
-        if(stream.motion.enabled) {
+        if(stream.motion.enabled && stream.motion.mask_file !== '') {
           if (allFiles.has(stream.motion.mask_file))
             duplicateMaskFile = true;
           else
@@ -178,13 +178,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     });
   }
 
-  updateMotionField(camIndex: number, streamIndex: number, field: string) {
-    const control = this.getStreamControl(camIndex, streamIndex, field);
-    if (control) {
-      this.updateMotion(camIndex, streamIndex, field, control.value);
-    }
-  }
-
+  // updateMotionField(camIndex: number, streamIndex: number, field: string) {
+  //   const control = this.getStreamControl(camIndex, streamIndex, field);
+  //   if (control) {
+  //     this.updateMotion(camIndex, streamIndex, field, control.value);
+  //   }
+  // }
+  //
 
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
