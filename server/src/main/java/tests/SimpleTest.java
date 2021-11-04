@@ -18,7 +18,7 @@ public class SimpleTest {
 
     final Map<String, OnvifDevice> onvifCameras = new HashMap<>();
     final Map<String, OnvifCredentials> credentialsMap = new HashMap<>();
-    final String propFileRelativePath = "/home/richard/onvif/onvif-java/src/test/resources/onvif.properties";
+    final String propFileRelativePath = "server/src/main/java/tests/resources/onvif.properties";
     final Properties config = new Properties();
     final File f = new File(propFileRelativePath);
     if (!f.exists()) throw new Exception("fnf: " + f.getAbsolutePath());
