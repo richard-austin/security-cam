@@ -1,24 +1,24 @@
 {
   "camera1": {
-    "name": "Porch",
-    "address": "192.168.0.30",
+    "name": "Spare",
+    "address": "192.168.0.45",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
     "streams": {
       "stream1": {
         "descr": "HD",
         "defaultOnMultiDisplay": false,
-        "netcam_uri": "rtsp://192.168.0.30:554/11",
+        "netcam_uri": "rtsp://192.168.0.45:554/11",
         "uri": "http://localhost:8009/nms/stream1.flv",
         "nms_uri": "rtmp://localhost:1935/nms/stream1",
         "motion": {
           "enabled": false,
-          "mask_file": "",
+          "mask_file": "porch_cam_mask.pgm",
           "trigger_recording_on": ""
         },
         "video_width": 0,
         "video_height": 0,
         "recording": {
-          "enabled": true,
+          "enabled": false,
           "uri": "http://localhost:8084/recording/stream1/",
           "location": "stream1"
         }
@@ -26,13 +26,13 @@
       "stream2": {
         "descr": "Normal",
         "defaultOnMultiDisplay": true,
-        "netcam_uri": "rtsp://192.168.0.30:554/12",
+        "netcam_uri": "rtsp://192.168.0.45:554/12",
         "uri": "http://localhost:8009/nms/stream2.flv",
         "nms_uri": "rtmp://localhost:1935/nms/stream2",
         "motion": {
           "enabled": true,
           "mask_file": "porch_cam_mask.pgm",
-          "trigger_recording_on": "camera1.stream1"
+          "trigger_recording_on": ""
         },
         "video_width": 640,
         "video_height": 352,
@@ -40,96 +40,6 @@
           "enabled": true,
           "uri": "http://localhost:8084/recording/stream2/",
           "location": "stream2"
-        }
-      }
-    }
-  },
-  "camera2": {
-    "name": "Garage",
-    "address": "192.168.0.34",
-    "controlUri": "web/cgi-bin/hi3510/param.cgi",
-    "streams": {
-      "stream1": {
-        "descr": "HD",
-        "defaultOnMultiDisplay": false,
-        "netcam_uri": "rtsp://192.168.0.34:554/11",
-        "uri": "http://localhost:8009/nms/stream3.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/stream3",
-        "motion": {
-          "enabled": false,
-          "mask_file": "",
-          "trigger_recording_on": ""
-        },
-        "video_width": 0,
-        "video_height": 0,
-        "recording": {
-          "enabled": true,
-          "uri": "http://localhost:8084/recording/stream3/",
-          "location": "stream3"
-        }
-      },
-      "stream2": {
-        "descr": "Normal",
-        "defaultOnMultiDisplay": true,
-        "netcam_uri": "rtsp://192.168.0.34:554/12",
-        "uri": "http://localhost:8009/nms/stream4.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/stream4",
-        "motion": {
-          "enabled": true,
-          "mask_file": "garage_cam_mask.pgm",
-          "trigger_recording_on": "camera2.stream1"
-        },
-        "video_width": 640,
-        "video_height": 352,
-        "recording": {
-          "enabled": true,
-          "uri": "http://localhost:8084/recording/stream4/",
-          "location": "stream4"
-        }
-      }
-    }
-  },
-  "camera3": {
-    "name": "Garden",
-    "address": "192.168.0.35",
-    "controlUri": "web/cgi-bin/hi3510/param.cgi",
-    "streams": {
-      "stream1": {
-        "descr": "HD",
-        "defaultOnMultiDisplay": false,
-        "netcam_uri": "rtsp://192.168.0.35:554/11",
-        "uri": "http://localhost:8009/nms/stream5.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/stream5",
-        "motion": {
-          "enabled": false,
-          "mask_file": "",
-          "trigger_recording_on": ""
-        },
-        "video_width": 0,
-        "video_height": 0,
-        "recording": {
-          "enabled": true,
-          "uri": "http://localhost:8084/recording/stream5/",
-          "location": "stream5"
-        }
-      },
-      "stream2": {
-        "descr": "Normal",
-        "defaultOnMultiDisplay": true,
-        "netcam_uri": "rtsp://192.168.0.35:554/12",
-        "uri": "http://localhost:8009/nms/stream6.flv",
-        "nms_uri": "rtmp://localhost:1935/nms/stream6",
-        "motion": {
-          "enabled": true,
-          "mask_file": "",
-          "trigger_recording_on": "camera3.stream1"
-        },
-        "video_width": 640,
-        "video_height": 352,
-        "recording": {
-          "enabled": true,
-          "uri": "http://localhost:8084/recording/stream6/",
-          "location": "stream6"
         }
       }
     }

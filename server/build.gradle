@@ -86,7 +86,7 @@ dependencies {
 
     implementation 'commons-io:commons-io:2.8.0'
     compileOnly "io.micronaut:micronaut-inject-groovy"
-    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     console "org.grails:grails-console"
     profile "org.grails.profiles:web"
     runtimeOnly "org.glassfish.web:el-impl:2.1.2-b03"
@@ -108,6 +108,11 @@ dependencies {
 
     // Onvif dependencies
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.apache.cxf.xjc-utils', name: 'cxf-xjc-runtime', version: '3.3.1'
+    compile group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.0'
+    compile group: 'org.apache.cxf', name: 'cxf-distribution-manifest', version: '3.4.3'
+    compile group: 'com.sun.xml.messaging.saaj', name: 'saaj-impl', version: '1.5.1'
+    compile group: 'javax.activation', name: 'activation', version: '1.1'
 
     //Annotations
     compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
@@ -135,7 +140,7 @@ bootRun {
 }
 
 assetCompile.dependsOn(':server:setVersion')
-bootWar.dependsOn(':client:buildClient')
+//bootWar.dependsOn(':client:buildClient')
 
 bootWar {
     webInf {
