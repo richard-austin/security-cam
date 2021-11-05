@@ -58,7 +58,7 @@ public class DiscoverAndTest {
     return out.toString();
   }
 
-  public static void main(String[] args) {
+  public static void mainX(String[] args) {
     // get user and password.. we will ignore device host
     String user = "";
     String password = "";

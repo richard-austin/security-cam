@@ -56,6 +56,10 @@ configurations {
     runtimeClasspath {
         extendsFrom developmentOnly
     }
+    all*.exclude module : 'slf4j-jdk14'  // Exclude this one (part of a package in the Onvif code)
+                                         // as it clashes with Logback
+//    all*.exclude module : 'spring-boot-starter-logging'
+//    all*.exclude module : 'logback-classic'
 }
 
 dependencies {
@@ -107,7 +111,7 @@ dependencies {
     testRuntimeOnly "org.seleniumhq.selenium:selenium-firefox-driver:3.14.0"
 
     // Onvif dependencies
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+//    testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'org.apache.cxf.xjc-utils', name: 'cxf-xjc-runtime', version: '3.3.1'
     compile group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.0'
     compile group: 'org.apache.cxf', name: 'cxf-distribution-manifest', version: '3.4.3'

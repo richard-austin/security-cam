@@ -22,7 +22,7 @@ import org.onvif.ver20.imaging.wsdl.ImagingService;
 import org.onvif.ver20.ptz.wsdl.PTZ;
 import org.onvif.ver20.ptz.wsdl.PtzService;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.LoggerFactory;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.BindingProvider;
@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  * @author Modified by Brad Lowe
  */
 public class OnvifDevice {
-  private static final Logger logger = LoggerFactory.getLogger(OnvifDevice.class);
+//  private static final Logger logger = LoggerFactory.getLogger(OnvifDevice.class);
   private static final String DEVICE_SERVICE = "/onvif/device_service";
 
   private final URL url; // Example http://host:port, https://host, http://host, http://ip_address

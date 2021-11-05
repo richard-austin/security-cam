@@ -1,4 +1,6 @@
-package org.onvif.client;
+package org.utils;
+
+import java.util.LinkedHashMap;
 
 public class OnvifCredentials {
   private String host; // 92.168.xx.yy, or http://host[:port]

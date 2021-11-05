@@ -14,7 +14,7 @@ public class SimpleTest {
 
   // This test reads connection params from a properties file and take a
   // screenshot
-  public static void main(String[] args) throws Exception {
+  public static void mainX(String[] args) throws Exception {
 
     final Map<String, OnvifDevice> onvifCameras = new HashMap<>();
     final Map<String, OnvifCredentials> credentialsMap = new HashMap<>();

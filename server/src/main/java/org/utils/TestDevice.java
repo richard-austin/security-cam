@@ -1,14 +1,22 @@
-package tests;
+package org.utils;
 
 import onvif.beans.DeviceInfo;
 import onvif.soap.OnvifDevice;
 import onvif.utils.OnvifUtils;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import javax.xml.soap.SOAPException;
 import org.onvif.ver10.device.wsdl.DeviceServiceCapabilities;
 import org.onvif.ver10.events.wsdl.EventPortType;
 import org.onvif.ver10.events.wsdl.GetEventProperties;
 import org.onvif.ver10.events.wsdl.GetEventPropertiesResponse;
 import org.onvif.ver10.media.wsdl.Media;
-import org.onvif.ver10.schema.*;
+import org.onvif.ver10.schema.AudioSource;
+import org.onvif.ver10.schema.PTZPreset;
+import org.onvif.ver10.schema.PTZStatus;
+import org.onvif.ver10.schema.Profile;
+import org.onvif.ver10.schema.VideoSource;
 import org.onvif.ver20.imaging.wsdl.ImagingPort;
 import org.onvif.ver20.ptz.wsdl.Capabilities;
 import org.onvif.ver20.ptz.wsdl.PTZ;
@@ -18,11 +26,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.soap.SOAPException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.lang.Object;
+import static org.utils.GetTestDevice.*;
 
 /** @author Brad Lowe */
 public class TestDevice {
@@ -179,8 +183,8 @@ public class TestDevice {
     return inspect(device);
   }
 
-  public static void main(String[] args) {
-    OnvifCredentials creds = GetTestDevice.getOnvifCredentials(args);
+  public static void mainX(String[] args) {
+    OnvifCredentials creds = getOnvifCredentials(args);
     try {
       // OnvifDevice.setVerbose(true);
       String out = testCamera(creds);

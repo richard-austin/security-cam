@@ -39,7 +39,7 @@ public class WsNotificationTest {
   // A good idea could be to follow this guide:
   // https://access.redhat.com/documentation/en-us/red_hat_jboss_a-mq/6.1/html-single/ws-notification_guide/index#WSNTutorial
 
-  public static void main(String[] args) throws IOException {
+  public static void mainX(String[] args) throws IOException {
     OnvifCredentials creds = GetTestDevice.getOnvifCredentials(args);
     System.out.println("Connect to camera, please wait ...");
 

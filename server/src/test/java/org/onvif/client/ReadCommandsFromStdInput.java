@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 import javax.xml.soap.SOAPException;
 import org.onvif.ver10.schema.Profile;
+import org.utils.TestDevice;
 
 public class ReadCommandsFromStdInput {
 

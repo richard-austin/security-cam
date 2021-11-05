@@ -1,4 +1,4 @@
-package org.onvif.client;
+package org.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

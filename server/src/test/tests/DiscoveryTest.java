@@ -10,7 +10,7 @@ import java.util.Collection;
 public class DiscoveryTest {
   private static final Logger LOG = LoggerFactory.getLogger(DiscoveryTest.class);
 
-  public static void main(String[] args) {
+  public static void mainX(String[] args) {
     Collection<URL> urls = OnvifDiscovery.discoverOnvifURLs();
     for (URL u : urls) {
       LOG.info(u.toString());
