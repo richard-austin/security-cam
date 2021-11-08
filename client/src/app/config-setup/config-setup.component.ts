@@ -109,6 +109,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   downloading: boolean = true;
   updating: boolean = false;
+  discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
   cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address'];
   cameraFooterColumns = ['buttons'];
@@ -122,6 +123,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   list$!: BehaviorSubject<Camera[]>;
   confirmSave: boolean = false;
   confirmNew: boolean = false;
+  confirmNewLookup: boolean = false;
 
   constructor(private cameraSvc: CameraService) {
   }
@@ -520,6 +522,18 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     stream1.defaultOnMultiDisplay = true;  // There must always be just one default on multi display so set it on the only stream.
     this.cameras.get('camera1')?.streams.set('stream1', stream1);
     this.FixUpCamerasData();
+  }
+
+  startOnvifSearch() {
+    this.discovering=true;
+    this.cameraSvc.discover().subscribe((cams:Map<string, Camera>) => {
+      this.cameras = cams;
+      this.FixUpCamerasData();
+      this.discovering=false;
+    },
+      reason => {
+        this.reporting.errorMessage = reason;
+      });
   }
 
   totalNumberOfStreams(): number {

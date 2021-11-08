@@ -64,7 +64,7 @@ configurations {
 
 dependencies {
 //    implementation 'org.projectlombok:lombok:1.18.16'
-//    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation 'org.grails.plugins:spring-security-core:4.0.3'
     implementation "org.springframework.boot:spring-boot-starter-logging"
     implementation "org.springframework.boot:spring-boot-autoconfigure"
@@ -151,7 +151,7 @@ bootRun {
 }
 
 assetCompile.dependsOn(':server:setVersion')
-//bootWar.dependsOn(':client:buildClient')
+bootWar.dependsOn(':client:buildClient')
 
 bootWar {
     webInf {

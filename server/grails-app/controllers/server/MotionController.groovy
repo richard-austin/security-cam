@@ -1,5 +1,6 @@
 package server
 
+import com.google.gson.internal.LinkedHashTreeMap
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
@@ -24,36 +25,35 @@ class MotionEvents {
 }
 
 class Recording {
-    boolean enabled
-    String uri
-    String location
+    boolean enabled=false
+    String uri=''
+    String location=''
 }
 
 class Motion {
-    boolean enabled    // If true, motion detection is enabled for the stream
-    String mask_file  // Mask file which defines area used in motion sensing
-    String trigger_recording_on  // The name of the camera stream on which recordings will be triggered following
+    boolean enabled=false    // If true, motion detection is enabled for the stream
+    String mask_file=''  // Mask file which defines area used in motion sensing
+    String trigger_recording_on=''  // The name of the camera stream on which recordings will be triggered following
     // Motion events on this camera stream (usually another stream on the same physical camera).
 }
 
 class Stream {
-    String descr
-    boolean defaultOnMultiDisplay
-    String netcam_uri
-    String uri
-    String nms_uri
-    Motion motion
-    Integer video_width
-    Integer video_height
-    String mask_file
-    Recording recording
+    String descr=''
+    boolean defaultOnMultiDisplay=false
+    String netcam_uri=''
+    String uri=''
+    String nms_uri=''
+    Motion motion=new Motion()
+    Integer video_width=0
+    Integer video_height=0
+    Recording recording=new Recording()
 }
 
 class Camera {
-    String name
-    String address
-    String controlUri
-    Map<String, Stream> streams
+    String name=''
+    String address=''
+    String controlUri=''
+    Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
 }
 
 class MotionController {
