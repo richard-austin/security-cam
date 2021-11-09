@@ -36,7 +36,7 @@ class CamService {
             if(Environment.current.name == 'development')
                 fis = new FileInputStream("../xtrn-scripts-and-config/cameras_dev.json")
             else if(Environment.current.name == 'production')
-                fis = new FileInputStream("/home/security-cam/cameras.json")
+                fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/cameras.json")
             else
                 throw new Exception('Unknown environment, expecting production or development')
 
@@ -66,7 +66,7 @@ class CamService {
                     mask_files.add(stream.value.motion.mask_file)
 
         // Get the .pgm files in the motion directory
-        File directory = new File("/home/security-cam/motion")  // TODO: Get these hard coded paths from config
+        File directory = new File("${grailsApplication.config.camerasHomeDirectory}/motion")
         File[] files = directory.listFiles(new FilenameFilter() {
             @Override
             boolean accept(File dir, String name) {
@@ -95,7 +95,7 @@ class CamService {
             if(Environment.current.name == 'development')
                 fileName = "../xtrn-scripts-and-config/cameras_dev.json"
             else if(Environment.current.name == 'production')
-                fileName = "/home/security-cam/cameras.json"
+                fileName = "${grailsApplication.config.camerasHomeDirectory}/cameras.json"
             else
                 throw new Exception('Unknown environment, expecting production or development')
 
@@ -130,7 +130,7 @@ class CamService {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             File file
-            file = new File("/home/security-cam/motion/"+ cmd.maskFile.originalFilename) // TODO: Get hard coded paths like this from config
+            file = new File("${grailsApplication.config.camerasHomeDirectory}/motion/"+ cmd.maskFile.originalFilename)
             cmd.maskFile.transferTo(file)
         }
         catch (Exception ex) { // Some other type of exception
