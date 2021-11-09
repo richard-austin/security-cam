@@ -12,7 +12,11 @@
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Updating Cameras Data, Please wait..</span>
   </mat-card-content>
-  <mat-card-content *ngIf="!downloading  && !updating">
+  <mat-card-content class="wait-box mat-form-field-flex" *ngIf="discovering">
+    <mat-spinner [diameter]="25"></mat-spinner>
+    <span>Camera discovery active, Please wait..</span>
+  </mat-card-content>
+  <mat-card-content *ngIf="!downloading  && !updating && !discovering">
     <table mat-table
            [dataSource]="cameras | mapToKeyValue" multiTemplateDataRows
            class="mat-elevation-z8">
@@ -263,7 +267,7 @@
       <!-- Cameras table Footer with the control buttons -->
       <ng-container matColumnDef="buttons">
         <td mat-footer-cell [attr.colspan]="cameraColumns.length" *matFooterCellDef>
-          <button [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 10" mat-icon-button
+          <button [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10" mat-icon-button
                   (click)="addCamera()"
                   matTooltip="Add another camera."
                   matTooltipClass="tooltip">
@@ -272,13 +276,19 @@
           <button [disabled]="anyInvalid() || confirmSave" mat-icon-button (click)="confirmNew=true"
                   matTooltip="Start a new configuration"
                   matTooltipClass="tooltip"
-                  *ngIf="!confirmNew">
+                  *ngIf="!confirmNew && !confirmNewLookup">
             <mat-icon>note</mat-icon>
           </button>
-          <button [disabled]="anyInvalid() || confirmNew" mat-icon-button (click)="confirmSave=true"
-                  matTooltip="Commit the configuration"
+          <button  [disabled]="confirmSave || confirmNewLookup" mat-icon-button (click)="confirmNewLookup=true"
+            matTooltip="Perform onvif LAN search for cameras"
+            matTooltipClass="tooltip"
+            *ngIf="!confirmNewLookup && !confirmNewLookup">
+            <mat-icon>explore</mat-icon>
+          </button>
+          <button [disabled]="anyInvalid() || confirmNew || confirmNewLookup" mat-icon-button (click)="confirmSave=true"
+                  matTooltip="Commit the current configuration in this editor"
                   matTooltipClass="tooltip"
-                  *ngIf="!confirmSave">
+                  *ngIf="!confirmSave && !confirmNewLookup">
             <mat-icon>save</mat-icon>
           </button>
           <span class="confirm-group" *ngIf="confirmNew">
@@ -287,6 +297,15 @@
               Cancel
             </button>
             <button color="warning" mat-flat-button (click)="createNew();confirmNew=false;">
+              New
+            </button>
+          </span>
+          <span class="confirm-group" *ngIf="confirmNewLookup">
+            <span>Start Onvif camera search, are you sure?</span>
+            <button color="default" mat-flat-button (click)="confirmNewLookup=false">
+              Cancel
+            </button>
+            <button color="warning" mat-flat-button (click)="startOnvifSearch();confirmNewLookup=false;">
               New
             </button>
           </span>

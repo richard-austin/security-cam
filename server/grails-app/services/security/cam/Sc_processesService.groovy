@@ -12,19 +12,63 @@ import java.util.concurrent.TimeUnit
 class Sc_processesService {
     LogService logService
 
-    Sc_processesService()
-    {
+    Sc_processesService() {
     }
 
     Process p
     Long pid = null
 
+    private List<ProcessHandle> killProcessTree(ProcessHandle ph) {
+        List<ProcessHandle> handles = new ArrayList<>()
+        ph.children().forEach({ ProcessHandle phc ->
+            handles.addAll(killProcessTree(phc))
+        })
+        ph.destroy()
+        handles.add(ph)
+        return handles
+    }
+
+    private killProcesses(ProcessHandle handle) {
+        List<ProcessHandle> handles = killProcessTree(handle)
+        List<ProcessHandle> remainingHandles = new ArrayList<ProcessHandle>()
+        int testCount = 1200
+
+        while (--testCount > 0) {
+            Thread.sleep(20)
+            handles.forEach({ ProcessHandle phr ->
+                if (phr.isAlive())
+                    remainingHandles.add(phr)
+            })
+
+            handles.clear()
+            handles.addAll(remainingHandles)
+            if (remainingHandles.size() > 0) {
+                remainingHandles.clear()
+            } else {
+                logService.cam.info("All processes successfully stopped")
+                break
+            }
+        }
+
+        // If any still remain, destroy forcibly
+        handles.forEach({ ProcessHandle rph ->
+            rph.destroyForcibly()
+            logService.cam.error("Process ${rph.pid()} (${rph.toString()}) remains running, kill signal sent")
+        })
+    }
+
     def startProcesses() {
         ObjectCommandResponse response = new ObjectCommandResponse()
+        logService.cam.debug "startProcesses called"
+
         try {
             if (pid == null) {
                 // There should be no processes running at this point, run killall to make sure they are all off
                 p = Runtime.getRuntime().exec("killall sc_processes.sh")
+                p.waitFor()
+                p = Runtime.getRuntime().exec("killall ffmpeg")
+                p.waitFor()
+                p = Runtime.getRuntime().exec("killall motion")
                 p.waitFor()
 
                 if (Environment.current.name == 'development')
@@ -33,11 +77,16 @@ class Sc_processesService {
                     p = Runtime.getRuntime().exec("/home/security-cam/sc_processes.sh")
 
                 p.waitFor(100, TimeUnit.MILLISECONDS)
-                pid = p.pid()
+                if(p.isAlive())
+                {
+                    pid = p.pid()
+                    logService.cam.debug "sc_processes successfully started ${p.toString()}"
+                }
+                else
+                    throw new Exception("sc_processes not started")
             }
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error "Exception in startProcesses: " + ex.getMessage()
             response.status = PassFail.FAIL
             response.error = ex.getMessage()
@@ -47,29 +96,16 @@ class Sc_processesService {
     }
 
     @PreDestroy
-    def stopProcesses()
-    {
+    def stopProcesses() {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
-            logService.cam.debug"stopProcessses: pid = " + pid + ": kill -INT ${pid}"
-            if (pid != null) {
-                Process p = Runtime.getRuntime().exec("kill -INT ${pid}")
-                p.waitFor()
-                pid = null
+            logService.cam.debug "stopProcessses called ${p.toString()}"
 
-                int retryCount = 400
-
-                while(isRunning())
-                {
-                    if(--retryCount <= 0)
-                        throw new Exception("Unable to stop sc_processes service")
-
-                    Thread.sleep(20)
-                }
-            }
+            // Recursively kill the process tree
+            killProcesses(p.toHandle())
+            pid = null
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error "Exception in stopProcesses: " + ex.getMessage()
             response.status = PassFail.FAIL
             response.error = ex.getMessage()
@@ -84,4 +120,5 @@ class Sc_processesService {
         } catch (ignored) {
             return true
         }
-    }}
+    }
+}
