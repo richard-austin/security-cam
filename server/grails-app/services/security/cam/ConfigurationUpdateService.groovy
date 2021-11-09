@@ -20,6 +20,7 @@ class ConfigurationUpdateService {
      */
     def generateConfigs() {
         ObjectCommandResponse response = new ObjectCommandResponse()
+        logService.cam.info "generateConfigs called"
         try {
             // Stop sc_processes.sh before updating the config
             sc_processesService.stopProcesses()
@@ -42,12 +43,14 @@ class ConfigurationUpdateService {
 
             Map<String, Camera> jsonObj = response.responseObject as Map<String, Camera>
 
+            logService.cam.info "Calling UpdateMotionConfig"
             UpdateMotionConfig(jsonObj)
 
             // Update sc_processes.sh
+            logService.cam.info "Calling UpdateScProcesses"
             UpdateScProcesses(jsonObj)
             sc_processesService.startProcesses()
-            Thread.sleep(300)  // Give it time to stop
+            Thread.sleep(300)  // Give it time to start
         }
         catch (Exception ex) {
             logService.cam.error "Exception in generateConfigs: " + ex.getMessage()

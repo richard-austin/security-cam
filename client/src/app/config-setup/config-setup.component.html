@@ -279,7 +279,7 @@
                   *ngIf="!confirmNew && !confirmNewLookup">
             <mat-icon>note</mat-icon>
           </button>
-          <button  [disabled]="anyInvalid() || confirmSave || confirmNewLookup" mat-icon-button (click)="confirmNewLookup=true"
+          <button  [disabled]="confirmSave || confirmNewLookup" mat-icon-button (click)="confirmNewLookup=true"
             matTooltip="Perform onvif LAN search for cameras"
             matTooltipClass="tooltip"
             *ngIf="!confirmNewLookup && !confirmNewLookup">

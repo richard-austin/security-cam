@@ -44,8 +44,10 @@ class Sc_processesService {
             handles.addAll(remainingHandles)
             if (remainingHandles.size() > 0) {
                 remainingHandles.clear()
-            } else
+            } else {
+                logService.cam.info("All processes successfully stopped")
                 break
+            }
         }
 
         // If any still remain, destroy forcibly
@@ -57,10 +59,16 @@ class Sc_processesService {
 
     def startProcesses() {
         ObjectCommandResponse response = new ObjectCommandResponse()
+        logService.cam.debug "startProcesses called"
+
         try {
             if (pid == null) {
                 // There should be no processes running at this point, run killall to make sure they are all off
                 p = Runtime.getRuntime().exec("killall sc_processes.sh")
+                p.waitFor()
+                p = Runtime.getRuntime().exec("killall ffmpeg")
+                p.waitFor()
+                p = Runtime.getRuntime().exec("killall motion")
                 p.waitFor()
 
                 if (Environment.current.name == 'development')
@@ -69,7 +77,13 @@ class Sc_processesService {
                     p = Runtime.getRuntime().exec("/home/security-cam/sc_processes.sh")
 
                 p.waitFor(100, TimeUnit.MILLISECONDS)
-                pid = p.pid()
+                if(p.isAlive())
+                {
+                    pid = p.pid()
+                    logService.cam.debug "sc_processes successfully started ${p.toString()}"
+                }
+                else
+                    throw new Exception("sc_processes not started")
             }
         }
         catch (Exception ex) {
@@ -85,8 +99,9 @@ class Sc_processesService {
     def stopProcesses() {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
-            logService.cam.debug "stopProcessses: pid = " + pid + ": kill -INT ${pid}"
+            logService.cam.debug "stopProcessses called ${p.toString()}"
 
+            // Recursively kill the process tree
             killProcesses(p.toHandle())
             pid = null
         }

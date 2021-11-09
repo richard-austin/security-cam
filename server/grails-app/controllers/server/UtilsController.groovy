@@ -65,6 +65,8 @@ class UtilsController {
     def cameraParams(CameraParamsCommand cmd)
     {
         ObjectCommandResponse result =  new ObjectCommandResponse()
+        logService.cam.info("Getting parameters for camera at ${cmd.address}")
+
         if(cmd.hasErrors())
         {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'cameraParams')
@@ -77,6 +79,7 @@ class UtilsController {
 
             if(response.status != RestfulResponseStatusEnum.PASS)
             {
+                logService.cam.error "cameraParams: error: ${response.errorMsg}"
                 result.status = PassFail.FAIL
                 result.error = response.errorMsg
                 result.userError = response.userError
@@ -103,7 +106,7 @@ class UtilsController {
 
             if(response.status != RestfulResponseStatusEnum.PASS)
             {
-                logService.cam.error "setCameraParams: error: " + response.errorMsg
+                logService.cam.error "setCameraParams: error: ${response.errorMsg}"
                 result.status = PassFail.FAIL
                 result.error = response.errorMsg
                 result.userError = response.userError
