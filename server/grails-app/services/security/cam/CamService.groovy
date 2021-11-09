@@ -55,7 +55,7 @@ class CamService {
         return result
     }
 
-    static private def removeUnusedMaskFiles(LinkedTreeMap<String, Camera> jsonObj)
+    static private def removeUnusedMaskFiles(LinkedTreeMap<String, Camera> jsonObj, GrailsApplication grailsApplication)
     {
         Set<String> mask_files = new HashSet<String>()
 
@@ -112,7 +112,7 @@ class CamService {
             Gson gson2 = new Gson()
             LinkedTreeMap<String, Camera> obj = gson2.fromJson(prettyJsonString, Object.class) as LinkedTreeMap<String, Camera>
 
-            removeUnusedMaskFiles(obj)
+            removeUnusedMaskFiles(obj, grailsApplication)
 
             result.setResponseObject(obj)
         }
