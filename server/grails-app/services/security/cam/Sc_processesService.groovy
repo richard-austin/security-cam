@@ -12,12 +12,48 @@ import java.util.concurrent.TimeUnit
 class Sc_processesService {
     LogService logService
 
-    Sc_processesService()
-    {
+    Sc_processesService() {
     }
 
     Process p
     Long pid = null
+
+    private List<ProcessHandle> killProcessTree(ProcessHandle ph) {
+        List<ProcessHandle> handles = new ArrayList<>()
+        ph.children().forEach({ ProcessHandle phc ->
+            handles.addAll(killProcessTree(phc))
+        })
+        ph.destroy()
+        handles.add(ph)
+        return handles
+    }
+
+    private killProcesses(ProcessHandle handle) {
+        List<ProcessHandle> handles = killProcessTree(handle)
+        List<ProcessHandle> remainingHandles = new ArrayList<ProcessHandle>()
+        int testCount = 1200
+
+        while (--testCount > 0) {
+            Thread.sleep(20)
+            handles.forEach({ ProcessHandle phr ->
+                if (phr.isAlive())
+                    remainingHandles.add(phr)
+            })
+
+            handles.clear()
+            handles.addAll(remainingHandles)
+            if (remainingHandles.size() > 0) {
+                remainingHandles.clear()
+            } else
+                break
+        }
+
+        // If any still remain, destroy forcibly
+        handles.forEach({ ProcessHandle rph ->
+            rph.destroyForcibly()
+            logService.cam.error("Process ${rph.pid()} (${rph.toString()}) remains running, kill signal sent")
+        })
+    }
 
     def startProcesses() {
         ObjectCommandResponse response = new ObjectCommandResponse()
@@ -36,8 +72,7 @@ class Sc_processesService {
                 pid = p.pid()
             }
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error "Exception in startProcesses: " + ex.getMessage()
             response.status = PassFail.FAIL
             response.error = ex.getMessage()
@@ -47,29 +82,15 @@ class Sc_processesService {
     }
 
     @PreDestroy
-    def stopProcesses()
-    {
+    def stopProcesses() {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
-            logService.cam.debug"stopProcessses: pid = " + pid + ": kill -INT ${pid}"
-            if (pid != null) {
-                Process p = Runtime.getRuntime().exec("kill -INT ${pid}")
-                p.waitFor()
-                pid = null
+            logService.cam.debug "stopProcessses: pid = " + pid + ": kill -INT ${pid}"
 
-                int retryCount = 400
-
-                while(isRunning())
-                {
-                    if(--retryCount <= 0)
-                        throw new Exception("Unable to stop sc_processes service")
-
-                    Thread.sleep(20)
-                }
-            }
+            killProcesses(p.toHandle())
+            pid = null
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error "Exception in stopProcesses: " + ex.getMessage()
             response.status = PassFail.FAIL
             response.error = ex.getMessage()
@@ -84,4 +105,5 @@ class Sc_processesService {
         } catch (ignored) {
             return true
         }
-    }}
+    }
+}
