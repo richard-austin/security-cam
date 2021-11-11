@@ -191,3 +191,21 @@ td, th {
   }
 }
 
+.snapshot
+{
+  position: relative;
+  > img {
+    position:absolute;
+    z-index: 2;
+    left: 5rem;
+    top: -2rem;
+    height: 352px;
+    width: 640px;
+  }
+  > mat-spinner {
+    position:absolute;
+    z-index: 2;
+    left: 5rem;
+  }
+}
+

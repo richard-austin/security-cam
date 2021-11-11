@@ -1,46 +1,47 @@
 {
   "camera1": {
-    "address": "192.168.0.45",
-    "controlUri": "",
     "name": "Spare",
+    "address": "",
+    "controlUri": "",
+    "snapshotUri": "",
     "streams": {
       "stream1": {
-        "defaultOnMultiDisplay": false,
         "descr": "HD",
+        "defaultOnMultiDisplay": false,
+        "netcam_uri": "rtsp://192.168.0.45:554/11",
+        "uri": "http://localhost:8009/nms/stream1.flv",
+        "nms_uri": "rtmp://localhost:1935/nms/stream1",
         "motion": {
           "enabled": false,
           "mask_file": "",
           "trigger_recording_on": ""
         },
-        "netcam_uri": "rtsp://192.168.0.45:554/11",
-        "nms_uri": "rtmp://localhost:1935/nms/stream1",
+        "video_width": 0,
+        "video_height": 0,
         "recording": {
           "enabled": true,
-          "location": "stream1",
-          "uri": "http://localhost:8084/recording/stream1/"
-        },
-        "uri": "http://localhost:8009/nms/stream1.flv",
-        "video_height": 1080,
-        "video_width": 1920
+          "uri": "http://localhost:8084/recording/stream1/",
+          "location": "stream1"
+        }
       },
       "stream2": {
-        "defaultOnMultiDisplay": true,
         "descr": "Normal",
+        "defaultOnMultiDisplay": true,
+        "netcam_uri": "rtsp://192.168.0.45:554/12",
+        "uri": "http://localhost:8009/nms/stream2.flv",
+        "nms_uri": "rtmp://localhost:1935/nms/stream2",
         "motion": {
           "enabled": true,
           "mask_file": "",
           "trigger_recording_on": "camera1.stream1"
         },
-        "netcam_uri": "rtsp://192.168.0.45:554/12",
-        "nms_uri": "rtmp://localhost:1935/nms/stream2",
+        "video_width": 640,
+        "video_height": 352,
         "recording": {
           "enabled": true,
-          "location": "stream2",
-          "uri": "http://localhost:8084/recording/stream2/"
-        },
-        "uri": "http://localhost:8009/nms/stream2.flv",
-        "video_height": 352,
-        "video_width": 640
+          "uri": "http://localhost:8084/recording/stream2/",
+          "location": "stream2"
+        }
       }
     }
   }

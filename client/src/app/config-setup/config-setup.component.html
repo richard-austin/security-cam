@@ -23,10 +23,15 @@
 
       <ng-container matColumnDef="camera_id">
         <th mat-header-cell *matHeaderCellDef>Camera ID</th>
-        <td mat-cell *matCellDef="let cam"
+        <td mat-cell *matCellDef="let cam" (mouseover)="getSnapshot(cam)"
+            (mouseout)="snapShotKey=''"
             matTooltip="The logical id of the camera (sequential numbering)"
             matTooltipClass="tooltip">
           {{cam.key}}
+          <div class="snapshot" *ngIf="snapShotKey==cam.key && cam.value.snapshotUri !== ''">
+            <mat-spinner [diameter]="25" *ngIf="snapshotLoading"></mat-spinner>
+            <img #outputframeid [src]="this.snapshot" *ngIf="!snapshotLoading" alt="Snapshot from {{cam.key}}">
+          </div>
         </td>
       </ng-container>
 
@@ -306,7 +311,7 @@
               Cancel
             </button>
             <button color="warning" mat-flat-button (click)="startOnvifSearch();confirmNewLookup=false;">
-              New
+              Search
             </button>
           </span>
           <span class="confirm-group" *ngIf="confirmSave">

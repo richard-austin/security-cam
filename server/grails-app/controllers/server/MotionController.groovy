@@ -53,6 +53,7 @@ class Camera {
     String name=''
     String address=''
     String controlUri=''
+    String snapshotUri=''
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
 }
 

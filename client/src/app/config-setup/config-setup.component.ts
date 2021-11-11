@@ -16,6 +16,9 @@ import {BehaviorSubject} from 'rxjs';
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {MatSelectChange} from '@angular/material/select/select';
 import {HttpErrorResponse} from "@angular/common/http";
+import { DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import { ElementRef } from '@angular/core';
+import { KeyValue } from '@angular/common';
 
 export function isValidIP(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -106,7 +109,7 @@ export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
 })
 export class ConfigSetupComponent implements OnInit, AfterViewInit {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
-
+  @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
   downloading: boolean = true;
   updating: boolean = false;
   discovering: boolean = false;
@@ -124,8 +127,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   confirmSave: boolean = false;
   confirmNew: boolean = false;
   confirmNewLookup: boolean = false;
+  snapshotLoading: boolean = false;
+  snapshot: SafeResourceUrl|String = '';
+  snapShotKey: string ='';
 
-  constructor(private cameraSvc: CameraService) {
+  constructor(private cameraSvc: CameraService, private sanitizer: DomSanitizer) {
   }
 
   getCamControl(index: number, fieldName: string): FormControl {
@@ -581,6 +587,31 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       // Clear the input so that selecting the same file again still triggers an onchange event
       fileUploadInput.value = '';
     }
+  }
+
+  getSnapshot(cam: KeyValue<string, Camera>)
+  {
+    this.snapshotLoading = true;
+    if(cam.value.snapshotUri !== '') {
+      this.snapShotKey = cam.key;
+      this.cameraSvc.getSnapshot(cam.value.snapshotUri).subscribe(result => {
+          this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(result));
+          this.snapshotLoading = false;
+        },
+        reason => {
+          this.reporting.errorMessage = reason;
+        })
+    }
+  }
+
+  toBase64(data:Array<any>): string {
+    let binary:string = '';
+    let bytes: Uint8Array = new Uint8Array( data );
+    let len: number = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode( bytes[ i ] );
+    }
+    return window.btoa( binary );
   }
 
   ngOnInit(): void {
