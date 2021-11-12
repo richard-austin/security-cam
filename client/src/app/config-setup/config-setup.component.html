@@ -3,7 +3,23 @@
     can be found in the LICENSE file at http://angular.io/license -->
 
 <mat-card>
-  <mat-card-title>Cameras Configuration</mat-card-title>
+    <mat-card-title>Cameras Configuration
+      <button class="change-password-button"
+              matTooltip="Set or change the user name and password used to access the cameras. All cameras should have the same user name and password."
+              matTooltipClass="tooltip"
+              mat-icon-button
+              (click)="togglePasswordDialogue()">
+        <mat-icon>security</mat-icon>
+      </button>
+      <div class="password-dialogue">
+        <div class="mat-elevation-z15" [@detailExpand]="showPasswordDialogue ? 'expanded' : 'collapsed'">
+          <div>
+          </div>
+          <app-credentials-for-camera-access
+            (hideDialogue)="togglePasswordDialogue()"></app-credentials-for-camera-access>
+        </div>
+      </div>
+    </mat-card-title>
   <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Loading, Please wait..</span>
@@ -23,14 +39,18 @@
 
       <ng-container matColumnDef="camera_id">
         <th mat-header-cell *matHeaderCellDef>Camera ID</th>
-        <td mat-cell *matCellDef="let cam" (mouseover)="getSnapshot(cam)"
-            (mouseout)="snapShotKey=''"
+        <td class="snapshot"
+            [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''"
+            mat-cell
+            *matCellDef="let cam" (mousedown)="getSnapshot(cam)"
             matTooltip="The logical id of the camera (sequential numbering)"
             matTooltipClass="tooltip">
           {{cam.key}}
-          <div class="snapshot" *ngIf="snapShotKey==cam.key && cam.value.snapshotUri !== ''">
+          <div *ngIf="snapShotKey==cam.key && cam.value.snapshotUri !== ''">
             <mat-spinner [diameter]="25" *ngIf="snapshotLoading"></mat-spinner>
-            <img #outputframeid [src]="this.snapshot" *ngIf="!snapshotLoading" alt="Snapshot from {{cam.key}}">
+            <div class="snapshot mat-elevation-z8">
+              <img #outputframeid [src]="this.snapshot" *ngIf="!snapshotLoading" alt="Snapshot from {{cam.key}}">
+            </div>
           </div>
         </td>
       </ng-container>
@@ -200,7 +220,9 @@
                 <th mat-header-cell *matHeaderCellDef> Mask File</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
                   <mat-form-field appearance="legacy" [style.width.px]="220">
-                    <input style="position: absolute" hidden #fileInput type="file" (change)="uploadMaskFile($event, cam.key, camIndex, streamIndex)"/>
+                    <input style="position: absolute"
+                           hidden #fileInput type="file" accept=".pgm"
+                           (change)="uploadMaskFile($event, cam.key, camIndex, streamIndex)"/>
                     <div class="file-upload">
                       <button type="button" mat-icon-button (click)="fileInput.click()"
                               [disabled]="!stream.value.motion.enabled"
@@ -272,10 +294,12 @@
       <!-- Cameras table Footer with the control buttons -->
       <ng-container matColumnDef="buttons">
         <td mat-footer-cell [attr.colspan]="cameraColumns.length" *matFooterCellDef>
-          <button [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10" mat-icon-button
-                  (click)="addCamera()"
-                  matTooltip="Add another camera."
-                  matTooltipClass="tooltip">
+          <button
+            [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10"
+            mat-icon-button
+            (click)="addCamera()"
+            matTooltip="Add another camera."
+            matTooltipClass="tooltip">
             <mat-icon>add</mat-icon>
           </button>
           <button [disabled]="anyInvalid() || confirmSave" mat-icon-button (click)="confirmNew=true"
@@ -284,10 +308,10 @@
                   *ngIf="!confirmNew && !confirmNewLookup">
             <mat-icon>note</mat-icon>
           </button>
-          <button  [disabled]="confirmSave || confirmNewLookup" mat-icon-button (click)="confirmNewLookup=true"
-            matTooltip="Perform onvif LAN search for cameras"
-            matTooltipClass="tooltip"
-            *ngIf="!confirmNewLookup && !confirmNewLookup">
+          <button [disabled]="confirmSave || confirmNewLookup" mat-icon-button (click)="confirmNewLookup=true"
+                  matTooltip="Perform onvif LAN search for cameras"
+                  matTooltipClass="tooltip"
+                  *ngIf="!confirmNewLookup && !confirmNewLookup">
             <mat-icon>explore</mat-icon>
           </button>
           <button [disabled]="anyInvalid() || confirmNew || confirmNewLookup" mat-icon-button (click)="confirmSave=true"

@@ -130,6 +130,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   snapshotLoading: boolean = false;
   snapshot: SafeResourceUrl|String = '';
   snapShotKey: string ='';
+  showPasswordDialogue: boolean = false;
 
   constructor(private cameraSvc: CameraService, private sanitizer: DomSanitizer) {
   }
@@ -592,7 +593,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   getSnapshot(cam: KeyValue<string, Camera>)
   {
     this.snapshotLoading = true;
-    if(cam.value.snapshotUri !== '') {
+    if(this.snapShotKey === cam.key)
+      this.snapShotKey = '';
+    else if(cam.value.snapshotUri !== '') {
       this.snapShotKey = cam.key;
       this.cameraSvc.getSnapshot(cam.value.snapshotUri).subscribe(result => {
           this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(result));
@@ -614,6 +617,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     return window.btoa( binary );
   }
 
+  togglePasswordDialogue() {
+      this.showPasswordDialogue=!this.showPasswordDialogue;
+  }
+
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the check boxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
@@ -630,4 +637,5 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
   }
+
 }
