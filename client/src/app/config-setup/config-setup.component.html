@@ -16,7 +16,9 @@
           <div>
           </div>
           <app-credentials-for-camera-access
-            (hideDialogue)="togglePasswordDialogue()"></app-credentials-for-camera-access>
+            (hideDialogue)="togglePasswordDialogue()"
+            [reporting]="errorReporting">
+          </app-credentials-for-camera-access>
         </div>
       </div>
     </mat-card-title>
