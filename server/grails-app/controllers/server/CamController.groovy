@@ -80,6 +80,7 @@ class CamController {
      * @param cmd: Command object containing the username and password
      * @return: Success/error state.
      */
+    @Secured(['ROLE_CLIENT'])
     def setAccessCredentials(SetAccessCredentialsCommand cmd)
     {
         if(cmd.hasErrors())
