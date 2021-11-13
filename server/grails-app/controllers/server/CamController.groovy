@@ -1,12 +1,7 @@
 package server
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonElement
-import com.google.gson.JsonParser
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import grails.util.Environment
 import grails.validation.ValidationErrors
 import security.cam.CamService
 import security.cam.LogService

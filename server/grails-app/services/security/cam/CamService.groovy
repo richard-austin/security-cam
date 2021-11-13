@@ -130,7 +130,7 @@ class CamService {
             cmd.maskFile.transferTo(file)
         }
         catch (Exception ex) { // Some other type of exception
-            logService.cam.error "CamController.uploadMaskFile() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            logService.cam.error "uploadMaskFile() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
@@ -154,17 +154,58 @@ class CamService {
     \"camerasAdminPassword\": \"${cmd.camerasAdminPassword}\"
 }
 """
-            String fileName = "/home/security-cam/cameraCredentials.json"
+            String fileName = "${grailsApplication.config.camerasHomeDirectory}/cameraCredentials.json"
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
             writer.write(json)
 
             writer.close()
         }
         catch (Exception ex) {
-            logService.cam.error "CamController.uploadMaskFile() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            logService.cam.error "setCameraAccessCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            response.status = PassFail.FAIL
+            response.error = ex.getMessage()
+        }
+
+        return response
+    }
+
+    private def getCameraCredentials()
+    {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            FileInputStream fis
+
+            fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/cameraCredentials.json")
+
+            String data = IOUtils.toString(fis, "UTF-8")
+            Gson gson2 = new Gson()
+            Object obj = gson2.fromJson(data, Object.class)
+            response.responseObject = obj
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error "getCameraCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
             response.status = PassFail.FAIL
             response.error = ex.getMessage()
         }
         return response
+    }
+
+    /**
+     * cameraAdminUserName
+     * @return: The admin user name for the cameras
+     */
+    String cameraAdminUserName()
+    {
+        return getCameraCredentials().responseObject?.camerasAdminUserName
+    }
+
+    /**
+     * cameraAdminPassword
+     * @return: The admin password for the cameras
+     */
+    String cameraAdminPassword()
+    {
+        return getCameraCredentials().responseObject?.camerasAdminPassword
     }
 }

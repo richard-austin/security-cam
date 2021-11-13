@@ -22,6 +22,7 @@ import java.nio.file.Files
 class OnvifService {
     LogService logService
     GrailsApplication grailsApplication
+    CamService camService
 
     /**
      * getMediaProfiles: Get the details of Onvif compliant cameras which are online on the LAN.
@@ -177,8 +178,8 @@ class OnvifService {
         try {
             URL url = new URL(strUrl)
             URLConnection uc = url.openConnection()
-            String username = grailsApplication.config.camerasAdminUserName
-            String password = grailsApplication.config.camerasAdminPassword
+            String username = camService.cameraAdminUserName()
+            String password = camService.cameraAdminPassword()
 
             String userpass = "${username}:${password}"
             String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()))

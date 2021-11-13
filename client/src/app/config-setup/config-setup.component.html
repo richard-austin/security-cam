@@ -45,7 +45,7 @@
             [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''"
             mat-cell
             *matCellDef="let cam" (mousedown)="getSnapshot(cam)"
-            matTooltip="The logical id of the camera (sequential numbering)"
+            matTooltip="The logical id of the camera (sequential numbering).{{cam.value.snapshotUri != '' ? ' Click to show a snapshot from this camera.' : ''}}"
             matTooltipClass="tooltip">
           {{cam.key}}
           <div *ngIf="snapShotKey==cam.key && cam.value.snapshotUri !== ''">

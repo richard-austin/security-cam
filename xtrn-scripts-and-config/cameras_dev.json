@@ -1,8 +1,8 @@
 {
   "camera1": {
     "name": "Spare",
-    "address": "",
-    "controlUri": "",
+    "address": "192.168.0.45",
+    "controlUri": "web/cgi-bin/hi3510/param.cgi",
     "snapshotUri": "",
     "streams": {
       "stream1": {
