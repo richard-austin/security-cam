@@ -1,7 +1,6 @@
 #!/bin/bash
 
 cp /tmp/motion.conf /etc/motion
-cp -r /tmp/conf.d /home/security-cam/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/ssmtp.conf /etc/ssmtp
 mv /tmp/chrony.conf /etc/chrony
@@ -10,7 +9,7 @@ mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
 rm -r /var/lib/tomcat9/webapps/ROOT
 
-rm -r /tmp/conf.d /tmp/motion.conf
+rm -r /tmp/motion.conf
 deb-systemd-invoke stop tomcat9.service  # Stop tomcat before
 useradd sec-cam
 groupadd security-cam
