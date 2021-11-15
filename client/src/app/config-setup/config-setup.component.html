@@ -88,7 +88,7 @@
                    matTooltip="Enter the name to identify {{cam.key}} in the menus"
                    matTooltipClass="tooltip"
                    placeholder="Camera Name" (change)="updateCamField(i, 'name')">
-            <!--            <mat-hint>Change camera name if required</mat-hint>-->
+            <mat-error *ngIf="getCamControl(i, 'name').invalid">Camera name is required</mat-error>
           </mat-form-field>
         </td>
       </ng-container>
@@ -122,6 +122,7 @@
                    matTooltip="The IP address of {{cam.key}}. This is required if the ControlURI is set to anything other than 'None'."
                    matTooltipClass="tooltip"
                    placeholder="Camera IP Address" (change)="updateCamField(i, 'address')">
+            <mat-error *ngIf="getCamControl(i, 'address').invalid">Enter a valid IP address</mat-error>
           </mat-form-field>
         </td>
       </ng-container>
@@ -159,6 +160,8 @@
                            matTooltipClass="tooltip"
                            placeholder="Stream Description"
                            (change)="updateStreamField(camIndex, streamIndex, 'descr')">
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('required')">Description is required</mat-error>
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('pattern')">2-20 characters, no special characters</mat-error>
                   </mat-form-field>
                 </td>
               </ng-container>
@@ -171,6 +174,8 @@
                            matTooltip="Set the URI for connection to the camera stream. This is in the form 'rtsp://<ip address>/<uri>"
                            matTooltipClass="tooltip"
                            placeholder="Netcam URI" (blur)="updateStreamField(camIndex, streamIndex, 'netcam_uri')">
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('pattern')">Should be: rtsp://[uri..]</mat-error>
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('required')">Netcam URI is required</mat-error>
                   </mat-form-field>
 
                 </td>
@@ -244,6 +249,7 @@
                         <mat-icon>close</mat-icon>
                       </button>
                     </div>
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'mask_file')">Please select a valid .pgm file, or clear.</mat-error>
                   </mat-form-field>
                 </td>
               </ng-container>
@@ -256,6 +262,7 @@
                            matTooltip="The width in pixels of the video on {{stream.key}}. This is required if motion detection is enabled on {{stream.key}}."
                            matTooltipClass="tooltip"
                            placeholder="Video Width" (blur)="updateStreamField(camIndex, streamIndex, 'video_width')">
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex,'video_width').invalid">Valid: 90-5000</mat-error>
                   </mat-form-field>
                 </td>
               </ng-container>
@@ -268,6 +275,7 @@
                            matTooltip="The height in pixels of the video on {{stream.key}}. This is required if motion detection is enabled on {{stream.key}}."
                            matTooltipClass="tooltip"
                            placeholder="Video Height" (blur)="updateStreamField(camIndex, streamIndex, 'video_height')">
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex,'video_height').invalid">Valid: 90-3000</mat-error>
                   </mat-form-field>
                 </td>
               </ng-container>

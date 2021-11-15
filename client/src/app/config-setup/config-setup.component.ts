@@ -20,36 +20,6 @@ import { DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import { ElementRef } from '@angular/core';
 import { KeyValue } from '@angular/common';
 
-export function isValidIP(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-
-    const value = control.value;
-
-    if (!value) {
-      return {address: true};
-    }
-    // Camera IP address is required if control URI is defined.
-    const addressValid = /\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/.test(value);
-
-    return !addressValid ? {address: true} : null;
-  }
-}
-
-export function isValidNetCamURI(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-
-    const value = control.value;
-
-    if (!value) {
-      return null;
-    }
-
-    const uriValid = RegExp('\\b((rtsp):\\/\\/[-\\w]+(\\.\\w[-\\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\\.)+(?: com\\b|edu\\b|biz\\b|gov\\b|in(?:t|fo)\\b|mil\\b|net\\b|org\\b|[a-z][a-z]\\b))(\\\\:\\d+)?(\\/[^.!,?;"\'<>()\\[\\]{}\\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"\'<>()\\[\\]{}\\s\x7F-\xFF]+)*)?').test(value);
-
-    return !uriValid ? {netcam_uri: true} : null;
-  }
-}
-
 export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
 
@@ -209,8 +179,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           descr: new FormControl({
             value: stream.descr,
             disabled: false
-          }, [Validators.required, Validators.maxLength(25)]),
-          netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, isValidNetCamURI()]),
+          }, [Validators.required, Validators.maxLength(25), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){0,18}[a-zA-Z0-9]$")]),
+          netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
           video_width: new FormControl({
             value: stream.video_width,
             disabled: !stream.motion?.enabled
@@ -234,7 +204,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       this.streamControls.push(new FormArray(toStreamGroups));
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
-        address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [isValidIP()]),
+        address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
         controlUri: new FormControl({
           value: camera.controlUri,
           disabled: false
@@ -639,5 +609,4 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
   }
-
 }

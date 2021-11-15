@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
+import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {CameraService} from "../cameras/camera.service";
 import {ReportingComponent} from "../reporting/reporting.component";
 
@@ -7,21 +7,6 @@ export class CameraAdminCredentials
 {
   camerasAdminUserName: string='';
   camerasAdminPassword: string='';
-}
-
-export function matches(regex:string): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-
-    const value = control.value;
-
-    if (!value) {
-      return null;
-    }
-
-    const isValid = RegExp(regex).test(value);
-
-    return !isValid ? {valid_regex: true} : null;
-  }
 }
 
 @Component({
@@ -72,8 +57,8 @@ export class CredentialsForCameraAccessComponent implements OnInit {
 
   ngOnInit(): void {
     this.setPasswordForm = new FormGroup({
-      camerasUsername: new FormControl(this.camerasUsername, [Validators.required, Validators.maxLength(20), matches("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
-      camerasPassword: new FormControl(this.camerasPassword, [Validators.required, Validators.maxLength(25), matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")])
+      camerasUsername: new FormControl(this.camerasUsername, [Validators.required, Validators.maxLength(20), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
+      camerasPassword: new FormControl(this.camerasPassword, [Validators.required, Validators.maxLength(25), Validators.pattern("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")])
     }, {updateOn: "change"});
 
     // Ensure camera form controls highlight immediately if invalid
