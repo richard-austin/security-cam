@@ -179,7 +179,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           descr: new FormControl({
             value: stream.descr,
             disabled: false
-          }, [Validators.required, Validators.maxLength(25), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){0,18}[a-zA-Z0-9]$")]),
+          }, [Validators.required, Validators.maxLength(25), Validators.pattern("^[a-zA-Z0-9](_(?!(\\.|_|))|\\.(?!(_|\\.))|[a-zA-Z0-9 ]){0,18}[a-zA-Z0-9]$")]),
           netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
           video_width: new FormControl({
             value: stream.video_width,

@@ -154,7 +154,7 @@
                 <th mat-header-cell *matHeaderCellDef> Descr.</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
                   <mat-form-field appearance="legacy">
-                    <input matInput type="text" autocomplete="off" maxlength="25"
+                    <input matInput type="text" autocomplete="off" maxlength="20"
                            [formControl]="getStreamControl(camIndex, streamIndex, 'descr')"
                            matTooltip="Set the description for {{stream.key}}. This is usually relating to the resolution of the stream."
                            matTooltipClass="tooltip"
