@@ -16,36 +16,9 @@ import {BehaviorSubject} from 'rxjs';
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {MatSelectChange} from '@angular/material/select/select';
 import {HttpErrorResponse} from "@angular/common/http";
-
-export function isValidIP(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-
-    const value = control.value;
-
-    if (!value) {
-      return {address: true};
-    }
-    // Camera IP address is required if control URI is defined.
-    const addressValid = /\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/.test(value);
-
-    return !addressValid ? {address: true} : null;
-  }
-}
-
-export function isValidNetCamURI(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-
-    const value = control.value;
-
-    if (!value) {
-      return null;
-    }
-
-    const uriValid = RegExp('\\b((rtsp):\\/\\/[-\\w]+(\\.\\w[-\\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\\.)+(?: com\\b|edu\\b|biz\\b|gov\\b|in(?:t|fo)\\b|mil\\b|net\\b|org\\b|[a-z][a-z]\\b))(\\\\:\\d+)?(\\/[^.!,?;"\'<>()\\[\\]{}\\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"\'<>()\\[\\]{}\\s\x7F-\xFF]+)*)?').test(value);
-
-    return !uriValid ? {netcam_uri: true} : null;
-  }
-}
+import { DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import { ElementRef } from '@angular/core';
+import { KeyValue } from '@angular/common';
 
 export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -106,7 +79,7 @@ export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
 })
 export class ConfigSetupComponent implements OnInit, AfterViewInit {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
-
+  @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
   downloading: boolean = true;
   updating: boolean = false;
   discovering: boolean = false;
@@ -124,8 +97,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   confirmSave: boolean = false;
   confirmNew: boolean = false;
   confirmNewLookup: boolean = false;
+  snapshotLoading: boolean = false;
+  snapshot: SafeResourceUrl|String = '';
+  snapShotKey: string ='';
+  showPasswordDialogue: boolean = false;
 
-  constructor(private cameraSvc: CameraService) {
+  constructor(private cameraSvc: CameraService, private sanitizer: DomSanitizer) {
   }
 
   getCamControl(index: number, fieldName: string): FormControl {
@@ -202,8 +179,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           descr: new FormControl({
             value: stream.descr,
             disabled: false
-          }, [Validators.required, Validators.maxLength(25)]),
-          netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, isValidNetCamURI()]),
+          }, [Validators.required, Validators.maxLength(25), Validators.pattern("^[a-zA-Z0-9](_(?!(\\.|_|))|\\.(?!(_|\\.))|[a-zA-Z0-9 ]){0,18}[a-zA-Z0-9]$")]),
+          netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
           video_width: new FormControl({
             value: stream.video_width,
             disabled: !stream.motion?.enabled
@@ -227,7 +204,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       this.streamControls.push(new FormArray(toStreamGroups));
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
-        address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [isValidIP()]),
+        address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
         controlUri: new FormControl({
           value: camera.controlUri,
           disabled: false
@@ -581,6 +558,39 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       // Clear the input so that selecting the same file again still triggers an onchange event
       fileUploadInput.value = '';
     }
+  }
+
+  getSnapshot(cam: KeyValue<string, Camera>)
+  {
+    this.snapshotLoading = true;
+    if(this.snapShotKey === cam.key)
+      this.snapShotKey = '';
+    else if(cam.value.snapshotUri !== '') {
+      this.snapShotKey = cam.key;
+      this.cameraSvc.getSnapshot(cam.value.snapshotUri).subscribe(result => {
+          this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(result));
+          this.snapshotLoading = false;
+        },
+        reason => {
+          this.reporting.errorMessage = reason;
+          this.snapshotLoading = false;
+          this.snapShotKey = '';
+        })
+    }
+  }
+
+  toBase64(data:Array<any>): string {
+    let binary:string = '';
+    let bytes: Uint8Array = new Uint8Array( data );
+    let len: number = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode( bytes[ i ] );
+    }
+    return window.btoa( binary );
+  }
+
+  togglePasswordDialogue() {
+      this.showPasswordDialogue=!this.showPasswordDialogue;
   }
 
   ngOnInit(): void {

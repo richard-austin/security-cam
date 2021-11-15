@@ -126,15 +126,6 @@ environments:
 
         camerasHomeDirectory: /home/security-cam
 
-        motion:
-            cameraNames:
-                - name: PorchCam
-                - name: SideGate
-                - name: Garden
-
-        camerasAdminUserName: admin
-        camerasAdminPassword: R@nc1dTapsB0ttom
-
     test:
         dataSource:
             dbCreate: update
@@ -170,12 +161,3 @@ environments:
                 defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
 
         camerasHomeDirectory: /home/security-cam
-
-        motion:
-             cameraNames:
-                - name: PorchCam
-                - name: SideGate
-                - name: Garden
-
-        camerasAdminUserName: admin
-        camerasAdminPassword: R@nc1dTapsB0ttom

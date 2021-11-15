@@ -1,35 +1,33 @@
 package security.cam
 
 import com.google.gson.internal.LinkedTreeMap
+import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
-import org.apache.commons.io.FileUtils
 import org.onvif.ver10.media.wsdl.Media
-import org.onvif.ver10.schema.AudioEncoderConfiguration
-import org.onvif.ver10.schema.AudioSourceConfiguration
-import org.onvif.ver10.schema.PTZCapabilities
-import org.onvif.ver10.schema.PTZConfiguration
-import org.onvif.ver10.schema.PTZSpeed
-import org.onvif.ver10.schema.PTZVector
 import org.onvif.ver10.schema.Profile
-import org.onvif.ver10.schema.Vector1D
 import org.onvif.ver10.schema.VideoEncoderConfiguration
 import org.onvif.ver10.schema.VideoResolution
-import org.onvif.ver20.ptz.wsdl.PTZ
 import org.utils.OnvifCredentials
 import org.utils.TestDevice
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
-import server.Motion
-import server.Recording
 import server.Stream
+
+import java.nio.file.Files
 
 @Transactional
 class OnvifService {
     LogService logService
+    GrailsApplication grailsApplication
+    CamService camService
 
+    /**
+     * getMediaProfiles: Get the details of Onvif compliant cameras which are online on the LAN.
+     * @return: LinkedHashMap<String, Camera> containing discovered cameras with all fields populated which can be.
+     */
     def getMediaProfiles() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         logService.cam.info "Camera discovery..."
@@ -54,7 +52,7 @@ class OnvifService {
                     device = new OnvifDevice(credentials.getHost(), credentials.getUser(), credentials.getPassword())
 
                     Media media = device.getMedia()
-                    media.getVideoSources()
+                   // def options =media.getVideoSources()
                     List<Profile> profiles = media.getProfiles()
 
                     int streamNum = 0
@@ -69,7 +67,6 @@ class OnvifService {
 
                         VideoEncoderConfiguration vec = profile.getVideoEncoderConfiguration()
                         VideoResolution resolution = vec.resolution
-
                         stream.video_width = resolution.getWidth()
                         stream.video_height = resolution.getHeight()
 
@@ -95,19 +92,21 @@ class OnvifService {
 
                     String snapshotUri = device.getSnapshotUri()
                     if (!snapshotUri.isEmpty()) {
-                        File tempFile = File.createTempFile("tmp", ".jpg")
+                        cam.snapshotUri = snapshotUri
 
-                        try {
-                            // Note: This will likely fail if the camera/device is password protected.
-                            // embedding the user:password@ into the URL will not work with FileUtils.copyURLToFile
-                            FileUtils.copyURLToFile(new URL(snapshotUri), tempFile)
-                            logService.cam.info(
-                                    "snapshot: " + tempFile.getAbsolutePath() + " length:" + tempFile.length())
-                        }
-                        catch(Exception ex)
-                        {
-                            logService.cam.error("Cannot get snapshot data from ${snapshotUri} : "+ex.getMessage())
-                        }
+//                        File tempFile = File.createTempFile("tmp", ".jpg")
+//
+//                        try {
+//                            // Note: This will likely fail if the camera/device is password protected.
+//                            // embedding the user:password@ into the URL will not work with FileUtils.copyURLToFile
+//                            FileUtils.copyURLToFile(new URL(snapshotUri), tempFile)
+//                            logService.cam.info(
+//                                    "snapshot: " + tempFile.getAbsolutePath() + " length:" + tempFile.length())
+//                        }
+//                        catch(Exception ex)
+//                        {
+//                            logService.cam.error("Cannot get snapshot data from ${snapshotUri} : "+ex.getMessage())
+//                        }
                     }
 
                 } catch (Exception th) {
@@ -124,6 +123,12 @@ class OnvifService {
         return result
      }
 
+    /**
+     *
+     * @param url: The full rtsp url with IP address, of the discovered camera
+     * @return: The IP address portion of the URL
+     * @throws Exception
+     */
     private static String getIPFromUrl(String url)
         throws Exception
     {
@@ -136,6 +141,11 @@ class OnvifService {
         return urlParts[1].substring(0, indexOfColon)
     }
 
+    /**
+     * setDefaults: Set default values for video_height and width, motion enabled (on the lowest res stream) and
+     *              defaultOnMultiDisplay (also on the lowest res stream).
+     * @param camera
+     */
     private static void setDefaults(Camera camera) {
         int lowestRes = Integer.MAX_VALUE
         String lowestResStream = ""
@@ -156,5 +166,41 @@ class OnvifService {
             lrs.defaultOnMultiDisplay = true
             lrs.motion.enabled = true
         }
+    }
+
+    /**
+     * getSnapshot: Get a snapshot from the given URL and save it as a jpg file to the stream1 recording location
+     * @param url
+     */
+    def getSnapshot(String strUrl)
+    {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            URL url = new URL(strUrl)
+            URLConnection uc = url.openConnection()
+            String username = camService.cameraAdminUserName()
+            String password = camService.cameraAdminPassword()
+
+            String userpass = "${username}:${password}"
+            String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()))
+            uc.setRequestProperty("Authorization", basicAuth)
+            InputStream input = uc.getInputStream()
+            result.responseObject = input.readAllBytes()
+            input.close()
+//            Files.write(new File("${grailsApplication.config.camerasHomeDirectory}/auto.jpg").toPath(), result.responseObject as byte[])
+        }
+        catch(IOException ex)
+        {
+            result.error = "IO Error in getSnapshot: ${ex.getMessage()}"
+            logService.cam.error (result.error)
+            result.status = PassFail.FAIL
+        }
+        catch(Exception ex)
+        {
+            result.error = "Error in getSnapshot: ${ex.getMessage()}"
+            logService.cam.error (result.error)
+            result.status = PassFail.FAIL
+        }
+        return result
     }
 }

@@ -18,6 +18,7 @@ export class ReportingComponent implements OnInit {
 
   set errorMessage(error: HttpErrorResponse)
   {
+    this.clearMessage();
     this.success = undefined;
     this.error = error;
     this.validationErrors = [];
@@ -35,6 +36,7 @@ export class ReportingComponent implements OnInit {
 
   set successMessage(success: string)
   {
+    this.clearMessage();
     this.success = success;
   }
 

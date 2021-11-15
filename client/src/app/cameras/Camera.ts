@@ -44,6 +44,7 @@ export class Camera
     name: string = "";
     address: string="";
     controlUri: string="";
+    snapshotUri: string="";
     streams: Map<string, Stream> = new Map<string, Stream>();
 }
 

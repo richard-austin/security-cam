@@ -6,6 +6,7 @@ import grails.validation.ValidationErrors
 import security.cam.CamService
 import security.cam.LogService
 import security.cam.ValidationErrorService
+import security.cam.commands.SetAccessCredentialsCommand
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.commands.UploadMaskFileCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -71,4 +72,30 @@ class CamController {
         }
     }
 
+    /**
+     * setAccessCredentials: Set the access credentials used for administrative operations (and snapshot access)
+     *                       on the cameras. Note that ths does not change credentials on any camera, just those
+     *                       used on this software to access them. Ideally all cameras should use the same user
+     *                       name and password.
+     * @param cmd: Command object containing the username and password
+     * @return: Success/error state.
+     */
+    @Secured(['ROLE_CLIENT'])
+    def setAccessCredentials(SetAccessCredentialsCommand cmd)
+    {
+        if(cmd.hasErrors())
+        {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "setAccessCredentials")
+            render(status: 400, text: (errorsMap as JSON))
+        }
+        else
+        {
+            ObjectCommandResponse response = camService.setCameraAccessCredentials(cmd)
+
+            if(response.status != PassFail.PASS)
+                render (status: 500, text: response.error)
+            else
+                render (status: 200, text:'')
+        }
+    }
 }

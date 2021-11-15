@@ -4,6 +4,7 @@ import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
 import {Camera, CameraStream, Stream} from "./Camera";
+import {CameraAdminCredentials} from "../credentials-for-camera-access/credentials-for-camera-access.component";
 
 
 /**
@@ -250,6 +251,21 @@ export class CameraService {
     const formData: FormData = new FormData();
     formData.append('maskFile', uploadFile);
     return this.http.post<any>(this._baseUrl.getLink("cam", "uploadMaskFile"), formData, this.httpUploadOptions).pipe(
+      tap(),
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+
+  getSnapshot(url:string): Observable<Array<any>>{
+    const formData: FormData = new FormData();
+    formData.append('url', url);
+    return this.http.post<Array<any>>(this._baseUrl.getLink("onvif", "getSnapshot"), formData, this.httpUploadOptions).pipe(
+      tap(),
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+
+  setCameraAdminCredentials(creds: CameraAdminCredentials):Observable<any>
+  {
+    return this.http.post<any>(this._baseUrl.getLink("cam", "setAccessCredentials"), creds, this.httpUploadOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

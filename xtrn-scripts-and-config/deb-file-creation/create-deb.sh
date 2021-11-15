@@ -17,7 +17,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
 mkdir -p security-cam_"${VERSION}"_arm64/home/security-cam/recording-pids
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion
+mkdir -p security-cam_"${VERSION}"_arm64/home/security-cam/motion/conf.d
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream1
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream2
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream3
@@ -36,7 +36,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
-cp -r ../motion/motion.conf ../motion/conf.d ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
+cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
