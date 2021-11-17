@@ -1,0 +1,226 @@
+table {
+  width: 100%;
+}
+
+tr.example-detail-row {
+  height: 0;
+}
+
+tr.example-element-row.example-expanded-row:hover {
+  background: darkblue;
+}
+
+tr.example-element-row:not(.example-expanded-row):hover {
+  background: darkblue;
+}
+
+tr.example-element-row:not(.example-expanded-row):active {
+  background: grey;
+}
+
+.example-element-row td {
+  border-bottom-width: 0;
+}
+
+.example-element-detail {
+  overflow: hidden;
+  display: flex;
+}
+
+.example-element-diagram {
+  min-width: 80px;
+  border: 2px solid black;
+  padding: 8px;
+  font-weight: lighter;
+  margin: 8px 0;
+  height: 104px;
+}
+
+.example-element-symbol {
+  font-weight: bold;
+  font-size: 40px;
+  line-height: normal;
+}
+
+.example-element-description {
+  padding: 16px;
+}
+
+.example-element-description-attribution {
+  opacity: 0.5;
+}
+
+.streams-info {
+  min-width: 500px;
+  margin-bottom: 1rem;
+  background-color: #1e1b3d;
+}
+
+.expand {
+  position: relative;
+  font-size: xx-large;
+}
+
+td, th {
+  padding-left: 1rem !important;
+}
+
+.bottom-buttons-bar {
+  margin-top: 1rem;
+  height: 3rem;
+
+  > button {
+    // Centre vertically
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  width: 100%;
+  //margin-right: 160px;
+  min-width: 1675px;
+}
+
+.mat-column-camera_id {
+  width: 4%;
+}
+
+.mat-column-delete {
+  width: 4%;
+}
+
+.mat-column-expand {
+  width: 4%;
+}
+
+.mat-column-name {
+  width: 12%;
+}
+
+.mat-column-controlUri {
+  width: 10%;
+}
+
+.mat-column-address {
+  width: 68%;
+}
+
+.mat-column-stream_id {
+  width: 5%;
+}
+
+.mat-column-descr {
+  width: 12%;
+}
+
+.mat-column-netcam_uri {
+  width: 12%;
+}
+
+.mat-column-defaultOnMultiDisplay {
+  width: 5%;
+}
+
+.mat-column-motion {
+  width: 6%;
+}
+
+.mat-column-trigger_recording_on {
+  width: 6%;
+}
+
+.mat-column-mask_file {
+  width: 11%;
+}
+
+.mat-column-video_width {
+  width: 4%;
+}
+
+.file-upload {
+  position: relative;
+  display: flex;
+
+  > input {
+    position: relative;
+    left: 2.0rem;
+    font-style: italic;
+    cursor: default;
+  }
+
+  > button:first-of-type {
+    position: absolute;
+    left: -0.5rem;
+    top: -1rem;
+  }
+
+  > input {
+    width: 11rem;
+  }
+
+  > button:nth-of-type(2) {
+    position: absolute;
+    mat-icon {
+      font-size: medium;
+    }
+    right: -0.9rem;
+    top: -0.85rem;
+    &:enabled {
+      color: red;
+    }
+  }
+}
+
+.snapshot
+{
+  > div {
+    position: relative;
+    > div {
+      position: absolute;
+      z-index: 2;
+      left: 5rem;
+      top: -2rem;
+      border: 2px solid #2a2929;
+      border-radius: 2px;
+       > img {
+        height: 352px;
+        width: 640px;
+      }
+    }
+     > mat-spinner {
+      position: absolute;
+      z-index: 2;
+      left: 5rem;
+    }
+  }
+}
+
+button.change-password-button
+{
+  position: relative;
+  top: -0.4rem;
+}
+
+div.password-dialogue {
+  display: inline;
+  position: relative;
+  > div {
+    width: 17rem;
+    > div {
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+
+      border-bottom: 10px solid #b0b0b0;
+      z-index: 3;
+    }
+    z-index: 2;
+    left: -2rem;
+    overflow: hidden;
+    position: absolute;
+  }
+}
+
+.mat-card-content {
+  display: block;
+}

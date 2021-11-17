@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {UtilsService} from "../shared/utils.service";
 import {CameraService} from "../cameras/camera.service";
-import {Camera, CameraParams} from "../cameras/Camera";
+import {Camera, CameraParams, CameraStream} from "../cameras/Camera";
 import {Subscription} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
@@ -25,7 +25,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   cameraParams!: CameraParams;
-  cam!: Camera;
+  cam!: CameraStream;
   downloading: boolean = true;
   camControlFormGroup!: FormGroup;
 
@@ -33,8 +33,8 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.reporting.dismiss();
     this.downloading = true;
     this.cam = this.cameraSvc.getActiveLive()[0];
-    if (this.cam && this.cam.address !== undefined && this.cam.controlUri !== undefined) {
-      this.utils.cameraParams(this.cam.address, this.cam.controlUri, "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1").subscribe(
+    if (this.cam && this.cam.camera.address !== undefined && this.cam.camera.controlUri !== undefined) {
+      this.utils.cameraParams(this.cam.camera.address, this.cam.camera.controlUri, "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1").subscribe(
         result => {
           this.downloading = false;
           this.cameraParams = result;
@@ -61,7 +61,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   updateParams() {
     this.reporting.dismiss();
     this.downloading = true;
-    this.utils.setCameraParams(this.cam.address, this.cam.controlUri, this.irselector.value, this.cameraName.value).subscribe(() => {
+    this.utils.setCameraParams(this.cam.camera.address, this.cam.camera.controlUri, this.irselector.value, this.cameraName.value).subscribe(() => {
         this.downloading = false;
         this.reporting.successMessage = "Update Successful"
 

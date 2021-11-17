@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {Camera} from "../cameras/Camera";
+import {Camera, CameraStream} from "../cameras/Camera";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {Subscription} from "rxjs";
@@ -21,6 +21,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
   @ViewChild('navbarCollapse') navbarCollapse!:ElementRef<HTMLDivElement>;
 
+  cameraStreams: CameraStream[] = []; // All camera streams
   cameras: Camera[] = [];
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
@@ -35,18 +36,20 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
   }
 
-  setVideoStream(cam: Camera): void {
-    this.cameraSvc.setActiveLive([cam]);
+  setVideoStream(camStream: CameraStream): void {
+    this.cameraSvc.setActiveLive([camStream]);
     window.location.href = '#/live';
   }
 
-  showRecording(cam: Camera): void {
-    this.cameraSvc.setActiveLive([cam]);
+  showRecording(camStream: CameraStream): void {
+    this.cameraSvc.setActiveLive([camStream]);
     window.location.href = '#/recording';
   }
 
   cameraControl(cam: Camera) {
-    this.cameraSvc.setActiveLive([cam]);
+    let cs:CameraStream = new CameraStream();
+    cs.camera=cam;
+    this.cameraSvc.setActiveLive([cs]);
     window.location.href = '#/cameraparams';
   }
 
@@ -105,6 +108,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/dc';
   }
 
+  configSetup() {
+    window.location.href = '#/configsetup';
+  }
+
   openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
     let data: any = {};
     let remainingSecs: number = timeout - count;
@@ -139,7 +146,9 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.cameras = this.cameraSvc.getCameras();
+    this.cameraStreams = this.cameraSvc.getCameraStreams();
+    this.cameras = this.cameraSvc.getCameras()
+
     // Get the initial core temperature
     this.getTemperature();
 
@@ -172,6 +181,11 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Gets the core temperature every minute (Raspberry pi only), and keeps the session alive
     this.pingHandle = this.userIdle.ping$.subscribe(() => this.getTemperature());
+
+    this.cameraSvc.getConfigUpdates().subscribe(() => {
+      this.cameraStreams = this.cameraSvc.getCameraStreams();
+      this.cameras = this.cameraSvc.getCameras()
+    });
   }
 
    ngAfterViewInit(): void {

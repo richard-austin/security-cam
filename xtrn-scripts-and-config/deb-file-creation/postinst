@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cp -r /tmp/motion.conf /tmp/conf.d /etc/motion
+cp /tmp/motion.conf /etc/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/ssmtp.conf /etc/ssmtp
 mv /tmp/chrony.conf /etc/chrony
@@ -9,7 +9,7 @@ mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
 rm -r /var/lib/tomcat9/webapps/ROOT
 
-rm -r /tmp/conf.d /tmp/motion.conf
+rm -r /tmp/motion.conf
 deb-systemd-invoke stop tomcat9.service  # Stop tomcat before
 useradd sec-cam
 groupadd security-cam
@@ -19,6 +19,7 @@ usermod -a -G security-cam sec-cam
 usermod -a -G security-cam www-data
 
 chown -R sec-cam:security-cam /home/security-cam
+
 chown tomcat:security-cam /home/security-cam/logs/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
 chmod 640 /etc/tomcat9/tomcat-users.xml
@@ -35,8 +36,11 @@ chmod 640 /etc/ssmtp/ssmtp.conf
 find /home/security-cam -type d -print0 | xargs -0 chmod 775
 # Give files permission 664
 find /home/security-cam -type f -print0 | xargs -0 chmod 664
+# Make sure sc_processes.sh is executable if present and set ownership to tomcat
+chmod +x /home/security-cam/sc_processes.sh || true
+chown tomcat:tomcat /home/security-cam/sc_processes.sh || true
 
-# Copy install-cert.sh with executable attribs unaffected by previous command
+# Copy install-cert.sh and sc_processes.sh with executable attribs unaffected by previous command
 mv /tmp/install-cert.sh /home/security-cam/
 chown root:root /home/security-cam/install-cert.sh
 
@@ -67,6 +71,6 @@ deb-systemd-invoke stop chrony
 deb-systemd-invoke start chrony
 
 # This runs the node media server, motion and the ffmpeg instances
-deb-systemd-invoke enable sc_processes.service
-deb-systemd-invoke start sc_processes.service
+# deb-systemd-invoke enable sc_processes.service
+# deb-systemd-invoke start sc_processes.service
 

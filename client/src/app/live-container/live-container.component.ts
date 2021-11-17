@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {Camera} from "../cameras/Camera";
+import {Camera, CameraStream} from "../cameras/Camera";
 import {Subscription} from "rxjs";
 import {VideoComponent} from "../video/video.component";
 import {IdleTimeoutStatusMessage, UtilsService} from "../shared/utils.service";
@@ -32,7 +32,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
     });
     let index: number = 0;
     if (this.cameraSvc.getActiveLive().length > 0) {
-      this.cameraSvc.getActiveLive().forEach((cam: Camera) => {
+      this.cameraSvc.getActiveLive().forEach((cam: CameraStream) => {
         this.timerHandle?.unsubscribe();
         if (cam !== undefined) {
           let video: VideoComponent | undefined = this.videos?.get(index++);

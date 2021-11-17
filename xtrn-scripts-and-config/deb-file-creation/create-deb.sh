@@ -8,7 +8,7 @@ rm -r security-cam_*_arm64
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam
 
 cp ../start_hd_recording.sh ../end_hd_recording.sh ../processmotionrecordings.sh \
- ../porch_cam_mask.pgm ../garage_cam_mask.pgm ../sc_processes.sh \
+ ../porch_cam_mask.pgm ../garage_cam_mask.pgm \
  security-cam_"${VERSION}"_arm64/etc/security-cam
 
 tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
@@ -16,14 +16,19 @@ tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
-mkdir -p security-cam_"${VERSION}"_arm64/home/security-cam/hls
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/recording-pids
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/hls2
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/hls3
+mkdir -p security-cam_"${VERSION}"_arm64/home/security-cam/recording-pids
+mkdir -p security-cam_"${VERSION}"_arm64/home/security-cam/motion/conf.d
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream1
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream2
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream3
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream4
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream5
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream6
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream7
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream8
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream9
+mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream10
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/logs
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-hls2lo
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-hls3lo
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-hlslo
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 
@@ -31,11 +36,11 @@ mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
-cp -r ../motion.conf ../conf.d ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
+cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
-cp ../sc_processes.service security-cam_"${VERSION}"_arm64/lib/systemd/system
+#cp ../sc_processes.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 
 cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
 Package: security-cam

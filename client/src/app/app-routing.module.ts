@@ -8,6 +8,7 @@ import {AboutComponent} from "./about/about.component";
 import {SetIpComponent} from "./set-ip/set-ip.component";
 import {CameraParamsComponent} from "./camera-params/camera-params.component";
 import {DrawdownCalcContainerComponent} from "./drawdown-calc-container/drawdown-calc-container.component";
+import {ConfigSetupComponent} from "./config-setup/config-setup.component";
 
 const routes: Routes = [
   {path: 'live', component: LiveContainerComponent},
@@ -17,6 +18,7 @@ const routes: Routes = [
   {path: 'about', component: AboutComponent},
   {path: 'setip', component: SetIpComponent},
   {path: 'cameraparams', component: CameraParamsComponent},
+  {path: 'configsetup', component: ConfigSetupComponent},
   {path: 'dc', component: DrawdownCalcContainerComponent}
 ];
 

@@ -3,8 +3,10 @@ package server
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
+import security.cam.ConfigurationUpdateService
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
+import security.cam.Sc_processesService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
@@ -63,6 +65,8 @@ class UtilsController {
     def cameraParams(CameraParamsCommand cmd)
     {
         ObjectCommandResponse result =  new ObjectCommandResponse()
+        logService.cam.info("Getting parameters for camera at ${cmd.address}")
+
         if(cmd.hasErrors())
         {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'cameraParams')
@@ -75,6 +79,7 @@ class UtilsController {
 
             if(response.status != RestfulResponseStatusEnum.PASS)
             {
+                logService.cam.error "cameraParams: error: ${response.errorMsg}"
                 result.status = PassFail.FAIL
                 result.error = response.errorMsg
                 result.userError = response.userError
@@ -101,7 +106,7 @@ class UtilsController {
 
             if(response.status != RestfulResponseStatusEnum.PASS)
             {
-                logService.cam.error "setCameraParams: error: " + response.errorMsg
+                logService.cam.error "setCameraParams: error: ${response.errorMsg}"
                 result.status = PassFail.FAIL
                 result.error = response.errorMsg
                 result.userError = response.userError
@@ -110,5 +115,39 @@ class UtilsController {
             else
                 render response.responseObject as JSON
         }
+    }
+
+    Sc_processesService sc_processesService
+    @Secured(['ROLE_CLIENT'])
+    def startProcs()
+    {
+        ObjectCommandResponse response = sc_processesService.startProcesses()
+        if(response.status != PassFail.PASS)
+            render (status: 500, text: response.error)
+        else
+            render "success"
+    }
+
+    @Secured(['ROLE_CLIENT'])
+    def stopProcs()
+    {
+        ObjectCommandResponse response = sc_processesService.stopProcesses()
+        if(response.status != PassFail.PASS)
+            render (status: 500, text: response.error)
+        else
+            render "success"
+
+    }
+
+    ConfigurationUpdateService configurationUpdateService
+
+    @Secured(['ROLE_CLIENT'])
+    def generateConfigs()
+    {
+        ObjectCommandResponse response = configurationUpdateService.generateConfigs()
+        if(response.status != PassFail.PASS)
+            render (status: 500, text: response.error)
+        else
+            render "success"
     }
 }

@@ -15,6 +15,7 @@ class CameraParams {
 class RestfulInterfaceService {
     LogService logService
     GrailsApplication grailsApplication
+    CamService camService
 
     /**
      * Attempt to send a RESTFul request to a given host to perform a service
@@ -37,8 +38,8 @@ class RestfulInterfaceService {
         String url = buildURL(address, uri, isPOST ? null : params)
 
         try {
-            String username = grailsApplication.config.camerasAdminUserName
-            String password = grailsApplication.config.camerasAdminPassword
+            String username = camService.cameraAdminUserName()
+            String password = camService.cameraAdminPassword()
             String userPass = "${username}:${password}"
             String basicAuth = "Basic " + userPass.bytes.encodeBase64().toString()
             URL u = new URL(url)

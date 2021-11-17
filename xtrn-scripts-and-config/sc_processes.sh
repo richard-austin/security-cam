@@ -9,13 +9,26 @@ read_ip() {
     current_reading=$(curl -s 'https://api.ipify.org/?format=json' | python3 -c "import sys, json; print(json.load(sys.stdin)['ip'])")
 
     if [[ $current_reading =~ $ipV4RegEx  ]]; then
-      current_ip=$current_reading
+      current_ip=${current_reading}
     else
       echo "$(date +%d-%m-%Y" "%T): Bad reading (${current_reading}) from https://api.ipify.org" >>"${log_dir}ipify_$(date +%Y%m%d)".log
     fi
 
     # The myip file is updated when the user uses the Save Current IP option in the web application
     #  in response to the email sent here
+}
+
+kill_descendant_processes() {
+    local pid="$1"
+    local and_self="${2: -false}"
+    if children="$(pgrep -P "$pid")"; then
+        for child in $children; do
+            kill_descendant_processes "$child" true
+        done
+    fi
+    if [[ "$and_self" == true ]]; then
+        kill -TERM "$pid"
+    fi
 }
 
 run_check_ip_not_changed() {
@@ -47,35 +60,32 @@ EOT
 
 run_ffmpeg() {
   while true; do
-    ffmpeg -hide_banner -loglevel error -stimeout 1000000 -rtsp_transport tcp -i "$1" -an -c copy -f flv rtmp://localhost/"$2/$3" 2>>${log_dir}ffmpeg_"$2"_"$3"_"$(date +%Y%m%d)".log
+    /usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -rtsp_transport tcp -i "$1" -an -c copy -f flv "$2" 2>>"${log_dir}ffmpeg_"$3"_$(date +%Y%m%d)".log
     sleep 1
-    # ffmpeg -hide_banner -loglevel error -stimeout 1000000 -re -rtsp_transport tcp -i $1 -c copy -c:a aac -b:a 160k -ar 44100 -f flv rtmp://localhost/$2/$3 2>> ${log_dir}ffmpeg_$2_$3_`date +%Y%m%d`.log
-    echo "ffmpeg terminated at $(date +%d-%m-%Y" "%T)" >>"${log_dir}ffmpeg_$2_$3_$(date +%Y%m%d)".log
+    echo "ffmpeg terminated at $(date +%d-%m-%Y" "%T)" >>"${log_dir}ffmpeg_"$3"_$(date +%Y%m%d)".log
   done
 }
 
 run_nms() {
   while true; do
-    node /etc/security-cam/nms/app.js
+    /usr/bin/node /etc/security-cam/nms/app.js
     sleep 1
   done
 }
 
 run_motion() {
   while true; do
-    motion
+    /usr/bin/motion
     sleep 1
   done
 }
 
 run_nms &
 run_motion &
-run_ffmpeg rtsp://192.168.0.30:554/11 live porch &
-run_ffmpeg rtsp://192.168.0.30:554/12 livelo porch &
-run_ffmpeg rtsp://192.168.0.34:554/11 live2 cam2 &
-run_ffmpeg rtsp://192.168.0.34:554/12 live2lo cam2 &
-run_ffmpeg rtsp://192.168.0.35:554/11 live3 cam3 &
-run_ffmpeg rtsp://192.168.0.35:554/12 live3lo cam3 &
+run_ffmpeg "rtsp://192.168.0.45:554/11" "rtmp://localhost:1935/nms/stream1" "Spare_HD" &
+run_ffmpeg "rtsp://192.168.0.45:554/12" "rtmp://localhost:1935/nms/stream2" "Spare_Normal" &
+
 run_check_ip_not_changed &
 
+trap 'kill_descendant_processes $$' INT EXIT TERM
 wait

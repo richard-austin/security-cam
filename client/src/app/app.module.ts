@@ -33,6 +33,14 @@ import {MatMenuModule} from "@angular/material/menu";
 import { LayoutModule } from '@angular/cdk/layout';
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {MatInputModule} from "@angular/material/input";
+import { ConfigSetupComponent } from './config-setup/config-setup.component';
+import {MatTableModule} from "@angular/material/table";
+import {MatSortModule} from "@angular/material/sort";
+import {MatTooltipModule} from "@angular/material/tooltip";
+import { ExcludeOwnStreamPipe } from './config-setup/exclude-own-stream.pipe';
+import { DisableControlDirective } from './config-setup/disable-control.directive';
+import { MapToKeyValuePipe } from './config-setup/map-to-key-value.pipe';
+import { CredentialsForCameraAccessComponent } from './credentials-for-camera-access/credentials-for-camera-access.component';
 
 @NgModule({
   declarations: [
@@ -50,32 +58,40 @@ import {MatInputModule} from "@angular/material/input";
     IdleTimeoutModalComponent,
     CameraParamsComponent,
     DrawdownCalcContainerComponent,
+    ConfigSetupComponent,
+    ExcludeOwnStreamPipe,
+    DisableControlDirective,
+    MapToKeyValuePipe,
+    CredentialsForCameraAccessComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    MatCardModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatCheckboxModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatInputModule,
-    MatIconModule,
-    MatSelectModule,
-    MatDialogModule,
-    MatMenuModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    FormsModule,
-    // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
-    // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
-    // and `ping` is 6q0 (1 minutes).
-    UserIdleModule.forRoot({idle: 600, timeout: 60, ping: 60}),
-    LayoutModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+        MatCardModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatCheckboxModule,
+        MatButtonModule,
+        MatButtonToggleModule,
+        MatInputModule,
+        MatIconModule,
+        MatSelectModule,
+        MatDialogModule,
+        MatMenuModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        FormsModule,
+        // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
+        // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
+        // and `ping` is 6q0 (1 minutes).
+        UserIdleModule.forRoot({idle: 600, timeout: 60, ping: 60}),
+        LayoutModule,
+        MatTableModule,
+        MatSortModule,
+        MatTooltipModule
+    ],
   providers: [HttpClient, BaseUrl],
   bootstrap: [AppComponent],
   entryComponents: [IdleTimeoutModalComponent]

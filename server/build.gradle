@@ -13,23 +13,53 @@ buildscript {
 version "0.1"
 group "server"
 
-apply plugin:"eclipse"
-apply plugin:"idea"
-apply plugin:"war"
-apply plugin:"org.grails.grails-web"
-apply plugin:"com.github.erdi.webdriver-binaries"
-apply plugin:"com.bertramlabs.asset-pipeline"
-apply plugin:"org.grails.grails-gsp"
+apply plugin: "eclipse"
+apply plugin: "idea"
+apply plugin: "war"
+apply plugin: "org.grails.grails-web"
+apply plugin: "com.github.erdi.webdriver-binaries"
+apply plugin: "com.bertramlabs.asset-pipeline"
+apply plugin: "org.grails.grails-gsp"
 
 repositories {
     maven { url "https://repo.grails.org/grails/core" }
 }
+
+//group 'security.cam.onvif'
+//
+//ext {
+//    bintrayRepo = 'ONVIF-Java'
+//    bintrayName = 'ONVIF-Java'
+//
+//    publishedGroupId = 'security.cam.onvif'
+//    libraryName = 'ONVIF-Java'
+//    artifact = 'onvif'
+//
+//    libraryDescription = 'A Java client library to discover, control and manage ONVIF-supported devices.'
+//
+//    siteUrl = 'https://github.com/RootSoft/ONVIF-Java'
+//    gitUrl = 'https://github.com/RootSoft/ONVIF-Java.git'
+//
+//    libraryVersion = '1.0.2'
+//
+//    developerId = 'tomasverhelst'
+//    developerName = 'Tomas Verhelst'
+//    developerEmail = 'tve@teletask.be'
+//
+//    licenseName = 'The Apache Software License, Version 2.0'
+//    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//    allLicenses = ["Apache-2.0"]
+//}
 
 configurations {
     developmentOnly
     runtimeClasspath {
         extendsFrom developmentOnly
     }
+    all*.exclude module: 'slf4j-jdk14'  // Exclude this one (part of a package in the Onvif code)
+    // as it clashes with Logback
+//    all*.exclude module : 'spring-boot-starter-logging'
+//    all*.exclude module : 'logback-classic'
 }
 
 dependencies {
@@ -55,7 +85,11 @@ dependencies {
     implementation "org.grails.plugins:events"
     implementation "org.grails.plugins:hibernate5"
     implementation "org.hibernate:hibernate-core:5.4.18.Final"
+    implementation 'com.google.code.gson:gson:2.8.7'
+
+    implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.1'
     compile "org.grails.plugins:gsp"
+
     implementation 'commons-io:commons-io:2.8.0'
     compileOnly "io.micronaut:micronaut-inject-groovy"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
@@ -66,6 +100,8 @@ dependencies {
     runtimeOnly "org.apache.tomcat:tomcat-jdbc"
 
     runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
+    runtimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.1'
+
     runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:3.2.4"
     testCompileOnly "io.micronaut:micronaut-inject-groovy"
     testCompileOnly "org.grails:grails-gorm-testing-support"
@@ -77,15 +113,38 @@ dependencies {
     testCompileOnly "org.seleniumhq.selenium:selenium-support:3.14.0"
     testRuntimeOnly "org.seleniumhq.selenium:selenium-chrome-driver:3.14.0"
     testRuntimeOnly "org.seleniumhq.selenium:selenium-firefox-driver:3.14.0"
+
+    // Onvif dependencies
+    compile group: 'org.apache.cxf', name: 'cxf-rt-bindings-soap', version: '3.4.4'
+    compile 'org.apache.cxf:cxf-rt-frontend-jaxws:3.4.3'
+    compile group: 'org.apache.cxf', name: 'cxf-rt-transports-http', version: '3.4.4'
+    compile group: 'org.apache.cxf', name: 'cxf-core', version: '3.4.4'
+    compile group: 'javax.jws', name: 'jsr181-api', version: '1.0-MR1'
+    compile group: 'org.apache.wss4j', name: 'wss4j-ws-security-common', version: '2.3.2'
+    compile group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1'
+    compile group: 'javax.activation', name: 'activation', version: '1.1.1'
+    compile group: 'com.sun.xml.messaging.saaj', name: 'saaj-impl', version: '1.5.1'
+
+    // Annotations
+    compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
+
+    //XML parser
+    compile group: 'net.sf.kxml', name: 'kxml2', version: '2.3.0'
+
+    //OkHttp
+    compile 'com.squareup.okhttp3:okhttp:3.11.0'
+
+    //OkHttp Digest
+    compile 'com.burgstaller:okhttp-digest:1.18'
 }
 
 bootRun {
     ignoreExitValue true
     jvmArgs(
-        '-Dspring.output.ansi.enabled=always', 
-        '-noverify', 
-        '-XX:TieredStopAtLevel=1',
-        '-Xmx1024m')
+            '-Dspring.output.ansi.enabled=always',
+            '-noverify',
+            '-XX:TieredStopAtLevel=1',
+            '-Xmx1024m')
     sourceResources sourceSets.main
     String springProfilesActive = 'spring.profiles.active'
     systemProperty springProfilesActive, System.getProperty(springProfilesActive)
@@ -107,7 +166,7 @@ task setVersion(type: Exec) {
     description = 'Sets the version.txt file with the current version from git describe'
     workingDir "$projectDir"
     executable "sh"
-    args = ['-c',  'mkdir -p grails-app/assets/version && git describe --tags --dirty | tr -d \'\\n\' > grails-app/assets/version/version.txt']
+    args = ['-c', 'mkdir -p grails-app/assets/version && git describe --tags --dirty | tr -d \'\\n\' > grails-app/assets/version/version.txt']
 }
 
 task buildDebFile(type: Exec, dependsOn: [':server:assemble']) {

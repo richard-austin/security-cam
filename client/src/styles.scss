@@ -131,13 +131,37 @@ html, body {
 }
 
 mat-card-content.wait-box {
+  >mat-spinner {
+    display: inline;
+  }
   >span {
-    margin-left: 1rem;
-    margin-bottom: auto;
-    margin-top:auto;
+    position: relative;
+    top: 0.4rem;
+    left: 2rem;
+    display: inline;
   }
 }
 
 mat-card.hide-background {
   background-color: transparent;
 }
+
+.mat-tooltip.tooltip {
+  background-color: #e3ba4f;
+  color: black;
+  font-size: 12px;
+}
+
+.confirm-group {
+  > span {
+    background: #d9a11a;
+    color: black;
+    padding: 0.9rem;
+    border-radius: 1rem;
+  }
+
+  > button {
+    margin-left: 0.5rem;
+  }
+}
+

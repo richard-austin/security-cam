@@ -1,6 +1,7 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Camera} from "../cameras/Camera";
+import {Stream, CameraStream} from "../cameras/Camera";
 import {timer} from "rxjs";
+
 
 declare let Hls: any;
 declare let mpegts: any;
@@ -14,7 +15,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>
   @Input() isFlv: boolean = false;
-  camera!:Camera;
+  camstream!:CameraStream;
   video!: HTMLVideoElement;
   hls:any = null;
   flvPlayer: any = null;
@@ -30,14 +31,14 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * setSource: Set up to play the given manifest file and display the camera details
-   * @param cam: The camera
+   * @param camStream: The camera
    * @param manifest: The manifest file
    */
-  setSource(cam:Camera, manifest:string=""):void
+  setSource(camStream:CameraStream, manifest:string=""):void
   {
-      this.camera = cam;
+      this.camstream = camStream;
       this.recording = manifest !== "";
-      this.recordingUri = cam.recording.uri;
+      this.recordingUri = camStream.stream.recording.uri;
 
       if(this.recordingUri[this.recordingUri.length-1] !== '/')
         this.recordingUri+='/';
@@ -61,22 +62,22 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private startVideo():void {
     if(!this.isFlv) {
-      if (this.camera !== undefined) {
+      if (this.camstream !== undefined) {
         if (Hls.isSupported()) {
           this.hls = new Hls()
-          this.hls.loadSource(this.recording ? this.recordingUri : this.camera.uri);
+          this.hls.loadSource(this.recording ? this.recordingUri : this.camstream.stream.uri);
           this.hls.attachMedia(this.video);
 
           //hls.on(Hls.Events.MANIFEST_PARSED, this.video.play());
           // this.video.play();
         } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
-          this.video.src = this.camera.uri;
+          this.video.src = this.camstream.stream.uri;
         }
       }
     }
     else
     {
-      if(this.camera !== undefined && mpegts.isSupported())
+      if(this.camstream !== undefined && mpegts.isSupported())
       {
         this.stop();
         let getUrl = window.location;
@@ -84,16 +85,16 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.flvPlayer = mpegts.createPlayer({
           type: 'flv',
           isLive: true,
-          url: this.camera.uri.startsWith('http:') || this.camera.uri.startsWith('https:')
+          url: this.camstream.stream.uri.startsWith('http:') || this.camstream.stream.uri.startsWith('https:')
             ?  // Absolute url
-            this.camera.uri
+            this.camstream.stream.uri
               .replace('https', 'wss') // Change https to wss
               .replace('http', 'ws')  // or change http to ws
             :  // Relative uri
             baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
               .replace('https', 'wss') // Change https to wss
               .replace('http', 'ws')  // or change http to ws
-              +this.camera.uri
+              +this.camstream.stream.uri
         },
         {
           liveBufferLatencyChasing: false,
