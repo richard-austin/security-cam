@@ -6,7 +6,7 @@ buildscript {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
         classpath "gradle.plugin.com.github.erdi.webdriver-binaries:webdriver-binaries-gradle-plugin:2.0"
         classpath "org.grails.plugins:hibernate5:7.0.4"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:3.2.4"
+        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:3.3.6"
     }
 }
 
@@ -88,7 +88,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.7'
 
     implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.1'
-    compile "org.grails.plugins:gsp"
+    implementation "org.grails.plugins:gsp"
 
     implementation 'commons-io:commons-io:2.8.0'
     compileOnly "io.micronaut:micronaut-inject-groovy"
@@ -102,7 +102,7 @@ dependencies {
     runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
     runtimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.1'
 
-    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:3.2.4"
+    implementation "com.bertramlabs.plugins:asset-pipeline-grails:3.3.6"
     testCompileOnly "io.micronaut:micronaut-inject-groovy"
     testCompileOnly "org.grails:grails-gorm-testing-support"
     testCompileOnly "org.mockito:mockito-core"
@@ -115,27 +115,27 @@ dependencies {
     testRuntimeOnly "org.seleniumhq.selenium:selenium-firefox-driver:3.14.0"
 
     // Onvif dependencies
-    compile group: 'org.apache.cxf', name: 'cxf-rt-bindings-soap', version: '3.4.4'
-    compile 'org.apache.cxf:cxf-rt-frontend-jaxws:3.4.3'
-    compile group: 'org.apache.cxf', name: 'cxf-rt-transports-http', version: '3.4.4'
-    compile group: 'org.apache.cxf', name: 'cxf-core', version: '3.4.4'
-    compile group: 'javax.jws', name: 'jsr181-api', version: '1.0-MR1'
-    compile group: 'org.apache.wss4j', name: 'wss4j-ws-security-common', version: '2.3.2'
-    compile group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1'
-    compile group: 'javax.activation', name: 'activation', version: '1.1.1'
-    compile group: 'com.sun.xml.messaging.saaj', name: 'saaj-impl', version: '1.5.1'
+    implementation group: 'org.apache.cxf', name: 'cxf-rt-bindings-soap', version: '3.4.4'
+    implementation 'org.apache.cxf:cxf-rt-frontend-jaxws:3.4.3'
+    implementation group: 'org.apache.cxf', name: 'cxf-rt-transports-http', version: '3.4.4'
+    implementation group: 'org.apache.cxf', name: 'cxf-core', version: '3.4.4'
+    implementation group: 'javax.jws', name: 'jsr181-api', version: '1.0-MR1'
+    implementation group: 'org.apache.wss4j', name: 'wss4j-ws-security-common', version: '2.3.2'
+    implementation group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1'
+    implementation group: 'javax.activation', name: 'activation', version: '1.1.1'
+    implementation group: 'com.sun.xml.messaging.saaj', name: 'saaj-impl', version: '1.5.1'
 
     // Annotations
-    compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
+    compileOnly group: 'org.jetbrains', name: 'annotations', version: '15.0'
 
     //XML parser
-    compile group: 'net.sf.kxml', name: 'kxml2', version: '2.3.0'
+    compileOnly group: 'net.sf.kxml', name: 'kxml2', version: '2.3.0'
 
     //OkHttp
-    compile 'com.squareup.okhttp3:okhttp:3.11.0'
+    compileOnly 'com.squareup.okhttp3:okhttp:3.11.0'
 
     //OkHttp Digest
-    compile 'com.burgstaller:okhttp-digest:1.18'
+    compileOnly 'com.burgstaller:okhttp-digest:1.18'
 }
 
 bootRun {
