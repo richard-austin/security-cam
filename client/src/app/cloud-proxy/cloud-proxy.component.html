@@ -1,0 +1,14 @@
+<app-reporting></app-reporting>
+
+<div class="cloud-proxy-box-container">
+  <mat-card class="mat-elevation-z8" xmlns="http://www.w3.org/1999/html">
+    <mat-card-title>Set Cloud Proxy Status</mat-card-title>
+    <mat-card-content>
+      <mat-checkbox [color]="'primary'" [checked]="cps"
+                    [disabled]="!cbEnabled"
+                    (change)="setCloudProxyStatus($event)">
+        Set Cloud Proxy {{cps ? 'Off' : 'On'}}
+      </mat-checkbox>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -125,11 +125,17 @@ environments:
             url: jdbc:h2:mem:devDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
 
         camerasHomeDirectory: /home/security-cam
+        cloudProxy:
+            enabled: true
+            trustStorePath: src/cacert.jks
+            keyStorePath: src/client.jks
+            keyStorePassword: b0331e
+            trustStorePassword: B0331e
 
-    test:
-        dataSource:
-            dbCreate: update
-            url: jdbc:h2:mem:testDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+        test:
+            dataSource:
+                dbCreate: update
+                url: jdbc:h2:mem:testDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     production:
         grails:
             plugin:
@@ -161,3 +167,10 @@ environments:
                 defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
 
         camerasHomeDirectory: /home/security-cam
+        cloudProxy:
+            enabled: false
+            trustStorePath: /etc/security-cam/cacert.jks
+            keyStorePath: /etc/security-cam/client.jks
+            keyStorePassword: b0331e
+            trustStorePassword: B0331e
+

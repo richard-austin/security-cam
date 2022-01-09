@@ -13,14 +13,14 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -33,7 +33,7 @@ public class CloudProxy implements SslContextProvider {
     private final int closedFlagLength = Byte.BYTES;
     private final int headerLength = tokenLength + lengthLength + closedFlagLength;
     public static final int BUFFER_SIZE = 16000;
-    private static final Logger logger = Logger.getLogger("CloudProxy");
+    private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     final Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
     SSLSocket cloudChannel;
     private boolean running = false;
@@ -41,6 +41,7 @@ public class CloudProxy implements SslContextProvider {
     private final int webserverPort;
     private final String cloudHost;
     private final int cloudPort;
+    RestfulProperties restfulProperties = new RestfulProperties();
 
     private ExecutorService cloudProxyExecutor;
     private ExecutorService splitMessagesExecutor;
@@ -57,50 +58,61 @@ public class CloudProxy implements SslContextProvider {
         this.cloudPort = cloudPort;
     }
 
-    public static void main(String[] args) {
-        new CloudProxy("192.168.0.31", 8088, "localhost", 8081).start();
-    }
-
+     //    public static void main(String[] args) {
+//        new CloudProxy("192.168.0.31", 8088, "localhost", 8081).start();
+//    }
+//
     final Object LOCK = new Object();
 
-    void start() {
-        cloudProxyExecutor = Executors.newSingleThreadExecutor();
-        splitMessagesExecutor = Executors.newSingleThreadExecutor();
-        webserverReadExecutor = Executors.newCachedThreadPool();
-        webserverWriteExecutor = Executors.newSingleThreadExecutor();
-        sendResponseToCloudExecutor = Executors.newSingleThreadExecutor();
-        cloudConnectionCheckExecutor = Executors.newSingleThreadScheduledExecutor();
-        startCloudInputProcessExecutor = Executors.newSingleThreadExecutor();
+    public void start() {
+        if(!running) {
+            cloudProxyExecutor = Executors.newSingleThreadExecutor();
+            splitMessagesExecutor = Executors.newSingleThreadExecutor();
+            webserverReadExecutor = Executors.newCachedThreadPool();
+            webserverWriteExecutor = Executors.newSingleThreadExecutor();
+            sendResponseToCloudExecutor = Executors.newSingleThreadExecutor();
+            cloudConnectionCheckExecutor = Executors.newSingleThreadScheduledExecutor();
+            startCloudInputProcessExecutor = Executors.newSingleThreadExecutor();
 
-        cloudProxyExecutor.execute(() -> {
-        running = true;
-        try {
-            createConnectionToCloud();
-
-            synchronized (LOCK) {
+            cloudProxyExecutor.execute(() -> {
+                running = true;
                 try {
-                    LOCK.wait();
-                } catch (InterruptedException e) {
-                    showExceptionDetails(e, "start");
+                    createConnectionToCloud();
+
+                    synchronized (LOCK) {
+                        try {
+                            LOCK.wait();
+                        } catch (InterruptedException e) {
+                            showExceptionDetails(e, "start");
+                        }
+                    }
+                } catch (Exception ex) {
+                    showExceptionDetails(ex, "start");
                 }
-            }
-        } catch (Exception ex) {
-            showExceptionDetails(ex, "start");
+            });
         }
-        });
     }
 
-    void stop() {
-        splitMessagesExecutor.shutdownNow();
-        webserverReadExecutor.shutdownNow();
-        webserverWriteExecutor.shutdownNow();
-        sendResponseToCloudExecutor.shutdownNow();
-        cloudConnectionCheckExecutor.shutdownNow();
-        startCloudInputProcessExecutor.shutdownNow();
-        synchronized (LOCK) {
-            LOCK.notify();
+    public void stop() throws IOException {
+        if(running) {
+            running = false;
+            if (cloudChannel != null && !cloudChannel.isClosed())
+                cloudChannel.close();
+            splitMessagesExecutor.shutdownNow();
+            webserverReadExecutor.shutdownNow();
+            webserverWriteExecutor.shutdownNow();
+            sendResponseToCloudExecutor.shutdownNow();
+            cloudConnectionCheckExecutor.shutdownNow();
+            startCloudInputProcessExecutor.shutdownNow();
+            synchronized (LOCK) {
+                LOCK.notify();
+            }
+            cloudProxyExecutor.shutdownNow();
         }
-        cloudProxyExecutor.shutdownNow();
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 
     private void createConnectionToCloud() {
@@ -108,12 +120,12 @@ public class CloudProxy implements SslContextProvider {
             if (this.cloudChannel == null || !this.cloudChannel.isConnected() || this.cloudChannel.isClosed()) {
                 SSLSocket cloudChannel = createSSLSocket(cloudHost, cloudPort, this);
                 this.cloudChannel = cloudChannel;
-                logger.log(Level.INFO, "Connected successfully to the Cloud");
+                logger.info("Connected successfully to the Cloud");
                 startCloudInputProcess(cloudChannel);
             }
 
         } catch (Exception e) {
-            logger.warning("Exception in createConnectionToCloud: "+e.getMessage()+": Couldn't connect to Cloud");
+            logger.warn("Exception in createConnectionToCloud: " + e.getMessage() + ": Couldn't connect to Cloud");
             if (this.cloudChannel != null) {
                 try {
                     this.cloudChannel.close();
@@ -159,14 +171,11 @@ public class CloudProxy implements SslContextProvider {
                         setBufferForSend(buf);
                         write(os, buf);  // This will be ignored by the Cloud, just throws an exception if the link is down
                     } else throw new Exception("Not connected");
-                }
-                catch(NullPointerException ignored)
-                {
-                    logger.warning("cloudChannel is null, Cloud connection is down");
+                } catch (NullPointerException ignored) {
+                    logger.warn("cloudChannel is null, Cloud connection is down");
                     restart();
-                }
-                catch (Exception ex) {
-                    logger.severe("Exception in cloudConnectionCheck: " + ex.getMessage());
+                } catch (Exception ex) {
+                    logger.error("Exception in cloudConnectionCheck: " + ex.getMessage());
                     if (cloudChannel != null && !cloudChannel.isClosed()) {
                         try {
                             cloudChannel.close();
@@ -190,41 +199,43 @@ public class CloudProxy implements SslContextProvider {
      * cleanUpForRestart: Some sort of problem occurred with the Cloud connection, ensure we restart cleanly
      */
     private void restart() {
-        try {
-            logger.info("Restarting CloudProxy");
-            sendResponseToCloudExecutor.shutdownNow();
-            startCloudInputProcessExecutor.shutdownNow();
-            cloudConnectionCheckExecutor.shutdownNow();
-            webserverWriteExecutor.shutdownNow();
+        if (running) {
+            try {
+                logger.info("Restarting CloudProxy");
+                sendResponseToCloudExecutor.shutdownNow();
+                startCloudInputProcessExecutor.shutdownNow();
+                cloudConnectionCheckExecutor.shutdownNow();
+                webserverWriteExecutor.shutdownNow();
 
-            sendResponseToCloudExecutor = Executors.newSingleThreadExecutor();
-            startCloudInputProcessExecutor = Executors.newSingleThreadExecutor();
-            cloudConnectionCheckExecutor = Executors.newSingleThreadScheduledExecutor();
-            webserverWriteExecutor = Executors.newSingleThreadExecutor();
+                sendResponseToCloudExecutor = Executors.newSingleThreadExecutor();
+                startCloudInputProcessExecutor = Executors.newSingleThreadExecutor();
+                cloudConnectionCheckExecutor = Executors.newSingleThreadScheduledExecutor();
+                webserverWriteExecutor = Executors.newSingleThreadExecutor();
 
-            // Ensure all sockets in the token/socket map are closed
-            tokenSocketMap.forEach((token, socket) -> {
-                try {
-                    socket.close();
-                } catch (IOException ignore) {
+                // Ensure all sockets in the token/socket map are closed
+                tokenSocketMap.forEach((token, socket) -> {
+                    try {
+                        socket.close();
+                    } catch (IOException ignore) {
+                    }
+                });
+                // Clear the token/socket map
+                tokenSocketMap.clear();
+                remainsOfPreviousBuffer = null;
+                // Ensure the connection is actually closed
+                if (cloudChannel != null && cloudChannel.isConnected() && !cloudChannel.isClosed()) {
+                    try {
+                        cloudChannel.close();
+                    } catch (IOException ignored) {
+                    }
                 }
-            });
-            // Clear the token/socket map
-            tokenSocketMap.clear();
-            remainsOfPreviousBuffer = null;
-            // Ensure the connection is actually closed
-            if (cloudChannel != null && cloudChannel.isConnected() && !cloudChannel.isClosed()) {
-                try {
-                    cloudChannel.close();
-                } catch (IOException ignored) {
-                }
+                cloudChannel = null;
+
+                // Restart the start process
+                new Thread(this::createConnectionToCloud).start();
+            } catch (Exception ex) {
+                showExceptionDetails(ex, "restart");
             }
-            cloudChannel = null;
-
-            // Restart the start process
-            new Thread(this::createConnectionToCloud).start();
-        } catch (Exception ex) {
-            showExceptionDetails(ex, "restart");
         }
     }
 
@@ -432,20 +443,19 @@ public class CloudProxy implements SslContextProvider {
         return crc32.getValue();
     }
 
-    void setBufferForSend(ByteBuffer buf) throws Exception {
+    void setBufferForSend(ByteBuffer buf) {
         buf.flip();
     }
 
-    private void write(OutputStream os, ByteBuffer buf) throws IOException
-    {
-        os.write(buf.array(), buf.position(), buf.limit()-buf.position());
+    private void write(OutputStream os, ByteBuffer buf) throws IOException {
+        os.write(buf.array(), buf.position(), buf.limit() - buf.position());
         os.flush();
         buf.position(buf.limit());
     }
 
     private int read(InputStream is, ByteBuffer buf) throws IOException {
-        final int retVal = is.read(buf.array(), buf.position(),  buf.capacity()-buf.position());
-        if(retVal != -1) {
+        final int retVal = is.read(buf.array(), buf.position(), buf.capacity() - buf.position());
+        if (retVal != -1) {
             buf.limit(buf.position() + retVal);
             buf.position(buf.limit());
         }
@@ -496,12 +506,22 @@ public class CloudProxy implements SslContextProvider {
         });
     }
 
+    void setLogLevel(String level) {
+        logger.setLevel(Objects.equals(level, "INFO") ? Level.INFO :
+                Objects.equals(level, "DEBUG") ? Level.DEBUG :
+                        Objects.equals(level, "TRACE") ? Level.TRACE :
+                                Objects.equals(level, "WARN") ? Level.WARN :
+                                        Objects.equals(level, "ERROR") ? Level.ERROR :
+                                                Objects.equals(level, "OFF") ? Level.OFF :
+                                                        Objects.equals(level, "ALL") ? Level.ALL : Level.OFF);
+    }
+
     private int getMessageLengthFromPosition(ByteBuffer buf) {
         return buf.getInt(buf.position() + tokenLength) + headerLength;
     }
 
     void showExceptionDetails(Throwable t, String functionName) {
-        logger.log(Level.SEVERE, t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
+        logger.error(t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
         for (StackTraceElement stackTraceElement : t.getStackTrace()) {
             System.err.println(stackTraceElement.toString());
         }
@@ -509,7 +529,7 @@ public class CloudProxy implements SslContextProvider {
 
     @Override
     public KeyManager[] getKeyManagers() throws GeneralSecurityException, IOException {
-        return createKeyManagers(RestfulProperties.CLOUD_PROXY_KEYSTORE_PATH, RestfulProperties.CLOUD_PROXY_KEYSTORE_PASSWORD.toCharArray());
+        return createKeyManagers(restfulProperties.CLOUD_PROXY_KEYSTORE_PATH, restfulProperties.CLOUD_PROXY_KEYSTORE_PASSWORD.toCharArray());
     }
 
     @Override
@@ -519,7 +539,7 @@ public class CloudProxy implements SslContextProvider {
 
     @Override
     public TrustManager[] getTrustManagers() throws GeneralSecurityException, IOException {
-        return createTrustManagers(RestfulProperties.TRUSTSTORE_PATH, RestfulProperties.TRUSTSTORE_PASSWORD.toCharArray());
+        return createTrustManagers(restfulProperties.TRUSTSTORE_PATH, restfulProperties.TRUSTSTORE_PASSWORD.toCharArray());
     }
 
     private String log(ByteBuffer buf) {

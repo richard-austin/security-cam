@@ -1,7 +1,7 @@
+package spring
 import security.cam.commands.UserPasswordEncoderListener
 import security.cam.eventlisteners.SecCamAuthFailEventListener
 import security.cam.eventlisteners.SecCamSecurityEventListener
-
 
 // Place your Spring DSL code here
 beans = {

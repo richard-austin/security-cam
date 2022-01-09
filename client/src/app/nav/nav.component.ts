@@ -104,6 +104,9 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/setip';
   }
 
+  cloudProxy() {
+    window.location.href = '#/cloudproxy';
+  }
   drawdownCalc() {
     window.location.href = '#/dc';
   }
