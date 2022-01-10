@@ -93,11 +93,9 @@ grails:
                 scriptlet: html
                 taglib: none
                 staticparts: none
-management:
-    endpoints:
-        jmx:
-            unique-names: true
-
+spring:
+    jmx:
+        unique-names: true
 ---
 hibernate:
     cache:
@@ -127,10 +125,14 @@ environments:
         camerasHomeDirectory: /home/security-cam
         cloudProxy:
             enabled: true
-            trustStorePath: src/cacert.jks
-            keyStorePath: src/client.jks
-            keyStorePassword: b0331e
+            trustStorePath: ../xtrn-scripts-and-config/cacert.jks
+            keyStorePath: ../xtrn-scripts-and-config/client.jks
+            keyStorePassword: B0331e
             trustStorePassword: B0331e
+            cloudHost: localhost
+            cloudPort: 8081
+            webServerHost: localhost
+            webServerPort: 8088
 
         test:
             dataSource:
@@ -171,6 +173,10 @@ environments:
             enabled: false
             trustStorePath: /etc/security-cam/cacert.jks
             keyStorePath: /etc/security-cam/client.jks
-            keyStorePassword: b0331e
+            keyStorePassword: B0331e
             trustStorePassword: B0331e
+            cloudHost: 192.168.0.37
+            cloudPort: 8081
+            webServerHost: localhost
+            webServerPort: 8088
 

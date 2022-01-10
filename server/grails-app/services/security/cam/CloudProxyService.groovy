@@ -1,6 +1,7 @@
 package security.cam
 
 import com.proxy.CloudProxy
+import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -8,9 +9,20 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 @Transactional
 class CloudProxyService {
     LogService logService
-    CloudProxy cloudProxy = new CloudProxy("192.168.0.31", 8088, "localhost", 8081)
+    GrailsApplication grailsApplication
+
+    CloudProxy cloudProxy = null
 
     ObjectCommandResponse start() {
+        if(cloudProxy == null)
+        {
+            cloudProxy = new CloudProxy(
+                    (String)(grailsApplication.config.cloudProxy.webServerHost),
+                    (Integer)(grailsApplication.config.cloudProxy.webServerPort),
+                    (String)(grailsApplication.config.cloudProxy.cloudHost),
+                    (Integer)(grailsApplication.config.cloudProxy.cloudPort))
+        }
+
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
             cloudProxy.start()
@@ -41,7 +53,7 @@ class CloudProxyService {
     ObjectCommandResponse status() {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
-            response.responseObject = cloudProxy.isRunning()
+            response.responseObject = cloudProxy == null ? false : cloudProxy.isRunning()
         }
         catch(Exception ex)
         {

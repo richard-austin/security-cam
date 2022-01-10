@@ -41,7 +41,7 @@ public class CloudProxy implements SslContextProvider {
     private final int webserverPort;
     private final String cloudHost;
     private final int cloudPort;
-    RestfulProperties restfulProperties = new RestfulProperties();
+    CloudProxyProperties restfulProperties = CloudProxyProperties.getInstance();
 
     private ExecutorService cloudProxyExecutor;
     private ExecutorService splitMessagesExecutor;
@@ -51,17 +51,13 @@ public class CloudProxy implements SslContextProvider {
     private ScheduledExecutorService cloudConnectionCheckExecutor;
     private ExecutorService startCloudInputProcessExecutor;
 
-    CloudProxy(String webServerHost, int webServerPort, String cloudHost, int cloudPort) {
+    public CloudProxy(String webServerHost, int webServerPort, String cloudHost, int cloudPort) {
         this.webserverHost = webServerHost;
         this.webserverPort = webServerPort;
         this.cloudHost = cloudHost;
         this.cloudPort = cloudPort;
     }
 
-     //    public static void main(String[] args) {
-//        new CloudProxy("192.168.0.31", 8088, "localhost", 8081).start();
-//    }
-//
     final Object LOCK = new Object();
 
     public void start() {
@@ -529,7 +525,7 @@ public class CloudProxy implements SslContextProvider {
 
     @Override
     public KeyManager[] getKeyManagers() throws GeneralSecurityException, IOException {
-        return createKeyManagers(restfulProperties.CLOUD_PROXY_KEYSTORE_PATH, restfulProperties.CLOUD_PROXY_KEYSTORE_PASSWORD.toCharArray());
+        return createKeyManagers(restfulProperties.getCLOUD_PROXY_KEYSTORE_PATH(), restfulProperties.getCLOUD_PROXY_KEYSTORE_PASSWORD().toCharArray());
     }
 
     @Override
@@ -539,7 +535,7 @@ public class CloudProxy implements SslContextProvider {
 
     @Override
     public TrustManager[] getTrustManagers() throws GeneralSecurityException, IOException {
-        return createTrustManagers(restfulProperties.TRUSTSTORE_PATH, restfulProperties.TRUSTSTORE_PASSWORD.toCharArray());
+        return createTrustManagers(restfulProperties.getTRUSTSTORE_PATH(), restfulProperties.getTRUSTSTORE_PASSWORD().toCharArray());
     }
 
     private String log(ByteBuffer buf) {
