@@ -28,6 +28,8 @@ chmod 640 /etc/tomcat9/server.xml
 chown root:tomcat /etc/tomcat9/server.xml
 chown root:mail /etc/ssmtp/ssmtp.conf
 chmod 640 /etc/ssmtp/ssmtp.conf
+chown root:security-cam /etc/security-cam/cacert.jks /etc/security-cam/client.jks
+chmod 440 /etc/security-cam/cacert.jks /etc/security-cam/client.jks
 
 #A new group, security-cam, is added, then the users tomcat and sec-cam added to that group.
 # The security-cam group is then given group access to sec-cam and it's subdirectories. The user and group permissions are then set up.

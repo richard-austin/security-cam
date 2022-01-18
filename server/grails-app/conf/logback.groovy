@@ -52,6 +52,24 @@ appender("camLogAppender", RollingFileAppender) {
     }
 }
 
+appender("cloudProxyLogAppender", RollingFileAppender) {
+
+    def path = "/home/security-cam/logs/"
+    file = "${path}cloud-proxy.log"
+    encoder(PatternLayoutEncoder) {
+        pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} [%thread] - %M:%L - %msg%n"
+    }
+
+    rollingPolicy(SizeAndTimeBasedRollingPolicy) {
+        FileNamePattern = "${path}cloud-proxy.log-%d{yyyy-MM-dd}.%i"
+        maxHistory = 10
+        totalSizeCap = new FileSize(3000000000)
+        MaxFileSize = new FileSize(10000000)
+    }
+}
+
+
 logger('CAM', DEBUG, ['camLogAppender'], true)
+logger('CLOUDPROXY', DEBUG, ['cloudProxyLogAppender'], true)
 
 root(ERROR, ['STDOUT'])

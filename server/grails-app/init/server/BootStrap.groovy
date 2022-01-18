@@ -1,5 +1,7 @@
 package server
 
+import grails.core.GrailsApplication
+import security.cam.CloudProxyService
 import security.cam.RoleService
 import security.cam.Sc_processesService
 import security.cam.User
@@ -12,7 +14,8 @@ class BootStrap {
     RoleService roleService
     UserRoleService userRoleService
     Sc_processesService sc_processesService
-
+    CloudProxyService cloudProxyService
+    GrailsApplication grailsApplication
 
     def init = { servletContext ->
         List<String> authorities = ['ROLE_CLIENT']
@@ -28,6 +31,8 @@ class BootStrap {
         }
 
         sc_processesService.startProcesses()
+        if(grailsApplication.config.cloudProxy.enabled)
+            cloudProxyService.start()
     }
     def destroy = {
 //   //     sc_processesService.stopProcesses()

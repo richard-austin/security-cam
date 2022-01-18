@@ -1,7 +1,9 @@
+package spring
+
+import com.proxy.CloudProxyProperties
 import security.cam.commands.UserPasswordEncoderListener
 import security.cam.eventlisteners.SecCamAuthFailEventListener
 import security.cam.eventlisteners.SecCamSecurityEventListener
-
 
 // Place your Spring DSL code here
 beans = {
@@ -15,5 +17,9 @@ beans = {
     // This bean audits failed user logins
     secCamAuthFailEventListener(SecCamAuthFailEventListener) {
         logService = ref("logService")
+    }
+
+    restfulProperties(CloudProxyProperties) {
+        grailsApplication = ref('grailsApplication')
     }
 }

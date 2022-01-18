@@ -61,6 +61,7 @@ configurations {
 //    all*.exclude module : 'spring-boot-starter-logging'
 //    all*.exclude module : 'logback-classic'
 }
+//sourceSets { main { java { srcDirs += ['src/main/groovy'] } groovy { srcDirs += ['src/main/java'] } } }
 
 dependencies {
 //    implementation 'org.projectlombok:lombok:1.18.16'
