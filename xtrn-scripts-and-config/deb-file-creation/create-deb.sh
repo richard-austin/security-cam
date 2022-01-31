@@ -8,7 +8,8 @@ rm -r security-cam_*_arm64
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam
 
 cp ../start_hd_recording.sh ../end_hd_recording.sh ../processmotionrecordings.sh \
-  ../cacert.jks ../client.jks \
+  ../cacert.jks ../client.jks ../productKeyGen/generateProductKey.jar ../productKeyGen/publicKey \
+  ../productKeyGen/productKeyGen.sh \
  security-cam_"${VERSION}"_arm64/etc/security-cam
 
 tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
