@@ -4,8 +4,7 @@ grails.plugin.springsecurity.logout.handlerNames = [
 		'rememberMeServices',
 		'securityContextLogoutHandler',
 		'secCamSecurityEventListener',
-		'secCamAuthFailEventListener',
-        'cloudAuthenticationProcessingFilter']
+		'secCamAuthFailEventListener']
 
 //This is needed to turn-on the generation of springsecurity events so that logins and logouts may be audited
 grails.plugin.springsecurity.useSecurityEventListener          = true

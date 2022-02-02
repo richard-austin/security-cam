@@ -114,7 +114,7 @@ environments:
         grails:
             plugin:
                 springsecurity:
-                    active: false
+                    active: true
             cors:
                 enabled: true
 
@@ -127,12 +127,13 @@ environments:
             enabled: true
             trustStorePath: ../xtrn-scripts-and-config/cacert.jks
             keyStorePath: ../xtrn-scripts-and-config/client.jks
+            productKeyPath: /etc/security-cam/prodKey
             keyStorePassword: B0331e
             trustStorePassword: B0331e
             cloudHost: localhost
             cloudPort: 8081
             webServerHost: localhost
-            webServerPort: 8088
+            webServerPort: 8080
 
         test:
             dataSource:
@@ -173,10 +174,10 @@ environments:
             enabled: false
             trustStorePath: /etc/security-cam/cacert.jks
             keyStorePath: /etc/security-cam/client.jks
+            productKeyPath: /etc/security-cam/prodKey
             keyStorePassword: B0331e
             trustStorePassword: B0331e
             cloudHost: 192.168.0.37
             cloudPort: 8081
             webServerHost: localhost
             webServerPort: 8088
-
