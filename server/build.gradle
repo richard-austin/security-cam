@@ -51,6 +51,10 @@ repositories {
 //    allLicenses = ["Apache-2.0"]
 //}
 
+springBoot {
+    mainClass.set("server.Application")
+}
+
 configurations {
     developmentOnly
     runtimeClasspath {
@@ -62,6 +66,7 @@ configurations {
 //    all*.exclude module : 'logback-classic'
 }
 //sourceSets { main { java { srcDirs += ['src/main/groovy'] } groovy { srcDirs += ['src/main/java'] } } }
+
 
 dependencies {
 //    implementation 'org.projectlombok:lombok:1.18.16'
