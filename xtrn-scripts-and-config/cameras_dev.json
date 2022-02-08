@@ -1,7 +1,7 @@
 {
   "camera1": {
     "address": "192.168.0.45",
-    "controlUri": "",
+    "controlUri": "web/cgi-bin/hi3510/param.cgi",
     "name": "Spare",
     "snapshotUri": "http://192.168.0.45:80/tmpfs/auto.jpg",
     "streams": {

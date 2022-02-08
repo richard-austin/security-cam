@@ -25,7 +25,10 @@ class BootStrap {
             }
         }
         if ( !userService.findByUsername('admin') ) {
-            User u = new User(username: 'admin', password: 'elementary')
+            User u = new User(username: 'admin', password: 'elementary', cloudAccount: false, header: null)
+            u = userService.save(u)
+            userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
+            u = new User(username: 'cloud', password: 'DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU', cloudAccount: true, header: "7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!")
             u = userService.save(u)
             userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
         }
@@ -35,6 +38,8 @@ class BootStrap {
             cloudProxyService.start()
     }
     def destroy = {
-//   //     sc_processesService.stopProcesses()
+        sc_processesService.stopProcesses()
+        if (grailsApplication.config.cloudProxy.enabled)
+            cloudProxyService.stop()
     }
 }
