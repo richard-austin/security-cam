@@ -21,16 +21,25 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
 
         Object details = authentication.details
 
-        if ( !(details instanceof TwoFactorAuthenticationDetails) ) {
-            logService.cam.debug("Authentication failed: authenticationToken principal is not a TwoFactorPrincipal")
-            throw new BadCredentialsException(messages.getMessage(
-                    "AbstractUserDetailsAuthenticationProvider.badCredentials",
-                    "Bad credentials"))
+        if(details != null) {  // UserDetails are null when change password used
+            if (!(details instanceof TwoFactorAuthenticationDetails)) {
+                logService.cam.debug("Authentication failed: authenticationToken principal is not a TwoFactorPrincipal")
+                throw new BadCredentialsException(messages.getMessage(
+                        "AbstractUserDetailsAuthenticationProvider.badCredentials",
+                        "Bad credentials"))
+            }
+            TwoFactorAuthenticationDetails tfad = details
+            String userName = userDetails.getUsername()
+            if (getIsCloudAccount(userName) && tfad.xAuthToken != requiredXAuthToken(userName)) {
+                logService.cam.debug("Authentication failed: authtoken incorrect for Cloud account valid")
+                throw new BadCredentialsException(messages.getMessage(
+                        "AbstractUserDetailsAuthenticationProvider.badCredentials",
+                        "Bad credentials"))
+            }
         }
-        TwoFactorAuthenticationDetails tfad = details
-        String userName = userDetails.getUsername()
-        if ( getIsCloudAccount(userName) && tfad.xAuthToken != requiredXAuthToken(userName) ) {
-            logService.cam.debug("Authentication failed: authtoken incorrect for Cloud account valid")
+        else if(getIsCloudAccount(userDetails.getUsername()))
+        {
+            logService.cam.debug("Authentication failed: no TwoFactorAuthenticationDetails for cloud account: "+userDetails.getUsername())
             throw new BadCredentialsException(messages.getMessage(
                     "AbstractUserDetailsAuthenticationProvider.badCredentials",
                     "Bad credentials"))
