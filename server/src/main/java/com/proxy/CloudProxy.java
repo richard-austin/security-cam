@@ -3,6 +3,7 @@ package com.proxy;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,6 +13,7 @@ import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -41,7 +43,7 @@ public class CloudProxy implements SslContextProvider {
     private final int webserverPort;
     private final String cloudHost;
     private final int cloudPort;
-    CloudProxyProperties restfulProperties = CloudProxyProperties.getInstance();
+    CloudProxyProperties cloudProxyProperties = CloudProxyProperties.getInstance();
 
     private ExecutorService cloudProxyExecutor;
     private ExecutorService splitMessagesExecutor;
@@ -115,9 +117,13 @@ public class CloudProxy implements SslContextProvider {
         try {
             if (this.cloudChannel == null || !this.cloudChannel.isConnected() || this.cloudChannel.isClosed()) {
                 SSLSocket cloudChannel = createSSLSocket(cloudHost, cloudPort, this);
-                this.cloudChannel = cloudChannel;
-                logger.info("Connected successfully to the Cloud");
-                startCloudInputProcess(cloudChannel);
+                if(productKeyAccepted(cloudChannel)) {
+                    this.cloudChannel = cloudChannel;
+                    logger.info("Connected successfully to the Cloud");
+                    startCloudInputProcess(cloudChannel);
+                }
+                else
+                    logger.error("Product key was not accepted by the Cloud server");
             }
 
         } catch (Exception e) {
@@ -130,6 +136,29 @@ public class CloudProxy implements SslContextProvider {
             }
         }
         startCloudConnectionCheck();
+    }
+
+    /**
+     * productKeyAccepted: Send the product key to the Cloud server and check it was accepted
+     * @param cloudChannel: The SSLSocket connected to the Cloud
+     * @return: true if product key was accepted, otherwise false
+     */
+    private boolean productKeyAccepted(SSLSocket cloudChannel) throws IOException {
+        boolean retVal = false;
+        // Get the product key string
+        final String prodKey = Files.readString(new File(cloudProxyProperties.getPRODUCT_KEY_PATH()).toPath());
+
+        OutputStream os = cloudChannel.getOutputStream();
+        os.write(prodKey.getBytes(StandardCharsets.UTF_8));
+        os.flush();
+        InputStream is = cloudChannel.getInputStream();
+        final byte[] result = new byte[10];
+        int bytesRead = is.read(result);
+
+        if((new String(result, 0 , bytesRead)).equals("OK"))
+            retVal = true;
+
+        return retVal;
     }
 
     private void startCloudInputProcess(SSLSocket cloudChannel) {
@@ -525,7 +554,7 @@ public class CloudProxy implements SslContextProvider {
 
     @Override
     public KeyManager[] getKeyManagers() throws GeneralSecurityException, IOException {
-        return createKeyManagers(restfulProperties.getCLOUD_PROXY_KEYSTORE_PATH(), restfulProperties.getCLOUD_PROXY_KEYSTORE_PASSWORD().toCharArray());
+        return createKeyManagers(cloudProxyProperties.getCLOUD_PROXY_KEYSTORE_PATH(), cloudProxyProperties.getCLOUD_PROXY_KEYSTORE_PASSWORD().toCharArray());
     }
 
     @Override
@@ -535,7 +564,7 @@ public class CloudProxy implements SslContextProvider {
 
     @Override
     public TrustManager[] getTrustManagers() throws GeneralSecurityException, IOException {
-        return createTrustManagers(restfulProperties.getTRUSTSTORE_PATH(), restfulProperties.getTRUSTSTORE_PASSWORD().toCharArray());
+        return createTrustManagers(cloudProxyProperties.getTRUSTSTORE_PATH(), cloudProxyProperties.getTRUSTSTORE_PASSWORD().toCharArray());
     }
 
     private String log(ByteBuffer buf) {

@@ -9,14 +9,25 @@ const PROXY_CONFIG = [
       "/onvif",
       "/user",
       "/utils",
-      "/recording",
-      "/live",
       "/login"
     ],
-    ws: true,
     target: "http://localhost:8080",
     secure: false
-  }
-]
+  },
+  {
+    context: [
+      "/live"
+    ],
+    ws: true,
+    target: "http://localhost:8009",
+    secure: false
+  },
+  {
+    context: [
+      "/recording"
+    ],
+    target: "http://localhost:8080/recording",
+    secure: false
+  }]
 
 module.exports = PROXY_CONFIG;

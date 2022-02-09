@@ -6,6 +6,10 @@ grails.plugin.springsecurity.logout.handlerNames = [
 		'secCamSecurityEventListener',
 		'secCamAuthFailEventListener']
 
+grails.plugin.springsecurity.providerNames = [
+		'twoFactorAuthenticationProvider',
+		'rememberMeAuthenticationProvider']
+
 //This is needed to turn-on the generation of springsecurity events so that logins and logouts may be audited
 grails.plugin.springsecurity.useSecurityEventListener          = true
 

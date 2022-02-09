@@ -29,6 +29,7 @@ public final class CloudProxyProperties {
         CLOUD_PROXY_KEYSTORE_PATH = config.getProperty("cloudProxy.keyStorePath");
         TRUSTSTORE_PASSWORD = config.getProperty("cloudProxy.trustStorePassword");
         CLOUD_PROXY_KEYSTORE_PASSWORD = config.getProperty("cloudProxy.keyStorePassword");
+        PRODUCT_KEY_PATH = config.getProperty("cloudProxy.productKeyPath");
     }
 
     static final int REQUEST_TIMEOUT_SECS = 300;
@@ -36,6 +37,7 @@ public final class CloudProxyProperties {
     private String CLOUD_PROXY_KEYSTORE_PATH ;
     private String CLOUD_PROXY_KEYSTORE_PASSWORD ;
     private String TRUSTSTORE_PASSWORD;
+    private String PRODUCT_KEY_PATH;
 
     public String getTRUSTSTORE_PATH() {
         return TRUSTSTORE_PATH;
@@ -52,5 +54,8 @@ public final class CloudProxyProperties {
     public String getTRUSTSTORE_PASSWORD() {
         return TRUSTSTORE_PASSWORD;
     }
+
+
+    public String getPRODUCT_KEY_PATH() { return PRODUCT_KEY_PATH; }
 }
 
