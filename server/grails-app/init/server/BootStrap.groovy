@@ -24,11 +24,8 @@ class BootStrap {
                 roleService.save(authority)
             }
         }
-        if ( !userService.findByUsername('admin') ) {
-            User u = new User(username: 'admin', password: 'elementary', cloudAccount: false, header: null)
-            u = userService.save(u)
-            userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
-            u = new User(username: 'cloud', password: 'DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU', cloudAccount: true, header: "7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!")
+        if ( !userService.findByUsername('cloud') ) {
+            User u = new User(username: 'cloud', password: 'DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU', cloudAccount: true, header: "7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!")
             u = userService.save(u)
             userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
         }

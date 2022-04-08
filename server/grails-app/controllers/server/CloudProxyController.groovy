@@ -11,7 +11,7 @@ class CloudProxyController {
     @Secured(['ROLE_CLIENT'])
     def start()
     {
-        ObjectCommandResponse resp =  cloudProxyService.start();
+        ObjectCommandResponse resp =  cloudProxyService.start()
         if(resp.status == PassFail.PASS)
             render (status: 200, text: "")
         else
@@ -21,7 +21,7 @@ class CloudProxyController {
     @Secured(['ROLE_CLIENT'])
     def stop()
     {
-        ObjectCommandResponse resp = cloudProxyService.stop();
+        ObjectCommandResponse resp = cloudProxyService.stop()
         if(resp.status == PassFail.PASS)
             render (status: 200, text: "")
         else
@@ -31,7 +31,7 @@ class CloudProxyController {
     @Secured(['ROLE_CLIENT'])
     def status()
     {
-        ObjectCommandResponse resp = cloudProxyService.status();
+        ObjectCommandResponse resp = cloudProxyService.status()
         if(resp.status == PassFail.PASS)
             render (status: 200, text: resp.responseObject)
         else
