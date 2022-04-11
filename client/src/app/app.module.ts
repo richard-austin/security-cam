@@ -42,6 +42,7 @@ import { DisableControlDirective } from './config-setup/disable-control.directiv
 import { MapToKeyValuePipe } from './config-setup/map-to-key-value.pipe';
 import { CredentialsForCameraAccessComponent } from './credentials-for-camera-access/credentials-for-camera-access.component';
 import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
+import { ChangeEmailComponent } from './change-email/change-email.component';
 
 @NgModule({
   declarations: [
@@ -64,7 +65,8 @@ import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
     DisableControlDirective,
     MapToKeyValuePipe,
     CredentialsForCameraAccessComponent,
-    CloudProxyComponent
+    CloudProxyComponent,
+    ChangeEmailComponent
   ],
     imports: [
         BrowserModule,

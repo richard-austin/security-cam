@@ -2,6 +2,7 @@ package security.cam
 
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
+import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CreateAccountCommand
 import security.cam.commands.ResetPasswordCommand
 import security.cam.enums.PassFail
@@ -46,6 +47,39 @@ class UserAdminService {
         }
         catch (Exception ex) {
             logService.cam.error("Exception in createAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    ObjectCommandResponse hasLocalAccount() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            result.responseObject = User.findByCloudAccount(false) != null
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in hasLocalAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    ObjectCommandResponse changeEmail(ChangeEmailCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            def principal = springSecurityService.getPrincipal()
+            String userName = principal.getUsername()
+
+            User user = User.findByUsername(userName)
+            user.setEmail(cmd.getEmail())
+            user.save()
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in changeEmail: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
