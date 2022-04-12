@@ -1,1 +1,45 @@
-<p>change-email works!</p>
+<div class="change-email-container">
+  <mat-card class="mat-elevation-z8" xmlns="http://www.w3.org/1999/html">
+    <mat-card-title>Change Email Address</mat-card-title>
+    <mat-card-content>
+      <form (ngSubmit)="$event.preventDefault(); formSubmitted()" [formGroup]="changeEmailForm">
+        <div>
+          <mat-form-field appearance="standard">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password"
+                   placeholder="Enter password">
+            <mat-error *ngIf="hasError('password', 'required')">Password is required</mat-error>
+            <mat-error *ngIf="hasError('password', 'pattern')">Password incorrect</mat-error>
+            <mat-hint>Enter password</mat-hint>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="standard">
+            <mat-label>New email address</mat-label>
+            <input matInput type="text" formControlName="newEmail"
+                   placeholder="New password">
+            <mat-error *ngIf="hasError('newEmail', 'required')">Email address required</mat-error>
+            <mat-error *ngIf="hasError('newEmail', 'pattern')">Email format is incorrect
+            </mat-error>
+            <mat-hint>Enter new email address</mat-hint>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="standard">
+            <mat-label>Confirm new email address</mat-label>
+            <input matInput type="text" formControlName="confirmNewEmail"
+                   placeholder="Confirm new email address">
+            <mat-error *ngIf="hasError('confirmNewEmail', 'required')">Confirm new email address is required</mat-error>
+            <mat-error *ngIf="hasError('confirmNewEmail', 'confirmNewEmail')">Confirm new email and new email differ
+            </mat-error>
+            <mat-hint>Enter new email again</mat-hint>
+          </mat-form-field>
+        </div>
+        <div class="button-container">
+          <button mat-raised-button [disabled]="changeEmailButtonDisabled()" color="warning">Change Email</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+<app-reporting></app-reporting>

@@ -74,7 +74,7 @@ class UserAdminService {
             String userName = principal.getUsername()
 
             User user = User.findByUsername(userName)
-            user.setEmail(cmd.getEmail())
+            user.setEmail(cmd.getNewEmail())
             user.save()
         }
         catch(Exception ex)

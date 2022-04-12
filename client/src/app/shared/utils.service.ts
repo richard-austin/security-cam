@@ -98,6 +98,23 @@ export class UtilsService {
     );
   }
 
+  changePassword(oldPassword:string, newPassword:string, confirmNewPassword:string):Observable<void>
+  {
+    let passwordChange:{oldPassword: string, newPassword:string, confirmNewPassword: string} = {oldPassword: oldPassword, newPassword: newPassword, confirmNewPassword: confirmNewPassword};
+    return this.http.post<void>(this._baseUrl.getLink("user", "changePassword"), JSON.stringify(passwordChange), this.httpJSONOptions).pipe(
+      tap(),
+      catchError((err:HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  changeEmail(password: string, newEmail: string, confirmNewEmail: string) {
+    let passwordChange:{password: string, newEmail:string, confirmNewEmail: string} = {password: password, newEmail: newEmail, confirmNewEmail: confirmNewEmail};
+    return this.http.post<void>(this._baseUrl.getLink("user", "changeEmail"), JSON.stringify(passwordChange), this.httpJSONOptions).pipe(
+      tap(),
+      catchError((err:HttpErrorResponse) => throwError(err))
+    );
+  }
+
   sendMessage(message:Message)
   {
     this._messaging.next(message);
@@ -106,4 +123,5 @@ export class UtilsService {
   getMessages(): Observable<Message> {
     return this._messaging.asObservable();
   }
+
 }
