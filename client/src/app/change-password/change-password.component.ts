@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
@@ -12,9 +12,6 @@ import { UtilsService } from '../shared/utils.service';
 export class ChangePasswordComponent implements OnInit {
 
   changePasswordForm!: FormGroup;
-  @ViewChild('oldPassword') oldPasswordEl!: ElementRef<HTMLInputElement>;
-  @ViewChild('newPassword') newPassword!: ElementRef<HTMLInputElement>;
-  @ViewChild('confirmNewPassword') confirmNewPassword!: ElementRef<HTMLInputElement>;
   @ViewChild(ReportingComponent) reporting!:ReportingComponent;
 
   constructor(private utilsService: UtilsService) { }
