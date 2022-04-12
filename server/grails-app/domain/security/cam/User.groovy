@@ -13,6 +13,7 @@ class User implements Serializable {
 
     String username
     String password
+    String email
     String header
     boolean cloudAccount
 
@@ -29,6 +30,7 @@ class User implements Serializable {
         password nullable: false, blank: false, password: true
         username nullable: false, blank: false, unique: true
         header nullable: true, blank: false
+        email nullable: true, blank: true, unique: true
         cloudAccount nullable: false, inList: [true, false]
     }
 

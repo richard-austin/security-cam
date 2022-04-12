@@ -1,6 +1,8 @@
 package spring
 
 import com.proxy.CloudProxyProperties
+import grails.core.GrailsApplication
+import grails.util.Environment
 import security.cam.commands.UserPasswordEncoderListener
 
 import security.cam.eventlisteners.SecCamAuthFailEventListener
@@ -10,6 +12,8 @@ import security.cam.interfaceobjects.TwoFactorAuthenticationDetailsSource
 
 // Place your Spring DSL code here
 beans = {
+    //GrailsApplication grailsApplication
+
     userPasswordEncoderListener(UserPasswordEncoderListener)
 
     // This bean audits user logins and logouts
@@ -26,18 +30,21 @@ beans = {
         grailsApplication = ref('grailsApplication')
     }
 
-    twoFactorAuthenticationProvider(TwoFactorAuthenticationProvider) {
-        logService = ref("logService")
-        userDetailsService = ref('userDetailsService')
-        passwordEncoder = ref('passwordEncoder')
-        userCache = ref('userCache')
-        preAuthenticationChecks = ref('preAuthenticationChecks')
-        postAuthenticationChecks = ref('postAuthenticationChecks')
-        authoritiesMapper = ref('authoritiesMapper')
-        hideUserNotFoundExceptions = true
+    if (grailsApplication.config.grails.plugin.springsecurity.active == true) {
+        twoFactorAuthenticationProvider(TwoFactorAuthenticationProvider) {
+            logService = ref("logService")
+            userDetailsService = ref('userDetailsService')
+            passwordEncoder = ref('passwordEncoder')
+            userCache = ref('userCache')
+            preAuthenticationChecks = ref('preAuthenticationChecks')
+            postAuthenticationChecks = ref('postAuthenticationChecks')
+            authoritiesMapper = ref('authoritiesMapper')
+            hideUserNotFoundExceptions = true
+        }
+
+        authenticationDetailsSource(TwoFactorAuthenticationDetailsSource)
     }
 
-    authenticationDetailsSource(TwoFactorAuthenticationDetailsSource)
 
 //    authenticationDetailsSource(TwoFactorAuthenticationDetailsProvider) {
 //        logService = ref("logService")

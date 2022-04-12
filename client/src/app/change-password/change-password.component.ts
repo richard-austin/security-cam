@@ -1,9 +1,8 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {AbstractControl, FormControl, FormGroup, ValidatorFn, Validators} from "@angular/forms";
-import {timer} from "rxjs";
-import {ChangePasswordService} from "./change-password.service";
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
+import { UtilsService } from '../shared/utils.service';
 
 @Component({
   selector: 'app-change-password',
@@ -13,20 +12,12 @@ import {HttpErrorResponse} from "@angular/common/http";
 export class ChangePasswordComponent implements OnInit {
 
   changePasswordForm!: FormGroup;
-  @ViewChild('oldPassword') oldPasswordEl!: ElementRef<HTMLInputElement>;
-  @ViewChild('newPassword') newPassword!: ElementRef<HTMLInputElement>;
-  @ViewChild('confirmNewPassword') confirmNewPassword!: ElementRef<HTMLInputElement>;
   @ViewChild(ReportingComponent) reporting!:ReportingComponent;
 
-  constructor(private changePasswordService:ChangePasswordService) { }
+  constructor(private utilsService: UtilsService) { }
 
   changePasswordButtonDisabled():boolean {
-    // for(const key of Object.keys(this.changePasswordForm.controls))
-    // {
-    //   if(this.hasError(key, 'required') || this.hasError(key, 'pattern'))
-    //     return true;
-    // }
-    return false;
+     return this.anyInvalid();
   }
 
   hasError = (controlName: string, errorName: string):boolean =>{
@@ -38,7 +29,7 @@ export class ChangePasswordComponent implements OnInit {
     let newPassword:AbstractControl = this.changePasswordForm.controls['newPassword'];
     let confirmNewPassword: AbstractControl = this.changePasswordForm.controls['confirmNewPassword'];
 
-    this.changePasswordService.changePassword(oldPassword.value, newPassword.value, confirmNewPassword.value).subscribe(() => {
+    this.utilsService.changePassword(oldPassword.value, newPassword.value, confirmNewPassword.value).subscribe(() => {
       this.reporting.successMessage="Password changed";
     },
     (reason: HttpErrorResponse) => {
@@ -48,6 +39,7 @@ export class ChangePasswordComponent implements OnInit {
             if(key === 'oldPassword')
               this.invalidPassword();
         }
+        this.reporting.errorMessage = reason;
       }
       else
         this.reporting.error = reason;
@@ -76,11 +68,16 @@ export class ChangePasswordComponent implements OnInit {
     return null;
   }
 
+  anyInvalid(): boolean{
+    return this.changePasswordForm.invalid;
+  }
+
   ngOnInit(): void {
     this.changePasswordForm = new FormGroup({
       oldPassword: new FormControl('', [Validators.required]),
       newPassword: new FormControl('', [Validators.required, Validators.pattern(/^[-\[\]!\"#$%&\'()*+,.\/:;<=>?@^_\`{}|~\\0-9A-Za-z]{1,64}$/)]),
-      confirmNewPassword: new FormControl('', [this.comparePasswords])
+      confirmNewPassword: new FormControl('', [Validators.required, this.comparePasswords])
     });
+    this.changePasswordForm.markAllAsTouched();
   }
 }
