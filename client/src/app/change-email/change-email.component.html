@@ -14,9 +14,9 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="standard">
+          <mat-form-field appearance="standard" class="email-input">
             <mat-label>New email address</mat-label>
-            <input matInput type="text" formControlName="newEmail"
+            <input matInput type="text" formControlName="newEmail" autocomplete="off" maxlength="40"
                    placeholder="New password">
             <mat-error *ngIf="hasError('newEmail', 'required')">Email address required</mat-error>
             <mat-error *ngIf="hasError('newEmail', 'pattern')">Email format is incorrect
@@ -25,9 +25,9 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="standard">
+          <mat-form-field appearance="standard" class="email-input">
             <mat-label>Confirm new email address</mat-label>
-            <input matInput type="text" formControlName="confirmNewEmail"
+            <input matInput type="text" formControlName="confirmNewEmail" autocomplete="off" maxlength="40"
                    placeholder="Confirm new email address">
             <mat-error *ngIf="hasError('confirmNewEmail', 'required')">Confirm new email address is required</mat-error>
             <mat-error *ngIf="hasError('confirmNewEmail', 'confirmNewEmail')">Confirm new email and new email differ
