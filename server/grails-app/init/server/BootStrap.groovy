@@ -31,7 +31,9 @@ class BootStrap {
         }
 
         sc_processesService.startProcesses()
-        if(grailsApplication.config.cloudProxy.enabled)
+
+        // Start CloudProxy if enabled in the config or if there is no local web account on the NVR
+        if(grailsApplication.config.cloudProxy.enabled || !User.findByCloudAccount(false))
             cloudProxyService.start()
     }
     def destroy = {
