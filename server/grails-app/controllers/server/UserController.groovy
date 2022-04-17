@@ -37,6 +37,17 @@ class UserController {
     }
 
     @Secured(['ROLE_CLIENT'])
+    def getEmail() {
+        ObjectCommandResponse result = userAdminService.getEmail()
+        if (result.status != PassFail.PASS) {
+            render(status: 500, text: result.error)
+        } else {
+            logService.cam.info("getEmail: success")
+            render (text: result.responseObject as JSON)
+        }
+    }
+
+    @Secured(['ROLE_CLIENT'])
     def changeEmail(ChangeEmailCommand cmd) {
         ObjectCommandResponse result
 
@@ -44,8 +55,7 @@ class UserController {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'changeEmail')
             logService.cam.error "changeEmail: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
-        }
-        else {
+        } else {
             result = userAdminService.changeEmail(cmd)
             if (result.status != PassFail.PASS) {
                 render(status: 500, text: result.error)

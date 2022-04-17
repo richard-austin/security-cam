@@ -107,10 +107,16 @@ export class UtilsService {
     );
   }
 
+  getEmail():Observable<{email: string}>
+  {
+    return this.http.post<{email: string}>(this._baseUrl.getLink("user", "getEmail"), '', this.httpJSONOptions).pipe(
+      catchError((err:HttpErrorResponse) => throwError(err))
+    );
+  }
+
   changeEmail(password: string, newEmail: string, confirmNewEmail: string) {
     let passwordChange:{password: string, newEmail:string, confirmNewEmail: string} = {password: password, newEmail: newEmail, confirmNewEmail: confirmNewEmail};
     return this.http.post<void>(this._baseUrl.getLink("user", "changeEmail"), JSON.stringify(passwordChange), this.httpJSONOptions).pipe(
-      tap(),
       catchError((err:HttpErrorResponse) => throwError(err))
     );
   }

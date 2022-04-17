@@ -3,13 +3,14 @@ import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/form
 import {ReportingComponent} from '../reporting/reporting.component';
 import {HttpErrorResponse} from '@angular/common/http';
 import { UtilsService } from '../shared/utils.service';
+import { AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'app-change-email',
   templateUrl: './change-email.component.html',
   styleUrls: ['./change-email.component.scss']
 })
-export class ChangeEmailComponent implements OnInit {
+export class ChangeEmailComponent implements OnInit, AfterViewInit {
 
   changeEmailForm!: FormGroup;
   @ViewChild(ReportingComponent) reporting!:ReportingComponent;
@@ -79,5 +80,11 @@ export class ChangeEmailComponent implements OnInit {
       confirmNewEmail: new FormControl('', [Validators.required, this.compareEmails])
     });
     this.changeEmailForm.markAllAsTouched();
+  }
+
+  ngAfterViewInit(): void {
+    this.utilsService.getEmail().subscribe((result)=> {
+      this.changeEmailForm.controls['newEmail'].setValue(result.email);
+    })
   }
 }

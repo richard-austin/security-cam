@@ -2,6 +2,7 @@ package security.cam
 
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
+import groovy.json.JsonSlurper
 import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CreateAccountCommand
 import security.cam.commands.ResetPasswordCommand
@@ -61,6 +62,26 @@ class UserAdminService {
         catch(Exception ex)
         {
             logService.cam.error("Exception in hasLocalAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    ObjectCommandResponse getEmail()
+    {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            def principal = springSecurityService.getPrincipal()
+            String userName = principal.getUsername()
+
+            User user = User.findByUsername(userName)
+
+            result.responseObject = [email: user.getEmail()]
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in getEmail: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
