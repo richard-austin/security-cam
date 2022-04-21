@@ -28,9 +28,8 @@ class UserAdminService {
             user.setPassword(cmd.getNewPassword())
             user.save()
         }
-        catch(Exception ex)
-        {
-            logService.cam.error("Exception in resetPassword: "+ex.getCause()+ ' ' + ex.getMessage())
+        catch (Exception ex) {
+            logService.cam.error("Exception in resetPassword: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
@@ -38,6 +37,17 @@ class UserAdminService {
         return result
     }
 
+    /**
+     * createAccount: This is used to create a local web account on the NVR which can be logged into directly, rather
+     *                than via the Cloud service.
+     * @param cmd:     String username
+     *                 String password
+     *                 String confirmPassword
+     *                 String email
+     *                 String confirmEmail
+     *
+     * @return: Success/error status
+     */
     ObjectCommandResponse createAccount(CreateAccountCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
@@ -54,13 +64,39 @@ class UserAdminService {
         return result
     }
 
+    /**
+     * removeAccount: Remove the local NVR direct web access account
+     * @return  Success/error status
+     */
+    ObjectCommandResponse removeAccount() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            User user = User.findByCloudAccount(false)
+            if(user != null) {
+                result.responseObject = [username: user.getUsername()]
+                UserRole userRole = UserRole.findByUser(user)
+                userRole.delete(flush: true)
+                user.delete(flush: true)
+            }
+            else
+                throw new Exception("There is no local web account present on this NVR")
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in removeAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
     ObjectCommandResponse hasLocalAccount() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             result.responseObject = User.findByCloudAccount(false) != null
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("Exception in hasLocalAccount: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
@@ -68,8 +104,7 @@ class UserAdminService {
         return result
     }
 
-    ObjectCommandResponse getEmail()
-    {
+    ObjectCommandResponse getEmail() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             def principal = springSecurityService.getPrincipal()
@@ -79,8 +114,7 @@ class UserAdminService {
 
             result.responseObject = [email: user.getEmail()]
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("Exception in getEmail: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
@@ -98,12 +132,12 @@ class UserAdminService {
             user.setEmail(cmd.getNewEmail())
             user.save()
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("Exception in changeEmail: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
         return result
     }
+
 }

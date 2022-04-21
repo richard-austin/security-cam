@@ -86,6 +86,21 @@ class UserController {
     }
 
     @Secured(['ROLE_CLIENT'])
+    /**
+     * removeAccount: Remove the local web account used for direct access to to NVR
+     */
+    def removeAccount()
+    {
+        ObjectCommandResponse result = userAdminService.removeAccount()
+        if (result.status != PassFail.PASS) {
+            render(status: 500, text: result.error)
+        } else {
+            logService.cam.info("removeAccount: success")
+            render (text: result.responseObject as JSON)
+        }
+    }
+
+    @Secured(['ROLE_CLIENT'])
     def hasLocalAccount() {
         ObjectCommandResponse result = userAdminService.hasLocalAccount()
 
