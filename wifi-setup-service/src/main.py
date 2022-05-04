@@ -65,12 +65,14 @@ def checkConnectionState(ssid: str):
 
 
 class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(400)
+    def returnResponse(self, http_status: int,  response: str):
+        self.send_response(http_status)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        message = "GET calls are not supported"
-        self.wfile.write(bytes(message, "utf8"))
+        self.wfile.write(bytes(response, "utf8"))
+
+    def do_GET(self):
+        self.returnResponse(400, "GET calls are not supported")
 
     def do_POST(self):
         try:
@@ -78,10 +80,6 @@ class Handler(BaseHTTPRequestHandler):
 
             match cmd['command']:
                 case 'scanwifi':
-                    self.send_response(200)
-                    self.send_header('Content-type', 'text/html')
-                    self.end_headers()
-
                     stream = os.popen('nmcli -t dev wifi')
                     message = stream.read()
                     wifis: [] = []
@@ -101,16 +99,13 @@ class Handler(BaseHTTPRequestHandler):
                             wifis.append(wifi_details)
 
                     json_str = json.dumps(wifis, default=obj_dict)
-                    self.wfile.write(bytes(json_str, "utf8"))
+                    self.returnResponse(200, json_str)
 
                 case 'setupwifi':
                     hasethernet: bool = check_for_ethernet()
                     if not hasethernet:
-                        self.send_response(401)
-                        self.send_header('Content-type', 'text/html')
-                        self.end_headers()
-                        self.wfile.write(bytes("You must connect the NVR through Ethernet to change wifi settings",
-                                               "utf8"))
+                        self.returnResponse(401, "You must connect the NVR through Ethernet to change wifi settings")
+                        return
 
                     self.send_response(200)
                     ssid: str = cmd['ssid']
@@ -118,25 +113,14 @@ class Handler(BaseHTTPRequestHandler):
                     os.system(f"nmcli dev wifi connect {ssid} password {password}")
                     activated = checkConnectionState(cmd['ssid'])
                     if activated:
-                        self.send_response(200)
-                        self.send_header('Content-type', 'text/html')
-                        self.end_headers()
-                        self.wfile.write(bytes(f"Wifi connection to {cmd['ssid']} is active",
-                                               "utf8"))
+                        self.returnResponse(200, f"Wifi connection to {cmd['ssid']} is active")
                     else:
-                        self.send_response(500)
-                        self.send_header('Content-type', 'text/html')
-                        self.end_headers()
-                        self.wfile.write(bytes(f"Failed to activate Wifi connection to {cmd['ssid']}",
-                                               "utf8"))
+                        self.returnResponse(500, f"Failed to activate Wifi connection to {cmd['ssid']}")
                 case _:
                     self.send_response(400)
 
         except Exception as ex:
-            self.send_response(500)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write(bytes(ex.__str__(), "utf8"))
+            self.returnResponse(500, ex.__str__())
 
     def parse_POST(self):
         ctype, pdict = parse_header(self.headers['content-type'])
