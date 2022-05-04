@@ -1,7 +1,11 @@
 #! /usr/bin/python3
+from datetime import datetime
 import json
 import os
 import re
+import logging
+from logging.handlers import TimedRotatingFileHandler
+from pytz import timezone
 from cgi import parse_header
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from wifi_details import WifiDetails
@@ -12,6 +16,24 @@ from connection_state_details import ConnectionStateDetails
 def obj_dict(obj):
     return obj.__dict__
 
+
+tz = timezone('Europe/London')  # UTC, Asia/Shanghai, Europe/Berlin
+
+
+def timetz(*args):
+    return datetime.now(tz).timetuple()
+
+
+FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logging.basicConfig(encoding='utf-8', level=logging.INFO, format=FORMAT)
+logging.Formatter.converter = timetz
+logger = logging.getLogger('wifimgr')
+
+# Set up a handler for time rotated file logging
+logHandler = TimedRotatingFileHandler(filename="/var/log/wifimgr/wifimgr.log", when="midnight")
+logHandler.setFormatter(logging.Formatter(FORMAT))
+# add ch to logger
+logger.addHandler(logHandler)
 
 """
     check_for_ethernet: Checks that we are connected through ethernet
@@ -65,7 +87,11 @@ def checkConnectionState(ssid: str):
 
 
 class Handler(BaseHTTPRequestHandler):
-    def returnResponse(self, http_status: int,  response: str):
+    def returnResponse(self, http_status: int, response: str):
+        if http_status == 200:
+            logger.info(f"Return response {http_status}: {response}")
+        else:
+            logger.error(f"Return response: {http_status}: {response}")
         self.send_response(http_status)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
@@ -80,6 +106,7 @@ class Handler(BaseHTTPRequestHandler):
 
             match cmd['command']:
                 case 'scanwifi':
+                    logger.info("Scan for wifi access points")
                     stream = os.popen('nmcli -t dev wifi')
                     message = stream.read()
                     wifis: [] = []
@@ -107,8 +134,8 @@ class Handler(BaseHTTPRequestHandler):
                         self.returnResponse(401, "You must connect the NVR through Ethernet to change wifi settings")
                         return
 
-                    self.send_response(200)
                     ssid: str = cmd['ssid']
+                    logger.info(f"Setting up wifi for SSID {ssid}")
                     password: str = cmd['password']
                     os.system(f"nmcli dev wifi connect {ssid} password {password}")
                     activated = checkConnectionState(cmd['ssid'])
@@ -117,7 +144,7 @@ class Handler(BaseHTTPRequestHandler):
                     else:
                         self.returnResponse(500, f"Failed to activate Wifi connection to {cmd['ssid']}")
                 case _:
-                    self.send_response(400)
+                    self.send_response(400, f"Unknown command {cmd['command']}")
 
         except Exception as ex:
             self.returnResponse(500, ex.__str__())
