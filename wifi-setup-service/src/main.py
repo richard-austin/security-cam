@@ -143,6 +143,13 @@ class Handler(BaseHTTPRequestHandler):
                         self.returnResponse(200, f"Wifi connection to {cmd['ssid']} is active")
                     else:
                         self.returnResponse(500, f"Failed to activate Wifi connection to {cmd['ssid']}")
+
+                case 'checkwifistatus':
+                    logger.info("Check if wifi enabled")
+
+                case 'setwifistatus':
+                    logger.info("Set wifi on or off")
+
                 case _:
                     self.send_response(400, f"Unknown command {cmd['command']}")
 
