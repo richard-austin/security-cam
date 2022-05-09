@@ -96,6 +96,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         self.wfile.write(bytes(response, "utf8"))
+        return
 
     def do_GET(self):
         self.returnResponse(400, "GET calls are not supported")
@@ -137,12 +138,19 @@ class Handler(BaseHTTPRequestHandler):
                     ssid: str = cmd['ssid']
                     logger.info(f"Setting up wifi for SSID {ssid}")
                     password: str = cmd['password']
-                    os.system(f"nmcli dev wifi connect {ssid} password {password}")
+                    try:
+                        os.system(f"nmcli dev wifi connect {ssid} password {password}")
+                    except Exception as ex:
+                        logger.error(f"Exception when trying to set Wifi: {ex}")
+                        self.returnResponse(500, f"An error occurred: {ex}")
+                        return
+
                     activated = checkConnectionState(cmd['ssid'])
                     if activated:
                         self.returnResponse(200, f"Wifi connection to {cmd['ssid']} is active")
                     else:
-                        self.returnResponse(500, f"Failed to activate Wifi connection to {cmd['ssid']}")
+                        self.returnResponse(400, f"Failed to activate Wifi connection to {cmd['ssid']}. Please check "
+                                                 "the SSID and password are correct")
 
                 case 'checkwifistatus':
                     logger.info("Check if wifi enabled")

@@ -110,7 +110,7 @@ class UtilsController {
                 result.status = PassFail.FAIL
                 result.error = response.errorMsg
                 result.userError = response.userError
-                render(status: 500, result as JSON)
+                render(status: response.responseCode, result as JSON)
             }
             else
                 render response.responseObject as JSON
