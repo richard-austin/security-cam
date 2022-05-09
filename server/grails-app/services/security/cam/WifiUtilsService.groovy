@@ -17,6 +17,28 @@ class WifiUtilsService {
     GrailsApplication grailsApplication
     RestfulInterfaceService restfulInterfaceService
 
+    def scanWifi() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            RestfulResponse resp =
+                    restfulInterfaceService.sendRequest("localhost:8000","/",
+                            "{\"command\": \"scanwifi\"}",
+                            true, 60)
+
+            result.responseObject = resp
+
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in scanWifi: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+
+        return result
+    }
+
     def setUpWifi(SetUpWifiCommand cmd)
     {
         ObjectCommandResponse result = new ObjectCommandResponse()

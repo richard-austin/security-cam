@@ -5,6 +5,7 @@ import os
 import re
 import logging
 from logging.handlers import TimedRotatingFileHandler
+
 from pytz import timezone
 from cgi import parse_header
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -71,17 +72,24 @@ def check_for_ethernet() -> bool:
 
 def checkConnectionState(ssid: str):
     retval: bool = False
-    stream = os.popen(f"nmcli -t -f GENERAL.STATE con show {ssid}")
-    message = stream.read()
-    result: []
-    lines = message.split("\n")
-    for line in lines:
-        result = line.split(":")
-        if len(result) == 2:
-            connection_state = ConnectionStateDetails(general_state=result[1])
-            if connection_state.general_state == "activated":
-                retval = True
+    try:
+        stream = os.popen(f"nmcli -t -f GENERAL.STATE con show {ssid}")
+        message = stream.read()
+        errorcode = stream.close()
+        if errorcode is not None:
+            errorcode = os.WEXITSTATUS(errorcode)
+            raise Exception(f"nmcli command returned error code {errorcode}")
+        result: []
+        lines = message.split("\n")
+        for line in lines:
+            result = line.split(":")
+            if len(result) == 2:
+                connection_state = ConnectionStateDetails(general_state=result[1])
+                if connection_state.general_state == "activated":
+                    retval = True
                 break
+    except Exception as ex:
+        logger.error(f"{ex}")
 
     return retval
 
@@ -108,26 +116,36 @@ class Handler(BaseHTTPRequestHandler):
             match cmd['command']:
                 case 'scanwifi':
                     logger.info("Scan for wifi access points")
-                    stream = os.popen('nmcli -t dev wifi')
-                    message = stream.read()
-                    wifis: [] = []
-                    result: []
-                    lines = message.split("\n")
-                    for line in lines:
-                        result = re.split(r"(?<!\\):", line)
-                        if len(result) == 9:
-                            wifi_details = WifiDetails(in_use=result[0] == '*',
-                                                       bssid=result[1].replace('\\', ''),
-                                                       ssid=result[2],
-                                                       mode=result[3],
-                                                       channel=result[4],
-                                                       rate=result[5],
-                                                       signal=result[6],
-                                                       security=result[8])
-                            wifis.append(wifi_details)
+                    try:
+                        stream = os.popen('nmcli -t dev wifi')
+                        message = stream.read()
+                        exitcode = stream.close()
+                        if exitcode is not None:
+                            exitcode = os.WEXITSTATUS(exitcode)
+                            raise Exception(f"Error code {exitcode} when running nmcli command")
 
-                    json_str = json.dumps(wifis, default=obj_dict)
-                    self.returnResponse(200, json_str)
+                        wifis: [] = []
+                        result: []
+                        lines = message.split("\n")
+                        for line in lines:
+                            result = re.split(r"(?<!\\):", line)
+                            if len(result) == 9:
+                                wifi_details = WifiDetails(in_use=result[0] == '*',
+                                                           bssid=result[1].replace('\\', ''),
+                                                           ssid=result[2],
+                                                           mode=result[3],
+                                                           channel=result[4],
+                                                           rate=result[5],
+                                                           signal=result[6],
+                                                           security=result[8])
+                                wifis.append(wifi_details)
+
+                        json_str = json.dumps(wifis, default=obj_dict)
+                        self.returnResponse(200, json_str)
+                    except Exception as ex:
+                        logger.error(f"Exception when trying to scan Wifi: {ex}")
+                        self.returnResponse(500, f"An error occurred: {ex}")
+                        return
 
                 case 'setupwifi':
                     hasethernet: bool = check_for_ethernet()
@@ -138,8 +156,14 @@ class Handler(BaseHTTPRequestHandler):
                     ssid: str = cmd['ssid']
                     logger.info(f"Setting up wifi for SSID {ssid}")
                     password: str = cmd['password']
+                    message: str
                     try:
-                        os.system(f"nmcli dev wifi connect {ssid} password {password}")
+                        stream = os.popen(f"nmcli dev wifi connect {ssid} password {password}")
+                        message = stream.read()
+                        exitcode = stream.close()
+                        if exitcode is not None:
+                            exitcode = os.WEXITSTATUS(exitcode)
+                            raise Exception(f"nmcli command returned error {exitcode}")
                     except Exception as ex:
                         logger.error(f"Exception when trying to set Wifi: {ex}")
                         self.returnResponse(500, f"An error occurred: {ex}")
