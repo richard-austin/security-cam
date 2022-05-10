@@ -44,9 +44,7 @@ logger.addHandler(logHandler)
 
 def check_for_ethernet() -> bool:
     retval: bool = False
-    stream = os.popen('nmcli -t con show')
-    message = stream.read()
-    result: []
+    message = executeOsCommand('nmcli -t con show', Handler.nmcli_errors)
     lines = message.split("\n")
     for line in lines:
         result = line.split(":")
@@ -73,12 +71,8 @@ def check_for_ethernet() -> bool:
 def checkConnectionState(ssid: str):
     retval: bool = False
     try:
-        stream = os.popen(f"nmcli -t -f GENERAL.STATE con show {ssid}")
-        message = stream.read()
-        errorcode = stream.close()
-        if errorcode is not None:
-            errorcode = os.WEXITSTATUS(errorcode)
-            raise Exception(f"nmcli command returned error code {errorcode}")
+        message = executeOsCommand(f"nmcli -t -f GENERAL.STATE con show {ssid}",
+                                   Handler.nmcli_errors)
         result: []
         lines = message.split("\n")
         for line in lines:
@@ -94,7 +88,34 @@ def checkConnectionState(ssid: str):
     return retval
 
 
+def executeOsCommand(command: str, exception_messages: {int, str}) -> str:
+    stream = os.popen(command)
+    message = stream.read()
+    exitcode = stream.close()
+    if exitcode is not None:
+        exitcode = os.WEXITSTATUS(exitcode)
+        error_message = exception_messages[exitcode]
+        if error_message is not None:
+            raise Exception(f"{error_message}")
+        else:
+            raise Exception(f"Unknown error code {exitcode}")
+    return message
+
+
 class Handler(BaseHTTPRequestHandler):
+    nmcli_errors = {
+        0: "Success – indicates the operation succeeded.",
+        1: "Unknown or unspecified error.",
+        2: "Invalid user input, wrong nmcli invocation.",
+        3: "Timeout expired (see --wait option).",
+        4: "Connection activation failed.",
+        5: "Connection deactivation failed.",
+        6: "Disconnecting device failed.",
+        7: "Connection deletion failed.",
+        8: "NetworkManager is not running.",
+        10: "Connection, device, or access point does not exist."
+    }
+
     def returnResponse(self, http_status: int, response: str):
         if http_status == 200:
             logger.info(f"Return response {http_status}: {response}")
@@ -117,13 +138,7 @@ class Handler(BaseHTTPRequestHandler):
                 case 'scanwifi':
                     logger.info("Scan for wifi access points")
                     try:
-                        stream = os.popen('nmcli -t dev wifi')
-                        message = stream.read()
-                        exitcode = stream.close()
-                        if exitcode is not None:
-                            exitcode = os.WEXITSTATUS(exitcode)
-                            raise Exception(f"Error code {exitcode} when running nmcli command")
-
+                        message = executeOsCommand('nmcli -t dev wifi', self.nmcli_errors)
                         wifis: [] = []
                         result: []
                         lines = message.split("\n")
@@ -158,12 +173,8 @@ class Handler(BaseHTTPRequestHandler):
                     password: str = cmd['password']
                     message: str
                     try:
-                        stream = os.popen(f"nmcli dev wifi connect {ssid} password {password}")
-                        message = stream.read()
-                        exitcode = stream.close()
-                        if exitcode is not None:
-                            exitcode = os.WEXITSTATUS(exitcode)
-                            raise Exception(f"nmcli command returned error {exitcode}")
+                        executeOsCommand(f"nmcli dev wifi connect {ssid} password {password}",
+                                         self.nmcli_errors)
                     except Exception as ex:
                         logger.error(f"Exception when trying to set Wifi: {ex}")
                         self.returnResponse(500, f"An error occurred: {ex}")
@@ -175,18 +186,30 @@ class Handler(BaseHTTPRequestHandler):
                     else:
                         self.returnResponse(400, f"Failed to activate Wifi connection to {cmd['ssid']}. Please check "
                                                  "the SSID and password are correct")
+                    return
 
                 case 'checkwifistatus':
                     logger.info("Check if wifi enabled")
+                    message = executeOsCommand("nmcli radio wifi", self.nmcli_errors)
+                    self.returnResponse(200, message)
+                    return
 
                 case 'setwifistatus':
-                    logger.info("Set wifi on or off")
+                    status = cmd["status"]
+                    if {"on": 1, "off": 1}.__contains__(status):
+                        logger.info(f"Set wifi {status}")
+                        executeOsCommand(f"nmcli radio wifi {status}", self.nmcli_errors)
+                        self.returnResponse(200, f"WiFi is now {status}")
+                    else:
+                        self.returnResponse(400, f"Unknown status {status}")
+                    return
 
                 case _:
-                    self.send_response(400, f"Unknown command {cmd['command']}")
+                    self.returnResponse(400, f"Unknown command {cmd['command']}")
 
         except Exception as ex:
             self.returnResponse(500, ex.__str__())
+            return
 
     def parse_POST(self):
         ctype, pdict = parse_header(self.headers['content-type'])
