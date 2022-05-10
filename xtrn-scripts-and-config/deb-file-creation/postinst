@@ -30,6 +30,7 @@ chown root:mail /etc/ssmtp/ssmtp.conf
 chmod 640 /etc/ssmtp/ssmtp.conf
 chown root:security-cam /etc/security-cam/cacert.jks /etc/security-cam/client.jks
 chmod 440 /etc/security-cam/cacert.jks /etc/security-cam/client.jks
+chown root:root /etc/security-cam/*.py
 
 #A new group, security-cam, is added, then the users tomcat and sec-cam added to that group.
 # The security-cam group is then given group access to sec-cam and it's subdirectories. The user and group permissions are then set up.
@@ -49,10 +50,11 @@ chown root:root /home/security-cam/install-cert.sh
 chgrp -R security-cam /home/security-cam/
 chown sec-cam:adm /var/log/motion
 
-# Start the services
-deb-systemd-invoke stop motion   ## It will be run under nginx
+# Disable the motion service as it will run under nginx
+deb-systemd-invoke stop motion
 deb-systemd-invoke disable motion
 systemctl daemon-reload
+# Start the services
 deb-systemd-invoke enable tomcat9.service
 deb-systemd-invoke start tomcat9.service
 deb-systemd-invoke enable nginx.service
@@ -75,7 +77,6 @@ deb-systemd-invoke start chrony
 # Generate the product key if it does not already exist
 cd /etc/security-cam/ || exit
 ./productKeyGen.sh
-# This runs the node media server, motion and the ffmpeg instances
-# deb-systemd-invoke enable sc_processes.service
-# deb-systemd-invoke start sc_processes.service
-
+systemctl daemon-reload
+systemctl enable wifimanagement.service
+systemctl start wifimanagement.service
