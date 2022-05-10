@@ -88,11 +88,18 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            RestfulResponse resp =
-                    restfulInterfaceService.sendRequest("localhost:8000", "/",
-                            "{\"command\": \"setwifistatus\", \"status\": \""+cmd.status+"\"}",
-                            true, 60)
-            result.responseObject = resp
+            EthernetStatusEnum status = checkConnectedThroughEthernet()
+
+            if (cmd.status != "off" || status == EthernetStatusEnum.connectedViaEthernet) {
+                RestfulResponse resp =
+                        restfulInterfaceService.sendRequest("localhost:8000", "/",
+                                "{\"command\": \"setwifistatus\", \"status\": \"" + cmd.status + "\"}",
+                                true, 60)
+                result.responseObject = resp
+            } else {
+                result.status = PassFail.FAIL
+                result.error = "Must be connected via Ethernet to set Wifi status to off"
+            }
         }
         catch (Exception ex) {
             logService.cam.error("Exception in setWifiStatus: " + ex.getCause() + ' ' + ex.getMessage())
