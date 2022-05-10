@@ -4,6 +4,7 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import org.apache.commons.lang.StringUtils
 import security.cam.commands.SetUpWifiCommand
+import security.cam.commands.SetWifiStatusCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ConnectionDetails
 import security.cam.interfaceobjects.EthernetStatusEnum
@@ -22,15 +23,14 @@ class WifiUtilsService {
 
         try {
             RestfulResponse resp =
-                    restfulInterfaceService.sendRequest("localhost:8000","/",
+                    restfulInterfaceService.sendRequest("localhost:8000", "/",
                             "{\"command\": \"scanwifi\"}",
                             true, 60)
 
             result.responseObject = resp
 
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("Exception in scanWifi: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
@@ -39,34 +39,66 @@ class WifiUtilsService {
         return result
     }
 
-    def setUpWifi(SetUpWifiCommand cmd)
-    {
+    def setUpWifi(SetUpWifiCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
             EthernetStatusEnum status = checkConnectedThroughEthernet()
 
-            if(status == EthernetStatusEnum.connectedViaEthernet)
-            {
+            if (status == EthernetStatusEnum.connectedViaEthernet) {
                 RestfulResponse resp =
-                        restfulInterfaceService.sendRequest("localhost:8000","/",
-                                                 "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\", \"password\": \"${cmd.password}\"}",
+                        restfulInterfaceService.sendRequest("localhost:8000", "/",
+                                "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\", \"password\": \"${cmd.password}\"}",
 
-                                                 true, 60)
-               result.responseObject = resp
-            }
-            else {
+                                true, 60)
+                result.responseObject = resp
+            } else {
                 result.status = PassFail.FAIL
                 result.error = "Must be connected via Ethernet to set up a Wifi Connection"
             }
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("Exception in setUpWifi: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
 
+        return result
+    }
+
+    def checkWifiStatus() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            RestfulResponse resp =
+                    restfulInterfaceService.sendRequest("localhost:8000", "/",
+                            "{\"command\": \"checkwifistatus\"}",
+                            true, 60)
+            result.responseObject = resp
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in checkWifiStatus: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    def setWifiStatus(SetWifiStatusCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            RestfulResponse resp =
+                    restfulInterfaceService.sendRequest("localhost:8000", "/",
+                            "{\"command\": \"setwifistatus\", \"status\": \""+cmd.status+"\"}",
+                            true, 60)
+            result.responseObject = resp
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in setWifiStatus: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
         return result
     }
 
@@ -90,7 +122,7 @@ class WifiUtilsService {
         })
 
         // Check if there is an Ethernet connection
-        if(ethernetCon == null)
+        if (ethernetCon == null)
             return EthernetStatusEnum.noEthernet
         String[] command = [
                 "/bin/sh",
@@ -101,7 +133,7 @@ class WifiUtilsService {
         // Find the IP address for the Ethernet interface
         String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
         def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
-        Integer cloudPort = (Integer)(grailsApplication.config.cloudProxy.cloudPort)
+        Integer cloudPort = (Integer) (grailsApplication.config.cloudProxy.cloudPort)
         command = [
                 "/bin/sh",
                 "-c",

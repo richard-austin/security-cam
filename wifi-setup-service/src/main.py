@@ -206,6 +206,7 @@ class Handler(BaseHTTPRequestHandler):
 
                 case _:
                     self.returnResponse(400, f"Unknown command {cmd['command']}")
+                    return
 
         except Exception as ex:
             self.returnResponse(500, ex.__str__())
