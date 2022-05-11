@@ -27,8 +27,12 @@ class WifiUtilsService {
                             "{\"command\": \"scanwifi\"}",
                             true, 60)
 
-            result.responseObject = resp
-
+            if (resp.responseCode == 200)
+                result.responseObject = resp
+            else {
+                result.status = PassFail.FAIL
+                result.error = resp.getErrorMsg()
+            }
         }
         catch (Exception ex) {
             logService.cam.error("Exception in scanWifi: " + ex.getCause() + ' ' + ex.getMessage())
@@ -50,8 +54,15 @@ class WifiUtilsService {
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
                                 "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\", \"password\": \"${cmd.password}\"}",
 
-                                true, 60)
-                result.responseObject = resp
+                                true, 180)
+
+                if (resp.responseCode == 200)
+                    result.responseObject = resp
+                else {
+                    result.status = PassFail.FAIL
+                    result.error = resp.getErrorMsg()
+                }
+
             } else {
                 result.status = PassFail.FAIL
                 result.error = "Must be connected via Ethernet to set up a Wifi Connection"
@@ -74,7 +85,12 @@ class WifiUtilsService {
                     restfulInterfaceService.sendRequest("localhost:8000", "/",
                             "{\"command\": \"checkwifistatus\"}",
                             true, 60)
-            result.responseObject = resp
+            if (resp.responseCode == 200)
+                result.responseObject = resp
+            else {
+                result.status = PassFail.FAIL
+                result.error = resp.getErrorMsg()
+            }
         }
         catch (Exception ex) {
             logService.cam.error("Exception in checkWifiStatus: " + ex.getCause() + ' ' + ex.getMessage())
@@ -95,7 +111,12 @@ class WifiUtilsService {
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
                                 "{\"command\": \"setwifistatus\", \"status\": \"" + cmd.status + "\"}",
                                 true, 60)
-                result.responseObject = resp
+                if (resp.responseCode == 200)
+                    result.responseObject = resp
+                else {
+                    result.status = PassFail.FAIL
+                    result.error = resp.getErrorMsg()
+                }
             } else {
                 result.status = PassFail.FAIL
                 result.error = "Must be connected via Ethernet to set Wifi status to off"
