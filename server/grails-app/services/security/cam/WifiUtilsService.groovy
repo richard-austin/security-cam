@@ -8,8 +8,12 @@ import security.cam.commands.SetWifiStatusCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ConnectionDetails
 import security.cam.interfaceobjects.EthernetStatusEnum
+import security.cam.interfaceobjects.IpAddressDetails
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.interfaceobjects.RestfulResponse
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 @Transactional
 class WifiUtilsService {
@@ -20,6 +24,7 @@ class WifiUtilsService {
 
     def scanWifi() {
         ObjectCommandResponse result = new ObjectCommandResponse()
+        getActiveIPAddresses()
 
         try {
             RestfulResponse resp =
@@ -130,7 +135,59 @@ class WifiUtilsService {
         return result
     }
 
-    private EthernetStatusEnum checkConnectedThroughEthernet() {
+    /**
+     * getActiveIPAddresses: Get the active IP addresses and their associated interface details
+     * @return:
+     */
+    def getActiveIPAddresses()
+    {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        ArrayList<IpAddressDetails> ipDets = new ArrayList<>()
+
+        try {
+            ArrayList<ConnectionDetails> cdList = getActiveConnections()
+
+            StringBuilder sb = new StringBuilder()
+            // Build up the regex used with grep to get the inet lines for the active interfaces
+            boolean isFirst = true
+            for(ConnectionDetails cd in cdList) {
+                if(!isFirst)
+                    sb.append("\\|")
+                else
+                    isFirst = false
+
+                sb.append("${cd.getDevice()}")
+            }
+            String[] command = [
+                    "sh",
+                    "-c",
+                    "ip addr show | grep -w inet | grep '${sb.toString()}'"
+            ]
+            String[] res = utilsService.executeLinuxCommand(command).split("\n")
+
+            for(String line in res) {
+                String ip = StringUtils.substringBetween(line, 'inet ', '/')
+                String iface = line.substring(line.lastIndexOf(" ")+1, line.length())
+                ConnectionDetails cd = cdList.find((cdets) -> {
+                    return iface == cdets.device
+                })
+
+                IpAddressDetails ipad = new IpAddressDetails(ip, cd)
+                ipDets.add(ipad)
+            }
+            result.responseObject = ipDets
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in getActiveIPAddresses: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    private ArrayList<ConnectionDetails> getActiveConnections()
+    {
         String connections = utilsService.executeLinuxCommand("nmcli -t con show")
         String[] lines = connections.split("\n")
         ArrayList<ConnectionDetails> cdList = new ArrayList<>()
@@ -144,7 +201,11 @@ class WifiUtilsService {
                 cdList.add(connection_details)
             }
         }
+        return cdList
+    }
 
+    private EthernetStatusEnum checkConnectedThroughEthernet() {
+        ArrayList<ConnectionDetails> cdList = getActiveConnections()
         ConnectionDetails ethernetCon = cdList.find(cd -> {
             return cd.con_type.contains("ethernet")
         })
@@ -171,5 +232,4 @@ class WifiUtilsService {
         String cloudEtherConn = utilsService.executeLinuxCommand(command)
         return cloudEtherConn == "" ? EthernetStatusEnum.notConnectedViaEthernet : EthernetStatusEnum.connectedViaEthernet
     }
-
 }

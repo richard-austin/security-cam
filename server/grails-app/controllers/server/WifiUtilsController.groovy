@@ -33,11 +33,9 @@ class WifiUtilsController {
             }
             else
             {
-                logService.cam.error "scanWifi: error: ${result.errorMsg}"
+                logService.cam.error "scanWifi: error: ${result.error}"
                 result.status = PassFail.FAIL
-                result.error = result.errorMsg
-                result.userError = result.userError
-                render(status: 500, result as JSON)
+                render(status: 500, text: result.error)
             }
         }
         else
@@ -60,7 +58,6 @@ class WifiUtilsController {
             result = wifiUtilsService.setUpWifi(cmd)
 
             if(result.status == PassFail.PASS) {
-
                 if(result.responseObject instanceof RestfulResponse) {
                     RestfulResponse rr = result.responseObject as RestfulResponse
                     if (rr.status == RestfulResponseStatusEnum.PASS)
@@ -70,11 +67,9 @@ class WifiUtilsController {
                 }
                 else
                 {
-                    logService.cam.error "setUpWifi: error: ${result.errorMsg}"
+                    logService.cam.error "setUpWifi: error: ${result.error}"
                     result.status = PassFail.FAIL
-                    result.error = result.errorMsg
-                    result.userError = result.userError
-                    render(status: 500, result as JSON)
+                    render(status: 500, text: result.error)
                 }
             }
             else
@@ -92,11 +87,9 @@ class WifiUtilsController {
             else
                 render(status: rr.responseCode, text: rr.errorMsg)
         } else {
-            logService.cam.error "checkWifiStatus: error: ${result.errorMsg}"
+            logService.cam.error "checkWifiStatus: error: ${result.error}"
             result.status = PassFail.FAIL
-            result.error = result.errorMsg
-            result.userError = result.userError
-            render(status: 500, result as JSON)
+            render(status: 500, text: result.error)
         }
     }
 
@@ -104,18 +97,34 @@ class WifiUtilsController {
     def setWifiStatus(SetWifiStatusCommand cmd)
     {
         ObjectCommandResponse result = wifiUtilsService.setWifiStatus(cmd)
-        if (result.responseObject instanceof RestfulResponse) {
-            RestfulResponse rr = result.responseObject as RestfulResponse
-            if (rr.status == RestfulResponseStatusEnum.PASS)
-                render(status: 200, text: rr.responseObject)
-            else
-                render(status: rr.responseCode, text: rr.errorMsg)
-        } else {
+        if(result.status == PassFail.PASS) {
+            if (result.responseObject instanceof RestfulResponse) {
+                RestfulResponse rr = result.responseObject as RestfulResponse
+                if (rr.status == RestfulResponseStatusEnum.PASS)
+                    render(status: 200, text: rr.responseObject)
+                else
+                    render(status: rr.responseCode, text: rr.errorMsg)
+            } else {
+                logService.cam.error "setWifiStatus: error: ${result.error}"
+                result.status = PassFail.FAIL
+                render(status: 500, text: result.error)
+            }
+        }
+        else
+            render(status: 500, text: result.error)
+    }
+
+    @Secured(['ROLE_CLIENT'])
+    def getActiveIPAddresses()
+    {
+        ObjectCommandResponse result = wifiUtilsService.getActiveIPAddresses()
+
+        if(result.status == PassFail.PASS)
+            render (status:200, text:result as JSON)
+        else
+        {
             logService.cam.error "checkWifiStatus: error: ${result.errorMsg}"
-            result.status = PassFail.FAIL
-            result.error = result.errorMsg
-            result.userError = result.userError
-            render(status: 500, result as JSON)
+            render(status: 500, text: result.error)
         }
     }
 }
