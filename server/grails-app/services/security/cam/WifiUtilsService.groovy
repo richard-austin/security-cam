@@ -2,6 +2,7 @@ package security.cam
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import groovy.json.JsonSlurper
 import org.apache.commons.lang.StringUtils
 import security.cam.commands.SetUpWifiCommand
 import security.cam.commands.SetWifiStatusCommand
@@ -32,8 +33,11 @@ class WifiUtilsService {
                             "{\"command\": \"scanwifi\"}",
                             true, 60)
 
-            if (resp.responseCode == 200)
-                result.responseObject = resp
+            if (resp.responseCode == 200) {
+                JsonSlurper parser = new JsonSlurper()
+                def json = parser.parseText(resp.responseObject.response as String)
+                result.responseObject = json
+            }
             else {
                 result.status = PassFail.FAIL
                 result.error = resp.getErrorMsg()

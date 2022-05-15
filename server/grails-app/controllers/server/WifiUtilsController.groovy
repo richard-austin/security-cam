@@ -19,61 +19,40 @@ class WifiUtilsController {
     WifiUtilsService wifiUtilsService
 
     @Secured(['ROLE_CLIENT'])
-    def scanWifi()
-    {
+    def scanWifi() {
         response.contentType = "application/json"
         ObjectCommandResponse result = wifiUtilsService.scanWifi()
-        if(result.status == PassFail.PASS) {
-            if(result.responseObject instanceof RestfulResponse) {
-                RestfulResponse rr = result.responseObject as RestfulResponse
-                if ((result.responseObject as RestfulResponse).status == RestfulResponseStatusEnum.PASS)
-                    render(status: 200, text: rr.responseObject as JSON)
-                else
-                    render(status: rr.responseCode, text: rr.errorMsg)
-            }
-            else
-            {
-                logService.cam.error "scanWifi: error: ${result.error}"
-                result.status = PassFail.FAIL
-                render(status: 500, text: result.error)
-            }
-        }
-        else
-            render (status: 500, text: result.error)
-
+        if (result.status == PassFail.PASS) {
+            render(status: 200, text: result.responseObject as JSON)
+        } else
+            render(status: 500, text: result.error)
     }
 
     @Secured(['ROLE_CLIENT'])
-    def setUpWifi(SetUpWifiCommand cmd)
-    {
-        ObjectCommandResponse result = new ObjectCommandResponse()
+    def setUpWifi(SetUpWifiCommand cmd) {
+        ObjectCommandResponse result
 
-        if(cmd.hasErrors())
-        {
+        if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'setUpWifi')
             logService.cam.error "setUpWifi: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
-        }
-        else {
+        } else {
             result = wifiUtilsService.setUpWifi(cmd)
 
-            if(result.status == PassFail.PASS) {
-                if(result.responseObject instanceof RestfulResponse) {
+            if (result.status == PassFail.PASS) {
+                if (result.responseObject instanceof RestfulResponse) {
                     RestfulResponse rr = result.responseObject as RestfulResponse
                     if (rr.status == RestfulResponseStatusEnum.PASS)
                         render(status: 200, text: rr.responseObject)
                     else
                         render(status: rr.responseCode, text: rr.errorMsg)
-                }
-                else
-                {
+                } else {
                     logService.cam.error "setUpWifi: error: ${result.error}"
                     result.status = PassFail.FAIL
                     render(status: 500, text: result.error)
                 }
-            }
-            else
-                render (status: 500, text: result.error)
+            } else
+                render(status: 500, text: result.error)
         }
     }
 
@@ -94,10 +73,9 @@ class WifiUtilsController {
     }
 
     @Secured(['ROLE_CLIENT'])
-    def setWifiStatus(SetWifiStatusCommand cmd)
-    {
+    def setWifiStatus(SetWifiStatusCommand cmd) {
         ObjectCommandResponse result = wifiUtilsService.setWifiStatus(cmd)
-        if(result.status == PassFail.PASS) {
+        if (result.status == PassFail.PASS) {
             if (result.responseObject instanceof RestfulResponse) {
                 RestfulResponse rr = result.responseObject as RestfulResponse
                 if (rr.status == RestfulResponseStatusEnum.PASS)
@@ -109,20 +87,17 @@ class WifiUtilsController {
                 result.status = PassFail.FAIL
                 render(status: 500, text: result.error)
             }
-        }
-        else
+        } else
             render(status: 500, text: result.error)
     }
 
     @Secured(['ROLE_CLIENT'])
-    def getActiveIPAddresses()
-    {
+    def getActiveIPAddresses() {
         ObjectCommandResponse result = wifiUtilsService.getActiveIPAddresses()
 
-        if(result.status == PassFail.PASS)
-            render (status:200, text:result as JSON)
-        else
-        {
+        if (result.status == PassFail.PASS)
+            render(status: 200, text: result as JSON)
+        else {
             logService.cam.error "checkWifiStatus: error: ${result.errorMsg}"
             render(status: 500, text: result.error)
         }
