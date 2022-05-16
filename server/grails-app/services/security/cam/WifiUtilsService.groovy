@@ -208,32 +208,39 @@ class WifiUtilsService {
         return cdList
     }
 
-    private EthernetStatusEnum checkConnectedThroughEthernet() {
-        ArrayList<ConnectionDetails> cdList = getActiveConnections()
-        ConnectionDetails ethernetCon = cdList.find(cd -> {
-            return cd.con_type.contains("ethernet")
-        })
+    EthernetStatusEnum checkConnectedThroughEthernet() {
+        try {
+            ArrayList<ConnectionDetails> cdList = getActiveConnections()
+            ConnectionDetails ethernetCon = cdList.find(cd -> {
+                return cd.con_type.contains("ethernet")
+            })
 
-        // Check if there is an Ethernet connection
-        if (ethernetCon == null)
-            return EthernetStatusEnum.noEthernet
-        String[] command = [
-                "/bin/sh",
-                "-c",
-                "ip addr show ${ethernetCon.getDevice()} | grep -w inet"
-        ]
+            // Check if there is an Ethernet connection
+            if (ethernetCon == null)
+                return EthernetStatusEnum.noEthernet
+            String[] command = [
+                    "/bin/sh",
+                    "-c",
+                    "ip addr show ${ethernetCon.getDevice()} | grep -w inet"
+            ]
 
-        // Find the IP address for the Ethernet interface
-        String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
-        def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
-        Integer cloudPort = (Integer) (grailsApplication.config.cloudProxy.cloudPort)
-        command = [
-                "/bin/sh",
-                "-c",
-                "ss -n | grep ${ipAddress} | grep ${cloudPort}"
-        ]
+            // Find the IP address for the Ethernet interface
+            String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
+            def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
+            Integer cloudPort = (Integer) (grailsApplication.config.cloudProxy.cloudPort)
+            command = [
+                    "/bin/sh",
+                    "-c",
+                    "ss -n | grep ${ipAddress} | grep ${cloudPort}"
+            ]
 
-        String cloudEtherConn = utilsService.executeLinuxCommand(command)
-        return cloudEtherConn == "" ? EthernetStatusEnum.notConnectedViaEthernet : EthernetStatusEnum.connectedViaEthernet
+            String cloudEtherConn = utilsService.executeLinuxCommand(command)
+            return cloudEtherConn == "" ? EthernetStatusEnum.notConnectedViaEthernet : EthernetStatusEnum.connectedViaEthernet
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("${ex.getClass().getName()} in checkConnectedThroughEthernet: ${ex.getCause()}-${ex.getMessage()}")
+            return EthernetStatusEnum.error
+        }
     }
 }

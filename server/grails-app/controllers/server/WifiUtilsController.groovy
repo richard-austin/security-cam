@@ -1,5 +1,6 @@
 package server
 
+import com.google.common.collect.ImmutableMap
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
@@ -10,6 +11,7 @@ import security.cam.commands.SetUpWifiCommand
 import security.cam.commands.SetWifiStatusCommand
 import security.cam.enums.PassFail
 import security.cam.enums.RestfulResponseStatusEnum
+import security.cam.interfaceobjects.EthernetStatusEnum
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.interfaceobjects.RestfulResponse
 
@@ -17,6 +19,12 @@ class WifiUtilsController {
     ValidationErrorService validationErrorService
     LogService logService
     WifiUtilsService wifiUtilsService
+
+    private static final ImmutableMap<EthernetStatusEnum, String> ethernetConnectionStatus =
+            ImmutableMap.of(
+                    EthernetStatusEnum.connectedViaEthernet, "CONNECTED_VIA_ETHERNET",
+                    EthernetStatusEnum.notConnectedViaEthernet, "NOT_CONNECTED_VIA_ETHERNET",
+                    EthernetStatusEnum.noEthernet, "NO_ETHERNET")
 
     @Secured(['ROLE_CLIENT'])
     def scanWifi() {
@@ -100,6 +108,20 @@ class WifiUtilsController {
         else {
             logService.cam.error "checkWifiStatus: error: ${result.errorMsg}"
             render(status: 500, text: result.error)
+        }
+    }
+
+    @Secured(['ROLE_CLIENT'])
+    def checkConnectedThroughEthernet()
+    {
+        EthernetStatusEnum result = wifiUtilsService.checkConnectedThroughEthernet()
+        if (result != EthernetStatusEnum.error) {
+            render(status: 200, text: ethernetConnectionStatus[result])
+        }
+        else {
+            def errMsg = "An error occurred in checkConnectedThroughEthernet."
+            logService.cam.error(errMsg)
+            render(status: 500, text: errMsg)
         }
     }
 }
