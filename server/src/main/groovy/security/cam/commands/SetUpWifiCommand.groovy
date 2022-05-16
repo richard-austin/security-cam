@@ -12,6 +12,6 @@ class SetUpWifiCommand implements Validateable {
 
     static constraints = {
         ssid(nullable: false, blank: false)
-        password(nullable: false, blank: false)
+        password(nullable: true, blank: false)
     }
 }

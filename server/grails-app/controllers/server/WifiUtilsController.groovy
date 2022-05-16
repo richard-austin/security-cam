@@ -10,10 +10,8 @@ import security.cam.WifiUtilsService
 import security.cam.commands.SetUpWifiCommand
 import security.cam.commands.SetWifiStatusCommand
 import security.cam.enums.PassFail
-import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.EthernetStatusEnum
 import security.cam.interfaceobjects.ObjectCommandResponse
-import security.cam.interfaceobjects.RestfulResponse
 
 class WifiUtilsController {
     ValidationErrorService validationErrorService
@@ -48,31 +46,20 @@ class WifiUtilsController {
             result = wifiUtilsService.setUpWifi(cmd)
 
             if (result.status == PassFail.PASS) {
-                if (result.responseObject instanceof RestfulResponse) {
-                    RestfulResponse rr = result.responseObject as RestfulResponse
-                    if (rr.status == RestfulResponseStatusEnum.PASS)
-                        render(status: 200, text: rr.responseObject)
-                    else
-                        render(status: rr.responseCode, text: rr.errorMsg)
-                } else {
-                    logService.cam.error "setUpWifi: error: ${result.error}"
-                    result.status = PassFail.FAIL
-                    render(status: 500, text: result.error)
-                }
-            } else
+                render(status: 200, text: result.responseObject)
+            } else {
+                logService.cam.error "setUpWifi: error: ${result.error}"
+                result.status = PassFail.FAIL
                 render(status: 500, text: result.error)
+            }
         }
     }
 
     @Secured(['ROLE_CLIENT'])
     def checkWifiStatus() {
         ObjectCommandResponse result = wifiUtilsService.checkWifiStatus()
-        if (result.responseObject instanceof RestfulResponse) {
-            RestfulResponse rr = result.responseObject as RestfulResponse
-            if (rr.status == RestfulResponseStatusEnum.PASS)
-                render(status: 200, text: rr.responseObject)
-            else
-                render(status: rr.responseCode, text: rr.errorMsg)
+        if (result.status == PassFail.PASS) {
+            render(status: 200, text: result.responseObject)
         } else {
             logService.cam.error "checkWifiStatus: error: ${result.error}"
             result.status = PassFail.FAIL
@@ -84,19 +71,12 @@ class WifiUtilsController {
     def setWifiStatus(SetWifiStatusCommand cmd) {
         ObjectCommandResponse result = wifiUtilsService.setWifiStatus(cmd)
         if (result.status == PassFail.PASS) {
-            if (result.responseObject instanceof RestfulResponse) {
-                RestfulResponse rr = result.responseObject as RestfulResponse
-                if (rr.status == RestfulResponseStatusEnum.PASS)
-                    render(status: 200, text: rr.responseObject)
-                else
-                    render(status: rr.responseCode, text: rr.errorMsg)
-            } else {
-                logService.cam.error "setWifiStatus: error: ${result.error}"
-                result.status = PassFail.FAIL
-                render(status: 500, text: result.error)
-            }
-        } else
+            render(status: 200, text: result.responseObject)
+        } else {
+            logService.cam.error "setWifiStatus: error: ${result.error}"
+            result.status = PassFail.FAIL
             render(status: 500, text: result.error)
+        }
     }
 
     @Secured(['ROLE_CLIENT'])
@@ -112,16 +92,15 @@ class WifiUtilsController {
     }
 
     @Secured(['ROLE_CLIENT'])
-    def checkConnectedThroughEthernet()
-    {
+    def checkConnectedThroughEthernet() {
         EthernetStatusEnum result = wifiUtilsService.checkConnectedThroughEthernet()
         if (result != EthernetStatusEnum.error) {
             render(status: 200, text: ethernetConnectionStatus[result])
-        }
-        else {
+        } else {
             def errMsg = "An error occurred in checkConnectedThroughEthernet."
             logService.cam.error(errMsg)
             render(status: 500, text: errMsg)
         }
     }
+
 }

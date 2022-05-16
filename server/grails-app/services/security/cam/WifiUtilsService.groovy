@@ -59,14 +59,18 @@ class WifiUtilsService {
             EthernetStatusEnum status = checkConnectedThroughEthernet()
 
             if (status == EthernetStatusEnum.connectedViaEthernet) {
-                RestfulResponse resp =
+                RestfulResponse resp = cmd.password != null
+                        ?
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
                                 "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\", \"password\": \"${cmd.password}\"}",
-
+                                true, 180)
+                        :
+                        restfulInterfaceService.sendRequest("localhost:8000", "/",
+                                "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\"}",
                                 true, 180)
 
                 if (resp.responseCode == 200)
-                    result.responseObject = resp
+                    result.responseObject = resp.responseObject['response']
                 else {
                     result.status = PassFail.FAIL
                     result.error = resp.getErrorMsg()
@@ -95,7 +99,7 @@ class WifiUtilsService {
                             "{\"command\": \"checkwifistatus\"}",
                             true, 60)
             if (resp.responseCode == 200)
-                result.responseObject = resp
+                result.responseObject = resp.responseObject['response']
             else {
                 result.status = PassFail.FAIL
                 result.error = resp.getErrorMsg()
@@ -121,7 +125,7 @@ class WifiUtilsService {
                                 "{\"command\": \"setwifistatus\", \"status\": \"" + cmd.status + "\"}",
                                 true, 60)
                 if (resp.responseCode == 200)
-                    result.responseObject = resp
+                    result.responseObject = resp.responseObject['response']
                 else {
                     result.status = PassFail.FAIL
                     result.error = resp.getErrorMsg()

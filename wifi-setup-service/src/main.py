@@ -170,11 +170,15 @@ class Handler(BaseHTTPRequestHandler):
 
                     ssid: str = cmd['ssid']
                     logger.info(f"Setting up wifi for SSID {ssid}")
-                    password: str = cmd['password']
+                    password: str = cmd['password'] if cmd.__contains__('password') else None
                     message: str
                     try:
-                        executeOsCommand(f"nmcli dev wifi connect {ssid} password {password}",
-                                         self.nmcli_errors)
+                        if password is None:
+                            executeOsCommand(f"nmcli dev wifi connect {ssid}",
+                                             self.nmcli_errors)
+                        else:
+                            executeOsCommand(f"nmcli dev wifi connect {ssid} password {password}",
+                                             self.nmcli_errors)
                     except Exception as ex:
                         logger.error(f"Exception when trying to set Wifi: {ex}")
                         self.returnResponse(500, f"An error occurred: {ex}")
