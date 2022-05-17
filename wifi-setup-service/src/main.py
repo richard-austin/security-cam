@@ -195,7 +195,8 @@ class Handler(BaseHTTPRequestHandler):
                 case 'checkwifistatus':
                     logger.info("Check if wifi enabled")
                     message = executeOsCommand("nmcli radio wifi", self.nmcli_errors)
-                    self.returnResponse(200, message)
+                    status = 'on' if message.strip('\n') == 'enabled' else 'off'
+                    self.returnResponse(200, f'{{"status": "{status}"}}')
                     return
 
                 case 'setwifistatus':
@@ -203,7 +204,7 @@ class Handler(BaseHTTPRequestHandler):
                     if {"on": 1, "off": 1}.__contains__(status):
                         logger.info(f"Set wifi {status}")
                         executeOsCommand(f"nmcli radio wifi {status}", self.nmcli_errors)
-                        self.returnResponse(200, f"WiFi is now {status}")
+                        self.returnResponse(200, f'{{"status": "{status}"}}')
                     else:
                         self.returnResponse(400, f"Unknown status {status}")
                     return

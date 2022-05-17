@@ -1,5 +1,6 @@
 package security.cam
 
+import grails.converters.JSON
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
@@ -96,8 +97,11 @@ class WifiUtilsService {
                     restfulInterfaceService.sendRequest("localhost:8000", "/",
                             "{\"command\": \"checkwifistatus\"}",
                             true, 60)
-            if (resp.responseCode == 200)
-                result.responseObject = resp.responseObject['response']
+            if (resp.responseCode == 200){
+                JsonSlurper parser = new JsonSlurper()
+                def json = parser.parseText(resp.responseObject['response'] as String)
+                result.responseObject = json as JSON
+            }
             else {
                 result.status = PassFail.FAIL
                 result.error = resp.getErrorMsg()
@@ -122,8 +126,11 @@ class WifiUtilsService {
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
                                 "{\"command\": \"setwifistatus\", \"status\": \"" + cmd.status + "\"}",
                                 true, 60)
-                if (resp.responseCode == 200)
-                    result.responseObject = resp.responseObject['response']
+                if (resp.responseCode == 200) {
+                    JsonSlurper parser = new JsonSlurper()
+                    def json = parser.parseText(resp.responseObject['response'] as String)
+                    result.responseObject = json as JSON
+                }
                 else {
                     result.status = PassFail.FAIL
                     result.error = resp.getErrorMsg()
