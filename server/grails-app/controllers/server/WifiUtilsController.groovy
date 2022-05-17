@@ -80,6 +80,21 @@ class WifiUtilsController {
     }
 
     @Secured(['ROLE_CLIENT'])
+    def getCurrentWifiConnection()
+    {
+        ObjectCommandResponse result = wifiUtilsService.getCurrentWifiConnection()
+
+        if(result.status == PassFail.PASS)
+            render (status: 200, result.responseObject as JSON)
+        else
+        {
+            logService.cam.error "getCurrentWifiConnection: error: ${result.error}"
+            result.status = PassFail.FAIL
+            render(status: 500, text: result.error)
+        }
+    }
+
+    @Secured(['ROLE_CLIENT'])
     def getActiveIPAddresses() {
         ObjectCommandResponse result = wifiUtilsService.getActiveIPAddresses()
 

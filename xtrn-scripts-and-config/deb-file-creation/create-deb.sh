@@ -59,7 +59,8 @@ Depends: openjdk-11-jre-headless (>=11.0.11), openjdk-11-jre-headless (<< 12.0.0
  tomcat9-admin (>=9.0.43-1), tomcat9-admin (<= 10.0.0),
  libraspberrypi-bin, chrony,
  nodejs, ssmtp,
- network-manager (>= 1.36.4), network-manager (<= 2.0.0)
+ network-manager (>= 1.36.4), network-manager (<< 2.0.0),
+ wireless-tools (>=30~pre9-13), wireless-tools (<< 40)
 EOF
 
 dpkg-deb --build --root-owner-group security-cam_"${VERSION}"_arm64

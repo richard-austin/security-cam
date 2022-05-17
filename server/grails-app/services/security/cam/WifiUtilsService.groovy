@@ -8,13 +8,11 @@ import security.cam.commands.SetUpWifiCommand
 import security.cam.commands.SetWifiStatusCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ConnectionDetails
+import security.cam.interfaceobjects.CurrentWifiConnection
 import security.cam.interfaceobjects.EthernetStatusEnum
 import security.cam.interfaceobjects.IpAddressDetails
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.interfaceobjects.RestfulResponse
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 @Transactional
 class WifiUtilsService {
@@ -140,6 +138,32 @@ class WifiUtilsService {
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
+        return result
+    }
+
+    def getCurrentWifiConnection()
+    {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            String[] lines = utilsService.executeLinuxCommand('iwconfig').split('\n')
+            String accessPoint = ""
+            for(line in lines)
+                if(line.contains("SSID"))
+                {
+                    accessPoint = StringUtils.substringBetween(line, 'SSID:"','"')
+                    break
+                }
+
+            CurrentWifiConnection cwc = new CurrentWifiConnection(accessPoint, lines)
+            result.responseObject = cwc
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("${ex.getClass().getName()} in getCurrentWifiConnection: ${ex.getCause()} ${ex.getMessage()}")
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+
         return result
     }
 
