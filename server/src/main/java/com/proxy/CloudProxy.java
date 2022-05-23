@@ -185,7 +185,6 @@ public class CloudProxy implements SslContextProvider {
         createCloudProxySessionTimer();
     }
 
-
     private boolean isHeartbeat(ByteBuffer buf) {
         boolean retVal = false;
         // Dump the connection test heartbeats
@@ -580,9 +579,9 @@ public class CloudProxy implements SslContextProvider {
 
     void showExceptionDetails(Throwable t, String functionName) {
         logger.error(t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
-        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
-            System.err.println(stackTraceElement.toString());
-        }
+//        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
+//            System.err.println(stackTraceElement.toString());
+//        }
     }
 
     @Override

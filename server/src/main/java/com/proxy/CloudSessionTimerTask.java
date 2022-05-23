@@ -4,7 +4,7 @@ import java.util.TimerTask;
 
 public class CloudSessionTimerTask extends TimerTask {
     CloudProxy thisCP;
-    CloudSessionTimerTask(CloudProxy thisCP)
+    public CloudSessionTimerTask(CloudProxy thisCP)
     {
         this.thisCP = thisCP;
     }

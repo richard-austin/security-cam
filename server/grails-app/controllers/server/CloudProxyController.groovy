@@ -29,6 +29,16 @@ class CloudProxyController {
     }
 
     @Secured(['ROLE_CLIENT'])
+    def restart()
+    {
+        ObjectCommandResponse resp = cloudProxyService.restart()
+        if(resp.status == PassFail.PASS)
+            render (status: 200, text: "Timer set to restart")
+        else
+            render(status: 500, text: resp.error)
+    }
+
+    @Secured(['ROLE_CLIENT'])
     def status()
     {
         ObjectCommandResponse resp = cloudProxyService.status()
@@ -37,4 +47,5 @@ class CloudProxyController {
         else
             render(status: 500, text: resp.error)
     }
+
 }
