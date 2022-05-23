@@ -18,12 +18,6 @@ class WifiUtilsController {
     LogService logService
     WifiUtilsService wifiUtilsService
 
-    private static final ImmutableMap<EthernetStatusEnum, String> ethernetConnectionStatus =
-            ImmutableMap.of(
-                    EthernetStatusEnum.connectedViaEthernet, "CONNECTED_VIA_ETHERNET",
-                    EthernetStatusEnum.notConnectedViaEthernet, "NOT_CONNECTED_VIA_ETHERNET",
-                    EthernetStatusEnum.noEthernet, "NO_ETHERNET")
-
     @Secured(['ROLE_CLIENT'])
     def scanWifi() {
         response.contentType = "application/json"
@@ -108,14 +102,13 @@ class WifiUtilsController {
 
     @Secured(['ROLE_CLIENT'])
     def checkConnectedThroughEthernet() {
-        EthernetStatusEnum result = wifiUtilsService.checkConnectedThroughEthernet()
-        if (result != EthernetStatusEnum.error) {
-            render(status: 200, text: ethernetConnectionStatus[result])
+        ObjectCommandResponse result = wifiUtilsService.checkConnectedThroughEthernet()
+        if (result.status == PassFail.PASS) {
+            render(status: 200, text: result.responseObject as JSON)
         } else {
-            def errMsg = "An error occurred in checkConnectedThroughEthernet."
+            def errMsg = "An error occurred in checkConnectedThroughEthernet:- (${result.error})"
             logService.cam.error(errMsg)
             render(status: 500, text: errMsg)
         }
     }
-
 }

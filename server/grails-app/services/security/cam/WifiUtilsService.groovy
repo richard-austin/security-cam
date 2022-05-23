@@ -1,5 +1,6 @@
 package security.cam
 
+import com.google.common.collect.ImmutableMap
 import grails.converters.JSON
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
@@ -21,6 +22,12 @@ class WifiUtilsService {
     UtilsService utilsService
     GrailsApplication grailsApplication
     RestfulInterfaceService restfulInterfaceService
+
+    static final ImmutableMap<EthernetStatusEnum, String> ethernetConnectionStatus =
+            ImmutableMap.of(
+                    EthernetStatusEnum.connectedViaEthernet, "CONNECTED_VIA_ETHERNET",
+                    EthernetStatusEnum.notConnectedViaEthernet, "NOT_CONNECTED_VIA_ETHERNET",
+                    EthernetStatusEnum.noEthernet, "NO_ETHERNET")
 
     def scanWifi() {
         ObjectCommandResponse result = new ObjectCommandResponse()
@@ -55,7 +62,7 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            EthernetStatusEnum status = checkConnectedThroughEthernet()
+            EthernetStatusEnum status = isConnectedThroughEthernet()
 
             if (status == EthernetStatusEnum.connectedViaEthernet) {
                 RestfulResponse resp = cmd.password != null
@@ -119,7 +126,7 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            EthernetStatusEnum status = checkConnectedThroughEthernet()
+            EthernetStatusEnum status = isConnectedThroughEthernet()
 
             if (cmd.status != "off" || status == EthernetStatusEnum.connectedViaEthernet) {
                 RestfulResponse resp =
@@ -243,7 +250,21 @@ class WifiUtilsService {
         return cdList
     }
 
-    EthernetStatusEnum checkConnectedThroughEthernet() {
+    ObjectCommandResponse checkConnectedThroughEthernet()
+    {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        EthernetStatusEnum es = isConnectedThroughEthernet()
+        if(es != EthernetStatusEnum.error)
+            result.responseObject = [status: ethernetConnectionStatus[es]]
+        else
+        {
+            result.status = PassFail.FAIL
+            result.error = "Failed to get ethernet connection status"
+        }
+        return result
+    }
+
+    private EthernetStatusEnum isConnectedThroughEthernet() {
         try {
             ArrayList<ConnectionDetails> cdList = getActiveConnections()
             ConnectionDetails ethernetCon = cdList.find(cd -> {
@@ -253,25 +274,25 @@ class WifiUtilsService {
             // Check if there is an Ethernet connection
             if (ethernetCon == null)
                 return EthernetStatusEnum.noEthernet
-            String[] command = [
-                    "/bin/sh",
-                    "-c",
-                    "ip addr show ${ethernetCon.getDevice()} | grep -w inet"
-            ]
+                String[] command = [
+                        "/bin/sh",
+                        "-c",
+                        "ip addr show ${ethernetCon.getDevice()} | grep -w inet"
+                ]
 
-            // Find the IP address for the Ethernet interface
-            String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
-            def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
-            Integer cloudPort = (Integer) (grailsApplication.config.cloudProxy.cloudPort)
-            command = [
-                    "/bin/sh",
-                    "-c",
-                    "ss -n | grep ${ipAddress} | grep ${cloudPort}"
-            ]
+                // Find the IP address for the Ethernet interface
+                String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
+                def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
+                Integer cloudPort = (Integer) (grailsApplication.config.cloudProxy.cloudPort)
+                command = [
+                        "/bin/sh",
+                        "-c",
+                        "ss -n | grep ${ipAddress} | grep ${cloudPort}"
+                ]
 
-            String cloudEtherConn = utilsService.executeLinuxCommand(command)
+                String cloudEtherConn = utilsService.executeLinuxCommand(command)
             return cloudEtherConn == "" ? EthernetStatusEnum.notConnectedViaEthernet : EthernetStatusEnum.connectedViaEthernet
-        }
+         }
         catch(Exception ex)
         {
             logService.cam.error("${ex.getClass().getName()} in checkConnectedThroughEthernet: ${ex.getCause()}-${ex.getMessage()}")

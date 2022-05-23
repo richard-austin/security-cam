@@ -62,6 +62,7 @@ class CloudProxyService {
         try {
             Timer timer = new Timer("CloudProxyRestartTimer")
             timer.schedule(new CloudProxyRestartTask(this), 2000)
+            response.responseObject = [message: "Timer set up for restart"]
         }
         catch(Exception ex)
         {

@@ -1,5 +1,6 @@
 package server
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import security.cam.CloudProxyService
 import security.cam.enums.PassFail
@@ -33,7 +34,7 @@ class CloudProxyController {
     {
         ObjectCommandResponse resp = cloudProxyService.restart()
         if(resp.status == PassFail.PASS)
-            render (status: 200, text: "Timer set to restart")
+            render (status: 200, text: resp.responseObject as JSON)
         else
             render(status: 500, text: resp.error)
     }
