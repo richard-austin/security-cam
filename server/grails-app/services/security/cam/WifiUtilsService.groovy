@@ -76,7 +76,7 @@ class WifiUtilsService {
                                 true, 180)
 
                 if (resp.responseCode == 200)
-                    result.responseObject = resp.responseObject['response']
+                    result.responseObject = resp.responseObject as JSON
                 else {
                     result.status = PassFail.FAIL
                     result.error = resp.getErrorMsg()
