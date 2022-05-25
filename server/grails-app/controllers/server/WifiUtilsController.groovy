@@ -44,7 +44,7 @@ class WifiUtilsController {
             } else {
                 logService.cam.error "setUpWifi: error: ${result.error}"
                 result.status = PassFail.FAIL
-                render(status: 500, text: result.error)
+                render(status: result.errno, text: result.responseObject as JSON)
             }
         }
     }

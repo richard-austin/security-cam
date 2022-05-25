@@ -15,6 +15,7 @@ import security.cam.interfaceobjects.EthernetStatusEnum
 import security.cam.interfaceobjects.IpAddressDetails
 import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.interfaceobjects.RestfulResponse
+import security.cam.interfaceobjects.WifiConnectResult
 
 @Transactional
 class WifiUtilsService {
@@ -78,13 +79,17 @@ class WifiUtilsService {
                 if (resp.responseCode == 200)
                     result.responseObject = resp.responseObject as JSON
                 else {
-                    result.status = PassFail.FAIL
+                    result.errno = resp.responseCode
+                    result.responseObject = new WifiConnectResult(resp.getErrorMsg())
                     result.error = resp.getErrorMsg()
+                    result.status = PassFail.FAIL
                 }
 
             } else {
+                result.errno = 400
                 result.status = PassFail.FAIL
-                result.error = "Must be connected via Ethernet to set up a Wifi Connection"
+                result.responseObject = new WifiConnectResult("Must be connected via Ethernet to set up a Wifi Connection")
+                result.error = result.responseObject.message
             }
         }
         catch (Exception ex) {

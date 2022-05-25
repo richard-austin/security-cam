@@ -174,10 +174,10 @@ class Handler(BaseHTTPRequestHandler):
                     message: str
                     try:
                         if password is None:
-                            executeOsCommand(f"nmcli dev wifi connect {ssid}",
+                            message = executeOsCommand(f"nmcli dev wifi connect {ssid}",
                                              self.nmcli_errors)
                         else:
-                            executeOsCommand(f"nmcli dev wifi connect {ssid} password {password}",
+                            message = executeOsCommand(f"nmcli dev wifi connect {ssid} password {password}",
                                              self.nmcli_errors)
                     except Exception as ex:
                         logger.error(f"Exception when trying to set Wifi: {ex}")
@@ -188,8 +188,7 @@ class Handler(BaseHTTPRequestHandler):
                     if activated:
                         self.returnResponse(200, f"Wifi connection to {cmd['ssid']} is active")
                     else:
-                        self.returnResponse(400, f"Failed to activate Wifi connection to {cmd['ssid']}. Please check "
-                                                 "the SSID and password are correct")
+                        self.returnResponse(400, f"Failed to activate Wifi connection to {cmd['ssid']}. {message}")
                     return
 
                 case 'checkwifistatus':
