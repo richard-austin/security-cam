@@ -35,6 +35,7 @@ mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream10
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/logs
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
+mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr
 
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
