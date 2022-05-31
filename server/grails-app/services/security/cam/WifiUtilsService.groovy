@@ -44,8 +44,7 @@ class WifiUtilsService {
                 JsonSlurper parser = new JsonSlurper()
                 def json = parser.parseText(resp.responseObject.response as String)
                 result.responseObject = json
-            }
-            else {
+            } else {
                 result.status = PassFail.FAIL
                 result.error = resp.getErrorMsg()
             }
@@ -109,12 +108,11 @@ class WifiUtilsService {
                     restfulInterfaceService.sendRequest("localhost:8000", "/",
                             "{\"command\": \"checkwifistatus\"}",
                             true, 60)
-            if (resp.responseCode == 200){
+            if (resp.responseCode == 200) {
                 JsonSlurper parser = new JsonSlurper()
                 def json = parser.parseText(resp.responseObject['response'] as String)
                 result.responseObject = json as JSON
-            }
-            else {
+            } else {
                 result.status = PassFail.FAIL
                 result.error = resp.getErrorMsg()
             }
@@ -142,8 +140,7 @@ class WifiUtilsService {
                     JsonSlurper parser = new JsonSlurper()
                     def json = parser.parseText(resp.responseObject['response'] as String)
                     result.responseObject = json as JSON
-                }
-                else {
+                } else {
                     result.status = PassFail.FAIL
                     result.error = resp.getErrorMsg()
                 }
@@ -160,24 +157,21 @@ class WifiUtilsService {
         return result
     }
 
-    def getCurrentWifiConnection()
-    {
+    def getCurrentWifiConnection() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             String[] lines = utilsService.executeLinuxCommand('iwconfig').split('\n')
             String accessPoint = ""
-            for(line in lines)
-                if(line.contains("SSID"))
-                {
-                    accessPoint = StringUtils.substringBetween(line, 'SSID:"','"')
+            for (line in lines)
+                if (line.contains("SSID")) {
+                    accessPoint = StringUtils.substringBetween(line, 'SSID:"', '"')
                     break
                 }
 
             CurrentWifiConnection cwc = new CurrentWifiConnection(accessPoint, lines)
             result.responseObject = cwc
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("${ex.getClass().getName()} in getCurrentWifiConnection: ${ex.getCause()} ${ex.getMessage()}")
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
@@ -190,46 +184,36 @@ class WifiUtilsService {
      * getActiveIPAddresses: Get the active IP addresses and their associated interface details
      * @return:
      */
-    def getActiveIPAddresses()
-    {
+    def getActiveIPAddresses() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         ArrayList<IpAddressDetails> ipDets = new ArrayList<>()
 
         try {
-            ArrayList<ConnectionDetails> cdList = getActiveConnections()
+            RestfulResponse resp =
+                    restfulInterfaceService.sendRequest("localhost:8000", "/",
+                            "{\"command\": \"getactiveconnections\"}",
+                            true, 60)
+            if (resp.responseCode == 200) {
+                JsonSlurper parser = new JsonSlurper()
+                def json = parser.parseText(resp.responseObject['response'] as String)
 
-            StringBuilder sb = new StringBuilder()
-            // Build up the regex used with grep to get the inet lines for the active interfaces
-            boolean isFirst = true
-            for(ConnectionDetails cd in cdList) {
-                if(!isFirst)
-                    sb.append("\\|")
-                else
-                    isFirst = false
-
-                sb.append("${cd.getDevice()}")
-            }
-            String[] command = [
-                    "sh",
-                    "-c",
-                    "ip addr show | grep -w inet | grep '${sb.toString()}'"
-            ]
-            String[] res = utilsService.executeLinuxCommand(command).split("\n")
-
-            for(String line in res) {
-                String ip = StringUtils.substringBetween(line, 'inet ', '/')
-                String iface = line.substring(line.lastIndexOf(" ")+1, line.length())
-                ConnectionDetails cd = cdList.find((cdets) -> {
-                    return iface == cdets.device
-                })
-
-                IpAddressDetails ipad = new IpAddressDetails(ip, cd)
-                ipDets.add(ipad)
+                for(obj in json)
+                {
+                    ConnectionDetails cd = new ConnectionDetails(obj.description as String,
+                            obj.configuration.driver as String,
+                            (obj.capabilities.tp == "twisted pair" ? "ethernet" : "wifi") as String,
+                            obj.logicalname as String)
+                    IpAddressDetails ipad = new IpAddressDetails(obj.configuration.ip as String, cd)
+                    ipDets.add(ipad)
+                }
+                result.responseObject = ipDets
+            } else {
+                result.status = PassFail.FAIL
+                result.error = resp.getErrorMsg()
             }
             result.responseObject = ipDets
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("Exception in getActiveIPAddresses: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
@@ -237,32 +221,12 @@ class WifiUtilsService {
         return result
     }
 
-    private ArrayList<ConnectionDetails> getActiveConnections()
-    {
-        String connections = utilsService.executeLinuxCommand("nmcli -t con show")
-        String[] lines = connections.split("\n")
-        ArrayList<ConnectionDetails> cdList = new ArrayList<>()
-        for (line in lines) {
-            String[] result = line.split(':')
-            if (result.length == 4) {
-                ConnectionDetails connection_details = new ConnectionDetails(result[0],
-                        result[1].replace('\\', ''),
-                        result[2],
-                        result[3])
-                cdList.add(connection_details)
-            }
-        }
-        return cdList
-    }
-
-    ObjectCommandResponse checkConnectedThroughEthernet()
-    {
+    ObjectCommandResponse checkConnectedThroughEthernet() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         EthernetStatusEnum es = isConnectedThroughEthernet()
-        if(es != EthernetStatusEnum.error)
+        if (es != EthernetStatusEnum.error)
             result.responseObject = [status: ethernetConnectionStatus[es]]
-        else
-        {
+        else {
             result.status = PassFail.FAIL
             result.error = "Failed to get ethernet connection status"
         }
@@ -271,7 +235,26 @@ class WifiUtilsService {
 
     private EthernetStatusEnum isConnectedThroughEthernet() {
         try {
-            ArrayList<ConnectionDetails> cdList = getActiveConnections()
+            ArrayList<ConnectionDetails> cdList = new ArrayList<>()
+
+            RestfulResponse resp =
+                    restfulInterfaceService.sendRequest("localhost:8000", "/",
+                            "{\"command\": \"getactiveconnections\"}",
+                            true, 60)
+            if (resp.responseCode == 200) {
+                JsonSlurper parser = new JsonSlurper()
+                def json = parser.parseText(resp.responseObject['response'] as String)
+
+                for (obj in json) {
+                    ConnectionDetails cd = new ConnectionDetails(obj.description as String,
+                            obj.configuration.driver as String,
+                            (obj.capabilities.tp == "twisted pair" ? "ethernet" : "wifi") as String,
+                            obj.logicalname as String)
+                    if(cd.con_type == "ethernet")
+                        cdList.add(cd)
+                }
+            }
+
             ConnectionDetails ethernetCon = cdList.find(cd -> {
                 return cd.con_type.contains("ethernet")
             })
@@ -279,27 +262,27 @@ class WifiUtilsService {
             // Check if there is an Ethernet connection
             if (ethernetCon == null)
                 return EthernetStatusEnum.noEthernet
-                String[] command = [
-                        "/bin/sh",
-                        "-c",
-                        "ip addr show ${ethernetCon.getDevice()} | grep -w inet"
-                ]
 
-                // Find the IP address for the Ethernet interface
-                String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
-                def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
-                Integer cloudPort = (Integer) (grailsApplication.config.cloudProxy.cloudPort)
-                command = [
-                        "/bin/sh",
-                        "-c",
-                        "ss -n | grep ${ipAddress} | grep ${cloudPort}"
-                ]
+            String[] command = [
+                    "/bin/sh",
+                    "-c",
+                    "ip addr show ${ethernetCon.getDevice()} | grep -w inet"
+            ]
 
-                String cloudEtherConn = utilsService.executeLinuxCommand(command)
+            // Find the IP address for the Ethernet interface
+            String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
+            def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
+            Integer cloudPort = (Integer) (grailsApplication.config.cloudProxy.cloudPort)
+            command = [
+                    "/bin/sh",
+                    "-c",
+                    "ss -n | grep ${ipAddress} | grep ${cloudPort}"
+            ]
+
+            String cloudEtherConn = utilsService.executeLinuxCommand(command)
             return cloudEtherConn == "" ? EthernetStatusEnum.notConnectedViaEthernet : EthernetStatusEnum.connectedViaEthernet
-         }
-        catch(Exception ex)
-        {
+        }
+        catch (Exception ex) {
             logService.cam.error("${ex.getClass().getName()} in checkConnectedThroughEthernet: ${ex.getCause()}-${ex.getMessage()}")
             return EthernetStatusEnum.error
         }
