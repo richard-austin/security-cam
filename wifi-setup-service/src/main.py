@@ -58,7 +58,7 @@ def check_for_ethernet() -> bool:
     objs = get_active_connections()
     for obj in objs:
         if "capabilities" in obj.__dict__:
-            cap = obj.capabilities.__dict__
+            cap = obj.capabilities
             if obj.description.lower().__contains__("ethernet") or "tp" in cap:
                 retval = True
                 break
@@ -128,9 +128,9 @@ class Handler(BaseHTTPRequestHandler):
             logger.error(f"Return response: {http_status}: {response}")
         self.send_response(http_status)
         if type(response) is str:
-            self.wfile.write(bytes(response, "utf8"))
             self.send_header('Content-type', 'text/html')
             self.end_headers()
+            self.wfile.write(bytes(response, "utf8"))
         elif type(response) is list:
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -171,9 +171,7 @@ class Handler(BaseHTTPRequestHandler):
                                                            signal=result[6],
                                                            security=result[8])
                                 wifis.append(wifi_details)
-
-                        json_str = json.dumps(wifis, default=lambda wf: wf.__dict__)
-                        self.returnResponse(200, json_str)
+                        self.returnResponse(200, wifis)
                     except Exception as ex:
                         logger.error(f"Exception when trying to scan Wifi: {ex}")
                         self.returnResponse(500, f"An error occurred: {ex}")
