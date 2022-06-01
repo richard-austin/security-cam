@@ -13,7 +13,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from wifi_details import WifiDetails
 from connection_state_details import ConnectionStateDetails
 
-
 tz = timezone('Europe/London')  # UTC, Asia/Shanghai, Europe/Berlin
 
 
@@ -33,18 +32,39 @@ logHandler.setFormatter(logging.Formatter(FORMAT))
 logger.addHandler(logHandler)
 
 
-def get_active_connections() -> list:
-    data = executeOsCommand('lshw -json -class network', Handler.nmcli_errors)
-    # Parse JSON into an object with attributes corresponding to dict keys.
-    connections: [object] = json.loads(data, object_hook=lambda d: dict(**d))
-    connections = filter(lambda conn:
-                         "configuration" in conn
-                         and "link" in conn["configuration"]
-                         and conn["configuration"]["link"] == "yes",
-                         connections)
-    connections = map(lambda conn: SimpleNamespace(**conn), connections)
+def get_devices() -> list[SimpleNamespace]:
+    data = executeOsCommand('nmcli -t dev show', Handler.nmcli_errors)
+    devices_str: list[str] = data.split("\n\n")
+    devices: list[SimpleNamespace] = []
+    for i in range(len(devices_str)):
+        lines = devices_str[i].split('\n')
+        sn: SimpleNamespace = SimpleNamespace()
+        for line in lines:
+            attrval = line.split(':', 1)
+            if len(attrval) == 2:  # Skip the blank line at the end
+                # Replace the dot separator in the attribute name with  underscore
+                attrval[0] = attrval[0].replace('.', '_')
+                # Replace any dash separator with underscore
+                attrval[0] = attrval[0].replace('-', '_')
+                # Replace '[' with underscores and ']' with blank
+                attrval[0] = attrval[0].replace('[', '_').replace(']', '')
+                setattr(sn, attrval[0], attrval[1])
+        devices.append(sn)
+    return devices
 
-    return list(connections)
+
+def get_active_connections() -> list:
+    data = get_devices()
+
+    filt = filter(lambda conn:
+                  (conn.GENERAL_TYPE == 'ethernet' and conn.WIRED_PROPERTIES_CARRIER.lower() == 'on')
+                  or
+                  (conn.GENERAL_TYPE == 'wifi' and conn.GENERAL_STATE.startswith('100')),
+                  data)
+
+    connections: list[SimpleNamespace] = list(filt)
+
+    return connections
 
 
 """
@@ -57,13 +77,12 @@ def check_for_ethernet() -> bool:
     retval: bool = False
     objs = get_active_connections()
     for obj in objs:
-        if "capabilities" in obj.__dict__:
-            cap = obj.capabilities
-            if obj.description.lower().__contains__("ethernet") or "tp" in cap:
-                retval = True
-                break
+        if "GENERAL_TYPE" in obj.__dict__ and obj.GENERAL_TYPE == 'ethernet':
+            retval = True
+            break
 
     return retval
+
 
 """
     checkConnectionState: Checks that the wifi connection with the given ssid is active
@@ -190,10 +209,10 @@ class Handler(BaseHTTPRequestHandler):
                     try:
                         if password is None:
                             message = executeOsCommand(f"nmcli dev wifi connect {ssid}",
-                                             self.nmcli_errors)
+                                                       self.nmcli_errors)
                         else:
                             message = executeOsCommand(f"nmcli dev wifi connect {ssid} password {password}",
-                                             self.nmcli_errors)
+                                                       self.nmcli_errors)
                     except Exception as ex:
                         logger.error(f"Exception when trying to set Wifi: {ex}")
                         self.returnResponse(500, f"An error occurred: {ex}")

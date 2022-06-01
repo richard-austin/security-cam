@@ -199,11 +199,13 @@ class WifiUtilsService {
 
                 for(obj in json)
                 {
-                    ConnectionDetails cd = new ConnectionDetails(obj.description as String,
-                            obj.configuration.driver as String,
-                            (obj.capabilities.tp == "twisted pair" ? "ethernet" : "wifi") as String,
-                            obj.logicalname as String)
-                    IpAddressDetails ipad = new IpAddressDetails(obj.configuration.ip as String, cd)
+                    // We have to fill in the name for ethernet as it's not managed by nmcli, which gives no name for it
+                    ConnectionDetails cd = new ConnectionDetails(obj.GENERAL_TYPE == "ethernet" ? "Wired connection" : obj.GENERAL_CONNECTION as String,
+                            obj.GENERAL_HWADDR as String,
+                            obj.GENERAL_TYPE as String,
+                            obj.GENERAL_DEVICE as String)
+                    // We're only dealing with one IP address
+                    IpAddressDetails ipad = new IpAddressDetails(obj.IP4_ADDRESS_1 as String, cd)
                     ipDets.add(ipad)
                 }
                 result.responseObject = ipDets
@@ -246,10 +248,10 @@ class WifiUtilsService {
                 def json = parser.parseText(resp.responseObject['response'] as String)
 
                 for (obj in json) {
-                    ConnectionDetails cd = new ConnectionDetails(obj.description as String,
-                            obj.configuration.driver as String,
-                            (obj.capabilities.tp == "twisted pair" ? "ethernet" : "wifi") as String,
-                            obj.logicalname as String)
+                    ConnectionDetails cd = new ConnectionDetails(obj.GENERAL_CONNECTION as String,
+                            obj.GENERAL_HWADDR as String,
+                            obj.GENERAL_TYPE as String,
+                            obj.GENERAL_DEVICE as String)
                     if(cd.con_type == "ethernet")
                         cdList.add(cd)
                 }
