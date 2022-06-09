@@ -95,8 +95,12 @@ public class CloudProxy implements SslContextProvider {
     public void stop() throws IOException {
         if (running) {
             running = false;
-            if (cloudChannel != null && !cloudChannel.isClosed())
-                cloudChannel.close();
+            try {
+                if (cloudChannel != null && !cloudChannel.isClosed())
+                    cloudChannel.close();
+            }
+            catch(Exception ignored){}
+
             splitMessagesExecutor.shutdownNow();
             webserverReadExecutor.shutdownNow();
             webserverWriteExecutor.shutdownNow();
@@ -217,7 +221,7 @@ public class CloudProxy implements SslContextProvider {
                 }
             } catch (Exception ex) {
                 showExceptionDetails(ex, "startCloudInputProcess");
-                restart();
+             //   restart();  // The session timeout will restart it, this will only result in 2 restarts.
             }
         });
     }

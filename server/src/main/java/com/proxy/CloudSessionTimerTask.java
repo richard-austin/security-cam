@@ -1,9 +1,14 @@
 package com.proxy;
 
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.TimerTask;
 
 public class CloudSessionTimerTask extends TimerTask {
     CloudProxy thisCP;
+    private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
+
     public CloudSessionTimerTask(CloudProxy thisCP)
     {
         this.thisCP = thisCP;
