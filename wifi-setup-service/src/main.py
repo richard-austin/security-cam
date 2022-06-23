@@ -197,11 +197,6 @@ class Handler(BaseHTTPRequestHandler):
                         return
 
                 case 'setupwifi':
-                    hasethernet: bool = check_for_ethernet()
-                    if not hasethernet:
-                        self.returnResponse(401, "You must connect the NVR through Ethernet to change wifi settings")
-                        return
-
                     ssid: str = cmd['ssid']
                     logger.info(f"Setting up wifi for SSID {ssid}")
                     password: str = cmd['password'] if cmd.__contains__('password') else None

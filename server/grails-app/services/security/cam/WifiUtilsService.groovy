@@ -62,33 +62,23 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            EthernetStatusEnum status = isConnectedThroughEthernet()
+            RestfulResponse resp = cmd.password != null
+                    ?
+                    restfulInterfaceService.sendRequest("localhost:8000", "/",
+                            "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\", \"password\": \"${cmd.password}\"}",
+                            true, 180)
+                    :
+                    restfulInterfaceService.sendRequest("localhost:8000", "/",
+                            "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\"}",
+                            true, 180)
 
-            if (status == EthernetStatusEnum.connectedViaEthernet) {
-                RestfulResponse resp = cmd.password != null
-                        ?
-                        restfulInterfaceService.sendRequest("localhost:8000", "/",
-                                "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\", \"password\": \"${cmd.password}\"}",
-                                true, 180)
-                        :
-                        restfulInterfaceService.sendRequest("localhost:8000", "/",
-                                "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\"}",
-                                true, 180)
-
-                if (resp.responseCode == 200)
-                    result.responseObject = resp.responseObject as JSON
-                else {
-                    result.errno = resp.responseCode
-                    result.responseObject = new WifiConnectResult(resp.getErrorMsg())
-                    result.error = resp.getErrorMsg()
-                    result.status = PassFail.FAIL
-                }
-
-            } else {
-                result.errno = 400
+            if (resp.responseCode == 200)
+                result.responseObject = resp.responseObject as JSON
+            else {
+                result.errno = resp.responseCode
+                result.responseObject = new WifiConnectResult(resp.getErrorMsg())
+                result.error = resp.getErrorMsg()
                 result.status = PassFail.FAIL
-                result.responseObject = new WifiConnectResult("Must be connected via Ethernet to set up a Wifi Connection")
-                result.error = result.responseObject.message
             }
         }
         catch (Exception ex) {
@@ -141,16 +131,19 @@ class WifiUtilsService {
                     def json = parser.parseText(resp.responseObject['response'] as String)
                     result.responseObject = json as JSON
                 } else {
+                    result.errno = resp.responseCode
                     result.status = PassFail.FAIL
                     result.error = resp.getErrorMsg()
                 }
             } else {
+                result.errno = 403
                 result.status = PassFail.FAIL
                 result.error = "Must be connected via Ethernet to set Wifi status to off"
             }
         }
         catch (Exception ex) {
             logService.cam.error("Exception in setWifiStatus: " + ex.getCause() + ' ' + ex.getMessage())
+            result.errno = 500
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
@@ -197,8 +190,7 @@ class WifiUtilsService {
                 JsonSlurper parser = new JsonSlurper()
                 def json = parser.parseText(resp.responseObject['response'] as String)
 
-                for(obj in json)
-                {
+                for (obj in json) {
                     // We have to fill in the name for ethernet as it's not managed by nmcli, which gives no name for it
                     ConnectionDetails cd = new ConnectionDetails(obj.GENERAL_TYPE == "ethernet" ? "Wired connection" : obj.GENERAL_CONNECTION as String,
                             obj.GENERAL_HWADDR as String,
@@ -252,7 +244,7 @@ class WifiUtilsService {
                             obj.GENERAL_HWADDR as String,
                             obj.GENERAL_TYPE as String,
                             obj.GENERAL_DEVICE as String)
-                    if(cd.con_type == "ethernet")
+                    if (cd.con_type == "ethernet")
                         cdList.add(cd)
                 }
             }
