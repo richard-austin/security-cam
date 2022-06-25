@@ -260,7 +260,15 @@ public class CloudProxy implements SslContextProvider {
     }
 
     void removeSocket(int token) {
-        tokenSocketMap.remove(token);
+        try {
+            SocketChannel sock = tokenSocketMap.get(token);
+            sock.close();
+            tokenSocketMap.remove(token);
+        }
+        catch(Exception ex)
+        {
+            showExceptionDetails(ex, "removeSocket");
+        }
     }
 
     /**
@@ -348,8 +356,11 @@ public class CloudProxy implements SslContextProvider {
                 }
                 while (result != -1 && buf.position() < buf.limit());
             } catch (ClosedChannelException ignored) {
-                // Don't report AsynchronousCloseException or ClosedChannelException as these come up when the channel
-                // has been closed by a signal via getConnectionClosedFlag  from ???CloudProxy???
+                try {
+                    // Close the channel or the socket will be left in the CLOSE-WAIT state
+                    webserverChannel.close();
+                }
+                catch(Exception ignore){}
             } catch (Exception ex) {
                 showExceptionDetails(ex, "writeRequestToWebserver");
             }
@@ -367,6 +378,7 @@ public class CloudProxy implements SslContextProvider {
                 }
                 setConnectionClosedFlag(buf);
                 sendResponseToCloud(buf);
+                webserverChannel.close();
             } catch (AsynchronousCloseException ignored) {
                 // Don't report AsynchronousCloseException as these come up when the channel has been closed
                 //  by a signal via getConnectionClosedFlag  from Cloud
