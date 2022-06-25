@@ -25,7 +25,7 @@ class RestfulInterfaceService {
      * @param params : map of any key:value parameters needed in the API call, null if there are none
      * @return : RestfulResponse object containing details of the result of the request, including an object containing the data received back from the host if any
      */
-    RestfulResponse sendRequest(String address, String uri, String params = null, boolean isPOST = false) {
+    RestfulResponse sendRequest(String address, String uri, String params = null, boolean isPOST = false, int timeOut = 6) {
         def result = new RestfulResponse()
         result.status = RestfulResponseStatusEnum.FAIL
         result.responseObject = null
@@ -50,8 +50,8 @@ class RestfulInterfaceService {
             conn.setRequestProperty("Accept", "application/json")
             conn.setRequestProperty("Accept-Charset", "UTF-8")
             conn.setDoOutput(true)
-            conn.setConnectTimeout(6 * 1000)
-            conn.setReadTimeout(6 * 1000)
+            conn.setConnectTimeout(timeOut * 1000)
+            conn.setReadTimeout(timeOut * 1000)
 
             if(isPOST)
             {
@@ -87,9 +87,9 @@ class RestfulInterfaceService {
                     result.responseObject=[response:out.toString()]  // Used when setting rather than reading values.
             } else {
                 logService.cam.error("API [${uri}] request failed to [${address}]. Error message: ${out.toString()}")
-                result.status = RestfulResponseStatusEnum.ERROR_RESPONSE
-                result.responseCode = 500 //conn.getResponseCode()
-                result.errorMsg = RestfulResponseStatusEnum.ERROR_RESPONSE.toString()
+                result.status =result.status
+                result.responseCode = conn.getResponseCode()
+                result.errorMsg = out.toString()
             }
         }
         catch (MalformedURLException | SocketTimeoutException | ConnectException e) {

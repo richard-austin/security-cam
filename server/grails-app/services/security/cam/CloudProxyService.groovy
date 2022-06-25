@@ -1,6 +1,7 @@
 package security.cam
 
 import com.proxy.CloudProxy
+import security.cam.interfaceobjects.CloudProxyRestartTask
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import security.cam.enums.PassFail
@@ -47,6 +48,29 @@ class CloudProxyService {
             response.error = "Exception in CloudProxy.stop: "+ex.getClass().getName()+": "+ex.getMessage()
             logService.cam.error(response.error)
         }
+        return response
+    }
+
+    /**
+     * restart: Set up an asynchronous restart of the CloudProxy. This is used when switching between Wi-Fi and Ethernet
+     *          when setting up or changing Wi-Fi configuration.
+     * @return
+     */
+    ObjectCommandResponse restart()
+    {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            Timer timer = new Timer("CloudProxyRestartTimer")
+            timer.schedule(new CloudProxyRestartTask(this), 2000)
+            response.responseObject = [message: "Timer set up for restart"]
+        }
+        catch(Exception ex)
+        {
+            response.status= PassFail.FAIL
+            response.error = "Exception in CloudProxy.restart: "+ex.getClass().getName()+": "+ex.getMessage()
+            logService.cam.error(response.error)
+        }
+
         return response
     }
 

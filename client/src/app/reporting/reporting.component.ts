@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {HttpErrorResponse} from "@angular/common/http";
+import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
   selector: 'app-reporting',
@@ -9,33 +9,37 @@ import {HttpErrorResponse} from "@angular/common/http";
 export class ReportingComponent implements OnInit {
   error: HttpErrorResponse | undefined;
   success: string | undefined;
-  validationErrors!:string[];
-  showMessageInError:boolean = true;
+  validationErrors!: string[];
+  showMessageInError: boolean = true;
+  messageToShow: string = '';
 
-  constructor()
-  {
+  constructor() {
   }
 
-  set errorMessage(error: HttpErrorResponse)
-  {
+  set errorMessage(error: HttpErrorResponse) {
     this.clearMessage();
     this.success = undefined;
     this.error = error;
     this.validationErrors = [];
 
-      if(error.status === 400)
-      {
-        for(const key of Object.keys(error.error))
-          this.validationErrors.push(key + ': ' + error.error[key]);
+    if (error.status === 400) {
+      for (const key of Object.keys(error.error)) {
+        this.validationErrors.push(key + ': ' + error.error[key]);
       }
-      else if(typeof (error.error) !== 'string')
-      {
-        this.showMessageInError=false;
+    } else if (typeof (error.error) !== 'string' && (error.error.error === undefined || error.error.error === '')) {
+      this.showMessageInError = false;
+    } else {
+      if (typeof (error?.error) == 'string') {
+        this.messageToShow = error.error;
+      } else if (typeof (error?.error?.error) === 'string' && error.error.error !== '') {
+        this.messageToShow = error.error.error;
+      } else {
+        this.showMessageInError = false;
       }
+    }
   }
 
-  set successMessage(success: string)
-  {
+  set successMessage(success: string) {
     this.clearMessage();
     this.success = success;
   }

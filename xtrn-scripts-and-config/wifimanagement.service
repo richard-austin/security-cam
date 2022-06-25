@@ -1,0 +1,13 @@
+[Unit]
+Description=Wifi Management Root Access Service
+After=network.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/bin/python3 /etc/security-cam/main.py
+
+[Install]
+WantedBy=multi-user.target

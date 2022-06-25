@@ -44,8 +44,6 @@ export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
         }
       })
     })
-
-
     return !fileNameValid || duplicateMaskFile ? {mask_file: !fileNameValid, duplicate: duplicateMaskFile} : null;
   }
 }
@@ -84,7 +82,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address', 'snapshotUri'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -207,6 +205,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
         controlUri: new FormControl({
           value: camera.controlUri,
+          disabled: false
+        }, [Validators.maxLength(55)]),
+        snapshotUri: new FormControl({
+          value: camera.snapshotUri,
           disabled: false
         }, [Validators.maxLength(55)]),
       }, {updateOn: "change"});

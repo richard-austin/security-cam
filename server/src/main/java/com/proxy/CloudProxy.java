@@ -35,6 +35,7 @@ public class CloudProxy implements SslContextProvider {
     private final int closedFlagLength = Byte.BYTES;
     private final int headerLength = tokenLength + lengthLength + closedFlagLength;
     public static final int BUFFER_SIZE = 16000;
+    private final long cloudProxySessionTimeout = 50 * 1000; // Restart CloudProxy after 50 seconds without a heartbeat
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     final Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
     SSLSocket cloudChannel;
@@ -63,7 +64,7 @@ public class CloudProxy implements SslContextProvider {
     final Object LOCK = new Object();
 
     public void start() {
-        if(!running) {
+        if (!running) {
             cloudProxyExecutor = Executors.newSingleThreadExecutor();
             splitMessagesExecutor = Executors.newSingleThreadExecutor();
             webserverReadExecutor = Executors.newCachedThreadPool();
@@ -92,10 +93,14 @@ public class CloudProxy implements SslContextProvider {
     }
 
     public void stop() throws IOException {
-        if(running) {
+        if (running) {
             running = false;
-            if (cloudChannel != null && !cloudChannel.isClosed())
-                cloudChannel.close();
+            try {
+                if (cloudChannel != null && !cloudChannel.isClosed())
+                    cloudChannel.close();
+            }
+            catch(Exception ignored){}
+
             splitMessagesExecutor.shutdownNow();
             webserverReadExecutor.shutdownNow();
             webserverWriteExecutor.shutdownNow();
@@ -116,13 +121,17 @@ public class CloudProxy implements SslContextProvider {
     private void createConnectionToCloud() {
         try {
             if (this.cloudChannel == null || !this.cloudChannel.isConnected() || this.cloudChannel.isClosed()) {
+                createCloudProxySessionTimer();   // Start the connection timer, if heartbeats are not received for the
+                                                  // timout period, this will trigger a retry.
+                                                  // If we fail to connect,this time, the timeout will trigger a retry
+                                                  // after the timeout period.
+
                 SSLSocket cloudChannel = createSSLSocket(cloudHost, cloudPort, this);
-                if(productKeyAccepted(cloudChannel)) {
+                if (productKeyAccepted(cloudChannel)) {
                     this.cloudChannel = cloudChannel;
                     logger.info("Connected successfully to the Cloud");
                     startCloudInputProcess(cloudChannel);
-                }
-                else
+                } else
                     logger.error("Product key was not accepted by the Cloud server");
             }
 
@@ -140,6 +149,7 @@ public class CloudProxy implements SslContextProvider {
 
     /**
      * productKeyAccepted: Send the product key to the Cloud server and check it was accepted
+     *
      * @param cloudChannel: The SSLSocket connected to the Cloud
      * @return: true if product key was accepted, otherwise false
      */
@@ -155,9 +165,41 @@ public class CloudProxy implements SslContextProvider {
         final byte[] result = new byte[10];
         int bytesRead = is.read(result);
 
-        if((new String(result, 0 , bytesRead)).equals("OK"))
+        if ((new String(result, 0, bytesRead)).equals("OK"))
             retVal = true;
 
+        return retVal;
+    }
+
+    Timer cloudProxySessionTimer;
+
+    private void createCloudProxySessionTimer() {
+        if (cloudProxySessionTimer != null)
+            cloudProxySessionTimer.cancel();
+        CloudSessionTimerTask cstt = new CloudSessionTimerTask(this);
+        cloudProxySessionTimer = new Timer("cloudProxySessionTimer");
+        cloudProxySessionTimer.schedule(cstt, cloudProxySessionTimeout);
+    }
+
+    public void resetCloudProxySessionTimeout() {
+
+        if (cloudProxySessionTimer != null)
+            cloudProxySessionTimer.cancel();
+
+        createCloudProxySessionTimer();
+    }
+
+    private boolean isHeartbeat(ByteBuffer buf) {
+        boolean retVal = false;
+        // Dump the connection test heartbeats
+        final String ignored = "Ignore";
+        if (getToken(buf) == -1 && getDataLength(buf) == ignored.length()) {
+            String strVal = new String(Arrays.copyOfRange(buf.array(), headerLength, buf.limit()), StandardCharsets.UTF_8);
+            if (ignored.equals(strVal)) {
+                resetCloudProxySessionTimeout();
+                retVal = true;
+            }
+        }
         return retVal;
     }
 
@@ -170,7 +212,8 @@ public class CloudProxy implements SslContextProvider {
                     InputStream is = cloudChannel.getInputStream();
                     ByteBuffer buf = getBuffer();
                     while (read(is, buf) != -1) {
-                        splitMessages(buf);
+                        if (!isHeartbeat(buf))
+                            splitMessages(buf);
                         buf = getBuffer();
                     }
                     recycle(buf);
@@ -178,7 +221,7 @@ public class CloudProxy implements SslContextProvider {
                 }
             } catch (Exception ex) {
                 showExceptionDetails(ex, "startCloudInputProcess");
-                restart();
+             //   restart();  // The session timeout will restart it, this will only result in 2 restarts.
             }
         });
     }
@@ -217,13 +260,21 @@ public class CloudProxy implements SslContextProvider {
     }
 
     void removeSocket(int token) {
-        tokenSocketMap.remove(token);
+        try {
+            SocketChannel sock = tokenSocketMap.get(token);
+            sock.close();
+            tokenSocketMap.remove(token);
+        }
+        catch(Exception ex)
+        {
+            showExceptionDetails(ex, "removeSocket");
+        }
     }
 
     /**
      * cleanUpForRestart: Some sort of problem occurred with the Cloud connection, ensure we restart cleanly
      */
-    private void restart() {
+    void restart() {
         if (running) {
             try {
                 logger.info("Restarting CloudProxy");
@@ -262,19 +313,12 @@ public class CloudProxy implements SslContextProvider {
                 showExceptionDetails(ex, "restart");
             }
         }
+        /**/
     }
 
     private void writeRequestToWebserver(ByteBuffer buf) {
-        // Dump the connection test heartbeats
         try {
-            final String ignored = "Ignore";
-            if (getToken(buf) == -1 && getDataLength(buf) == ignored.length()) {
-                String strVal = new String(Arrays.copyOfRange(buf.array(), headerLength, buf.limit()), StandardCharsets.UTF_8);
-                if (ignored.equals(strVal)) {
-                    return;
-                }
-            }
-
+            logger.info("Received message ");
             int token = getToken(buf);
             if (tokenSocketMap.containsKey(token)) {
                 if (getConnectionClosedFlag(buf) != 0) {
@@ -312,8 +356,11 @@ public class CloudProxy implements SslContextProvider {
                 }
                 while (result != -1 && buf.position() < buf.limit());
             } catch (ClosedChannelException ignored) {
-                // Don't report AsynchronousCloseException or ClosedChannelException as these come up when the channel
-                // has been closed by a signal via getConnectionClosedFlag  from ???CloudProxy???
+                try {
+                    // Close the channel or the socket will be left in the CLOSE-WAIT state
+                    webserverChannel.close();
+                }
+                catch(Exception ignore){}
             } catch (Exception ex) {
                 showExceptionDetails(ex, "writeRequestToWebserver");
             }
@@ -331,6 +378,7 @@ public class CloudProxy implements SslContextProvider {
                 }
                 setConnectionClosedFlag(buf);
                 sendResponseToCloud(buf);
+                webserverChannel.close();
             } catch (AsynchronousCloseException ignored) {
                 // Don't report AsynchronousCloseException as these come up when the channel has been closed
                 //  by a signal via getConnectionClosedFlag  from Cloud
@@ -547,9 +595,9 @@ public class CloudProxy implements SslContextProvider {
 
     void showExceptionDetails(Throwable t, String functionName) {
         logger.error(t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
-        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
-            System.err.println(stackTraceElement.toString());
-        }
+//        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
+//            System.err.println(stackTraceElement.toString());
+//        }
     }
 
     @Override

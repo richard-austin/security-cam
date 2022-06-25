@@ -1,5 +1,6 @@
 package server
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import security.cam.CloudProxyService
 import security.cam.enums.PassFail
@@ -29,6 +30,16 @@ class CloudProxyController {
     }
 
     @Secured(['ROLE_CLIENT'])
+    def restart()
+    {
+        ObjectCommandResponse resp = cloudProxyService.restart()
+        if(resp.status == PassFail.PASS)
+            render (status: 200, text: resp.responseObject as JSON)
+        else
+            render(status: 500, text: resp.error)
+    }
+
+    @Secured(['ROLE_CLIENT'])
     def status()
     {
         ObjectCommandResponse resp = cloudProxyService.status()
@@ -37,4 +48,5 @@ class CloudProxyController {
         else
             render(status: 500, text: resp.error)
     }
+
 }

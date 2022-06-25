@@ -9,8 +9,11 @@ mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam
 
 cp ../start_hd_recording.sh ../end_hd_recording.sh ../processmotionrecordings.sh \
   ../cacert.jks ../client.jks ../productKeyGen/generateProductKey.jar ../productKeyGen/publicKey \
-  ../productKeyGen/productKeyGen.sh \
+  ../productKeyGen/productKeyGen.sh ../../wifi-setup-service/src/*.py \
  security-cam_"${VERSION}"_arm64/etc/security-cam
+
+mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system
+cp ../wifimanagement.service  security-cam_"${VERSION}"_arm64/lib/systemd/system
 
 tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 
@@ -32,6 +35,7 @@ mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream10
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/logs
 mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
+mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr
 
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
@@ -41,7 +45,6 @@ cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf ../ssmtp.conf security-
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
-#cp ../sc_processes.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 
 cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
 Package: security-cam
@@ -56,7 +59,9 @@ Depends: openjdk-11-jre-headless (>=11.0.11), openjdk-11-jre-headless (<< 12.0.0
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
  tomcat9-admin (>=9.0.43-1), tomcat9-admin (<= 10.0.0),
  libraspberrypi-bin, chrony,
- nodejs, ssmtp
+ nodejs, ssmtp,
+ network-manager (>= 1.36.4), network-manager (<< 2.0.0),
+ wireless-tools (>=30~pre9-13), wireless-tools (<< 40)
 EOF
 
 dpkg-deb --build --root-owner-group security-cam_"${VERSION}"_arm64

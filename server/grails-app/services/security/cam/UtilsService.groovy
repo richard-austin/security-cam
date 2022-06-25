@@ -56,10 +56,27 @@ class UtilsService {
      * @param command the command and its parameters as a string
      * @return: The returned value
      */
-    String executeLinuxCommand(String command) {
+    String executeLinuxCommand(String command)
+    {
         Process p = Runtime.getRuntime().exec(command)
         p.waitFor()
 
+        return processCommandOutput(p)
+   }
+
+    /**
+     * executeLinuxCommand: Execute a linux command
+     * @param command the command and its parameters as a string array (used for specifying a shell to execute the command)
+     * @return: The returned value
+     */
+    String executeLinuxCommand(String[] command) {
+        Process p = Runtime.getRuntime().exec(command)
+        p.waitFor()
+        return processCommandOutput(p)
+    }
+
+    private static String processCommandOutput(Process p)
+    {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(p.getInputStream()))
         StringBuffer sb = new StringBuffer()

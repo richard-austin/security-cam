@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Stream, CameraStream} from "../cameras/Camera";
-import {timer} from "rxjs";
+import {CameraStream} from '../cameras/Camera';
+import {timer} from 'rxjs';
 
 
 declare let Hls: any;
@@ -13,17 +13,18 @@ declare let mpegts: any;
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>
+  @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
   @Input() isFlv: boolean = false;
-  camstream!:CameraStream;
+  camstream!: CameraStream;
   video!: HTMLVideoElement;
-  hls:any = null;
+  hls: any = null;
   flvPlayer: any = null;
   visible: boolean = false;
   recording: boolean = false;
-  recordingUri: string = "";
-  manifest: string = "";
+  recordingUri: string = '';
+  manifest: string = '';
   multi: boolean = false;
+
 //  private isFullscreenNow: boolean = false;
 
   constructor() {
@@ -34,37 +35,37 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param camStream: The camera
    * @param manifest: The manifest file
    */
-  setSource(camStream:CameraStream, manifest:string=""):void
-  {
-      this.camstream = camStream;
-      this.recording = manifest !== "";
-      this.recordingUri = camStream.stream.recording.uri;
+  setSource(camStream: CameraStream, manifest: string = ''): void {
+    this.stop();
+    this.camstream = camStream;
+    this.recording = manifest !== '';
+    this.recordingUri = camStream.stream.recording.uri;
 
-      if(this.recordingUri[this.recordingUri.length-1] !== '/')
-        this.recordingUri+='/';
+    if (this.recordingUri[this.recordingUri.length - 1] !== '/') {
+      this.recordingUri += '/';
+    }
 
-      this.recordingUri+=manifest;
-      this.manifest = manifest;   // Save the manifest file name so it can be returned by getManifest
-      this.startVideo();
+    this.recordingUri += manifest;
+    this.manifest = manifest;   // Save the manifest file name so it can be returned by getManifest
+    this.startVideo();
   }
 
   /**
    * Get the currently selected recording manifest file
    */
-  getManifest():string
-  {
-      return this.manifest;
+  getManifest(): string {
+    return this.manifest;
   }
 
   /**
    * startVideo: Start the video (assumes appropriate uri and camera is set up).
    * @private
    */
-  private startVideo():void {
-    if(!this.isFlv) {
+  private startVideo(): void {
+    if (!this.isFlv) {
       if (this.camstream !== undefined) {
         if (Hls.isSupported()) {
-          this.hls = new Hls()
+          this.hls = new Hls();
           this.hls.loadSource(this.recording ? this.recordingUri : this.camstream.stream.uri);
           this.hls.attachMedia(this.video);
 
@@ -74,50 +75,46 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           this.video.src = this.camstream.stream.uri;
         }
       }
-    }
-    else
-    {
-      if(this.camstream !== undefined && mpegts.isSupported())
-      {
+    } else {
+      if (this.camstream !== undefined && mpegts.isSupported()) {
         this.stop();
         let getUrl = window.location;
-        let baseUrl = getUrl .protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+        let baseUrl = getUrl.protocol + '//' + getUrl.host + '/' + getUrl.pathname.split('/')[1];
         this.flvPlayer = mpegts.createPlayer({
-          type: 'flv',
-          isLive: true,
-          url: this.camstream.stream.uri.startsWith('http:') || this.camstream.stream.uri.startsWith('https:')
-            ?  // Absolute url
-            this.camstream.stream.uri
-              .replace('https', 'wss') // Change https to wss
-              .replace('http', 'ws')  // or change http to ws
-            :  // Relative uri
-            baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
-              .replace('https', 'wss') // Change https to wss
-              .replace('http', 'ws')  // or change http to ws
-              +this.camstream.stream.uri
-        },
-        {
-          liveBufferLatencyChasing: false,
-          enableStashBuffer: true,
-          enableWorker: true,
-        });
-         this.flvPlayer.attachMediaElement(this.video)
-         this.flvPlayer.load();
-         this.flvPlayer.play();
+            type: 'flv',
+            isLive: true,
+            url: this.camstream.stream.uri.startsWith('http:') || this.camstream.stream.uri.startsWith('https:')
+              ?  // Absolute url
+              this.camstream.stream.uri
+                .replace('https', 'wss') // Change https to wss
+                .replace('http', 'ws')  // or change http to ws
+              :  // Relative uri
+              baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
+                .replace('https', 'wss') // Change https to wss
+                .replace('http', 'ws')  // or change http to ws
+              + this.camstream.stream.uri
+          },
+          {
+            liveBufferLatencyChasing: false,
+            enableStashBuffer: true,
+            enableWorker: true,
+          });
+        this.flvPlayer.attachMediaElement(this.video);
+        this.flvPlayer.load();
+        this.flvPlayer.play();
       }
     }
   }
 
   stop() {
-    if(!this.isFlv && this.hls !== null) {
+    if (!this.isFlv && this.hls !== null) {
       this.video.pause();
       this.hls.stopLoad();
       this.hls.detachMedia();
       this.hls.destroy();
       this.hls = null;
-    }
-    else if(this.flvPlayer !== null)
-    {
+    } else if (this.flvPlayer !== null) {
+      this.video.pause();
       this.flvPlayer.pause();
       this.flvPlayer.unload();
       this.flvPlayer.detachMediaElement();

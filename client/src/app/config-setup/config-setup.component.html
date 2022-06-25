@@ -127,6 +127,19 @@
         </td>
       </ng-container>
 
+      <ng-container matColumnDef="snapshotUri">
+        <th mat-header-cell *matHeaderCellDef>Snapshot URI.</th>
+        <td mat-cell *matCellDef="let cam; let i = dataIndex">
+          <mat-form-field appearance="legacy" [style.width.px]="300">
+            <input matInput type="text" autocomplete="off" maxlength="55" [formControl]="getCamControl(i, 'snapshotUri')"
+                   matTooltip="The URI for snapshots for {{cam.key}}. This is used to view the image from the camera by clicking on the camera ID in the Cameras Configuration editor."
+                   matTooltipClass="tooltip"
+                   placeholder="Snapshot URI" (change)="updateCamField(i, 'snapshotUri')">
+            <mat-error *ngIf="getCamControl(i, 'snapshotUri').invalid">Enter the URI</mat-error>
+          </mat-form-field>
+        </td>
+      </ng-container>
+
       <!-- Expanded Streams Column - The streams row is made up of this one column that spans across all columns -->
       <ng-container matColumnDef="expandedStreamDetail">
         <td mat-cell *matCellDef="let cam; let camIndex=dataIndex" [attr.colspan]="cameraColumns.length">
