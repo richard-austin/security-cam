@@ -44,9 +44,4 @@ beans = {
 
         authenticationDetailsSource(TwoFactorAuthenticationDetailsSource)
     }
-
-
-//    authenticationDetailsSource(TwoFactorAuthenticationDetailsProvider) {
-//        logService = ref("logService")
-//    }
 }
