@@ -6,7 +6,7 @@ mv /tmp/ssmtp.conf /etc/ssmtp
 mv /tmp/chrony.conf /etc/chrony
 mv /tmp/server.xml /etc/tomcat9/
 mv /tmp/tomcat-users.xml /etc/tomcat9
-mv /tmp/server-0.1.war /var/lib/tomcat9/webapps/ROOT.war
+mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
 rm -r /var/lib/tomcat9/webapps/ROOT
 
 rm -r /tmp/motion.conf
