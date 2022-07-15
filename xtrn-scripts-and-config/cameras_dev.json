@@ -2,11 +2,11 @@
   "camera1": {
     "address": "192.168.0.45",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
-    "name": "Spare",
+    "name": "Fig Tree",
     "snapshotUri": "http://192.168.0.45:80/tmpfs/auto.jpg",
     "streams": {
       "stream1": {
-        "defaultOnMultiDisplay": false,
+        "defaultOnMultiDisplay": true,
         "descr": "HD",
         "motion": {
           "enabled": false,
@@ -16,32 +16,13 @@
         "netcam_uri": "rtsp://192.168.0.45:554/11",
         "nms_uri": "rtmp://localhost:1935/nms/stream1",
         "recording": {
-          "enabled": true,
-          "location": "stream1",
-          "uri": "http://localhost:8084/recording/stream1/"
+          "enabled": false,
+          "location": "stream4",
+          "uri": "/recording/stream4/"
         },
-        "uri": "http://localhost:8009/nms/stream1.flv",
+        "uri": "/live/nms/stream1.flv",
         "video_height": 1080,
         "video_width": 1920
-      },
-      "stream2": {
-        "defaultOnMultiDisplay": true,
-        "descr": "Standard",
-        "motion": {
-          "enabled": true,
-          "mask_file": "",
-          "trigger_recording_on": "camera1.stream1"
-        },
-        "netcam_uri": "rtsp://192.168.0.45:554/12",
-        "nms_uri": "rtmp://localhost:1935/nms/stream2",
-        "recording": {
-          "enabled": true,
-          "location": "stream2",
-          "uri": "http://localhost:8084/recording/stream2/"
-        },
-        "uri": "http://localhost:8009/nms/stream2.flv",
-        "video_height": 352,
-        "video_width": 640
       }
     }
   }
