@@ -5,6 +5,7 @@ mv /tmp/nginx.conf /etc/nginx
 mv /tmp/ssmtp.conf /etc/ssmtp
 mv /tmp/chrony.conf /etc/chrony
 mv /tmp/server.xml /etc/tomcat9/
+mv /tmp/tomcat9 /etc/default/  # Updated tomcat9 default file to enable use of Java 17
 mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
 rm -r /var/lib/tomcat9/webapps/ROOT
