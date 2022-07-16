@@ -82,8 +82,7 @@ run_motion() {
 
 run_nms &
 run_motion &
-run_ffmpeg "rtsp://192.168.0.45:554/11" "rtmp://localhost:1935/nms/stream1" "Spare_HD" &
-run_ffmpeg "rtsp://192.168.0.45:554/12" "rtmp://localhost:1935/nms/stream2" "Spare_Standard" &
+run_ffmpeg "rtsp://192.168.0.45:554/11" "rtmp://localhost:1935/nms/stream1" "Fig_Tree_HD" &
 
 run_check_ip_not_changed &
 

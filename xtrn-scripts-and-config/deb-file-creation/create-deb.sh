@@ -43,8 +43,8 @@ mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
 cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
-cp ../install-cert.sh security-cam_"${VERSION}"_arm64/tmp
-cp ../../server/build/libs/server-0.1.war security-cam_"${VERSION}"_arm64/tmp
+cp ../install-cert.sh ../tomcat9 security-cam_"${VERSION}"_arm64/tmp
+cp ../../server/build/libs/server-7.3.war security-cam_"${VERSION}"_arm64/tmp
 
 cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
 Package: security-cam
@@ -52,7 +52,7 @@ Version: $VERSION
 Architecture: arm64
 Maintainer: Richard Austin <richard.david.austin@gmail.com>
 Description: A security camera system accessed through a secure web based interface.
-Depends: openjdk-11-jre-headless (>=11.0.11), openjdk-11-jre-headless (<< 12.0.0),
+Depends: openjdk-17-jre-headless (>=17.0.3), openjdk-17-jre-headless (<< 18.0.0),
  ffmpeg (>=7:4.2.4), ffmpeg (<<7:5.0.0),
  motion (>=4.3.2-1), motion(<<5.0.0-0),
  nginx (>=1.18.0), nginx(<=1.20.9),
