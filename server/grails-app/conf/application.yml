@@ -130,7 +130,7 @@ environments:
       productKeyPath: /etc/security-cam/prodKey
       keyStorePassword: B0331e
       trustStorePassword: B0331e
-      cloudHost: 192.168.0.31
+      cloudHost: 192.168.0.37
       cloudPort: 8081
       webServerHost: localhost
       webServerPort: 8080

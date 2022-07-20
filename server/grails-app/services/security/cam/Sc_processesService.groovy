@@ -1,22 +1,32 @@
 package security.cam
 
+import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
+import groovy.json.JsonSlurper
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
+import server.Camera
 
 import javax.annotation.PreDestroy
+import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 @Transactional
 class Sc_processesService {
     LogService logService
+    GrailsApplication grailsApplication
+
+    ExecutorService processExecutors
+    ArrayList<Process> processes
+    boolean running = false
 
     Sc_processesService() {
+        processes = new ArrayList()
+        processExecutors = Executors.newCachedThreadPool()
     }
-
-    Process p
-    Long pid = null
 
     private List<ProcessHandle> killProcessTree(ProcessHandle ph) {
         List<ProcessHandle> handles = new ArrayList<>()
@@ -28,97 +38,96 @@ class Sc_processesService {
         return handles
     }
 
-    private killProcesses(ProcessHandle handle) {
-        List<ProcessHandle> handles = killProcessTree(handle)
-        List<ProcessHandle> remainingHandles = new ArrayList<ProcessHandle>()
-        int testCount = 1200
-
-        while (--testCount > 0) {
-            Thread.sleep(20)
-            handles.forEach({ ProcessHandle phr ->
-                if (phr.isAlive())
-                    remainingHandles.add(phr)
-            })
-
-            handles.clear()
-            handles.addAll(remainingHandles)
-            if (remainingHandles.size() > 0) {
-                remainingHandles.clear()
-            } else {
-                logService.cam.info("All processes successfully stopped")
-                break
-            }
-        }
-
-        // If any still remain, destroy forcibly
-        handles.forEach({ ProcessHandle rph ->
-            rph.destroyForcibly()
-            logService.cam.error("Process ${rph.pid()} (${rph.toString()}) remains running, kill signal sent")
-        })
-    }
 
     def startProcesses() {
         ObjectCommandResponse response = new ObjectCommandResponse()
         logService.cam.debug "startProcesses called"
-
         try {
-            if (pid == null) {
-                // There should be no processes running at this point, run killall to make sure they are all off
-                p = Runtime.getRuntime().exec("killall sc_processes.sh")
-                p.waitFor()
-                p = Runtime.getRuntime().exec("killall ffmpeg")
-                p.waitFor()
-                p = Runtime.getRuntime().exec("killall motion")
-                p.waitFor()
+//            def name = cams['camera1'].name
+//            def address = cams['camera1'].address
+//            def controlUri = cams['camera1'].controlUri
+//            def snapshotUri = cams['camera1'].snapshotUri
+//            def streams = cams['camera1'].streams
 
-                if (Environment.current.name == 'development')
-                    p = Runtime.getRuntime().exec("../xtrn-scripts-and-config/sc_processes.sh")
-                else if (Environment.current.name == 'production')
-                    p = Runtime.getRuntime().exec("/home/security-cam/sc_processes.sh")
+            running = true
+           // startProcess("/usr/bin/motion")
+            startProcess("/usr/bin/node /etc/security-cam/nms/app.js")
+            Map<String, Camera> cams = getCamerasData()
+            String log_dir="/home/security-cam/logs/"      // TODO: Get from config
+                    cams.forEach((ck, cam) -> {
+                cam.streams.forEach((sk, stream) -> {
+                    String[] command = new String[3]
+                    command[0] = "bash"
+                    command[1] = "-c"
+                    command[2] = "/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -rtsp_transport tcp -i ${stream.netcam_uri} -an -c copy -f flv ${stream.nms_uri} 2>> ${log_dir}ffmpeg_${cam.name.replace(' ', '_') + "_" + stream.descr.replace(' ', '_').replace('.', '_')}_\$(date +%Y%m%d).log"
+                    startProcess(command)
+                })
+            })
 
-                p.waitFor(100, TimeUnit.MILLISECONDS)
-                if(p.isAlive())
-                {
-                    pid = p.pid()
-                    logService.cam.debug "sc_processes successfully started ${p.toString()}"
-                }
-                else
-                    throw new Exception("sc_processes not started")
-            }
+//            Thread.sleep(60000)
+//            stopProcesses()
         }
         catch (Exception ex) {
             logService.cam.error "Exception in startProcesses: " + ex.getMessage()
             response.status = PassFail.FAIL
             response.error = ex.getMessage()
-            pid = null
         }
         return response
+    }
+
+    void startProcess(final String command)
+    {
+        submitTask(command)
+    }
+
+    void startProcess(final String[] command)
+    {
+        submitTask(command)
+    }
+
+    private void submitTask(def command)
+    {
+        processExecutors.submit(() -> {
+            do {
+                try {
+                    Process proc
+                    if(command instanceof String )
+                        proc = Runtime.getRuntime().exec(command)
+                    else if(command instanceof String[])
+                        proc = Runtime.getRuntime().exec(command)
+                    else
+                        break;
+                    proc.waitFor(100, TimeUnit.MILLISECONDS)
+
+                    if (proc.isAlive())
+                        processes.add(proc)
+                    proc.waitFor()
+                }
+                catch (Exception ex) {
+                    logService.cam.error "${ex.getClass().getName()} in startProcess: " + ex.getMessage()
+                }
+                Thread.sleep(1000)
+            }
+            while(running)
+        })
     }
 
     @PreDestroy
-    def stopProcesses() {
-        ObjectCommandResponse response = new ObjectCommandResponse()
-        try {
-            logService.cam.debug "stopProcessses called ${p.toString()}"
-
-            // Recursively kill the process tree
-            killProcesses(p.toHandle())
-            pid = null
-        }
-        catch (Exception ex) {
-            logService.cam.error "Exception in stopProcesses: " + ex.getMessage()
-            response.status = PassFail.FAIL
-            response.error = ex.getMessage()
-        }
-        return response
+    void stopProcesses()
+    {
+        running = false
+        processExecutors.shutdownNow()
+        processes.forEach(process -> {
+            process.descendants().forEach(desc -> desc.destroy())
+            process.destroy()
+        })
     }
 
-    boolean isRunning() {
-        try {
-            p.exitValue()
-            return false
-        } catch (ignored) {
-            return true
-        }
+    private Map<String, Camera> getCamerasData()
+    {
+        File file = new File("${grailsApplication.config.camerasHomeDirectory}/cameras.json")
+        JsonSlurper parser = new JsonSlurper()
+        def json = parser.parse(file)
+        return json as Map<String, Camera>
     }
 }
