@@ -1,17 +1,19 @@
 const PROXY_CONFIG = [
-  {
-    context: [
+  {  context: [
       "/application",
       "/assets",
       "/cam",
-      "/CloudProxy",
       "/motion",
       "/onvif",
       "/user",
       "/utils",
-      "/login"
+      "/recording",
+      "/wifiUtils",
+      "/cloudProxy",
+      "/dc"
     ],
-    target: "http://localhost:8080",
+    target: "http://localhost:8080/",
+    changeOrigin: false,
     secure: false
   },
   {
@@ -19,15 +21,10 @@ const PROXY_CONFIG = [
       "/live"
     ],
     ws: true,
-    target: "http://localhost:8009",
+    target: "http://localhost:8009/",
+    changeOrigin: false,
     secure: false
-  },
-  {
-    context: [
-      "/recording"
-    ],
-    target: "http://localhost:8080/recording",
-    secure: false
-  }]
+  }
+]
 
 module.exports = PROXY_CONFIG;

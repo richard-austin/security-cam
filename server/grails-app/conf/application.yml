@@ -114,7 +114,7 @@ environments:
     grails:
       plugin:
         springsecurity:
-          active: true
+          active: false
       cors:
         enabled: true
 
