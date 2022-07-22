@@ -2,14 +2,12 @@ package security.cam
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
-import grails.util.Environment
 import groovy.json.JsonSlurper
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
 
 import javax.annotation.PreDestroy
-import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -25,7 +23,6 @@ class Sc_processesService {
 
     Sc_processesService() {
         processes = new ArrayList()
-        processExecutors = Executors.newCachedThreadPool()
     }
 
     private List<ProcessHandle> killProcessTree(ProcessHandle ph) {
@@ -43,13 +40,8 @@ class Sc_processesService {
         ObjectCommandResponse response = new ObjectCommandResponse()
         logService.cam.debug "startProcesses called"
         try {
-//            def name = cams['camera1'].name
-//            def address = cams['camera1'].address
-//            def controlUri = cams['camera1'].controlUri
-//            def snapshotUri = cams['camera1'].snapshotUri
-//            def streams = cams['camera1'].streams
-
             running = true
+            processExecutors = Executors.newCachedThreadPool()
            // startProcess("/usr/bin/motion")
             startProcess("/usr/bin/node /etc/security-cam/nms/app.js")
             Map<String, Camera> cams = getCamerasData()
@@ -96,7 +88,7 @@ class Sc_processesService {
                     else if(command instanceof String[])
                         proc = Runtime.getRuntime().exec(command)
                     else
-                        break;
+                        break
                     proc.waitFor(100, TimeUnit.MILLISECONDS)
 
                     if (proc.isAlive())

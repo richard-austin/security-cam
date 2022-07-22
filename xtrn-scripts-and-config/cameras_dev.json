@@ -2,7 +2,7 @@
   "camera1": {
     "address": "192.168.0.30",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
-    "name": "Porch",
+    "name": "Porch 6",
     "snapshotUri": "http://192.168.0.30:80/tmpfs/auto.jpg",
     "streams": {
       "stream1": {
@@ -18,7 +18,7 @@
         "recording": {
           "enabled": true,
           "location": "stream1",
-          "uri": "/recording/stream1/"
+          "uri": "http://localhost:8084/recording/stream1/"
         },
         "uri": "http://localhost:8009/nms/stream1.flv",
         "video_height": 1080,
@@ -37,7 +37,7 @@
         "recording": {
           "enabled": true,
           "location": "stream2",
-          "uri": "/recording/stream2/"
+          "uri": "http://localhost:8084/recording/stream2/"
         },
         "uri": "http://localhost:8009/nms/stream2.flv",
         "video_height": 352,
@@ -64,7 +64,7 @@
         "recording": {
           "enabled": true,
           "location": "stream3",
-          "uri": "/recording/stream3/"
+          "uri": "http://localhost:8084/recording/stream3/"
         },
         "uri": "http://localhost:8009/nms/stream3.flv",
         "video_height": 1080,
@@ -83,7 +83,7 @@
         "recording": {
           "enabled": true,
           "location": "stream4",
-          "uri": "/recording/stream4/"
+          "uri": "http://localhost:8084/recording/stream4/"
         },
         "uri": "http://localhost:8009/nms/stream4.flv",
         "video_height": 352,
@@ -110,7 +110,7 @@
         "recording": {
           "enabled": true,
           "location": "stream5",
-          "uri": "/recording/stream5/"
+          "uri": "http://localhost:8084/recording/stream5/"
         },
         "uri": "http://localhost:8009/nms/stream5.flv",
         "video_height": 1080,
@@ -129,7 +129,7 @@
         "recording": {
           "enabled": true,
           "location": "stream6",
-          "uri": "/recording/stream6/"
+          "uri": "http://localhost:8084/recording/stream6/"
         },
         "uri": "http://localhost:8009/nms/stream6.flv",
         "video_height": 352,
@@ -156,7 +156,7 @@
         "recording": {
           "enabled": true,
           "location": "stream7",
-          "uri": "/recording/stream7/"
+          "uri": "http://localhost:8084/recording/stream7/"
         },
         "uri": "http://localhost:8009/nms/stream7.flv",
         "video_height": 1080,
@@ -175,7 +175,7 @@
         "recording": {
           "enabled": true,
           "location": "stream8",
-          "uri": "/recording/stream8/"
+          "uri": "http://localhost:8084/recording/stream8/"
         },
         "uri": "http://localhost:8009/nms/stream8.flv",
         "video_height": 352,

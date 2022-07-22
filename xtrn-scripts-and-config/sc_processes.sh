@@ -82,7 +82,14 @@ run_motion() {
 
 run_nms &
 run_motion &
-run_ffmpeg "rtsp://192.168.0.45:554/11" "rtmp://localhost:1935/nms/stream1" "Fig_Tree_HD" &
+run_ffmpeg "rtsp://192.168.0.30:554/11" "rtmp://localhost:1935/nms/stream1" "Porch_6_HD" &
+run_ffmpeg "rtsp://192.168.0.30:554/12" "rtmp://localhost:1935/nms/stream2" "Porch_6_Standard" &
+run_ffmpeg "rtsp://192.168.0.34:554/11" "rtmp://localhost:1935/nms/stream3" "Garage_HD" &
+run_ffmpeg "rtsp://192.168.0.34:554/12" "rtmp://localhost:1935/nms/stream4" "Garage_Standard" &
+run_ffmpeg "rtsp://192.168.0.35:554/11" "rtmp://localhost:1935/nms/stream5" "Garden_HD" &
+run_ffmpeg "rtsp://192.168.0.35:554/12" "rtmp://localhost:1935/nms/stream6" "Garden_Standard" &
+run_ffmpeg "rtsp://192.168.0.45:554/11" "rtmp://localhost:1935/nms/stream7" "Fig_Tree_HD" &
+run_ffmpeg "rtsp://192.168.0.45:554/12" "rtmp://localhost:1935/nms/stream8" "Fig_Tree_Standard" &
 
 run_check_ip_not_changed &
 

@@ -40,17 +40,19 @@ class ConfigurationUpdateService {
             // TODO: Must change these hard coded references to configured ones.
 
             response = camService.getCameras()
+            if(response.status == PassFail.PASS) {
 
-            Map<String, Camera> jsonObj = response.responseObject as Map<String, Camera>
+                Map<String, Camera> jsonObj = response.responseObject as Map<String, Camera>
 
-            logService.cam.info "Calling UpdateMotionConfig"
-            UpdateMotionConfig(jsonObj)
+                logService.cam.info "Calling UpdateMotionConfig"
+                UpdateMotionConfig(jsonObj)
 
-            // Update sc_processes.sh
-            logService.cam.info "Calling UpdateScProcesses"
-            UpdateScProcesses(jsonObj)
-            sc_processesService.startProcesses()
-            Thread.sleep(300)  // Give it time to start
+                // Update sc_processes.sh
+                logService.cam.info "Calling UpdateScProcesses"
+                UpdateScProcesses(jsonObj)
+                response = sc_processesService.startProcesses()
+                Thread.sleep(300)  // Give it time to start
+            }
         }
         catch (Exception ex) {
             logService.cam.error "Exception in generateConfigs: " + ex.getMessage()
