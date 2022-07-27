@@ -98,6 +98,7 @@ dependencies {
 
     implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.1'
     implementation "org.grails.plugins:gsp"
+    implementation 'javax.mail:mail:1.4.7'
 
     implementation 'commons-io:commons-io:2.8.0'
     compileOnly "io.micronaut:micronaut-inject-groovy"

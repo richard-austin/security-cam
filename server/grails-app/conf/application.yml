@@ -123,6 +123,8 @@ environments:
       url: jdbc:h2:mem:devDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
 
     camerasHomeDirectory: /home/security-cam
+    myipFileLocation: /home/security-cam/myip
+
     cloudProxy:
       enabled: true
       trustStorePath: ../xtrn-scripts-and-config/cacert.jks
@@ -134,6 +136,20 @@ environments:
       cloudPort: 8081
       webServerHost: localhost
       webServerPort: 8080
+
+    mail:
+      smtp:
+        auth: true
+        username: rdaustin@virginmedia.com
+        password: DC10plus
+        starttls:
+          enable: true
+        ssl:
+          protocols: TLSv1.2
+          trust: smtp.virginmedia.com
+        host: smtp.virginmedia.com
+        port: 587
+        fromaddress: rdaustin@virginmedia.com
 
     test:
       dataSource:
@@ -170,6 +186,8 @@ environments:
         defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
 
     camerasHomeDirectory: /home/security-cam
+    myipFileLocation: /home/security-cam/myip
+
     cloudProxy:
       enabled: false
       trustStorePath: /etc/security-cam/cacert.jks
@@ -181,3 +199,17 @@ environments:
       cloudPort: 8081
       webServerHost: localhost
       webServerPort: 8088
+
+    mail:
+      smtp:
+        auth: true
+        username: rdaustin@virginmedia.com
+        password: DC10plus
+        starttls:
+          enable: true
+        ssl:
+          protocols: TLSv1.2
+          trust: smtp.virginmedia.com
+        host: smtp.virginmedia.com
+        port: 587
+        fromaddress: rdaustin@virginmedia.com
