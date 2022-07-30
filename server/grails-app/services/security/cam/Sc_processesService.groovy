@@ -2,6 +2,7 @@ package security.cam
 
 import grails.config.Config
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.util.Environment
 import security.cam.eventlisteners.IpCheckTimerTask
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
@@ -102,21 +103,21 @@ class Sc_processesService {
             logService.cam.warn("Current IP (${currentIp}) now matches the saved IP address. Stop sending warning emails")
         } else {
             // IP address does not match the saved IP, send a warning email
-            def principal = springSecurityService.getPrincipal()
-            String userName = principal?.getUsername()
-            User user = userName != null ? User.findByUsername(userName) : null
-            if (user != null)  // User will be null in development mode
-                sendEmail(userName, user.email, currentIp)
-            else
+            if (Environment.current.name == 'development') {
                 sendEmail("Richard", "richard.david.austin@gmail.com", currentIp)
+            } else {
+                User user = User.findByCloudAccount(false)
+                if (user != null)
+                    sendEmail(user.username, user.email, currentIp)
+            }
         }
     }
 
     /**
      * sendEmail: Send the warning email with the new IP address if the public facing IP address for the broadband connection changes.
-     * @param userName: User name used for salutation
-     * @param recipientAddress: The address to send te message to.
-     * @param currentIP: The current (new) IP address
+     * @param userName : User name used for salutation
+     * @param recipientAddress : The address to send te message to.
+     * @param currentIP : The current (new) IP address
      * @return
      */
     private void sendEmail(String userName, String recipientAddress, String currentIP) {
@@ -209,7 +210,8 @@ class Sc_processesService {
             setupIpCheckTimer()
             running = true
             processExecutors = Executors.newCachedThreadPool()
-            // startProcess("/usr/bin/motion")
+            if (Environment.current.name != 'development')
+                startProcess("/usr/bin/motion")
             startProcess("/usr/bin/node /etc/security-cam/nms/app.js")
             Map<String, Camera> cams = getCamerasData()
             String log_dir = "/home/security-cam/logs/"      // TODO: Get from config
@@ -270,6 +272,14 @@ class Sc_processesService {
                 }
                 catch (Exception ex) {
                     logService.cam.error "${ex.getClass().getName()} in startProcess: " + ex.getMessage()
+                }
+                if (command instanceof String)
+                    logService.cam.warn("Process terminated: (${command}}")
+                else if (command instanceof  String[])
+                {
+                    logService.cam.warn("Process terminated: -")
+                    for(String cmd: command)
+                        logService.cam.warn("${cmd}")
                 }
                 Thread.sleep(1000)
             }
