@@ -136,6 +136,7 @@ environments:
       cloudPort: 8081
       webServerHost: localhost
       webServerPort: 8080
+      logLevel: TRACE
 
     mail:
       smtp:
@@ -199,6 +200,7 @@ environments:
       cloudPort: 8081
       webServerHost: localhost
       webServerPort: 8088
+      logLevel: INFO
 
     mail:
       smtp:

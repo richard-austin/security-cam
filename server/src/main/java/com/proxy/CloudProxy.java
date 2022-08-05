@@ -34,7 +34,7 @@ public class CloudProxy implements SslContextProvider {
     private final int lengthLength = Integer.BYTES;
     private final int closedFlagLength = Byte.BYTES;
     private final int headerLength = tokenLength + lengthLength + closedFlagLength;
-    public static final int BUFFER_SIZE = 16000;
+    public static final int BUFFER_SIZE = 1024;
     private final long cloudProxySessionTimeout = 50 * 1000; // Restart CloudProxy after 50 seconds without a heartbeat
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     final Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
@@ -65,6 +65,7 @@ public class CloudProxy implements SslContextProvider {
 
     public void start() {
         if (!running) {
+            setLogLevel(cloudProxyProperties.getLOG_LEVEL());
             cloudProxyExecutor = Executors.newSingleThreadExecutor();
             splitMessagesExecutor = Executors.newSingleThreadExecutor();
             webserverReadExecutor = Executors.newCachedThreadPool();
@@ -98,8 +99,8 @@ public class CloudProxy implements SslContextProvider {
             try {
                 if (cloudChannel != null && !cloudChannel.isClosed())
                     cloudChannel.close();
+            } catch (Exception ignored) {
             }
-            catch(Exception ignored){}
 
             splitMessagesExecutor.shutdownNow();
             webserverReadExecutor.shutdownNow();
@@ -122,9 +123,9 @@ public class CloudProxy implements SslContextProvider {
         try {
             if (this.cloudChannel == null || !this.cloudChannel.isConnected() || this.cloudChannel.isClosed()) {
                 createCloudProxySessionTimer();   // Start the connection timer, if heartbeats are not received for the
-                                                  // timout period, this will trigger a retry.
-                                                  // If we fail to connect,this time, the timeout will trigger a retry
-                                                  // after the timeout period.
+                // timout period, this will trigger a retry.
+                // If we fail to connect,this time, the timeout will trigger a retry
+                // after the timeout period.
 
                 SSLSocket cloudChannel = createSSLSocket(cloudHost, cloudPort, this);
                 if (productKeyAccepted(cloudChannel)) {
@@ -190,16 +191,17 @@ public class CloudProxy implements SslContextProvider {
     }
 
     private boolean isHeartbeat(ByteBuffer buf) {
+        final int position = buf.position();
         boolean retVal = false;
         // Dump the connection test heartbeats
         final String ignored = "Ignore";
         if (getToken(buf) == -1 && getDataLength(buf) == ignored.length()) {
             String strVal = new String(Arrays.copyOfRange(buf.array(), headerLength, buf.limit()), StandardCharsets.UTF_8);
             if (ignored.equals(strVal)) {
-                resetCloudProxySessionTimeout();
                 retVal = true;
             }
         }
+        buf.position(position);
         return retVal;
     }
 
@@ -212,16 +214,23 @@ public class CloudProxy implements SslContextProvider {
                     InputStream is = cloudChannel.getInputStream();
                     ByteBuffer buf = getBuffer();
                     while (read(is, buf) != -1) {
+                        logger.trace("startCloudInputProcess read pos: " +buf.position()+" length: "+buf.limit());
                         if (!isHeartbeat(buf))
                             splitMessages(buf);
+                        else {
+                            resetCloudProxySessionTimeout();
+                            logger.debug("Heartbeat received");
+                        }
                         buf = getBuffer();
                     }
                     recycle(buf);
                     busy.set(false);
+                    busy.set(false);
+                    logger.error("Cloud reader socket has closed in startCloudInputProcess");
                 }
             } catch (Exception ex) {
                 showExceptionDetails(ex, "startCloudInputProcess");
-             //   restart();  // The session timeout will restart it, this will only result in 2 restarts.
+                //   restart();  // The session timeout will restart it, this will only result in 2 restarts.
             }
         });
     }
@@ -264,9 +273,7 @@ public class CloudProxy implements SslContextProvider {
             SocketChannel sock = tokenSocketMap.get(token);
             sock.close();
             tokenSocketMap.remove(token);
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             showExceptionDetails(ex, "removeSocket");
         }
     }
@@ -277,6 +284,7 @@ public class CloudProxy implements SslContextProvider {
     void restart() {
         if (running) {
             try {
+                setLogLevel(cloudProxyProperties.getLOG_LEVEL());
                 logger.info("Restarting CloudProxy");
                 sendResponseToCloudExecutor.shutdownNow();
                 startCloudInputProcessExecutor.shutdownNow();
@@ -334,6 +342,7 @@ public class CloudProxy implements SslContextProvider {
                 webserverChannel.connect(new InetSocketAddress(webserverHost, webserverPort));
                 webserverChannel.configureBlocking(true);
                 tokenSocketMap.put(token, webserverChannel);
+                logger.debug("writeRequestToWebserver(1) length: " + getDataLengthFullRestore(buf));
                 writeRequestToWebserver(buf, webserverChannel);
                 readResponseFromWebserver(webserverChannel, token);
             }
@@ -351,16 +360,19 @@ public class CloudProxy implements SslContextProvider {
                 buf.position(headerLength);
                 buf.limit(headerLength + length);
                 int result;
+                logger.debug("writeRequestToWebserver(2) length: " + getDataLengthFullRestore(buf));
                 do {
                     result = webserverChannel.write(buf);
                 }
                 while (result != -1 && buf.position() < buf.limit());
+
+               // recycle(buf);
             } catch (ClosedChannelException ignored) {
                 try {
                     // Close the channel or the socket will be left in the CLOSE-WAIT state
                     webserverChannel.close();
+                } catch (Exception ignore) {
                 }
-                catch(Exception ignore){}
             } catch (Exception ex) {
                 showExceptionDetails(ex, "writeRequestToWebserver");
             }
@@ -376,6 +388,7 @@ public class CloudProxy implements SslContextProvider {
                     sendResponseToCloud(buf);
                     buf = getBuffer(token);
                 }
+                logger.debug("readResponseFromWebserver length: " + getDataLengthFullRestore(buf));
                 setConnectionClosedFlag(buf);
                 sendResponseToCloud(buf);
                 webserverChannel.close();
@@ -396,7 +409,7 @@ public class CloudProxy implements SslContextProvider {
                 OutputStream os = cloudChannel.getOutputStream();
                 setBufferForSend(buf);
 
-                int result;
+                logger.debug("sendResponseToCloud length: " + getDataLengthFullRestore(buf));
                 do {
                     write(os, buf);
                 }
@@ -495,6 +508,16 @@ public class CloudProxy implements SslContextProvider {
         return length;
     }
 
+    private int getDataLengthFullRestore(ByteBuffer buf) {
+        int limit = buf.limit();
+        int position = buf.position();
+        int length = getDataLength(buf);
+        buf.limit(limit);
+        buf.position(position);
+
+        return length;
+    }
+
     /**
      * getToken: Get the token in the ByteBuffer
      *
@@ -538,11 +561,12 @@ public class CloudProxy implements SslContextProvider {
     ByteBuffer remainsOfPreviousBuffer = null;
 
     void splitMessages(ByteBuffer buf) {
+        logger.trace("splitMessages (pre thread) input buf pos: " +buf.position() + " length: "+buf.limit());
         splitMessagesExecutor.submit(() -> {
             try {
                 buf.flip();
                 ByteBuffer combinedBuf;
-
+                logger.trace("splitMessages input buf pos: " +buf.position() + " length: "+buf.limit());
                 if (remainsOfPreviousBuffer != null) {
                     // Append the new buffer onto the previous ones remaining content
                     combinedBuf = ByteBuffer.allocate(buf.limit() + remainsOfPreviousBuffer.limit() - remainsOfPreviousBuffer.position());
@@ -554,24 +578,25 @@ public class CloudProxy implements SslContextProvider {
                 combinedBuf.rewind();
 
                 while (combinedBuf.position() < combinedBuf.limit()) {
+                    int lengthThisMessage = getMessageLengthFromPosition(combinedBuf);
                     if (combinedBuf.limit() - combinedBuf.position() < headerLength) {
                         remainsOfPreviousBuffer = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.limit()));
                         combinedBuf.position(combinedBuf.limit());
                     } else {
-                        int lengthThisMessage = getMessageLengthFromPosition(combinedBuf);
-                        if (lengthThisMessage > combinedBuf.limit() - combinedBuf.position()) {
-                            remainsOfPreviousBuffer = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.limit()));
-                            combinedBuf.position(combinedBuf.limit());
-                        } else {
+                         if (lengthThisMessage > combinedBuf.limit() - combinedBuf.position()) {
+                        remainsOfPreviousBuffer = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.limit()));
+                        combinedBuf.position(combinedBuf.limit());
+                    } else {
                             ByteBuffer newBuf = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.position() + lengthThisMessage));
                             newBuf.rewind();
-                            //    logger.log(Level.INFO, "Buffer size " + newBuf.limit() + " lengthThisMessage= " + lengthThisMessage);
+                            //     logger.log(Level.INFO, "Buffer size " + newBuf.limit() + " lengthThisMessage= " + lengthThisMessage);
                             combinedBuf.position(combinedBuf.position() + lengthThisMessage);
+                            logger.debug("splitMessages length: "+getDataLengthFullRestore(newBuf));
                             writeRequestToWebserver(newBuf);
                         }
                     }
                 }
-                recycle(buf);
+                //recycle(buf);
             } catch (Exception ex) {
                 showExceptionDetails(ex, "splitMessages");
                 restart();

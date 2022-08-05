@@ -30,6 +30,7 @@ public final class CloudProxyProperties {
         TRUSTSTORE_PASSWORD = config.getProperty("cloudProxy.trustStorePassword");
         CLOUD_PROXY_KEYSTORE_PASSWORD = config.getProperty("cloudProxy.keyStorePassword");
         PRODUCT_KEY_PATH = config.getProperty("cloudProxy.productKeyPath");
+        LOG_LEVEL = config.getProperty("cloudProxy.logLevel");
     }
 
     static final int REQUEST_TIMEOUT_SECS = 300;
@@ -38,6 +39,7 @@ public final class CloudProxyProperties {
     private String CLOUD_PROXY_KEYSTORE_PASSWORD ;
     private String TRUSTSTORE_PASSWORD;
     private String PRODUCT_KEY_PATH;
+    private String LOG_LEVEL;
 
     public String getTRUSTSTORE_PATH() {
         return TRUSTSTORE_PATH;
@@ -57,5 +59,7 @@ public final class CloudProxyProperties {
 
 
     public String getPRODUCT_KEY_PATH() { return PRODUCT_KEY_PATH; }
+
+    public String getLOG_LEVEL() { return LOG_LEVEL; }
 }
 

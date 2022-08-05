@@ -6,11 +6,11 @@
     "snapshotUri": "http://192.168.0.30:80/tmpfs/auto.jpg",
     "streams": {
       "stream1": {
-        "defaultOnMultiDisplay": false,
+        "defaultOnMultiDisplay": true,
         "descr": "HD",
         "motion": {
-          "enabled": false,
-          "mask_file": "",
+          "enabled": true,
+          "mask_file": "porch_cam_mask.pgm",
           "trigger_recording_on": ""
         },
         "netcam_uri": "rtsp://192.168.0.30:554/11",
@@ -23,25 +23,6 @@
         "uri": "/live/nms/stream1.flv",
         "video_height": 1080,
         "video_width": 1920
-      },
-      "stream2": {
-        "defaultOnMultiDisplay": true,
-        "descr": "Standard",
-        "motion": {
-          "enabled": true,
-          "mask_file": "porch_cam_mask.pgm",
-          "trigger_recording_on": "camera1.stream1"
-        },
-        "netcam_uri": "rtsp://192.168.0.30:554/12",
-        "nms_uri": "rtmp://localhost:1935/nms/stream2",
-        "recording": {
-          "enabled": true,
-          "location": "stream2",
-          "uri": "/recording/stream2/"
-        },
-        "uri": "/live/nms/stream2.flv",
-        "video_height": 352,
-        "video_width": 640
       }
     }
   }
