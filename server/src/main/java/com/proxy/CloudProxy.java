@@ -214,7 +214,7 @@ public class CloudProxy implements SslContextProvider {
                     InputStream is = cloudChannel.getInputStream();
                     ByteBuffer buf = getBuffer();
                     while (read(is, buf) != -1) {
-                        logger.trace("startCloudInputProcess read pos: " +buf.position()+" length: "+buf.limit());
+                        logger.trace("startCloudInputProcess read pos: " + buf.position() + " length: " + buf.limit());
                         if (!isHeartbeat(buf))
                             splitMessages(buf);
                         else {
@@ -223,7 +223,6 @@ public class CloudProxy implements SslContextProvider {
                         }
                         buf = getBuffer();
                     }
-                    recycle(buf);
                     busy.set(false);
                     busy.set(false);
                     logger.error("Cloud reader socket has closed in startCloudInputProcess");
@@ -366,7 +365,7 @@ public class CloudProxy implements SslContextProvider {
                 }
                 while (result != -1 && buf.position() < buf.limit());
 
-               // recycle(buf);
+               // Don't recycle the dynamically created buffer as it will cause a build up in the buffer qeue// These are left to be cleared up by Java housekeeping.
             } catch (ClosedChannelException ignored) {
                 try {
                     // Close the channel or the socket will be left in the CLOSE-WAIT state
@@ -561,42 +560,48 @@ public class CloudProxy implements SslContextProvider {
     ByteBuffer remainsOfPreviousBuffer = null;
 
     void splitMessages(ByteBuffer buf) {
-        logger.trace("splitMessages (pre thread) input buf pos: " +buf.position() + " length: "+buf.limit());
+        logger.trace("splitMessages (pre thread) input buf pos: " + buf.position() + " length: " + buf.limit());
         splitMessagesExecutor.submit(() -> {
             try {
                 buf.flip();
                 ByteBuffer combinedBuf;
-                logger.trace("splitMessages input buf pos: " +buf.position() + " length: "+buf.limit());
+                logger.trace("splitMessages input buf pos: " + buf.position() + " length: " + buf.limit());
                 if (remainsOfPreviousBuffer != null) {
                     // Append the new buffer onto the previous ones remaining content
                     combinedBuf = ByteBuffer.allocate(buf.limit() + remainsOfPreviousBuffer.limit() - remainsOfPreviousBuffer.position());
                     combinedBuf.put(remainsOfPreviousBuffer);
                     combinedBuf.put(buf);
                     remainsOfPreviousBuffer = null;
-                } else
-                    combinedBuf = buf;
-                combinedBuf.rewind();
+
+                } else {
+                    combinedBuf = getBuffer();
+                    combinedBuf.put(buf);
+                }
+                combinedBuf.flip();
+                recycle(buf);
+
 
                 while (combinedBuf.position() < combinedBuf.limit()) {
                     int lengthThisMessage = getMessageLengthFromPosition(combinedBuf);
                     if (combinedBuf.limit() - combinedBuf.position() < headerLength) {
                         remainsOfPreviousBuffer = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.limit()));
+                        remainsOfPreviousBuffer.rewind();
                         combinedBuf.position(combinedBuf.limit());
                     } else {
-                         if (lengthThisMessage > combinedBuf.limit() - combinedBuf.position()) {
-                        remainsOfPreviousBuffer = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.limit()));
-                        combinedBuf.position(combinedBuf.limit());
-                    } else {
+                        if (lengthThisMessage > combinedBuf.limit() - combinedBuf.position()) {
+                            remainsOfPreviousBuffer = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.limit()));
+                            remainsOfPreviousBuffer.rewind();
+                            combinedBuf.position(combinedBuf.limit());
+                        } else {
                             ByteBuffer newBuf = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.position() + lengthThisMessage));
                             newBuf.rewind();
                             //     logger.log(Level.INFO, "Buffer size " + newBuf.limit() + " lengthThisMessage= " + lengthThisMessage);
                             combinedBuf.position(combinedBuf.position() + lengthThisMessage);
-                            logger.debug("splitMessages length: "+getDataLengthFullRestore(newBuf));
+                            logger.debug("splitMessages length: " + getDataLengthFullRestore(newBuf));
                             writeRequestToWebserver(newBuf);
                         }
                     }
                 }
-                //recycle(buf);
             } catch (Exception ex) {
                 showExceptionDetails(ex, "splitMessages");
                 restart();
