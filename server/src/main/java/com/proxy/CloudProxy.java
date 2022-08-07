@@ -462,8 +462,10 @@ public class CloudProxy implements SslContextProvider {
     }
 
     private void recycle(ByteBuffer buf) {
-        buf.clear();
-        bufferQueue.add(buf);
+        if(buf.capacity() == BUFFER_SIZE) {  // Don't recycle buffers created outside getBuffer()
+            buf.clear();
+            bufferQueue.add(buf);
+        }
     }
 
     /**
