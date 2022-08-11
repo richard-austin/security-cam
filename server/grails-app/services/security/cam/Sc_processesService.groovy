@@ -296,14 +296,15 @@ class Sc_processesService {
                     logService.cam.error "${ex.getClass().getName()} in startProcess: " + ex.getMessage()
                 }
                 if (command instanceof String)
-                    logService.cam.warn("Process terminated: (${command}}")
+                    logService.cam.debug("Process terminated: (${command}}")
                 else if (command instanceof  String[])
                 {
                     logService.cam.warn("Process terminated: -")
                     for(String cmd: command)
-                        logService.cam.warn("${cmd}")
+                        logService.cam.debug("${cmd}")
                 }
-                Thread.sleep(1000)
+                if(running)
+                    Thread.sleep(1000)
             }
             while (running)
         })
@@ -315,10 +316,13 @@ class Sc_processesService {
     @PreDestroy
     void stopProcesses() {
         running = false
+        ipChangeCheckTimer.cancel()
+        ipChangeCheckTimer.purge()
         processExecutors.shutdownNow()
         processes.forEach(process -> {
             process.descendants().forEach(desc -> desc.destroy())
             process.destroy()
+            while(process.isAlive()){Thread.sleep(20)}
         })
     }
 

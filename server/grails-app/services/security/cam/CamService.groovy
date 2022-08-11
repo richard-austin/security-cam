@@ -34,13 +34,7 @@ class CamService {
         try {
             FileInputStream fis
 
-            if (Environment.current.name == 'development')
-                fis = new FileInputStream("../xtrn-scripts-and-config/cameras_dev.json")
-            else if (Environment.current.name == 'production')
-                fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/cameras.json")
-            else
-                throw new Exception('Unknown environment, expecting production or development')
-
+            fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/cameras.json")
             String data = IOUtils.toString(fis, "UTF-8")
             Gson gson2 = new Gson()
             Object obj = gson2.fromJson(data, Object.class)
@@ -89,12 +83,7 @@ class CamService {
             String prettyJsonString = gson.toJson(je)
 
             String fileName
-            if (Environment.current.name == 'development')
-                fileName = "../xtrn-scripts-and-config/cameras_dev.json"
-            else if (Environment.current.name == 'production')
-                fileName = "${grailsApplication.config.camerasHomeDirectory}/cameras.json"
-            else
-                throw new Exception('Unknown environment, expecting production or development')
+            fileName = "${grailsApplication.config.camerasHomeDirectory}/cameras.json"
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
             writer.write(prettyJsonString)
@@ -102,7 +91,6 @@ class CamService {
             writer.close()
 
             sc_processesService.stopProcesses()
-            Thread.sleep(500)
             configurationUpdateService.generateConfigs()
             sc_processesService.startProcesses()
 

@@ -22,9 +22,6 @@ class ConfigurationUpdateService {
         ObjectCommandResponse response = new ObjectCommandResponse()
         logService.cam.info "generateConfigs called"
         try {
-            // Stop sc_processes.sh before updating the config
-            sc_processesService.stopProcesses()
-
             int retryCount = 200
             while (sc_processesService.isRunning()) {
                 if (--retryCount <= 0)
@@ -46,10 +43,7 @@ class ConfigurationUpdateService {
 
                 logService.cam.info "Calling UpdateMotionConfig"
                 UpdateMotionConfig(jsonObj)
-
-                response = sc_processesService.startProcesses()
-                Thread.sleep(300)  // Give it time to start
-            }
+              }
         }
         catch (Exception ex) {
             logService.cam.error "Exception in generateConfigs: " + ex.getMessage()
