@@ -124,6 +124,7 @@ environments:
 
     camerasHomeDirectory: /home/security-cam
     myipFileLocation: /home/security-cam/myip
+    logLevel: DEBUG
 
     cloudProxy:
       enabled: true
@@ -188,6 +189,7 @@ environments:
 
     camerasHomeDirectory: /home/security-cam
     myipFileLocation: /home/security-cam/myip
+    logLevel: DEBUG
 
     cloudProxy:
       enabled: false

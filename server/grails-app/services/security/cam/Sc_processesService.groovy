@@ -94,7 +94,9 @@ class Sc_processesService {
     /**
      * emailTask: Task called periodically by the email timer
      */
+    @Transactional
     private void emailTask() {
+        try {
         String savedIp = getSavedIP()
         String currentIp = readMyIp()
         if (savedIp == currentIp) {
@@ -103,13 +105,22 @@ class Sc_processesService {
             logService.cam.warn("Current IP (${currentIp}) now matches the saved IP address. Stop sending warning emails")
         } else {
             // IP address does not match the saved IP, send a warning email
-            if (Environment.current.name == 'development') {
+                if (Environment.current.name == 'development') {
                 sendEmail("Richard", "richard.david.austin@gmail.com", currentIp)
             } else {
                 User user = User.findByCloudAccount(false)
+                    if (user == null)
+                        logService.cam.debug("emailTask: User is null")
+                    else
+                        logService.cam.debug("emailTask: username = ${user.username} email = ${user.email}")
+
                 if (user != null)
                     sendEmail(user.username, user.email, currentIp)
             }
+        }
+        }
+        catch (Exception ex) {
+            logService.cam.error("${ex.getClass().getName()} in emailTask: ${ex.getMessage()}: Caused by: ${ex.getCause()}")
         }
     }
 
@@ -133,24 +144,35 @@ class Sc_processesService {
         def fromaddress = config.getProperty("mail.smtp.fromaddress")
 
         Properties prop = new Properties()
-        prop.put("mail.smtp.auth", auth.toBoolean())
+        prop.put("mail.smtp.auth", auth)
         prop.put("mail.smtp.starttls.enable", enable)
         prop.put("mail.smtp.ssl.protocols", protocols)
         prop.put("mail.smtp.host", host)
-        prop.put("mail.smtp.port", port.toInteger())
+        prop.put("mail.smtp.port", port)
         prop.put("mail.smtp.ssl.trust", trust)
 
-        Session session = Session.getDefaultInstance(prop, new Authenticator() {
+        logService.cam.debug("mail.smtp.auth=${auth}")
+        logService.cam.debug("mail.smtp.starttls.enable=${enable}")
+        logService.cam.debug("mail.smtp.ssl.protocols=${protocols}")
+        logService.cam.debug("mail.smtp.host=${host}")
+        logService.cam.debug("mail.smtp.port=${port}")
+        logService.cam.debug("mail.smtp.ssl.trust=${trust}")
+
+        Session session = Session.getInstance(prop, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
+                logService.cam.trace("Authenticating: ${smtpUsername}:xxxxxxxxxx")
                 return new PasswordAuthentication(smtpUsername, password)
             }
         })
-
+        session.setDebug(true)
+        FileOutputStream fs = new FileOutputStream("/home/security-cam/javaxMailLog.log")
+        PrintStream ps = new PrintStream(fs, true)
+        session.setDebugOut(ps)
         Message message = new MimeMessage(session)
+        logService.cam.trace("fromaddress: ${fromaddress}")
         message.setFrom(new InternetAddress(fromaddress))
-        message.setRecipients(
-                Message.RecipientType.TO, InternetAddress.parse(recipientAddress))
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientAddress))
         message.setSubject("Change of public IP address")
 
         String msg = """Hi ${userName}.
@@ -176,7 +198,7 @@ class Sc_processesService {
         multipart.addBodyPart(mimeBodyPart)
 
         message.setContent(multipart)
-
+        logService.cam.debug("Sending email to ${recipientAddress}")
         Transport.send(message)
     }
 
