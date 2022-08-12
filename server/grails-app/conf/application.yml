@@ -114,7 +114,7 @@ environments:
     grails:
       plugin:
         springsecurity:
-          active: true
+          active: false
       cors:
         enabled: true
 
@@ -125,6 +125,11 @@ environments:
     camerasHomeDirectory: /home/security-cam
     myipFileLocation: /home/security-cam/myip
     logLevel: DEBUG
+
+    motion:
+      configDir: /home/security-cam/motion/conf.d
+      maskFileDir: /home/security-cam/motion
+      recordingDir: /home/security-cam
 
     cloudProxy:
       enabled: true
@@ -190,6 +195,11 @@ environments:
     camerasHomeDirectory: /home/security-cam
     myipFileLocation: /home/security-cam/myip
     logLevel: DEBUG
+
+    motion:
+      configDir: /home/security-cam/motion/conf.d
+      maskFileDir: /home/security-cam/motion
+      recordingDir: /home/security-cam
 
     cloudProxy:
       enabled: false
