@@ -1,24 +1,24 @@
 {
   "camera1": {
-    "address": "192.168.0.45",
+    "address": "192.168.0.30",
     "controlUri": "web/cgi-bin/hi3510/param.cgi",
-    "name": "Fig Tree",
-    "snapshotUri": "http://192.168.0.45:80/tmpfs/auto.jpg",
+    "name": "Porch",
+    "snapshotUri": "http://192.168.0.30:80/tmpfs/auto.jpg",
     "streams": {
       "stream1": {
         "defaultOnMultiDisplay": true,
         "descr": "HD",
         "motion": {
-          "enabled": false,
-          "mask_file": "",
+          "enabled": true,
+          "mask_file": "porch_cam_mask.pgm",
           "trigger_recording_on": ""
         },
-        "netcam_uri": "rtsp://192.168.0.45:554/11",
+        "netcam_uri": "rtsp://192.168.0.30:554/11",
         "nms_uri": "rtmp://localhost:1935/nms/stream1",
         "recording": {
-          "enabled": false,
-          "location": "stream4",
-          "uri": "/recording/stream4/"
+          "enabled": true,
+          "location": "stream1",
+          "uri": "/recording/stream1/"
         },
         "uri": "/live/nms/stream1.flv",
         "video_height": 1080,

@@ -2,6 +2,7 @@ package security.cam
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import org.slf4j.LoggerFactory
 
@@ -11,6 +12,8 @@ import javax.annotation.PostConstruct
 class LogService {
 
     Logger cam = null
+    GrailsApplication grailsApplication
+
     static Logger logger = null
 
     void setLogLevel(String level)
@@ -31,6 +34,6 @@ class LogService {
 
     @PostConstruct
     def initialise() {
-        setLogLevel('DEBUG')
+        setLogLevel(grailsApplication.config.logLevel as String)
     }
 }

@@ -11,7 +11,7 @@ node {
 task bootRun(type: NpmTask, dependsOn: 'npmInstall') {
     group = 'application'
     description = 'Start client side server'
-    args = ['run', 'start']
+    args = ['run', 'startProxy']
 }
 
 task test(type: NpmTask, dependsOn: 'npmInstall') {

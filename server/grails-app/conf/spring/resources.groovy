@@ -1,8 +1,6 @@
 package spring
 
 import com.proxy.CloudProxyProperties
-import grails.core.GrailsApplication
-import grails.util.Environment
 import security.cam.commands.UserPasswordEncoderListener
 
 import security.cam.eventlisteners.SecCamAuthFailEventListener

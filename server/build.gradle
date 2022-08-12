@@ -61,7 +61,11 @@ configurations {
         extendsFrom developmentOnly
     }
     all*.exclude module: 'slf4j-jdk14'  // Exclude this one (part of a package in the Onvif code)
-    // as it clashes with Logback
+                                        // as it clashes with Logback
+    all*.exclude module: 'geronimo-javamail_1.4_mail' // Exclude this as not needed by OnVif and it stops javax.mail working
+                                                      // as it tries to use the Transport in this module.
+
+
 //    all*.exclude module : 'spring-boot-starter-logging'
 //    all*.exclude module : 'logback-classic'
 }
@@ -85,8 +89,6 @@ dependencies {
     implementation "org.grails:grails-plugin-services"
     implementation "org.grails:grails-plugin-url-mappings"
     implementation "org.grails:grails-plugin-interceptors"
-//    // https://mvnrepository.com/artifact/org.codehaus.groovy/groovy
-//    implementation group: 'org.codehaus.groovy', name: 'groovy', version: '3.0.11'
 
     implementation "org.grails.plugins:cache", { exclude group: "org.codehaus.groovy", module: "groovy-all" }
     implementation "org.grails.plugins:async"
@@ -98,13 +100,14 @@ dependencies {
 
     implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.1'
     implementation "org.grails.plugins:gsp"
+    implementation 'javax.mail:mail:1.4.7'
 
     implementation 'commons-io:commons-io:2.8.0'
     compileOnly "io.micronaut:micronaut-inject-groovy"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     console "org.grails:grails-console"
     profile "org.grails.profiles:web"
- //   runtimeOnly "org.glassfish.web:el-impl:2.2.1-b05"
+
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.apache.tomcat:tomcat-jdbc"
 
@@ -112,7 +115,6 @@ dependencies {
     runtimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.1'
 
     implementation "com.bertramlabs.plugins:asset-pipeline-grails:3.3.6"
-   // testCompileOnly "io.micronaut:micronaut-inject-cle"
     testCompileOnly "org.grails:grails-gorm-testing-support"
     testCompileOnly "org.mockito:mockito-core"
     testCompileOnly "org.grails:grails-web-testing-support"
