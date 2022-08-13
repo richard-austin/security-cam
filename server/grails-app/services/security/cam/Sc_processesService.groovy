@@ -244,6 +244,8 @@ class Sc_processesService {
                     startProcess(command)
                 })
             })
+            // Make motion reload its config to take on any changes
+            Runtime.getRuntime().exec("pkill --signal SIGHUP motion")
         }
         catch (Exception ex) {
             logService.cam.error "Exception in startProcesses: " + ex.getMessage()
