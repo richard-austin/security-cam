@@ -97,27 +97,27 @@ class Sc_processesService {
     @Transactional
     private void emailTask() {
         try {
-        String savedIp = getSavedIP()
-        String currentIp = readMyIp()
-        if (savedIp == currentIp) {
-            ipChangeCheckTimer.cancel()
-            setupIpCheckTimer()   // Set back to the periodic IP check when the saved and current IP are equal
-            logService.cam.warn("Current IP (${currentIp}) now matches the saved IP address. Stop sending warning emails")
-        } else {
-            // IP address does not match the saved IP, send a warning email
-                if (Environment.current.name == 'development') {
-                sendEmail("Richard", "richard.david.austin@gmail.com", currentIp)
+            String savedIp = getSavedIP()
+            String currentIp = readMyIp()
+            if (savedIp == currentIp) {
+                ipChangeCheckTimer.cancel()
+                setupIpCheckTimer()   // Set back to the periodic IP check when the saved and current IP are equal
+                logService.cam.warn("Current IP (${currentIp}) now matches the saved IP address. Stop sending warning emails")
             } else {
-                User user = User.findByCloudAccount(false)
+                // IP address does not match the saved IP, send a warning email
+                if (Environment.current.name == 'development') {
+                    sendEmail("Richard", "richard.david.austin@gmail.com", currentIp)
+                } else {
+                    User user = User.findByCloudAccount(false)
                     if (user == null)
                         logService.cam.debug("emailTask: User is null")
                     else
                         logService.cam.debug("emailTask: username = ${user.username} email = ${user.email}")
 
-                if (user != null)
-                    sendEmail(user.username, user.email, currentIp)
+                    if (user != null)
+                        sendEmail(user.username, user.email, currentIp)
+                }
             }
-        }
         }
         catch (Exception ex) {
             logService.cam.error("${ex.getClass().getName()} in emailTask: ${ex.getMessage()}: Caused by: ${ex.getCause()}")
@@ -232,8 +232,6 @@ class Sc_processesService {
             setupIpCheckTimer()
             running = true
             processExecutors = Executors.newCachedThreadPool()
-            if (Environment.current.name != 'development')
-                startProcess("/usr/bin/motion")
             startProcess("/usr/bin/node /etc/security-cam/nms/app.js")
             Map<String, Camera> cams = getCamerasData()
             String log_dir = "/home/security-cam/logs/"      // TODO: Get from config
@@ -297,13 +295,12 @@ class Sc_processesService {
                 }
                 if (command instanceof String)
                     logService.cam.debug("Process terminated: (${command}}")
-                else if (command instanceof  String[])
-                {
+                else if (command instanceof String[]) {
                     logService.cam.warn("Process terminated: -")
-                    for(String cmd: command)
+                    for (String cmd : command)
                         logService.cam.debug("${cmd}")
                 }
-                if(running)
+                if (running)
                     Thread.sleep(1000)
             }
             while (running)
@@ -322,7 +319,9 @@ class Sc_processesService {
         processes.forEach(process -> {
             process.descendants().forEach(desc -> desc.destroy())
             process.destroy()
-            while(process.isAlive()){Thread.sleep(20)}
+            while (process.isAlive()) {
+                Thread.sleep(20)
+            }
         })
     }
 
