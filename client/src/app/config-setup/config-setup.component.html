@@ -181,14 +181,14 @@
               <ng-container matColumnDef="audio_bitrate">
                 <th mat-header-cell *matHeaderCellDef>Audio Bitrate</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
-                  <mat-form-field appearance="legacy" [style.width.px]="60">
+                  <mat-form-field appearance="legacy" [style.width.px]="115">
                     <input matInput type="text" autocomplete="off" maxlength="20"
                            [formControl]="getStreamControl(camIndex, streamIndex, 'audio_bitrate')"
                            matTooltip="Set the audio bitrate for {{stream.key}}. If in doubt use 48000, or use zero if no audio on the camera."
                            matTooltipClass="tooltip"
                            placeholder="Audio Bitrate"
                            (change)="updateStreamField(camIndex, streamIndex, 'audio_bitrate')">
-                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_bitrate').hasError('required')">Description is required</mat-error>
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_bitrate').hasError('required')">Audio bitrate is required</mat-error>
                     <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_bitrate').hasError('pattern')">Values 0,8000,16000,24000,32000,40000 or 48000 accepted</mat-error>
                   </mat-form-field>
                 </td>
