@@ -6,6 +6,7 @@ import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
 import org.onvif.ver10.media.wsdl.Media
+import org.onvif.ver10.schema.AudioEncoderConfiguration
 import org.onvif.ver10.schema.Profile
 import org.onvif.ver10.schema.VideoEncoderConfiguration
 import org.onvif.ver10.schema.VideoResolution
@@ -16,7 +17,7 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
 import server.Stream
 
-import java.nio.file.Files
+import java.nio.charset.Charset
 
 @Transactional
 class OnvifService {
@@ -69,6 +70,11 @@ class OnvifService {
                         VideoResolution resolution = vec.resolution
                         stream.video_width = resolution.getWidth()
                         stream.video_height = resolution.getHeight()
+
+                        AudioEncoderConfiguration aec = profile.getAudioEncoderConfiguration()
+                        stream.audio_bitrate = aec.getBitrate()
+                        stream.audio_encoding =aec.getEncoding().value()
+                        stream.audio_sample_rate = aec.getSampleRate()
 
 //                        AudioSourceConfiguration aec = profile.getAudioSourceConfiguration()
 //                        PTZConfiguration ptzConf = profile.getPTZConfiguration()

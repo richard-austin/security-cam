@@ -114,7 +114,7 @@ environments:
     grails:
       plugin:
         springsecurity:
-          active: false
+          active: false  # Set to false for direct development access, or true to access via Cloud server
       cors:
         enabled: true
 
