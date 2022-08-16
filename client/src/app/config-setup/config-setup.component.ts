@@ -86,7 +86,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
-  streamColumns = ['stream_id', 'delete', 'descr', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
+  streamColumns = ['stream_id', 'delete', 'descr', 'audio_bitrate', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
   streamFooterColumns = ['buttons']
 //  camSetupFormGroup!: FormGroup;
   camControls!: FormArray;
@@ -178,7 +178,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             value: stream.descr,
             disabled: false
           }, [Validators.required, Validators.maxLength(25), Validators.pattern("^[a-zA-Z0-9](_(?!(\\.|_|))|\\.(?!(_|\\.))|[a-zA-Z0-9 ]){0,18}[a-zA-Z0-9]$")]),
-          netcam_uri: new FormControl(stream.netcam_uri, [Validators.required, Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
+          audio_bitrate: new FormControl(stream.audio_bitrate, [Validators.required, Validators.pattern(/^(0|8000|16000|24000|32000|40000|48000)$/)]),
+          netcam_uri: new FormControl(stream.netcam_uri, [Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
           video_width: new FormControl({
             value: stream.video_width,
             disabled: !stream.motion?.enabled

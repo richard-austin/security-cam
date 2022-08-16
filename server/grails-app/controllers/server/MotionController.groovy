@@ -4,6 +4,7 @@ import com.google.gson.internal.LinkedHashTreeMap
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
+import org.onvif.ver10.schema.AudioEncoding
 import security.cam.LogService
 import security.cam.commands.DeleteRecordingCommand
 import security.cam.commands.DownloadRecordingCommand
@@ -42,6 +43,9 @@ class Stream {
     boolean defaultOnMultiDisplay=false
     String netcam_uri=''
     String uri=''
+    String audio_bitrate="0"
+    String audio_encoding = null
+    Integer audio_sample_rate = 0
     String nms_uri=''
     Motion motion=new Motion()
     Integer video_width=0

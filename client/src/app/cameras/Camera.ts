@@ -33,6 +33,10 @@ export class Stream {
   netcam_uri: string = "";
   uri: string = "";
   nms_uri: string = "";
+  audio_bitrate: number=0;
+  audio_encoding:string = "";
+  audio_sample_rate:number = 0;
+
   motion: Motion = new Motion();
   video_width: number = 0;
   video_height: number = 0;

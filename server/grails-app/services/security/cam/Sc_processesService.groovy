@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit
 @Transactional
 class Sc_processesService {
     LogService logService
+    RestfulInterfaceService restfulInterfaceService
     GrailsApplication grailsApplication
     SpringSecurityService springSecurityService
 
@@ -240,12 +241,17 @@ class Sc_processesService {
                     String[] command = new String[3]
                     command[0] = "bash"
                     command[1] = "-c"
-                    command[2] = "/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -rtsp_transport tcp -i ${stream.netcam_uri} -an -c copy -f flv ${stream.nms_uri} 2>> ${log_dir}ffmpeg_${cam.name.replace(' ', '_') + "_" + stream.descr.replace(' ', '_').replace('.', '_')}_\$(date +%Y%m%d).log"
+                    command[2] = "/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -rtsp_transport tcp -i ${stream.netcam_uri} ${stream.audio_bitrate == "0" || stream.audio_bitrate == null ? "-an" : "-c:a aac -ar ${stream.audio_bitrate}"} -c:v copy  -preset superfast -tune zerolatency -f flv ${stream.nms_uri} 2>> ${log_dir}ffmpeg_${cam.name.replace(' ', '_') + "_" + stream.descr.replace(' ', '_').replace('.', '_')}_\$(date +%Y%m%d).log"
                     startProcess(command)
                 })
             })
-            // Make motion reload its config to take on any changes
-            Runtime.getRuntime().exec("pkill --signal SIGHUP motion")
+
+            // Start motion and reload config to take on any changes
+            restfulInterfaceService.sendRequest("localhost:8000", "/",
+                    "{\"command\": \"start_motion\"}",
+                    true, 12000)
+       //     Runtime.getRuntime().exec("pkill --signal SIGHUP motion")
+
         }
         catch (Exception ex) {
             logService.cam.error "Exception in startProcesses: " + ex.getMessage()
@@ -315,6 +321,10 @@ class Sc_processesService {
     @PreDestroy
     void stopProcesses() {
         running = false
+        restfulInterfaceService.sendRequest("localhost:8000", "/",
+                "{\"command\": \"stop_motion\"}",
+                true, 15000)
+
         ipChangeCheckTimer.cancel()
         ipChangeCheckTimer.purge()
         processExecutors.shutdownNow()

@@ -143,7 +143,7 @@
       <!-- Expanded Streams Column - The streams row is made up of this one column that spans across all columns -->
       <ng-container matColumnDef="expandedStreamDetail">
         <td mat-cell *matCellDef="let cam; let camIndex=dataIndex" [attr.colspan]="cameraColumns.length">
-          <div class="example-element-detail mat-elevation-z10"
+          <div class="element-detail mat-elevation-z10"
                [@detailExpand]="cam.value == expandedElement ? 'expanded' : 'collapsed'">
             <table mat-table [dataSource]="cam.value.streams | mapToKeyValue" class="streams-info mat-elevation-z10">
               <ng-container matColumnDef="stream_id">
@@ -175,6 +175,21 @@
                            (change)="updateStreamField(camIndex, streamIndex, 'descr')">
                     <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('required')">Description is required</mat-error>
                     <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('pattern')">2-20 characters, no special characters</mat-error>
+                  </mat-form-field>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="audio_bitrate">
+                <th mat-header-cell *matHeaderCellDef>Audio Bitrate</th>
+                <td mat-cell *matCellDef="let stream; let streamIndex = index">
+                  <mat-form-field appearance="legacy" [style.width.px]="115">
+                    <input matInput type="text" autocomplete="off" maxlength="20"
+                           [formControl]="getStreamControl(camIndex, streamIndex, 'audio_bitrate')"
+                           matTooltip="Set the audio bitrate for {{stream.key}}. If in doubt use 48000, or use zero if no audio on the camera."
+                           matTooltipClass="tooltip"
+                           placeholder="Audio Bitrate"
+                           (change)="updateStreamField(camIndex, streamIndex, 'audio_bitrate')">
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_bitrate').hasError('required')">Audio bitrate is required</mat-error>
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_bitrate').hasError('pattern')">Values 0,8000,16000,24000,32000,40000 or 48000 accepted</mat-error>
                   </mat-form-field>
                 </td>
               </ng-container>
@@ -375,11 +390,11 @@
 
       <tr mat-header-row *matHeaderRowDef="cameraColumns"></tr>
       <tr mat-row *matRowDef="let cam; columns: cameraColumns;"
-          class="example-element-row"
+          class="element-row"
           [class.example-expanded-row]="expandedElement === cam.value">
       </tr>
 
-      <tr mat-row *matRowDef="let e; columns: ['expandedStreamDetail']" class="example-detail-row">
+      <tr mat-row *matRowDef="let e; columns: ['expandedStreamDetail']" class="detail-row">
       </tr>
       <tr mat-footer-row *matFooterRowDef="cameraFooterColumns"></tr>
     </table>
