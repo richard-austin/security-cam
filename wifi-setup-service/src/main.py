@@ -137,7 +137,54 @@ class Handler(BaseHTTPRequestHandler):
         6: "Disconnecting device failed.",
         7: "Connection deletion failed.",
         8: "NetworkManager is not running.",
-        10: "Connection, device, or access point does not exist."
+        10: "Connection, device, or access point does not exist.",
+    }
+
+    systemd_errors = {
+        0: "Success",
+        200: "Changing to the requested working directory failed. See WorkingDirectory.",
+        201: "Failed to set up process scheduling priority (nice level). See Nice.",
+        202: "Failed to close unwanted file descriptors, or to adjust passed file descriptors.",
+        203: "The actual process execution failed (specifically, the execve(2) system call). Most likely this is caused by a missing or non-accessible executable file.",
+        204: "Failed to perform an action due to memory shortage.",
+        205: "Failed to adjust resource limits. See LimitCPU= and related settings above.",
+        206: "Failed to adjust the OOM setting. See OOMScoreAdjust.",
+        207: "Failed to set process signal mask.",
+        208: "Failed to set up standard input. See StandardInput.",
+        209: "Failed to set up standard output. See StandardOutput.",
+        210: "Failed to change root directory (chroot(2)). See RootDirectory=/RootImage.",
+        211: "Failed to set up IO scheduling priority. See IOSchedulingClass=/IOSchedulingPriority.",
+        212: "Failed to set up timer slack. See TimerSlackNSec.",
+        213: "Failed to set process secure bits. See SecureBits.",
+        214: "Failed to set up CPU scheduling. See CPUSchedulingPolicy=/CPUSchedulingPriority.",
+        215: "Failed to set up CPU affinity. See CPUAffinity.",
+        216: "Failed to determine or change group credentials. See Group=/SupplementaryGroups.",
+        217: "Failed to determine or change user credentials, or to set up user namespacing. See User=/PrivateUsers.",
+        218: "Failed to drop capabilities, or apply ambient capabilities. See CapabilityBoundingSet=/AmbientCapabilities.",
+        219: "Setting up the service control group failed.",
+        220: "Failed to create new process session.",
+        221: "Execution has been cancelled by the user. See the systemd.confirm_spawn= kernel command line setting on kernel-command-line(7) for details.",
+        222: "Failed to set up standard error output. See StandardError.",
+        224: "Failed to set up PAM session. See PAMName.",
+        225: "Failed to set up network namespacing. See PrivateNetwork.",
+        226: "Failed to set up mount, UTS, or IPC namespacing. See ReadOnlyPaths=, ProtectHostname=, PrivateIPC=, and related settings above.",
+        227: "Failed to disable new privileges. See NoNewPrivileges=yes above.",
+        228: "Failed to apply system call filters. See SystemCallFilter= and related settings above.",
+        229: "Determining or changing SELinux context failed. See SELinuxContext.",
+        230: "Failed to set up an execution domain (personality). See Personality.",
+        231: "Failed to prepare changing AppArmor profile. See AppArmorProfile.",
+        232: "Failed to restrict address families. See RestrictAddressFamilies.",
+        233: "Setting up runtime directory failed. See RuntimeDirectory= and related settings above.",
+        235: "Failed to adjust socket ownership. Used for socket units only.",
+        236: "Failed to set SMACK label. See SmackProcessLabel.",
+        237: "Failed to set up kernel keyring.",
+        238: "Failed to set up unit's state directory. See StateDirectory.",
+        239: "Failed to set up unit's cache directory. See CacheDirectory.",
+        240: "Failed to set up unit's logging directory. See LogsDirectory.",
+        241: "Failed to set up unit's configuration directory. See ConfigurationDirectory.",
+        242: "Failed to set up unit's NUMA memory policy. See NUMAPolicy= and NUMAMask.",
+        243: "Failed to set up unit's credentials. See LoadCredential= and SetCredential.",
+        245: "Failed to apply BPF restrictions. See RestrictFileSystems."
     }
 
     def returnResponse(self, http_status: int, response):
@@ -247,6 +294,16 @@ class Handler(BaseHTTPRequestHandler):
                     logger.info("Check if an ethernet connection is active")
                     ethernet: bool = check_for_ethernet()
                     self.returnResponse(200, {"ethernet": ethernet})
+                    return
+                # Options to start and stop the motion service. This requires root privileges
+                # hence using this module which is otherwise meant for Wi-Fi and network related control
+
+                case 'start_motion':
+                    executeOsCommand('systemctl start motion.service', self.systemd_errors)
+                    return
+
+                case 'stop_motion':
+                    executeOsCommand('systemctl stop motion.service', self.systemd_errors)
                     return
 
                 case _:

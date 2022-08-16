@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit
 @Transactional
 class Sc_processesService {
     LogService logService
+    RestfulInterfaceService restfulInterfaceService
     GrailsApplication grailsApplication
     SpringSecurityService springSecurityService
 
@@ -244,8 +245,13 @@ class Sc_processesService {
                     startProcess(command)
                 })
             })
-            // Make motion reload its config to take on any changes
-            Runtime.getRuntime().exec("pkill --signal SIGHUP motion")
+
+            // Start motion and reload config to take on any changes
+            restfulInterfaceService.sendRequest("localhost:8000", "/",
+                    "{\"command\": \"start_motion\"}",
+                    true, 12000)
+       //     Runtime.getRuntime().exec("pkill --signal SIGHUP motion")
+
         }
         catch (Exception ex) {
             logService.cam.error "Exception in startProcesses: " + ex.getMessage()
@@ -315,6 +321,10 @@ class Sc_processesService {
     @PreDestroy
     void stopProcesses() {
         running = false
+        restfulInterfaceService.sendRequest("localhost:8000", "/",
+                "{\"command\": \"stop_motion\"}",
+                true, 15000)
+
         ipChangeCheckTimer.cancel()
         ipChangeCheckTimer.purge()
         processExecutors.shutdownNow()
