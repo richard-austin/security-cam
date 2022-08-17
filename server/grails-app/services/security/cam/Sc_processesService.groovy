@@ -9,6 +9,7 @@ import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
+import security.cam.interfaceobjects.RestfulResponse
 import server.Camera
 
 import javax.annotation.PreDestroy
@@ -72,7 +73,7 @@ class Sc_processesService {
                 retVal = reader.nextLine()
         }
         catch (Exception ex) {
-            logService.cam.error "${ex.getClass().getName()} in startProcesses: " + ex.getMessage()
+            logService.cam.error "${ex.getClass().getName()} in getSavedIP: " + ex.getMessage()
         }
 
         return retVal
@@ -247,9 +248,15 @@ class Sc_processesService {
             })
 
             // Start motion and reload config to take on any changes
-            restfulInterfaceService.sendRequest("localhost:8000", "/",
+            RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
                     "{\"command\": \"start_motion\"}",
                     true, 12000)
+
+            if(restResponse.responseCode != 200) {
+                logService.cam.error("Error starting motion service: ${restResponse.errorMsg}")
+                response.status = PassFail.FAIL
+                response.error = restResponse.errorMsg
+            }
        //     Runtime.getRuntime().exec("pkill --signal SIGHUP motion")
 
         }
@@ -298,8 +305,12 @@ class Sc_processesService {
                         processes.add(proc)
                     proc.waitFor()
                 }
+                catch(InterruptedException iex)
+                {
+                    logService.cam.warn "${iex.getClass().getName()} in submitTask: " + iex.getMessage()
+                }
                 catch (Exception ex) {
-                    logService.cam.error "${ex.getClass().getName()} in startProcess: " + ex.getMessage()
+                    logService.cam.error "${ex.getClass().getName()} in submitTask: " + ex.getMessage()
                 }
                 if (command instanceof String)
                     logService.cam.debug("Process terminated: (${command}}")
@@ -319,22 +330,34 @@ class Sc_processesService {
      * stopProcesses: Stop all started processes and their descendents
      */
     @PreDestroy
-    void stopProcesses() {
-        running = false
-        restfulInterfaceService.sendRequest("localhost:8000", "/",
-                "{\"command\": \"stop_motion\"}",
-                true, 15000)
-
-        ipChangeCheckTimer.cancel()
-        ipChangeCheckTimer.purge()
-        processExecutors.shutdownNow()
-        processes.forEach(process -> {
-            process.descendants().forEach(desc -> desc.destroy())
-            process.destroy()
-            while (process.isAlive()) {
-                Thread.sleep(20)
+    def stopProcesses() {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            running = false
+            RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
+                    "{\"command\": \"stop_motion\"}",
+                    true, 15000)
+            if (restResponse.responseCode != 200) {
+                logService.cam.error("Error stopping motion service: ${restResponse.errorMsg}")
+                response.status = PassFail.FAIL
+                response.error = restResponse.errorMsg
             }
-        })
+
+            ipChangeCheckTimer.cancel()
+            ipChangeCheckTimer.purge()
+            processExecutors.shutdownNow()
+            processes.forEach(process -> {
+                process.descendants().forEach(desc -> desc.destroy())
+                process.destroy()
+                while (process.isAlive()) {
+                    Thread.sleep(20)
+                }
+            })
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("${ex.getClass().getName()} in stopProcesses: ${ex.getMessage()}")
+        }
     }
 
     private Map<String, Camera> getCamerasData() {
