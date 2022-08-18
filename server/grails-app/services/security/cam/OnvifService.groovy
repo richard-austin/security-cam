@@ -95,7 +95,6 @@ class OnvifService {
 //                        AudioEncoderConfiguration aconfig = media.getAudioEncoderConfiguration(audio2[0].getToken())
 //                        def info = device.getDeviceInfo()
                         })
-
                         logService.cam.info("Connected to device %s (%s)%n", device.getDeviceInfo(), device.streamUri.toString())
                         logService.cam.info(TestDevice.inspect(device))
 
@@ -119,9 +118,9 @@ class OnvifService {
                         }
 
                     } catch (Exception th) {
-                        logService.cam.error("Error on device: ${device?.streamUri?.toString()} ${th.getMessage()}")
+                        logService.cam.error("Error on device: ${device?.streamUri?.toString()}: ${th.getClass().getName()}: ${th.getMessage()}")
                         result.status = PassFail.FAIL
-                        result.error = "Error processing Onvif responses " + th.getMessage()
+                        result.error = "Error processing Onvif device responses " + th.getMessage()
                     }
                     // Set lowest resolution stream for default on multi display and for motion detection
                     setDefaults(cam)
