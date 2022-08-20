@@ -7,7 +7,6 @@ import com.google.gson.JsonParser
 import com.google.gson.internal.LinkedTreeMap
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
-import grails.util.Environment
 import org.apache.commons.io.IOUtils
 import security.cam.commands.SetAccessCredentialsCommand
 import security.cam.commands.UpdateCamerasCommand
@@ -90,14 +89,19 @@ class CamService {
 
             writer.close()
 
-            sc_processesService.stopProcesses()
+            ObjectCommandResponse stopResult = sc_processesService.stopProcesses()
             configurationUpdateService.generateConfigs()
-            sc_processesService.startProcesses()
+            ObjectCommandResponse startResult = sc_processesService.startProcesses()
 
             Gson gson2 = new Gson()
             LinkedTreeMap<String, Camera> obj = gson2.fromJson(prettyJsonString, Object.class) as LinkedTreeMap<String, Camera>
 
             removeUnusedMaskFiles(obj, grailsApplication)
+
+            if(stopResult.status != PassFail.PASS)
+                result = stopResult
+            else if (startResult.status != PassFail.PASS)
+                result = startResult
 
             result.setResponseObject(obj)
         }

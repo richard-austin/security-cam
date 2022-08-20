@@ -513,6 +513,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     },
       reason => {
         this.reporting.errorMessage = reason;
+        this.discovering=false;
       });
   }
 

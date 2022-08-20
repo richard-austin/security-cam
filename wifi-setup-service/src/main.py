@@ -300,10 +300,12 @@ class Handler(BaseHTTPRequestHandler):
 
                 case 'start_motion':
                     executeOsCommand('systemctl start motion.service', self.systemd_errors)
+                    self.returnResponse(200, {"result": "Motion service started"})
                     return
 
                 case 'stop_motion':
                     executeOsCommand('systemctl stop motion.service', self.systemd_errors)
+                    self.returnResponse(200, {"result": "Motion service stopped"})
                     return
 
                 case _:
