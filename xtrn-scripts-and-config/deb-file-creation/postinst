@@ -78,21 +78,20 @@ AddToTomcatUnitFileIfNotPresent() {
 lineToWrite="ReadWritePaths=/var/log/security-cam/"
 lineToWrite2="ReadWritePaths=/etc/security-cam/"
 lineToWriteUnder="ReadWritePaths=/var/lib/tomcat9/webapps/"
-unitFile="/etc/systemd/system/multi-user.target.wants/tomcat9.service"
+unitFile="/usr/lib/systemd/system/tomcat9.service"
 
 AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
 AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
 
-systemctl daemon-reload  # Register the motion service file change
+deb-systemd-invoke daemon-reload  # Register the motion service file change
 
 # Start the services
 deb-systemd-invoke enable motion
 deb-systemd-invoke start motion
-
-deb-systemd-invoke enable tomcat9.service
-deb-systemd-invoke start tomcat9.service
-
 deb-systemd-invoke enable nginx.service
+
+systemctl enable wifimanagement.service
+systemctl start wifimanagement.service
 
 CERT_FILE=/etc/nginx/security-cam.crt
 if test -f "$CERT_FILE"; then
@@ -109,9 +108,8 @@ fi
 deb-systemd-invoke stop chrony
 deb-systemd-invoke start chrony
 
+systemctl start tomcat9.service
+
 # Generate the product key if it does not already exist
 cd /etc/security-cam/ || exit
 ./productKeyGen.sh
-systemctl daemon-reload
-systemctl enable wifimanagement.service
-systemctl start wifimanagement.service
