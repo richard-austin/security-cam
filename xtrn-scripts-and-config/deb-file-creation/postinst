@@ -22,9 +22,9 @@ usermod -a -G security-cam tomcat
 usermod -a -G security-cam sec-cam
 usermod -a -G security-cam www-data
 
-chown -R sec-cam:security-cam /home/security-cam
+chown -R tomcat:security-cam /etc/security-cam
 
-chown tomcat:security-cam /home/security-cam/logs/security-cam.log*  # To prevent access denied errors on first starting tomcat
+chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
 chmod 640 /etc/tomcat9/tomcat-users.xml
 chown root:tomcat /etc/tomcat9/tomcat-users.xml
@@ -40,22 +40,48 @@ chown root:root /etc/security-cam/*.py
 # The security-cam group is then given group access to sec-cam and it's subdirectories. The user and group permissions are then set up.
 
 # Give directories only permission 775
-find /home/security-cam -type d -print0 | xargs -0 chmod 775
+find /etc/security-cam -type d -print0 | xargs -0 chmod 775
 # Give files permission 664
-find /home/security-cam -type f -print0 | xargs -0 chmod 664
-# Make sure sc_processes.sh is executable if present and set ownership to tomcat
-chmod +x /home/security-cam/sc_processes.sh || true
-chown tomcat:tomcat /home/security-cam/sc_processes.sh || true
+find /etc/security-cam -type f -print0 | xargs -0 chmod 664
 
-# Copy install-cert.sh and sc_processes.sh with executable attribs unaffected by previous command
-mv /tmp/install-cert.sh /home/security-cam/
-chown root:root /home/security-cam/install-cert.sh
+# Copy install-cert.sh with executable attribs unaffected by previous command
+mv /tmp/install-cert.sh /etc/security-cam/
+chown root:root /etc/security-cam/install-cert.sh
 
-chgrp -R security-cam /home/security-cam/
-chown sec-cam:adm /var/log/motion
+chgrp -R security-cam /etc/security-cam/
+chown sec-cam:security-cam /var/log/motion
+chown tomcat:security-cam /var/log/security-cam
+chmod +x /etc/security-cam/start_hd_recording.sh || true
+chmod +x /etc/security-cam/end_hd_recording.sh || true
+chmod +x /etc/security-cam/processmotionrecordings.sh || true
+chmod +x /etc/security-cam/productKeyGen.sh || true
 
 # Change the motion service user to tomcat
 sed -i 's/User=motion/User=tomcat/' /lib/systemd/system/motion.service
+
+#
+# AddToTomcatUnitFileIfNotPresent: Add ReadWriteFilePaths to the tomcat unit file to enable access to /etc/security-cam
+#                                  and /var/log/security-cam.
+#
+AddToTomcatUnitFileIfNotPresent() {
+  lineToWrite=$1
+  lineToWriteUnder=$2
+  unitFile=$3
+  # Enter lineToWrite after lineToWriteUnder if not already present
+  if ! grep "$lineToWrite" "$unitFile"; then
+    # Add the line after lineToWriteUnder escaping all '/' as the regex is within / delimiters.
+    result=$(awk '/'"${lineToWriteUnder//\//\\/}"'/ { print; print '\""${lineToWrite}"\"'; next }1' "$unitFile")
+    echo "$result" >"$unitFile"
+  fi
+}
+
+lineToWrite="ReadWritePaths=/var/log/security-cam/"
+lineToWrite2="ReadWritePaths=/etc/security-cam/"
+lineToWriteUnder="ReadWritePaths=/var/lib/tomcat9/webapps/"
+unitFile="/etc/systemd/system/multi-user.target.wants/tomcat9.service"
+
+AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
+AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
 
 systemctl daemon-reload  # Register the motion service file change
 

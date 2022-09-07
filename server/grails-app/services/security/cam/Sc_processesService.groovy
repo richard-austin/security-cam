@@ -168,7 +168,7 @@ class Sc_processesService {
             }
         })
         session.setDebug(true)
-        FileOutputStream fs = new FileOutputStream("/home/security-cam/javaxMailLog.log")
+        FileOutputStream fs = new FileOutputStream("/var/log/security-cam/javaxMailLog.log")
         PrintStream ps = new PrintStream(fs, true)
         session.setDebugOut(ps)
         Message message = new MimeMessage(session)
@@ -236,7 +236,7 @@ class Sc_processesService {
             processExecutors = Executors.newCachedThreadPool()
             startProcess("/usr/bin/node /etc/security-cam/nms/app.js")
             Map<String, Camera> cams = getCamerasData()
-            String log_dir = "/home/security-cam/logs/"      // TODO: Get from config
+            String log_dir = "/var/log/security-cam/"      // TODO: Get from config
             cams.forEach((ck, cam) -> {
                 cam.streams.forEach((sk, stream) -> {
                     String[] command = new String[3]
@@ -357,7 +357,10 @@ class Sc_processesService {
         catch(Exception ex)
         {
             logService.cam.error("${ex.getClass().getName()} in stopProcesses: ${ex.getMessage()}")
+            response.status = PassFail.FAIL
+            response.error = "${ex.getClass().getName()} in stopProcesses: ${ex.getMessage()}"
         }
+        return response
     }
 
     private Map<String, Camera> getCamerasData() {
