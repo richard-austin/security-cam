@@ -38,7 +38,7 @@ if (Environment.isDevelopmentMode() && targetDir != null) {
 
 appender("camLogAppender", RollingFileAppender) {
 
-    def path = "/home/security-cam/logs/"
+    def path = "/var/log/security-cam/"
     file = "${path}security-cam.log"
     encoder(PatternLayoutEncoder) {
         pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} [%thread] - %M:%L - %msg%n"
@@ -54,7 +54,7 @@ appender("camLogAppender", RollingFileAppender) {
 
 appender("cloudProxyLogAppender", RollingFileAppender) {
 
-    def path = "/home/security-cam/logs/"
+    def path = "/var/log/security-cam/"
     file = "${path}cloud-proxy.log"
     encoder(PatternLayoutEncoder) {
         pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} [%thread] - %M:%L - %msg%n"

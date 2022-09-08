@@ -20,20 +20,19 @@ tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
-mkdir -p security-cam_"${VERSION}"_arm64/home/security-cam/recording-pids
-mkdir -p security-cam_"${VERSION}"_arm64/home/security-cam/motion/conf.d
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream1
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream2
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream3
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream4
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream5
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream6
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream7
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream8
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream9
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/stream10
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/logs
-mkdir security-cam_"${VERSION}"_arm64/home/security-cam/motion-log
+mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/recording-pids
+mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/motion/conf.d
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream1
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream2
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream3
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream4
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream5
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream6
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream7
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream8
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream9
+mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream10
+mkdir -p security-cam_"${VERSION}"_arm64/var/log/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr
 

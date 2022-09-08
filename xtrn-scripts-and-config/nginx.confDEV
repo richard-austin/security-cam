@@ -40,7 +40,7 @@ http {
           auth_request_set $auth_status $upstream_status;
           error_page 500 =401 /error/401;
           autoindex off;
-          alias /home/security-cam/;
+          alias /etc/security-cam/;
        }
 
         location / {
@@ -113,7 +113,7 @@ http {
        location /recording/ {
           autoindex off;
           add_header Access-Control-Allow-Origin *;
-          alias /home/security-cam/;
+          alias /etc/security-cam/;
        }
 
     }

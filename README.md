@@ -8,7 +8,7 @@ ffmpeg -stimeout 1000000 -re -rtsp_transport tcp -i rtsp://192.168.0.30:554/11 -
 From https://github.com/fpompermaier/onvif
 
 ## Set up the sec-cam home directory
-The project requires that the nginx user (sec-cam) has a "home" directory /home/security-cam owned by sec-cam.
+The project requires that the nginx user (sec-cam) has a "home" directory /etc/security-cam owned by sec-cam.
 
 This directory has the following structure:-
 
@@ -29,8 +29,8 @@ The security-cam group is then given group access to sec-cam and it's subdirecto
  sudo groupadd security-cam  
  sudo usermod -a -G security-cam tomcat  
  sudo usermod -a -G security-cam sec-cam  
- sudo chmod -R 775 /home/security-cam/  
- sudo chgrp -R security-cam /home/security-cam/  
+ sudo chmod -R 775 /etc/security-cam/  
+ sudo chgrp -R security-cam /etc/security-cam/  
 
  ## The following files are placed at /etc/security-cam
 + start_hd_recording.sh 
