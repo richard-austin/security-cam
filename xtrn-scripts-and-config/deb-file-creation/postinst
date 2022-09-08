@@ -90,8 +90,8 @@ deb-systemd-invoke enable motion
 deb-systemd-invoke start motion
 deb-systemd-invoke enable nginx.service
 
-systemctl enable wifimanagement.service
-systemctl start wifimanagement.service
+deb-systemd-invoke enable wifimanagement.service
+deb-systemd-invoke start wifimanagement.service
 
 CERT_FILE=/etc/nginx/security-cam.crt
 if test -f "$CERT_FILE"; then
@@ -108,7 +108,7 @@ fi
 deb-systemd-invoke stop chrony
 deb-systemd-invoke start chrony
 
-systemctl start tomcat9.service
+deb-systemd-invoke start tomcat9.service
 
 # Generate the product key if it does not already exist
 cd /etc/security-cam/ || exit
