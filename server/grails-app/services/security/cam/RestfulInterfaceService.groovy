@@ -87,8 +87,6 @@ class RestfulInterfaceService {
                     result.responseObject=[response:out.toString()]  // Used when setting rather than reading values.
             } else {
                 logService.cam.error("API [${uri}] request failed to [${address}]. Error message: ${out.toString()}")
-                result.status =result.status
-                result.responseCode = conn.getResponseCode()
                 result.errorMsg = out.toString()
             }
         }

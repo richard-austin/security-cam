@@ -189,9 +189,10 @@ class OnvifService {
      */
     def getSnapshot(String strUrl) {
         ObjectCommandResponse result = new ObjectCommandResponse()
+        HttpURLConnection uc = null
         try {
             URL url = new URL(strUrl)
-            URLConnection uc = url.openConnection()
+            uc = url.openConnection() as HttpURLConnection
             String username = camService.cameraAdminUserName()
             String password = camService.cameraAdminPassword()
 
@@ -205,6 +206,8 @@ class OnvifService {
         }
         catch (IOException ex) {
             result.error = "IO Error in getSnapshot: ${ex.getMessage()}"
+            if(uc != null)
+                result.errno = uc.getResponseCode()
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
         }

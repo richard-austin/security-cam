@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {UtilsService} from "../shared/utils.service";
 import {CameraService} from "../cameras/camera.service";
-import {Camera, CameraParams, CameraStream} from "../cameras/Camera";
+import {CameraParams, CameraStream} from "../cameras/Camera";
 import {Subscription} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
@@ -51,8 +51,17 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.model.disable();
         },
         reason => {
+          if(reason.status == 401)
+          {
+             this.reporting.warningMessage = `
+             Unauthorised: The credentials for this camera are not correctly set. Please go to General -> Configure Camera Setup and
+             click on the shield icon beside the title (Cameras Configuration). You can then set the the user name and
+             password which must be set the same on all cameras.
+             `;
+          }
+          else
+            this.reporting.errorMessage = reason;
           this.downloading = false;
-          this.reporting.errorMessage = reason;
         }
       )
     }

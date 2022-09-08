@@ -576,7 +576,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           this.snapshotLoading = false;
         },
         reason => {
-          this.reporting.errorMessage = reason;
+          if (reason.status === 401) {
+            this.reporting.warningMessage =
+              `Access to camera snapshot at ${cam.value.snapshotUri} is unauthorised. Please ensure the correct credentials for
+              all cameras are set. (Click on the shield icon to the right of this page title).`;
+          } else {
+            this.reporting.errorMessage = reason;
+          }
           this.snapshotLoading = false;
           this.snapShotKey = '';
         })

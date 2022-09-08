@@ -37,6 +37,10 @@ class OnvifController {
             def result = onvifService.getSnapshot(cmd.url)
             if (result.status == PassFail.PASS)
                 render result.responseObject
+            else if(result.errno == 401)
+            {
+                render(status: 401, text: result.error)
+            }
             else {
                 render(status: 500, text: result.error)
             }
