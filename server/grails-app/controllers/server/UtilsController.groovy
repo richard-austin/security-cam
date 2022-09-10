@@ -64,7 +64,6 @@ class UtilsController {
     @Secured(['ROLE_CLIENT'])
     def cameraParams(CameraParamsCommand cmd)
     {
-        ObjectCommandResponse result =  new ObjectCommandResponse()
         logService.cam.info("Getting parameters for camera at ${cmd.address}")
 
         if(cmd.hasErrors())
@@ -80,10 +79,7 @@ class UtilsController {
             if(response.status != RestfulResponseStatusEnum.PASS)
             {
                 logService.cam.error "cameraParams: error: ${response.errorMsg}"
-                result.status = PassFail.FAIL
-                result.error = response.errorMsg
-                result.userError = response.userError
-                render(status: response.getResponseCode(), text: result)
+                render(status: response.getResponseCode(), text: [error: response.errorMsg, camera: cmd.address])
             }
             else
                 render response.responseObject as JSON
@@ -93,7 +89,6 @@ class UtilsController {
     @Secured(['ROLE_CLIENT'])
     def setCameraParams(SetCameraParamsCommand cmd)
     {
-        ObjectCommandResponse result =  new ObjectCommandResponse()
         if(cmd.hasErrors())
         {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'cameraParams')
@@ -107,10 +102,7 @@ class UtilsController {
             if(response.status != RestfulResponseStatusEnum.PASS)
             {
                 logService.cam.error "setCameraParams: error: ${response.errorMsg}"
-                result.status = PassFail.FAIL
-                result.error = response.errorMsg
-                result.userError = response.userError
-                render(status: response.responseCode, result as JSON)
+                render(status: response.getResponseCode(), text: [error: response.errorMsg, camera: cmd.address])
             }
             else
                 render response.responseObject as JSON

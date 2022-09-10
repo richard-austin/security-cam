@@ -205,9 +205,16 @@ class OnvifService {
 //            Files.write(new File("${grailsApplication.config.camerasHomeDirectory}/auto.jpg").toPath(), result.responseObject as byte[])
         }
         catch (IOException ex) {
-            result.error = "IO Error in getSnapshot: ${ex.getMessage()}"
-            if(uc != null)
-                result.errno = uc.getResponseCode()
+            result.error = "IO Error connecting to camera at ${strUrl}: ${ex.getMessage()}"
+            if(uc != null) {
+                try {
+                    result.errno = uc.getResponseCode()
+                }
+                catch(Exception ignore){
+                    result.errno = 500
+                }
+            }
+
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
         }
