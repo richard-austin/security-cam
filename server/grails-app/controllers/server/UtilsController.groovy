@@ -79,7 +79,7 @@ class UtilsController {
             if(response.status != RestfulResponseStatusEnum.PASS)
             {
                 logService.cam.error "cameraParams: error: ${response.errorMsg}"
-                render(status: response.getResponseCode(), text: [error: response.errorMsg, camera: cmd.address])
+                render(status: response.getResponseCode(), text: "Failed to get camera parameters ${response.errorMsg}: for camera ${cmd.address}")
             }
             else
                 render response.responseObject as JSON
@@ -102,7 +102,7 @@ class UtilsController {
             if(response.status != RestfulResponseStatusEnum.PASS)
             {
                 logService.cam.error "setCameraParams: error: ${response.errorMsg}"
-                render(status: response.getResponseCode(), text: [error: response.errorMsg, camera: cmd.address])
+                render(status: response.getResponseCode(), text: "Failed to set camera parameters ${response.errorMsg}: for camera ${cmd.address}")
             }
             else
                 render response.responseObject as JSON
