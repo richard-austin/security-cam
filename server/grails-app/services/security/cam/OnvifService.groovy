@@ -189,9 +189,10 @@ class OnvifService {
      */
     def getSnapshot(String strUrl) {
         ObjectCommandResponse result = new ObjectCommandResponse()
+        HttpURLConnection uc = null
         try {
             URL url = new URL(strUrl)
-            URLConnection uc = url.openConnection()
+            uc = url.openConnection() as HttpURLConnection
             String username = camService.cameraAdminUserName()
             String password = camService.cameraAdminPassword()
 
@@ -204,7 +205,16 @@ class OnvifService {
 //            Files.write(new File("${grailsApplication.config.camerasHomeDirectory}/auto.jpg").toPath(), result.responseObject as byte[])
         }
         catch (IOException ex) {
-            result.error = "IO Error in getSnapshot: ${ex.getMessage()}"
+            result.error = "IO Error connecting to camera at ${strUrl}: ${ex.getMessage()}"
+            if(uc != null) {
+                try {
+                    result.errno = uc.getResponseCode()
+                }
+                catch(Exception ignore){
+                    result.errno = 500
+                }
+            }
+
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
         }

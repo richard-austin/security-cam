@@ -84,26 +84,27 @@ class RestfulInterfaceService {
                 result.status = RestfulResponseStatusEnum.PASS
                 result.responseObject = createMap(out.toString())
                 if(result.responseObject==null)
-                    result.responseObject=[response:out.toString()]  // Used when setting rather than reading values.
+                    result.responseObject=[response:conn.getResponseMessage()]  // Used when setting rather than reading values.
             } else {
-                logService.cam.error("API [${uri}] request failed to [${address}]. Error message: ${out.toString()}")
-                result.status =result.status
-                result.responseCode = conn.getResponseCode()
-                result.errorMsg = out.toString()
+                logService.cam.error("API [${uri}] request failed to [${address}]. Error message: ${conn.getResponseMessage()}")
+                result.errorMsg = conn.getResponseMessage()
             }
         }
         catch (MalformedURLException | SocketTimeoutException | ConnectException e) {
             logService.cam.error(e.getMessage())
+            result.responseCode = 500 //conn.getResponseCode()
             result.status = RestfulResponseStatusEnum.CONNECT_FAIL
-            result.errorMsg = RestfulResponseStatusEnum.CONNECT_FAIL.toString()
+            result.errorMsg = e.getMessage()
         }
         catch (FileNotFoundException e) {
             logService.cam.error(e.getMessage())
+            result.responseCode = 500 //conn.getResponseCode()
             result.status = RestfulResponseStatusEnum.SERVICE_NOT_FOUND
-            result.errorMsg = RestfulResponseStatusEnum.SERVICE_NOT_FOUND.toString()
+            result.errorMsg = e.getMessage()
         }
         catch (UnknownHostException e) {
             logService.cam.error('Unknown host ' + e.getMessage())
+            result.responseCode = 500 //conn.getResponseCode()
             result.status = RestfulResponseStatusEnum.CONNECT_FAIL
             result.userError = true
             result.errorMsg = 'Unknown host ' + e.getMessage()
@@ -111,14 +112,15 @@ class RestfulInterfaceService {
         catch (IOException e) {
             logService.cam.error(e.getMessage())
             result.responseCode = 500 //conn.getResponseCode()
+            result.responseObject = e.getClass().getName()
             result.status = RestfulResponseStatusEnum.ERROR_RESPONSE
-            result.errorMsg = RestfulResponseStatusEnum.ERROR_RESPONSE.toString()
+            result.errorMsg = e.getMessage()
         }
         catch (Exception e) {
             logService.cam.error(e.getMessage())
             result.responseCode = 500 //conn.getResponseCode()
             result.status = RestfulResponseStatusEnum.FAIL
-            result.errorMsg = RestfulResponseStatusEnum.FAIL.toString()
+            result.errorMsg = e.getMessage()
         }
         finally {
             if (conn && conn.getErrorStream()) {

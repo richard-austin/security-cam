@@ -108,6 +108,7 @@ fi
 deb-systemd-invoke stop chrony
 deb-systemd-invoke start chrony
 
+deb-systemd-invoke enable tomcat9.service
 deb-systemd-invoke start tomcat9.service
 
 # Generate the product key if it does not already exist

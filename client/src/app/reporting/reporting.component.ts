@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {HttpErrorResponse} from '@angular/common/http';
+import {Component, Input, OnInit} from '@angular/core';
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-reporting',
@@ -9,39 +9,42 @@ import {HttpErrorResponse} from '@angular/common/http';
 export class ReportingComponent implements OnInit {
   error: HttpErrorResponse | undefined;
   success: string | undefined;
-  validationErrors!: string[];
-  showMessageInError: boolean = true;
-  messageToShow: string = '';
-
-  constructor() {
+  warning: string | undefined;
+  validationErrors!:string[];
+  showMessageInError:boolean = true;
+  @Input() embedded: boolean = false;
+  constructor()
+  {
   }
 
-  set errorMessage(error: HttpErrorResponse) {
+  set errorMessage(error: HttpErrorResponse)
+  {
     this.clearMessage();
     this.success = undefined;
     this.error = error;
     this.validationErrors = [];
 
-    if (error.status === 400) {
-      for (const key of Object.keys(error.error)) {
-        this.validationErrors.push(key + ': ' + error.error[key]);
+      if(error.status === 400)
+      {
+        for(const key of Object.keys(error.error))
+          this.validationErrors.push(key + ': ' + error.error[key]);
       }
-    } else if (typeof (error.error) !== 'string' && (error.error.error === undefined || error.error.error === '')) {
-      this.showMessageInError = false;
-    } else {
-      if (typeof (error?.error) == 'string') {
-        this.messageToShow = error.error;
-      } else if (typeof (error?.error?.error) === 'string' && error.error.error !== '') {
-        this.messageToShow = error.error.error;
-      } else {
-        this.showMessageInError = false;
+      else if(typeof (error.error) !== 'string')
+      {
+        this.showMessageInError=false;
       }
-    }
   }
 
-  set successMessage(success: string) {
+  set successMessage(success: string)
+  {
     this.clearMessage();
     this.success = success;
+  }
+
+  set warningMessage(warning: string)
+  {
+    this.clearMessage();
+    this.warning = warning;
   }
 
   dismiss() {
@@ -49,9 +52,9 @@ export class ReportingComponent implements OnInit {
   }
 
   private clearMessage() {
-    // @ts-ignore
     this.error = undefined;
     this.success = undefined;
+    this.warning = undefined;
   }
 
   ngOnInit(): void {
