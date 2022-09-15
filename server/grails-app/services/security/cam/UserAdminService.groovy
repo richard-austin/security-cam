@@ -71,12 +71,17 @@ class UserAdminService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            User user = User.findByCloudAccount(false)
+            User user = User.all.find{it.username != 'guest' && !it.cloudAccount}
             if(user != null) {
                 result.responseObject = [username: user.getUsername()]
                 UserRole userRole = UserRole.findByUser(user)
                 userRole.delete(flush: true)
                 user.delete(flush: true)
+
+                // Disable the guest account
+                user = User.findByUsername('guest')
+                user.setEnabled(false)
+                userService.save(user)
             }
             else
                 throw new Exception("There is no local web account present on this NVR")
