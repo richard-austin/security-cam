@@ -10,7 +10,7 @@ class ApplicationController implements PluginManagerAware {
     GrailsApplication grailsApplication
     GrailsPluginManager pluginManager
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def index() {
         [grailsApplication: grailsApplication, pluginManager: pluginManager]
     }

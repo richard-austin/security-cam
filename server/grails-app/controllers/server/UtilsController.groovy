@@ -26,7 +26,7 @@ class UtilsController {
      * getTemperature: Get the core temperature (Raspberry pi only). This is called at intervals to keep the session alive
      * @return: The temperature as a string. On non Raspberry pi systems an error is returned.
      */
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getTemperature() {
         ObjectCommandResponse response = utilsService.getTemperature()
 
@@ -40,7 +40,7 @@ class UtilsController {
      * getVersion: Get the version number from application.yml config
      * @return: The version strig
      */
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getVersion() {
         ObjectCommandResponse response = utilsService.getVersion()
         if (response.status != PassFail.PASS)
@@ -53,7 +53,7 @@ class UtilsController {
      * setIP: Set the file myip to contain our current public ip address.
      * @return: Our public ip address
      */
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def setIP()
     {
         ObjectCommandResponse response
@@ -61,7 +61,7 @@ class UtilsController {
         render response.responseObject as JSON
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def cameraParams(CameraParamsCommand cmd)
     {
         logService.cam.info("Getting parameters for camera at ${cmd.address}")
@@ -86,7 +86,7 @@ class UtilsController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def setCameraParams(SetCameraParamsCommand cmd)
     {
         if(cmd.hasErrors())
@@ -110,7 +110,7 @@ class UtilsController {
     }
 
     Sc_processesService sc_processesService
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def startProcs()
     {
         ObjectCommandResponse response = sc_processesService.startProcesses()
@@ -120,7 +120,7 @@ class UtilsController {
             render "success"
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def stopProcs()
     {
         ObjectCommandResponse response = sc_processesService.stopProcesses()
@@ -133,7 +133,7 @@ class UtilsController {
 
     ConfigurationUpdateService configurationUpdateService
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def generateConfigs()
     {
         ObjectCommandResponse response = configurationUpdateService.generateConfigs()

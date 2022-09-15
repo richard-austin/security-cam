@@ -18,7 +18,7 @@ class WifiUtilsController {
     LogService logService
     WifiUtilsService wifiUtilsService
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLOUD'])
     def scanWifi() {
         response.contentType = "application/json"
         ObjectCommandResponse result = wifiUtilsService.scanWifi()
@@ -28,7 +28,7 @@ class WifiUtilsController {
             render(status: 500, text: result.error)
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLOUD'])
     def setUpWifi(SetUpWifiCommand cmd) {
         ObjectCommandResponse result
 
@@ -49,7 +49,7 @@ class WifiUtilsController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLOUD'])
     def checkWifiStatus() {
         ObjectCommandResponse result = wifiUtilsService.checkWifiStatus()
         if (result.status == PassFail.PASS) {
@@ -61,7 +61,7 @@ class WifiUtilsController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLOUD'])
     def setWifiStatus(SetWifiStatusCommand cmd) {
         ObjectCommandResponse result = wifiUtilsService.setWifiStatus(cmd)
         if (result.status == PassFail.PASS) {
@@ -73,7 +73,7 @@ class WifiUtilsController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLOUD'])
     def getCurrentWifiConnection()
     {
         ObjectCommandResponse result = wifiUtilsService.getCurrentWifiConnection()
@@ -88,19 +88,19 @@ class WifiUtilsController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLOUD'])
     def getActiveIPAddresses() {
         ObjectCommandResponse result = wifiUtilsService.getActiveIPAddresses()
 
         if (result.status == PassFail.PASS)
             render(status: 200, text: result as JSON)
         else {
-            logService.cam.error "checkWifiStatus: error: ${result.errorMsg}"
+            logService.cam.error "checkWifiStatus: error: ${result.error}"
             render(status: 500, text: result.error)
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLOUD'])
     def checkConnectedThroughEthernet() {
         ObjectCommandResponse result = wifiUtilsService.checkConnectedThroughEthernet()
         if (result.status == PassFail.PASS) {

@@ -28,12 +28,12 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/**/css/**',      access: ['permitAll']],
 	[pattern: '/**/images/**',   access: ['permitAll']],
 	[pattern: '/**/favicon.ico', access: ['permitAll']],
-	[pattern: '/**/index.html',  access: ['ROLE_CLIENT']],
-	[pattern: '/#/**',           access: ['ROLE_CLIENT']],
-	[pattern: '/**/*.js',        access: ['ROLE_CLIENT']],
-	[pattern: '/**/*.css',       access: ['ROLE_CLIENT']],
-	[pattern: '/**/*.ttf',       access: ['ROLE_CLIENT']],
-	[pattern: '/**/*.woff2',     access: ['ROLE_CLIENT']]
+	[pattern: '/**/index.html',  access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],
+	[pattern: '/#/**',           access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],
+	[pattern: '/**/*.js',        access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],
+	[pattern: '/**/*.css',       access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],
+	[pattern: '/**/*.ttf',       access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],
+	[pattern: '/**/*.woff2',     access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']]
 ]
 
 grails.plugin.springsecurity.filterChain.chainMap = [

@@ -17,7 +17,7 @@ class UserController {
     ValidationErrorService validationErrorService
     LogService logService
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def changePassword(ResetPasswordCommand cmd) {
         ObjectCommandResponse result
 
@@ -36,7 +36,7 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getEmail() {
         ObjectCommandResponse result = userAdminService.getEmail()
         if (result.status != PassFail.PASS) {
@@ -47,7 +47,7 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def changeEmail(ChangeEmailCommand cmd) {
         ObjectCommandResponse result
 
@@ -66,7 +66,7 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def createAccount(CreateAccountCommand cmd) {
         ObjectCommandResponse result
 
@@ -85,7 +85,7 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     /**
      * removeAccount: Remove the local web account used for direct access to to NVR
      */
@@ -100,7 +100,7 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def hasLocalAccount() {
         ObjectCommandResponse result = userAdminService.hasLocalAccount()
 

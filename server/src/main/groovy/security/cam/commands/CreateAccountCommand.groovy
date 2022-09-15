@@ -16,7 +16,7 @@ class CreateAccountCommand implements Validateable{
     static constraints = {
         username(nullable: false, blank: false,
         validator: {username, cmd ->
-            if(User.findByCloudAccount(false))
+            if(User.all.find{it.username != 'guest' && !it.cloudAccount} != null)
                 return "There is already a local web account defined"
             else if(!username.matches(cmd.utilsService.usernameRegex))
                 return "Format or length of username is incorrect"

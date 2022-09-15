@@ -23,7 +23,7 @@ class CamController {
      * getCameras: Get all cameras defined in the application.yml file
      * @return
      */
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getCameras() {
         ObjectCommandResponse cameras = camService.getCameras()
 
@@ -35,7 +35,7 @@ class CamController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def updateCameras(UpdateCamerasCommand cmd)
     {
         ObjectCommandResponse result
@@ -52,7 +52,7 @@ class CamController {
         }
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def uploadMaskFile(UploadMaskFileCommand cmd) {
         logService.cam.debug "CamController.uploadMaskFile() called"
         ObjectCommandResponse result
@@ -80,7 +80,7 @@ class CamController {
      * @param cmd: Command object containing the username and password
      * @return: Success/error state.
      */
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def setAccessCredentials(SetAccessCredentialsCommand cmd)
     {
         if(cmd.hasErrors())

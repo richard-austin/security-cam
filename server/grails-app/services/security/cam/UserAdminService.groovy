@@ -93,7 +93,7 @@ class UserAdminService {
     ObjectCommandResponse hasLocalAccount() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            result.responseObject = User.findByCloudAccount(false) != null
+            result.responseObject = User.all.find{it.username != 'guest' && !it.cloudAccount} != null
         }
         catch (Exception ex) {
             logService.cam.error("Exception in hasLocalAccount: " + ex.getCause() + ' ' + ex.getMessage())
