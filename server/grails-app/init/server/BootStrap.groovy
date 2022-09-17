@@ -31,7 +31,7 @@ class BootStrap {
         }
 
         if ( !userService.findByUsername('guest') ) {
-            User u = new User(username: 'guest', password: 'guest', cloudAccount: false, enabled: false)
+            User u = new User(username: 'guest', password: 'guest', cloudAccount: false, enabled: false, passwordExpired: true)
             u = userService.save(u)
             userRoleService.save(u, roleService.findByAuthority('ROLE_GUEST'))
         }

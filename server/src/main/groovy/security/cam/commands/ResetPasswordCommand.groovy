@@ -4,8 +4,6 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.Validateable
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import security.cam.User
 
 class ResetPasswordCommand implements Validateable{
     String oldPassword

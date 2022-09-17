@@ -42,7 +42,7 @@ export class ChangePasswordComponent implements OnInit {
         this.reporting.errorMessage = reason;
       }
       else
-        this.reporting.error = reason;
+        this.reporting.errorMessage = reason;
     });
   }
 

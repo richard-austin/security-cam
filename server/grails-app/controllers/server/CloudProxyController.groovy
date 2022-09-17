@@ -9,7 +9,7 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 class CloudProxyController {
     CloudProxyService cloudProxyService
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def start()
     {
         ObjectCommandResponse resp =  cloudProxyService.start()
@@ -19,7 +19,7 @@ class CloudProxyController {
             render(status: 500, text: resp.error)
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def stop()
     {
         ObjectCommandResponse resp = cloudProxyService.stop()
@@ -29,7 +29,7 @@ class CloudProxyController {
             render(status: 500, text: resp.error)
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def restart()
     {
         ObjectCommandResponse resp = cloudProxyService.restart()

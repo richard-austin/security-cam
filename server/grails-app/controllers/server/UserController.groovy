@@ -9,6 +9,7 @@ import security.cam.ValidationErrorService
 import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CreateAccountCommand
 import security.cam.commands.ResetPasswordCommand
+import security.cam.commands.SetupGuestAccountCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
@@ -110,6 +111,39 @@ class UserController {
             logService.cam.info("hasLocalAccount: (= ${result.responseObject}) success")
             render(text: result.responseObject) as JSON
         }
+    }
+
+    @Secured(['ROLE_CLIENT'])
+    def setupGuestAccount(SetupGuestAccountCommand cmd)
+    {
+        ObjectCommandResponse result
+
+        if(cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'setupGuestAccount')
+            logService.cam.error "setupGuestAccount: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else {
+            result = userAdminService.setupGuestAccount(cmd)
+
+            if(result.status != PassFail.PASS)
+                render (ststus: 500, text: result.error)
+            else {
+                logService.cam.info("setupGuestAccount: (= ${result.responseObject}) success")
+                render(text: result.responseObject as JSON )
+            }
+        }
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    def isGuest()
+    {
+        ObjectCommandResponse result = userAdminService.isGuest()
+
+        if(result.status != PassFail.PASS)
+            render(status: 500, text: result.error)
+        else
+            render (status: 200, text: result.responseObject as JSON)
     }
 }
 

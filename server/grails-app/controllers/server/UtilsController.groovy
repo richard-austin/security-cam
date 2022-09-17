@@ -53,7 +53,7 @@ class UtilsController {
      * setIP: Set the file myip to contain our current public ip address.
      * @return: Our public ip address
      */
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def setIP()
     {
         ObjectCommandResponse response
