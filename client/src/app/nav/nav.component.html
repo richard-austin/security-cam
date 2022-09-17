@@ -56,10 +56,11 @@
       <mat-menu #menuGeneral="matMenu">
         <button mat-menu-item (click)="configSetup();menuClosed()">Configure Camera Setup</button>
         <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
-        <button mat-menu-item (click)="changePassword();menuClosed()">Change Password</button>
-        <button mat-menu-item (click)="changeEmail(); menuClosed()">Change Account Email</button>
+        <button mat-menu-item [disabled]="isGuest" (click)="changePassword();menuClosed()">Change Password</button>
+        <button mat-menu-item [disabled]="isGuest" (click)="changeEmail(); menuClosed()">Change Account Email</button>
+        <button mat-menu-item *ngIf="!isGuest" (click)="setUpGuestAccount(); menuClosed()">Set Up Guest Account</button>
         <div class="dropdown-divider"></div>
-        <button mat-menu-item (click)="setIp();menuClosed()">Save Current Public IP</button>
+        <button mat-menu-item [disabled]="isGuest" (click)="setIp();menuClosed()">Save Current Public IP</button>
         <button mat-menu-item (click)="cloudProxy();menuClosed()">Set CloudProxy Status</button>
         <button mat-menu-item (click)="drawdownCalc();menuClosed()">Pension Drawdown Calculator</button>
         <div class="dropdown-divider"></div>

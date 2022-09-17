@@ -145,5 +145,15 @@ class UserController {
         else
             render (status: 200, text: result.responseObject as JSON)
     }
+
+    @Secured(['ROLE_CLIENT'])
+    def guestAccountEnabled()
+    {
+        ObjectCommandResponse result = userAdminService.guestAccountEnabled()
+        if(result.status != PassFail.PASS)
+            render(status: 500, text: result.error)
+        else
+            render (status: 200, text: result.responseObject as JSON)
+    }
 }
 

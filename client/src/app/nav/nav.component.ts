@@ -120,6 +120,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/configsetup';
   }
 
+  setUpGuestAccount() {
+    window.location.href = '#/setupguestaccount';
+  }
+
   openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
     let data: any = {};
     let remainingSecs: number = timeout - count;
@@ -204,6 +208,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       console.error("Error calling isGuest = "+error.error)
     }
   }
+
 
    ngAfterViewInit(): void {
     // If the camera service got any errors while getting the camera setup, then we report it here.

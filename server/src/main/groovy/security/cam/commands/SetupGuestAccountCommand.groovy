@@ -13,7 +13,7 @@ class SetupGuestAccountCommand implements Validateable {
         password(nullable: true, blank: true, // Empty or blank password means don't change it
                 validator: { password, cmd ->
                     User u = User.all.find { it.username == 'guest' && !it.cloudAccount }
-                    if (cmd.enabled && u.passwordExpired && password == "" || password == null)
+                    if (cmd.enabled && (u.passwordExpired && password == "" || password == null) && (u.password == "" || u.password == null))
                         return "The password must be set on the first time the guest account is enabled"
 
                     if (!password.matches(/^[-\[\]!\"#$%&\'()*+,.\/:;<=>?@^_\`{}|~\\0-9A-Za-z]{1,64}$/))

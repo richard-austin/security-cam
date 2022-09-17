@@ -28,6 +28,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   cam!: CameraStream;
   downloading: boolean = true;
   camControlFormGroup!: FormGroup;
+  isGuest: boolean = true;
 
   private setCamera() {
     this.reporting.dismiss();
@@ -102,6 +103,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
       softVersion: new FormControl('', [Validators.required]),
       model: new FormControl('', [Validators.required])
     });
+    this.isGuest = this.utils.isGuestAccount;
   }
 
   ngAfterViewInit(): void {

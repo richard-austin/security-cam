@@ -2,6 +2,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatCheckboxChange} from '@angular/material/checkbox';
 import {CloudProxyService} from './cloud-proxy.service';
 import {ReportingComponent} from '../reporting/reporting.component';
+import { UtilsService } from '../shared/utils.service';
 
 @Component({
   selector: 'app-cloud-proxy',
@@ -11,9 +12,11 @@ import {ReportingComponent} from '../reporting/reporting.component';
 export class CloudProxyComponent implements OnInit {
   cps: boolean = true;
   cbEnabled: boolean = true;
+  isGuest: boolean = true;
+
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
 
-  constructor(private cpService: CloudProxyService) {
+  constructor(private cpService: CloudProxyService, private utils: UtilsService) {
     cpService.getStatus().subscribe((status: boolean) => {
       this.cps = status;
     },
@@ -47,6 +50,7 @@ export class CloudProxyComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.isGuest = this.utils.isGuestAccount;
   }
 
   setCloudProxyStatus($event: MatCheckboxChange) {

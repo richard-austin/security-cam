@@ -179,4 +179,20 @@ class UserAdminService {
         }
         return result
     }
+
+    ObjectCommandResponse guestAccountEnabled()
+    {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            User guest = User.all.find{it.username == "guest" && !it.cloudAccount}
+            result.responseObject = [enabled: guest != null && guest.enabled]
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in guestAccountEnabled: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
 }

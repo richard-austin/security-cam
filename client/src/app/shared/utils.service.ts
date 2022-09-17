@@ -41,6 +41,10 @@ export class GuestStatus {
   guestAccount: boolean = true;
 }
 
+export class GuestAccountStatus {
+  enabled: boolean = false;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -53,7 +57,7 @@ export class UtilsService {
   };
 
   private _messaging: Subject<any> = new Subject<any>();
-
+  private _isGuestAccount: boolean = true;
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
   }
 
@@ -140,8 +144,34 @@ export class UtilsService {
     )
   }
 
+  /**
+   * isGuest: check if logged in as guest.
+   *          This is called from the nav component ngOnInit
+   */
   async isGuest() : Promise<GuestStatus> {
-    return await this.http.post<GuestStatus>(this._baseUrl.getLink("user", "isGuest"), '', this.httpJSONOptions).toPromise()
+    let retVal : GuestStatus = await this.http.post<GuestStatus>(this._baseUrl.getLink("user", "isGuest"), '', this.httpJSONOptions).toPromise()
+    this.isGuestAccount = retVal.guestAccount;
+    return retVal;
+  }
+
+  /**
+   * isGuestAccount: Set true if guest account, else false.
+   * @param value
+   */
+  set isGuestAccount(value: boolean)
+  {
+    this._isGuestAccount = value;
+  }
+
+  /**
+   * isGuestAccount: Returns true if logged in as guest. The value is set by a preceding call to isGuest from the nav component.
+   */
+  get isGuestAccount()
+  {
+    return this._isGuestAccount;
+  }
+  async guestAccountEnabled() : Promise<GuestAccountStatus> {
+    return await this.http.post<GuestAccountStatus>(this._baseUrl.getLink("user", "guestAccountEnabled"), '', this.httpJSONOptions).toPromise()
   }
 
   sendMessage(message: Message) {

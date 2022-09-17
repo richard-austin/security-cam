@@ -31,7 +31,7 @@ export class SetUpGuestAccountComponent implements OnInit {
     let confirmPassword: AbstractControl = this.setupGuestAccountForm.controls['confirmPassword'];
 
     this.utilsService.setupGuestAccount(enabled.value, password.value, confirmPassword.value).subscribe(() => {
-        this.reporting.successMessage = "Password changed";
+        this.reporting.successMessage = "Guest account settings changed";
       },
       (reason: HttpErrorResponse) => {
         if (reason.status === 400) {
@@ -74,12 +74,13 @@ export class SetUpGuestAccountComponent implements OnInit {
     this.setupGuestAccountForm.controls['enabled'].setValue($event.checked);
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.setupGuestAccountForm = new FormGroup({
       enabled: new FormControl('', []),
       password: new FormControl('', []),
       confirmPassword: new FormControl('', [this.comparePasswords])
     });
     this.setupGuestAccountForm.markAllAsTouched();
+    this.setupGuestAccountForm.controls['enabled'].setValue((await this.utilsService.guestAccountEnabled()).enabled);
   }
 }

@@ -8,6 +8,7 @@
               matTooltip="Set or change the user name and password used to access the cameras. All cameras should have the same user name and password."
               matTooltipClass="tooltip"
               mat-icon-button
+              [disabled]="isGuest"
               (click)="togglePasswordDialogue()">
         <mat-icon>security</mat-icon>
       </button>
@@ -352,7 +353,7 @@
                   *ngIf="!confirmNewLookup && !confirmNewLookup">
             <mat-icon>explore</mat-icon>
           </button>
-          <button [disabled]="anyInvalid() || confirmNew || confirmNewLookup" mat-icon-button (click)="confirmSave=true"
+          <button [disabled]="anyInvalid() || confirmNew || confirmNewLookup || isGuest" mat-icon-button (click)="confirmSave=true"
                   matTooltip="Commit the current configuration in this editor"
                   matTooltipClass="tooltip"
                   *ngIf="!confirmSave && !confirmNewLookup">
@@ -381,7 +382,7 @@
             <button color="default" mat-flat-button (click)="confirmSave=false">
               Cancel
             </button>
-            <button color="warning" mat-flat-button (click)="commitConfig();confirmSave=false;">
+            <button color="warning" mat-flat-button [disabled]="isGuest" (click)="commitConfig();confirmSave=false;">
               Save
             </button>
           </span>
