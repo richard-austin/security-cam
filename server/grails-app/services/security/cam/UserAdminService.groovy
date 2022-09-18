@@ -112,8 +112,9 @@ class UserAdminService {
         try {
             User u = User.all.find { it.username == 'guest' && !it.cloudAccount }
             u.enabled = cmd.enabled
-            if (cmd.password != "" && cmd.password != null)
+            if (cmd.password != "" && cmd.password != null) {
                 u.setPassword(cmd.password)
+            }
 
             u.passwordExpired = false
             userService.save(u)

@@ -77,7 +77,7 @@ export class ChangePasswordComponent implements OnInit {
       oldPassword: new FormControl('', [Validators.required]),
       newPassword: new FormControl('', [Validators.required, Validators.pattern(/^[-\[\]!\"#$%&\'()*+,.\/:;<=>?@^_\`{}|~\\0-9A-Za-z]{1,64}$/)]),
       confirmNewPassword: new FormControl('', [Validators.required, this.comparePasswords])
-    });
+    }, {updateOn: "change"});
     this.changePasswordForm.markAllAsTouched();
   }
 }

@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {AbstractControl, FormControl, FormGroup} from "@angular/forms";
+import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {UtilsService} from '../shared/utils.service';
@@ -77,9 +77,9 @@ export class SetUpGuestAccountComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.setupGuestAccountForm = new FormGroup({
       enabled: new FormControl('', []),
-      password: new FormControl('', []),
+      password: new FormControl('', [Validators.pattern(/^$|[-\[\]!\"#$%&\'()*+,.\/:;<=>?@^_\`{}|~\\0-9A-Za-z]{8,64}$/)]),
       confirmPassword: new FormControl('', [this.comparePasswords])
-    });
+    }, {updateOn: "change"});
     this.setupGuestAccountForm.markAllAsTouched();
     this.setupGuestAccountForm.controls['enabled'].setValue((await this.utilsService.guestAccountEnabled()).enabled);
   }

@@ -14,7 +14,9 @@
         <div>
           <mat-form-field appearance="standard">
             <mat-label>Password</mat-label>
-            <input matInput type="password" formControlName="password"
+            <input matTooltip="Enter the password for the guest account. If left blank, the existing password will be retained."
+                   matTooltipClass="tooltip"
+                   matInput type="password" formControlName="password"
                    placeholder="Enter current password">
             <mat-error *ngIf="hasError('password', 'pattern')">Password incorrect</mat-error>
             <mat-hint>Enter password</mat-hint>
@@ -23,7 +25,9 @@
         <div>
           <mat-form-field appearance="standard">
             <mat-label>Confirm password</mat-label>
-            <input matInput type="password" formControlName="confirmPassword"
+            <input matTooltip="Enter the password again to confirm, leave blank if the password is blank"
+                   matTooltipClass="tooltip"
+                   matInput type="password" formControlName="confirmPassword"
                    placeholder="Confirm new password">
             <mat-error *ngIf="hasError('confirmPassword', 'required')">Confirm password is required</mat-error>
             <mat-error *ngIf="hasError('confirmPassword', 'confirmPassword')">Confirmed new password and New password differ
