@@ -43,7 +43,7 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
           this.reporting.errorMessage = reason;
         }
         else
-          this.reporting.error = reason;
+          this.reporting.errorMessage = reason;
       });
   }
 

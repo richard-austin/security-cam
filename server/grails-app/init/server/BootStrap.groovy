@@ -18,7 +18,7 @@ class BootStrap {
     GrailsApplication grailsApplication
 
     def init = { servletContext ->
-        List<String> authorities = ['ROLE_CLIENT']
+        List<String> authorities = ['ROLE_CLIENT', 'ROLE_GUEST', 'ROLE_CLOUD']
         authorities.each { authority ->
             if ( !roleService.findByAuthority(authority) ) {
                 roleService.save(authority)
@@ -27,13 +27,19 @@ class BootStrap {
         if ( !userService.findByUsername('cloud') ) {
             User u = new User(username: 'cloud', password: 'DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU', cloudAccount: true, header: "7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!")
             u = userService.save(u)
-            userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
+            userRoleService.save(u, roleService.findByAuthority('ROLE_CLOUD'))
+        }
+
+        if ( !userService.findByUsername('guest') ) {
+            User u = new User(username: 'guest', password: 'guest', cloudAccount: false, enabled: false, passwordExpired: true)
+            u = userService.save(u)
+            userRoleService.save(u, roleService.findByAuthority('ROLE_GUEST'))
         }
 
         sc_processesService.startProcesses()
 
-        // Start CloudProxy if enabled in the config or if there is no local web account on the NVR
-        if(grailsApplication.config.cloudProxy.enabled || !User.findByCloudAccount(false))
+        // Start CloudProxy if enabled in the config or if there is no local web account other than guest on the NVR
+        if(grailsApplication.config.cloudProxy.enabled || User.all.find{it.username != 'guest' && !it.cloudAccount} == null)
             cloudProxyService.start()
     }
     def destroy = {

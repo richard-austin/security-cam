@@ -19,6 +19,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 import { DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import { ElementRef } from '@angular/core';
 import { KeyValue } from '@angular/common';
+import { UtilsService } from '../shared/utils.service';
 
 export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -99,8 +100,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   snapshot: SafeResourceUrl|String = '';
   snapShotKey: string ='';
   showPasswordDialogue: boolean = false;
+  isGuest: boolean = true;
 
-  constructor(private cameraSvc: CameraService, private sanitizer: DomSanitizer) {
+  constructor(private cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
   }
 
   getCamControl(index: number, fieldName: string): FormControl {
@@ -145,24 +147,16 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
-  updateMotion(camIndex: number, streamIndex: number, field: string, value: any) {
-    Array.from(  // Streams
-      Array.from( // Cameras
-        this.cameras.values())[camIndex].streams.values()).forEach((stream: Stream, i) => {
-      if (i === streamIndex) { // @ts-ignore
-        stream['motion'][field] = value;
-      }
-    });
-  }
-
-  // updateMotionField(camIndex: number, streamIndex: number, field: string) {
-  //   const control = this.getStreamControl(camIndex, streamIndex, field);
-  //   if (control) {
-  //     this.updateMotion(camIndex, streamIndex, field, control.value);
-  //   }
+  // updateMotion(camIndex: number, streamIndex: number, field: string, value: any) {
+  //   Array.from(  // Streams
+  //     Array.from( // Cameras
+  //       this.cameras.values())[camIndex].streams.values()).forEach((stream: Stream, i) => {
+  //     if (i === streamIndex) { // @ts-ignore
+  //       stream['motion'][field] = value;
+  //     }
+  //   });
   // }
   //
-
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
    */
@@ -604,7 +598,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // Set up the available streams/cameras for selection by the check boxes
+    // Set up the available streams/cameras for selection by the checkboxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
         this.cameras = cameras;
         this.FixUpCamerasData()
@@ -615,6 +609,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
         this.downloading = false;
       })
+    this.isGuest = this.utils.isGuestAccount;
   }
 
   ngAfterViewInit(): void {

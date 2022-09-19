@@ -42,7 +42,7 @@ export class ChangePasswordComponent implements OnInit {
         this.reporting.errorMessage = reason;
       }
       else
-        this.reporting.error = reason;
+        this.reporting.errorMessage = reason;
     });
   }
 
@@ -75,9 +75,9 @@ export class ChangePasswordComponent implements OnInit {
   ngOnInit(): void {
     this.changePasswordForm = new FormGroup({
       oldPassword: new FormControl('', [Validators.required]),
-      newPassword: new FormControl('', [Validators.required, Validators.pattern(/^[-\[\]!\"#$%&\'()*+,.\/:;<=>?@^_\`{}|~\\0-9A-Za-z]{1,64}$/)]),
+      newPassword: new FormControl('', [Validators.required, Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/)]),
       confirmNewPassword: new FormControl('', [Validators.required, this.comparePasswords])
-    });
+    }, {updateOn: "change"});
     this.changePasswordForm.markAllAsTouched();
   }
 }

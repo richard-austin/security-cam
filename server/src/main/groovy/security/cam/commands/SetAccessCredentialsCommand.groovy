@@ -15,7 +15,7 @@ class SetAccessCredentialsCommand implements Validateable {
         })
         camerasAdminPassword(nullable: false, maxSize: 25,
         validator: {camerasAdminPassword ->
-            if(!camerasAdminPassword.matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@\u0024!%*#?&])[A-Za-z\d@\u0024!%*#?&]{8,}\u0024/))
+            if(!camerasAdminPassword.matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/))
                 return "Invalid password, must be minimum eight characters, at least one letter, one number and one special character."
             return
         })

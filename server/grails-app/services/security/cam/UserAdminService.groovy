@@ -5,6 +5,7 @@ import grails.plugin.springsecurity.SpringSecurityService
 import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CreateAccountCommand
 import security.cam.commands.ResetPasswordCommand
+import security.cam.commands.SetupGuestAccountCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
@@ -39,7 +40,7 @@ class UserAdminService {
     /**
      * createAccount: This is used to create a local web account on the NVR which can be logged into directly, rather
      *                than via the Cloud service.
-     * @param cmd:     String username
+     * @param cmd :     String username
      *                 String password
      *                 String confirmPassword
      *                 String email
@@ -65,24 +66,27 @@ class UserAdminService {
 
     /**
      * removeAccount: Remove the local NVR direct web access account
-     * @return  Success/error status
+     * @return Success/error status
      */
     ObjectCommandResponse removeAccount() {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            User user = User.findByCloudAccount(false)
-            if(user != null) {
+            User user = User.all.find { it.username != 'guest' && !it.cloudAccount }
+            if (user != null) {
                 result.responseObject = [username: user.getUsername()]
                 UserRole userRole = UserRole.findByUser(user)
                 userRole.delete(flush: true)
                 user.delete(flush: true)
-            }
-            else
+
+                // Disable the guest account
+                user = User.findByUsername('guest')
+                user.setEnabled(false)
+                userService.save(user)
+            } else
                 throw new Exception("There is no local web account present on this NVR")
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("Exception in removeAccount: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
@@ -93,10 +97,30 @@ class UserAdminService {
     ObjectCommandResponse hasLocalAccount() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            result.responseObject = User.findByCloudAccount(false) != null
+            result.responseObject = User.all.find { it.username != 'guest' && !it.cloudAccount } != null
         }
         catch (Exception ex) {
             logService.cam.error("Exception in hasLocalAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    ObjectCommandResponse setupGuestAccount(SetupGuestAccountCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            User u = User.all.find { it.username == 'guest' && !it.cloudAccount }
+            u.enabled = cmd.enabled
+            if (cmd.password != "" && cmd.password != null) {
+                u.setPassword(cmd.password)
+            }
+
+            u.passwordExpired = false
+            userService.save(u)
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in setupGuestAccount: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
@@ -139,4 +163,37 @@ class UserAdminService {
         return result
     }
 
+    ObjectCommandResponse isGuest() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            def principal = springSecurityService.getPrincipal()
+            String userName = principal.getUsername()
+
+            User user = User.findByUsername(userName)
+            result.responseObject = [guestAccount: user.username == "guest" && !user.cloudAccount]
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in isGuest: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    ObjectCommandResponse guestAccountEnabled()
+    {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            User guest = User.all.find{it.username == "guest" && !it.cloudAccount}
+            result.responseObject = [enabled: guest != null && guest.enabled]
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in guestAccountEnabled: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
 }

@@ -32,6 +32,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   idleTimeoutDialogRef!: MatDialogRef<IdleTimeoutModalComponent>;
   private idleTimeoutActive: boolean = true;
   private messageSubscription!: Subscription;
+  isGuest: boolean = true;
 
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
   }
@@ -119,6 +120,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/configsetup';
   }
 
+  setUpGuestAccount() {
+    window.location.href = '#/setupguestaccount';
+  }
+
   openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
     let data: any = {};
     let remainingSecs: number = timeout - count;
@@ -152,7 +157,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     navbarCollapse.setAttribute('style', 'max-height: 0');
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.cameraStreams = this.cameraSvc.getCameraStreams();
     this.cameras = this.cameraSvc.getCameras()
 
@@ -193,7 +198,17 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cameraStreams = this.cameraSvc.getCameraStreams();
       this.cameras = this.cameraSvc.getCameras()
     });
+
+    try {
+      this.isGuest = (await this.utilsService.isGuest()).guestAccount;
+    }
+    catch (error)
+    {
+      this.isGuest = true;
+      console.error("Error calling isGuest = "+error.error)
+    }
   }
+
 
    ngAfterViewInit(): void {
     // If the camera service got any errors while getting the camera setup, then we report it here.

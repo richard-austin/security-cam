@@ -84,10 +84,12 @@ class RestfulInterfaceService {
                 result.status = RestfulResponseStatusEnum.PASS
                 result.responseObject = createMap(out.toString())
                 if(result.responseObject==null)
-                    result.responseObject=[response:conn.getResponseMessage()]  // Used when setting rather than reading values.
+                    result.responseObject=[response:out.toString()]  // Used when setting rather than reading values.
             } else {
-                logService.cam.error("API [${uri}] request failed to [${address}]. Error message: ${conn.getResponseMessage()}")
-                result.errorMsg = conn.getResponseMessage()
+                logService.cam.error("API [${uri}] request failed to [${address}]. Error message: ${out.toString()}")
+                result.status =result.status
+                result.responseCode = conn.getResponseCode()
+                result.errorMsg = out.toString()
             }
         }
         catch (MalformedURLException | SocketTimeoutException | ConnectException e) {

@@ -72,7 +72,7 @@ class MotionController {
      * @param cmd : camera: Camera to get motion events for
      * @return
      */
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getMotionEvents(GetMotionEventsCommand cmd) {
         response.contentType = "application/json"
 
@@ -98,7 +98,7 @@ class MotionController {
      *             camera: The camera the recording is from
      * @return: Binary stream for the .mp4 file
      */
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def downloadRecording(DownloadRecordingCommand cmd) {
         ObjectCommandResponse result
 
@@ -141,7 +141,7 @@ class MotionController {
      * @param cmd : fileName The name of any one of the files in the recording to be deleted
      *                      All the files will be deleted.
      */
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def deleteRecording(DeleteRecordingCommand cmd) {
         ObjectCommandResponse result
 

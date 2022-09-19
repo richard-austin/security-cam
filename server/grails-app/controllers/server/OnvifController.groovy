@@ -14,7 +14,7 @@ class OnvifController {
     LogService logService
     OnvifService onvifService
     ValidationErrorService validationErrorService
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def discover() {
         ObjectCommandResponse resp = onvifService.getMediaProfiles()
 
@@ -24,7 +24,7 @@ class OnvifController {
             render (status: 500, text: resp.error)
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getSnapshot(GetSnapshotCommand cmd)
     {
         if(cmd.hasErrors())

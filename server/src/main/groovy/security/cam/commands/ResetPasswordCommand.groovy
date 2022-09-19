@@ -4,8 +4,6 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.Validateable
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import security.cam.User
 
 class ResetPasswordCommand implements Validateable{
     String oldPassword
@@ -25,7 +23,7 @@ class ResetPasswordCommand implements Validateable{
             try {
                 cmd.authenticationManager.authenticate new UsernamePasswordAuthenticationToken(userName, oldPassword)
             }
-            catch (BadCredentialsException e) {
+            catch (BadCredentialsException ignore) {
                 valid = false
             }
 
@@ -35,8 +33,8 @@ class ResetPasswordCommand implements Validateable{
 
         newPassword(nullable: false, blank: false,
         validator: {newPassword, cmd ->
-            if(!newPassword.matches(/^[-\[\]!\"#$%&\'()*+,.\/:;<=>?@^_\`{}|~\\0-9A-Za-z]{1,64}$/))
-                return "New password contains invalid characters or is too long (must be <= 64 characters)"
+            if(!newPassword.matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/))
+                return "Invalid password, must be minimum eight characters, at least one letter, one number and one special character. (must be <= 64 characters)"
         })
 
         confirmNewPassword(validator: {confirmNewPassword, cmd ->

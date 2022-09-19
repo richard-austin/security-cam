@@ -43,6 +43,7 @@ import { MapToKeyValuePipe } from './config-setup/map-to-key-value.pipe';
 import { CredentialsForCameraAccessComponent } from './credentials-for-camera-access/credentials-for-camera-access.component';
 import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
+import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-account.component';
 
 @NgModule({
   declarations: [
@@ -66,7 +67,8 @@ import { ChangeEmailComponent } from './change-email/change-email.component';
     MapToKeyValuePipe,
     CredentialsForCameraAccessComponent,
     CloudProxyComponent,
-    ChangeEmailComponent
+    ChangeEmailComponent,
+    SetUpGuestAccountComponent
   ],
     imports: [
         BrowserModule,

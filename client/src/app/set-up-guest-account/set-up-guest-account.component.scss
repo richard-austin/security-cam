@@ -1,0 +1,17 @@
+.guest-account-container
+{
+  margin-top: 1rem;
+  font-size: 2rem;
+  display: inline-flex;
+  width: 100%;
+  >mat-card
+  {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+div.button-container{
+  margin-top: 0.6rem;
+}

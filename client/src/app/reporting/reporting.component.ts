@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {HttpErrorResponse} from "@angular/common/http";
+import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
   selector: 'app-reporting',
@@ -10,39 +10,36 @@ export class ReportingComponent implements OnInit {
   error: HttpErrorResponse | undefined;
   success: string | undefined;
   warning: string | undefined;
+  isHtml: boolean = false;
   validationErrors!:string[];
   showMessageInError:boolean = true;
   @Input() embedded: boolean = false;
-  constructor()
-  {
+
+  constructor() {
   }
 
-  set errorMessage(error: HttpErrorResponse)
-  {
+  set errorMessage(error: HttpErrorResponse) {
     this.clearMessage();
     this.success = undefined;
     this.error = error;
     this.validationErrors = [];
+    this.isHtml = /<\/?[a-z][\s\S]*>/.test(error?.error);
 
-      if(error.status === 400)
-      {
-        for(const key of Object.keys(error.error))
+    if (error.status === 400) {
+      for (const key of Object.keys(error.error)) {
           this.validationErrors.push(key + ': ' + error.error[key]);
       }
-      else if(typeof (error.error) !== 'string')
-      {
+    } else if (typeof (error.error) !== 'string') {
         this.showMessageInError=false;
       }
   }
 
-  set successMessage(success: string)
-  {
+  set successMessage(success: string) {
     this.clearMessage();
     this.success = success;
   }
 
-  set warningMessage(warning: string)
-  {
+  set warningMessage(warning: string) {
     this.clearMessage();
     this.warning = warning;
   }

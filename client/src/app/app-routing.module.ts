@@ -11,6 +11,7 @@ import {DrawdownCalcContainerComponent} from "./drawdown-calc-container/drawdown
 import {ConfigSetupComponent} from "./config-setup/config-setup.component";
 import {CloudProxyComponent} from './cloud-proxy/cloud-proxy.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
+import {SetUpGuestAccountComponent} from "./set-up-guest-account/set-up-guest-account.component";
 
 const routes: Routes = [
   {path: 'live', component: LiveContainerComponent},
@@ -22,6 +23,7 @@ const routes: Routes = [
   {path: 'setip', component: SetIpComponent},
   {path: 'cameraparams', component: CameraParamsComponent},
   {path: 'configsetup', component: ConfigSetupComponent},
+  {path: 'setupguestaccount', component: SetUpGuestAccountComponent},
   {path: 'dc', component: DrawdownCalcContainerComponent},
   {path: 'cloudproxy', component: CloudProxyComponent}
 ];

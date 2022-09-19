@@ -14,16 +14,19 @@
     {{warning}}
   </div>
   <div *ngIf="!success && error?.status != 400">
-    <div *ngIf="error !== undefined && error?.status !== undefined && error?.status != 0">Error status: {{error?.status}}</div>
+    <div *ngIf="error !== undefined && error?.status !== undefined && error?.status != 0">Error
+      status: {{error?.status}}</div>
     <br>
-    <div *ngIf="showMessageInError">{{error?.error}}</div>
+    <div *ngIf="isHtml" [innerHTML]="error?.error"></div>
+    <div *ngIf="showMessageInError && !isHtml">{{error?.error}}</div>
     <div *ngIf="!showMessageInError">See logs for more information</div>
   </div>
   <button mat-flat-button class="dismiss-button" color="default" (click)="dismiss()">Dismiss</button>
 </mat-card>
 
 <ng-container *ngIf="embedded && (error || success || warning)">
-  <div [ngClass]="{'alert-danger-embedded': error, 'alert-success-embedded': success, 'alert-warning-embedded': warning}"
+  <div
+    [ngClass]="{'alert-danger-embedded': error, 'alert-success-embedded': success, 'alert-warning-embedded': warning}"
        (click)="dismiss()">
     <ng-container *ngIf="success">
       <div>
@@ -50,9 +53,8 @@
           <div>Error status: {{error?.status}}</div>
         </ng-container>
         <br>
-        <ng-container *ngIf="showMessageInError">
-          <div>{{error?.error}}</div>
-        </ng-container>
+        <div *ngIf="isHtml" [innerHTML]="error?.error"></div>
+        <div *ngIf="showMessageInError && !isHtml">{{error?.error}}</div>
         <ng-container *ngIf="!showMessageInError">
           <div>See logs for more information</div>
         </ng-container>
