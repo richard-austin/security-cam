@@ -34,7 +34,7 @@ class ResetPasswordCommand implements Validateable{
         newPassword(nullable: false, blank: false,
         validator: {newPassword, cmd ->
             if(!newPassword.matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/))
-                return "New password contains invalid characters or is too long (must be <= 64 characters)"
+                return "Invalid password, must be minimum eight characters, at least one letter, one number and one special character. (must be <= 64 characters)"
         })
 
         confirmNewPassword(validator: {confirmNewPassword, cmd ->
