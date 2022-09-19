@@ -23,7 +23,7 @@ class ResetPasswordCommand implements Validateable{
             try {
                 cmd.authenticationManager.authenticate new UsernamePasswordAuthenticationToken(userName, oldPassword)
             }
-            catch (BadCredentialsException e) {
+            catch (BadCredentialsException ignore) {
                 valid = false
             }
 
@@ -33,7 +33,7 @@ class ResetPasswordCommand implements Validateable{
 
         newPassword(nullable: false, blank: false,
         validator: {newPassword, cmd ->
-            if(!newPassword.matches(/^[-\[\]!\"#$%&\'()*+,.\/:;<=>?@^_\`{}|~\\0-9A-Za-z]{1,64}$/))
+            if(!newPassword.matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/))
                 return "New password contains invalid characters or is too long (must be <= 64 characters)"
         })
 
