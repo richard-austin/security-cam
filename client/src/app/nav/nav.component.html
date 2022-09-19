@@ -19,7 +19,7 @@
       </button>
       <mat-menu #menuSelectCamera="matMenu">
         <ng-container *ngFor="let cs of cameraStreams">
-          <button  mat-menu-item (click)="setVideoStream(cs);menuClosed()">
+          <button mat-menu-item (click)="setVideoStream(cs);menuClosed()">
             {{cs.camera.name + " (" + cs.stream.descr + ")"}}
           </button>
         </ng-container>
@@ -50,17 +50,27 @@
       </mat-menu>
     </div>
 
-  <!--    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>-->
+    <!--    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>-->
     <div>
       <button mat-button [matMenuTriggerFor]="menuGeneral">General</button>
       <mat-menu #menuGeneral="matMenu">
         <button mat-menu-item (click)="configSetup();menuClosed()">Configure Camera Setup</button>
         <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
-        <button mat-menu-item [disabled]="isGuest" (click)="changePassword();menuClosed()">Change Password</button>
-        <button mat-menu-item [disabled]="isGuest" (click)="changeEmail(); menuClosed()">Change Account Email</button>
-        <button mat-menu-item *ngIf="!isGuest" (click)="setUpGuestAccount(); menuClosed()">Set Up Guest Account</button>
+        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+          <button mat-menu-item [disabled]="isGuest" (click)="changePassword();menuClosed()">Change Password</button>
+        </span>
+        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+          <button mat-menu-item [disabled]="isGuest" (click)="changeEmail(); menuClosed()">Change Account Email</button>
+        </span>
+        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+          <button mat-menu-item *ngIf="!isGuest"
+                  (click)="setUpGuestAccount(); menuClosed()">Set Up Guest Account
+          </button>
+        </span>
         <div class="dropdown-divider"></div>
-        <button mat-menu-item [disabled]="isGuest" (click)="setIp();menuClosed()">Save Current Public IP</button>
+        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+          <button mat-menu-item [disabled]="isGuest" (click)="setIp();menuClosed()">Save Current Public IP</button>
+        </span>
         <button mat-menu-item (click)="cloudProxy();menuClosed()">Set CloudProxy Status</button>
         <button mat-menu-item (click)="drawdownCalc();menuClosed()">Pension Drawdown Calculator</button>
         <div class="dropdown-divider"></div>

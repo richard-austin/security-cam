@@ -77,7 +77,7 @@ export class SetUpGuestAccountComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.setupGuestAccountForm = new FormGroup({
       enabled: new FormControl('', []),
-      password: new FormControl('', [Validators.pattern(/^$|[-\[\]!\"#$%&\'()*+,.\/:;<=>?@^_\`{}|~\\0-9A-Za-z]{8,64}$/)]),
+      password: new FormControl('', [Validators.pattern(/^$|^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/)]),
       confirmPassword: new FormControl('', [this.comparePasswords])
     }, {updateOn: "change"});
     this.setupGuestAccountForm.markAllAsTouched();

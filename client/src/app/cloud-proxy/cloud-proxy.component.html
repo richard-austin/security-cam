@@ -4,11 +4,13 @@
   <mat-card class="mat-elevation-z8" xmlns="http://www.w3.org/1999/html">
     <mat-card-title>Set Cloud Proxy Status</mat-card-title>
     <mat-card-content>
-      <mat-checkbox [color]="'primary'" [checked]="cps"
-                    [disabled]="!cbEnabled || isGuest"
-                    (change)="setCloudProxyStatus($event)">
-        Set Cloud Proxy {{cps ? 'Off' : 'On'}}
-      </mat-checkbox>
+      <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+        <mat-checkbox [color]="'primary'" [checked]="cps"
+                      [disabled]="!cbEnabled || isGuest"
+                      (change)="setCloudProxyStatus($event)">
+          Set Cloud Proxy {{cps ? 'Off' : 'On'}}
+        </mat-checkbox>
+      </span>
     </mat-card-content>
   </mat-card>
 </div>
