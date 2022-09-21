@@ -15,15 +15,6 @@ const PROXY_CONFIG = [
     target: "http://localhost:8080/",
     changeOrigin: false,
     secure: false
-  },
-  {
-    context: [
-      "/live"
-    ],
-    ws: true,
-    target: "http://localhost:8009/",
-    changeOrigin: false,
-    secure: false
   }
 ]
 

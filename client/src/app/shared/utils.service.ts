@@ -4,6 +4,7 @@ import {BaseUrl} from "./BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
 import {CameraParams} from "../cameras/Camera";
+import {environment} from "../../environments/environment";
 
 export class Temperature {
   temp: string = "";
@@ -39,6 +40,7 @@ export class IdleTimeoutStatusMessage extends Message {
 
 export class GuestStatus {
   guestAccount: boolean = true;
+   constructor(guestAccount: boolean){this.guestAccount = guestAccount;}
 }
 
 export class GuestAccountStatus {
@@ -149,7 +151,7 @@ export class UtilsService {
    *          This is called from the nav component ngOnInit
    */
   async isGuest() : Promise<GuestStatus> {
-    let retVal : GuestStatus = await this.http.post<GuestStatus>(this._baseUrl.getLink("user", "isGuest"), '', this.httpJSONOptions).toPromise()
+    let retVal : GuestStatus = environment.production ? await this.http.post<GuestStatus>(this._baseUrl.getLink("user", "isGuest"), '', this.httpJSONOptions).toPromise() : new GuestStatus(false)
     this.isGuestAccount = retVal.guestAccount;
     return retVal;
   }
