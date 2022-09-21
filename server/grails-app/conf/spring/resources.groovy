@@ -6,6 +6,7 @@ import security.cam.commands.UserPasswordEncoderListener
 import security.cam.eventlisteners.SecCamAuthFailEventListener
 import security.cam.eventlisteners.SecCamSecurityEventListener
 import security.cam.eventlisteners.TwoFactorAuthenticationProvider
+import security.cam.eventlisteners.WebSocketConfiguration
 import security.cam.interfaceobjects.TwoFactorAuthenticationDetailsSource
 
 // Place your Spring DSL code here
@@ -42,4 +43,6 @@ beans = {
 
         authenticationDetailsSource(TwoFactorAuthenticationDetailsSource)
     }
+    webSocketConfiguration(WebSocketConfiguration)
+
 }

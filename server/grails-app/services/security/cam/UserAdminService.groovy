@@ -1,7 +1,10 @@
 package security.cam
 
+import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
+import org.grails.web.json.JSONObject
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CreateAccountCommand
 import security.cam.commands.ResetPasswordCommand
@@ -17,6 +20,12 @@ class UserAdminService {
     UserService userService
     UserRoleService userRoleService
     RoleService roleService
+    SimpMessagingTemplate brokerMessagingTemplate
+
+    final String logoff = new JSONObject()
+            .put("message", "logoff")
+            .toString()
+
 
     ObjectCommandResponse resetPassword(ResetPasswordCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
@@ -118,6 +127,10 @@ class UserAdminService {
 
             u.passwordExpired = false
             userService.save(u)
+
+            // Kick off any guest users who are logged in
+            if(!cmd.enabled)
+                brokerMessagingTemplate.convertAndSend("/topic/logoff", logoff)
         }
         catch (Exception ex) {
             logService.cam.error("Exception in setupGuestAccount: " + ex.getCause() + ' ' + ex.getMessage())

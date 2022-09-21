@@ -11,6 +11,9 @@ import {MatDialogRef} from "@angular/material/dialog/dialog-ref";
 import {UserIdleConfig} from "../angular-user-idle/angular-user-idle.config";
 import {UserIdleService} from "../angular-user-idle/angular-user-idle.service";
 
+declare let SockJS: any;
+declare let Stomp: any;
+
 @Component({
   selector: 'app-nav',
   templateUrl: './nav.component.html',
@@ -33,6 +36,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   private idleTimeoutActive: boolean = true;
   private messageSubscription!: Subscription;
   isGuest: boolean = true;
+  private stompClient: any;
 
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
   }
@@ -157,6 +161,26 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     navbarCollapse.setAttribute('style', 'max-height: 0');
   }
 
+  initializeWebSocketConnection() {
+    let serverUrl: string = window.location.origin + "/stomp";
+
+    let ws = new SockJS(serverUrl);
+    this.stompClient = Stomp.over(ws);
+    this.stompClient.debug = null;
+    let that = this;
+    this.stompClient.connect({}, () => {
+      that.stompClient.subscribe("/topic/logoff", (message: any) => {
+        if (message.body) {
+          let msgObj = JSON.parse(message.body);
+          if (msgObj.message === "logoff" && this.isGuest) {
+            this.logOff(true);
+            console.log(message.body);
+          }
+        }
+      });
+    });
+  }
+
   async ngOnInit(): Promise<void> {
     this.cameraStreams = this.cameraSvc.getCameraStreams();
     this.cameras = this.cameraSvc.getCameras()
@@ -207,6 +231,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isGuest = true;
       console.error("Error calling isGuest = "+error.error)
     }
+    this.initializeWebSocketConnection();
   }
 
 
