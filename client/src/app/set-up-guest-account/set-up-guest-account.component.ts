@@ -12,13 +12,19 @@ import {MatCheckboxChange} from '@angular/material/checkbox';
 })
 export class SetUpGuestAccountComponent implements OnInit {
   setupGuestAccountForm!: FormGroup;
+  private originalEnabledState!: boolean
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  private currentEnabledState!: boolean;
 
   constructor(private utilsService: UtilsService) {
   }
 
   submitButtonDisabled(): boolean {
-    return this.anyInvalid();
+    let password: string = this.setupGuestAccountForm.controls['password'].value;
+
+    return this.anyInvalid() ||
+      ((this.originalEnabledState === this.currentEnabledState) &&
+      (password === undefined || password === '' ));
   }
 
   hasError = (controlName: string, errorName: string): boolean => {
@@ -30,8 +36,14 @@ export class SetUpGuestAccountComponent implements OnInit {
     let password: AbstractControl = this.setupGuestAccountForm.controls['password'];
     let confirmPassword: AbstractControl = this.setupGuestAccountForm.controls['confirmPassword'];
 
+    this.currentEnabledState = this.originalEnabledState = enabled.value;
+
     this.utilsService.setupGuestAccount(enabled.value, password.value, confirmPassword.value).subscribe(() => {
         this.reporting.successMessage = "Guest account settings changed";
+
+        // Clear the password fields
+        this.setupGuestAccountForm.controls['password'].setValue('');
+        this.setupGuestAccountForm.controls['confirmPassword'].setValue('');
       },
       (reason: HttpErrorResponse) => {
         if (reason.status === 400) {
@@ -71,6 +83,7 @@ export class SetUpGuestAccountComponent implements OnInit {
   }
 
   setEnabled($event: MatCheckboxChange) {
+    this.currentEnabledState = $event.checked
     this.setupGuestAccountForm.controls['enabled'].setValue($event.checked);
   }
 
@@ -80,7 +93,14 @@ export class SetUpGuestAccountComponent implements OnInit {
       password: new FormControl('', [Validators.pattern(/^$|^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/)]),
       confirmPassword: new FormControl('', [this.comparePasswords])
     }, {updateOn: "change"});
+
+    // Trigger revalidation on confirmPassword when password is changed.
+    this.setupGuestAccountForm.controls['password'].valueChanges.subscribe(() => {
+        this.setupGuestAccountForm.controls['confirmPassword'].updateValueAndValidity();
+      }
+    )
     this.setupGuestAccountForm.markAllAsTouched();
-    this.setupGuestAccountForm.controls['enabled'].setValue((await this.utilsService.guestAccountEnabled()).enabled);
+    this.originalEnabledState = this.currentEnabledState = (await this.utilsService.guestAccountEnabled()).enabled
+    this.setupGuestAccountForm.controls['enabled'].setValue(this.originalEnabledState);
   }
 }
