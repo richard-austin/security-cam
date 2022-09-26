@@ -194,7 +194,7 @@ task setVersion(type: Exec) {
     args = ['-c', 'mkdir -p grails-app/assets/version && git describe --tags --dirty | tr -d \'\\n\' > grails-app/assets/version/version.txt']
 }
 
-task buildDebFile(type: Exec, dependsOn: [':server:assemble']) {
+task buildDebFile(type: Exec, dependsOn: [':server:assemble', ':generateProductKey:uberJar']) {
     group = 'build'
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'
