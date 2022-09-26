@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'GenerateProductKey'
+        )
+    }
+}
+
+task copyToDeploymentStaging(type: Copy) {
+    from(libsDirectory)
+    into file('../xtrn-scripts-and-config/productKeyGen')
+
+    from ('../xtrn-scripts-and-config/productKeyGen/')
+    include 'generateProductKey-1.0-SNAPSHOT-uber.jar'
+    destinationDir file('../xtrn-scripts-and-config/productKeyGen/')
+    rename 'generateProductKey-1.0-SNAPSHOT-uber.jar', 'generateProductKey.jar'
+}
+
+tasks.register('uberJar', Jar) {
+    archiveClassifier = 'uber'
+    group = 'build'
+
+    manifest {
+        attributes(
+                'Main-Class': 'GenerateProductKey'
+        )
+    }
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
+
+uberJar.finalizedBy(copyToDeploymentStaging)
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
+
+dependencies {
+    compileOnly 'junit:junit:4.12'
+    implementation 'commons-codec:commons-codec:1.15'
+}
