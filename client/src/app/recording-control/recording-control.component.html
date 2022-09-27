@@ -5,7 +5,7 @@
       <mat-form-field appearance="fill">
         <mat-label>Motion Events</mat-label>
         <mat-select #selector (selectionChange)="showMotionEvent($event)"
-                    matTooltip="Select a recording by ate and time"
+                    matTooltip="Select a recording by date and time"
                     matTooltipClass="tooltip">
           <mat-option *ngFor="let event of motionEvents" [value]="event">
             {{event.dateTime}}
