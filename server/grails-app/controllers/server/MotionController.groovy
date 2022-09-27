@@ -141,7 +141,7 @@ class MotionController {
      * @param cmd : fileName The name of any one of the files in the recording to be deleted
      *                      All the files will be deleted.
      */
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def deleteRecording(DeleteRecordingCommand cmd) {
         ObjectCommandResponse result
 

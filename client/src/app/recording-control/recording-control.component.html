@@ -4,31 +4,42 @@
     <mat-card-content>
       <mat-form-field appearance="fill">
         <mat-label>Motion Events</mat-label>
-        <mat-select #selector (selectionChange)="showMotionEvent($event)">
+        <mat-select #selector (selectionChange)="showMotionEvent($event)"
+                    matTooltip="Select a recording by ate and time"
+                    matTooltipClass="tooltip">
           <mat-option *ngFor="let event of motionEvents" [value]="event">
             {{event.dateTime}}
           </mat-option>
         </mat-select>
       </mat-form-field>
       <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
-        <div *ngSwitchCase="false">
-          <button (click)="confirmDelete=true" color="warning" mat-flat-button
-                  title="Delete the currently selected recording">Delete This Recording
+        <div *ngSwitchCase="false"
+             matTooltip="{{isGuest ? 'Disabled for guest' : 'Delete the currently selected recording'}}"
+             matTooltipClass="tooltip">
+          <button (click)="confirmDelete=true" [disabled]="isGuest" color="warning" mat-flat-button
+                  matTooltip="Delete the currently displayed recording" matTooltipClass="tooltip">
+            Delete This Recording
           </button>
         </div>
         <div *ngSwitchCase="true">
           Delete {{selector.value.dateTime}},
           <div>are you sure?</div>
           <button (click)="confirmDelete=false;deleteRecording()" color="danger" mat-flat-button
-                  title="Delete the currently selected recording">Confirm
+                  matTooltip="Delete the currently selected recording"
+                  matTooltipClass="tooltip">Confirm
           </button>
           <button (click)="confirmDelete=false" color="default" mat-flat-button
-                  title="Do not delete the recording">Cancel
+                  matTooltip="Do not delete the recording"
+                  matTooltipClass="tooltip">
+            Cancel
           </button>
         </div>
       </div>
       <div *ngIf="!confirmDelete && !downloading" class="download-button">
-        <button (click)="downloadRecording()" color="light" mat-flat-button>Download Recording
+        <button (click)="downloadRecording()" color="light" mat-flat-button
+                matTooltip="Download this recording to your PC or phone"
+                matTooltipClass="tooltip">
+          Download Recording
         </button>
       </div>
     </mat-card-content>
@@ -44,25 +55,25 @@
         <mat-button-toggle-group aria-label="Playback control" name="playbackControl"
                                  [(ngModel)]="selectedPlaybackMode">
           <button mat-button (click)="returnToStart()"
-                  title="Go back to the start of the recording">
+                  matTooltip="Go back to the start of the recording" matTooltipClass="tooltip">
             <mat-icon>fast_rewind</mat-icon>
           </button>
-          <button mat-button (click)="stepBack()" title="Step backward 10 seconds">
+          <button mat-button (click)="stepBack()" matTooltip="Step backward 10 seconds" matTooltipClass="tooltip">
             <mat-icon>replay_10</mat-icon>
           </button>
-          <button mat-button (click)="stepForward()" title="Step forward 10 seconds">
+          <button mat-button (click)="stepForward()" matTooltip="Step forward 10 seconds" matTooltipClass="tooltip">
             <mat-icon>forward_10</mat-icon>
           </button>
 
-          <mat-button-toggle (click)="paused ? start() : pause()" [title]="paused ? 'Play' : 'Pause'"
+          <mat-button-toggle (click)="paused ? start() : pause()" [matTooltip]="paused ? 'Play' : 'Pause'" matTooltipClass="tooltip"
                              value="startPause">
             <mat-icon *ngIf="!paused">pause</mat-icon>
             <mat-icon *ngIf="paused">play_arrow</mat-icon>
           </mat-button-toggle>
-          <mat-button-toggle (click)="fastForward()" title="Fast forward" value="fastForward">
+          <mat-button-toggle (click)="fastForward()" matTooltip="Fast forward" matTooltipClass="tooltip" value="fastForward">
             <mat-icon>fast_forward</mat-icon>
           </mat-button-toggle>
-          <mat-button-toggle (click)="fasterForward()" title="Faster forward" value="fasterForward">
+          <mat-button-toggle (click)="fasterForward()" matTooltip="Faster forward" matTooltipClass="tooltip" value="fasterForward">
             <mat-icon class="faster-forward">fast_forward</mat-icon>
           </mat-button-toggle>
         </mat-button-toggle-group>
