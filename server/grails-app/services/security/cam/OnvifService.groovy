@@ -5,11 +5,21 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
+import org.onvif.ver20.ptz.wsdl.Capabilities
+
+import  javax.xml.datatype.DatatypeFactory
 import org.onvif.ver10.media.wsdl.Media
 import org.onvif.ver10.schema.AudioEncoderConfiguration
+import org.onvif.ver10.schema.AudioSourceConfiguration
+import org.onvif.ver10.schema.PTZConfiguration
+import org.onvif.ver10.schema.PTZSpeed
+import org.onvif.ver10.schema.PTZVector
 import org.onvif.ver10.schema.Profile
+import org.onvif.ver10.schema.Vector1D
+import org.onvif.ver10.schema.Vector2D
 import org.onvif.ver10.schema.VideoEncoderConfiguration
 import org.onvif.ver10.schema.VideoResolution
+import org.onvif.ver20.ptz.wsdl.PTZ
 import org.utils.OnvifCredentials
 import org.utils.TestDevice
 import security.cam.enums.PassFail
@@ -17,6 +27,7 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
 import server.Stream
 
+import javax.xml.datatype.Duration
 import java.nio.charset.Charset
 
 @Transactional
@@ -79,21 +90,40 @@ class OnvifService {
                             stream.audio_encoding = aec.getEncoding().value()
                             stream.audio_sample_rate = aec.getSampleRate()
 
-//                        AudioSourceConfiguration aec = profile.getAudioSourceConfiguration()
-//                        PTZConfiguration ptzConf = profile.getPTZConfiguration()
-//                        Map ptzProps = ptzConf.getProperties()
-//                        PTZ ptz = device.getPtz()
-//                        List pre = ptz.getPresets(profile.getToken())
-//                        PTZSpeed ptzSpd = new PTZSpeed()
-//                        ptzSpd.setZoom(new Vector1D().setX(4))
-//                        ptz.absoluteMove(profile.getToken(), pre[3].getPTZPosition(), new PTZSpeed())
-//
-//                        String name = profile.getName()
+                            AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
+                            if(cam.address == "192.168.0.52") {
+                                PTZConfiguration ptzConf = profile.getPTZConfiguration()
+                                Map ptzProps = ptzConf.getProperties()
+                                PTZ ptz = device.getPtz()
 
-//                        List<AudioEncoderConfiguration> audio2 =  media.getCompatibleAudioEncoderConfigurations(profileToken)
-//                        //                       audio1 =  media.getAudioOutputConfiguration(audio2[0].getToken())
-//                        AudioEncoderConfiguration aconfig = media.getAudioEncoderConfiguration(audio2[0].getToken())
-//                        def info = device.getDeviceInfo()
+                                Capabilities cap = ptz.getServiceCapabilities()
+                                List pre = ptz.getPresets(profile.getToken())
+
+                                Vector2D panTilt = new Vector2D()
+                                DatatypeFactory dtf = DatatypeFactory.newDefaultInstance()
+                                Duration timeOut = dtf.newDuration(true, 0, 0, 0, 0, 0, 1)
+
+                                PTZSpeed ptzSpd = new PTZSpeed()
+                                ptzSpd.setZoom(new Vector1D())
+                                ptzSpd.getZoom().setX(-0.5)
+                                panTilt.setX(0.5)
+                                panTilt.setY(0.0)
+                                ptzSpd.setPanTilt(panTilt)
+
+                                ptz.continuousMove(profile.getToken(), ptzSpd, null)
+                                Thread.sleep(300)
+                                ptz.stop(profile.getToken(), true, true)
+                              //  ptz.setHomePosition(profile.getToken()) // Action not supported
+
+                                //   ptz.absoluteMove(profile.getToken(), pre[3].getPTZPosition(), new PTZSpeed())
+
+                                String name = profile.getName()
+
+                                List<AudioEncoderConfiguration> audio2 = media.getCompatibleAudioEncoderConfigurations(profileToken)
+                                //                       audio1 =  media.getAudioOutputConfiguration(audio2[0].getToken())
+                                AudioEncoderConfiguration aconfig = media.getAudioEncoderConfiguration(audio2[0].getToken())
+                                def info = device.getDeviceInfo()
+                            }
                         })
                         logService.cam.info("Connected to device %s (%s)%n", device.getDeviceInfo(), device.streamUri.toString())
                         logService.cam.info(TestDevice.inspect(device))
@@ -206,11 +236,11 @@ class OnvifService {
         }
         catch (IOException ex) {
             result.error = "IO Error connecting to camera at ${strUrl}: ${ex.getMessage()}"
-            if(uc != null) {
+            if (uc != null) {
                 try {
                     result.errno = uc.getResponseCode()
                 }
-                catch(Exception ignore){
+                catch (Exception ignore) {
                     result.errno = 500
                 }
             }
