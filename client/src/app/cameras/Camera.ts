@@ -49,6 +49,7 @@ export class Camera
     address: string="";
     controlUri: string="";
     snapshotUri: string="";
+    ptzControls: boolean = false;
     streams: Map<string, Stream> = new Map<string, Stream>();
 }
 

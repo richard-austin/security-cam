@@ -1,0 +1,27 @@
+mat-card.card-features {
+  margin-top: 60px;
+
+  > mat-card-subtitle {
+    display: flex;
+    color: yellow;
+    justify-content: center;
+  }
+}
+
+div.flex-container
+{
+  > div {
+    margin-left: -2.5rem;
+    margin-right: -2.5rem;
+    width: 11rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    > app-ptzbutton {
+      &:hover {
+        color: white;
+      }
+      color: lightgrey;
+     }
+  }
+}

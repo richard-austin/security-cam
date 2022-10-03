@@ -28,6 +28,7 @@ import server.Camera
 import server.Stream
 
 import javax.xml.datatype.Duration
+import javax.xml.ws.Holder
 import java.nio.charset.Charset
 
 @Transactional
@@ -96,6 +97,8 @@ class OnvifService {
                                 Map ptzProps = ptzConf.getProperties()
                                 PTZ ptz = device.getPtz()
 
+                                def nodes = ptz.getNodes()
+
                                 Capabilities cap = ptz.getServiceCapabilities()
                                 List pre = ptz.getPresets(profile.getToken())
 
@@ -110,9 +113,17 @@ class OnvifService {
                                 panTilt.setY(0.0)
                                 ptzSpd.setPanTilt(panTilt)
 
+                                Thread.sleep(3000)
+                                ptz.setPreset(profileToken, "3", null)
                                 ptz.continuousMove(profile.getToken(), ptzSpd, null)
-                                Thread.sleep(300)
+                                Thread.sleep(3000)
                                 ptz.stop(profile.getToken(), true, true)
+                                ptz.setPreset(profileToken, "1", null)
+                                Thread.sleep(3000)
+                                ptz.gotoPreset(profileToken, "3", ptzSpd)
+                                Thread.sleep(3000)
+                                ptz.gotoPreset(profileToken, "1", ptzSpd)
+
                               //  ptz.setHomePosition(profile.getToken()) // Action not supported
 
                                 //   ptz.absoluteMove(profile.getToken(), pre[3].getPTZPosition(), new PTZSpeed())

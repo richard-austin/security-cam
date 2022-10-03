@@ -44,6 +44,8 @@ import { CredentialsForCameraAccessComponent } from './credentials-for-camera-ac
 import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-account.component';
+import { PTZControlsComponent } from './live-container/ptzcontrols/ptzcontrols.component';
+import { PTZButtonComponent } from './live-container/ptzcontrols/ptzbutton/ptzbutton.component';
 
 @NgModule({
   declarations: [
@@ -68,7 +70,9 @@ import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-
     CredentialsForCameraAccessComponent,
     CloudProxyComponent,
     ChangeEmailComponent,
-    SetUpGuestAccountComponent
+    SetUpGuestAccountComponent,
+    PTZControlsComponent,
+    PTZButtonComponent
   ],
     imports: [
         BrowserModule,

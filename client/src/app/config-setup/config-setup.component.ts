@@ -49,7 +49,15 @@ export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
   }
 }
 
-@Component({
+export function validateTrueOrFalse (): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+
+    let invalidValue: boolean = control.value != true && control.value !== false;
+    return invalidValue ? {ptzControls: true} : null;
+  }
+}
+
+    @Component({
   selector: 'app-config-setup',
   templateUrl: './config-setup.component.html',
   styleUrls: ['./config-setup.component.scss'],
@@ -83,7 +91,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address', 'snapshotUri'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address', 'snapshotUri', 'ptzControls'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -206,6 +214,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           value: camera.snapshotUri,
           disabled: false
         }, [Validators.maxLength(55)]),
+        ptzControls: new FormControl({
+          value: camera.ptzControls,
+          disabled: false
+        }, [validateTrueOrFalse()])
       }, {updateOn: "change"});
     });
     this.camControls = new FormArray(toCameraGroups);
@@ -224,7 +236,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * deleteCamera: Delete a camera from the cameras.map
+   * deleteCamera: Delete a camera from the cameras map
    * @param key: The key of the map entry to be deleted
    */
   deleteCamera(key: string): boolean {
@@ -235,7 +247,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * deleteStream: Delete a stream from the streams.map
+   * deleteStream: Delete a stream from the streams map
    * @param cameraKey
    * @param streamKey
    */
@@ -255,7 +267,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             enableFirstAsMultiDisplayDefault = false;
           }
           if (stream.motion.enabled)
-            stream.motion.trigger_recording_on = '';  // Set all recording triggers to 'None' as the the stream keys may be renumbered
+            stream.motion.trigger_recording_on = '';  // Set all recording triggers to 'None' as the stream keys may be renumbered
         })
       }
       this.FixUpCamerasData();
@@ -264,7 +276,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * FixUpCamerasData: Fix the key names in the cameras and streams maps so they follow the sequence
+   * FixUpCamerasData: Fix the key names in the cameras and streams maps, so they follow the sequence
    *                   camera1, camera2 or stream1, stream 2 etc. This is run after deleting an item
    *                   from the map. Also number the live streams and recording uri's logically
    */

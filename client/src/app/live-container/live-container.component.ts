@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {CameraService} from "../cameras/camera.service";
-import {Camera, CameraStream} from "../cameras/Camera";
+import {CameraStream} from "../cameras/Camera";
 import {Subscription} from "rxjs";
 import {VideoComponent} from "../video/video.component";
 import {IdleTimeoutStatusMessage, UtilsService} from "../shared/utils.service";
@@ -26,7 +26,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   setupVideo() {
     this.reporting.dismiss();
     this.videos.forEach((video) => {
-      video.multi = this.multi ? this.multi : false;
+      video.multi = this.multi;
       video.visible = false;
       video.stop();
     });
@@ -44,6 +44,11 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
       });
     } else
       this.showInvalidInput();
+  }
+
+
+  hasPTZControls() {
+    return !this.multi && this.cameraSvc.getActiveLive()[0]?.camera?.ptzControls;
   }
 
   /**

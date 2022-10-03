@@ -144,6 +144,18 @@
         </td>
       </ng-container>
 
+      <ng-container matColumnDef="ptzControls">
+        <th mat-header-cell *matHeaderCellDef>PTZ Controls.</th>
+        <td mat-cell *matCellDef="let cam; let i = dataIndex">
+          <mat-checkbox [formControl]="getCamControl(i, 'ptzControls')"
+                        matTooltip="The Pan Tilt and Zoom controls for {{cam.key}} will be present on the live stream view if checked."
+                        matTooltipClass="tooltip"
+                        (change)="updateCamField(i, 'ptzControls')">
+          </mat-checkbox>
+          <mat-error *ngIf="getCamControl(i, 'ptzControls').invalid">Set the PTZ status</mat-error>
+        </td>
+      </ng-container>
+
       <!-- Expanded Streams Column - The streams row is made up of this one column that spans across all columns -->
       <ng-container matColumnDef="expandedStreamDetail">
         <td mat-cell *matCellDef="let cam; let camIndex=dataIndex" [attr.colspan]="cameraColumns.length">
@@ -177,7 +189,8 @@
                            matTooltipClass="tooltip"
                            placeholder="Stream Description"
                            (change)="updateStreamField(camIndex, streamIndex, 'descr')">
-                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('required')">Description
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('required')">
+                      Description
                       is required
                     </mat-error>
                     <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('pattern')">2-20
@@ -214,10 +227,12 @@
                            matTooltip="Set the URI for connection to the camera stream. This is in the form 'rtsp://<ip address>/<uri>"
                            matTooltipClass="tooltip"
                            placeholder="Netcam URI" (blur)="updateStreamField(camIndex, streamIndex, 'netcam_uri')">
-                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('pattern')">Should
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('pattern')">
+                      Should
                       be: rtsp://[uri..]
                     </mat-error>
-                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('required')">Netcam
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('required')">
+                      Netcam
                       URI is required
                     </mat-error>
                   </mat-form-field>
@@ -321,7 +336,8 @@
                            [formControl]="getStreamControl(camIndex, streamIndex,'video_height')"
                            matTooltip="The height in pixels of the video on {{stream.key}}. This is required if motion detection is enabled on {{stream.key}}."
                            matTooltipClass="tooltip"
-                           placeholder="Video Height" (blur)="updateStreamField(camIndex, streamIndex, 'video_height')">
+                           placeholder="Video Height"
+                           (blur)="updateStreamField(camIndex, streamIndex, 'video_height')">
                     <mat-error *ngIf="getStreamControl(camIndex, streamIndex,'video_height').invalid">Valid: 90-3000
                     </mat-error>
                   </mat-form-field>

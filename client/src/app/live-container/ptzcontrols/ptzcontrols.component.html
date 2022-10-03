@@ -1,0 +1,19 @@
+<mat-card class="mat-elevation-z8 card-features">
+  <mat-card-title></mat-card-title>
+  <mat-card-subtitle>PTZ Controls</mat-card-subtitle>
+  <mat-card-content>
+    <div class="flex-container">
+      <div>
+        <app-ptzbutton matIcon="keyboard_arrow_up" ptzBtnMatTooltip="Tilt upward" [moveDirection]="eMoveDirections['tiltUp']">
+        </app-ptzbutton>
+      </div>
+      <div>
+        <app-ptzbutton matIcon="keyboard_arrow_left" ptzBtnMatTooltip="Pan left" [moveDirection]="eMoveDirections['panLeft']"></app-ptzbutton>
+        <app-ptzbutton matIcon="keyboard_arrow_right" ptzBtnMatTooltip="Pan right" [moveDirection]="eMoveDirections['panRight']"></app-ptzbutton>
+      </div>
+      <div>
+        <app-ptzbutton matIcon="keyboard_arrow_down" ptzBtnMatTooltip="Tilt downward" [moveDirection]="eMoveDirections['tiltDown']"></app-ptzbutton>
+      </div>
+    </div>
+   </mat-card-content>
+</mat-card>

@@ -58,6 +58,7 @@ class Camera {
     String address=''
     String controlUri=''
     String snapshotUri=''
+    boolean ptzControls = false
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
 }
 
