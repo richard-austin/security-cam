@@ -4,16 +4,35 @@
   <mat-card-content>
     <div class="flex-container">
       <div>
-        <app-ptzbutton matIcon="keyboard_arrow_up" ptzBtnMatTooltip="Tilt upward" [moveDirection]="eMoveDirections['tiltUp']">
+        <app-ptzbutton matIcon="keyboard_arrow_up"
+                       ptzBtnMatTooltip="Tilt upward"
+                       [reporting]="reporting"
+                       [moveDirection]="eMoveDirections['tiltUp']"
+                       [camera]="camera">
         </app-ptzbutton>
       </div>
       <div>
-        <app-ptzbutton matIcon="keyboard_arrow_left" ptzBtnMatTooltip="Pan left" [moveDirection]="eMoveDirections['panLeft']"></app-ptzbutton>
-        <app-ptzbutton matIcon="keyboard_arrow_right" ptzBtnMatTooltip="Pan right" [moveDirection]="eMoveDirections['panRight']"></app-ptzbutton>
+        <app-ptzbutton matIcon="keyboard_arrow_left"
+                       ptzBtnMatTooltip="Pan left"
+                       [reporting]="reporting"
+                       [moveDirection]="eMoveDirections['panLeft']"
+                       [camera]="camera">
+        </app-ptzbutton>
+        <app-ptzbutton matIcon="keyboard_arrow_right"
+                       ptzBtnMatTooltip="Pan right"
+                       [reporting]="reporting"
+                       [moveDirection]="eMoveDirections['panRight']"
+                       [camera]="camera">
+        </app-ptzbutton>
       </div>
       <div>
-        <app-ptzbutton matIcon="keyboard_arrow_down" ptzBtnMatTooltip="Tilt downward" [moveDirection]="eMoveDirections['tiltDown']"></app-ptzbutton>
+        <app-ptzbutton matIcon="keyboard_arrow_down"
+                       ptzBtnMatTooltip="Tilt downward"
+                       [reporting]="reporting"
+                       [moveDirection]="eMoveDirections['tiltDown']"
+                       [camera]="camera">
+        </app-ptzbutton>
       </div>
     </div>
-   </mat-card-content>
+  </mat-card-content>
 </mat-card>

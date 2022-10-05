@@ -60,6 +60,7 @@ class Camera {
     String snapshotUri=''
     boolean ptzControls = false
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
+    String onvifHost=''
 }
 
 class MotionController {

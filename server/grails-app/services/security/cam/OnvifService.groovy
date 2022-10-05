@@ -6,6 +6,9 @@ import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
 import org.onvif.ver20.ptz.wsdl.Capabilities
+import security.cam.commands.MoveCommand
+import security.cam.commands.MoveCommand.eMoveDirections
+import security.cam.commands.StopCommand
 
 import  javax.xml.datatype.DatatypeFactory
 import org.onvif.ver10.media.wsdl.Media
@@ -13,7 +16,6 @@ import org.onvif.ver10.schema.AudioEncoderConfiguration
 import org.onvif.ver10.schema.AudioSourceConfiguration
 import org.onvif.ver10.schema.PTZConfiguration
 import org.onvif.ver10.schema.PTZSpeed
-import org.onvif.ver10.schema.PTZVector
 import org.onvif.ver10.schema.Profile
 import org.onvif.ver10.schema.Vector1D
 import org.onvif.ver10.schema.Vector2D
@@ -28,8 +30,20 @@ import server.Camera
 import server.Stream
 
 import javax.xml.datatype.Duration
-import javax.xml.ws.Holder
-import java.nio.charset.Charset
+
+class XYZValues {
+    float x
+    float y
+    float z
+
+    XYZValues(float x, float y, float z)
+    {
+        this.x = x
+        this.y = y
+        this.z = z
+    }
+}
+
 
 @Transactional
 class OnvifService {
@@ -37,7 +51,14 @@ class OnvifService {
     GrailsApplication grailsApplication
     CamService camService
     Sc_processesService sc_processesService
+    final Map<eMoveDirections, XYZValues> xyzMap = new HashMap<eMoveDirections, XYZValues>()
 
+    OnvifService() {
+        xyzMap.put(eMoveDirections.panLeft, new XYZValues(-0.5, 0, 0))
+        xyzMap.put(eMoveDirections.panRight, new XYZValues(0.5, 0, 0))
+        xyzMap.put(eMoveDirections.tiltDown, new XYZValues(0, -0.5, 0))
+        xyzMap.put(eMoveDirections.tiltUp, new XYZValues(0, 0.5, 0))
+    }
     /**
      * getMediaProfiles: Get the details of Onvif compliant cameras which are online on the LAN.
      * @return: LinkedHashMap<String, Camera> containing discovered cameras with all fields populated which can be.
@@ -61,6 +82,7 @@ class OnvifService {
                 if (credentials != null) {
                     OnvifDevice device = null
                     Camera cam = new Camera()
+                    cam.onvifHost = credentials.host
                     cam.streams = new LinkedTreeMap<String, Stream>()
 
                     try {
@@ -92,7 +114,7 @@ class OnvifService {
                             stream.audio_sample_rate = aec.getSampleRate()
 
                             AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
-                            if(cam.address == "192.168.0.52") {
+                            if(false && cam.address == "192.168.0.52") {
                                 PTZConfiguration ptzConf = profile.getPTZConfiguration()
                                 Map ptzProps = ptzConf.getProperties()
                                 PTZ ptz = device.getPtz()
@@ -261,6 +283,75 @@ class OnvifService {
         }
         catch (Exception ex) {
             result.error = "Error in getSnapshot: ${ex.getMessage()}"
+            logService.cam.error(result.error)
+            result.status = PassFail.FAIL
+        }
+        return result
+    }
+
+    ObjectCommandResponse move(MoveCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            OnvifDevice device = new OnvifDevice(cmd.onvifBaseAddress, "", "")
+
+            Media media = device.getMedia()
+            // def options =media.getVideoSources()
+            List<Profile> profiles = media.getProfiles()
+
+            if(profiles.size() > 0)
+            {
+                Profile profile = profiles[0]
+
+                PTZ ptz = device.getPtz()
+                PTZSpeed ptzSpd = new PTZSpeed()
+                Vector2D panTilt = new Vector2D()
+                Vector1D zoom = new Vector1D()
+                XYZValues xyzValues = xyzMap.get(cmd.getMoveDirection())
+                panTilt.setX(xyzValues.getX())
+                panTilt.setY(xyzValues.getY())
+                zoom.setX(xyzValues.getZ())
+                ptzSpd.setPanTilt(panTilt)
+                ptzSpd.setZoom(zoom)
+                ptz.continuousMove(profile.getToken(), ptzSpd, null)
+            }
+            else
+                throw new Exception("Device ${cmd.onvifBaseAddress} has no media profiles")
+
+        }
+        catch(Exception ex)
+        {
+            result.error = "Error in move: ${ex.getMessage()}"
+            logService.cam.error(result.error)
+            result.status = PassFail.FAIL
+        }
+        return result
+    }
+
+    ObjectCommandResponse stop(StopCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            OnvifDevice device = new OnvifDevice(cmd.onvifBaseAddress, "", "")
+
+            Media media = device.getMedia()
+            // def options =media.getVideoSources()
+            List<Profile> profiles = media.getProfiles()
+
+            if(profiles.size() > 0)
+            {
+                Profile profile = profiles[0]
+
+                PTZ ptz = device.getPtz()
+                ptz.stop(profile.getToken(), true, true)
+             }
+            else
+                throw new Exception("Device ${cmd.onvifBaseAddress} has no media profiles")
+
+        }
+        catch(Exception ex)
+        {
+            result.error = "Error in stop: ${ex.getMessage()}"
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
         }

@@ -57,7 +57,18 @@ export function validateTrueOrFalse (): ValidatorFn {
   }
 }
 
-    @Component({
+/**
+ * validateNotEmptyOnPTZEnabled: Custom validator to ensure the ONVIF Host field is not empty unless PTZ Controls not checked.
+ */
+export function validateNotEmptyOnPTZEnabled (): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+
+    let invalidValue: boolean = control.value != true && control.value !== false;
+    return invalidValue ? {ptzControls: true} : null;
+  }
+}
+
+@Component({
   selector: 'app-config-setup',
   templateUrl: './config-setup.component.html',
   styleUrls: ['./config-setup.component.scss'],
@@ -91,7 +102,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address', 'snapshotUri', 'ptzControls'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address', 'snapshotUri', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -117,6 +128,15 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     return this.camControls.at(index).get(fieldName) as FormControl;
   }
 
+  setOnvifHostDisabledState(index: number): void
+  {
+    let fc: FormControl = this.getCamControl(index, 'onvifHost');
+
+     this.getCamControl(index, 'ptzControls').value ?
+       fc.enable({onlySelf: true, emitEvent: false}) :
+       fc.disable({onlySelf: true, emitEvent: false});
+  }
+
   updateCam(index: number, field: string, value: any) {
     console.log(index, field, value);
 
@@ -132,6 +152,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     if (control) {
       this.updateCam(index, field, control.value);
     }
+    if(field=='ptzControls')
+      this.setOnvifHostDisabledState(index);
   }
 
   getStreamControl(camIndex: number, streamIndex: number, fieldName: string): FormControl {
@@ -155,16 +177,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // updateMotion(camIndex: number, streamIndex: number, field: string, value: any) {
-  //   Array.from(  // Streams
-  //     Array.from( // Cameras
-  //       this.cameras.values())[camIndex].streams.values()).forEach((stream: Stream, i) => {
-  //     if (i === streamIndex) { // @ts-ignore
-  //       stream['motion'][field] = value;
-  //     }
-  //   });
-  // }
-  //
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
    */
@@ -217,7 +229,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         ptzControls: new FormControl({
           value: camera.ptzControls,
           disabled: false
-        }, [validateTrueOrFalse()])
+        }, [validateTrueOrFalse()]),
+        onvifHost: new FormControl({
+          value: camera.onvifHost,
+          disabled: !camera.ptzControls
+        }, [Validators.maxLength(22), Validators.pattern(/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$/)])
       }, {updateOn: "change"});
     });
     this.camControls = new FormArray(toCameraGroups);

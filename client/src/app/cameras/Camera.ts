@@ -51,6 +51,7 @@ export class Camera
     snapshotUri: string="";
     ptzControls: boolean = false;
     streams: Map<string, Stream> = new Map<string, Stream>();
+    onvifHost: string="";
 }
 
 export class CameraStream
