@@ -30,7 +30,7 @@ class PtzController {
             if(response.status != PassFail.PASS)
                 render(status: 500, text: response.error)
             else
-                render(status: 200, text: 'Move successful')
+                render(status: 200, text: [message: 'Move successful'] as JSON)
         }
 
     }
@@ -49,7 +49,7 @@ class PtzController {
             if(response.status != PassFail.PASS)
                 render(status: 500, text: response.error)
             else
-                render(status: 200, text: 'Stop successful')
+                render(status: 200, text: [message: 'Stop successful'] as JSON)
         }
 
     }
