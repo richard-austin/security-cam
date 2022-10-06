@@ -4,7 +4,7 @@ import grails.validation.Validateable
 import security.cam.UtilsService
 
 class MoveCommand implements Validateable{
-    static final enum eMoveDirections {tiltUp, tiltDown, panLeft, panRight}
+    static final enum eMoveDirections {tiltUp, tiltDown, panLeft, panRight, zoomIn, zoomOut}
 
     eMoveDirections moveDirection
 
@@ -15,7 +15,9 @@ class MoveCommand implements Validateable{
                 inList:[eMoveDirections.tiltUp,
                         eMoveDirections.tiltDown,
                         eMoveDirections.panLeft,
-                        eMoveDirections.panRight] )
+                        eMoveDirections.panRight,
+                        eMoveDirections.zoomIn,
+                        eMoveDirections.zoomOut] )
         onvifBaseAddress(blank: false, nullable: false,
         validator: {onvifBaseAddress ->
             if(!onvifBaseAddress.matches(UtilsService.onvifBaseAddressRegex))

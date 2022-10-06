@@ -58,6 +58,8 @@ class OnvifService {
         xyzMap.put(eMoveDirections.panRight, new XYZValues(0.5, 0, 0))
         xyzMap.put(eMoveDirections.tiltDown, new XYZValues(0, -0.5, 0))
         xyzMap.put(eMoveDirections.tiltUp, new XYZValues(0, 0.5, 0))
+        xyzMap.put(eMoveDirections.zoomIn, new XYZValues(0, 0, 0.5))
+        xyzMap.put(eMoveDirections.zoomOut, new XYZValues(0, 0, -0.5))
    }
 
     def populateDeviceMap() {

@@ -1,27 +1,56 @@
+@mixin mat-card-subtitle {
+  display: flex;
+  color: yellow;
+  justify-content: center;
+}
+
 mat-card.card-features {
   margin-top: 60px;
 
   > mat-card-subtitle {
-    display: flex;
-    color: yellow;
-    justify-content: center;
+    @include mat-card-subtitle;
   }
 }
 
-div.flex-container
-{
-  > div {
-    margin-left: -2.5rem;
-    margin-right: -2.5rem;
-    width: 11rem;
+div.flex-container {
+  > mat-card-subtitle {
+    margin-top: 1rem;
+    @include mat-card-subtitle;
+  }
+
+  width: 22rem;
+
+  > div:first-child {
+    width: 22rem;
+
+    > div {
+      margin-left: auto;
+      margin-right: auto;
+      width: 11rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+
+      > app-ptzbutton {
+        &:hover {
+          color: white;
+        }
+
+        color: lightgrey;
+      }
+    }
+  }
+
+  > div:nth-child(2) {
+    margin-left: auto;
+    margin-right: auto;
+    width: 22rem;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-around;
-    > app-ptzbutton {
-      &:hover {
-        color: white;
-      }
-      color: lightgrey;
-     }
+    justify-content: space-between;
+  }
+
+  > div:nth-child(3) {
+    margin-right: 2rem;
   }
 }

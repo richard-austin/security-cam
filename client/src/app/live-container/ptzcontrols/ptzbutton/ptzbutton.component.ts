@@ -3,7 +3,7 @@ import {Camera} from 'src/app/cameras/Camera';
 import {ReportingComponent} from 'src/app/reporting/reporting.component';
 import {PTZMove, PTZService, PTZStop} from '../../ptz.service';
 
-export enum eMoveDirections {tiltUp, tiltDown, panLeft, panRight}
+export enum eMoveDirections {tiltUp, tiltDown, panLeft, panRight, zoomIn, zoomOut}
 
 @Component({
   selector: 'app-ptzbutton',
@@ -16,6 +16,7 @@ export class PTZButtonComponent implements OnInit {
   @Input() moveDirection!: eMoveDirections;
   @Input() camera!: Camera | null;
   @Input() reporting!: ReportingComponent;
+  @Input() scale: number = 2;
 
   constructor(private ptz: PTZService) {
   }

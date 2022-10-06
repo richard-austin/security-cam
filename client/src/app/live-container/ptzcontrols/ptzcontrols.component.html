@@ -4,34 +4,61 @@
   <mat-card-content>
     <div class="flex-container">
       <div>
-        <app-ptzbutton matIcon="keyboard_arrow_up"
-                       ptzBtnMatTooltip="Tilt upward"
-                       [reporting]="reporting"
-                       [moveDirection]="eMoveDirections['tiltUp']"
-                       [camera]="camera">
-        </app-ptzbutton>
+        <div>
+          <app-ptzbutton matIcon="keyboard_arrow_up"
+                         ptzBtnMatTooltip="Tilt upward"
+                         [reporting]="reporting"
+                         [moveDirection]="eMoveDirections['tiltUp']"
+                         [camera]="camera">
+          </app-ptzbutton>
+        </div>
+        <div>
+          <app-ptzbutton matIcon="keyboard_arrow_left"
+                         ptzBtnMatTooltip="Pan left"
+                         [reporting]="reporting"
+                         [moveDirection]="eMoveDirections['panLeft']"
+                         [camera]="camera">
+          </app-ptzbutton>
+          <app-ptzbutton matIcon="keyboard_arrow_right"
+                         ptzBtnMatTooltip="Pan right"
+                         [reporting]="reporting"
+                         [moveDirection]="eMoveDirections['panRight']"
+                         [camera]="camera">
+          </app-ptzbutton>
+        </div>
+        <div>
+          <app-ptzbutton matIcon="keyboard_arrow_down"
+                         ptzBtnMatTooltip="Tilt downward"
+                         [reporting]="reporting"
+                         [moveDirection]="eMoveDirections['tiltDown']"
+                         [camera]="camera">
+          </app-ptzbutton>
+        </div>
+        <div>
+          <app-ptzbutton matIcon="add_circle_outline"
+                         ptzBtnMatTooltip="Zoom in"
+                         [scale]="1"
+                         [reporting]="reporting"
+                         [moveDirection]="eMoveDirections['zoomIn']"
+                         [camera]="camera">
+          </app-ptzbutton>
+          <app-ptzbutton matIcon="remove_circle_outline"
+                         ptzBtnMatTooltip="Zoom out"
+                         [scale]="1"
+                         [reporting]="reporting"
+                         [moveDirection]="eMoveDirections['zoomOut']"
+                         [camera]="camera">
+          </app-ptzbutton>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <mat-card-subtitle>Presets</mat-card-subtitle>
+      <div>
+        <app-preset-button *ngFor="let l of counter(32); let i=index" presetId="{{i+1}}"></app-preset-button>
       </div>
       <div>
-        <app-ptzbutton matIcon="keyboard_arrow_left"
-                       ptzBtnMatTooltip="Pan left"
-                       [reporting]="reporting"
-                       [moveDirection]="eMoveDirections['panLeft']"
-                       [camera]="camera">
-        </app-ptzbutton>
-        <app-ptzbutton matIcon="keyboard_arrow_right"
-                       ptzBtnMatTooltip="Pan right"
-                       [reporting]="reporting"
-                       [moveDirection]="eMoveDirections['panRight']"
-                       [camera]="camera">
-        </app-ptzbutton>
-      </div>
-      <div>
-        <app-ptzbutton matIcon="keyboard_arrow_down"
-                       ptzBtnMatTooltip="Tilt downward"
-                       [reporting]="reporting"
-                       [moveDirection]="eMoveDirections['tiltDown']"
-                       [camera]="camera">
-        </app-ptzbutton>
+        <mat-slide-toggle (change)="presetSaveSwitchChanged($event)">{{savePreset ? "Save Preset" : "Goto Preset"}}</mat-slide-toggle>
+        <mat-slide-toggle (change)="clearPresetSwitchChanged($event)">Clear Preset</mat-slide-toggle>
       </div>
     </div>
   </mat-card-content>
