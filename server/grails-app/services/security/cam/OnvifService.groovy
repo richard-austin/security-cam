@@ -58,7 +58,18 @@ class OnvifService {
         xyzMap.put(eMoveDirections.panRight, new XYZValues(0.5, 0, 0))
         xyzMap.put(eMoveDirections.tiltDown, new XYZValues(0, -0.5, 0))
         xyzMap.put(eMoveDirections.tiltUp, new XYZValues(0, 0.5, 0))
+   }
+
+    def populateDeviceMap() {
+        deviceMap.clear()
+        def getCamerasResult = camService.getCameras()
+        // Populate the Onvif device map
+        def cameras = getCamerasResult.getResponseObject()
+        cameras.forEach((k, cam) -> {
+            getDevice(cam.onvifHost as String)
+        })
     }
+
     /**
      * getMediaProfiles: Get the details of Onvif compliant cameras which are online on the LAN.
      * @return: LinkedHashMap<String, Camera> containing discovered cameras with all fields populated which can be.
@@ -86,8 +97,8 @@ class OnvifService {
                     cam.streams = new LinkedTreeMap<String, Stream>()
 
                     try {
-                        logService.cam.info "Connect to camera, please wait ..."
-                        device = new OnvifDevice(credentials.getHost(), credentials.getUser(), credentials.getPassword())
+                        logService.cam.info "Creating onvif device for ${credentials.getHost()} ..."
+                        device = getDevice(credentials.getHost())
 
                         Media media = device.getMedia()
                         // def options =media.getVideoSources()
@@ -289,14 +300,22 @@ class OnvifService {
         return result
     }
 
+    private final static Map<String, OnvifDevice> deviceMap = new HashMap<>()
+    private static OnvifDevice getDevice(String onvifBaseAddress)
+    {
+        if(!deviceMap.containsKey(onvifBaseAddress))
+            deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, "", ""))
+
+        deviceMap.get(onvifBaseAddress)
+    }
+
     ObjectCommandResponse move(MoveCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            OnvifDevice device = new OnvifDevice(cmd.onvifBaseAddress, "", "")
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
 
             Media media = device.getMedia()
-            // def options =media.getVideoSources()
             List<Profile> profiles = media.getProfiles()
 
             if(profiles.size() > 0)
@@ -332,7 +351,7 @@ class OnvifService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            OnvifDevice device = new OnvifDevice(cmd.onvifBaseAddress, "", "")
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
 
             Media media = device.getMedia()
             // def options =media.getVideoSources()

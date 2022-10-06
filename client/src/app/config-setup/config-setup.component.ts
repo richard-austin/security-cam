@@ -16,12 +16,12 @@ import {BehaviorSubject} from 'rxjs';
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {MatSelectChange} from '@angular/material/select/select';
 import {HttpErrorResponse} from "@angular/common/http";
-import { DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
-import { ElementRef } from '@angular/core';
-import { KeyValue } from '@angular/common';
-import { UtilsService } from '../shared/utils.service';
+import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import {ElementRef} from '@angular/core';
+import {KeyValue} from '@angular/common';
+import {UtilsService} from '../shared/utils.service';
 
-export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
+export function isValidMaskFileName(cameras: Map<string, Camera>): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
 
     const value = control.value;
@@ -30,14 +30,14 @@ export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
       return null;
     }
 
-    let allFiles:Set<string> = new Set<string>();
+    let allFiles: Set<string> = new Set<string>();
     let duplicateMaskFile: boolean = false;
 
     const fileNameValid = RegExp('^[a-zA-Z0-9-_]+.pgm$').test(value);
     // Check that no file name is being used by more than one camera
-    cameras.forEach((cam:Camera) => {
-      cam.streams.forEach((stream:Stream) => {
-        if(stream.motion.enabled && stream.motion.mask_file !== '') {
+    cameras.forEach((cam: Camera) => {
+      cam.streams.forEach((stream: Stream) => {
+        if (stream.motion.enabled && stream.motion.mask_file !== '') {
           if (allFiles.has(stream.motion.mask_file))
             duplicateMaskFile = true;
           else
@@ -49,20 +49,8 @@ export function isValidMaskFileName(cameras:Map<string, Camera>): ValidatorFn {
   }
 }
 
-export function validateTrueOrFalse (): ValidatorFn {
+export function validateTrueOrFalse(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-
-    let invalidValue: boolean = control.value != true && control.value !== false;
-    return invalidValue ? {ptzControls: true} : null;
-  }
-}
-
-/**
- * validateNotEmptyOnPTZEnabled: Custom validator to ensure the ONVIF Host field is not empty unless PTZ Controls not checked.
- */
-export function validateNotEmptyOnPTZEnabled (): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-
     let invalidValue: boolean = control.value != true && control.value !== false;
     return invalidValue ? {ptzControls: true} : null;
   }
@@ -116,8 +104,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   confirmNew: boolean = false;
   confirmNewLookup: boolean = false;
   snapshotLoading: boolean = false;
-  snapshot: SafeResourceUrl|String = '';
-  snapShotKey: string ='';
+  snapshot: SafeResourceUrl | String = '';
+  snapShotKey: string = '';
   showPasswordDialogue: boolean = false;
   isGuest: boolean = true;
 
@@ -128,13 +116,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     return this.camControls.at(index).get(fieldName) as FormControl;
   }
 
-  setOnvifHostDisabledState(index: number): void
-  {
+  setOnvifHostDisabledState(index: number): void {
     let fc: FormControl = this.getCamControl(index, 'onvifHost');
 
-     this.getCamControl(index, 'ptzControls').value ?
-       fc.enable({onlySelf: true, emitEvent: false}) :
-       fc.disable({onlySelf: true, emitEvent: false});
+    this.getCamControl(index, 'ptzControls').value ?
+      fc.enable({onlySelf: true, emitEvent: false}) :
+      fc.disable({onlySelf: true, emitEvent: false});
   }
 
   updateCam(index: number, field: string, value: any) {
@@ -152,7 +139,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     if (control) {
       this.updateCam(index, field, control.value);
     }
-    if(field=='ptzControls')
+    if (field == 'ptzControls')
       this.setOnvifHostDisabledState(index);
   }
 
@@ -217,7 +204,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       this.streamControls.push(new FormArray(toStreamGroups));
       return new FormGroup({
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
-        address: new FormControl({value: camera.address, disabled: camera.controlUri.length == 0}, [Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
+        address: new FormControl({
+          value: camera.address,
+          disabled: camera.controlUri.length == 0
+        }, [Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
         controlUri: new FormControl({
           value: camera.controlUri,
           disabled: false
@@ -232,8 +222,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         }, [validateTrueOrFalse()]),
         onvifHost: new FormControl({
           value: camera.onvifHost,
-          disabled: !camera.ptzControls
-        }, [Validators.maxLength(22), Validators.pattern(/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$/)])
+          disabled: false
+        }, [Validators.maxLength(22),
+          Validators.pattern(/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/)])
       }, {updateOn: "change"});
     });
     this.camControls = new FormArray(toCameraGroups);
@@ -527,15 +518,15 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   startOnvifSearch() {
-    this.discovering=true;
-    this.cameraSvc.discover().subscribe((cams:Map<string, Camera>) => {
-      this.cameras = cams;
-      this.FixUpCamerasData();
-      this.discovering=false;
-    },
+    this.discovering = true;
+    this.cameraSvc.discover().subscribe((cams: Map<string, Camera>) => {
+        this.cameras = cams;
+        this.FixUpCamerasData();
+        this.discovering = false;
+      },
       reason => {
         this.reporting.errorMessage = reason;
-        this.discovering=false;
+        this.discovering = false;
       });
   }
 
@@ -550,7 +541,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     return totalStreams;
   }
 
-  uploadMaskFile($event: Event, camKey:string, camIndex: number, streamIndex: number) {
+  uploadMaskFile($event: Event, camKey: string, camIndex: number, streamIndex: number) {
     let fileUploadInput: HTMLInputElement = $event.target as HTMLInputElement;
     if (fileUploadInput.files && fileUploadInput.files.length > 0) {
       let stream: Stream = Array.from(  // Streams
@@ -561,7 +552,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
       let control: FormControl = this.getStreamControl(camIndex, streamIndex, 'mask_file');
       control.setValue(stream.motion.mask_file);
-      if(control.valid) {
+      if (control.valid) {
         // Upload file to server
         this.cameraSvc.uploadMaskFile(fileUploadInput.files[0])
           .subscribe(() => {
@@ -570,11 +561,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             (reason) => {
               this.reporting.errorMessage = reason
             });
-      }
-      else
+      } else
         this.reporting.errorMessage = new HttpErrorResponse({
           error: "The file " + stream.motion.mask_file + (control.errors?.mask_file ? " is not a valid mask file"
-              : control.errors?.duplicate ? " is used with more than one stream"
+            : control.errors?.duplicate ? " is used with more than one stream"
               : " has an unspecified error"),
           status: 0,
           statusText: "",
@@ -586,12 +576,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
-  getSnapshot(cam: KeyValue<string, Camera>)
-  {
+  getSnapshot(cam: KeyValue<string, Camera>) {
     this.snapshotLoading = true;
-    if(this.snapShotKey === cam.key)
+    if (this.snapShotKey === cam.key)
       this.snapShotKey = '';
-    else if(cam.value.snapshotUri !== '') {
+    else if (cam.value.snapshotUri !== '') {
       this.snapShotKey = cam.key;
       this.cameraSvc.getSnapshot(cam.value.snapshotUri).subscribe(result => {
           this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(result));
@@ -611,18 +600,18 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
-  toBase64(data:Array<any>): string {
-    let binary:string = '';
-    let bytes: Uint8Array = new Uint8Array( data );
+  toBase64(data: Array<any>): string {
+    let binary: string = '';
+    let bytes: Uint8Array = new Uint8Array(data);
     let len: number = bytes.byteLength;
     for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode( bytes[ i ] );
+      binary += String.fromCharCode(bytes[i]);
     }
-    return window.btoa( binary );
+    return window.btoa(binary);
   }
 
   togglePasswordDialogue() {
-      this.showPasswordDialogue=!this.showPasswordDialogue;
+    this.showPasswordDialogue = !this.showPasswordDialogue;
   }
 
   ngOnInit(): void {
