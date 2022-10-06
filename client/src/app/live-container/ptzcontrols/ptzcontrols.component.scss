@@ -41,7 +41,7 @@ div.flex-container {
     }
   }
 
-  > div:nth-child(2) {
+  > div:nth-child(5) {
     margin-left: auto;
     margin-right: auto;
     width: 22rem;
@@ -50,7 +50,17 @@ div.flex-container {
     justify-content: space-between;
   }
 
-  > div:nth-child(3) {
-    margin-right: 2rem;
+  > div:nth-child(6) {
+    margin-top: 2rem;
+    > mat-slide-toggle {
+      margin-right: 2rem;
+    }
   }
+}
+
+mat-card-subtitle.smaller-text {
+  font-size: 12px;
+  color: black !important;
+  border-radius: 8px;
+  background-color: #d9a11a !important;
 }

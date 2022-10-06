@@ -1,5 +1,6 @@
-import {Component, Input, OnInit} from '@angular/core';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { QueryList } from '@angular/core';
+import {Component, Input, OnInit, ViewChildren} from '@angular/core';
+import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {Camera} from 'src/app/cameras/Camera';
 import { ReportingComponent } from 'src/app/reporting/reporting.component';
 import { eMoveDirections } from './ptzbutton/ptzbutton.component';
@@ -12,8 +13,11 @@ import { eMoveDirections } from './ptzbutton/ptzbutton.component';
 export class PTZControlsComponent implements OnInit {
   @Input() camera!:Camera | null;
   @Input() reporting!: ReportingComponent;
+  @ViewChildren(MatSlideToggle) slideToggles!: QueryList<MatSlideToggle>;
   eMoveDirections: any = eMoveDirections;
   savePreset: boolean = false;
+  clearPreset: boolean = false;
+
   constructor() { }
 
   // ngFor counter for preset buttons
@@ -24,11 +28,31 @@ export class PTZControlsComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  presetsTooltip(presetNbr: number): string
+  {
+    return this.savePreset ? "Save the current view to preset "+presetNbr :
+           this.clearPreset ? "Clear the saved position from preset "+presetNbr :
+             "Move the view to the saved position in preset "+presetNbr;
+  }
+
   presetSaveSwitchChanged($event: MatSlideToggleChange) {
     this.savePreset = $event.checked;
   }
 
   clearPresetSwitchChanged($event: MatSlideToggleChange) {
+    this.clearPreset = $event.checked;
+  }
 
+  presetButtonPressed(preset: number) {
+    this.slideToggles.forEach(slideToggle => {
+      slideToggle.checked = false;
+    })
+    this.clearPreset = this.savePreset = false;
+  }
+
+  presetFunctionDescription(): string {
+    return this.savePreset ? "Click a preset button to save the current view to that preset " :
+      this.clearPreset ? "Click a preset button to Clear the saved position from that preset " :
+        "Click a preset button to move the camera to the saved position";
   }
 }

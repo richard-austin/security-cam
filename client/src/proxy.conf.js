@@ -10,6 +10,7 @@ const PROXY_CONFIG = [
       "/recording",
       "/wifiUtils",
       "/cloudProxy",
+      "/ptz",
       "/dc"
     ],
     target: "http://localhost:8080/",

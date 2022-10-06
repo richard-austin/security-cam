@@ -53,12 +53,23 @@
       </div>
       <mat-divider></mat-divider>
       <mat-card-subtitle>Presets</mat-card-subtitle>
+      <mat-card-subtitle class="smaller-text">{{presetFunctionDescription()}}</mat-card-subtitle>
       <div>
-        <app-preset-button *ngFor="let l of counter(32); let i=index" presetId="{{i+1}}"></app-preset-button>
+        <app-preset-button *ngFor="let l of counter(32); let i=index" presetId="{{i+1}}"
+                           (click)="presetButtonPressed(i+1)"
+                           matTooltip="{{presetsTooltip(i+1)}}"
+                           matTooltipClass="tooltip">
+        </app-preset-button>
       </div>
       <div>
-        <mat-slide-toggle (change)="presetSaveSwitchChanged($event)">{{savePreset ? "Save Preset" : "Goto Preset"}}</mat-slide-toggle>
-        <mat-slide-toggle (change)="clearPresetSwitchChanged($event)">Clear Preset</mat-slide-toggle>
+        <mat-slide-toggle (change)="presetSaveSwitchChanged($event)"
+                           [disabled]="clearPreset">
+          {{savePreset ? "Save Preset" : "Goto Preset"}}
+        </mat-slide-toggle>
+          <mat-slide-toggle (change)="clearPresetSwitchChanged($event)"
+                            [disabled]="savePreset">
+            Clear Preset
+          </mat-slide-toggle>
       </div>
     </div>
   </mat-card-content>
