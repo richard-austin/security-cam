@@ -32,6 +32,12 @@ export class PTZPreset {
   onvifBaseAddress: string;
   preset: string;
 }
+export class PTZMaxPresets {
+  constructor(onvifBaseAddress: string) {
+    this.onvifBaseAddress = onvifBaseAddress;
+  }
+  onvifBaseAddress: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -55,5 +61,9 @@ export class PTZService {
 
   preset(presetOp: PTZPreset): Observable<void> {
     return this.http.post<void>(this._baseUrl.getLink("ptz", "preset"), JSON.stringify(presetOp), this.httpJSONOptions).pipe(tap(), catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+
+  maxNumberOfPresets(presetOp: PTZMaxPresets): Observable<{maxPresets: number}> {
+    return this.http.post<{maxPresets: number}>(this._baseUrl.getLink("ptz", "maxNumberOfPresets"), JSON.stringify(presetOp), this.httpJSONOptions).pipe(tap(), catchError((err: HttpErrorResponse) => throwError(err)));
   }
 }

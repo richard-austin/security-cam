@@ -7,6 +7,7 @@ import security.cam.LogService
 import security.cam.OnvifService
 import security.cam.ValidationErrorService
 import security.cam.commands.MoveCommand
+import security.cam.commands.PTZMaxPresetsCommand
 import security.cam.commands.PTZPresetsCommand
 import security.cam.commands.StopCommand
 import security.cam.enums.PassFail
@@ -69,6 +70,24 @@ class PtzController {
                 render(status: 500, text: response.error)
             else
                 render(status: 200, text: [message: 'preset successful'] as JSON)
+        }
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    maxNumberOfPresets(PTZMaxPresetsCommand cmd)
+    {
+        if(cmd.hasErrors())
+        {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'maxNumberOfPresets')
+            logService.cam.error "maxNumberOfPresets: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else{
+            ObjectCommandResponse response = onvifService.maxNumberOfPresets(cmd)
+            if(response.status != PassFail.PASS)
+                render(status: 500, text: response.error)
+            else
+                render(status: 200, text: [maxPresets: response.getResponseObject()] as JSON)
         }
     }
 }

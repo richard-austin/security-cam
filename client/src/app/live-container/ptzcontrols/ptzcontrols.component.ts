@@ -4,6 +4,8 @@ import {Camera} from 'src/app/cameras/Camera';
 import {ReportingComponent} from 'src/app/reporting/reporting.component';
 import {ePresetOperations} from './preset-button/preset-button.component';
 import {eMoveDirections} from './ptzbutton/ptzbutton.component';
+import {UtilsService} from "../../shared/utils.service";
+import {PTZMaxPresets, PTZService} from "../ptz.service";
 
 @Component({
   selector: 'app-ptzcontrols',
@@ -17,15 +19,14 @@ export class PTZControlsComponent implements OnInit {
   eMoveDirections: any = eMoveDirections;
   savePreset: boolean = false;
   clearPreset: boolean = false;
+  isGuest: boolean = true;
+  maxPresets: number = 0;
 
-  constructor() { }
+  constructor(private utils: UtilsService, private ptzService: PTZService) { }
 
   // ngFor counter for preset buttons
   counter(i: number) {
     return new Array(i);
-  }
-
-  ngOnInit(): void {
   }
 
   presetsTooltip(presetNbr: number): string
@@ -60,5 +61,15 @@ export class PTZControlsComponent implements OnInit {
     return this.savePreset ? ePresetOperations.saveTo :
       this.clearPreset ? ePresetOperations.clearFrom :
        ePresetOperations.moveTo;
+  }
+
+  ngOnInit(): void {
+    this.isGuest = this.utils.isGuestAccount;
+    this.ptzService.maxNumberOfPresets(new PTZMaxPresets(this.camera?.onvifHost as string)).subscribe((result) => {
+      this.maxPresets = result.maxPresets > 32 ? 32 : result.maxPresets;
+    },
+      reason => {
+        this.reporting.errorMessage = reason;
+      })
   }
 }

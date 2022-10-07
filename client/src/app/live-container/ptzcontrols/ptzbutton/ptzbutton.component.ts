@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Camera} from 'src/app/cameras/Camera';
 import {ReportingComponent} from 'src/app/reporting/reporting.component';
+import { UtilsService } from 'src/app/shared/utils.service';
 import {PTZMove, PTZService, PTZStop} from '../../ptz.service';
 
 export enum eMoveDirections {tiltUp, tiltDown, panLeft, panRight, zoomIn, zoomOut}
@@ -17,8 +18,8 @@ export class PTZButtonComponent implements OnInit {
   @Input() camera!: Camera | null;
   @Input() reporting!: ReportingComponent;
   @Input() scale: number = 2;
-
-  constructor(private ptz: PTZService) {
+  isGuest: boolean = true;
+  constructor(private ptz: PTZService, private utils: UtilsService) {
   }
 
   move() {
@@ -40,5 +41,6 @@ export class PTZButtonComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.isGuest = this.utils.isGuestAccount;
   }
 }

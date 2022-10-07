@@ -55,13 +55,14 @@
       <mat-card-subtitle>Presets</mat-card-subtitle>
       <mat-card-subtitle class="smaller-text">{{presetFunctionDescription()}}</mat-card-subtitle>
       <div>
-        <app-preset-button *ngFor="let l of counter(32); let i=index" presetId="{{i+1}}"
+        <app-preset-button *ngFor="let l of counter(maxPresets); let i=index" presetId="{{i+1}}"
                            (click)="presetButtonPressed()"
                            [reporting]="reporting"
                            [camera]="camera"
                            [presetId]="(i+1).toString()"
                            [operation]="presetOperation()"
-                           matTooltip="{{presetsTooltip(i+1)}}"
+                           [isGuest]="isGuest"
+                           matTooltip="{{isGuest ? 'Disabled for guest' : presetsTooltip(i+1)}}"
                            matTooltipClass="tooltip">
         </app-preset-button>
       </div>

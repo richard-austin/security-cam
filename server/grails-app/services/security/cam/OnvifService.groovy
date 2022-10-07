@@ -5,9 +5,11 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
+import org.onvif.ver10.schema.PTZNode
 import org.onvif.ver20.ptz.wsdl.Capabilities
 import security.cam.commands.MoveCommand
 import security.cam.commands.MoveCommand.eMoveDirections
+import security.cam.commands.PTZMaxPresetsCommand
 import security.cam.commands.PTZPresetsCommand
 import security.cam.commands.StopCommand
 
@@ -126,7 +128,7 @@ class OnvifService {
                             stream.audio_encoding = aec.getEncoding().value()
                             stream.audio_sample_rate = aec.getSampleRate()
 
-                          //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
+                            //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
                         })
                         logService.cam.info("Connected to device %s (%s)%n", device.getDeviceInfo(), device.streamUri.toString())
                         logService.cam.info(TestDevice.inspect(device))
@@ -346,6 +348,28 @@ class OnvifService {
                 }
             } else
                 throw new Exception("Device ${cmd.onvifBaseAddress} has no media profiles")
+        }
+        catch (Exception ex) {
+            result.error = "Error in stop: ${ex.getMessage()}"
+            logService.cam.error(result.error)
+            result.status = PassFail.FAIL
+        }
+        return result
+    }
+
+    ObjectCommandResponse maxNumberOfPresets(PTZMaxPresetsCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
+            PTZ ptz = device.getPtz()
+
+            List<PTZNode> nodes = ptz.getNodes()
+            if (nodes.size() > 0) {
+                PTZNode node = nodes.get(0)
+                result.responseObject = node.getMaximumNumberOfPresets()
+            } else
+                throw new Exception("Device ${cmd.onvifBaseAddress} has no ptz nodes")
         }
         catch (Exception ex) {
             result.error = "Error in stop: ${ex.getMessage()}"

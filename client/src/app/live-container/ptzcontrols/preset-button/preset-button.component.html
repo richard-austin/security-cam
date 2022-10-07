@@ -1,4 +1,5 @@
-<button class="preset-button" mat-mini-fab (click)="presetPressed()" [color]="operation != 0 ? 'warn' : 'accent'">
+<button class="preset-button" mat-mini-fab (click)="presetPressed()" [color]="operation != 0 ? 'warn' : 'accent'"
+        [disabled]="isGuest">
   <div>
     {{
     presetId

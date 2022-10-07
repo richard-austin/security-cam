@@ -17,6 +17,7 @@ export class PresetButtonComponent implements OnInit {
   @Input() presetId!: string;
   @Input() operation!: ePresetOperations;
   @Input() color!: string;
+  @Input() isGuest: boolean = true;
 
   constructor(private ptz: PTZService) { }
 
@@ -29,10 +30,10 @@ export class PresetButtonComponent implements OnInit {
       })
   }
 
-  ngOnInit(): void {
-  }
-
   presetPressed() {
     this.preset();
+  }
+
+  ngOnInit(): void {
   }
 }
