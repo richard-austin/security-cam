@@ -56,7 +56,11 @@
       <mat-card-subtitle class="smaller-text">{{presetFunctionDescription()}}</mat-card-subtitle>
       <div>
         <app-preset-button *ngFor="let l of counter(32); let i=index" presetId="{{i+1}}"
-                           (click)="presetButtonPressed(i+1)"
+                           (click)="presetButtonPressed()"
+                           [reporting]="reporting"
+                           [camera]="camera"
+                           [presetId]="(i+1).toString()"
+                           [operation]="presetOperation()"
                            matTooltip="{{presetsTooltip(i+1)}}"
                            matTooltipClass="tooltip">
         </app-preset-button>
@@ -64,7 +68,7 @@
       <div>
         <mat-slide-toggle (change)="presetSaveSwitchChanged($event)"
                            [disabled]="clearPreset">
-          {{savePreset ? "Save Preset" : "Goto Preset"}}
+          {{!savePreset ? "Save Preset" : "Goto Preset"}}
         </mat-slide-toggle>
           <mat-slide-toggle (change)="clearPresetSwitchChanged($event)"
                             [disabled]="savePreset">

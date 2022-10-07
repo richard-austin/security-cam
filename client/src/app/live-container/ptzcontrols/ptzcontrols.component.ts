@@ -1,9 +1,9 @@
-import { QueryList } from '@angular/core';
-import {Component, Input, OnInit, ViewChildren} from '@angular/core';
+import {Component, Input, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {Camera} from 'src/app/cameras/Camera';
-import { ReportingComponent } from 'src/app/reporting/reporting.component';
-import { eMoveDirections } from './ptzbutton/ptzbutton.component';
+import {ReportingComponent} from 'src/app/reporting/reporting.component';
+import {ePresetOperations} from './preset-button/preset-button.component';
+import {eMoveDirections} from './ptzbutton/ptzbutton.component';
 
 @Component({
   selector: 'app-ptzcontrols',
@@ -43,7 +43,7 @@ export class PTZControlsComponent implements OnInit {
     this.clearPreset = $event.checked;
   }
 
-  presetButtonPressed(preset: number) {
+  presetButtonPressed() {
     this.slideToggles.forEach(slideToggle => {
       slideToggle.checked = false;
     })
@@ -54,5 +54,11 @@ export class PTZControlsComponent implements OnInit {
     return this.savePreset ? "Click a preset button to save the current view to that preset " :
       this.clearPreset ? "Click a preset button to Clear the saved position from that preset " :
         "Click a preset button to move the camera to the saved position";
+  }
+
+  presetOperation(): ePresetOperations {
+    return this.savePreset ? ePresetOperations.saveTo :
+      this.clearPreset ? ePresetOperations.clearFrom :
+       ePresetOperations.moveTo;
   }
 }
