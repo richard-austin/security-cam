@@ -350,7 +350,7 @@ class OnvifService {
                 throw new Exception("Device ${cmd.onvifBaseAddress} has no media profiles")
         }
         catch (Exception ex) {
-            result.error = "Error in stop: ${ex.getMessage()}"
+            result.error = "Error in preset function: ${ex.getMessage()}"
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
         }
@@ -372,7 +372,7 @@ class OnvifService {
                 throw new Exception("Device ${cmd.onvifBaseAddress} has no ptz nodes")
         }
         catch (Exception ex) {
-            result.error = "Error in stop: ${ex.getMessage()}"
+            result.error = "Error in maxNumberOfPresets: ${ex.getMessage()}"
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
         }
