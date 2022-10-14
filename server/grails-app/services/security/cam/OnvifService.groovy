@@ -6,18 +6,14 @@ import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
 import org.onvif.ver10.schema.PTZNode
-import org.onvif.ver20.ptz.wsdl.Capabilities
 import security.cam.commands.MoveCommand
 import security.cam.commands.MoveCommand.eMoveDirections
 import security.cam.commands.PTZMaxPresetsCommand
 import security.cam.commands.PTZPresetsCommand
 import security.cam.commands.StopCommand
 
-import javax.xml.datatype.DatatypeFactory
 import org.onvif.ver10.media.wsdl.Media
 import org.onvif.ver10.schema.AudioEncoderConfiguration
-import org.onvif.ver10.schema.AudioSourceConfiguration
-import org.onvif.ver10.schema.PTZConfiguration
 import org.onvif.ver10.schema.PTZSpeed
 import org.onvif.ver10.schema.Profile
 import org.onvif.ver10.schema.Vector1D
@@ -32,7 +28,8 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
 import server.Stream
 
-import javax.xml.datatype.Duration
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class XYZValues {
     float x
@@ -54,6 +51,7 @@ class OnvifService {
     CamService camService
     Sc_processesService sc_processesService
     final Map<eMoveDirections, XYZValues> xyzMap = new HashMap<eMoveDirections, XYZValues>()
+    private ExecutorService deviceUpdateExecutor = Executors.newSingleThreadExecutor()
 
     OnvifService() {
         xyzMap.put(eMoveDirections.panLeft, new XYZValues(-0.5, 0, 0))
@@ -249,11 +247,29 @@ class OnvifService {
 
     private final static Map<String, OnvifDevice> deviceMap = new HashMap<>()
 
-    private static OnvifDevice getDevice(String onvifBaseAddress) {
-        if (!deviceMap.containsKey(onvifBaseAddress))
-            deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, "", ""))
-
+    private synchronized OnvifDevice getDevice(String onvifBaseAddress) {
+        try {
+            if (!deviceMap.containsKey(onvifBaseAddress))
+                deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, "", ""))
+        }
+        catch (Exception ex) {
+            logService.cam.error("${ex.getClass().getName()} in getDevice ${ex.getMessage()}")
+        }
         deviceMap.get(onvifBaseAddress)
+    }
+
+    /**
+     * updateDevice: Replace the OnvifDevice entry for onvifBaseAddress when there has been an error in a PTZ call
+     * @param onvifBaseAddress
+     * @return
+     */
+    private void updateDevice(final String onvifBaseAddress)
+    {
+        deviceMap.remove(onvifBaseAddress)
+        // getDevice can be quite slow creating a new device so run it in a thread so it doesn't cause a delay in returning
+        deviceUpdateExecutor.submit(() -> {
+            getDevice(onvifBaseAddress)  // Replace he removed entry in the map
+        })
     }
 
     ObjectCommandResponse move(MoveCommand cmd) {
@@ -284,6 +300,7 @@ class OnvifService {
 
         }
         catch (Exception ex) {
+            updateDevice(cmd.getOnvifBaseAddress())
             result.error = "Error in move: ${ex.getMessage()}"
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
@@ -311,6 +328,7 @@ class OnvifService {
 
         }
         catch (Exception ex) {
+            updateDevice(cmd.getOnvifBaseAddress())
             result.error = "Error in stop: ${ex.getMessage()}"
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
@@ -332,6 +350,7 @@ class OnvifService {
                 Profile profile = profiles[0]
 
                 PTZ ptz = device.getPtz()
+
                 switch (cmd.operation) {
                     case PTZPresetsCommand.ePresetOperations.moveTo:
                         ptz.gotoPreset(profile.getToken(), cmd.preset, null)
@@ -350,6 +369,7 @@ class OnvifService {
                 throw new Exception("Device ${cmd.onvifBaseAddress} has no media profiles")
         }
         catch (Exception ex) {
+            updateDevice(cmd.getOnvifBaseAddress())
             result.error = "Error in preset function: ${ex.getMessage()}"
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
@@ -372,6 +392,7 @@ class OnvifService {
                 throw new Exception("Device ${cmd.onvifBaseAddress} has no ptz nodes")
         }
         catch (Exception ex) {
+            updateDevice(cmd.getOnvifBaseAddress())
             result.error = "Error in maxNumberOfPresets: ${ex.getMessage()}"
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
