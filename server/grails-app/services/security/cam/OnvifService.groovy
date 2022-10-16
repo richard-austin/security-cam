@@ -409,7 +409,7 @@ class OnvifService {
 
                 // Set up the arrays (up to max size 32) for the preset tokens
                 List<PTZPreset> presets = new ArrayList()
-                for (int i = 0; i < maxPresets && i < allPresets.size(); ++i) {
+                for (int i = 0; i < maxPresets && i < allPresets.size() && i < 32; ++i) {
                     PTZPreset preset = allPresets.get(i)
                     if (preset.getToken() == null || preset.token == "")
                         preset.token = (i + 1).toString()
