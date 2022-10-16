@@ -19,6 +19,7 @@ export class PTZButtonComponent implements OnInit {
   @Input() reporting!: ReportingComponent;
   @Input() scale: number = 2;
   isGuest: boolean = true;
+
   constructor(private ptz: PTZService, private utils: UtilsService) {
   }
 

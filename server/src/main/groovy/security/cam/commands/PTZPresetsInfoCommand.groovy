@@ -3,7 +3,7 @@ package security.cam.commands
 import grails.validation.Validateable
 import security.cam.UtilsService
 
-class PTZMaxPresetsCommand implements Validateable {
+class PTZPresetsInfoCommand implements Validateable {
     String onvifBaseAddress
 
     static constraints = {

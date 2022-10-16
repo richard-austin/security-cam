@@ -16,18 +16,6 @@ class PTZPresetsCommand implements Validateable{
             if(!onvifBaseAddress.matches(UtilsService.onvifBaseAddressRegex))
                 return "Invalid onvifBaseAddress ${onvifBaseAddress}"
         })
-        preset(nullable: false, empty: false,
-        validator: {preset ->
-            try {
-                int iPreset = Integer.parseInt(preset)
-                if(iPreset > 32 || iPreset < 1)
-                    return "Invalid preset number (${iPreset})"
-            }
-            catch(Exception ex)
-            {
-                return "Invalid preset value (${preset}): ${ex.getMessage()}"
-            }
-        })
+        preset(nullable: false, empty: false)
     }
-
 }

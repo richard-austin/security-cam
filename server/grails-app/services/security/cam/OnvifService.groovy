@@ -6,9 +6,13 @@ import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
 import org.onvif.ver10.schema.PTZNode
+import org.onvif.ver10.schema.PTZPreset
+import org.onvif.ver10.schema.PTZSpaces
+import org.onvif.ver10.schema.Space1DDescription
+import org.onvif.ver10.schema.Space2DDescription
 import security.cam.commands.MoveCommand
 import security.cam.commands.MoveCommand.eMoveDirections
-import security.cam.commands.PTZMaxPresetsCommand
+import security.cam.commands.PTZPresetsInfoCommand
 import security.cam.commands.PTZPresetsCommand
 import security.cam.commands.StopCommand
 
@@ -43,6 +47,13 @@ class XYZValues {
     }
 }
 
+class SC_PTZData {
+    Integer maxPresets
+    Media media
+    Profile profile
+    PTZSpaces spaces
+    Map<eMoveDirections, XYZValues> xyzMap
+}
 
 @Transactional
 class OnvifService {
@@ -50,16 +61,9 @@ class OnvifService {
     GrailsApplication grailsApplication
     CamService camService
     Sc_processesService sc_processesService
-    final Map<eMoveDirections, XYZValues> xyzMap = new HashMap<eMoveDirections, XYZValues>()
     private ExecutorService deviceUpdateExecutor = Executors.newSingleThreadExecutor()
 
     OnvifService() {
-        xyzMap.put(eMoveDirections.panLeft, new XYZValues(-0.5, 0, 0))
-        xyzMap.put(eMoveDirections.panRight, new XYZValues(0.5, 0, 0))
-        xyzMap.put(eMoveDirections.tiltDown, new XYZValues(0, -0.5, 0))
-        xyzMap.put(eMoveDirections.tiltUp, new XYZValues(0, 0.5, 0))
-        xyzMap.put(eMoveDirections.zoomIn, new XYZValues(0, 0, 0.5))
-        xyzMap.put(eMoveDirections.zoomOut, new XYZValues(0, 0, -0.5))
     }
 
     def populateDeviceMap() {
@@ -263,8 +267,7 @@ class OnvifService {
      * @param onvifBaseAddress
      * @return
      */
-    private void updateDevice(final String onvifBaseAddress)
-    {
+    private void updateDevice(final String onvifBaseAddress) {
         deviceMap.remove(onvifBaseAddress)
         // getDevice can be quite slow creating a new device so run it in a thread so it doesn't cause a delay in returning
         deviceUpdateExecutor.submit(() -> {
@@ -276,24 +279,27 @@ class OnvifService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
+
             OnvifDevice device = getDevice(cmd.onvifBaseAddress)
 
-            Media media = device.getMedia()
-            List<Profile> profiles = media.getProfiles()
+            Profile profile = ptzDataMap.get(cmd.onvifBaseAddress).getProfile()
 
-            if (profiles.size() > 0) {
-                Profile profile = profiles[0]
-
+            if (profile != null) {
                 PTZ ptz = device.getPtz()
                 PTZSpeed ptzSpd = new PTZSpeed()
-                Vector2D panTilt = new Vector2D()
-                Vector1D zoom = new Vector1D()
-                XYZValues xyzValues = xyzMap.get(cmd.getMoveDirection())
-                panTilt.setX(xyzValues.getX())
-                panTilt.setY(xyzValues.getY())
-                zoom.setX(xyzValues.getZ())
-                ptzSpd.setPanTilt(panTilt)
-                ptzSpd.setZoom(zoom)
+                if (cmd.getMoveDirection() == eMoveDirections.panRight || cmd.getMoveDirection() == eMoveDirections.panLeft ||
+                        cmd.moveDirection == eMoveDirections.tiltDown || cmd.moveDirection == eMoveDirections.tiltUp) {
+                    Vector2D panTilt = new Vector2D()
+                    XYZValues xyzValues = ptzDataMap.get(cmd.getOnvifBaseAddress()).xyzMap.get(cmd.getMoveDirection())
+                    panTilt.setX(xyzValues.getX())
+                    panTilt.setY(xyzValues.getY())
+                    ptzSpd.setPanTilt(panTilt)
+                } else if (cmd.getMoveDirection() == eMoveDirections.zoomIn || cmd.getMoveDirection() == eMoveDirections.zoomOut) {
+                    Vector1D zoom = new Vector1D()
+                    XYZValues xyzValues = ptzDataMap.get(cmd.getOnvifBaseAddress()).xyzMap.get(cmd.getMoveDirection())
+                    zoom.setX(xyzValues.getZ())
+                    ptzSpd.setZoom(zoom)
+                }
                 ptz.continuousMove(profile.getToken(), ptzSpd, null)
             } else
                 throw new Exception("Device ${cmd.onvifBaseAddress} has no media profiles")
@@ -314,13 +320,9 @@ class OnvifService {
         try {
             OnvifDevice device = getDevice(cmd.onvifBaseAddress)
 
-            Media media = device.getMedia()
-            // def options =media.getVideoSources()
-            List<Profile> profiles = media.getProfiles()
+            Profile profile = ptzDataMap.get(cmd.onvifBaseAddress).getProfile()
 
-            if (profiles.size() > 0) {
-                Profile profile = profiles[0]
-
+            if (profile != null) {
                 PTZ ptz = device.getPtz()
                 ptz.stop(profile.getToken(), true, true)
             } else
@@ -342,13 +344,9 @@ class OnvifService {
         try {
             OnvifDevice device = getDevice(cmd.onvifBaseAddress)
 
-            Media media = device.getMedia()
-            // def options =media.getVideoSources()
-            List<Profile> profiles = media.getProfiles()
+            Profile profile = ptzDataMap.get(cmd.onvifBaseAddress).getProfile()
 
-            if (profiles.size() > 0) {
-                Profile profile = profiles[0]
-
+            if (profile != null) {
                 PTZ ptz = device.getPtz()
 
                 switch (cmd.operation) {
@@ -377,23 +375,61 @@ class OnvifService {
         return result
     }
 
-    ObjectCommandResponse maxNumberOfPresets(PTZMaxPresetsCommand cmd) {
+    private final Map<String, SC_PTZData> ptzDataMap = new HashMap<>()
+
+    ObjectCommandResponse ptzPresetsInfo(PTZPresetsInfoCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
             OnvifDevice device = getDevice(cmd.onvifBaseAddress)
-            PTZ ptz = device.getPtz()
+            Media media = device.getMedia()
 
+            Profile profile = media.getProfiles().get(0)
+            PTZ ptz = device.getPtz()
+            List<PTZPreset> allPresets = ptz.getPresets(profile.getToken())
             List<PTZNode> nodes = ptz.getNodes()
             if (nodes.size() > 0) {
                 PTZNode node = nodes.get(0)
-                result.responseObject = node.getMaximumNumberOfPresets()
+                PTZSpaces spaces = node.supportedPTZSpaces
+                final int maxPresets = node.getMaximumNumberOfPresets()
+
+                // Set up the map containing the xyz (velocity) values for all ptz operations and directions
+                final Map<eMoveDirections, XYZValues> xyzMap = new HashMap<eMoveDirections, XYZValues>()
+                // TODO: What do we do if there is more than one of these spaces
+                Space2DDescription cptvs = spaces.continuousPanTiltVelocitySpace[0]
+                // TODO: What do we do if there is more than one of these spaces
+                Space1DDescription czvs = spaces.continuousZoomVelocitySpace[0]
+
+                xyzMap.put(eMoveDirections.panLeft, new XYZValues(cptvs.XRange.min, 0, 0))
+                xyzMap.put(eMoveDirections.panRight, new XYZValues(cptvs.XRange.max, 0, 0))
+                xyzMap.put(eMoveDirections.tiltDown, new XYZValues(0, cptvs.YRange.min, 0))
+                xyzMap.put(eMoveDirections.tiltUp, new XYZValues(0, cptvs.YRange.max, 0))
+                xyzMap.put(eMoveDirections.zoomIn, new XYZValues(0, 0, czvs.XRange.max))
+                xyzMap.put(eMoveDirections.zoomOut, new XYZValues(0, 0, czvs.XRange.min))
+
+                // Set up the arrays (up to max size 32) for the preset tokens
+                List<PTZPreset> presets = new ArrayList()
+                for (int i = 0; i < maxPresets && i < allPresets.size(); ++i) {
+                    PTZPreset preset = allPresets.get(i)
+                    if (preset.getToken() == null || preset.token == "")
+                        preset.token = (i + 1).toString()
+                    presets.add(allPresets.get(i))
+                }
+                // Save (or update) the PTZ data for this camera to the map for use by the move and preset methods
+                SC_PTZData ptzData = new SC_PTZData()
+                ptzData.spaces = spaces
+                ptzData.maxPresets = maxPresets
+                ptzData.media = media
+                ptzData.profile = profile
+                ptzData.xyzMap = xyzMap
+                ptzDataMap.put(cmd.getOnvifBaseAddress(), ptzData)
+                result.responseObject = [maxPresets: maxPresets, presets: presets]
             } else
                 throw new Exception("Device ${cmd.onvifBaseAddress} has no ptz nodes")
         }
         catch (Exception ex) {
             updateDevice(cmd.getOnvifBaseAddress())
-            result.error = "Error in maxNumberOfPresets: ${ex.getMessage()}"
+            result.error = "Error in ptzPresetsInfo: ${ex.getMessage()}"
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
         }

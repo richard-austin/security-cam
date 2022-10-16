@@ -1,6 +1,6 @@
 import { Input } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import {PTZPreset, PTZService} from "../../ptz.service";
+import {Preset, PTZPresetCommand, PTZService} from "../../ptz.service";
 import {Camera} from "../../../cameras/Camera";
 import {ReportingComponent} from "../../../reporting/reporting.component";
 
@@ -14,7 +14,8 @@ export enum ePresetOperations {moveTo, saveTo, clearFrom}
 export class PresetButtonComponent implements OnInit {
   @Input() camera!: Camera | null;
   @Input() reporting!: ReportingComponent;
-  @Input() presetId!: string;
+  @Input() presetInfo!: Preset;
+  @Input() presetNumber!: string;
   @Input() operation!: ePresetOperations;
   @Input() color!: string;
   @Input() isGuest: boolean = true;
@@ -22,7 +23,7 @@ export class PresetButtonComponent implements OnInit {
   constructor(private ptz: PTZService) { }
 
   preset() {
-    let ptz: PTZPreset = new PTZPreset(this.operation, this.camera?.onvifHost as string, this.presetId)
+    let ptz: PTZPresetCommand = new PTZPresetCommand(this.operation, this.camera?.onvifHost as string, this.presetInfo.token)
     this.ptz.preset(ptz).subscribe(() => {
       },
       reason => {

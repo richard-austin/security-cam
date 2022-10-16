@@ -7,7 +7,6 @@ class MoveCommand implements Validateable{
     static final enum eMoveDirections {tiltUp, tiltDown, panLeft, panRight, zoomIn, zoomOut}
 
     eMoveDirections moveDirection
-
     String onvifBaseAddress
 
     static constraints = {

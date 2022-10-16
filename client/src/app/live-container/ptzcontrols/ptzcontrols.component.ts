@@ -5,7 +5,7 @@ import {ReportingComponent} from 'src/app/reporting/reporting.component';
 import {ePresetOperations} from './preset-button/preset-button.component';
 import {eMoveDirections} from './ptzbutton/ptzbutton.component';
 import {UtilsService} from "../../shared/utils.service";
-import {PTZMaxPresets, PTZService} from "../ptz.service";
+import {PTZPresetsInfoCommand, PTZPresetsInfoResponse, PTZService} from "../ptz.service";
 
 @Component({
   selector: 'app-ptzcontrols',
@@ -13,7 +13,7 @@ import {PTZMaxPresets, PTZService} from "../ptz.service";
   styleUrls: ['./ptzcontrols.component.scss']
 })
 export class PTZControlsComponent implements OnInit {
-  @Input() camera!:Camera | null;
+  @Input() camera!: Camera | null;
   @Input() reporting!: ReportingComponent;
   @ViewChildren(MatSlideToggle) slideToggles!: QueryList<MatSlideToggle>;
   eMoveDirections: any = eMoveDirections;
@@ -21,19 +21,20 @@ export class PTZControlsComponent implements OnInit {
   clearPreset: boolean = false;
   isGuest: boolean = true;
   maxPresets: number = 0;
+  presetsInfo!: PTZPresetsInfoResponse;
 
-  constructor(private utils: UtilsService, private ptzService: PTZService) { }
+  constructor(private utils: UtilsService, private ptzService: PTZService) {
+  }
 
   // ngFor counter for preset buttons
   counter(i: number) {
     return new Array(i);
   }
 
-  presetsTooltip(presetNbr: number): string
-  {
-    return this.savePreset ? "Save the current view to preset "+presetNbr :
-           this.clearPreset ? "Clear the saved position from preset "+presetNbr :
-             "Move the view to the saved position in preset "+presetNbr;
+  presetsTooltip(presetNbr: number): string {
+    return this.savePreset ? "Save the current view to preset " + presetNbr :
+      this.clearPreset ? "Clear the saved position from preset " + presetNbr :
+        "Move the view to the saved position in preset " + presetNbr;
   }
 
   presetSaveSwitchChanged($event: MatSlideToggleChange) {
@@ -60,14 +61,15 @@ export class PTZControlsComponent implements OnInit {
   presetOperation(): ePresetOperations {
     return this.savePreset ? ePresetOperations.saveTo :
       this.clearPreset ? ePresetOperations.clearFrom :
-       ePresetOperations.moveTo;
+        ePresetOperations.moveTo;
   }
 
   ngOnInit(): void {
     this.isGuest = this.utils.isGuestAccount;
-    this.ptzService.maxNumberOfPresets(new PTZMaxPresets(this.camera?.onvifHost as string)).subscribe((result) => {
-      this.maxPresets = result.maxPresets > 32 ? 32 : result.maxPresets;
-    },
+    this.ptzService.ptzPresetsInfo(new PTZPresetsInfoCommand(this.camera?.onvifHost as string)).subscribe((result) => {
+        this.presetsInfo = result;
+        this.maxPresets = result.maxPresets > 32 ? 32 : this.presetsInfo.maxPresets;
+      },
       reason => {
         this.reporting.errorMessage = reason;
       })
