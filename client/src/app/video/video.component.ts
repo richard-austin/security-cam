@@ -96,7 +96,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           },
           {
             liveBufferLatencyChasing: true,
-            liveBufferLatencyMaxLatency: 1.7,
+            liveBufferLatencyMaxLatency: 1.5,
             liveBufferLatencyMinRemain: 0.5,
             enableStashBuffer: false,
             enableWorker: true,
