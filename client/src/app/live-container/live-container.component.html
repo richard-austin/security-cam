@@ -1,5 +1,10 @@
 <div class="flex-container">
   <app-video [isFlv]="true"></app-video>
+  <app-ptzcontrols *ngIf="hasPTZControls()" [camera]="camera()" [reporting]="reporting"></app-ptzcontrols>
+  <app-video [isFlv]="true"></app-video>
+</div>
+<div class="flex-container">
+  <app-video [isFlv]="true"></app-video>
   <app-video [isFlv]="true"></app-video>
 </div>
 <div class="flex-container">

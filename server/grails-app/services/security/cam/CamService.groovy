@@ -22,6 +22,7 @@ class CamService {
     LogService logService
     ConfigurationUpdateService configurationUpdateService
     Sc_processesService sc_processesService
+    OnvifService onvifService
 
     /**
      * getCameras: Get all cameras defined in the application.yml file
@@ -103,6 +104,8 @@ class CamService {
             else if (startResult.status != PassFail.PASS)
                 result = startResult
 
+            // Populate the Onvif device map to prevent the delay of creating the device at the start of each PTZ operation
+            onvifService.populateDeviceMap()
             result.setResponseObject(obj)
         }
         catch (Exception ex) {

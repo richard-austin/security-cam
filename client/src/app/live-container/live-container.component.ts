@@ -26,7 +26,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   setupVideo() {
     this.reporting.dismiss();
     this.videos.forEach((video) => {
-      video.multi = this.multi ? this.multi : false;
+      video.multi = this.multi;
       video.visible = false;
       video.stop();
     });
@@ -44,6 +44,15 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
       });
     } else
       this.showInvalidInput();
+  }
+
+
+  hasPTZControls() {
+    return !this.multi && this.cameraSvc.getActiveLive()[0]?.camera?.ptzControls;
+  }
+
+  camera(): Camera | null {
+    return !this.multi ? this.cameraSvc.getActiveLive()[0]?.camera : null;
   }
 
   /**

@@ -5,11 +5,26 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
+import org.onvif.ver10.schema.PTZNode
+import org.onvif.ver10.schema.PTZPreset
+import org.onvif.ver10.schema.PTZSpaces
+import org.onvif.ver10.schema.Space1DDescription
+import org.onvif.ver10.schema.Space2DDescription
+import security.cam.commands.MoveCommand
+import security.cam.commands.MoveCommand.eMoveDirections
+import security.cam.commands.PTZPresetsInfoCommand
+import security.cam.commands.PTZPresetsCommand
+import security.cam.commands.StopCommand
+
 import org.onvif.ver10.media.wsdl.Media
 import org.onvif.ver10.schema.AudioEncoderConfiguration
+import org.onvif.ver10.schema.PTZSpeed
 import org.onvif.ver10.schema.Profile
+import org.onvif.ver10.schema.Vector1D
+import org.onvif.ver10.schema.Vector2D
 import org.onvif.ver10.schema.VideoEncoderConfiguration
 import org.onvif.ver10.schema.VideoResolution
+import org.onvif.ver20.ptz.wsdl.PTZ
 import org.utils.OnvifCredentials
 import org.utils.TestDevice
 import security.cam.enums.PassFail
@@ -17,7 +32,28 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
 import server.Stream
 
-import java.nio.charset.Charset
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
+class XYZValues {
+    float x
+    float y
+    float z
+
+    XYZValues(float x, float y, float z) {
+        this.x = x
+        this.y = y
+        this.z = z
+    }
+}
+
+class SC_PTZData {
+    Integer maxPresets
+    Media media
+    Profile profile
+    PTZSpaces spaces
+    Map<eMoveDirections, XYZValues> xyzMap
+}
 
 @Transactional
 class OnvifService {
@@ -25,6 +61,20 @@ class OnvifService {
     GrailsApplication grailsApplication
     CamService camService
     Sc_processesService sc_processesService
+    private ExecutorService deviceUpdateExecutor = Executors.newSingleThreadExecutor()
+
+    OnvifService() {
+    }
+
+    def populateDeviceMap() {
+        deviceMap.clear()
+        def getCamerasResult = camService.getCameras()
+        // Populate the Onvif device map
+        def cameras = getCamerasResult.getResponseObject()
+        cameras.forEach((k, cam) -> {
+            getDevice(cam.onvifHost as String)
+        })
+    }
 
     /**
      * getMediaProfiles: Get the details of Onvif compliant cameras which are online on the LAN.
@@ -49,11 +99,12 @@ class OnvifService {
                 if (credentials != null) {
                     OnvifDevice device = null
                     Camera cam = new Camera()
+                    cam.onvifHost = credentials.host
                     cam.streams = new LinkedTreeMap<String, Stream>()
 
                     try {
-                        logService.cam.info "Connect to camera, please wait ..."
-                        device = new OnvifDevice(credentials.getHost(), credentials.getUser(), credentials.getPassword())
+                        logService.cam.info "Creating onvif device for ${credentials.getHost()} ..."
+                        device = getDevice(credentials.getHost())
 
                         Media media = device.getMedia()
                         // def options =media.getVideoSources()
@@ -79,21 +130,7 @@ class OnvifService {
                             stream.audio_encoding = aec.getEncoding().value()
                             stream.audio_sample_rate = aec.getSampleRate()
 
-//                        AudioSourceConfiguration aec = profile.getAudioSourceConfiguration()
-//                        PTZConfiguration ptzConf = profile.getPTZConfiguration()
-//                        Map ptzProps = ptzConf.getProperties()
-//                        PTZ ptz = device.getPtz()
-//                        List pre = ptz.getPresets(profile.getToken())
-//                        PTZSpeed ptzSpd = new PTZSpeed()
-//                        ptzSpd.setZoom(new Vector1D().setX(4))
-//                        ptz.absoluteMove(profile.getToken(), pre[3].getPTZPosition(), new PTZSpeed())
-//
-//                        String name = profile.getName()
-
-//                        List<AudioEncoderConfiguration> audio2 =  media.getCompatibleAudioEncoderConfigurations(profileToken)
-//                        //                       audio1 =  media.getAudioOutputConfiguration(audio2[0].getToken())
-//                        AudioEncoderConfiguration aconfig = media.getAudioEncoderConfiguration(audio2[0].getToken())
-//                        def info = device.getDeviceInfo()
+                            //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
                         })
                         logService.cam.info("Connected to device %s (%s)%n", device.getDeviceInfo(), device.streamUri.toString())
                         logService.cam.info(TestDevice.inspect(device))
@@ -101,20 +138,6 @@ class OnvifService {
                         String snapshotUri = device.getSnapshotUri()
                         if (!snapshotUri.isEmpty()) {
                             cam.snapshotUri = snapshotUri
-
-//                        File tempFile = File.createTempFile("tmp", ".jpg")
-//
-//                        try {
-//                            // Note: This will likely fail if the camera/device is password protected.
-//                            // embedding the user:password@ into the URL will not work with FileUtils.copyURLToFile
-//                            FileUtils.copyURLToFile(new URL(snapshotUri), tempFile)
-//                            logService.cam.info(
-//                                    "snapshot: " + tempFile.getAbsolutePath() + " length:" + tempFile.length())
-//                        }
-//                        catch(Exception ex)
-//                        {
-//                            logService.cam.error("Cannot get snapshot data from ${snapshotUri} : "+ex.getMessage())
-//                        }
                         }
 
                     } catch (Exception th) {
@@ -206,11 +229,11 @@ class OnvifService {
         }
         catch (IOException ex) {
             result.error = "IO Error connecting to camera at ${strUrl}: ${ex.getMessage()}"
-            if(uc != null) {
+            if (uc != null) {
                 try {
                     result.errno = uc.getResponseCode()
                 }
-                catch(Exception ignore){
+                catch (Exception ignore) {
                     result.errno = 500
                 }
             }
@@ -220,6 +243,193 @@ class OnvifService {
         }
         catch (Exception ex) {
             result.error = "Error in getSnapshot: ${ex.getMessage()}"
+            logService.cam.error(result.error)
+            result.status = PassFail.FAIL
+        }
+        return result
+    }
+
+    private final static Map<String, OnvifDevice> deviceMap = new HashMap<>()
+
+    private synchronized OnvifDevice getDevice(String onvifBaseAddress) {
+        try {
+            if (!deviceMap.containsKey(onvifBaseAddress))
+                deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, "", ""))
+        }
+        catch (Exception ex) {
+            logService.cam.error("${ex.getClass().getName()} in getDevice ${ex.getMessage()}")
+        }
+        deviceMap.get(onvifBaseAddress)
+    }
+
+    /**
+     * updateDevice: Replace the OnvifDevice entry for onvifBaseAddress when there has been an error in a PTZ call
+     * @param onvifBaseAddress
+     * @return
+     */
+    private void updateDevice(final String onvifBaseAddress) {
+        deviceMap.remove(onvifBaseAddress)
+        // getDevice can be quite slow creating a new device so run it in a thread so it doesn't cause a delay in returning
+        deviceUpdateExecutor.submit(() -> {
+            getDevice(onvifBaseAddress)  // Replace he removed entry in the map
+        })
+    }
+
+    ObjectCommandResponse move(MoveCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
+
+            Profile profile = ptzDataMap.get(cmd.onvifBaseAddress).getProfile()
+
+            if (profile != null) {
+                PTZ ptz = device.getPtz()
+                PTZSpeed ptzSpd = new PTZSpeed()
+                if (cmd.getMoveDirection() == eMoveDirections.panRight || cmd.getMoveDirection() == eMoveDirections.panLeft ||
+                        cmd.moveDirection == eMoveDirections.tiltDown || cmd.moveDirection == eMoveDirections.tiltUp) {
+                    Vector2D panTilt = new Vector2D()
+                    XYZValues xyzValues = ptzDataMap.get(cmd.getOnvifBaseAddress()).xyzMap.get(cmd.getMoveDirection())
+                    panTilt.setX(xyzValues.getX())
+                    panTilt.setY(xyzValues.getY())
+                    ptzSpd.setPanTilt(panTilt)
+                } else if (cmd.getMoveDirection() == eMoveDirections.zoomIn || cmd.getMoveDirection() == eMoveDirections.zoomOut) {
+                    Vector1D zoom = new Vector1D()
+                    XYZValues xyzValues = ptzDataMap.get(cmd.getOnvifBaseAddress()).xyzMap.get(cmd.getMoveDirection())
+                    zoom.setX(xyzValues.getZ())
+                    ptzSpd.setZoom(zoom)
+                }
+                ptz.continuousMove(profile.getToken(), ptzSpd, null)
+            } else
+                throw new Exception("Device ${cmd.onvifBaseAddress} has no media profiles")
+
+        }
+        catch (Exception ex) {
+            updateDevice(cmd.getOnvifBaseAddress())
+            result.error = "Error in move: ${ex.getMessage()}"
+            logService.cam.error(result.error)
+            result.status = PassFail.FAIL
+        }
+        return result
+    }
+
+    ObjectCommandResponse stop(StopCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
+
+            Profile profile = ptzDataMap.get(cmd.onvifBaseAddress).getProfile()
+
+            if (profile != null) {
+                PTZ ptz = device.getPtz()
+                ptz.stop(profile.getToken(), true, true)
+            } else
+                throw new Exception("Device ${cmd.onvifBaseAddress} has no media profiles")
+
+        }
+        catch (Exception ex) {
+            updateDevice(cmd.getOnvifBaseAddress())
+            result.error = "Error in stop: ${ex.getMessage()}"
+            logService.cam.error(result.error)
+            result.status = PassFail.FAIL
+        }
+        return result
+    }
+
+    ObjectCommandResponse preset(PTZPresetsCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
+
+            Profile profile = ptzDataMap.get(cmd.onvifBaseAddress).getProfile()
+
+            if (profile != null) {
+                PTZ ptz = device.getPtz()
+
+                switch (cmd.operation) {
+                    case PTZPresetsCommand.ePresetOperations.moveTo:
+                        ptz.gotoPreset(profile.getToken(), cmd.preset, null)
+                        break
+                    case PTZPresetsCommand.ePresetOperations.saveTo:
+                        ptz.setPreset(profile.getToken(), cmd.preset, null)
+                        break
+                    case PTZPresetsCommand.ePresetOperations.clearFrom:
+                        ptz.removePreset(profile.getToken(), cmd.preset)
+                        break
+                    default:
+                        throw new Exception("Invalid preset operation ${cmd.operation}")
+                        break
+                }
+            } else
+                throw new Exception("Device ${cmd.onvifBaseAddress} has no media profiles")
+        }
+        catch (Exception ex) {
+            updateDevice(cmd.getOnvifBaseAddress())
+            result.error = "Error in preset function: ${ex.getMessage()}"
+            logService.cam.error(result.error)
+            result.status = PassFail.FAIL
+        }
+        return result
+    }
+
+    private final Map<String, SC_PTZData> ptzDataMap = new HashMap<>()
+
+    ObjectCommandResponse ptzPresetsInfo(PTZPresetsInfoCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
+            Media media = device.getMedia()
+
+            Profile profile = media.getProfiles().get(0)
+            PTZ ptz = device.getPtz()
+            List<PTZPreset> allPresets = ptz.getPresets(profile.getToken())
+            List<PTZNode> nodes = ptz.getNodes()
+            if (nodes.size() > 0) {
+                PTZNode node = nodes.get(0)
+                PTZSpaces spaces = node.supportedPTZSpaces
+                final int maxPresets = node.getMaximumNumberOfPresets()
+
+                // Set up the map containing the xyz (velocity) values for all ptz operations and directions
+                final Map<eMoveDirections, XYZValues> xyzMap = new HashMap<eMoveDirections, XYZValues>()
+                // TODO: What do we do if there is more than one of these spaces
+                Space2DDescription cptvs = spaces.continuousPanTiltVelocitySpace[0]
+                // TODO: What do we do if there is more than one of these spaces
+                Space1DDescription czvs = spaces.continuousZoomVelocitySpace[0]
+
+                xyzMap.put(eMoveDirections.panLeft, new XYZValues(cptvs.XRange.min, 0, 0))
+                xyzMap.put(eMoveDirections.panRight, new XYZValues(cptvs.XRange.max, 0, 0))
+                xyzMap.put(eMoveDirections.tiltDown, new XYZValues(0, cptvs.YRange.min, 0))
+                xyzMap.put(eMoveDirections.tiltUp, new XYZValues(0, cptvs.YRange.max, 0))
+                xyzMap.put(eMoveDirections.zoomIn, new XYZValues(0, 0, czvs.XRange.max))
+                xyzMap.put(eMoveDirections.zoomOut, new XYZValues(0, 0, czvs.XRange.min))
+
+                // Set up the arrays (up to max size 32) for the preset tokens
+                List<PTZPreset> presets = new ArrayList()
+                for (int i = 0; i < maxPresets && i < allPresets.size() && i < 32; ++i) {
+                    PTZPreset preset = allPresets.get(i)
+                    if (preset.getToken() == null || preset.token == "")
+                        preset.token = (i + 1).toString()
+                    presets.add(allPresets.get(i))
+                }
+                // Save (or update) the PTZ data for this camera to the map for use by the move and preset methods
+                SC_PTZData ptzData = new SC_PTZData()
+                ptzData.spaces = spaces
+                ptzData.maxPresets = maxPresets
+                ptzData.media = media
+                ptzData.profile = profile
+                ptzData.xyzMap = xyzMap
+                ptzDataMap.put(cmd.getOnvifBaseAddress(), ptzData)
+                result.responseObject = [maxPresets: maxPresets, presets: presets]
+            } else
+                throw new Exception("Device ${cmd.onvifBaseAddress} has no ptz nodes")
+        }
+        catch (Exception ex) {
+            updateDevice(cmd.getOnvifBaseAddress())
+            result.error = "Error in ptzPresetsInfo: ${ex.getMessage()}"
             logService.cam.error(result.error)
             result.status = PassFail.FAIL
         }

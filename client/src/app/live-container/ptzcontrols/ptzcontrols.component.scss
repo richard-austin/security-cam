@@ -1,0 +1,66 @@
+@mixin mat-card-subtitle {
+  display: flex;
+  color: yellow;
+  justify-content: center;
+}
+
+mat-card.card-features {
+  margin-top: 60px;
+
+  > mat-card-subtitle {
+    @include mat-card-subtitle;
+  }
+}
+
+div.flex-container {
+  > mat-card-subtitle {
+    margin-top: 1rem;
+    @include mat-card-subtitle;
+  }
+
+  width: 22rem;
+
+  > div:first-child {
+    width: 22rem;
+
+    > div {
+      margin-left: auto;
+      margin-right: auto;
+      width: 11rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+
+      > app-ptzbutton {
+        &:hover {
+          color: white;
+        }
+
+        color: lightgrey;
+      }
+    }
+  }
+
+  > div:nth-child(5) {
+    margin-left: auto;
+    margin-right: auto;
+    width: 22rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  > div:nth-child(6) {
+    margin-top: 2rem;
+    > mat-slide-toggle {
+      margin-right: 2rem;
+    }
+  }
+}
+
+mat-card-subtitle.smaller-text {
+  font-size: 12px;
+  color: black !important;
+  border-radius: 8px;
+  background-color: #d9a11a !important;
+}

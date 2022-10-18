@@ -44,6 +44,11 @@ import { CredentialsForCameraAccessComponent } from './credentials-for-camera-ac
 import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-account.component';
+import { PTZControlsComponent } from './live-container/ptzcontrols/ptzcontrols.component';
+import { PTZButtonComponent } from './live-container/ptzcontrols/ptzbutton/ptzbutton.component';
+import { PresetButtonComponent } from './live-container/ptzcontrols/preset-button/preset-button.component';
+import {MatDividerModule} from "@angular/material/divider";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 @NgModule({
   declarations: [
@@ -68,36 +73,41 @@ import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-
     CredentialsForCameraAccessComponent,
     CloudProxyComponent,
     ChangeEmailComponent,
-    SetUpGuestAccountComponent
+    SetUpGuestAccountComponent,
+    PTZControlsComponent,
+    PTZButtonComponent,
+    PresetButtonComponent
   ],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        HttpClientModule,
-        BrowserAnimationsModule,
-        MatCardModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatCheckboxModule,
-        MatButtonModule,
-        MatButtonToggleModule,
-        MatInputModule,
-        MatIconModule,
-        MatSelectModule,
-        MatDialogModule,
-        MatMenuModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
-        FormsModule,
-        // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
-        // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
-        // and `ping` is 6q0 (1 minutes).
-        UserIdleModule.forRoot({idle: 600, timeout: 60, ping: 60}),
-        LayoutModule,
-        MatTableModule,
-        MatSortModule,
-        MatTooltipModule
-    ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    BrowserAnimationsModule,
+    MatCardModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatInputModule,
+    MatIconModule,
+    MatSelectModule,
+    MatDialogModule,
+    MatMenuModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    FormsModule,
+    // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
+    // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
+    // and `ping` is 6q0 (1 minutes).
+    UserIdleModule.forRoot({idle: 600, timeout: 60, ping: 60}),
+    LayoutModule,
+    MatTableModule,
+    MatSortModule,
+    MatTooltipModule,
+    MatDividerModule,
+    MatSlideToggleModule
+  ],
   providers: [HttpClient, BaseUrl],
   bootstrap: [AppComponent],
   entryComponents: [IdleTimeoutModalComponent]

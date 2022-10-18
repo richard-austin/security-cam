@@ -36,6 +36,8 @@ class Sc_processesService {
 
     ExecutorService processExecutors
     ArrayList<Process> processes
+    OnvifService onvifService
+
     boolean running = false
 
     final int ipCheckTimeout = 1000 * 60 * 15  // 15 minutes time between IP checks
@@ -251,6 +253,9 @@ class Sc_processesService {
             RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
                     "{\"command\": \"start_motion\"}",
                     true, 12000)
+
+            // Populate the onvif device map so the devices don't have to be created each time a PTZ operation is done
+            onvifService.populateDeviceMap()
 
             if(restResponse.responseCode != 200) {
                 logService.cam.error("Error starting motion service: ${restResponse.errorMsg}")
