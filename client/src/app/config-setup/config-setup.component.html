@@ -96,21 +96,18 @@
         </td>
       </ng-container>
 
-      <ng-container matColumnDef="controlUri">
-        <th mat-header-cell *matHeaderCellDef>Control URI.</th>
+      <ng-container matColumnDef="cameraParamSpecs">
+        <th mat-header-cell *matHeaderCellDef>Camera Type.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-form-field appearance="legacy" [style.width.px]="150">
+          <mat-form-field appearance="legacy" [style.width.px]="200">
             <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
                 enabled state is updated.-->
-            <mat-select [formControl]="getCamControl(i, 'controlUri')"
-                        (selectionChange)="updateCamField(i, 'controlUri'); setUpTableFormControls()"
+            <mat-select [formControl]="getCamControl(i, 'cameraParamSpecs')"
+                        (selectionChange)="updateCamField(i, 'cameraParamSpecs'); setUpTableFormControls()"
                         matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'None' to disable this feature, or if the camera type is not listed."
                         matTooltipClass="tooltip">
-              <mat-option [value]="''">
-                None
-              </mat-option>
-              <mat-option [value]="'web/cgi-bin/hi3510/param.cgi'">
-                For SV3C Cameras
+              <mat-option *ngFor="let spec of cameraSvc.cameraParamSpecs" [value]="spec">
+                  {{spec.name}}
               </mat-option>
             </mat-select>
           </mat-form-field>

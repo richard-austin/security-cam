@@ -42,7 +42,7 @@
       <button mat-button [matMenuTriggerFor]="menuCameraSettings">Camera Settings</button>
       <mat-menu #menuCameraSettings="matMenu">
         <ng-container *ngFor="let cam of cameras">
-          <button *ngIf="cam.address!=''&&cam.controlUri!=''" mat-menu-item
+          <button *ngIf="cam.address!=''&&cam.cameraParamSpecs.camType !== cameraTypes.none" mat-menu-item
                   (click)="cameraControl(cam);menuClosed()">
             {{cam.name}}
           </button>

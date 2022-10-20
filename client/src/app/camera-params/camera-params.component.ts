@@ -34,8 +34,8 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.reporting.dismiss();
     this.downloading = true;
     this.cam = this.cameraSvc.getActiveLive()[0];
-    if (this.cam && this.cam.camera.address !== undefined && this.cam.camera.controlUri !== undefined) {
-      this.utils.cameraParams(this.cam.camera.address, this.cam.camera.controlUri, "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1").subscribe(
+    if (this.cam && this.cam.camera.address !== undefined && this.cam.camera.cameraParamSpecs.uri !== undefined) {
+      this.utils.cameraParams(this.cam.camera.address, this.cam.camera.cameraParamSpecs.uri, this.cam.camera.cameraParamSpecs.params).subscribe(
         result => {
           this.downloading = false;
           this.cameraParams = result;
@@ -71,7 +71,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   updateParams() {
     this.reporting.dismiss();
     this.downloading = true;
-    this.utils.setCameraParams(this.cam.camera.address, this.cam.camera.controlUri, this.irselector.value, this.cameraName.value).subscribe(() => {
+    this.utils.setCameraParams(this.cam.camera.address, this.cam.camera.cameraParamSpecs.uri, this.irselector.value, this.cameraName.value).subscribe(() => {
         this.downloading = false;
         this.reporting.successMessage = "Update Successful"
 
@@ -92,6 +92,13 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   anyInvalid(): boolean {
     return this.irselector.invalid || this.cameraName.invalid;
+  }
+
+
+  anyChanged() {
+    return this.irselector?.value !== this.cameraParams?.infraredstat
+      || this.cameraName?.value !== this.cameraParams?.name_1
+      || this.dateFormat?.value !== this.cameraParams?.name_0;
   }
 
   ngOnInit(): void {
@@ -120,11 +127,5 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.activeLiveUpdates.unsubscribe();
-  }
-
-  anyChanged() {
-    return this.irselector?.value !== this.cameraParams?.infraredstat
-      || this.cameraName?.value !== this.cameraParams?.name_1
-      || this.dateFormat?.value !== this.cameraParams?.name_0;
   }
 }

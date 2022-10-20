@@ -53,10 +53,27 @@ class Stream {
     Recording recording=new Recording()
 }
 
+
+enum cameraTypes {sv3c, zxtechMCW5B10X}
+
+class CameraParamSpecs {
+    CameraParamSpecs(cameraTypes camType, String params, String uri, String name) {
+        this.camType = camType
+        this.params = params
+        this.uri = uri
+        this.name = name
+    }
+
+    cameraTypes camType
+    String params
+    String uri
+    String name
+}
+
 class Camera {
     String name=''
     String address=''
-    String controlUri=''
+    CameraParamSpecs cameraParamSpecs = null
     String snapshotUri=''
     boolean ptzControls = false
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
