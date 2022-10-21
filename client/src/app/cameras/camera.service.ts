@@ -27,7 +27,7 @@ export class LocalMotionEvents {
   events: LocalMotionEvent[] = [];
 }
 
-export enum cameraTypes {none, sv3c, zxtechMCW5B10X}
+export enum cameraType {none, sv3c, zxtechMCW5B10X}
 
 @Injectable({
   providedIn: 'root'
@@ -61,17 +61,17 @@ export class CameraService {
 
   private _cameraParamSpecs: CameraParamSpec[] =
     [new CameraParamSpec(
-      cameraTypes.none,
+      cameraType.none,
       "",
       '',
       "Not Listed"),
-      new CameraParamSpec(cameraTypes.sv3c,
+      new CameraParamSpec(cameraType.sv3c,
       "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1",
       'web/cgi-bin/hi3510/param.cgi',
       "SV3C (General)"),
       new CameraParamSpec(
-        cameraTypes.zxtechMCW5B10X,
-        "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1",
+        cameraType.zxtechMCW5B10X,
+        "cmd=getvideoattr&cmd=getlampattrex&cmd=getimageattr&cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1",
         'web/cgi-bin/hi3510/param.cgi',
         "ZTech MCW5B10X")]
 

@@ -211,7 +211,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         cameraParamSpecs: new FormControl({
           // Get the actual CameraParamSpec object used for the control rather than the copy of it returned from the API
           // call. If we don't do this, the selector won't show the correct setting.
-          value: this.cameraSvc.cameraParamSpecs.find((spec) => camera.cameraParamSpecs.camType===spec.camType),
+          value: this.cameraSvc.cameraParamSpecs.find((spec) => camera.cameraParamSpecs !== null ?
+            camera.cameraParamSpecs.camType===spec.camType :
+            this.cameraSvc.cameraParamSpecs[0]),
           disabled: false
         }, [Validators.maxLength(55)]),
         snapshotUri: new FormControl({

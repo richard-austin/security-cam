@@ -4,7 +4,6 @@ import com.google.gson.internal.LinkedHashTreeMap
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
-import org.onvif.ver10.schema.AudioEncoding
 import security.cam.LogService
 import security.cam.commands.DeleteRecordingCommand
 import security.cam.commands.DownloadRecordingCommand
@@ -15,7 +14,6 @@ import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
 import java.nio.file.Files
-import java.text.DecimalFormat
 
 class MotionEvents {
     MotionEvents(String[] events) {
@@ -54,17 +52,17 @@ class Stream {
 }
 
 
-enum cameraTypes {sv3c, zxtechMCW5B10X}
+enum cameraType {none, sv3c, zxtechMCW5B10X}
 
 class CameraParamSpecs {
-    CameraParamSpecs(cameraTypes camType, String params, String uri, String name) {
+    CameraParamSpecs(cameraType camType, String params, String uri, String name) {
         this.camType = camType
         this.params = params
         this.uri = uri
         this.name = name
     }
 
-    cameraTypes camType
+    cameraType camType
     String params
     String uri
     String name
