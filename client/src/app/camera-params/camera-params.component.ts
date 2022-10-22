@@ -25,15 +25,17 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
 
   constructor(private utils: UtilsService, private cameraSvc: CameraService) {
-    this.cam = this.cameraSvc.getActiveLive()[0];
   }
 
   cameraTypes: typeof cameraType = cameraType;
   cameraParams!: CameraParams;
-  cam!: CameraStream;
   downloading: boolean = true;
   camControlFormGroup!: FormGroup;
   isGuest: boolean = true;
+
+  get cam(): CameraStream {
+    return this.cameraSvc.getActiveLive()[0];
+  }
 
   private getCameraParams() {
     this.reporting.dismiss();
@@ -55,8 +57,6 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.cameraName.setValue(this.cameraParams.name_1);
           this.dateFormat.setValue(this.cameraParams.name_0);
           this.dateFormat.disable(); // Disable this one until I have suitable regex for validation
-          this.wdrStatus.setValue(this.cameraParams.wdr);
-          this.lampStatus.setValue(this.cameraParams.lamp_mode);
           this.startDate.disable();
           this.softVersion.setValue(this.cameraParams.softVersion);
           this.softVersion.disable();
@@ -146,14 +146,14 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.camType() === cameraType.sv3c ?
-    this.camControlFormGroup = new FormGroup({
-      irselector: new FormControl('', [Validators.required]),
-      cameraName: new FormControl('', [Validators.required, Validators.maxLength(25)]),
-      dateFormat: new FormControl('', [Validators.required, Validators.maxLength(30)]),
-      startDate: new FormControl('', [Validators.required]),
-      softVersion: new FormControl('', [Validators.required]),
-      model: new FormControl('', [Validators.required])
-    }) :
+      this.camControlFormGroup = new FormGroup({
+        irselector: new FormControl('', [Validators.required]),
+        cameraName: new FormControl('', [Validators.required, Validators.maxLength(25)]),
+        dateFormat: new FormControl('', [Validators.required, Validators.maxLength(30)]),
+        startDate: new FormControl('', [Validators.required]),
+        softVersion: new FormControl('', [Validators.required]),
+        model: new FormControl('', [Validators.required])
+      }) :
       this.camControlFormGroup = new FormGroup({
         lampStatus: new FormControl('', [Validators.required]),
         wdrStatus: new FormControl('', [Validators.required]),
@@ -180,8 +180,10 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.softVersion = this.camControlFormGroup.controls['softVersion'];
     this.model = this.camControlFormGroup.controls['model'];
 
-    this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => this.getCameraParams());
     this.getCameraParams();
+    // This event reinitialises the form when the camera reference is changes and allows changing form layout when necessary
+    if(this.activeLiveUpdates === undefined)
+      this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => {this.ngOnInit(); this.ngAfterViewInit()});
   }
 
   ngOnDestroy(): void {
