@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera, Stream} from "../cameras/Camera";
+import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {
@@ -165,6 +165,27 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   /**
+   *
+   * @param camera
+   * Get the actual CameraParamSpec object used for the control rather than the copy of it returned from the API
+   * call. If we don't do this, the selector won't show the correct setting.
+   */
+  getCameraParamSpecsReferenceCopy(camera: Camera): CameraParamSpec {
+    if ( camera?.cameraParamSpecs?.camType === undefined)
+      return this.cameraSvc.cameraParamSpecs[0];  // Return the Not Listed option
+    else
+      return this.cameraSvc.cameraParamSpecs.find((spec) => camera.cameraParamSpecs.camType === spec.camType) as CameraParamSpec;
+   }
+
+   getCameraAddressDisabledState(camera: Camera): boolean
+   {
+     if(camera?.cameraParamSpecs?.uri?.length === undefined)
+       return true;
+     else
+      return camera.cameraParamSpecs.uri.length == 0
+   }
+
+  /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
    */
   setUpTableFormControls(): void {
@@ -206,14 +227,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
         address: new FormControl({
           value: camera.address,
-          disabled: camera.cameraParamSpecs === null || camera.cameraParamSpecs.uri?.length == 0
+          disabled: this.getCameraAddressDisabledState(camera)
         }, [Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
         cameraParamSpecs: new FormControl({
-          // Get the actual CameraParamSpec object used for the control rather than the copy of it returned from the API
-          // call. If we don't do this, the selector won't show the correct setting.
-          value: this.cameraSvc.cameraParamSpecs.find((spec) => camera.cameraParamSpecs !== null ?
-            camera.cameraParamSpecs.camType===spec.camType :
-            this.cameraSvc.cameraParamSpecs[0]),
+          value: this.getCameraParamSpecsReferenceCopy(camera),
           disabled: false
         }, [Validators.maxLength(55)]),
         snapshotUri: new FormControl({
