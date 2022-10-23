@@ -32,6 +32,8 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   downloading: boolean = true;
   camControlFormGroup!: FormGroup;
   isGuest: boolean = true;
+  _reboot : boolean = false;
+  _confirmReboot: boolean = false;
 
   get cam(): CameraStream {
     return this.cameraSvc.getActiveLive()[0];
@@ -86,17 +88,20 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cam.camera.address,
         this.cam.camera.cameraParamSpecs.uri,
         this.irselector.value,
-        this.cameraName.value)
+        this.cameraName.value,
+        this._reboot)
       :
       new SetCameraParams(this.cam.camera.cameraParamSpecs.camType,
         this.cam.camera.address,
         this.cam.camera.cameraParamSpecs.uri,
         '',
         this.cameraName.value,
+        this._reboot,
         this.wdrStatus.value,
         this.lampStatus.value);
     this.utils.setCameraParams(params).subscribe(() => {
         this.downloading = false;
+        this._confirmReboot = this._reboot = false;
         this.reporting.successMessage = "Update Successful"
 
         // Update the locally stored values
@@ -108,9 +113,12 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cameraParams.wdr = this.wdrStatus.value;
       }
         this.cameraParams.name_1 = this.cameraName.value;
+        this._reboot = this._confirmReboot = false;
       },
       reason => {
         this.downloading = false;
+        this._reboot = this._confirmReboot = false;
+        this._confirmReboot = this._reboot = false;
         this.reporting.errorMessage = reason;
       }
     );
@@ -122,9 +130,9 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   anyInvalid(): boolean {
     if(this.camType() === cameraType.sv3c)
-      return this.irselector.invalid || this.cameraName.invalid;
+      return this.irselector?.invalid || this.cameraName?.invalid;
     else
-      return this.lampStatus.invalid || this.wdrStatus.invalid;
+      return this.lampStatus?.invalid || this.wdrStatus?.invalid;
   }
 
   camType() : cameraType
@@ -188,5 +196,36 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.activeLiveUpdates.unsubscribe();
+  }
+
+  confirmReboot() {
+    this._confirmReboot = true;
+    if(this.camType() === cameraType.sv3c)
+      this.irselector.disable();
+    else
+    {
+      this.lampStatus.disable();
+      this.wdrStatus.disable();
+    }
+    this.cameraName.disable();
+   }
+
+   reboot()
+   {
+     this._reboot = true;
+     this.updateParams();
+     this.cancelReboot();
+   }
+
+  cancelReboot() {
+    this._confirmReboot = this._reboot = false
+    if(this.camType() === cameraType.sv3c)
+      this.irselector.enable();
+    else
+    {
+      this.lampStatus.enable();
+      this.wdrStatus.enable();
+    }
+    this.cameraName.enable();
   }
 }

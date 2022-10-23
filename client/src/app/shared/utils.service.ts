@@ -49,7 +49,7 @@ export class GuestAccountStatus {
 }
 
 export class SetCameraParams {
-  constructor(cameraTypes: cameraType, address: string, uri: string, infraredstat: string, cameraName: string, wdr?: string, lamp_mode?: string) {
+  constructor(cameraTypes: cameraType, address: string, uri: string, infraredstat: string, cameraName: string, reboot: boolean=false, wdr?: string, lamp_mode?: string) {
     this.cameraType = cameraTypes;
     this.address = address;
     this.uri = uri;
@@ -57,6 +57,7 @@ export class SetCameraParams {
     this.cameraName = cameraName;
     this.wdr = wdr;
     this.lamp_mode = lamp_mode;
+    this.reboot = reboot;
   }
   cameraType: cameraType;
   address: string;
@@ -65,6 +66,7 @@ export class SetCameraParams {
   cameraName: string;
   wdr: string | undefined;
   lamp_mode: string | undefined;
+  reboot: boolean;
 }
 
 @Injectable({
