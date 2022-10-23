@@ -55,14 +55,7 @@ class Stream {
 enum cameraType {none, sv3c, zxtechMCW5B10X}
 
 class CameraParamSpecs {
-    CameraParamSpecs(cameraType camType, String params, String uri, String name) {
-        this.camType = camType
-        this.params = params
-        this.uri = uri
-        this.name = name
-    }
-
-    cameraType camType
+    int camType
     String params
     String uri
     String name
