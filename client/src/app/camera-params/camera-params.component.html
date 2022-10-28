@@ -8,23 +8,58 @@
     </mat-card-content>
     <mat-card-content [ngStyle]="downloading ? {display: 'none'} : {display: 'block'}">
       <div [formGroup]="camControlFormGroup">
-        <div>
-        <mat-form-field appearance="legacy">
-          <mat-label>Infra Red Status</mat-label>
-          <mat-select formControlName="irselector">
-            <mat-option value="auto">
-              Auto
-            </mat-option>
-            <mat-option value="open">
-              On
-            </mat-option>
-            <mat-option value="close">
-              Off
-            </mat-option>
-          </mat-select>
-          <mat-hint>Select required infra red status</mat-hint>
-          <mat-error *ngIf="hasError('irselector', 'required')">Infra red status is required</mat-error>
-        </mat-form-field>
+        <div *ngIf="camType() === cameraTypes.sv3c">
+          <mat-form-field appearance="legacy">
+            <mat-label>Infra Red Status</mat-label>
+            <mat-select formControlName="irselector">
+              <mat-option value="auto">
+                Auto
+              </mat-option>
+              <mat-option value="open">
+                On
+              </mat-option>
+              <mat-option value="close">
+                Off
+              </mat-option>
+            </mat-select>
+            <mat-hint>Select required infra red status</mat-hint>
+            <mat-error *ngIf="hasError('irselector', 'required')">Infra red status is required</mat-error>
+          </mat-form-field>
+        </div>
+        <div *ngIf="camType() !== cameraTypes.sv3c">
+          <div>
+            <mat-form-field appearance="legacy">
+              <mat-label>Night Vision Mode</mat-label>
+              <mat-select formControlName="lampStatus">
+                <mat-option value="0">
+                  Normal
+                </mat-option>
+                <mat-option value="1">
+                  Full Colour
+                </mat-option>
+                <mat-option value="2">
+                  Intelligent
+                </mat-option>
+              </mat-select>
+              <mat-hint>Select required night vision mode</mat-hint>
+              <mat-error *ngIf="hasError('lampStatus', 'required')">Infra red status is required</mat-error>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="legacy">
+              <mat-label>WDR</mat-label>
+              <mat-select formControlName="wdrStatus">
+                <mat-option value="off">
+                  Off
+                </mat-option>
+                <mat-option value="on">
+                  On
+                </mat-option>
+              </mat-select>
+              <mat-hint>Select Wide Dynamic Range mode</mat-hint>
+              <mat-error *ngIf="hasError('wdrStatus', 'required')">Infra red status is required</mat-error>
+            </mat-form-field>
+          </div>
         </div>
         <div>
           <mat-form-field appearance="standard">
@@ -45,8 +80,6 @@
             <mat-error *ngIf="hasError('dateFormat', 'required')">Camera name is required</mat-error>
             <mat-error *ngIf="hasError('dateFormat', 'maxlength')">Max camera name length exceeded</mat-error>
           </mat-form-field>
-        </div>
-        <div>
           <mat-form-field appearance="standard">
             <mat-label>Start Date</mat-label>
             <input matInput type="text" formControlName="startDate"
@@ -61,20 +94,35 @@
                    placeholder="Software Version">
             <mat-hint>Read only value</mat-hint>
           </mat-form-field>
-        </div>
-        <div>
           <mat-form-field appearance="standard">
             <mat-label>Model</mat-label>
             <input matInput type="text" formControlName="model"
                    placeholder="Model">
             <mat-hint>Read only value</mat-hint>
           </mat-form-field>
-         </div>
+        </div>
       </div>
-      <div class="button-container"
-           matTooltip="{{isGuest ? 'Disabled for guest' : (!anyChanged() || anyInvalid()) ? 'Ensure all fields are correct and complete before committing' : 'Click to commit the changes'}}"
-           matTooltipClass="tooltip">
-        <button mat-flat-button (click)="updateParams()" [disabled]="!anyChanged() || anyInvalid() || isGuest" color="warning">Update</button>
+      <div class="button-container">
+        <button *ngIf="!_confirmReboot" mat-flat-button (click)="updateParams()" [disabled]="!anyChanged() || anyInvalid() || isGuest"
+                matTooltip="{{isGuest ? 'Disabled for guest' : (!anyChanged() || anyInvalid()) ? 'Ensure all fields are correct and complete before committing' : 'Click to commit the changes'}}"
+                matTooltipClass="tooltip"
+                color="warning">Update
+        </button>
+        <button *ngIf="_confirmReboot" mat-flat-button (click)="reboot()" [disabled]="(!anyChanged() || anyInvalid()) && !_confirmReboot || isGuest"
+                matTooltip="Click to proceed with rebooting this camera"
+                matTooltipClass="tooltip"
+                color="warning">Reboot camera, Are you sure?
+        </button>
+        <button *ngIf="!_confirmReboot" mat-flat-button (click)="confirmReboot()" [disabled]="anyChanged() || anyInvalid() || isGuest"
+                matTooltip="{{isGuest ? 'Disabled for guest' : 'Click to reboot this camera'}}"
+                matTooltipClass="tooltip"
+                color="warning">Reboot Camera
+        </button>
+        <button *ngIf="_confirmReboot" mat-flat-button (click)="cancelReboot()" [disabled]="anyChanged() || anyInvalid() || isGuest"
+                matTooltip="Click to cancel reboot of this camera"
+                matTooltipClass="tooltip"
+                color="default">Cancel
+        </button>
       </div>
     </mat-card-content>
   </mat-card>

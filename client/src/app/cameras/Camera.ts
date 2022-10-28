@@ -1,3 +1,4 @@
+import {cameraType} from "./camera.service";
 
 export class CameraParams
 {
@@ -10,6 +11,16 @@ export class CameraParams
     softVersion!: string;
     startdate!: string;
     webVersion!: string;
+    lamp_mode!: number;
+    lamp_mode_flag!: number;
+    lamp_timeout!: number;
+    lamp_ckktime!: number;
+    wdr!: string;
+    sdshow!: number;
+    sdstatus!: string;
+    sdtotalspace!: number;
+    sdfreespace!: number;
+
 }
 export class Motion {
   enabled: boolean = false;
@@ -43,15 +54,30 @@ export class Stream {
   recording: Recording = new Recording();
   absolute_num: number = 0;  // Used to give an absolute stream number for the recording URI with motion triggered recordings
 }
+export class CameraParamSpec {
+  constructor(camType: cameraType, params: string, uri: string, name: string) {
+    this.camType = camType;
+    this.params = params;
+    this.uri = uri;
+    this.name = name;
+  }
+
+  camType: cameraType;
+  params: string;
+  uri: string;
+  name: string;
+}
+
 export class Camera
 {
     name: string = "";
     address: string="";
-    controlUri: string="";
+    cameraParamSpecs!: CameraParamSpec;
     snapshotUri: string="";
     ptzControls: boolean = false;
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
+
 }
 
 export class CameraStream

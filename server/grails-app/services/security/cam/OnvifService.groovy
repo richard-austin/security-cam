@@ -69,11 +69,15 @@ class OnvifService {
     def populateDeviceMap() {
         deviceMap.clear()
         def getCamerasResult = camService.getCameras()
-        // Populate the Onvif device map
-        def cameras = getCamerasResult.getResponseObject()
-        cameras.forEach((k, cam) -> {
-            getDevice(cam.onvifHost as String)
-        })
+        if(getCamerasResult.status == PassFail.PASS) {
+            // Populate the Onvif device map
+            def cameras = getCamerasResult.getResponseObject()
+            cameras.forEach((k, cam) -> {
+                getDevice(cam.onvifHost as String)
+            })
+        }
+        else
+            throw new Exception("Error in populateDeviceMap: "+getCamerasResult.error)
     }
 
     /**

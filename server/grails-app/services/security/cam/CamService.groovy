@@ -91,8 +91,11 @@ class CamService {
             writer.close()
 
             ObjectCommandResponse stopResult = sc_processesService.stopProcesses()
-            configurationUpdateService.generateConfigs()
+            result = configurationUpdateService.generateConfigs()
             ObjectCommandResponse startResult = sc_processesService.startProcesses()
+
+            if(result.status !== PassFail.PASS)
+                throw new Exception(result.error)
 
             Gson gson2 = new Gson()
             LinkedTreeMap<String, Camera> obj = gson2.fromJson(prettyJsonString, Object.class) as LinkedTreeMap<String, Camera>

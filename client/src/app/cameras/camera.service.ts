@@ -3,7 +3,7 @@ import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
-import {Camera, CameraStream, Stream} from "./Camera";
+import {Camera, CameraParamSpec, CameraStream, Stream} from "./Camera";
 import {CameraAdminCredentials} from "../credentials-for-camera-access/credentials-for-camera-access.component";
 
 
@@ -26,6 +26,8 @@ export class LocalMotionEvent {
 export class LocalMotionEvents {
   events: LocalMotionEvent[] = [];
 }
+
+export enum cameraType {none, sv3c, zxtechMCW5B10X}
 
 @Injectable({
   providedIn: 'root'
@@ -56,6 +58,26 @@ export class CameraService {
   // Currently active recording
   private activeRecording!: Camera;
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
+
+  private _cameraParamSpecs: CameraParamSpec[] =
+    [new CameraParamSpec(
+      cameraType.none,
+      "",
+      '',
+      "Not Listed"),
+      new CameraParamSpec(cameraType.sv3c,
+      "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1",
+      'web/cgi-bin/hi3510/param.cgi',
+      "SV3C (General)"),
+      new CameraParamSpec(
+        cameraType.zxtechMCW5B10X,
+        "cmd=getvideoattr&cmd=getlampattrex&cmd=getimageattr&cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1",
+        'web/cgi-bin/hi3510/param.cgi',
+        "ZTech MCW5B10X")]
+
+  get cameraParamSpecs() {
+    return this._cameraParamSpecs;
+  };
 
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     this.loadCameraStreams().subscribe(cameraStreams => {
@@ -231,7 +253,7 @@ export class CameraService {
     );
   }
 
-  discover():Observable<Map<string, Camera>> {
+  discover(): Observable<Map<string, Camera>> {
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discover"), '', this.httpJSONOptions).pipe(
       tap((cams) => {
         this.cameras = [];
@@ -255,7 +277,7 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getSnapshot(url:string): Observable<Array<any>>{
+  getSnapshot(url: string): Observable<Array<any>> {
     const formData: FormData = new FormData();
     formData.append('url', url);
     return this.http.post<Array<any>>(this._baseUrl.getLink("onvif", "getSnapshot"), formData, this.httpUploadOptions).pipe(
@@ -263,8 +285,7 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  setCameraAdminCredentials(creds: CameraAdminCredentials):Observable<any>
-  {
+  setCameraAdminCredentials(creds: CameraAdminCredentials): Observable<any> {
     return this.http.post<any>(this._baseUrl.getLink("cam", "setAccessCredentials"), creds, this.httpUploadOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));

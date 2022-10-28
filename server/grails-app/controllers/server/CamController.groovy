@@ -48,6 +48,8 @@ class CamController {
         }
         else {
             result = camService.updateCameras(cmd)
+            if(result.status != PassFail.PASS)
+                render (status: 500, text: result.error)
             render result.responseObject as JSON
         }
     }

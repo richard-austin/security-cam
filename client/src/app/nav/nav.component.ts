@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {CameraService} from "../cameras/camera.service";
+import {CameraService, cameraType} from "../cameras/camera.service";
 import {Camera, CameraStream} from "../cameras/Camera";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
@@ -37,6 +37,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   private messageSubscription!: Subscription;
   isGuest: boolean = true;
   private stompClient: any;
+  cameraTypes: typeof cameraType = cameraType;
 
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
   }

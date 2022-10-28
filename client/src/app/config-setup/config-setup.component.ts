@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera, Stream} from "../cameras/Camera";
+import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {
@@ -90,7 +90,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'controlUri', 'address', 'snapshotUri', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'address', 'snapshotUri', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -109,7 +109,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   showPasswordDialogue: boolean = false;
   isGuest: boolean = true;
 
-  constructor(private cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
+  constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
   }
 
   getCamControl(index: number, fieldName: string): FormControl {
@@ -139,7 +139,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     if (control) {
       this.updateCam(index, field, control.value);
     }
-    if (field == 'ptzControls')
+    if (field === 'ptzControls')
       this.setOnvifHostDisabledState(index);
   }
 
@@ -163,6 +163,27 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       this.updateStream(camIndex, streamIndex, field, control.value);
     }
   }
+
+  /**
+   *
+   * @param camera
+   * Get the actual CameraParamSpec object used for the control rather than the copy of it returned from the API
+   * call. If we don't do this, the selector won't show the correct setting.
+   */
+  getCameraParamSpecsReferenceCopy(camera: Camera): CameraParamSpec {
+    if ( camera?.cameraParamSpecs?.camType === undefined)
+      return this.cameraSvc.cameraParamSpecs[0];  // Return the Not Listed option
+    else
+      return this.cameraSvc.cameraParamSpecs.find((spec) => camera.cameraParamSpecs.camType === spec.camType) as CameraParamSpec;
+   }
+
+   getCameraAddressDisabledState(camera: Camera): boolean
+   {
+     if(camera?.cameraParamSpecs?.uri?.length === undefined)
+       return true;
+     else
+      return camera.cameraParamSpecs.uri.length == 0
+   }
 
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
@@ -206,10 +227,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
         address: new FormControl({
           value: camera.address,
-          disabled: camera.controlUri.length == 0
+          disabled: this.getCameraAddressDisabledState(camera)
         }, [Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
-        controlUri: new FormControl({
-          value: camera.controlUri,
+        cameraParamSpecs: new FormControl({
+          value: this.getCameraParamSpecsReferenceCopy(camera),
           disabled: false
         }, [Validators.maxLength(55)]),
         snapshotUri: new FormControl({

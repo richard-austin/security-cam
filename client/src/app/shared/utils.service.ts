@@ -2,9 +2,10 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "./BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
-import {catchError, tap} from "rxjs/operators";
+import {catchError,tap} from "rxjs/operators";
 import {CameraParams} from "../cameras/Camera";
 import {environment} from "../../environments/environment";
+import {cameraType} from '../cameras/camera.service';
 
 export class Temperature {
   temp: string = "";
@@ -45,6 +46,27 @@ export class GuestStatus {
 
 export class GuestAccountStatus {
   enabled: boolean = false;
+}
+
+export class SetCameraParams {
+  constructor(cameraTypes: cameraType, address: string, uri: string, infraredstat: string, cameraName: string, reboot: boolean=false, wdr?: string, lamp_mode?: string) {
+    this.cameraType = cameraTypes;
+    this.address = address;
+    this.uri = uri;
+    this.infraredstat = infraredstat;
+    this.cameraName = cameraName;
+    this.wdr = wdr;
+    this.lamp_mode = lamp_mode;
+    this.reboot = reboot;
+  }
+  cameraType: cameraType;
+  address: string;
+  uri: string;
+  infraredstat: string;
+  cameraName: string;
+  wdr: string | undefined;
+  lamp_mode: string | undefined;
+  reboot: boolean;
 }
 
 @Injectable({
@@ -92,13 +114,7 @@ export class UtilsService {
     );
   }
 
-  setCameraParams(address: string, uri: string, infraredstat: string, cameraName: string): Observable<CameraParams> {
-    let cameraParams: { address: string, uri: string, infraredstat: string, cameraName: string } = {
-      address: address,
-      uri: uri,
-      infraredstat: infraredstat,
-      cameraName: cameraName
-    };
+  setCameraParams(cameraParams: SetCameraParams): Observable<CameraParams> {
     return this.http.post<CameraParams>(this._baseUrl.getLink("utils", "setCameraParams"), JSON.stringify(cameraParams), this.httpJSONOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err))
