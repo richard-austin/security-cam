@@ -5,6 +5,7 @@ import {Observable, Subject, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
 import {Camera, CameraParamSpec, CameraStream, Stream} from "./Camera";
 import {CameraAdminCredentials} from "../credentials-for-camera-access/credentials-for-camera-access.component";
+import { NativeDateAdapter } from '@angular/material/core';
 
 
 /**
@@ -27,6 +28,24 @@ export class LocalMotionEvents {
   events: LocalMotionEvent[] = [];
 }
 
+export class DateSlot {
+  date!: Date;
+  lme: LocalMotionEvents = new LocalMotionEvents();
+}
+
+/**
+ * CustomDateAdapter: For formatting the date n the datepicker on the recording page
+ */
+export class CustomDateAdapter extends NativeDateAdapter {
+  readonly months: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  format(date: Date, displayFormat: any): string {
+    const days = date.getDate();
+    const months = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return ("00"+days).slice(-2) + '-' + this.months[months-1] + '-' + year;
+  }
+}
 export enum cameraType {none, sv3c, zxtechMCW5B10X}
 
 @Injectable({
