@@ -12,7 +12,6 @@ import {MatSelect} from "@angular/material/select/select";
 import {MatButtonToggle} from "@angular/material/button-toggle";
 import {UtilsService} from '../shared/utils.service';
 import {MatDatepickerInputEvent} from '@angular/material/datepicker';
-import { FormControl } from '@angular/forms';
 
 declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
 
@@ -51,7 +50,9 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   selectedPlaybackMode: string = "startPause";
   isGuest: boolean = true;
   dateSlots: DateSlot[] = [];
-  selectedDate!: Date | null;
+  _selectedDate!: Date | null;
+  _minDate!: Date;
+  _maxDate!: Date;
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService, private utilsService: UtilsService) {
   }
@@ -141,9 +142,12 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.motionService.getMotionEvents(cs).subscribe((events: LocalMotionEvents) => {
             this.dateSlots = this.createDateSlots(events);
             // Set to the most recent date
-            let mostRecentDateSlot: DateSlot = this.dateSlots[this.dateSlots.length - 1];
-            this.selectedDate = mostRecentDateSlot.date;
-            this.setSelectorsAndVideoSource(mostRecentDateSlot.lme.events);
+            if (this.dateSlots.length > 0) {
+              let mostRecentDateSlot: DateSlot = this.dateSlots[this.dateSlots.length - 1];
+              this._selectedDate = mostRecentDateSlot.date;
+              this.setSelectorsAndVideoSource(mostRecentDateSlot.lme.events);
+            } else
+              this.noVideo = true;
           },
           (error) => {
             this.reporting.errorMessage = error;
@@ -238,6 +242,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       let ds: DateSlot = new DateSlot();
       result.push(ds);
       ds.date = new Date(Date.parse(localMotionEvents[0].dateTime));
+      this._minDate = ds.date;
       localMotionEvents.forEach((lme) => {
         if (lme.dateTime.substring(0, 6) === date)
           ds.lme.events.push(lme);
@@ -249,6 +254,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
           ds.lme.events.push(lme)
         }
       });
+      this._maxDate = ds.date;
     }
     return result;
   }
@@ -260,25 +266,41 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     return ds !== undefined;
   };
 
-  startDate(): Date {
-    return this.dateSlots !== undefined && this.dateSlots.length > 0
-      ? this.dateSlots[this.dateSlots.length - 1].date :
-      new Date();
-  }
-
-
   setDateSlot($event: MatDatepickerInputEvent<Date, Date | null>) {
-    this.selectedDate = $event.value;
-    if (this.selectedDate !== null) {
+    this._selectedDate = $event.value;
+    if (this._selectedDate !== null) {
       let ds: DateSlot | undefined = this.dateSlots.find((ds) => {
-        return this.selectedDate?.getDate() === ds.date.getDate() &&
-          this.selectedDate?.getMonth() == ds.date.getMonth() &&
-          this.selectedDate.getFullYear() === ds.date.getFullYear();
+        return this._selectedDate?.getDate() === ds.date.getDate() &&
+          this._selectedDate?.getMonth() == ds.date.getMonth() &&
+          this._selectedDate.getFullYear() === ds.date.getFullYear();
       })
       if (ds !== undefined && ds?.lme.events !== null) {
         this.setSelectorsAndVideoSource(ds.lme.events);
       }
     }
+  }
+
+  /**
+   * selectedDate: Accessor returning type Date & string to satisfy [value] on the input element on the date picker.
+   */
+  get selectedDate(): Date & string {
+    return this._selectedDate as Date & string;
+  }
+
+  /**
+   * minDate: Accessor returning type Date & string to satisfy [min] on the input element on the date picker.
+   */
+  get minDate(): Date & string
+  {
+    return this._minDate as Date & string;
+  }
+
+  /**
+   * maxDate: Accessor returning type Date & string to satisfy [max] on the input element on the date picker.
+   */
+  get maxDate(): Date & string
+  {
+    return this._maxDate as Date & string;
   }
 
   setSelectorsAndVideoSource(events: LocalMotionEvent[]): void {
@@ -297,8 +319,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.visible = true;
         this.showInvalidInput(true);
       }
-    } else
-      this.noVideo = true;
+    }
   }
 
   ngOnInit(): void {

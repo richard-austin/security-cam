@@ -5,10 +5,10 @@
       <div>
         <mat-form-field appearance="fill">
           <mat-label>Choose a date</mat-label>
-          <input matInput readonly [matDatepickerFilter]="dateFilter" [value]="selectedDate" (dateChange)="setDateSlot($event)" [matDatepicker]="picker">
+          <input matInput readonly [matDatepickerFilter]="dateFilter" [min]="minDate" [max]="maxDate" [value]="selectedDate" (dateChange)="setDateSlot($event)" [matDatepicker]="picker">
           <mat-hint></mat-hint>
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker [startAt]="startDate()"></mat-datepicker>
+          <mat-datepicker #picker [startAt]="_selectedDate"></mat-datepicker>
         </mat-form-field>
       </div>
       <div>
