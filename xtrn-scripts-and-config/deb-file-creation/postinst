@@ -23,6 +23,7 @@ usermod -a -G security-cam sec-cam
 usermod -a -G security-cam www-data
 
 chown -R tomcat:security-cam /etc/security-cam
+chown -R tomcat:security-cam /var/security-cam
 
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
@@ -75,13 +76,16 @@ AddToTomcatUnitFileIfNotPresent() {
   fi
 }
 
+# Give tomcat permission to write to some additional directories
 lineToWrite="ReadWritePaths=/var/log/security-cam/"
 lineToWrite2="ReadWritePaths=/etc/security-cam/"
+lineToWrite3="ReadWritePaths=/var/security-cam/"
 lineToWriteUnder="ReadWritePaths=/var/lib/tomcat9/webapps/"
 unitFile="/usr/lib/systemd/system/tomcat9.service"
 
 AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
 AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
+AddToTomcatUnitFileIfNotPresent $lineToWrite3 $lineToWriteUnder $unitFile
 
 deb-systemd-invoke daemon-reload  # Register the motion service file change
 

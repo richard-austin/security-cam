@@ -22,16 +22,17 @@ cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/recording-pids
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/motion/conf.d
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream1
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream2
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream3
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream4
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream5
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream6
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream7
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream8
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream9
-mkdir security-cam_"${VERSION}"_arm64/etc/security-cam/stream10
+
+mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/rec1
+mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec2
+mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec3
+mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec4
+mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec5
+mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec6
+mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec7
+mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec8
+mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec9
+mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec10
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr

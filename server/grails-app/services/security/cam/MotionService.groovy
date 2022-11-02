@@ -29,7 +29,7 @@ class MotionService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            def baseDir = grailsApplication.config.camerasHomeDirectory
+            def baseDir = grailsApplication.config.recordingsHomeDirectory
 
             // Determine whether to get motion events for the main recordings or the motion recordings.
             String location = cmd.stream.recording.location

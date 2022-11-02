@@ -25,7 +25,8 @@ class DownloadRecordingCommand implements Validateable {
 
         manifest(nullable: false,
                 validator: { manifest, cmd ->
-                    String baseDir = cmd.grailsApplication.config.camerasHomeDirectory
+                    String baseDir = cmd.grailsApplication.config.recordingsHomeDirectory
+
                     Path recordingsDirectory = Paths.get(baseDir as String, cmd.stream.recording.location as String)
                     cmd.folder = new File(recordingsDirectory.toString())
                     Path manifestPath = Paths.get(recordingsDirectory.toString(), manifest)

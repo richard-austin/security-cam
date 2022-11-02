@@ -313,7 +313,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let streamNum: number = 1;  // Absolute (not local to camera) number to identify stream number
                                 // for recording and live URL's
     let retVal: Map<string, Camera> = new Map<string, Camera>();
-    let absoluteStreamNo: number = 1;  // Absolute number to be set in the stream object
+    let recNo: number = 1;  // Recording number to be set in the stream object
     this.cameras.forEach((camera: Camera) => {
       let streamMap: Map<string, Stream> = new Map<string, Stream>();
       let streamKeyNum: number = 1;
@@ -322,8 +322,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       // Also set the absolute stream number
       camera.streams.forEach((stream: Stream) => {
         stream.recording.enabled = false
-        stream.absolute_num = absoluteStreamNo++;
-
+        stream.rec_num = recNo++;
       });
       // Process the streams
       camera.streams.forEach((stream) => {
@@ -336,8 +335,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true;
-            stream.recording.uri = 'http://localhost:8084/recording/stream' + streamNum + '/';
-            stream.recording.location = 'stream' + streamNum;
+            stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
+            stream.recording.location = 'rec' + streamNum;
             if (stream.motion.trigger_recording_on !== '') {
               let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
               if (recStreamKey.length === 2) {
@@ -346,8 +345,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
                 // Set up the recording
                 if (recStream !== undefined) {
                   recStream.recording.enabled = true;
-                  recStream.recording.uri = 'http://localhost:8084/recording/stream' + recStream.absolute_num + '/';
-                  recStream.recording.location = 'stream' + recStream.absolute_num;
+                  recStream.recording.uri = 'http://localhost:8084/recording/rec' + recStream.rec_num + '/';
+                  recStream.recording.location = 'rec' + recStream.rec_num;
                 }
               }
             }
@@ -360,8 +359,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true
-            stream.recording.uri = '/recording/stream' + streamNum + '/';
-            stream.recording.location = 'stream' + streamNum;
+            stream.recording.uri = '/recording/rec' + streamNum + '/';
+            stream.recording.location = 'rec' + streamNum;
             if (stream.motion.trigger_recording_on !== '') {
               let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
               if (recStreamKey.length === 2)  // Should have a camera and stream number
@@ -371,8 +370,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
                 // Set up the recording
                 if (recStream !== undefined) {
                   recStream.recording.enabled = true;
-                  recStream.recording.uri = '/recording/stream' + recStream.absolute_num + '/';
-                  recStream.recording.location = 'stream' + recStream.absolute_num;
+                  recStream.recording.uri = '/recording/rec' + recStream.rec_num + '/';
+                  recStream.recording.location = 'rec' + recStream.rec_num;
                 }
               }
             }
@@ -504,7 +503,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         // @ts-ignore
         delete newStream.selected;
         // @ts-ignore
-        delete newStream.absolute_num;
+        delete newStream.rec_num;
         // @ts-ignore
         jsonStreams[strKey] = newStream;
       })

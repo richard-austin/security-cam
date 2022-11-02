@@ -52,7 +52,7 @@ export class Stream {
   video_width: number = 0;
   video_height: number = 0;
   recording: Recording = new Recording();
-  absolute_num: number = 0;  // Used to give an absolute stream number for the recording URI with motion triggered recordings
+  rec_num: number = 0;  // Used to give a rec number for the recording URI with motion triggered recordings
 }
 export class CameraParamSpec {
   constructor(camType: cameraType, params: string, uri: string, name: string) {
