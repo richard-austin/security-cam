@@ -75,10 +75,10 @@ export class Camera
     cameraParamSpecs!: CameraParamSpec;
     snapshotUri: string="";
     ptzControls: boolean = false;
+    ftp: boolean = false;
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
-
-}
+ }
 
 export class CameraStream
 {

@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
-import {CameraService} from '../cameras/camera.service';
+import {AfterViewInit, Component, ElementRef, isDevMode, OnInit, ViewChild} from '@angular/core';
+import {CameraService, cameraType} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
@@ -17,7 +17,6 @@ import {MatCheckboxChange} from "@angular/material/checkbox";
 import {MatSelectChange} from '@angular/material/select/select';
 import {HttpErrorResponse} from "@angular/common/http";
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
-import {ElementRef} from '@angular/core';
 import {KeyValue} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
 
@@ -49,10 +48,10 @@ export function isValidMaskFileName(cameras: Map<string, Camera>): ValidatorFn {
   }
 }
 
-export function validateTrueOrFalse(): ValidatorFn {
+export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     let invalidValue: boolean = control.value != true && control.value !== false;
-    return invalidValue ? {ptzControls: true} : null;
+    return invalidValue ? fieldCondition : null;
   }
 }
 
@@ -90,7 +89,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'address', 'snapshotUri', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -179,10 +178,18 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
 
    getCameraAddressDisabledState(camera: Camera): boolean
    {
-     if(camera?.cameraParamSpecs?.uri?.length === undefined)
+     if(camera?.cameraParamSpecs?.camType === undefined)
        return true;
      else
-      return camera.cameraParamSpecs.uri.length == 0
+      return camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X;
+   }
+
+   getFTPDisabledState(camera: Camera): boolean
+   {
+     if(camera?.cameraParamSpecs?.camType === undefined)
+       return true;
+     else
+       return this.motionSet(camera) || (camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X);
    }
 
   /**
@@ -233,6 +240,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           value: this.getCameraParamSpecsReferenceCopy(camera),
           disabled: false
         }, [Validators.maxLength(55)]),
+        ftp: new FormControl({
+          value: camera.ftp,
+          disabled: this.getFTPDisabledState(camera),
+        }, [validateTrueOrFalse( {ftp: true})]),
         snapshotUri: new FormControl({
           value: camera.snapshotUri,
           disabled: false
@@ -240,10 +251,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         ptzControls: new FormControl({
           value: camera.ptzControls,
           disabled: false
-        }, [validateTrueOrFalse()]),
+        }, [validateTrueOrFalse( {ptzControls: true})]),
         onvifHost: new FormControl({
           value: camera.onvifHost,
-          disabled: false
+          disabled: !camera.ptzControls,
         }, [Validators.maxLength(22),
           Validators.pattern(/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/)])
       }, {updateOn: "change"});
@@ -332,7 +343,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
 
-          if (stream.motion.enabled) {
+          if (stream.motion.enabled || (camera.ftp && stream.rec_num=== 1)) {
             // stream.recording = new Recording();
             stream.recording.enabled = true;
             stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
@@ -618,6 +629,27 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           this.snapShotKey = '';
         })
     }
+  }
+
+  ftpSet(cam: Camera): boolean
+  {
+     return  cam.ftp;
+  }
+
+  motionSet(cam: Camera): boolean
+  {
+    let hasMotionSet: boolean = false;
+    if(cam?.streams !== undefined)
+    {
+      for(let stream of cam.streams.values())
+      {
+        if(stream?.motion?.enabled !== undefined && stream.motion.enabled) {
+          hasMotionSet = true;
+          break;
+        }
+      }
+    }
+    return hasMotionSet;
   }
 
   toBase64(data: Array<any>): string {
