@@ -343,7 +343,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
 
-          if (stream.motion.enabled || (camera.ftp && stream.rec_num=== 1)) {
+          if(camera.ftp && stream.rec_num=== 1)
+          {
+            stream.recording.enabled = true
+            stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
+            stream.recording.location = 'rec' + streamNum;
+            stream.motion.trigger_recording_on = '';
+          }
+          else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true;
             stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
@@ -367,7 +374,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
-          if (stream.motion.enabled) {
+          if(camera.ftp && stream.rec_num=== 1)
+          {
+            stream.recording.enabled = true
+            stream.recording.uri = '/recording/rec' + streamNum + '/';
+            stream.recording.location = 'rec' + streamNum;
+            stream.motion.trigger_recording_on = '';
+          }
+          else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true
             stream.recording.uri = '/recording/rec' + streamNum + '/';

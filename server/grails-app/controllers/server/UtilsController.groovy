@@ -130,16 +130,4 @@ class UtilsController {
             render "success"
 
     }
-
-    ConfigurationUpdateService configurationUpdateService
-
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
-    def generateConfigs()
-    {
-        ObjectCommandResponse response = configurationUpdateService.generateConfigs()
-        if(response.status != PassFail.PASS)
-            render (status: 500, text: response.error)
-        else
-            render "success"
-    }
 }
