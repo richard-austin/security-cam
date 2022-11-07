@@ -7,7 +7,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=root
-ExecStart=/usr/bin/python3 /etc/security-cam/main.py
+ExecStart=/usr/bin/python3 /etc/security-cam/wifi-setup-service/main.py
 
 [Install]
 WantedBy=multi-user.target

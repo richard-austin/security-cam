@@ -1,0 +1,2 @@
+pyftpdlib==1.5.7
+pytz==2022.1

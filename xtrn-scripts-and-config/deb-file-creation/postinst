@@ -35,7 +35,7 @@ chown root:mail /etc/ssmtp/ssmtp.conf
 chmod 640 /etc/ssmtp/ssmtp.conf
 chown root:security-cam /etc/security-cam/cacert.jks /etc/security-cam/client.jks
 chmod 440 /etc/security-cam/cacert.jks /etc/security-cam/client.jks
-chown root:root /etc/security-cam/*.py
+chown root:root /etc/security-cam/wifi-setup-service/*.py
 
 #A new group, security-cam, is added, then the users tomcat and sec-cam added to that group.
 # The security-cam group is then given group access to sec-cam and it's subdirectories. The user and group permissions are then set up.
@@ -52,10 +52,22 @@ chown root:root /etc/security-cam/install-cert.sh
 chgrp -R security-cam /etc/security-cam/
 chown sec-cam:security-cam /var/log/motion
 chown tomcat:security-cam /var/log/security-cam
+chown tomcat:security-cam /var/log/camera-recordings-service
+chown tomcat:security-cam /var/lib/tomcat
+
 chmod +x /etc/security-cam/start_hd_recording.sh || true
 chmod +x /etc/security-cam/end_hd_recording.sh || true
 chmod +x /etc/security-cam/processmotionrecordings.sh || true
 chmod +x /etc/security-cam/productKeyGen.sh || true
+
+pushd /etc/security-cam/camera-recordings-service || true
+sudo -u tomcat pip install -r requirements.txt
+
+#pushd /etc/security-cam/wifi-setup-service || true
+#pip install -r requirements.txt
+#popd || true
+#popd || true
+
 
 # Change the motion service user to tomcat
 sed -i 's/User=motion/User=tomcat/' /lib/systemd/system/motion.service
@@ -87,7 +99,7 @@ AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
 AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
 AddToTomcatUnitFileIfNotPresent $lineToWrite3 $lineToWriteUnder $unitFile
 
-deb-systemd-invoke daemon-reload  # Register the motion service file change
+systemctl daemon-reload  # Register the motion service file change
 
 # Start the services
 deb-systemd-invoke enable motion
@@ -96,6 +108,8 @@ deb-systemd-invoke enable nginx.service
 
 deb-systemd-invoke enable wifimanagement.service
 deb-systemd-invoke start wifimanagement.service
+deb-systemd-invoke enable camera-recordings.service
+deb-systemd-invoke start camera-recordings.service
 
 CERT_FILE=/etc/nginx/security-cam.crt
 if test -f "$CERT_FILE"; then

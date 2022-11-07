@@ -170,27 +170,25 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    * call. If we don't do this, the selector won't show the correct setting.
    */
   getCameraParamSpecsReferenceCopy(camera: Camera): CameraParamSpec {
-    if ( camera?.cameraParamSpecs?.camType === undefined)
+    if (camera?.cameraParamSpecs?.camType === undefined)
       return this.cameraSvc.cameraParamSpecs[0];  // Return the Not Listed option
     else
       return this.cameraSvc.cameraParamSpecs.find((spec) => camera.cameraParamSpecs.camType === spec.camType) as CameraParamSpec;
-   }
+  }
 
-   getCameraAddressDisabledState(camera: Camera): boolean
-   {
-     if(camera?.cameraParamSpecs?.camType === undefined)
-       return true;
-     else
+  getCameraAddressDisabledState(camera: Camera): boolean {
+    if (camera?.cameraParamSpecs?.camType === undefined)
+      return true;
+    else
       return camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X;
-   }
+  }
 
-   getFTPDisabledState(camera: Camera): boolean
-   {
-     if(camera?.cameraParamSpecs?.camType === undefined)
-       return true;
-     else
-       return this.motionSet(camera) || (camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X);
-   }
+  getFTPDisabledState(camera: Camera): boolean {
+    if (camera?.cameraParamSpecs?.camType === undefined)
+      return true;
+    else
+      return this.motionSet(camera) || (camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X);
+  }
 
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
@@ -243,7 +241,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         ftp: new FormControl({
           value: camera.ftp,
           disabled: this.getFTPDisabledState(camera),
-        }, [validateTrueOrFalse( {ftp: true})]),
+        }, [validateTrueOrFalse({ftp: true})]),
         snapshotUri: new FormControl({
           value: camera.snapshotUri,
           disabled: false
@@ -251,7 +249,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         ptzControls: new FormControl({
           value: camera.ptzControls,
           disabled: false
-        }, [validateTrueOrFalse( {ptzControls: true})]),
+        }, [validateTrueOrFalse({ptzControls: true})]),
         onvifHost: new FormControl({
           value: camera.onvifHost,
           disabled: !camera.ptzControls,
@@ -327,7 +325,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let recNo: number = 1;  // Recording number to be set in the stream object
     this.cameras.forEach((camera: Camera) => {
       let streamMap: Map<string, Stream> = new Map<string, Stream>();
-      let streamKeyNum: number = 1;
 
       // First clear the recording objects in all the streams as we will set them up in the stream processing which follows.
       // Also set the absolute stream number
@@ -335,6 +332,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         stream.recording.enabled = false
         stream.rec_num = recNo++;
       });
+      let streamKeyNum: number = 1;
       // Process the streams
       camera.streams.forEach((stream) => {
         if (isDevMode()) {  // Development mode
@@ -343,14 +341,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
 
-          if(camera.ftp && stream.rec_num=== 1)
-          {
+          if (camera.ftp && streamKeyNum++ == 1) {
             stream.recording.enabled = true
             stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
             stream.motion.trigger_recording_on = '';
-          }
-          else if (stream.motion.enabled) {
+          } else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true;
             stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
@@ -374,14 +370,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
-          if(camera.ftp && stream.rec_num=== 1)
-          {
+          if (camera.ftp && stream.rec_num === 1) {
             stream.recording.enabled = true
             stream.recording.uri = '/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
             stream.motion.trigger_recording_on = '';
-          }
-          else if (stream.motion.enabled) {
+          } else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true
             stream.recording.uri = '/recording/rec' + streamNum + '/';
@@ -402,9 +396,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             }
           }
         }
-        streamMap.set('stream' + streamKeyNum, stream);
+        streamMap.set('stream' + streamNum, stream);
         ++streamNum;
-        ++streamKeyNum;
       })
       camera.streams = streamMap;
       let newKey = 'camera' + camNum;
@@ -645,19 +638,15 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
-  ftpSet(cam: Camera): boolean
-  {
-     return  cam.ftp;
+  ftpSet(cam: Camera): boolean {
+    return cam.ftp;
   }
 
-  motionSet(cam: Camera): boolean
-  {
+  motionSet(cam: Camera): boolean {
     let hasMotionSet: boolean = false;
-    if(cam?.streams !== undefined)
-    {
-      for(let stream of cam.streams.values())
-      {
-        if(stream?.motion?.enabled !== undefined && stream.motion.enabled) {
+    if (cam?.streams !== undefined) {
+      for (let stream of cam.streams.values()) {
+        if (stream?.motion?.enabled !== undefined && stream.motion.enabled) {
           hasMotionSet = true;
           break;
         }
