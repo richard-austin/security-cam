@@ -23,7 +23,8 @@ logging.Formatter.converter = timetz
 logger = logging.getLogger('rec-svc')
 
 # Set up a handler for time rotated file logging
-logHandler = TimedRotatingFileHandler(filename="/var/log/camera-recordings-service/recordings.log", when="midnight")
+logHandler = TimedRotatingFileHandler(filename="/var/log/camera-recordings-service/recordings.log",
+                                      when="midnight", interval=1, backupCount=30)
 logHandler.setFormatter(logging.Formatter(FORMAT))
 # add ch to logger
 logger.addHandler(logHandler)
@@ -91,35 +92,37 @@ class FTPAndVideoFileProcessor(FTPHandler):
         try:
             cams = json.load(f)
 
-            # recording_path = path.replace(self.ftpPath, '')
             camera_name: str = path.replace(self.ftpPath, '', 1)
             camera_name = camera_name[1: camera_name.index('/', 1)]
             camera = cams[camera_name]
             ffmpeg_cmd: str = ""
             if camera is not None:
-                cam_type: CameraType = camera['cameraParamSpecs']['camType']
-                first_stream = next(iter(camera['streams']))
-                location: str = camera['streams'][first_stream]['recording']['location']
-                match cam_type:
-                    case CameraType.sv3c.value:
-                        ffmpeg_cmd = (f"ffmpeg -i {path} -t 01:00:00 -an -bsf:v h264_mp4toannexb -f hls "
-                                      f"{self.recordingsPath}/{location}/{location}-$(date \"+%s\")_.m3u8")
-                    case CameraType.zxtechMCW5B10X.value:  # Need to prevent double speed layback with this camera
-                        ffmpeg_cmd = (
-                            f"ffmpeg -i {path} -t 01:00:00 -an -bsf:v h264_mp4toannexb  -vf \"setpts=2.0*N/FRAME_RATE/TB\" -f hls "
-                            f"{self.recordingsPath}/{location}/{location}-$(date \"+%s\")_.m3u8")
-                    case _:
-                        logger.warning(f"No camera type for file {path}, deleting it")
-                        os.remove(path)
+                if path.endswith('.264'):  # Only dealing with 264 files for now
+                    cam_type: CameraType = camera['cameraParamSpecs']['camType']
+                    first_stream = next(iter(camera['streams']))
+                    location: str = camera['streams'][first_stream]['recording']['location']
+                    match cam_type:
+                        case CameraType.sv3c.value:
+                            ffmpeg_cmd = (f"ffmpeg -i {path} -t 01:00:00 -an -bsf:v h264_mp4toannexb -f hls "
+                                          f"{self.recordingsPath}/{location}/{location}-$(date \"+%s\")_.m3u8")
+                        case CameraType.zxtechMCW5B10X.value:  # Need to prevent double speed layback with this camera
+                            ffmpeg_cmd = (
+                                f"ffmpeg -i {path} -t 01:00:00 -an -bsf:v h264_mp4toannexb  -vf \"setpts=2.0*N/FRAME_RATE/TB\" -f hls "
+                                f"{self.recordingsPath}/{location}/{location}-$(date \"+%s\")_.m3u8")
+                        case _:
+                            logger.warning(f"No camera type for file {path}, deleting it")
+                            os.remove(path)
 
-            if ffmpeg_cmd != "":
-                result: [int, str] = executeOsCommand(f"nice -10 {ffmpeg_cmd}")
-                msg: str = result.pop()
-                if msg == '':
+                    if ffmpeg_cmd != "":
+                        result: [int, str] = executeOsCommand(f"nice -10 {ffmpeg_cmd}")
+                        msg: str = result.pop()
+                        if msg == '':
+                            os.remove(path)
+                            logger.info(f"File processed {path}")
+                        else:
+                            logger.error(f"Error {result.pop()}, {msg}")
+                else:  # Not .264 file so just delete it.
                     os.remove(path)
-                    logger.info(f"File processed {path}")
-                else:
-                    logger.error(f"Error {result.pop()}, {msg}")
 
             # Remove old directories and any remaining files created by camera FTP transfers
             executeOsCommand(f"find {self.ftpPath}/* -mtime 2 -delete")

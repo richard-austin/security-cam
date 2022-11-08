@@ -324,6 +324,11 @@ class Sc_processesService {
                     for (String cmd : command)
                         logService.cam.debug("${cmd}")
                 }
+
+                // Clean up old ffmpeg live stream log files before looping round again
+                Process cleanup = Runtime.getRuntime().exec("/usr/bin/find /var/log/security-cam/ -mtime +21 -name ffmpeg*.log -delete")
+                cleanup.waitFor()
+
                 if (running)
                     Thread.sleep(1000)
             }
