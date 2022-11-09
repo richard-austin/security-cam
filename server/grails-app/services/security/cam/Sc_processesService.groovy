@@ -32,8 +32,7 @@ class Sc_processesService {
     LogService logService
     RestfulInterfaceService restfulInterfaceService
     GrailsApplication grailsApplication
-    SpringSecurityService springSecurityService
-
+    UtilsService utilsService
     ExecutorService processExecutors
     ArrayList<Process> processes
     OnvifService onvifService
@@ -76,6 +75,13 @@ class Sc_processesService {
         }
         catch (Exception ex) {
             logService.cam.error "${ex.getClass().getName()} in getSavedIP: " + ex.getMessage()
+            logService.cam.info("Attempting to get the current IP and save to myIp")
+            ObjectCommandResponse resp = utilsService.setIP()
+            if (resp.status == PassFail.PASS)
+                logService.cam.info("myIp set successfully")
+            else
+                logService.cam.error("myIp not set")
+
         }
 
         return retVal

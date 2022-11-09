@@ -158,9 +158,9 @@ class UtilsService {
                     LinkOption.NOFOLLOW_LINKS).setGroup(group)
          }
         catch (IOException e) {
-            logService.cam.error"Exception in getMyIP: " + e.getMessage()
+            logService.cam.error"${e.getClass().getName()} in setIP: ${e.getMessage()}"
             result.status = PassFail.FAIL
-            result.error = e.getMessage()
+            result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
         return result
     }

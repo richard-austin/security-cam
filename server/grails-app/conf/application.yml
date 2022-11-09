@@ -143,7 +143,7 @@ environments:
       cloudPort: 8081
       webServerHost: localhost
       webServerPort: 8080
-      logLevel: TRACE
+      logLevel: ERROR
 
     mail:
       smtp:
