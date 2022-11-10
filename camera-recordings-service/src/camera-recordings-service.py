@@ -89,6 +89,8 @@ class FTPAndVideoFileProcessor(FTPHandler):
 
     def convert264File(self, path: str):
         f = open("/etc/security-cam/cameras.json")
+        location: str = ""
+
         try:
             cams = json.load(f)
 
@@ -100,7 +102,7 @@ class FTPAndVideoFileProcessor(FTPHandler):
                 if path.endswith('.264'):  # Only dealing with 264 files for now
                     cam_type: CameraType = camera['cameraParamSpecs']['camType']
                     first_stream = next(iter(camera['streams']))
-                    location: str = camera['streams'][first_stream]['recording']['location']
+                    location = camera['streams'][first_stream]['recording']['location']
                     match cam_type:
                         case CameraType.sv3c.value:
                             ffmpeg_cmd = (f"ffmpeg -i {path} -t 01:00:00 -an -bsf:v h264_mp4toannexb -f hls "
@@ -125,7 +127,10 @@ class FTPAndVideoFileProcessor(FTPHandler):
                     os.remove(path)
 
             # Remove old directories and any remaining files created by camera FTP transfers
-            executeOsCommand(f"find {self.ftpPath}/* -mtime 2 -delete")
+            executeOsCommand(f"find {self.ftpPath}/* -mtime +2 -delete")
+            # Remove recordings file more than 3 weeks old
+            if location != "":
+                executeOsCommand(f"find {self.recordingsPath}/{location}/* -mtime +21 -delete")
 
         except TypeError as t:
             logger.error(f"Exception TypeError was raised {t!r}")
