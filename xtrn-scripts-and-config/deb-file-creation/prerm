@@ -13,7 +13,7 @@ deb-systemd-invoke stop camera-recordings.service
 deb-systemd-invoke disable camera-recordings.service
 
 pushd /etc/security-cam/camera-recordings-service || true
-sudo -u tomcat pip uninstall -r requirements.txt
+sudo -u tomcat pip uninstall -y -r requirements.txt
 
 #pushd /etc/security-cam/wifi-setup-service || true
 #pip uninstall -r requirements.txt
