@@ -118,7 +118,7 @@ class Sc_processesService {
                 if (Environment.current.name == 'development') {
                     sendEmail("Richard", "richard.david.austin@gmail.com", currentIp)
                 } else {
-                    User user = User.findByCloudAccount(false)
+                    User user = User.all.find { it.username != 'guest' && !it.cloudAccount }
                     if (user == null)
                         logService.cam.debug("emailTask: User is null")
                     else
@@ -263,12 +263,12 @@ class Sc_processesService {
             // Populate the onvif device map so the devices don't have to be created each time a PTZ operation is done
             onvifService.populateDeviceMap()
 
-            if(restResponse.responseCode != 200) {
+            if (restResponse.responseCode != 200) {
                 logService.cam.error("Error starting motion service: ${restResponse.errorMsg}")
                 response.status = PassFail.FAIL
                 response.error = restResponse.errorMsg
             }
-       //     Runtime.getRuntime().exec("pkill --signal SIGHUP motion")
+            //     Runtime.getRuntime().exec("pkill --signal SIGHUP motion")
 
         }
         catch (Exception ex) {
@@ -316,8 +316,7 @@ class Sc_processesService {
                         processes.add(proc)
                     proc.waitFor()
                 }
-                catch(InterruptedException iex)
-                {
+                catch (InterruptedException iex) {
                     logService.cam.warn "${iex.getClass().getName()} in submitTask: " + iex.getMessage()
                 }
                 catch (Exception ex) {
@@ -370,8 +369,7 @@ class Sc_processesService {
                 }
             })
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("${ex.getClass().getName()} in stopProcesses: ${ex.getMessage()}")
             response.status = PassFail.FAIL
             response.error = "${ex.getClass().getName()} in stopProcesses: ${ex.getMessage()}"
