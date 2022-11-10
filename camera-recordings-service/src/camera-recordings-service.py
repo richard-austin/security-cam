@@ -127,10 +127,10 @@ class FTPAndVideoFileProcessor(FTPHandler):
                     os.remove(path)
 
             # Remove old directories and any remaining files created by camera FTP transfers
-            executeOsCommand(f"find {self.ftpPath}/* -mtime +2 -delete")
+            executeOsCommand(f"find {self.ftpPath} -mtime +2 -delete")
             # Remove recordings file more than 3 weeks old
             if location != "":
-                executeOsCommand(f"find {self.recordingsPath}/{location}/* -mtime +21 -delete")
+                executeOsCommand(f"find {self.recordingsPath}/{location} -mtime +21 -delete")
 
         except TypeError as t:
             logger.error(f"Exception TypeError was raised {t!r}")
