@@ -1,6 +1,9 @@
 import json
 import logging
 import os
+import signal
+import subprocess
+import time
 from datetime import datetime
 from enum import Enum
 from logging.handlers import TimedRotatingFileHandler
@@ -9,6 +12,7 @@ from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import ThreadedFTPServer
 from pyftpdlib.authorizers import DummyAuthorizer
 from pytz import timezone
+from resettabletimer import ResettableTimer
 
 tz = timezone('Europe/London')  # UTC, Asia/Shanghai, Europe/Berlin
 
@@ -46,6 +50,8 @@ def executeOsCommand(command: str) -> [int, str]:
 class FTPAndVideoFileProcessor(FTPHandler):
     recordingsPath: str = "/var/security-cam"
     ftpPath: str = f"{recordingsPath}/ftp"
+
+    processDict: dict = dict()
 
     def on_connect(self):
         logger.info(f"{self.remote_ip}:{self.remote_port} connected")
@@ -86,6 +92,10 @@ class FTPAndVideoFileProcessor(FTPHandler):
     """
         convert264File: Convert an .264 file received from a camera to an hls file
     """
+    def finish_recording(self, subproc: subprocess, location: str):
+        subproc.send_signal(signal.SIGINT)
+        print(f"Recording ended for {location}")
+        self.processDict.pop(location)
 
     def convert264File(self, path: str):
         f = open("/etc/security-cam/cameras.json")
@@ -99,36 +109,43 @@ class FTPAndVideoFileProcessor(FTPHandler):
             camera = cams[camera_name]
             ffmpeg_cmd: str = ""
             if camera is not None:
-                if path.endswith('.264'):  # Only dealing with 264 files for now
+                if path.endswith('.jpg'):  # Only dealing with jpg files
                     cam_type: CameraType = camera['cameraParamSpecs']['camType']
                     first_stream = next(iter(camera['streams']))
                     location = camera['streams'][first_stream]['recording']['location']
+                    nms_uri = camera['streams'][first_stream]['nms_uri']
+                    epoch_time = int(time.time())
                     match cam_type:
                         case CameraType.sv3c.value:
-                            ffmpeg_cmd = (f"ffmpeg -i {path} -t 01:00:00 -an -f hls "
-                                          f"{self.recordingsPath}/{location}/{location}-$(date \"+%s\")_.m3u8")
+                            ffmpeg_cmd = (
+                                f"ffmpeg -i {nms_uri} -t 01:00:00 -an -c:v copy -level 3.0" 
+                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -f hls /var/security-cam/" 
+                                f"{location}/{location}-{epoch_time}_.m3u8")
+
                         case CameraType.zxtechMCW5B10X.value:  # Need to prevent double speed layback with this camera
                             ffmpeg_cmd = (
-                                f"ffmpeg -i {path} -t 01:00:00 -an -vf \"setpts=2.0*N/FRAME_RATE/TB\" -f hls "
-                                f"{self.recordingsPath}/{location}/{location}-$(date \"+%s\")_.m3u8")
+                                f"ffmpeg -i {nms_uri} -t 01:00:00 -c:a aac -ar 16000 -c:v copy -level 3.0" 
+                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -f hls /var/security-cam/" 
+                                f"{location}/{location}-{epoch_time}_.m3u8")
                         case _:
                             logger.warning(f"No camera type for file {path}, deleting it")
                             os.remove(path)
 
                     if ffmpeg_cmd != "":
-                        result: [int, str] = executeOsCommand(f"nice -10 {ffmpeg_cmd}")
-                        msg: str = result.pop()
-                        if msg == '':
-                            os.remove(path)
-                            logger.info(f"File processed {path}")
+                        if self.processDict.__contains__(location):
+                            self.processDict[location].reset()
                         else:
-                            logger.error(f"Error {result.pop()}, {msg}")
-                else:  # Not .264 file so just delete it.
-                    os.remove(path)
+                            subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
+                            timer: ResettableTimer = ResettableTimer(30, lambda: self.finish_recording(subproc, location))
+                            timer.start()
+                            self.processDict[location] = timer
+                            logger.info(f"Started recording for {location}")
+
+                os.remove(path)
 
             # Remove old directories and any remaining files created by camera FTP transfers
             executeOsCommand(f"find {self.ftpPath} -mtime +2 -delete")
-            # Remove recordings file more than 3 weeks old
+            # Remove recording files more than 3 weeks old
             if location != "":
                 executeOsCommand(f"find {self.recordingsPath}/{location} -mtime +21 -delete")
 
@@ -141,6 +158,10 @@ class FTPAndVideoFileProcessor(FTPHandler):
 
 
 def main():
+    # bashCmd: str = "ffmpeg -i rtsp://192.168.0.23:554/11 -t 01:00:00 -an -c copy -level 3.0 -start_number 0 -hls_time 3 -hls_list_size 0 -f hls /var/security-cam/rec1/rec1_.m3u8"
+    # process = subprocess.Popen(bashCmd.split(), stdout=subprocess.PIPE)
+    # pid: int = process.pid
+    # p = process
     authorizer = DummyAuthorizer()
     authorizer.add_user('user', '12345', homedir=FTPAndVideoFileProcessor.ftpPath, perm='elradfmwMT')
     authorizer.add_anonymous(homedir='.')
