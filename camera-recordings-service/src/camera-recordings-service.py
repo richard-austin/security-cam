@@ -105,11 +105,11 @@ class FTPAndVideoFileProcessor(FTPHandler):
                     location = camera['streams'][first_stream]['recording']['location']
                     match cam_type:
                         case CameraType.sv3c.value:
-                            ffmpeg_cmd = (f"ffmpeg -i {path} -t 01:00:00 -an -bsf:v h264_mp4toannexb -f hls "
+                            ffmpeg_cmd = (f"ffmpeg -i {path} -t 01:00:00 -an -f hls "
                                           f"{self.recordingsPath}/{location}/{location}-$(date \"+%s\")_.m3u8")
                         case CameraType.zxtechMCW5B10X.value:  # Need to prevent double speed layback with this camera
                             ffmpeg_cmd = (
-                                f"ffmpeg -i {path} -t 01:00:00 -an -bsf:v h264_mp4toannexb  -vf \"setpts=2.0*N/FRAME_RATE/TB\" -f hls "
+                                f"ffmpeg -i {path} -t 01:00:00 -an -vf \"setpts=2.0*N/FRAME_RATE/TB\" -f hls "
                                 f"{self.recordingsPath}/{location}/{location}-$(date \"+%s\")_.m3u8")
                         case _:
                             logger.warning(f"No camera type for file {path}, deleting it")
