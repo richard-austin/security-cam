@@ -81,7 +81,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         let getUrl = window.location;
         let baseUrl = getUrl.protocol + '//' + getUrl.host + '/' + getUrl.pathname.split('/')[1];
         this.flvPlayer = mpegts.createPlayer({
-            type: 'flv',
+            type: 'mse',
             isLive: true,
             url: this.camstream.stream.uri.startsWith('http:') || this.camstream.stream.uri.startsWith('https:')
               ?  // Absolute url
