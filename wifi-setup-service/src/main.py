@@ -26,7 +26,8 @@ logging.Formatter.converter = timetz
 logger = logging.getLogger('wifimgr')
 
 # Set up a handler for time rotated file logging
-logHandler = TimedRotatingFileHandler(filename="/var/log/wifimgr/wifimgr.log", when="midnight")
+logHandler = TimedRotatingFileHandler(filename="/var/log/wifimgr/wifimgr.log",
+                                      when="midnight", interval=1, backupCount=30)
 logHandler.setFormatter(logging.Formatter(FORMAT))
 # add ch to logger
 logger.addHandler(logHandler)

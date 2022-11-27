@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, isDevMode, OnInit, ViewChild} from '@angular/core';
-import {CameraService} from '../cameras/camera.service';
+import {AfterViewInit, Component, ElementRef, isDevMode, OnInit, ViewChild} from '@angular/core';
+import {CameraService, cameraType} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
@@ -17,7 +17,6 @@ import {MatCheckboxChange} from "@angular/material/checkbox";
 import {MatSelectChange} from '@angular/material/select/select';
 import {HttpErrorResponse} from "@angular/common/http";
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
-import {ElementRef} from '@angular/core';
 import {KeyValue} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
 
@@ -49,10 +48,10 @@ export function isValidMaskFileName(cameras: Map<string, Camera>): ValidatorFn {
   }
 }
 
-export function validateTrueOrFalse(): ValidatorFn {
+export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     let invalidValue: boolean = control.value != true && control.value !== false;
-    return invalidValue ? {ptzControls: true} : null;
+    return invalidValue ? fieldCondition : null;
   }
 }
 
@@ -90,7 +89,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'address', 'snapshotUri', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -171,19 +170,25 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
    * call. If we don't do this, the selector won't show the correct setting.
    */
   getCameraParamSpecsReferenceCopy(camera: Camera): CameraParamSpec {
-    if ( camera?.cameraParamSpecs?.camType === undefined)
+    if (camera?.cameraParamSpecs?.camType === undefined)
       return this.cameraSvc.cameraParamSpecs[0];  // Return the Not Listed option
     else
       return this.cameraSvc.cameraParamSpecs.find((spec) => camera.cameraParamSpecs.camType === spec.camType) as CameraParamSpec;
-   }
+  }
 
-   getCameraAddressDisabledState(camera: Camera): boolean
-   {
-     if(camera?.cameraParamSpecs?.uri?.length === undefined)
-       return true;
-     else
-      return camera.cameraParamSpecs.uri.length == 0
-   }
+  getCameraAddressDisabledState(camera: Camera): boolean {
+    if (camera?.cameraParamSpecs?.camType === undefined)
+      return true;
+    else
+      return camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X;
+  }
+
+  getFTPDisabledState(camera: Camera): boolean {
+    if (camera?.cameraParamSpecs?.camType === undefined)
+      return true;
+    else
+      return this.motionSet(camera) || (camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X);
+  }
 
   /**
    * setUpTableFormControls: Associate a FormControl with each editable field on the table
@@ -233,6 +238,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           value: this.getCameraParamSpecsReferenceCopy(camera),
           disabled: false
         }, [Validators.maxLength(55)]),
+        ftp: new FormControl({
+          value: camera.ftp,
+          disabled: this.getFTPDisabledState(camera),
+        }, [validateTrueOrFalse({ftp: true})]),
         snapshotUri: new FormControl({
           value: camera.snapshotUri,
           disabled: false
@@ -240,10 +249,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         ptzControls: new FormControl({
           value: camera.ptzControls,
           disabled: false
-        }, [validateTrueOrFalse()]),
+        }, [validateTrueOrFalse({ptzControls: true})]),
         onvifHost: new FormControl({
           value: camera.onvifHost,
-          disabled: false
+          disabled: !camera.ptzControls,
         }, [Validators.maxLength(22),
           Validators.pattern(/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/)])
       }, {updateOn: "change"});
@@ -313,18 +322,17 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let streamNum: number = 1;  // Absolute (not local to camera) number to identify stream number
                                 // for recording and live URL's
     let retVal: Map<string, Camera> = new Map<string, Camera>();
-    let absoluteStreamNo: number = 1;  // Absolute number to be set in the stream object
+    let recNo: number = 1;  // Recording number to be set in the stream object
     this.cameras.forEach((camera: Camera) => {
       let streamMap: Map<string, Stream> = new Map<string, Stream>();
-      let streamKeyNum: number = 1;
 
       // First clear the recording objects in all the streams as we will set them up in the stream processing which follows.
       // Also set the absolute stream number
       camera.streams.forEach((stream: Stream) => {
         stream.recording.enabled = false
-        stream.absolute_num = absoluteStreamNo++;
-
+        stream.rec_num = recNo++;
       });
+      let streamKeyNum: number = 1;
       // Process the streams
       camera.streams.forEach((stream) => {
         if (isDevMode()) {  // Development mode
@@ -333,11 +341,16 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
 
-          if (stream.motion.enabled) {
+          if (camera.ftp && streamKeyNum++ == 1) {
+            stream.recording.enabled = true
+            stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
+            stream.recording.location = 'rec' + streamNum;
+            stream.motion.trigger_recording_on = '';
+          } else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true;
-            stream.recording.uri = 'http://localhost:8084/recording/stream' + streamNum + '/';
-            stream.recording.location = 'stream' + streamNum;
+            stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
+            stream.recording.location = 'rec' + streamNum;
             if (stream.motion.trigger_recording_on !== '') {
               let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
               if (recStreamKey.length === 2) {
@@ -346,8 +359,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
                 // Set up the recording
                 if (recStream !== undefined) {
                   recStream.recording.enabled = true;
-                  recStream.recording.uri = 'http://localhost:8084/recording/stream' + recStream.absolute_num + '/';
-                  recStream.recording.location = 'stream' + recStream.absolute_num;
+                  recStream.recording.uri = 'http://localhost:8084/recording/rec' + recStream.rec_num + '/';
+                  recStream.recording.location = 'rec' + recStream.rec_num;
                 }
               }
             }
@@ -357,11 +370,16 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
-          if (stream.motion.enabled) {
+          if (camera.ftp && stream.rec_num === 1) {
+            stream.recording.enabled = true
+            stream.recording.uri = '/recording/rec' + streamNum + '/';
+            stream.recording.location = 'rec' + streamNum;
+            stream.motion.trigger_recording_on = '';
+          } else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true
-            stream.recording.uri = '/recording/stream' + streamNum + '/';
-            stream.recording.location = 'stream' + streamNum;
+            stream.recording.uri = '/recording/rec' + streamNum + '/';
+            stream.recording.location = 'rec' + streamNum;
             if (stream.motion.trigger_recording_on !== '') {
               let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
               if (recStreamKey.length === 2)  // Should have a camera and stream number
@@ -371,16 +389,15 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
                 // Set up the recording
                 if (recStream !== undefined) {
                   recStream.recording.enabled = true;
-                  recStream.recording.uri = '/recording/stream' + recStream.absolute_num + '/';
-                  recStream.recording.location = 'stream' + recStream.absolute_num;
+                  recStream.recording.uri = '/recording/rec' + recStream.rec_num + '/';
+                  recStream.recording.location = 'rec' + recStream.rec_num;
                 }
               }
             }
           }
         }
-        streamMap.set('stream' + streamKeyNum, stream);
+        streamMap.set('stream' + streamNum, stream);
         ++streamNum;
-        ++streamKeyNum;
       })
       camera.streams = streamMap;
       let newKey = 'camera' + camNum;
@@ -504,7 +521,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         // @ts-ignore
         delete newStream.selected;
         // @ts-ignore
-        delete newStream.absolute_num;
+        delete newStream.rec_num;
         // @ts-ignore
         jsonStreams[strKey] = newStream;
       })
@@ -619,6 +636,23 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           this.snapShotKey = '';
         })
     }
+  }
+
+  ftpSet(cam: Camera): boolean {
+    return cam.ftp;
+  }
+
+  motionSet(cam: Camera): boolean {
+    let hasMotionSet: boolean = false;
+    if (cam?.streams !== undefined) {
+      for (let stream of cam.streams.values()) {
+        if (stream?.motion?.enabled !== undefined && stream.motion.enabled) {
+          hasMotionSet = true;
+          break;
+        }
+      }
+    }
+    return hasMotionSet;
   }
 
   toBase64(data: Array<any>): string {

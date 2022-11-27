@@ -2,7 +2,6 @@ package security.cam
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
-import grails.util.Environment
 import org.apache.commons.io.FileUtils
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse

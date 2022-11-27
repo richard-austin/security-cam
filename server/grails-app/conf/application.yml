@@ -123,13 +123,14 @@ environments:
       url: jdbc:h2:mem:devDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
 
     camerasHomeDirectory: /etc/security-cam
+    recordingsHomeDirectory: /var/security-cam
     myipFileLocation: /etc/security-cam/myip
     logLevel: DEBUG
 
     motion:
       configDir: /etc/security-cam/motion/conf.d
       maskFileDir: /etc/security-cam/motion
-      recordingDir: /etc/security-cam
+      recordingDir: /var/security-cam
 
     cloudProxy:
       enabled: true
@@ -142,7 +143,7 @@ environments:
       cloudPort: 8081
       webServerHost: localhost
       webServerPort: 8080
-      logLevel: TRACE
+      logLevel: ERROR
 
     mail:
       smtp:
@@ -193,13 +194,14 @@ environments:
         defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
 
     camerasHomeDirectory: /etc/security-cam
+    recordingsHomeDirectory: /var/security-cam
     myipFileLocation: /etc/security-cam/myip
     logLevel: DEBUG
 
     motion:
       configDir: /etc/security-cam/motion/conf.d
       maskFileDir: /etc/security-cam/motion
-      recordingDir: /etc/security-cam
+      recordingDir: /var/security-cam
 
     cloudProxy:
       enabled: false

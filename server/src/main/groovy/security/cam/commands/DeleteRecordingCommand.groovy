@@ -25,7 +25,8 @@ class DeleteRecordingCommand  implements Validateable{
                     if (stream == null || stream.descr == "")
                         return "No stream was specified for which to delete a recording"
 
-                    String baseDir = cmd.grailsApplication.config.camerasHomeDirectory
+                    String baseDir = cmd.grailsApplication.config.recordingsHomeDirectory
+
                     Path recordingsDirectory = Paths.get(baseDir as String, cmd.stream.recording.location as String)
                     cmd.folder = new File(recordingsDirectory.toString())
                     return
