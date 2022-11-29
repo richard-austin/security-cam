@@ -20,9 +20,15 @@ mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-serv
 cp  ../../camera-recordings-service/src/*.py security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service
 cp  ../../camera-recordings-service/src/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service
 
+mkdir -p security-cam_"${VERSION}"_arm64/usr/bin
+mkdir -p security-cam_"${VERSION}"_arm64/etc/motion
+
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../wifimanagement.service  security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../camera-recordings.service security-cam_"${VERSION}"_arm64/lib/systemd/system
+cp ../motion/motion.service security-cam_"${VERSION}"_arm64/lib/systemd/system/motion.service
+cp ../motion/motion security-cam_"${VERSION}"_arm64/usr/bin
+cp ../motion/motion.conf security-cam_"${VERSION}"_arm64/etc/motion
 
 tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 
@@ -51,9 +57,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/var/lib/tomcat
 
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
-mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
-
-cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
+cp -r ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../install-cert.sh ../tomcat9 security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-7.3.war security-cam_"${VERSION}"_arm64/tmp
@@ -66,7 +70,6 @@ Maintainer: Richard Austin <richard.david.austin@gmail.com>
 Description: A security camera system accessed through a secure web based interface.
 Depends: openjdk-17-jre-headless (>=17.0.3), openjdk-17-jre-headless (<< 18.0.0),
  ffmpeg (>=7:4.2.4), ffmpeg (<<7:5.0.0),
- motion (>=4.3.2-1), motion(<<5.0.0-0),
  nginx (>=1.18.0), nginx(<=1.20.9),
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
  tomcat9-admin (>=9.0.43-1), tomcat9-admin (<= 10.0.0),
