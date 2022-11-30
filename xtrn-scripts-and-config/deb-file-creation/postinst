@@ -68,8 +68,7 @@ sudo -u tomcat pip install -r requirements.txt
 
 
 #
-# AddToTomcatUnitFileIfNotPresent: Add ReadWriteFilePaths to the tomcat unit file to enable access to /etc/security-cam
-#                                  and /var/log/security-cam.
+# AddToTomcatUnitFileIfNotPresent: Add ReadWriteFilePaths to the tomcat unit file to enable access to /etc/security-cam.
 #
 AddToTomcatUnitFileIfNotPresent() {
   lineToWrite=$1
@@ -85,13 +84,13 @@ AddToTomcatUnitFileIfNotPresent() {
 
 # Give tomcat permission to write to some additional directories
 lineToWrite="ReadWritePaths=/var/log/security-cam/"
-lineToWrite2="ReadWritePaths=/etc/security-cam/"
+# lineToWrite2="ReadWritePaths=/etc/security-cam/"
 lineToWrite3="ReadWritePaths=/var/security-cam/"
 lineToWriteUnder="ReadWritePaths=/var/lib/tomcat9/webapps/"
 unitFile="/usr/lib/systemd/system/tomcat9.service"
 
 AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
-AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
+# AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
 AddToTomcatUnitFileIfNotPresent $lineToWrite3 $lineToWriteUnder $unitFile
 
 systemctl daemon-reload  # Register the motion service file change

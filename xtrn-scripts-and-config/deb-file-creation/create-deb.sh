@@ -35,8 +35,8 @@ tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
-mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/recording-pids
-mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/motion/conf.d
+mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/recording-pids
+mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/motion/conf.d
 
 mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/ftp
 mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec1

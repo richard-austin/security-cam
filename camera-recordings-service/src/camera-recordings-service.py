@@ -98,7 +98,7 @@ class FTPAndVideoFileProcessor(FTPHandler):
         self.processDict.pop(location)
 
     def convert264File(self, path: str):
-        f = open("/etc/security-cam/cameras.json")
+        f = open("/var/security-cam/cameras.json")
         location: str = ""
 
         try:
