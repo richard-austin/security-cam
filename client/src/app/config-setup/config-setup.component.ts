@@ -370,7 +370,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
-          if (camera.ftp && stream.rec_num === 1) {
+          if (camera.ftp && streamKeyNum++ === 1) {
             stream.recording.enabled = true
             stream.recording.uri = '/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
