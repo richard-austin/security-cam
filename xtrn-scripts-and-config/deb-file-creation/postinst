@@ -1,6 +1,5 @@
 #!/bin/bash
 
-cp /tmp/motion.conf /etc/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/ssmtp.conf /etc/ssmtp
 mv /tmp/chrony.conf /etc/chrony
@@ -10,9 +9,8 @@ mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
 rm -r /var/lib/tomcat9/webapps/ROOT
 
-rm -r /tmp/motion.conf
 deb-systemd-invoke stop tomcat9.service  # Stop tomcat before making changes
-deb-systemd-invoke stop motion  # And motion
+
 sleep 2
 
 useradd sec-cam
@@ -69,12 +67,8 @@ sudo -u tomcat pip install -r requirements.txt
 #popd || true
 
 
-# Change the motion service user to tomcat
-sed -i 's/User=motion/User=tomcat/' /lib/systemd/system/motion.service
-
 #
-# AddToTomcatUnitFileIfNotPresent: Add ReadWriteFilePaths to the tomcat unit file to enable access to /etc/security-cam
-#                                  and /var/log/security-cam.
+# AddToTomcatUnitFileIfNotPresent: Add ReadWriteFilePaths to the tomcat unit file to enable access to /etc/security-cam.
 #
 AddToTomcatUnitFileIfNotPresent() {
   lineToWrite=$1
@@ -90,20 +84,20 @@ AddToTomcatUnitFileIfNotPresent() {
 
 # Give tomcat permission to write to some additional directories
 lineToWrite="ReadWritePaths=/var/log/security-cam/"
-lineToWrite2="ReadWritePaths=/etc/security-cam/"
+# lineToWrite2="ReadWritePaths=/etc/security-cam/"
 lineToWrite3="ReadWritePaths=/var/security-cam/"
 lineToWriteUnder="ReadWritePaths=/var/lib/tomcat9/webapps/"
 unitFile="/usr/lib/systemd/system/tomcat9.service"
 
 AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
-AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
+# AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
 AddToTomcatUnitFileIfNotPresent $lineToWrite3 $lineToWriteUnder $unitFile
 
 systemctl daemon-reload  # Register the motion service file change
 
 # Start the services
-deb-systemd-invoke enable motion
-deb-systemd-invoke start motion
+deb-systemd-invoke enable motion.service
+deb-systemd-invoke start motion.service
 deb-systemd-invoke enable nginx.service
 
 deb-systemd-invoke enable wifimanagement.service

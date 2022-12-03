@@ -250,7 +250,7 @@ class Sc_processesService {
                     String[] command = new String[3]
                     command[0] = "bash"
                     command[1] = "-c"
-                    command[2] = "/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -rtsp_transport tcp -i ${stream.netcam_uri} ${stream.audio_bitrate == "0" || stream.audio_bitrate == null ? "-an" : "-c:a aac -ar ${stream.audio_bitrate}"} -c:v copy  -preset superfast -tune zerolatency -f flv ${stream.nms_uri} 2>> ${log_dir}ffmpeg_${cam.name.replace(' ', '_') + "_" + stream.descr.replace(' ', '_').replace('.', '_')}_\$(date +%Y%m%d).log"
+                    command[2] = "/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -rtsp_transport tcp -i ${stream.netcam_uri} ${stream.audio_bitrate == "0" || stream.audio_bitrate == null ? "-an" : "-c:a aac -ar ${stream.audio_bitrate}"} -c:v copy  -preset superfast -tune zerolatency -f flv ${stream.nms_uri} 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> ${log_dir}ffmpeg_${cam.name.replace(' ', '_') + "_" + stream.descr.replace(' ', '_').replace('.', '_')}_\$(date +%Y%m%d).log"
                     startProcess(command)
                 })
             })
