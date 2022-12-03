@@ -77,6 +77,7 @@ Depends: openjdk-17-jre-headless (>=17.0.3), openjdk-17-jre-headless (<< 18.0.0)
  nodejs, ssmtp,
  network-manager (>= 1.36.4), network-manager (<< 2.0.0),
  wireless-tools (>=30~pre9-13), wireless-tools (<< 40),
+ moreutils,
  python3-pip, autoconf, automake, libtool, libavcodec-dev, libavdevice-dev, libavformat-dev, libswscale-dev, libjpeg-dev,
  libpq-dev, libsqlite3-dev, debhelper, dh-autoreconf, libwebp-dev, libmicrohttpd-dev, gettext, libmariadb-dev
 EOF
