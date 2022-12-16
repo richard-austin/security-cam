@@ -80,9 +80,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.stop();
         let getUrl = window.location;
         let baseUrl = getUrl.protocol + '//' + getUrl.host + '/' + getUrl.pathname.split('/')[1];
-
-        const hasAudio: boolean = this.camstream.stream.audio_bitrate != 0;
-
         this.flvPlayer = mpegts.createPlayer({
             type: 'mse',
             isLive: true,
@@ -99,8 +96,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           },
           {
             liveBufferLatencyChasing: true,
-            liveBufferLatencyMaxLatency: hasAudio ? 1.5 : 1.05,
-            liveBufferLatencyMinRemain: hasAudio ? 0.5 : 0.4,
+            liveBufferLatencyMaxLatency: 1.5,
+            liveBufferLatencyMinRemain: 0.5,
             enableStashBuffer: false,
             enableWorker: true,
           });
