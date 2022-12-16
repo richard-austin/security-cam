@@ -99,8 +99,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           },
           {
             liveBufferLatencyChasing: true,
-            liveBufferLatencyMaxLatency: hasAudio ? 1.5 : 0.9,
-            liveBufferLatencyMinRemain: hasAudio ? 0.5 : 0.35,
+            liveBufferLatencyMaxLatency: hasAudio ? 1.5 : 1.05,
+            liveBufferLatencyMinRemain: hasAudio ? 0.5 : 0.4,
             enableStashBuffer: false,
             enableWorker: true,
           });
@@ -117,7 +117,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.video.pause();
       this.hls.stopLoad();
       this.hls.detachMedia();
-      this.hls.destroy();
+      this.hls.destroy();to
       this.hls = null;
     } else if (this.flvPlayer !== null) {
       this.video.pause();
