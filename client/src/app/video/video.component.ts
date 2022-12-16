@@ -117,7 +117,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.video.pause();
       this.hls.stopLoad();
       this.hls.detachMedia();
-      this.hls.destroy();to
+      this.hls.destroy();
       this.hls = null;
     } else if (this.flvPlayer !== null) {
       this.video.pause();
