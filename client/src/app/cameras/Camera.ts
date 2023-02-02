@@ -43,7 +43,7 @@ export class Stream {
   selected: boolean = false;
   netcam_uri: string = "";
   uri: string = "";
-  nms_uri: string = "";
+  media_server_input_uri: string = "";
   audio_bitrate: number=0;
   audio_encoding:string = "";
   audio_sample_rate:number = 0;

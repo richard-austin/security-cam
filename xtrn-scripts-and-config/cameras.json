@@ -14,7 +14,7 @@
           "trigger_recording_on": ""
         },
         "netcam_uri": "rtsp://192.168.0.30:554/11",
-        "nms_uri": "rtmp://localhost:1935/nms/stream1",
+        "media_server_input_uri": "rtmp://localhost:1935/nms/stream1",
         "recording": {
           "enabled": true,
           "location": "stream1",
@@ -33,7 +33,7 @@
           "trigger_recording_on": "camera1.stream1"
         },
         "netcam_uri": "rtsp://192.168.0.30:554/12",
-        "nms_uri": "rtmp://localhost:1935/nms/stream2",
+        "media_server_input_uri": "rtmp://localhost:1935/nms/stream2",
         "recording": {
           "enabled": true,
           "location": "stream2",
@@ -60,7 +60,7 @@
           "trigger_recording_on": ""
         },
         "netcam_uri": "rtsp://192.168.0.34:554/11",
-        "nms_uri": "rtmp://localhost:1935/nms/stream3",
+        "media_server_input_uri": "rtmp://localhost:1935/nms/stream3",
         "recording": {
           "enabled": true,
           "location": "stream3",
@@ -79,7 +79,7 @@
           "trigger_recording_on": "camera2.stream1"
         },
         "netcam_uri": "rtsp://192.168.0.34:554/12",
-        "nms_uri": "rtmp://localhost:1935/nms/stream4",
+        "media_server_input_uri": "rtmp://localhost:1935/nms/stream4",
         "recording": {
           "enabled": true,
           "location": "stream4",
@@ -106,7 +106,7 @@
           "trigger_recording_on": ""
         },
         "netcam_uri": "rtsp://192.168.0.35:554/11",
-        "nms_uri": "rtmp://localhost:1935/nms/stream5",
+        "media_server_input_uri": "rtmp://localhost:1935/nms/stream5",
         "recording": {
           "enabled": true,
           "location": "stream5",
@@ -125,7 +125,7 @@
           "trigger_recording_on": "camera3.stream1"
         },
         "netcam_uri": "rtsp://192.168.0.35:554/12",
-        "nms_uri": "rtmp://localhost:1935/nms/stream6",
+        "media_server_input_uri": "rtmp://localhost:1935/nms/stream6",
         "recording": {
           "enabled": true,
           "location": "stream6",
@@ -152,7 +152,7 @@
           "trigger_recording_on": ""
         },
         "netcam_uri": "rtsp://192.168.0.45:554/11",
-        "nms_uri": "rtmp://localhost:1935/nms/stream7",
+        "media_server_input_uri": "rtmp://localhost:1935/nms/stream7",
         "recording": {
           "enabled": true,
           "location": "stream7",
@@ -171,7 +171,7 @@
           "trigger_recording_on": "camera4.stream1"
         },
         "netcam_uri": "rtsp://192.168.0.45:554/12",
-        "nms_uri": "rtmp://localhost:1935/nms/stream8",
+        "media_server_input_uri": "rtmp://localhost:1935/nms/stream8",
         "recording": {
           "enabled": true,
           "location": "stream8",

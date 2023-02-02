@@ -336,7 +336,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       // Process the streams
       camera.streams.forEach((stream) => {
         if (isDevMode()) {  // Development mode
-          stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
+          stream.media_server_input_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
@@ -366,7 +366,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             }
           }
         } else {  // Production mode
-          stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
+          stream.media_server_input_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
           stream.uri = "/live/nms/stream" + streamNum + ".flv";
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';

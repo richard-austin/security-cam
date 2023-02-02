@@ -113,18 +113,18 @@ class FTPAndVideoFileProcessor(FTPHandler):
                     cam_type: CameraType = camera['cameraParamSpecs']['camType']
                     first_stream = next(iter(camera['streams']))
                     location = camera['streams'][first_stream]['recording']['location']
-                    nms_uri = camera['streams'][first_stream]['nms_uri']
+                    media_server_input_uri = camera['streams'][first_stream]['media_server_input_uri']
                     epoch_time = int(time.time())
                     match cam_type:
                         case CameraType.sv3c.value:
                             ffmpeg_cmd = (
-                                f"ffmpeg -i {nms_uri} -t 01:00:00 -an -c:v copy -level 3.0" 
+                                f"ffmpeg -i {media_server_input_uri} -t 01:00:00 -an -c:v copy -level 3.0" 
                                 f" -start_number 0 -hls_time 3 -hls_list_size 0 -f hls /var/security-cam/" 
                                 f"{location}/{location}-{epoch_time}_.m3u8")
 
                         case CameraType.zxtechMCW5B10X.value:  # Need to prevent double speed layback with this camera
                             ffmpeg_cmd = (
-                                f"ffmpeg -i {nms_uri} -t 01:00:00 -c:a aac -ar 16000 -c:v copy -level 3.0" 
+                                f"ffmpeg -i {media_server_input_uri} -t 01:00:00 -c:a aac -ar 16000 -c:v copy -level 3.0" 
                                 f" -start_number 0 -hls_time 3 -hls_list_size 0 -f hls /var/security-cam/" 
                                 f"{location}/{location}-{epoch_time}_.m3u8")
                         case _:

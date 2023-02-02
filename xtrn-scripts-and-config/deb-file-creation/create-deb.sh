@@ -16,6 +16,10 @@ mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service &&
 cp ../../wifi-setup-service/src/*.py security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
 cp ../../wifi-setup-service/src/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
 
+mkdir -p security-cam_"${VERSION}"_arm64/etc/fmp4-ws-media-server &&
+cp  ../fmp4-ws-media-server/fmp4-ws-media-server_arm64 security-cam_"${VERSION}"_arm64/etc/fmp4-ws-media-server
+cp  ../fmp4-ws-media-server/config.json security-cam_"${VERSION}"_arm64/etc/fmp4-ws-media-server
+
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service &&
 cp  ../../camera-recordings-service/src/*.py security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service
 cp  ../../camera-recordings-service/src/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service
@@ -23,8 +27,7 @@ cp  ../../camera-recordings-service/src/requirements.txt security-cam_"${VERSION
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../wifimanagement.service  security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../camera-recordings.service security-cam_"${VERSION}"_arm64/lib/systemd/system
-
-tar -xf nms.tar --directory security-cam_"${VERSION}"_arm64/etc/security-cam
+cp ../fmp4-ws-media-server.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
@@ -45,6 +48,8 @@ mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec9
 mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec10
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/camera-recordings-service
+mkdir -p security-cam_"${VERSION}"_arm64/var/log/fmp4-ws-media-service
+
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr
 mkdir -p security-cam_"${VERSION}"_arm64/var/lib/tomcat

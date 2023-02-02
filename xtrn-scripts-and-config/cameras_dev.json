@@ -14,7 +14,7 @@
           "trigger_recording_on": ""
         },
         "netcam_uri": "rtsp://192.168.0.30:554/11",
-        "nms_uri": "rtmp://localhost:1935/nms/stream1",
+        "media_server_input_uri": "rtmp://localhost:1935/nms/stream1",
         "recording": {
           "enabled": true,
           "location": "stream1",

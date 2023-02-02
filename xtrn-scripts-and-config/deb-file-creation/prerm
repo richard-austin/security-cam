@@ -6,6 +6,8 @@ deb-systemd-invoke disable tomcat9.service
 deb-systemd-invoke stop tomcat9.service
 deb-systemd-invoke disable motion.service
 deb-systemd-invoke stop motion.service
+deb-systemd-invoke disable fmp4-ws-media-server.service
+deb-systemd-invoke stop fmp4-ws-media-server.service
 
 deb-systemd-invoke stop wifimanagement.service
 deb-systemd-invoke disable wifimanagement.service
