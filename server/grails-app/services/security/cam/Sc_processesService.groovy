@@ -231,8 +231,7 @@ class Sc_processesService {
     }
 
     /**
-     * startProcesses: Start ode Media Server (nms), the ffmpeg live stream links to nms server, motion sensing process
-     *                 and the IP change detection process
+     * startProcesses: Start the motion sensing, media server and the IP change detection processes
      * @return
      */
     def startProcesses() {
@@ -242,22 +241,9 @@ class Sc_processesService {
             setupIpCheckTimer()
             running = true
             processExecutors = Executors.newCachedThreadPool()
-            startProcess("/usr/bin/node /etc/security-cam/nms/app.js")
-            Map<String, Camera> cams = getCamerasData()
-            String log_dir = "/var/log/security-cam/"      // TODO: Get from config
-            cams.forEach((ck, cam) -> {
-                cam.streams.forEach((sk, stream) -> {
-                    String[] command = new String[3]
-                    command[0] = "bash"
-                    command[1] = "-c"
-                    command[2] = "/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -rtsp_transport tcp -i ${stream.netcam_uri} ${stream.audio_bitrate == "0" || stream.audio_bitrate == null ? "-an" : "-c:a aac -ar ${stream.audio_bitrate}"} -c:v copy  -preset superfast -tune zerolatency -f flv ${stream.media_server_input_uri} 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> ${log_dir}ffmpeg_${cam.name.replace(' ', '_') + "_" + stream.descr.replace(' ', '_').replace('.', '_')}_\$(date +%Y%m%d).log"
-                    startProcess(command)
-                })
-            })
-
-            // Start motion and reload config to take on any changes
+             // Start motion and media servers and reload config to take on any changes
             RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
-                    "{\"command\": \"start_motion\"}",
+                    "{\"command\": \"start_services\"}",
                     true, 12000)
 
             // Populate the onvif device map so the devices don't have to be created each time a PTZ operation is done
@@ -279,69 +265,7 @@ class Sc_processesService {
         return response
     }
 
-    /**
-     * startProcess: Start a single process
-     * @param command
-     */
-    void startProcess(final String command) {
-        submitTask(command)
-    }
-
-    /**
-     * startProcess: Start a single process with a multiline command (used for starting a process under a bash shell etc)
-     * @param command
-     */
-    void startProcess(final String[] command) {
-        submitTask(command)
-    }
-
-    /**
-     * submitTask: Start a process with the given command line within a restart loop in the thread pool thread.
-     * @param command
-     */
-    private void submitTask(def command) {
-        processExecutors.submit(() -> {
-            do {
-                try {
-                    Process proc
-                    if (command instanceof String)
-                        proc = Runtime.getRuntime().exec(command)
-                    else if (command instanceof String[])
-                        proc = Runtime.getRuntime().exec(command)
-                    else
-                        break
-                    proc.waitFor(100, TimeUnit.MILLISECONDS)
-
-                    if (proc.isAlive())
-                        processes.add(proc)
-                    proc.waitFor()
-                }
-                catch (InterruptedException iex) {
-                    logService.cam.warn "${iex.getClass().getName()} in submitTask: " + iex.getMessage()
-                }
-                catch (Exception ex) {
-                    logService.cam.error "${ex.getClass().getName()} in submitTask: " + ex.getMessage()
-                }
-                if (command instanceof String)
-                    logService.cam.debug("Process terminated: (${command}}")
-                else if (command instanceof String[]) {
-                    logService.cam.warn("Process terminated: -")
-                    for (String cmd : command)
-                        logService.cam.debug("${cmd}")
-                }
-
-                // Clean up old ffmpeg live stream log files before looping round again
-                Process cleanup = Runtime.getRuntime().exec("/usr/bin/find /var/log/security-cam/ -mtime +21 -name ffmpeg*.log -delete")
-                cleanup.waitFor()
-
-                if (running)
-                    Thread.sleep(1000)
-            }
-            while (running)
-        })
-    }
-
-    /**
+     /**
      * stopProcesses: Stop all started processes and their descendents
      */
     @PreDestroy
@@ -350,7 +274,7 @@ class Sc_processesService {
         try {
             running = false
             RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
-                    "{\"command\": \"stop_motion\"}",
+                    "{\"command\": \"stop_services\"}",
                     true, 15000)
             if (restResponse.responseCode != 200) {
                 logService.cam.error("Error stopping motion service: ${restResponse.errorMsg}")
