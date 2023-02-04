@@ -337,7 +337,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       camera.streams.forEach((stream) => {
         if (isDevMode()) {  // Development mode
           stream.media_server_input_uri = "http://localhost:8085/live/stream?suuid=stream" + streamNum;
-          stream.uri = "http://localhost:8085/ws/stream?suuid=stream" + streamNum;
+          stream.uri = "ws://localhost:8085/ws/stream?suuid=stream" + streamNum;
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
 
