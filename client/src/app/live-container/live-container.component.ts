@@ -20,7 +20,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   activeLiveUpdates!: Subscription;
   timerHandle!: Subscription;
 
-  constructor(private cameraSvc: CameraService, private utilsService: UtilsService) {
+  constructor(public cameraSvc: CameraService, private utilsService: UtilsService) {
   }
 
   setupVideo() {
@@ -28,7 +28,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
     this.videos.forEach((video) => {
       video.multi = this.multi;
       video.visible = false;
-      video.stop();
+      //video.stop();
     });
     let index: number = 0;
     if (this.cameraSvc.getActiveLive().length > 0) {

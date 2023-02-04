@@ -1,6 +1,5 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraStream} from '../cameras/Camera';
-import {timer} from 'rxjs';
 
 
 declare let Hls: any;
@@ -46,7 +45,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.recordingUri += manifest;
     this.manifest = manifest;   // Save the manifest file name so it can be returned by getManifest
- //   this.startVideo();
+    this.startVideo();
   }
 
   /**
@@ -96,7 +95,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   // }
 
   verbose:boolean = false;
-  buffering_sec: number = 1.0; // Default value
+  buffering_sec: number = 0.8; // Default value
   buffering_sec_seek: number = this.buffering_sec * 0.9;
   // ..seek the stream if it's this much away or
   // from the last available timestamp
@@ -191,7 +190,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       // source_buffer.mode = 'segments';  // TODO: should we use this instead?
 
       this.source_buffer.addEventListener("updateend", this.loadPacket);
-    } else {
+    } else if (this.started){
       // keep the latency to minimum
       let latest = this.video.duration;
       if ((this.video.duration >= this.buffering_sec) &&
@@ -199,8 +198,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         console.log("seek from ", this.video.currentTime, " to ", latest);
         let df = (this.video.duration - this.video.currentTime); // this much away from the last available frame
         if ((df > this.buffering_sec_seek)) {
-          let seek_to = this.video.duration - this.buffering_sec_seek_distance;
-          this.video.currentTime = seek_to;
+          this.video.currentTime = this.video.duration - this.buffering_sec_seek_distance;
         }
       }
 
@@ -262,7 +260,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.hls = null;
     }
     else if(this.isfmp4) {
-      this.ws.close();
+      if (this.ws !== undefined)
+        this.ws.close();
+      this.started = false;
       this.video.pause();
     }
   }
@@ -290,7 +290,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     // this.video.addEventListener('webkitfullscreenchange', this.fullScreenListener);
 
     // This prevents value changed after it was checked error
-    timer(10).subscribe(() => this.startVideo());
+    //timer(10).subscribe(() => this.startVideo());
   }
 
   ngOnDestroy(): void {
