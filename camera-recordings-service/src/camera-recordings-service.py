@@ -113,20 +113,22 @@ class FTPAndVideoFileProcessor(FTPHandler):
                     cam_type: CameraType = camera['cameraParamSpecs']['camType']
                     first_stream = next(iter(camera['streams']))
                     location = camera['streams'][first_stream]['recording']['location']
-                    media_server_input_uri = camera['streams'][first_stream]['media_server_input_uri']
+                    recording_src_url = camera['streams'][first_stream]['recording']['recording_src_url']
                     epoch_time = int(time.time())
                     match cam_type:
                         case CameraType.sv3c.value:
                             ffmpeg_cmd = (
-                                f"ffmpeg -i {media_server_input_uri} -t 01:00:00 -an -c:v copy -level 3.0" 
-                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -f hls /var/security-cam/" 
-                                f"{location}/{location}-{epoch_time}_.m3u8")
+                                f"ffmpeg -i {recording_src_url} -t 01:00:00 -an -c:v copy -level 3.0" 
+                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type fmp4"
+                                f" -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
+                                f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")
 
-                        case CameraType.zxtechMCW5B10X.value:  # Need to prevent double speed layback with this camera
+                        case CameraType.zxtechMCW5B10X.value:
                             ffmpeg_cmd = (
-                                f"ffmpeg -i {media_server_input_uri} -t 01:00:00 -c:a aac -ar 16000 -c:v copy -level 3.0" 
-                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -f hls /var/security-cam/" 
-                                f"{location}/{location}-{epoch_time}_.m3u8")
+                                f"ffmpeg -i {recording_src_url} -t 01:00:00 -c:a copy -c:v copy -level 3.0"
+                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type fmp4"
+                                f" -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
+                                f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")
                         case _:
                             logger.warning(f"No camera type for file {path}, deleting it")
                             os.remove(path)

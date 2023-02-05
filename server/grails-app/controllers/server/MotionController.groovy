@@ -25,6 +25,7 @@ class MotionEvents {
 
 class Recording {
     boolean enabled=false
+    String recording_src_url=''
     String uri=''
     String location=''
 }

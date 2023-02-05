@@ -33,6 +33,7 @@ export class Motion {
 export class Recording
 {
   enabled: boolean = false
+  recording_src_url: string = "";
   uri: string = "";
   location: string = "";
 }

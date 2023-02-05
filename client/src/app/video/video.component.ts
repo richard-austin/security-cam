@@ -84,7 +84,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  toInt(arr:Uint8Array, index: number): number { // From bytes to big-endian 32-bit integer.  Input: Uint8Array, index
+  toInt(arr: Uint8Array, index: number): number { // From bytes to big-endian 32-bit integer.  Input: Uint8Array, index
     let dv = new DataView(arr.buffer, 0);
     return dv.getInt32(index, false); // big endian
   }
@@ -94,7 +94,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   //   return String.fromCharCode.apply(null, arr.slice(fr, to));
   // }
 
-  verbose:boolean = false;
+  verbose: boolean = false;
   buffering_sec: number = 0.8; // Default value
   buffering_sec_seek: number = this.buffering_sec * 0.9;
   // ..seek the stream if it's this much away or
@@ -103,7 +103,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   // .. jump to this distance from the last avail. timestamp
   started: boolean = false;
 
-  mimeType: string = "video/mp4";
+  mimeType: string = 'video/mp4';
 
   stream_started = false; // is the source_buffer updateend callback active nor not
 
@@ -111,23 +111,24 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   ms!: MediaSource;
 
   // queue for incoming media packets
-  queue:BufferSource[] = [];
+  queue: BufferSource[] = [];
   ws!: WebSocket; // websocket
   seeked = false; // have seeked manually once ..
   cc: number = 0;
 
-  source_buffer!: SourceBuffer // source_buffer instance
+  source_buffer!: SourceBuffer; // source_buffer instance
 
   setlatencyLim(value: string) {
-    this.buffering_sec = Number(value)
+    this.buffering_sec = Number(value);
     // Update these accordingly
     this.buffering_sec_seek = this.buffering_sec * 0.9;
     this.buffering_sec_seek_distance = this.buffering_sec * 0.5;
   }
-  Utf8ArrayToStr(array:Uint8Array):string {
+
+  Utf8ArrayToStr(array: Uint8Array): string {
     let out, i, len, c;
     let char2, char3;
-    out = "";
+    out = '';
     len = array.length;
     i = 0;
     while (i < len) {
@@ -165,10 +166,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     let data = new Uint8Array(arr);
     if (data[0] === 9 && !this.started) {
       this.started = true;
-      let codecs  // https://wiki.whatwg.org/wiki/Video_type_parameters
+      let codecs;  // https://wiki.whatwg.org/wiki/Video_type_parameters
       let decoded_arr = data.slice(1);
       if (window.TextDecoder) {
-        codecs = new TextDecoder("utf-8").decode(decoded_arr);
+        codecs = new TextDecoder('utf-8').decode(decoded_arr);
       } else {
         codecs = this.Utf8ArrayToStr(decoded_arr);
       }
@@ -179,7 +180,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       // if your stream has audio, remember to include it in these definitions.. otherwise your mse goes sour
       let codecPars = this.mimeType + ';codecs="' + codecs + '"';
       if (!(window.MediaSource && window.MediaSource.isTypeSupported(codecPars))) {
-        console.log(codecPars + "Not supported");
+        console.log(codecPars + 'Not supported');
       }
       this.ms.duration = this.buffering_sec;
       this.source_buffer = this.ms.addSourceBuffer(codecPars);
@@ -189,13 +190,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.source_buffer.mode = 'sequence';
       // source_buffer.mode = 'segments';  // TODO: should we use this instead?
 
-      this.source_buffer.addEventListener("updateend", this.loadPacket);
-    } else if (this.started){
+      this.source_buffer.addEventListener('updateend', this.loadPacket);
+    } else if (this.started) {
       // keep the latency to minimum
       let latest = this.video.duration;
       if ((this.video.duration >= this.buffering_sec) &&
         ((latest - this.video.currentTime) > this.buffering_sec_seek)) {
-        console.log("seek from ", this.video.currentTime, " to ", latest);
+        console.log('seek from ', this.video.currentTime, ' to ', latest);
         let df = (this.video.duration - this.video.currentTime); // this much away from the last available frame
         if ((df > this.buffering_sec_seek)) {
           this.video.currentTime = this.video.duration - this.buffering_sec_seek_distance;
@@ -212,23 +213,24 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.queue.push(data); // add to the end
       if (this.verbose) {
-        console.log("queue push:", this.queue.length);
+        console.log('queue push:', this.queue.length);
       }
     }
   }
+
   loadPacket = () => { // called when source_buffer is ready for more
     if (!this.source_buffer.updating) { // really, really ready
       if (this.queue.length > 0) {
 
         let inp = this.queue.shift(); // pop from the beginning
         if (this.verbose) {
-          console.log("this.queue pop:", this.queue.length);
+          console.log('this.queue pop:', this.queue.length);
         }
 
         let memview = new Uint8Array(inp as Uint8Array);
 
         if (this.verbose) {
-          console.log(" ==> writing buffer with", memview[0], memview[1], memview[2], memview[3]);
+          console.log(' ==> writing buffer with', memview[0], memview[1], memview[2], memview[3]);
         }
 
         this.source_buffer.appendBuffer(inp as BufferSource);
@@ -238,18 +240,32 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else { // so it was not?
     }
-  }
+  };
 
 
   opened = () => { // MediaSource object is ready to go
-    console.log("Called opened")
+    console.log('Called opened');
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaSource/duration
-    this.ws = new WebSocket(this.camstream.stream.uri);
-    this.ws.binaryType = "arraybuffer";
+    let getUrl = window.location;
+    let baseUrl = getUrl.protocol + '//' + getUrl.host + '/' + getUrl.pathname.split('/')[1];
+
+    let url = this.camstream.stream.uri.startsWith('http:') || this.camstream.stream.uri.startsWith('https:') || this.camstream.stream.uri.startsWith('ws:')
+      ?  // Absolute url
+      this.camstream.stream.uri
+        .replace('https', 'wss') // Change https to wss
+        .replace('http', 'ws')  // or change http to ws
+      :  // Relative uri
+      baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
+        .replace('https', 'wss') // Change https to wss
+        .replace('http', 'ws')  // or change http to ws
+      + this.camstream.stream.uri;
+
+    this.ws = new WebSocket(url);
+    this.ws.binaryType = 'arraybuffer';
     this.ws.onmessage = (event: MessageEvent) => {
       this.putPacket(event.data);
     };
-  }
+  };
 
   stop(): void {
     if (!this.isfmp4 && this.hls !== null) {
@@ -258,10 +274,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.hls.detachMedia();
       this.hls.destroy();
       this.hls = null;
-    }
-    else if(this.isfmp4) {
-      if (this.ws !== undefined)
+    } else if (this.isfmp4) {
+      if (this.ws !== undefined) {
         this.ws.close();
+      }
       this.started = false;
       this.video.pause();
     }
