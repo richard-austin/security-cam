@@ -21,7 +21,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   recording: boolean = false;
   recordingUri: string = '';
   manifest: string = '';
-  multi: boolean = false;
+
 
 //  private isFullscreenNow: boolean = false;
 
@@ -95,6 +95,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   // }
 
   verbose: boolean = false;
+  multi: boolean = false;
   buffering_sec: number = 0.8; // Default value
   buffering_sec_seek: number = this.buffering_sec * 0.9;
   // ..seek the stream if it's this much away or
@@ -291,6 +292,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   //     this.userIdle.startWatching();
   // };
   //
+
   ngOnInit(): void {
   }
 

@@ -2,6 +2,12 @@ div.flex-container {
   display: inline-flex;
   flex-wrap: wrap;
 }
+div.flex-container-vid
+{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 
 div.setting-item {
   flex-grow: 1;

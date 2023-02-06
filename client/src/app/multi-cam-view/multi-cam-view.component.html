@@ -21,10 +21,15 @@
             </ul>
           </section>
         </ng-container>
-        <button mat-flat-button color="light" (click)="updateDisplay()" [disabled]="false">Update</button>
       </mat-card-content>
     </mat-card>
   </div>
   <app-reporting></app-reporting>
-  <app-live-container [multi]="true" class="multi-display-item"></app-live-container>
+  <div class="flex-container-vid">
+    <ng-container *ngFor="let cam of cameras | keyvalue">
+      <ng-container *ngFor="let strm of cam.value.streams| keyvalue">
+        <app-video *ngIf="strm.value.selected" [isfmp4]="true"></app-video>
+      </ng-container>
+    </ng-container>
+  </div>
 </div>
