@@ -75,7 +75,7 @@ class FTPAndVideoFileProcessor(FTPHandler):
     def on_file_received(self, file):
         # do something when a file has been received
         logger.info(f"File received: {file}")
-        self.convert264File(file)
+        self.triggerRecordingFromFTPFile(file)
 
     def on_incomplete_file_sent(self, file):
         # do something when a file is partially sent
@@ -94,10 +94,11 @@ class FTPAndVideoFileProcessor(FTPHandler):
     """
     def finish_recording(self, subproc: subprocess, location: str):
         subproc.send_signal(signal.SIGINT)
-        print(f"Recording ended for {location}")
+        subproc.wait()
+        logger.info(f"Recording ended for {location}")
         self.processDict.pop(location)
 
-    def convert264File(self, path: str):
+    def triggerRecordingFromFTPFile(self, path: str):
         f = open("/var/security-cam/cameras.json")
         location: str = ""
 
