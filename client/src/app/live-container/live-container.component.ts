@@ -1,11 +1,12 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera} from '../cameras/Camera';
+import {Camera, CameraStream} from '../cameras/Camera';
 import {Subscription} from 'rxjs';
 import {VideoComponent} from '../video/video.component';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ReportingComponent} from '../reporting/reporting.component';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-live-container',
@@ -16,21 +17,33 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @ViewChild(VideoComponent) video!: VideoComponent;
 
-  activeLiveUpdates!: Subscription | undefined;
   timerHandle!: Subscription;
+  cs!: CameraStream;
+  initialised: boolean;
 
-  constructor(public cameraSvc: CameraService, private utilsService: UtilsService) {
+  constructor(private route: ActivatedRoute, public cameraSvc: CameraService, private utilsService: UtilsService) {
+    this.initialised = false;
+    this.route.paramMap.subscribe((paramMap) => {
+      let streamName: string = paramMap.get('streamName') as string;
+      cameraSvc.getCameraStreams().forEach((cam) => {
+        if (cam.stream.media_server_input_uri.endsWith(streamName)) {
+          this.cs = cam;
+          if (this.initialised) {
+            this.setupVideo();
+          }
+        }
+      });
+    });
   }
 
   setupVideo() {
     this.reporting.dismiss();
 
     this.video.visible = false;
-    let cam = this.cameraSvc.getActiveLive()[0];
     this.timerHandle?.unsubscribe();
-    if (cam !== undefined) {
+    if (this.cs !== undefined) {
       if (this.video !== undefined) {
-        this.video.setSource(cam);
+        this.video.setSource(this.cs);
         this.video.visible = true;
       }
     }
@@ -40,11 +53,11 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
 
   hasPTZControls() {
-    return this.cameraSvc.getActiveLive()[0]?.camera?.ptzControls;
+    return this.cs?.camera?.ptzControls;
   }
 
   camera(): Camera | null {
-    return this.cameraSvc.getActiveLive()[0]?.camera;
+    return this.cs?.camera;
   }
 
   /**
@@ -67,16 +80,15 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit(): void {
-    if(this.activeLiveUpdates === undefined) {
+    if(!this.initialised) {
+      this.initialised = true;
       this.setupVideo();
-      this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => this.setupVideo());
     }
   }
 
+
   ngOnDestroy(): void {
     this.video.stop();
-    this.activeLiveUpdates?.unsubscribe();
-    this.activeLiveUpdates = undefined;
     this.timerHandle?.unsubscribe();
     // Re-enable the user idle service
     this.utilsService.sendMessage(new IdleTimeoutStatusMessage(true));

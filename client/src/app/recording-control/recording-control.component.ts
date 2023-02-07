@@ -59,8 +59,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     // route.url.subscribe((u:UrlSegment[]) => {
     // });
     this.initialised = false;
-    this.route.paramMap.subscribe(() => {
-      let streamName: string = route.snapshot.params.streamName;
+    this.route.paramMap.subscribe((paramMap) => {
+      let streamName: string = paramMap.get('streamName') as string;
       cameraSvc.getCameraStreams().forEach((cam) => {
         if (cam.stream.media_server_input_uri.endsWith(streamName)) {
           this.cs = cam;
@@ -126,11 +126,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   /**
-   * setupRecording: Display the recording from the camera details returned from getActiveLive. This will have either
-   *                 been selected from the navbar menu, or derived from the motionName given as a URL parameter.
-   *                 In the latter case, an epoch time will also be given as the point to set the video time to. The
-   *                 parameters are given in the URL in email motion alerts to enable immediate referencing of the
-   *                 point of interest.
+   * setupRecording: Display the recording from the camera details in this.cs. This will have
+   *                 been selected from the navbar menu.
    */
   setupRecording() {
     this.reporting.dismiss();
@@ -351,10 +348,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
   ngAfterViewInit(): void {
     this.isGuest = this.utilsService.isGuestAccount;
-    this.setupRecording();
     this.initialised = true;
-  }
-
+    this.setupRecording();  }
 
   ngOnDestroy(): void {
   }

@@ -17,7 +17,6 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
 
   constructor(private cameraSvc: CameraService) {
-    this.cameraSvc.setActiveLive([]);
   }
 
   cameras: Map<string, Camera> = new Map<string, Camera>();
@@ -30,8 +29,8 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
       video.stop();
     });
     let index: number = 0;
-    if (this.cameraSvc.getActiveLive().length > 0) {
-      this.cameraSvc.getActiveLive().forEach((cs) => {
+    if (this.cams.length > 0) {
+      this.cams.forEach((cs) => {
         let video: VideoComponent | undefined = this.videos?.get(index++);
         if (video !== undefined) {
           video.setSource(cs);
@@ -85,7 +84,6 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     });
-    this.cameraSvc.setActiveLive(this.cams);
     this.setupVideo();
   }
 
