@@ -1,8 +1,8 @@
-<div class="flex-container">
-  <div class="settings_item">
+<div class="controls-container">
+  <div class="setting_item">
     <mat-card class="camera-select mat-elevation-z8 hide-background">
       <mat-card-title>
-        Select Cameras to View
+        Select Camera streams
       </mat-card-title>
       <mat-card-content>
         <ng-container *ngFor="let cam of cameras | keyvalue">
@@ -24,12 +24,13 @@
       </mat-card-content>
     </mat-card>
   </div>
+</div>
   <app-reporting></app-reporting>
   <div class="flex-container-vid">
     <ng-container *ngFor="let cam of cameras | keyvalue">
-      <ng-container *ngFor="let strm of cam.value.streams| keyvalue">
+      <ng-container *ngFor="let strm of cam.value.streams| keyvalue; let i = index">
         <app-video *ngIf="strm.value.selected" [isfmp4]="true"></app-video>
       </ng-container>
     </ng-container>
   </div>
-</div>
+

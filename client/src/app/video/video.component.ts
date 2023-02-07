@@ -278,6 +278,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (this.isfmp4) {
       if (this.ws !== undefined) {
         this.ws.close();
+        this.ws.onmessage = null;
       }
       this.started = false;
       this.video.pause();

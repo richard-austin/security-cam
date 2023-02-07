@@ -15,7 +15,7 @@ import {SetUpGuestAccountComponent} from "./set-up-guest-account/set-up-guest-ac
 
 const routes: Routes = [
   {path: 'live', component: LiveContainerComponent},
-  {path: 'recording', component: RecordingControlComponent},
+  {path: 'recording/:streamName', component: RecordingControlComponent},
   {path: 'multicam', component: MultiCamViewComponent},
   {path: 'changepassword', component: ChangePasswordComponent},
   {path: 'changeemail', component: ChangeEmailComponent},

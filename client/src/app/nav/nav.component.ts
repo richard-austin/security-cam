@@ -48,8 +48,12 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   showRecording(camStream: CameraStream): void {
-    this.cameraSvc.setActiveLive([camStream]);
-    window.location.href = '#/recording';
+  //  this.cameraSvc.setActiveLive([camStream]);
+    let suuid = 'suuid=';
+    let uri = camStream.stream.recording.recording_src_url;
+    let index = uri.indexOf(suuid);
+    let streamName = uri.substring(index+suuid.length)
+    window.location.href = '#/recording/'+streamName;
   }
 
   cameraControl(cam: Camera) {

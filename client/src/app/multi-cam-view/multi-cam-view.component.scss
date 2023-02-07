@@ -1,6 +1,8 @@
-div.flex-container {
-  display: inline-flex;
+div.controls-container {
+  width: fit-content;
+  display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 div.flex-container-vid
 {
@@ -10,7 +12,8 @@ div.flex-container-vid
 }
 
 div.setting-item {
-  flex-grow: 1;
+  width: fit-content;
+  height: 100%
 }
 
 app-live-container.multi-display-item {
@@ -19,7 +22,7 @@ app-live-container.multi-display-item {
 
 mat-card.camera-select
 {
-  min-width: 18rem;
+  width: 16rem;
   > mat-card-content{
     padding-left: 1rem;
     padding-bottom: 1rem;

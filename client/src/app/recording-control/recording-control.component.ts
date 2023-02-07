@@ -1,15 +1,15 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {VideoComponent} from "../video/video.component";
-import {CameraStream} from "../cameras/Camera";
-import {CameraService, DateSlot, LocalMotionEvent, LocalMotionEvents} from "../cameras/camera.service";
-import {Subscription, timer} from "rxjs";
-import {MatSelectChange} from "@angular/material/select";
-import {MotionService} from "../motion/motion.service";
-import {ReportingComponent} from "../reporting/reporting.component";
-import {HttpErrorResponse} from "@angular/common/http";
-import {ActivatedRoute} from "@angular/router";
-import {MatSelect} from "@angular/material/select/select";
-import {MatButtonToggle} from "@angular/material/button-toggle";
+import {VideoComponent} from '../video/video.component';
+import {CameraStream} from '../cameras/Camera';
+import {CameraService, DateSlot, LocalMotionEvent, LocalMotionEvents} from '../cameras/camera.service';
+import {Subscription, timer} from 'rxjs';
+import {MatSelectChange} from '@angular/material/select';
+import {MotionService} from '../motion/motion.service';
+import {ReportingComponent} from '../reporting/reporting.component';
+import {HttpErrorResponse} from '@angular/common/http';
+import {ActivatedRoute} from '@angular/router';
+import {MatSelect} from '@angular/material/select/select';
+import {MatButtonToggle} from '@angular/material/button-toggle';
 import {UtilsService} from '../shared/utils.service';
 import {MatDatepickerInputEvent} from '@angular/material/datepicker';
 
@@ -21,11 +21,11 @@ declare global {
   }
 }
 
-Date.prototype.addDays = function (days: number): Date {
+Date.prototype.addDays = function(days: number): Date {
   let date: Date = new Date(this.valueOf());
   date.setDate(date.getDate() + days);
   return date;
-}
+};
 
 @Component({
   selector: 'app-recording-control',
@@ -38,23 +38,38 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   @ViewChild('selector') selector!: MatSelect;
   @ViewChild('recordingButtonGroup') recordingButtonGroup!: ElementRef<MatButtonToggle>;
   timerHandle!: Subscription;
-  private activeLiveUpdates!: Subscription;
   motionEvents!: LocalMotionEvent[];
   cs!: CameraStream;
-  manifest: string = "";
+  manifest: string = '';
   visible: boolean = false;
   noVideo: boolean = false;
   confirmDelete: boolean = false;
   downloading: boolean = false;
   paused: boolean = true;
-  selectedPlaybackMode: string = "startPause";
+  selectedPlaybackMode: string = 'startPause';
   isGuest: boolean = true;
   dateSlots: DateSlot[] = [];
   _selectedDate!: Date | null;
   _minDate!: Date;
   _maxDate!: Date;
+  //cs!: CameraStream;
+  initialised: boolean;
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService, private utilsService: UtilsService) {
+    // route.url.subscribe((u:UrlSegment[]) => {
+    // });
+    this.initialised = false;
+    this.route.paramMap.subscribe(() => {
+      let streamName: string = route.snapshot.params.streamName;
+      cameraSvc.getCameraStreams().forEach((cam) => {
+        if (cam.stream.media_server_input_uri.endsWith(streamName)) {
+          this.cs = cam;
+          if (this.initialised) {
+            this.setupRecording();
+          }
+        }
+      });
+    });
   }
 
   returnToStart() {
@@ -126,10 +141,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     //  the relevant part of the recording.
     //    this.checkForUrlParameters();
     // Check for selected camera (recording) from the nav bar menu, or URL parameters
-    let cs: CameraStream = this.cameraSvc.getActiveLive()[0];
     // If camera (recording) available, then load that video to the page
-    if (cs !== undefined) {
-      this.cs = cs;
+    if (this.cs !== undefined) {
       let video: VideoComponent | undefined = this.video;
       if (video !== undefined) {
         this.setUpVideoEventHandlers();
@@ -139,22 +152,24 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.selectedPlaybackMode = 'startPause';
 
         // Get the motion events for this camera (by motionName)
-        this.motionService.getMotionEvents(cs).subscribe((events: LocalMotionEvents) => {
+        this.motionService.getMotionEvents(this.cs).subscribe((events: LocalMotionEvents) => {
             this.dateSlots = this.createDateSlots(events);
             // Set to the most recent date
             if (this.dateSlots.length > 0) {
               let mostRecentDateSlot: DateSlot = this.dateSlots[this.dateSlots.length - 1];
               this._selectedDate = mostRecentDateSlot.date;
               this.setSelectorsAndVideoSource(mostRecentDateSlot.lme.events);
-            } else
+            } else {
               this.noVideo = true;
+            }
           },
           (error) => {
             this.reporting.errorMessage = error;
           });
       }
-    } else
+    } else {
       this.showInvalidInput(false);
+    }
   }
 
   /**
@@ -164,9 +179,9 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   showInvalidInput(inputValid: boolean): void {
     if (!inputValid) {
       this.reporting.errorMessage = new HttpErrorResponse({
-        error: "No recording has been specified",
+        error: 'No recording has been specified',
         status: 0,
-        statusText: "",
+        statusText: '',
         url: undefined
       });
     }
@@ -187,20 +202,20 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    */
   deleteRecording() {
     this.motionService.deleteRecording(this.cs.stream, this.manifest).subscribe(() => {
-        this.reporting.successMessage = "Recording " + this.selector.value.dateTime + " deleted";
+        this.reporting.successMessage = 'Recording ' + this.selector.value.dateTime + ' deleted';
         timer(2000).subscribe(() => this.setupRecording());  // Show the new latest recording
       },
       reason => {
         this.reporting.errorMessage = reason;
       }
-    )
+    );
   }
 
   async downloadRecording() {
     try {
       this.downloading = true;
       let blob: Blob = await this.motionService.downloadRecording(this.cs.stream, this.manifest);
-      saveAs(blob, this.manifest.replace('_.m3u8', '.mp4'))
+      saveAs(blob, this.manifest.replace('_.m3u8', '.mp4'));
     } catch (error) {
       let reader: FileReader = new FileReader();
       reader.onload = () => {
@@ -208,7 +223,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
           error: JSON.parse(reader.result as string),
           status: error.status
         });
-      }
+      };
       reader.readAsText(error.error);
     }
     this.downloading = false;
@@ -220,11 +235,11 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
       video.onpause = () => {
         this.paused = true;
-      }
+      };
 
       video.onplay = () => {
         this.paused = false;
-      }
+      };
     }
   }
 
@@ -244,14 +259,14 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       ds.date = new Date(Date.parse(localMotionEvents[0].dateTime));
       this._minDate = ds.date;
       localMotionEvents.forEach((lme) => {
-        if (lme.dateTime.substring(0, 6) === date)
+        if (lme.dateTime.substring(0, 6) === date) {
           ds.lme.events.push(lme);
-        else {
+        } else {
           ds = new DateSlot();
           result.push(ds);
           ds.date = new Date(Date.parse(lme.dateTime));
           date = lme.dateTime.substring(0, 6);
-          ds.lme.events.push(lme)
+          ds.lme.events.push(lme);
         }
       });
       this._maxDate = ds.date;
@@ -262,7 +277,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   dateFilter = (d: Date | null): boolean => {
     let ds: DateSlot | undefined = this.dateSlots.find((ds) => {
       return ds.date.getDate() === d?.getDate() && ds.date.getMonth() == d.getMonth() && ds.date.getFullYear() === d.getFullYear();
-    })
+    });
     return ds !== undefined;
   };
 
@@ -273,7 +288,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         return this._selectedDate?.getDate() === ds.date.getDate() &&
           this._selectedDate?.getMonth() == ds.date.getMonth() &&
           this._selectedDate.getFullYear() === ds.date.getFullYear();
-      })
+      });
       if (ds !== undefined && ds?.lme.events !== null) {
         this.setSelectorsAndVideoSource(ds.lme.events);
       }
@@ -290,16 +305,14 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   /**
    * minDate: Accessor returning type Date & string to satisfy [min] on the input element on the date picker.
    */
-  get minDate(): Date & string
-  {
+  get minDate(): Date & string {
     return this._minDate as Date & string;
   }
 
   /**
    * maxDate: Accessor returning type Date & string to satisfy [max] on the input element on the date picker.
    */
-  get maxDate(): Date & string
-  {
+  get maxDate(): Date & string {
     return this._maxDate as Date & string;
   }
 
@@ -308,7 +321,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     // Get the latest recording in the set
     let motionEvent: LocalMotionEvent | undefined = this.motionEvents && this.motionEvents.length > 0 ? this.motionEvents[this.motionEvents.length - 1] : undefined;
 
-    this.manifest = motionEvent ? motionEvent.manifest : "";
+    this.manifest = motionEvent ? motionEvent.manifest : '';
     if (motionEvent) {
       this.selector.writeValue(motionEvent);  // Make the selector show the correct event date/time
 
@@ -323,22 +336,26 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   ngOnInit(): void {
+    // this.route.queryParams.subscribe(queryParams => {
+    //   let x = queryParams;
+    //   // do something with the query params
+    // });
+    //
+    // this.route.params.subscribe(routeParams => {
+    //   routeParams.forEach((param: any) => {
+    //     let x = param;
+    //   })
+    //   this.setupRecording();
+    // });
   }
 
   ngAfterViewInit(): void {
-    // Call with timer to avoid expression changed after it was checked error
-    this.timerHandle = timer(100).subscribe(() => {
-      this.setupRecording()
-      this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => {
-        this.setupRecording();
-      });
-    });
     this.isGuest = this.utilsService.isGuestAccount;
+    this.setupRecording();
+    this.initialised = true;
   }
 
 
   ngOnDestroy(): void {
-    this.activeLiveUpdates?.unsubscribe();
-    this.timerHandle?.unsubscribe();
   }
 }
