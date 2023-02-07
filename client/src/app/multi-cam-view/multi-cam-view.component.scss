@@ -1,19 +1,13 @@
-div.controls-container {
-  width: fit-content;
+div.flex-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
 }
+
 div.flex-container-vid
 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-}
-
-div.setting-item {
-  width: fit-content;
-  height: 100%
 }
 
 app-live-container.multi-display-item {

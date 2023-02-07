@@ -44,7 +44,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setVideoStream(camStream: CameraStream): void {
     let suuid = 'suuid=';
-    let uri = camStream.stream.recording.recording_src_url;
+    let uri = camStream.stream.uri;
     let index = uri.indexOf(suuid);
     let streamName = uri.substring(index+suuid.length)
     window.location.href = '#/live/'+streamName;

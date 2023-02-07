@@ -1,36 +1,36 @@
-<div class="controls-container">
-        <div class="setting_item">
-          <mat-card class="camera-select mat-elevation-z8 hide-background">
-            <mat-card-title>
-              Select Camera streams
-            </mat-card-title>
-            <mat-card-content>
-              <ng-container *ngFor="let cam of cameras | keyvalue">
-                <section class="section">
+<div class="flex-container">
+  <div class="setting_item">
+    <mat-card class="camera-select mat-elevation-z8 hide-background">
+      <mat-card-title>
+        Select Camera streams
+      </mat-card-title>
+      <mat-card-content>
+        <ng-container *ngFor="let cam of cameras | keyvalue">
+          <section class="section">
                 <span>
                   <mat-icon>arrow_right</mat-icon>
                   {{cam.value.name}}
                 </span>
-                  <ul>
-                    <li *ngFor="let strm of cam.value.streams | keyvalue">
-                      <mat-checkbox [color]="'primary'" [checked]="strm.value.selected"
-                                    (change)="updateCameras($event, cam.value,  strm.value)">
-                        {{strm.value.descr}}
-                      </mat-checkbox>
-                    </li>
-                  </ul>
-                </section>
-              </ng-container>
-            </mat-card-content>
-          </mat-card>
-        </div>
-</div>
-      <app-reporting></app-reporting>
-  <div class="flex-container-vid">
-        <ng-container *ngFor="let cam of cameras | keyvalue">
-          <ng-container *ngFor="let strm of cam.value.streams| keyvalue; let i = index">
-            <app-video *ngIf="strm.value.selected" [isfmp4]="true"></app-video>
-          </ng-container>
+            <ul>
+              <li *ngFor="let strm of cam.value.streams | keyvalue">
+                <mat-checkbox [color]="'primary'" [checked]="strm.value.selected"
+                              (change)="updateCameras($event, cam.value,  strm.value)">
+                  {{strm.value.descr}}
+                </mat-checkbox>
+              </li>
+            </ul>
+          </section>
         </ng-container>
+      </mat-card-content>
+    </mat-card>
   </div>
+  <app-reporting></app-reporting>
+  <div class="flex-container-vid">
+    <ng-container *ngFor="let cam of cameras | keyvalue">
+      <ng-container *ngFor="let strm of cam.value.streams| keyvalue; let i = index">
+        <app-video *ngIf="strm.value.selected" [isfmp4]="true"></app-video>
+      </ng-container>
+    </ng-container>
+  </div>
+</div>
 
