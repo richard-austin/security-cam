@@ -30,7 +30,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.route.paramMap.subscribe((paramMap) => {
       let camera: string = paramMap.get('camera') as string;
       camera = atob(camera);
-      cameraSvc.loadCameras().subscribe(cams => {
+      let cams = cameraSvc.getCameras()
         cams.forEach((cam) => {
           if (cam.address == camera) {
             this.cam = new CameraStream();
@@ -72,7 +72,6 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         });
       });
-    });
   }
 
   cameraTypes: typeof cameraType = cameraType;
@@ -168,7 +167,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   hasError = (controlName: string, errorName: string): boolean => {
-    return this.camControlFormGroup.controls[controlName].hasError(errorName);
+    return this.camControlFormGroup?.controls[controlName].hasError(errorName);
   };
 
   anyInvalid(): boolean {
