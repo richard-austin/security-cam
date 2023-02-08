@@ -32,3 +32,24 @@ video.multi
   margin-right: -15px;
   margin-left: -15px;
 }
+
+div.latency-limit-selector {
+  position: relative;
+  top: -3px;
+  left: 25px;
+  >div {
+    visibility: visible;
+    position: absolute;
+    > span {
+      display: flex;
+      > label {
+        position: relative;
+        top: 3px;
+      }
+      > mat-select{
+        position: relative;
+        top: -40px;
+      }
+    }
+  }
+}

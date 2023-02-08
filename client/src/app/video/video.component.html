@@ -6,7 +6,24 @@
       </mat-card-title>
     </mat-card>
   </div>
-  <div class="row">
-    <video #video [ngClass]="{'multi': multi}" class="video"></video>
+  <div>
+    <video #video [ngClass]="{'multi': multi}" class="video">
+    </video>
+    <div *ngIf="isfmp4" class="latency-limit-selector">
+        <span matTooltip="Set upper latency chasing limit" matTooltipClass="tooltip">
+<!--          <label><mat-icon color="accent">timer</mat-icon></label>-->
+          <mat-select style="width: 90px;" #latencyLimitSelect (selectionChange)="setlatencyLim($event)">
+            <mat-option value="0.4">0.4</mat-option>
+            <mat-option value="0.6">0.6</mat-option>
+            <mat-option value="0.8"> 0.8</mat-option>
+            <mat-option value="1.0">1.0</mat-option>
+            <mat-option value="1.2">1.2</mat-option>
+            <mat-option value="1.4">1.4</mat-option>
+            <mat-option value="1.6">1.6</mat-option>
+            <mat-option value="1.8">1.8</mat-option>
+            <mat-option value="2.0">2.0</mat-option>
+          </mat-select>
+        </span>
+      </div>
+    </div>
   </div>
-</div>

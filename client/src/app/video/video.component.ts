@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraStream} from '../cameras/Camera';
-
+import {MatSelect, MatSelectChange } from '@angular/material/select';
 
 declare let Hls: any;
 
@@ -12,15 +12,17 @@ declare let Hls: any;
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
-
+  @ViewChild('latencyLimitSelect') llSelector!: MatSelect;
   @Input() isfmp4: boolean = false;
   camstream!: CameraStream;
   video!: HTMLVideoElement;
+
   hls: any = null;
   visible: boolean = false;
   recording: boolean = false;
   recordingUri: string = '';
   manifest: string = '';
+
 
 
 //  private isFullscreenNow: boolean = false;
@@ -119,8 +121,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   source_buffer!: SourceBuffer; // source_buffer instance
 
-  setlatencyLim(value: string) {
-    this.buffering_sec = Number(value);
+  setlatencyLim(val: MatSelectChange) {
+    this.buffering_sec = Number(val.value);
     // Update these accordingly
     this.buffering_sec_seek = this.buffering_sec * 0.9;
     this.buffering_sec_seek_distance = this.buffering_sec * 0.5;
@@ -285,25 +287,16 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // private fullScreenListener:() =>void = ():void => {
-  //   this.isFullscreenNow = document.fullscreenElement !== null
-  //   if(this.isFullscreenNow)
-  //     this.userIdle.stopWatching();
-  //   else
-  //     this.userIdle.startWatching();
-  // };
-  //
-
   ngOnInit(): void {
   }
 
   ngAfterViewInit(): void {
 
     this.video = this.videoEl.nativeElement;
+    this.llSelector.value = this.buffering_sec.toString();
     this.video.autoplay = true;
     this.video.muted = true;
     this.video.controls = true;
-
     // Stop the idle timeout if the video is being viewed full screen
     // this.video.addEventListener('fullscreenchange', this.fullScreenListener);
     // this.video.addEventListener('webkitfullscreenchange', this.fullScreenListener);
