@@ -6,11 +6,34 @@ import {ReportingComponent} from '../reporting/reporting.component';
 import {VideoComponent} from '../video/video.component';
 import {HttpErrorResponse} from '@angular/common/http';
 import {timer} from 'rxjs';
+import {animate, state, style, transition, trigger} from '@angular/animations';
 
 @Component({
   selector: 'app-multi-cam-view',
   templateUrl: './multi-cam-view.component.html',
-  styleUrls: ['./multi-cam-view.component.scss']
+  styleUrls: ['./multi-cam-view.component.scss'],
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
+    trigger('openClose', [
+      // ...
+      state('open', style({
+        transform: 'rotate(90deg)'
+      })),
+      state('closed', style({
+        transform: 'rotate(0deg)'
+      })),
+      transition('open => closed', [
+        animate('.2s')
+      ]),
+      transition('closed => open', [
+        animate('.2s')
+      ]),
+    ])
+  ]
 })
 export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren(VideoComponent) videos!: QueryList<VideoComponent>;
@@ -20,6 +43,10 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   cameras: Map<string, Camera> = new Map<string, Camera>();
+  showStreamSelector: boolean = false;
+  toggleStreamSelector() {
+      this.showStreamSelector = !this.showStreamSelector;
+  }
 
   setupVideo() {
     this.reporting.dismiss();
@@ -108,7 +135,26 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Now select this one. If the checkbox was clicked when checked, make sure it doesn't go unchecked (leaving all unchecked)
     $event.source.checked = stream.selected = true;
-    timer(10).subscribe(() => this.showSelected());
+
+    // Update the affected video
+    timer(10).subscribe(() => {
+      let index: number = 0;
+      this.cameras.forEach((cam) => {
+        cam.streams.forEach((stream) => {
+          if (camera.address === cam.address && stream.selected) {
+            let cs : CameraStream = new CameraStream();
+            cs.camera = cam;
+            cs.stream = stream;
+            let video: VideoComponent | undefined = this.videos?.get(index);
+            if (video !== undefined) {
+              video.setSource(cs);
+              video.visible = true;
+            }
+          }
+        });
+        ++index;
+      });
+    });
   }
 
   ngOnInit(): void {
@@ -120,4 +166,5 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
   }
+
 }

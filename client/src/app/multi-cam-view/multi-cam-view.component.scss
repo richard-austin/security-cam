@@ -1,6 +1,28 @@
+div.form-container {
+  position: absolute;
+  z-index: 3;
+  > div {
+    margin-left: 8px;
+    overflow: hidden;
+    background-color: #2d2d2d;
+    > div {
+      left: 70px;
+      > div {
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+
+        border-bottom: 10px solid #646363;
+      }
+    }
+  }
+}
+
 div.flex-container {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 div.flex-container-vid
