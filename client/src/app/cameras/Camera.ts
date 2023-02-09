@@ -45,9 +45,9 @@ export class Stream {
   netcam_uri: string = "";
   uri: string = "";
   media_server_input_uri: string = "";
-  audio_bitrate: number=0;
+  audio_bitrate: string="0";
   audio_encoding:string = "";
-  audio_sample_rate:number = 0;
+  audio_sample_rate:string = "0";
 
   motion: Motion = new Motion();
   video_width: number = 0;

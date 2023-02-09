@@ -293,7 +293,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
 
     this.video = this.videoEl.nativeElement;
-    this.llSelector.value = this.buffering_sec.toString();
+    if(this.isfmp4)
+      this.llSelector.value = this.buffering_sec.toString();
     this.video.autoplay = true;
     this.video.muted = true;
     this.video.controls = true;
