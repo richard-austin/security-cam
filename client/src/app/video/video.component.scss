@@ -37,7 +37,7 @@ div.latency-limit-selector {
 
   > div {
     height: 25px;
-    background-color: #3939f3;
+    background-color: #646363;
     border-top: #3939f3 1px solid;
     border-bottom: black 1px solid;
     border-left: black 1px solid;
@@ -50,9 +50,12 @@ div.latency-limit-selector {
       position: relative;
       top: 1px;
     }
-    > mat-select {
+    > select {
+      color: white;
+      background-color: #2d2d2d;
+      margin-right: 4px;
       position: relative;
-      top: -4px;
+      top: -8px;
     }
   }
 }

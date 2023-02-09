@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraStream} from '../cameras/Camera';
-import {MatSelect, MatSelectChange } from '@angular/material/select';
+import {MatSelect} from '@angular/material/select';
 
 declare let Hls: any;
 
@@ -121,8 +121,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   source_buffer!: SourceBuffer; // source_buffer instance
 
-  setlatencyLim(val: MatSelectChange) {
-    this.buffering_sec = Number(val.value);
+  setlatencyLim() {
+    this.buffering_sec = Number(this.buffering_sec);
     // Update these accordingly
     this.buffering_sec_seek = this.buffering_sec * 0.9;
     this.buffering_sec_seek_distance = this.buffering_sec * 0.5;
@@ -293,8 +293,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
 
     this.video = this.videoEl.nativeElement;
-    if(this.isfmp4)
-      this.llSelector.value = this.buffering_sec.toString();
+    // if(this.isfmp4)
+    //   this.llSelector.value = this.buffering_sec.toString();
     this.video.autoplay = true;
     this.video.muted = true;
     this.video.controls = true;
