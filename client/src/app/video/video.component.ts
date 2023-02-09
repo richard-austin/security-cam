@@ -98,7 +98,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   verbose: boolean = false;
   multi: boolean = false;
-  buffering_sec: number = 0.8; // Default value
+  buffering_sec: number = 1.2; // Default value, changeable from live video pages.
   buffering_sec_seek: number = this.buffering_sec * 0.9;
   // ..seek the stream if it's this much away or
   // from the last available timestamp
