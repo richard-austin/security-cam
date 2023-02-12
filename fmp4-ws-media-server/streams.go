@@ -77,7 +77,15 @@ func (s *Streams) put(suuid string, pckt Packet) error {
 			_ = fmt.Errorf(err.Error())
 		}
 		for _, packetStream := range stream.PcktStreams {
-			packetStream.ps <- pckt
+			length := len(packetStream.ps)
+			log.Tracef("%s channel length = %d", suuid, length)
+			select {
+			case packetStream.ps <- pckt:
+			default:
+				{
+					retVal = fmt.Errorf("client channel for %s has reached capacity (%d)", suuid, length)
+				}
+			}
 		}
 
 	} else {
