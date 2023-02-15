@@ -39,6 +39,10 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren(VideoComponent) videos!: QueryList<VideoComponent>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
 
+  expandedElement!: Camera | null;
+  cameraColumns = ['name', 'expand'];
+  streamColumns = ['select'];
+
   constructor(private cameraSvc: CameraService) {
   }
 
@@ -112,6 +116,9 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
     this.setupVideo();
+  }
+  toggle(el: { key: string, value: Camera }) {
+    this.expandedElement = this.expandedElement === el.value ? null : el.value;
   }
 
   /**
