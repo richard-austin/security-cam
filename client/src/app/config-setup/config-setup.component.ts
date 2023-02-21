@@ -204,7 +204,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
           descr: new FormControl({
             value: stream.descr,
             disabled: false
-          }, [Validators.required, Validators.maxLength(25), Validators.pattern("^[a-zA-Z0-9](_(?!(\\.|_|))|\\.(?!(_|\\.))|[a-zA-Z0-9 ]){0,18}[a-zA-Z0-9]$")]),
+          }, [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9\\ ]{2,20}$/)]),
           audio_bitrate: new FormControl(stream.audio_bitrate, [Validators.required, Validators.pattern(/^(0|8000|16000|24000|32000|40000|48000)$/)]),
           netcam_uri: new FormControl(stream.netcam_uri, [Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
           video_width: new FormControl({
@@ -336,19 +336,21 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       // Process the streams
       camera.streams.forEach((stream) => {
         if (isDevMode()) {  // Development mode
-          stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
-          stream.uri = "http://localhost:8009/nms/stream" + streamNum + ".flv";
+          stream.media_server_input_uri = "http://localhost:8085/live/stream?suuid=stream" + streamNum;
+          stream.uri = "ws://localhost:8085/ws/stream?suuid=stream" + streamNum;
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
 
           if (camera.ftp && streamKeyNum++ == 1) {
             stream.recording.enabled = true
+            stream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
             stream.motion.trigger_recording_on = '';
           } else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true;
+            stream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
             if (stream.motion.trigger_recording_on !== '') {
@@ -359,6 +361,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
                 // Set up the recording
                 if (recStream !== undefined) {
                   recStream.recording.enabled = true;
+                  recStream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + recStream.rec_num;
                   recStream.recording.uri = 'http://localhost:8084/recording/rec' + recStream.rec_num + '/';
                   recStream.recording.location = 'rec' + recStream.rec_num;
                 }
@@ -366,18 +369,20 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             }
           }
         } else {  // Production mode
-          stream.nms_uri = "rtmp://localhost:1935/nms/stream" + streamNum;
-          stream.uri = "/live/nms/stream" + streamNum + ".flv";
+          stream.media_server_input_uri = "http://localhost:8085/live/stream?suuid=stream" + streamNum;
+          stream.uri = "/ws/stream?suuid=stream" + streamNum;
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
           if (camera.ftp && streamKeyNum++ === 1) {
             stream.recording.enabled = true
+            stream.recording.recording_src_url ='http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = '/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
             stream.motion.trigger_recording_on = '';
           } else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true
+            stream.recording.recording_src_url ='http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = '/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
             if (stream.motion.trigger_recording_on !== '') {
@@ -389,6 +394,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
                 // Set up the recording
                 if (recStream !== undefined) {
                   recStream.recording.enabled = true;
+                  recStream.recording.recording_src_url ='http://localhost:8085/h/stream?suuid=stream' + recStream.rec_num;
                   recStream.recording.uri = '/recording/rec' + recStream.rec_num + '/';
                   recStream.recording.location = 'rec' + recStream.rec_num;
                 }

@@ -36,6 +36,7 @@ chmod 640 /etc/ssmtp/ssmtp.conf
 chown root:security-cam /etc/security-cam/cacert.jks /etc/security-cam/client.jks
 chmod 440 /etc/security-cam/cacert.jks /etc/security-cam/client.jks
 chown root:root /etc/security-cam/wifi-setup-service/*.py
+chown tomcat:tomcat -R /etc/fmp4-ws-media-server
 
 #A new group, security-cam, is added, then the users tomcat and sec-cam added to that group.
 # The security-cam group is then given group access to sec-cam and it's subdirectories. The user and group permissions are then set up.
@@ -53,6 +54,7 @@ chgrp -R security-cam /etc/security-cam/
 chown sec-cam:security-cam /var/log/motion
 chown tomcat:security-cam /var/log/security-cam
 chown tomcat:security-cam /var/log/camera-recordings-service
+chown tomcat:security-cam /var/log/fmp4-ws-media-service
 chown tomcat:security-cam /var/lib/tomcat
 
 chmod +x /etc/security-cam/start_hd_recording.sh || true
@@ -105,6 +107,8 @@ systemctl daemon-reload  # Register the motion service file change
 deb-systemd-invoke enable motion.service
 deb-systemd-invoke start motion.service
 deb-systemd-invoke enable nginx.service
+deb-systemd-invoke enable fmp4-ws-media-server
+deb-systemd-invoke start fmp4-ws-media-server
 
 deb-systemd-invoke enable wifimanagement.service
 deb-systemd-invoke start wifimanagement.service

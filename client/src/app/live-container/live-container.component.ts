@@ -1,11 +1,12 @@
-import {AfterViewInit, Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
-import {CameraService} from "../cameras/camera.service";
-import {Camera, CameraStream} from "../cameras/Camera";
-import {Subscription} from "rxjs";
-import {VideoComponent} from "../video/video.component";
-import {IdleTimeoutStatusMessage, UtilsService} from "../shared/utils.service";
-import {HttpErrorResponse} from "@angular/common/http";
-import {ReportingComponent} from "../reporting/reporting.component";
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {CameraService} from '../cameras/camera.service';
+import {Camera, CameraStream} from '../cameras/Camera';
+import {Subscription} from 'rxjs';
+import {VideoComponent} from '../video/video.component';
+import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
+import {HttpErrorResponse} from '@angular/common/http';
+import {ReportingComponent} from '../reporting/reporting.component';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-live-container',
@@ -13,46 +14,50 @@ import {ReportingComponent} from "../reporting/reporting.component";
   styleUrls: ['./live-container.component.scss']
 })
 export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() multi: boolean = false;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @ViewChildren(VideoComponent) videos!: QueryList<VideoComponent>;
+  @ViewChild(VideoComponent) video!: VideoComponent;
 
-  activeLiveUpdates!: Subscription;
   timerHandle!: Subscription;
+  cs!: CameraStream;
+  initialised: boolean;
 
-  constructor(private cameraSvc: CameraService, private utilsService: UtilsService) {
+  constructor(private route: ActivatedRoute, public cameraSvc: CameraService, private utilsService: UtilsService) {
+    this.initialised = false;
+    this.route.paramMap.subscribe((paramMap) => {
+      let streamName: string = paramMap.get('streamName') as string;
+      cameraSvc.getCameraStreams().forEach((cam) => {
+        if (cam.stream.media_server_input_uri.endsWith(streamName)) {
+          this.cs = cam;
+          if (this.initialised) {
+            this.setupVideo();
+          }
+        }
+      });
+    });
   }
 
   setupVideo() {
     this.reporting.dismiss();
-    this.videos.forEach((video) => {
-      video.multi = this.multi;
-      video.visible = false;
-      video.stop();
-    });
-    let index: number = 0;
-    if (this.cameraSvc.getActiveLive().length > 0) {
-      this.cameraSvc.getActiveLive().forEach((cam: CameraStream) => {
-        this.timerHandle?.unsubscribe();
-        if (cam !== undefined) {
-          let video: VideoComponent | undefined = this.videos?.get(index++);
-          if (video !== undefined) {
-            video.setSource(cam);
-            video.visible = true;
-          }
-        }
-      });
-    } else
+
+    this.video.visible = false;
+    this.timerHandle?.unsubscribe();
+    if (this.cs !== undefined) {
+      if (this.video !== undefined) {
+        this.video.setSource(this.cs);
+        this.video.visible = true;
+      }
+    }
+    else
       this.showInvalidInput();
   }
 
 
   hasPTZControls() {
-    return !this.multi && this.cameraSvc.getActiveLive()[0]?.camera?.ptzControls;
+    return this.cs?.camera?.ptzControls;
   }
 
   camera(): Camera | null {
-    return !this.multi ? this.cameraSvc.getActiveLive()[0]?.camera : null;
+    return this.cs?.camera;
   }
 
   /**
@@ -61,9 +66,9 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   showInvalidInput(): void {
     this.reporting.errorMessage = new HttpErrorResponse({
-      error: "No camera has been specified",
+      error: 'No camera has been specified',
       status: 0,
-      statusText: "",
+      statusText: '',
       url: undefined
     });
   }
@@ -75,13 +80,15 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit(): void {
-    this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => this.setupVideo());
-    if(!this.multi)
+    if(!this.initialised) {
+      this.initialised = true;
       this.setupVideo();
+    }
   }
 
+
   ngOnDestroy(): void {
-    this.activeLiveUpdates?.unsubscribe();
+    this.video.stop();
     this.timerHandle?.unsubscribe();
     // Re-enable the user idle service
     this.utilsService.sendMessage(new IdleTimeoutStatusMessage(true));

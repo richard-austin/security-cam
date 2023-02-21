@@ -299,20 +299,23 @@ class Handler(BaseHTTPRequestHandler):
                 # Options to start and stop the motion service. This requires root privileges
                 # hence using this module which is otherwise meant for Wi-Fi and network related control
 
-                case 'start_motion':
+                case 'start_services':
+                    executeOsCommand('systemctl start fmp4-ws-media-server.service', self.systemd_errors)
                     executeOsCommand('systemctl start motion.service', self.systemd_errors)
+                    executeOsCommand('systemctl start camera-recordings.service', self.systemd_errors)
                     self.returnResponse(200, {"result": "Motion service started"})
                     return
 
-                case 'stop_motion':
+                case 'stop_services':
                     executeOsCommand('systemctl stop motion.service', self.systemd_errors)
+                    executeOsCommand('systemctl stop camera-recordings.service', self.systemd_errors)
+                    executeOsCommand('systemctl stop fmp4-ws-media-server.service', self.systemd_errors)
                     self.returnResponse(200, {"result": "Motion service stopped"})
                     return
 
                 case _:
                     self.returnResponse(400, f"Unknown command {cmd['command']}")
                     return
-
 
         except Exception as ex:
             self.returnResponse(500, ex.__str__())

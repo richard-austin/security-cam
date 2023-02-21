@@ -14,14 +14,14 @@ import { ChangeEmailComponent } from './change-email/change-email.component';
 import {SetUpGuestAccountComponent} from "./set-up-guest-account/set-up-guest-account.component";
 
 const routes: Routes = [
-  {path: 'live', component: LiveContainerComponent},
-  {path: 'recording', component: RecordingControlComponent},
+  {path: 'live/:streamName', component: LiveContainerComponent},
+  {path: 'recording/:streamName', component: RecordingControlComponent},
   {path: 'multicam', component: MultiCamViewComponent},
   {path: 'changepassword', component: ChangePasswordComponent},
   {path: 'changeemail', component: ChangeEmailComponent},
   {path: 'about', component: AboutComponent},
   {path: 'setip', component: SetIpComponent},
-  {path: 'cameraparams', component: CameraParamsComponent},
+  {path: 'cameraparams/:camera', component: CameraParamsComponent},
   {path: 'configsetup', component: ConfigSetupComponent},
   {path: 'setupguestaccount', component: SetUpGuestAccountComponent},
   {path: 'dc', component: DrawdownCalcContainerComponent},

@@ -1,10 +1,10 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {SetCameraParams, UtilsService} from "../shared/utils.service";
-import {CameraService, cameraType} from "../cameras/camera.service";
-import {CameraParams, CameraStream} from "../cameras/Camera";
-import {Subscription} from "rxjs";
-import {ReportingComponent} from "../reporting/reporting.component";
-import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
+import {SetCameraParams, UtilsService} from '../shared/utils.service';
+import {CameraService, cameraType} from '../cameras/camera.service';
+import {CameraParams, CameraStream} from '../cameras/Camera';
+import {ReportingComponent} from '../reporting/reporting.component';
+import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-camera-params',
@@ -12,7 +12,6 @@ import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/form
   styleUrls: ['./camera-params.component.scss']
 })
 export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
-  private activeLiveUpdates!: Subscription;
   irselector!: AbstractControl;
   cameraName!: AbstractControl;
   dateFormat!: AbstractControl;
@@ -23,8 +22,56 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   model!: AbstractControl;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  cam!: CameraStream;
+  initialised: boolean;
 
-  constructor(private utils: UtilsService, private cameraSvc: CameraService) {
+  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private utils: UtilsService) {
+    this.initialised = false;
+    this.route.paramMap.subscribe((paramMap) => {
+      let camera: string = paramMap.get('camera') as string;
+      camera = atob(camera);
+      let cams = cameraSvc.getCameras()
+        cams.forEach((cam) => {
+          if (cam.address == camera) {
+            this.cam = new CameraStream();
+            this.cam.camera = cam;
+            this.camType() === cameraType.sv3c ?
+              this.camControlFormGroup = new FormGroup({
+                irselector: new FormControl('', [Validators.required]),
+                cameraName: new FormControl('', [Validators.required, Validators.maxLength(25)]),
+                dateFormat: new FormControl('', [Validators.required, Validators.maxLength(30)]),
+                startDate: new FormControl('', [Validators.required]),
+                softVersion: new FormControl('', [Validators.required]),
+                model: new FormControl('', [Validators.required])
+              }) :
+              this.camControlFormGroup = new FormGroup({
+                lampStatus: new FormControl('', [Validators.required]),
+                wdrStatus: new FormControl('', [Validators.required]),
+                cameraName: new FormControl('', [Validators.required, Validators.maxLength(25)]),
+                dateFormat: new FormControl('', [Validators.required, Validators.maxLength(30)]),
+                startDate: new FormControl('', [Validators.required]),
+                softVersion: new FormControl('', [Validators.required]),
+                model: new FormControl('', [Validators.required])
+              });
+            if (this.camType() === cameraType.sv3c) {
+              this.irselector = this.camControlFormGroup.controls['irselector'];
+            } else {
+              this.lampStatus = this.camControlFormGroup.controls['lampStatus'];
+              this.wdrStatus = this.camControlFormGroup.controls['wdrStatus'];
+            }
+            this.cameraName = this.camControlFormGroup.controls['cameraName'];
+            this.dateFormat = this.camControlFormGroup.controls['dateFormat'];
+            this.startDate = this.camControlFormGroup.controls['startDate'];
+            this.softVersion = this.camControlFormGroup.controls['softVersion'];
+            this.model = this.camControlFormGroup.controls['model'];
+
+            if (this.initialised) {
+              this.ngAfterViewInit();
+            }
+            return;
+          }
+        });
+      });
   }
 
   cameraTypes: typeof cameraType = cameraType;
@@ -32,26 +79,21 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   downloading: boolean = true;
   camControlFormGroup!: FormGroup;
   isGuest: boolean = true;
-  _reboot : boolean = false;
+  _reboot: boolean = false;
   _confirmReboot: boolean = false;
-
-  get cam(): CameraStream {
-    return this.cameraSvc.getActiveLive()[0];
-  }
 
   private getCameraParams() {
     this.reporting.dismiss();
     this.downloading = true;
-     if (this.cam && this.cam.camera.address !== undefined && this.cam.camera.cameraParamSpecs.uri !== undefined) {
+    if (this.cam && this.cam.camera.address !== undefined && this.cam.camera.cameraParamSpecs.uri !== undefined) {
       this.utils.cameraParams(this.cam.camera.address, this.cam.camera.cameraParamSpecs.uri, this.cam.camera.cameraParamSpecs.params).subscribe(
         result => {
           this.downloading = false;
           this.cameraParams = result;
           // Show the current IR setting
-          if(this.camType() === cameraType.sv3c)
+          if (this.camType() === cameraType.sv3c) {
             this.irselector.setValue(this.cameraParams.infraredstat);
-          else
-          {
+          } else {
             this.lampStatus.setValue(this.cameraParams.lamp_mode);
             this.wdrStatus.setValue(this.cameraParams.wdr);
           }
@@ -72,11 +114,12 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
              click on the shield icon beside the title (Cameras Configuration). You can then set the the user name and
              password which must be set the same on all cameras.
              `;
-          } else
+          } else {
             this.reporting.errorMessage = reason;
+          }
           this.downloading = false;
         }
-      )
+      );
     }
   }
 
@@ -102,16 +145,15 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.utils.setCameraParams(params).subscribe(() => {
         this.downloading = false;
         this._confirmReboot = this._reboot = false;
-        this.reporting.successMessage = "Update Successful"
+        this.reporting.successMessage = 'Update Successful';
 
         // Update the locally stored values
-      if(this.camType() === cameraType.sv3c)
-        this.cameraParams.infraredstat = this.irselector.value;
-      else
-      {
-        this.cameraParams.lamp_mode = this.lampStatus.value;
-        this.cameraParams.wdr = this.wdrStatus.value;
-      }
+        if (this.camType() === cameraType.sv3c) {
+          this.cameraParams.infraredstat = this.irselector.value;
+        } else {
+          this.cameraParams.lamp_mode = this.lampStatus.value;
+          this.cameraParams.wdr = this.wdrStatus.value;
+        }
         this.cameraParams.name_1 = this.cameraName.value;
         this._reboot = this._confirmReboot = false;
       },
@@ -125,104 +167,67 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   hasError = (controlName: string, errorName: string): boolean => {
-    return this.camControlFormGroup.controls[controlName].hasError(errorName);
-  }
+    return this.camControlFormGroup?.controls[controlName].hasError(errorName);
+  };
 
   anyInvalid(): boolean {
-    if(this.camType() === cameraType.sv3c)
+    if (this.camType() === cameraType.sv3c) {
       return this.irselector?.invalid || this.cameraName?.invalid;
-    else
+    } else {
       return this.lampStatus?.invalid || this.wdrStatus?.invalid;
+    }
   }
 
-  camType() : cameraType
-  {
-      return this.cam.camera.cameraParamSpecs.camType;
+  camType(): cameraType {
+    return this.cam.camera.cameraParamSpecs.camType;
   }
 
   anyChanged() {
     return this.camType() === cameraType.sv3c ?
-    this.irselector?.value !== this.cameraParams?.infraredstat
+      this.irselector?.value !== this.cameraParams?.infraredstat
       || this.cameraName?.value !== this.cameraParams?.name_1
       || this.dateFormat?.value !== this.cameraParams?.name_0
       :
       this.lampStatus?.value !== this.cameraParams?.lamp_mode
       || this.wdrStatus?.value !== this.cameraParams?.wdr
       || this.cameraName?.value !== this.cameraParams?.name_1
-      || this.dateFormat?.value !== this.cameraParams?.name_0
+      || this.dateFormat?.value !== this.cameraParams?.name_0;
   }
 
   ngOnInit(): void {
-    this.camType() === cameraType.sv3c ?
-      this.camControlFormGroup = new FormGroup({
-        irselector: new FormControl('', [Validators.required]),
-        cameraName: new FormControl('', [Validators.required, Validators.maxLength(25)]),
-        dateFormat: new FormControl('', [Validators.required, Validators.maxLength(30)]),
-        startDate: new FormControl('', [Validators.required]),
-        softVersion: new FormControl('', [Validators.required]),
-        model: new FormControl('', [Validators.required])
-      }) :
-      this.camControlFormGroup = new FormGroup({
-        lampStatus: new FormControl('', [Validators.required]),
-        wdrStatus: new FormControl('', [Validators.required]),
-        cameraName: new FormControl('', [Validators.required, Validators.maxLength(25)]),
-        dateFormat: new FormControl('', [Validators.required, Validators.maxLength(30)]),
-        startDate: new FormControl('', [Validators.required]),
-        softVersion: new FormControl('', [Validators.required]),
-        model: new FormControl('', [Validators.required])
-      });
-
     this.isGuest = this.utils.isGuestAccount;
   }
 
   ngAfterViewInit(): void {
-    if(this.camType() === cameraType.sv3c)
-      this.irselector = this.camControlFormGroup.controls['irselector'];
-    else{
-      this.lampStatus = this.camControlFormGroup.controls['lampStatus'];
-      this.wdrStatus = this.camControlFormGroup.controls['wdrStatus'];
-    }
-    this.cameraName = this.camControlFormGroup.controls['cameraName'];
-    this.dateFormat = this.camControlFormGroup.controls['dateFormat'];
-    this.startDate = this.camControlFormGroup.controls['startDate'];
-    this.softVersion = this.camControlFormGroup.controls['softVersion'];
-    this.model = this.camControlFormGroup.controls['model'];
-
     this.getCameraParams();
-    // This event reinitialises the form when the camera reference is changes and allows changing form layout when necessary
-    if(this.activeLiveUpdates === undefined)
-      this.activeLiveUpdates = this.cameraSvc.getActiveLiveUpdates().subscribe(() => {this.ngOnInit(); this.ngAfterViewInit()});
+    this.initialised = true;
   }
 
   ngOnDestroy(): void {
-    this.activeLiveUpdates.unsubscribe();
   }
 
   confirmReboot() {
     this._confirmReboot = true;
-    if(this.camType() === cameraType.sv3c)
+    if (this.camType() === cameraType.sv3c) {
       this.irselector.disable();
-    else
-    {
+    } else {
       this.lampStatus.disable();
       this.wdrStatus.disable();
     }
     this.cameraName.disable();
-   }
+  }
 
-   reboot()
-   {
-     this._reboot = true;
-     this.updateParams();
-     this.cancelReboot();
-   }
+  reboot() {
+    this._reboot = true;
+    this.updateParams();
+    this.cancelReboot();
+  }
 
   cancelReboot() {
-    this._confirmReboot = this._reboot = false
-    if(this.camType() === cameraType.sv3c)
+    this._confirmReboot = this._reboot = false;
+    if (this.camType() === cameraType.sv3c) {
       this.irselector.enable();
-    else
-    {
+    } else {
       this.lampStatus.enable();
       this.wdrStatus.enable();
     }

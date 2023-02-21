@@ -1,2 +1,2 @@
-include 'client', 'server', 'generateProductKey'
+include 'client', 'server', 'fmp4-ws-media-server', 'generateProductKey'
 

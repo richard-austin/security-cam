@@ -1,10 +1,35 @@
-div.flex-container {
-  display: inline-flex;
-  flex-wrap: wrap;
+div.form-container {
+  position: absolute;
+  z-index: 3;
+  > div {
+    margin-left: 8px;
+    overflow: hidden;
+    background-color: #2d2d2d;
+    > div {
+      left: 70px;
+      > div {
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+
+        border-bottom: 10px solid #646363;
+      }
+    }
+  }
 }
 
-div.setting-item {
-  flex-grow: 1;
+div.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+div.flex-container-vid
+{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 app-live-container.multi-display-item {
@@ -13,7 +38,9 @@ app-live-container.multi-display-item {
 
 mat-card.camera-select
 {
-  min-width: 18rem;
+  width: 16rem;
+  max-height: 48rem;
+  overflow-y: auto;
   > mat-card-content{
     padding-left: 1rem;
     padding-bottom: 1rem;
@@ -25,16 +52,38 @@ mat-card.camera-select
   }
 }
 
-mat-card-content
-{
-  padding-top: 1rem;
+tr.detail-row {
+  height: 0;
 }
 
-ul {
-  list-style-type: none;
-  margin-top: 4px;
-}
+
+.element-detail {
+   overflow: hidden;
+   display: flex;
+ }
 
 .section {
   margin: 12px 0;
+}
+
+
+.streams-info {
+  min-width: 10rem;
+  margin-bottom: 1rem;
+  background-color: #1e1b3d;
+}
+
+.expand {
+  position: relative;
+  font-size: xx-large;
+}
+
+td, th {
+  padding-left: 1rem !important;
+}
+tr.mat-header-row {
+  height: 2rem !important;
+}
+tr.mat-row {
+  height:fit-content !important;
 }

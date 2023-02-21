@@ -1,0 +1,13 @@
+[Unit]
+Description=fmp4 media service
+After=network.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=tomcat
+ExecStart=/etc/fmp4-ws-media-server/fmp4-ws-media-server_arm64
+
+[Install]
+WantedBy=multi-user.target

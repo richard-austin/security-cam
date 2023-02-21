@@ -1,6 +1,5 @@
-video.video
-{
-  @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px){
+video.video {
+  @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px) {
     width: 700px;
   }
   @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
@@ -14,9 +13,8 @@ video.video
 }
 
 // Smaller video size in multi display
-video.multi
-{
-    max-width: 700px;
+video.multi {
+  max-width: 700px;
 }
 
 .mx-auto {
@@ -31,4 +29,33 @@ video.multi
   flex-wrap: wrap;
   margin-right: -15px;
   margin-left: -15px;
+}
+
+div.latency-limit-selector {
+  display: flex;
+  justify-content: center;
+
+  > div {
+    height: 25px;
+    background-color: #646363;
+    border-top: #3939f3 1px solid;
+    border-bottom: black 1px solid;
+    border-left: black 1px solid;
+    border-right: black 1px solid;
+    display: block;
+    position: relative;
+    top: -5px;
+    > label {
+      margin-right: 5px;
+      position: relative;
+      top: 1px;
+    }
+    > select {
+      color: white;
+      background-color: #2d2d2d;
+      margin-right: 4px;
+      position: relative;
+      top: -8px;
+    }
+  }
 }

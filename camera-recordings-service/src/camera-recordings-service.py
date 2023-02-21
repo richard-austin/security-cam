@@ -75,7 +75,7 @@ class FTPAndVideoFileProcessor(FTPHandler):
     def on_file_received(self, file):
         # do something when a file has been received
         logger.info(f"File received: {file}")
-        self.convert264File(file)
+        self.triggerRecordingFromFTPFile(file)
 
     def on_incomplete_file_sent(self, file):
         # do something when a file is partially sent
@@ -94,10 +94,11 @@ class FTPAndVideoFileProcessor(FTPHandler):
     """
     def finish_recording(self, subproc: subprocess, location: str):
         subproc.send_signal(signal.SIGINT)
-        print(f"Recording ended for {location}")
+        subproc.wait()
+        logger.info(f"Recording ended for {location}")
         self.processDict.pop(location)
 
-    def convert264File(self, path: str):
+    def triggerRecordingFromFTPFile(self, path: str):
         f = open("/var/security-cam/cameras.json")
         location: str = ""
 
@@ -113,20 +114,22 @@ class FTPAndVideoFileProcessor(FTPHandler):
                     cam_type: CameraType = camera['cameraParamSpecs']['camType']
                     first_stream = next(iter(camera['streams']))
                     location = camera['streams'][first_stream]['recording']['location']
-                    nms_uri = camera['streams'][first_stream]['nms_uri']
+                    recording_src_url = camera['streams'][first_stream]['recording']['recording_src_url']
                     epoch_time = int(time.time())
                     match cam_type:
                         case CameraType.sv3c.value:
                             ffmpeg_cmd = (
-                                f"ffmpeg -i {nms_uri} -t 01:00:00 -an -c:v copy -level 3.0" 
-                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -f hls /var/security-cam/" 
-                                f"{location}/{location}-{epoch_time}_.m3u8")
+                                f"ffmpeg -i {recording_src_url} -t 01:00:00 -an -c:v copy -level 3.0" 
+                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type fmp4"
+                                f" -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
+                                f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")
 
-                        case CameraType.zxtechMCW5B10X.value:  # Need to prevent double speed layback with this camera
+                        case CameraType.zxtechMCW5B10X.value:
                             ffmpeg_cmd = (
-                                f"ffmpeg -i {nms_uri} -t 01:00:00 -c:a aac -ar 16000 -c:v copy -level 3.0" 
-                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -f hls /var/security-cam/" 
-                                f"{location}/{location}-{epoch_time}_.m3u8")
+                                f"ffmpeg -i {recording_src_url} -t 01:00:00 -c:a copy -c:v copy -level 3.0"
+                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type fmp4"
+                                f" -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
+                                f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")
                         case _:
                             logger.warning(f"No camera type for file {path}, deleting it")
                             os.remove(path)
