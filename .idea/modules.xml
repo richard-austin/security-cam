@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Python3/Python3.iml" filepath="$PROJECT_DIR$/Python3/Python3.iml" />
       <module fileurl="file://$PROJECT_DIR$/camera-recordings-service/camera-recordings-service.iml" filepath="$PROJECT_DIR$/camera-recordings-service/camera-recordings-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/security-cam.iml" filepath="$PROJECT_DIR$/.idea/modules/security-cam.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/client/security-cam.client.iml" filepath="$PROJECT_DIR$/.idea/modules/client/security-cam.client.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/security-cam.server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/server/security-cam.server.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/wifi-setup-service/wifi-setup-service.iml" filepath="$PROJECT_DIR$/wifi-setup-service/wifi-setup-service.iml" />
     </modules>
