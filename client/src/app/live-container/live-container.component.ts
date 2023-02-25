@@ -90,7 +90,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   ngOnDestroy(): void {
     this.video.stop();
     this.timerHandle?.unsubscribe();
-    // Re-enable the user idle service
-    this.utilsService.sendMessage(new IdleTimeoutStatusMessage(true));
+    // Disable the user idle service
+    this.utilsService.sendMessage(new IdleTimeoutStatusMessage(false));
   }
 }
