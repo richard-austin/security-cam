@@ -175,7 +175,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Disable the user idle service
-    this.utilsService.sendMessage(new IdleTimeoutStatusMessage(false));
+    // Re-enable the user idle service
+    this.utilsService.sendMessage(new IdleTimeoutStatusMessage(true));
   }
 }
