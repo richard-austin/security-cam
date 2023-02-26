@@ -224,7 +224,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     // Log off when time is up.
     this.userIdle.onTimeout().subscribe(() => {
       this.idleTimeoutDialogRef.close();
-      window.location.href = 'logoff';
+      this.logOff(true);
     });
 
     // Gets the core temperature every minute (Raspberry pi only), and keeps the session alive
