@@ -19,7 +19,7 @@ export class MyIp {
   myIp: string = "";
 }
 
-export enum messageType {idleTimeoutStatus}
+export enum messageType {idleTimeoutStatus, logoff}
 
 export abstract class Message {
   protected constructor(messageType: messageType) {
@@ -37,6 +37,12 @@ export class IdleTimeoutStatusMessage extends Message {
   }
 
   active: boolean = true;
+}
+
+export class LogoffMessage extends Message {
+  constructor() {
+    super(messageType.logoff);
+  }
 }
 
 export class GuestStatus {
