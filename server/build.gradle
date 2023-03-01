@@ -97,7 +97,7 @@ dependencies {
     implementation "org.grails.plugins:events"
     implementation "org.grails.plugins:hibernate5"
     implementation "org.hibernate:hibernate-core"
-    implementation 'com.google.code.gson:gson:2.8.7'
+    implementation 'com.google.code.gson:gson:2.8.9'
 
     implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.1'
     implementation "org.grails.plugins:gsp"
