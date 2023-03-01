@@ -11,6 +11,7 @@ const PROXY_CONFIG = [
       "/wifiUtils",
       "/cloudProxy",
       "/ptz",
+      "/stomp",
       "/dc"
     ],
     target: "http://localhost:8080/",
