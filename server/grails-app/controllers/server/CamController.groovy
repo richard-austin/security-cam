@@ -4,6 +4,7 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
 import security.cam.CamService
+import security.cam.CameraAdminPageHostingService
 import security.cam.LogService
 import security.cam.ValidationErrorService
 import security.cam.commands.SetAccessCredentialsCommand
@@ -18,13 +19,15 @@ class CamController {
     CamService camService
     LogService logService
     ValidationErrorService validationErrorService
-
+    CameraAdminPageHostingService cameraAdminPageHostingService
     /**
      * getCameras: Get all cameras defined in the application.yml file
      * @return
      */
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getCameras() {
+        def config = cameraAdminPageHostingService.config
+
         ObjectCommandResponse cameras = camService.getCameras()
 
         if(cameras.status != PassFail.PASS)
