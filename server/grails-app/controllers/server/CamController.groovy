@@ -26,7 +26,7 @@ class CamController {
      */
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getCameras() {
-        def config = cameraAdminPageHostingService.config
+        cameraAdminPageHostingService.setUpHttpServers()
 
         ObjectCommandResponse cameras = camService.getCameras()
 
