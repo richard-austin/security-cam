@@ -8,6 +8,7 @@ import org.apache.http.config.SocketConfig
 import org.apache.http.entity.BasicHttpEntity
 import org.apache.http.impl.bootstrap.HttpServer
 import org.apache.http.impl.bootstrap.ServerBootstrap
+import org.apache.http.message.BasicRequestLine
 import org.apache.http.protocol.HttpContext
 import org.apache.http.protocol.HttpRequestHandler
 import security.cam.interfaceobjects.StdErrorExceptionLogger
@@ -28,6 +29,7 @@ class CameraAdminPageHostingService {
                 .build()
 
         port = 9900
+        CamAdminRequestHandler requestHandler = new CamAdminRequestHandler()
 
         final server = ServerBootstrap.bootstrap()
                 .setListenerPort(port)
@@ -36,7 +38,7 @@ class CameraAdminPageHostingService {
                 .setSocketConfig(config)
         //     .setSslContext(sslcontext)
                 .setExceptionLogger(new StdErrorExceptionLogger(logService))
-                .registerHandler("*", new CamAdminRequestHandler())
+                .registerHandler("*", requestHandler)
                 .create()
 
         server.start()
@@ -47,23 +49,58 @@ class CameraAdminPageHostingService {
                 .setSocketConfig(config)
         //     .setSslContext(sslcontext)
                 .setExceptionLogger(new StdErrorExceptionLogger(logService))
-                .registerHandler("*", new CamAdminRequestHandler())
+                .registerHandler("/getAccessToken",requestHandler)
                 .create()
 
         server2.start()
 
-        def x = config
     }
 
     class CamAdminRequestHandler implements HttpRequestHandler {
+        Set<String> accessTokens = new HashSet<>()
         @Override
         void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
-            def x = request.getProperties()
-            BasicHttpEntity entity = x['entity'] as BasicHttpEntity
-            byte[] b = new byte[1000]
-            entity.content.read(b)
-            String z = new String(b, StandardCharsets.UTF_8)
-            def t = z
+            BasicRequestLine requestLine
+            BasicHttpEntity entity
+
+            def properties = request.getProperties()
+            if(properties.containsKey('requestLine'))
+                requestLine = properties.get('requestLine') as BasicRequestLine
+            else
+                throw new HttpException("No request line found")
+            if(properties.containsKey('entity'))
+                entity = properties.get('entity') as BasicHttpEntity
+            else
+                throw new HttpException("No entity found")
+
+            switch (requestLine.uri) {
+                case '/getAccessToken':
+                    def is1 = entity.getContent()
+                    byte[] b = new byte [entity.getContentLength()]
+                    is1.read(b)
+                    def clientRequest = new String(b, StandardCharsets.UTF_8)
+                    if(clientRequest == 'get-access-token') {
+                        String token = getAccessToken()
+                        accessTokens.add(token)
+
+                        BasicHttpEntity ent = new BasicHttpEntity()
+                        InputStream is = new ByteArrayInputStream(token.getBytes())
+                        ent.setContent(is)
+                        ent.setContentLength(token.length())
+                        response.setEntity(ent)
+                    }
+                    else
+                    {
+                        response.setReasonPhrase("Incorrectly formed request")
+                        response.statusCode= 400
+                    }
+                    break
+            }
+        }
+
+        String getAccessToken() {
+            UUID uuid = UUID.randomUUID()
+            return uuid.toString()
         }
     }
 }
