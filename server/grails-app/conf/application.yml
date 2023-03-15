@@ -148,16 +148,16 @@ environments:
     mail:
       smtp:
         auth: true
-        username: rdaustin@virginmedia.com
-        password: DC10plus
+        username: richard.david.austin@gmail.com
+        password: zuwdvhlcodazouzy
         starttls:
           enable: true
         ssl:
           protocols: TLSv1.2
-          trust: smtp.virginmedia.com
-        host: smtp.virginmedia.com
+          trust: smtp.gmail.com
+        host: smtp.gmail.com
         port: 587
-        fromaddress: rdaustin@virginmedia.com
+        fromaddress: richard.david.austin@gmail.com
 
     test:
       dataSource:
@@ -219,13 +219,13 @@ environments:
     mail:
       smtp:
         auth: true
-        username: rdaustin@virginmedia.com
-        password: DC10plus
+        username: richard.david.austin@gmail.com
+        password: zuwdvhlcodazouzy
         starttls:
           enable: true
         ssl:
           protocols: TLSv1.2
-          trust: smtp.virginmedia.com
-        host: smtp.virginmedia.com
+          trust: smtp.gmail.com
+        host: smtp.gmail.com
         port: 587
-        fromaddress: rdaustin@virginmedia.com
+        fromaddress: richard.david.austin@gmail.com
