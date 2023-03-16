@@ -125,7 +125,7 @@ environments:
     camerasHomeDirectory: /var/security-cam
     recordingsHomeDirectory: /var/security-cam
     myipFileLocation: /var/security-cam/myip
-    logLevel: DEBUG
+    logLevel: TRACE
 
     motion:
       configDir: /var/security-cam/motion/conf.d
