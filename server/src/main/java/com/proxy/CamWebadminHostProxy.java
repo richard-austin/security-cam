@@ -107,17 +107,16 @@ public class CamWebadminHostProxy {
                     server.configureBlocking(true);
                     while (server.isOpen() && (server.read(reply)) != -1) {
                         reply.flip();
-                        String x = "Reply: " + new String(reply.array(), StandardCharsets.UTF_8);
-                        logService.getCam().trace(x);
-                        // Only set the session cookie if the response was 200 OK, and it's not already set
+                        // Only set the session cookie if it's not already set
                         if (++pass == 1) {
-                            //String httpHeader = getHTTPHeader(reply);
                             if(!Objects.equals(currentSessionId.get(), newSessionId)) {
                                 AtomicReference<ByteBuffer> arReply = new AtomicReference<>();
-                                if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + newSessionId))
+                                if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + newSessionId+"; path=/"))
                                     reply = arReply.get();
                             }
                         }
+                        String x = "Reply: " + new String(reply.array(), StandardCharsets.UTF_8);
+                        logService.getCam().trace(x);
                         client.write(reply);
                         reply.clear();
                     }
