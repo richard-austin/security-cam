@@ -24,24 +24,28 @@ public class CamWebadminHostProxy {
      * It will run a single-threaded proxy server on
      * the provided local port.
      */
-    public void runServer(String host, int remotePort, int localport)
-            throws IOException {
-        // Creating a ServerSocket to listen for connections with
-        try (ServerSocketChannel s = ServerSocketChannel.open()) {
-            s.bind(new InetSocketAddress(localport));
-            while (true) {
-                SocketChannel client;
-                try {
-                    // Wait for a connection on the local port
-                    client = s.accept();
+    public void runServer(String host, int remotePort, int localport) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            // Creating a ServerSocket to listen for connections with
+            try (ServerSocketChannel s = ServerSocketChannel.open()) {
+                s.bind(new InetSocketAddress(localport));
+                while (true) {
+                    SocketChannel client;
+                    try {
+                        // Wait for a connection on the local port
+                        client = s.accept();
 
-                    requestProcessing(client, host, remotePort);
-                } catch (Exception ex) {
-                    logService.getCam().error(ex.getClass().getName() + " in runServer: " + ex.getMessage());
-                    break;
+                        requestProcessing(client, host, remotePort);
+                    } catch (Exception ex) {
+                        logService.getCam().error(ex.getClass().getName() + " in runServer: " + ex.getMessage());
+                        break;
+                    }
                 }
             }
-        }
+            catch(Exception ex) {
+                logService.getCam().error(ex.getClass().getName() + " in runServer (exiting thread): " + ex.getMessage());
+            }
+        });
     }
 
     void requestProcessing(@NotNull SocketChannel client, String host, int remotePort) {
