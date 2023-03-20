@@ -24,7 +24,7 @@ public class CamWebadminHostProxy {
      * It will run a single-threaded proxy server on
      * the provided local port.
      */
-    public void runServer(String host, int remotePort, int localport) {
+    public void runServer(int localport) {
         Executors.newSingleThreadExecutor().execute(() -> {
             // Creating a ServerSocket to listen for connections with
             try (ServerSocketChannel s = ServerSocketChannel.open()) {
@@ -35,32 +35,33 @@ public class CamWebadminHostProxy {
                         // Wait for a connection on the local port
                         client = s.accept();
 
-                        requestProcessing(client, host, remotePort);
+                        requestProcessing(client);
                     } catch (Exception ex) {
                         logService.getCam().error(ex.getClass().getName() + " in runServer: " + ex.getMessage());
                         break;
                     }
                 }
-            }
-            catch(Exception ex) {
+            } catch (Exception ex) {
                 logService.getCam().error(ex.getClass().getName() + " in runServer (exiting thread): " + ex.getMessage());
             }
         });
     }
 
-    void requestProcessing(@NotNull SocketChannel client, String host, int remotePort) {
-        Executors.newSingleThreadExecutor().execute(() -> handleClientRequest(client, host, remotePort));
+    void requestProcessing(@NotNull SocketChannel client) {
+        Executors.newSingleThreadExecutor().execute(() -> handleClientRequest(client));
     }
 
-    private void handleClientRequest(@NotNull SocketChannel client, String host, int remotePort) {
+    private void handleClientRequest(@NotNull SocketChannel client) {
         try {
             final ByteBuffer request = ByteBuffer.allocate(1024);
             ByteBuffer reply = ByteBuffer.allocate(4096);
+            final Object lock = new Object();
+
             // Create a connection to the real server.
             // If we cannot connect to the server, send an error to the
             // client, disconnect, and continue waiting for connections.
-            try (SocketChannel server = SocketChannel.open()) {
-                server.connect(new InetSocketAddress(host, remotePort));
+            try {
+                SocketChannel server = SocketChannel.open();
                 final AtomicReference<String> currentSessionId = new AtomicReference<>();
                 final String newSessionId = "lodfidfhwerrofgifhrfgkjfgbgkjp";
                 // a thread to read the client's requests and pass them
@@ -72,9 +73,14 @@ public class CamWebadminHostProxy {
                         while (client.read(request) != -1) {
                             request.flip();
                             if (++pass == 1) {
+                                String httpHeader = getHTTPHeader(request);
+                                server.connect(new InetSocketAddress("192.168.1.30", 80));
+                                synchronized (lock) {
+                                    lock.notify();
+                                }
                                 String cookie = getHeader(request, "Cookie");
                                 currentSessionId.set(getSessionId(cookie));
-                             }
+                            }
                             String x = "Request: " + new String(request.array(), StandardCharsets.UTF_8);
                             logService.getCam().trace(x);
                             int bytesWritten = 0;
@@ -104,18 +110,27 @@ public class CamWebadminHostProxy {
                     }
                 });
 
+                try {
+                    synchronized (lock) {
+                        lock.wait();
+                    }
+                } catch (Exception ex) {
+                    Object x = ex;
+                }
+
                 // Read the server's responses
                 // and pass them back to the client.
                 try {
+
                     int pass = 0;
                     server.configureBlocking(true);
                     while (server.isOpen() && (server.read(reply)) != -1) {
                         reply.flip();
                         // Only set the session cookie if it's not already set
                         if (++pass == 1) {
-                            if(!Objects.equals(currentSessionId.get(), newSessionId)) {
+                            if (!Objects.equals(currentSessionId.get(), newSessionId)) {
                                 AtomicReference<ByteBuffer> arReply = new AtomicReference<>();
-                                if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + newSessionId+"; path=/"))
+                                if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + newSessionId + "; path=/"))
                                     reply = arReply.get();
                             }
                         }
@@ -142,6 +157,7 @@ public class CamWebadminHostProxy {
             } catch (IOException e) {
                 logService.getCam().error("IOException in handleClientRequest when opening socket channel: " + e.getMessage());
             }
+
         } finally {
             try {
                 client.close();
@@ -191,18 +207,17 @@ public class CamWebadminHostProxy {
         // Check there is a double CRLF
         BinarySearcher bs = new BinarySearcher();
         List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf);
-        if(indexList.size()>0) {
+        if (indexList.size() > 0) {
             // Find the first crlf
             indexList = bs.searchBytes(byteBuffer.array(), crlf);
-            if(indexList.size() > 0)
-            {
+            if (indexList.size() > 0) {
                 String firstLine = new String(byteBuffer.array(), 0, indexList.get(0));
-                if(firstLine.contains("HTTP"))
+                if (firstLine.contains("HTTP"))
                     httpHeader = firstLine;
             }
         }
 
-        return  httpHeader;
+        return httpHeader;
     }
 
     boolean addHeader(@NotNull ByteBuffer src, AtomicReference<ByteBuffer> arDest, @NotNull String key, @NotNull String value) {
