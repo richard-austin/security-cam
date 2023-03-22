@@ -8,15 +8,19 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CamWebadminHostProxy {
     ILogService logService;
+    final Map<String, AccessDetails> accessDetailsMap;
 
     public CamWebadminHostProxy(ILogService logService) {
+        accessDetailsMap = new HashMap<>();
         this.logService = logService;
     }
 
@@ -73,6 +77,7 @@ public class CamWebadminHostProxy {
                         while (client.read(request) != -1) {
                             request.flip();
                             if (++pass == 1) {
+                                AccessDetails ad = getAccessDetails(request);
                                 String httpHeader = getHTTPHeader(request);
                                 server.connect(new InetSocketAddress("192.168.1.30", 80));
                                 synchronized (lock) {
@@ -121,7 +126,6 @@ public class CamWebadminHostProxy {
                 // Read the server's responses
                 // and pass them back to the client.
                 try {
-
                     int pass = 0;
                     server.configureBlocking(true);
                     while (server.isOpen() && (server.read(reply)) != -1) {
@@ -166,6 +170,18 @@ public class CamWebadminHostProxy {
             }
         }
     }
+
+    private AccessDetails getAccessDetails(ByteBuffer request) {
+        AccessDetails retVal = null;
+        // Check for an access token in the URL
+        String httpHeader = getHTTPHeader(request);
+        if (httpHeader.contains("?accessToken=")) {
+
+        }
+
+        return retVal;
+    }
+
 
     String getHeader(@NotNull ByteBuffer byteBuffer, @NotNull String key) {
         final byte[] crlfcrlf = {'\r', '\n', '\r', '\n'};
@@ -259,5 +275,29 @@ public class CamWebadminHostProxy {
                 retVal = cookies.substring(startIdx + key.length());
         }
         return retVal;
+    }
+
+    public void addAccessToken(IGetAccessTokenCommand cmd, String accessToken) {
+        AccessDetails ad = new AccessDetails(cmd.getHost(), cmd.getPort(), AccessDetails.eAuthType.basic);
+        accessDetailsMap.put(accessToken, ad);
+        ad.setTimer(accessToken, accessDetailsMap);
+    }
+
+    /**
+     * restTimer: Is called periodically by the client to prevent the access token from timing out. When the client navigates
+     * away or is closed, the access token will be removed by the timer.
+     *
+     * @param cmd: Contains the access token
+     */
+    public boolean resetTimer(IResetTimerCommand cmd) {
+        synchronized (accessDetailsMap) {
+            boolean retVal = true;
+            if (accessDetailsMap.containsKey(cmd.getAccessToken())) {
+                AccessDetails ad = accessDetailsMap.get(cmd.getAccessToken());
+                ad.resetTimer();
+            } else
+                retVal = false;
+            return retVal;
+        }
     }
 }

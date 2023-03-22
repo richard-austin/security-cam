@@ -3,6 +3,10 @@ package security.cam
 import com.proxy.CamWebadminHostProxy
 import grails.gorm.transactions.Transactional
 import org.apache.http.config.SocketConfig
+import security.cam.commands.GetAccessTokenCommand
+import security.cam.commands.ResetTimerCommand
+import security.cam.enums.PassFail
+import security.cam.interfaceobjects.ObjectCommandResponse
 
 import javax.annotation.PostConstruct
 
@@ -11,16 +15,45 @@ class CameraAdminPageHostingService {
     LogService logService
     SocketConfig config
     int port = 9900
+    CamWebadminHostProxy proxy
 
     @PostConstruct
     def initialize() {
-        CamWebadminHostProxy proxy = new CamWebadminHostProxy(logService)
-        proxy.runServer("192.168.1.30", 80, port)
+        proxy = new CamWebadminHostProxy(logService)
+        proxy.runServer(port)
     }
 
-    String getAccessToken() {
-        UUID uuid = UUID.randomUUID()
-        return uuid.toString()
+    def getAccessToken(GetAccessTokenCommand cmd) {
+        final ObjectCommandResponse response = new ObjectCommandResponse()
+
+        try {
+            UUID uuid = UUID.randomUUID()
+            proxy.addAccessToken(cmd, uuid.toString())
+            response.responseObject = uuid.toString()
+        }
+        catch(Exception ex)
+        {
+            response.status= PassFail.FAIL
+            response.error = ex.getClass().getName()+" in getAccessToken: "+ex.getMessage()
+            logService.cam.error(response.error)
+        }
+        return response
+    }
+
+    def resetTimer(ResetTimerCommand cmd) {
+        final ObjectCommandResponse response = new ObjectCommandResponse()
+
+        try {
+            if(!proxy.resetTimer(cmd))
+                throw new Exception("No such accessToken "+cmd.accessToken)
+        }
+        catch(Exception ex)
+        {
+            response.status= PassFail.FAIL
+            response.error = ex.getClass().getName()+" in resetTimer: "+ex.getMessage()
+            logService.cam.error(response.error)
+        }
+        return response
     }
 }
 
