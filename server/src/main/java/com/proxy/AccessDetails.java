@@ -13,12 +13,14 @@ public class AccessDetails {
     int cameraPort;
     eAuthType authType;
     final long maxTime = 36000;
+    boolean hasCookie;
 
     AccessDetails(String cameraHost, int cameraPort, eAuthType authType) {
         this.cameraHost = cameraHost;
         this.cameraPort = cameraPort;
         this.authType = authType;
         timer = new Timer();
+        hasCookie = false;
     }
 
     String accessToken;
@@ -35,7 +37,20 @@ public class AccessDetails {
         timer = new Timer();
         timer.schedule(new RemoveAccessTokenTask(accessToken, map), maxTime);
     }
+
+    void setHasCookie() {
+        hasCookie = true;
+    }
+
+    boolean getHasCookie() {
+        return hasCookie;
+    }
+
+    String getAccessToken() {
+        return accessToken;
+    }
 }
+
 
 class RemoveAccessTokenTask extends TimerTask {
     final String accessToken;

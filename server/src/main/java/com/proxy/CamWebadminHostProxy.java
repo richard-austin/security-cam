@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -66,8 +65,9 @@ public class CamWebadminHostProxy {
             // client, disconnect, and continue waiting for connections.
             try {
                 SocketChannel server = SocketChannel.open();
-                final AtomicReference<String> currentSessionId = new AtomicReference<>();
-                final String newSessionId = "lodfidfhwerrofgifhrfgkjfgbgkjp";
+//                final AtomicReference<String> currentSessionId = new AtomicReference<>();
+//                final AtomicReference<String> newSessionId = new AtomicReference<>();
+                final AtomicReference<AccessDetails> accessDetails = new AtomicReference<>();
                 // a thread to read the client's requests and pass them
                 // to the server. A separate thread for asynchronous.
                 Executors.newSingleThreadExecutor().execute(() -> {
@@ -77,14 +77,13 @@ public class CamWebadminHostProxy {
                         while (client.read(request) != -1) {
                             request.flip();
                             if (++pass == 1) {
-                                AccessDetails ad = getAccessDetails(request);
-                                String httpHeader = getHTTPHeader(request);
-                                server.connect(new InetSocketAddress("192.168.1.30", 80));
+                                accessDetails.set(getAccessDetails(request));
+                                AccessDetails ad = accessDetails.get();
+ //                               newSessionId.set(ad.accessToken);
+                                server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
                                 synchronized (lock) {
                                     lock.notify();
                                 }
-                                String cookie = getHeader(request, "Cookie");
-                                currentSessionId.set(getSessionId(cookie));
                             }
                             String x = "Request: " + new String(request.array(), StandardCharsets.UTF_8);
                             logService.getCam().trace(x);
@@ -106,6 +105,9 @@ public class CamWebadminHostProxy {
                         }
                         logService.getCam().error("IOException in handleClientRequest when in write request loop: " + e.getMessage());
                     }
+                    catch(Exception ex) {
+                        logService.getCam().error(ex.getClass().getName() + " in handleClientRequest: " + ex.getMessage());
+                    }
                     // the client closed the connection to us, so close our
                     // connection to the server.
                     try {
@@ -119,8 +121,7 @@ public class CamWebadminHostProxy {
                     synchronized (lock) {
                         lock.wait();
                     }
-                } catch (Exception ex) {
-                    Object x = ex;
+                } catch (Exception ignore) {
                 }
 
                 // Read the server's responses
@@ -132,9 +133,10 @@ public class CamWebadminHostProxy {
                         reply.flip();
                         // Only set the session cookie if it's not already set
                         if (++pass == 1) {
-                            if (!Objects.equals(currentSessionId.get(), newSessionId)) {
+                            if (!accessDetails.get().getHasCookie()) {
+                                accessDetails.get().setHasCookie();
                                 AtomicReference<ByteBuffer> arReply = new AtomicReference<>();
-                                if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + newSessionId + "; path=/"))
+                                if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + accessDetails.get().getAccessToken() + "; path=/"))
                                     reply = arReply.get();
                             }
                         }
@@ -171,14 +173,32 @@ public class CamWebadminHostProxy {
         }
     }
 
+    /**
+     * getAccessDetails: Check first for an accessToken in the url. If present, look up the access detail using
+     *  m                the token as a key.
+     * @param request: The request bytes from the client
+     * @return Access details for the key, or null if not found.
+     */
     private AccessDetails getAccessDetails(ByteBuffer request) {
         AccessDetails retVal = null;
         // Check for an access token in the URL
         String httpHeader = getHTTPHeader(request);
-        if (httpHeader.contains("?accessToken=")) {
+        final String tokenKey = "?accessToken=";
+        if (httpHeader.contains(tokenKey)) {
+            final int lengthOfAccessToken = 36;
+            final int idx = httpHeader.indexOf(tokenKey)+tokenKey.length();
+            final String accessToken = httpHeader.substring(idx, idx+lengthOfAccessToken);
+            if(accessDetailsMap.containsKey(accessToken))
+                retVal = accessDetailsMap.get(accessToken);
+        }
+        else
+        {
+            final String cookie = getHeader(request, "Cookie");
+            final String sessionId = getSessionId(cookie);
+            if(accessDetailsMap.containsKey(sessionId))
+                retVal = accessDetailsMap.get(sessionId);
 
         }
-
         return retVal;
     }
 
