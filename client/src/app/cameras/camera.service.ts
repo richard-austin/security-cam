@@ -262,4 +262,15 @@ export class CameraService {
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
+
+  getAccessToken(cameraHost:string, port:number) :Observable<{accessToken: string}> {
+    let params:{} = {host: cameraHost, port: port}
+    return this.http.post<{accessToken: string}>(this._baseUrl.getLink("cam", "getAccessToken"), params, this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+  resetTimer(accessToken: string): Observable<void> {
+    let params:{} = {accessToken: accessToken}
+    return this.http.post<void>(this._baseUrl.getLink("cam", "resetTimer"), params, this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
 }

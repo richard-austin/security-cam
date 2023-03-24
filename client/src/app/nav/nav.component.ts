@@ -63,6 +63,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/cameraparams/' + btoa(cam.address);
   }
 
+  cameraAdmin(cam: Camera) {
+    window.location.href = '#/camadmin/' + btoa(cam.address);
+  }
+
   changePassword() {
     window.location.href = '#/changepassword';
   }

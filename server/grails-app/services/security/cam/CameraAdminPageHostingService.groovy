@@ -1,14 +1,17 @@
 package security.cam
 
 import com.proxy.CamWebadminHostProxy
+import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import org.apache.http.config.SocketConfig
+import org.springframework.context.annotation.Bean
 import security.cam.commands.GetAccessTokenCommand
 import security.cam.commands.ResetTimerCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
 import javax.annotation.PostConstruct
+import java.beans.beancontext.BeanContext
 
 @Transactional
 class CameraAdminPageHostingService {
@@ -29,7 +32,9 @@ class CameraAdminPageHostingService {
         try {
             UUID uuid = UUID.randomUUID()
             proxy.addAccessToken(cmd, uuid.toString())
-            response.responseObject = uuid.toString()
+            Map<String, String> map = new HashMap<>()
+            map.put('accessToken', uuid.toString())
+            response.responseObject = map as JSON
         }
         catch(Exception ex)
         {

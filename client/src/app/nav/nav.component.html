@@ -39,7 +39,11 @@
     </div>
 
     <div>
-      <button mat-button [matMenuTriggerFor]="menuCameraSettings">Camera Settings</button>
+      <button mat-button [matMenuTriggerFor]="cameraSettings">Camera Settings</button>
+      <mat-menu #cameraSettings="matMenu">
+        <button mat-menu-item [matMenuTriggerFor]="menuCameraSettings">Quick Camera Setup</button>
+        <button mat-menu-item [matMenuTriggerFor]="menuCameraAdmin">Camera Admin</button>
+      </mat-menu>
       <mat-menu #menuCameraSettings="matMenu">
         <ng-container *ngFor="let cam of cameras">
           <button *ngIf="cam.address!=''&&cam.cameraParamSpecs.camType !== cameraTypes.none" mat-menu-item
@@ -48,9 +52,17 @@
           </button>
         </ng-container>
       </mat-menu>
+      <mat-menu #menuCameraAdmin="matMenu">
+        <ng-container *ngFor="let cam of cameras">
+          <button *ngIf="cam.address!=''&&cam.cameraParamSpecs.camType !== cameraTypes.none" mat-menu-item
+                  (click)="cameraAdmin(cam);menuClosed()">
+            {{cam.name}}
+          </button>
+        </ng-container>
+      </mat-menu>
+
     </div>
 
-    <!--    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass" class="mx-auto temp">Core Temp: {{temperature}} °C</div>-->
     <div>
       <button mat-button [matMenuTriggerFor]="menuGeneral">General</button>
       <mat-menu #menuGeneral="matMenu">

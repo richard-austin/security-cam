@@ -138,7 +138,7 @@ class CamController {
             if(response.status != PassFail.PASS)
                 render (status: 500, text: response.error)
             else
-                render (status: 200, text: response.responseObject)
+                render (status: 200, text: (response.responseObject as JSON))
         }
     }
 }

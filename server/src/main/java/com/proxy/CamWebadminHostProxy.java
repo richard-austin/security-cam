@@ -17,6 +17,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class CamWebadminHostProxy {
     ILogService logService;
     final Map<String, AccessDetails> accessDetailsMap;
+    final byte[] crlf = {'\r', '\n'};
+    final byte[] crlfcrlf = {'\r', '\n', '\r', '\n'};
+    final byte[] colonSpace = {':', ' '};
 
     public CamWebadminHostProxy(ILogService logService) {
         accessDetailsMap = new HashMap<>();
@@ -28,6 +31,7 @@ public class CamWebadminHostProxy {
      * the provided local port.
      */
     public void runServer(int localport) {
+
         Executors.newSingleThreadExecutor().execute(() -> {
             // Creating a ServerSocket to listen for connections with
             try (ServerSocketChannel s = ServerSocketChannel.open()) {
@@ -56,7 +60,6 @@ public class CamWebadminHostProxy {
 
     private void handleClientRequest(@NotNull SocketChannel client) {
         try {
-            final ByteBuffer request = ByteBuffer.allocate(1024);
             ByteBuffer reply = ByteBuffer.allocate(4096);
             final Object lock = new Object();
 
@@ -65,31 +68,45 @@ public class CamWebadminHostProxy {
             // client, disconnect, and continue waiting for connections.
             try {
                 SocketChannel server = SocketChannel.open();
-//                final AtomicReference<String> currentSessionId = new AtomicReference<>();
-//                final AtomicReference<String> newSessionId = new AtomicReference<>();
                 final AtomicReference<AccessDetails> accessDetails = new AtomicReference<>();
                 // a thread to read the client's requests and pass them
                 // to the server. A separate thread for asynchronous.
                 Executors.newSingleThreadExecutor().execute(() -> {
+                    ByteBuffer request = ByteBuffer.allocate(1024);
                     try {
                         int pass = 0;
+
                         client.configureBlocking(true);
                         while (client.read(request) != -1) {
                             request.flip();
+                            if(request.limit() == request.capacity())
+                            {
+                                // Didn't read all, so grow the buffer and get some more
+                                ByteBuffer newBuffer = ByteBuffer.allocate(request.limit()+1024);
+                                newBuffer.put(request.array());
+                                request = newBuffer;
+                                continue;
+                            }
+
                             if (++pass == 1) {
                                 accessDetails.set(getAccessDetails(request));
                                 AccessDetails ad = accessDetails.get();
- //                               newSessionId.set(ad.accessToken);
                                 server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
                                 synchronized (lock) {
                                     lock.notify();
                                 }
                             }
-                            String x = "Request: " + new String(request.array(), StandardCharsets.UTF_8);
+                            AtomicReference<ByteBuffer> newReq = new AtomicReference<>();
+                            ByteBuffer req;
+//                            if(modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost))
+//                                req = newReq.get();
+//                            else
+                                req = request;
+                            String x = "Request: " + new String(req.array(), StandardCharsets.UTF_8);
                             logService.getCam().trace(x);
                             int bytesWritten = 0;
-                            while (bytesWritten < request.limit()) {
-                                int val = server.write(request);
+                            while (bytesWritten < req.limit()) {
+                                int val = server.write(req);
                                 if (val == -1)
                                     break;
                                 bytesWritten += val;
@@ -104,8 +121,7 @@ public class CamWebadminHostProxy {
                             logService.getCam().error(ex.getClass().getName() + " in handleClientRequest when writing request: " + ex.getMessage());
                         }
                         logService.getCam().error("IOException in handleClientRequest when in write request loop: " + e.getMessage());
-                    }
-                    catch(Exception ex) {
+                    } catch (Exception ex) {
                         logService.getCam().error(ex.getClass().getName() + " in handleClientRequest: " + ex.getMessage());
                     }
                     // the client closed the connection to us, so close our
@@ -119,7 +135,7 @@ public class CamWebadminHostProxy {
 
                 try {
                     synchronized (lock) {
-                        lock.wait();
+                       lock.wait();
                     }
                 } catch (Exception ignore) {
                 }
@@ -175,7 +191,8 @@ public class CamWebadminHostProxy {
 
     /**
      * getAccessDetails: Check first for an accessToken in the url. If present, look up the access detail using
-     *  m                the token as a key.
+     * m                the token as a key.
+     *
      * @param request: The request bytes from the client
      * @return Access details for the key, or null if not found.
      */
@@ -186,16 +203,14 @@ public class CamWebadminHostProxy {
         final String tokenKey = "?accessToken=";
         if (httpHeader.contains(tokenKey)) {
             final int lengthOfAccessToken = 36;
-            final int idx = httpHeader.indexOf(tokenKey)+tokenKey.length();
-            final String accessToken = httpHeader.substring(idx, idx+lengthOfAccessToken);
-            if(accessDetailsMap.containsKey(accessToken))
+            final int idx = httpHeader.indexOf(tokenKey) + tokenKey.length();
+            final String accessToken = httpHeader.substring(idx, idx + lengthOfAccessToken);
+            if (accessDetailsMap.containsKey(accessToken))
                 retVal = accessDetailsMap.get(accessToken);
-        }
-        else
-        {
+        } else {
             final String cookie = getHeader(request, "Cookie");
             final String sessionId = getSessionId(cookie);
-            if(accessDetailsMap.containsKey(sessionId))
+            if (accessDetailsMap.containsKey(sessionId))
                 retVal = accessDetailsMap.get(sessionId);
 
         }
@@ -204,9 +219,6 @@ public class CamWebadminHostProxy {
 
 
     String getHeader(@NotNull ByteBuffer byteBuffer, @NotNull String key) {
-        final byte[] crlfcrlf = {'\r', '\n', '\r', '\n'};
-        final byte[] crlf = {'\r', '\n'};
-        final byte[] colonSpace = {':', ' '};
         String retVal = "";
         try {
             BinarySearcher bs = new BinarySearcher();
@@ -238,8 +250,6 @@ public class CamWebadminHostProxy {
 
     String getHTTPHeader(@NotNull ByteBuffer byteBuffer) {
         String httpHeader = "";
-        final byte[] crlfcrlf = {'\r', '\n', '\r', '\n'};
-        final byte[] crlf = {'\r', '\n'};
         // Check there is a double CRLF
         BinarySearcher bs = new BinarySearcher();
         List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf);
@@ -257,8 +267,6 @@ public class CamWebadminHostProxy {
     }
 
     boolean addHeader(@NotNull ByteBuffer src, AtomicReference<ByteBuffer> arDest, @NotNull String key, @NotNull String value) {
-        final byte[] crlf = {'\r', '\n'};
-        final byte[] colonSpace = {':', ' '};
         boolean retVal = false;
         ByteBuffer dest = ByteBuffer.allocate(src.limit() + key.length() + colonSpace.length + value.length() + crlf.length);
         BinarySearcher bs = new BinarySearcher();
@@ -280,6 +288,38 @@ public class CamWebadminHostProxy {
             retVal = true;
         }
         return retVal;
+    }
+
+    boolean removeHeader(@NotNull ByteBuffer src, AtomicReference<ByteBuffer> arDest, @NotNull String key) {
+        boolean retVal = false;
+        BinarySearcher bs = new BinarySearcher();
+        // Find the first CRLF in the source buffer
+        List<Integer> indexList = bs.searchBytes(src.array(), key.getBytes());
+        if (indexList.size() > 0) {
+            final int startIdx = indexList.get(0);
+            indexList = bs.searchBytes(src.array(), crlf, startIdx);
+            if (indexList.size() > 0) {
+                final int endIdx = indexList.get(0) + crlf.length;
+                final ByteBuffer dest = ByteBuffer.allocate(src.limit() - (endIdx - startIdx));
+                dest.put(src.array(), 0, startIdx);
+                dest.put(src.array(), endIdx, src.limit() - endIdx);
+                arDest.set(dest);
+                retVal = true;
+            }
+        }
+        return retVal;
+    }
+
+    boolean modifyHeader(@NotNull ByteBuffer src, AtomicReference<ByteBuffer> arDest, @NotNull String key, @NotNull String newValue) {
+        boolean retVal = false;
+        AtomicReference<ByteBuffer> headerRemoved = new AtomicReference<>();
+        // First remove the existing header
+        if(removeHeader(src, headerRemoved, key))
+            // Then add with the required new value
+            retVal = addHeader(headerRemoved.get(), arDest, key, newValue);
+
+        System.out.print(new String(headerRemoved.get().array(), 0, headerRemoved.get().limit()));
+         return retVal;
     }
 
     String getSessionId(@NotNull String cookies) {
