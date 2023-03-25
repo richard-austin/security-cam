@@ -36,7 +36,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
     if(this.cam !== undefined)
       this.cameraSvc.getAccessToken(this.cam.address, this.defaultPort).subscribe((result) => {
         this.accessToken = result.accessToken;
-        this.hostServiceUrl = this.domSanitizer.bypassSecurityTrustResourceUrl('http://localhost:9900/?accessToken='+this.accessToken)
+        this.hostServiceUrl = this.domSanitizer.bypassSecurityTrustResourceUrl(window.location.protocol+'//'+window.location.hostname+':9900/?accessToken='+this.accessToken)
         //window.open('http://192.168.1.207:9900/?accessToken='+this.accessToken);
         this.intervalSubscription = interval(10000).subscribe(() => {
           this.cameraSvc.resetTimer(this.accessToken).subscribe(() => {},

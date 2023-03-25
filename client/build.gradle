@@ -13,6 +13,12 @@ task bootRun(type: NpmTask, dependsOn: 'npmInstall') {
     description = 'Start client side server'
     args = ['run', 'startProxy']
 }
+// Same as bootRun but binds server to 0.0.0.0 instead of localhost
+task bootRunOnNetwork(type: NpmTask, dependsOn: 'npmInstall') {
+  group = 'application'
+  description = 'Start client side server'
+  args = ['run', 'startProxyNetwork']
+}
 
 task test(type: NpmTask, dependsOn: 'npmInstall') {
     group = 'verification'

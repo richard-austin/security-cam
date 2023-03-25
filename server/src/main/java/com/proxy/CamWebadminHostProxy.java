@@ -96,14 +96,17 @@ public class CamWebadminHostProxy {
                                     lock.notify();
                                 }
                             }
+
+                            String x = "\nRequest before modifyHeader: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
+                            logService.getCam().trace(x);
                             AtomicReference<ByteBuffer> newReq = new AtomicReference<>();
                             ByteBuffer req;
-//                            if(modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost))
-//                                req = newReq.get();
-//                            else
+                            if(modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost))
+                                req = newReq.get();
+                            else
                                 req = request;
-                            String x = "Request: " + new String(req.array(), StandardCharsets.UTF_8);
-                            logService.getCam().trace(x);
+                            String xyz = "\nRequest: " + new String(req.array(), 0, req.limit(), StandardCharsets.UTF_8);
+                            logService.getCam().trace(xyz);
                             int bytesWritten = 0;
                             while (bytesWritten < req.limit()) {
                                 int val = server.write(req);
@@ -152,11 +155,11 @@ public class CamWebadminHostProxy {
                             if (!accessDetails.get().getHasCookie()) {
                                 accessDetails.get().setHasCookie();
                                 AtomicReference<ByteBuffer> arReply = new AtomicReference<>();
-                                if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + accessDetails.get().getAccessToken() + "; path=/"))
+                                if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + accessDetails.get().getAccessToken() + "; path=/; HttpOnly"))
                                     reply = arReply.get();
                             }
                         }
-                        String x = "Reply: " + new String(reply.array(), StandardCharsets.UTF_8);
+                        String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
                         logService.getCam().trace(x);
                         client.write(reply);
                         reply.clear();
@@ -318,7 +321,7 @@ public class CamWebadminHostProxy {
             // Then add with the required new value
             retVal = addHeader(headerRemoved.get(), arDest, key, newValue);
 
-        System.out.print(new String(headerRemoved.get().array(), 0, headerRemoved.get().limit()));
+     //   System.out.print(new String(headerRemoved.get().array(), 0, headerRemoved.get().limit()));
          return retVal;
     }
 
