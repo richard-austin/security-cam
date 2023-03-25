@@ -4,20 +4,19 @@ import com.proxy.CamWebadminHostProxy
 import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import org.apache.http.config.SocketConfig
-import org.springframework.context.annotation.Bean
 import security.cam.commands.GetAccessTokenCommand
 import security.cam.commands.ResetTimerCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 
 import javax.annotation.PostConstruct
-import java.beans.beancontext.BeanContext
+
 
 @Transactional
 class CameraAdminPageHostingService {
     LogService logService
     SocketConfig config
-    int port = 9900
+    int port = 8446
     CamWebadminHostProxy proxy
 
     @PostConstruct

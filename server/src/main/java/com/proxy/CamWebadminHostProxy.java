@@ -60,7 +60,7 @@ public class CamWebadminHostProxy {
 
     private void handleClientRequest(@NotNull SocketChannel client) {
         try {
-            ByteBuffer reply = ByteBuffer.allocate(4096);
+            ByteBuffer reply = ByteBuffer.allocate(5000);
             final Object lock = new Object();
 
             // Create a connection to the real server.
@@ -72,22 +72,13 @@ public class CamWebadminHostProxy {
                 // a thread to read the client's requests and pass them
                 // to the server. A separate thread for asynchronous.
                 Executors.newSingleThreadExecutor().execute(() -> {
-                    ByteBuffer request = ByteBuffer.allocate(1024);
-                    try {
+                     ByteBuffer request = ByteBuffer.allocate(5000);
+                     try {
                         int pass = 0;
 
                         client.configureBlocking(true);
                         while (client.read(request) != -1) {
                             request.flip();
-                            if(request.limit() == request.capacity())
-                            {
-                                // Didn't read all, so grow the buffer and get some more
-                                ByteBuffer newBuffer = ByteBuffer.allocate(request.limit()+1024);
-                                newBuffer.put(request.array());
-                                request = newBuffer;
-                                continue;
-                            }
-
                             if (++pass == 1) {
                                 accessDetails.set(getAccessDetails(request));
                                 AccessDetails ad = accessDetails.get();
@@ -123,7 +114,7 @@ public class CamWebadminHostProxy {
                         } catch (Exception ex) {
                             logService.getCam().error(ex.getClass().getName() + " in handleClientRequest when writing request: " + ex.getMessage());
                         }
-                        logService.getCam().error("IOException in handleClientRequest when in write request loop: " + e.getMessage());
+                        logService.getCam().error("IOException in handleClientRequest when in read request loop: " + e.getMessage());
                     } catch (Exception ex) {
                         logService.getCam().error(ex.getClass().getName() + " in handleClientRequest: " + ex.getMessage());
                     }
