@@ -106,15 +106,14 @@ public class CamWebadminHostProxy {
                                 bytesWritten += val;
                             }
                             synchronized (lock) {
-                               lock.notify();
+                                lock.notify();
                             }
                             req.clear();
                         }
                     } catch (IOException ignore) {
                     } catch (Exception ex) {
                         logService.getCam().error(ex.getClass().getName() + " in handleClientRequest: " + ex.getMessage());
-                    }
-                    finally {
+                    } finally {
                         CamWebadminHostProxy.recycle(req);
                     }
                     // the client closed the connection to us, so close our
@@ -372,5 +371,15 @@ public class CamWebadminHostProxy {
     public static synchronized void recycle(ByteBuffer buf) {
         buf.clear();
         bufferQueue.add(buf);
+    }
+
+    void pushState(final ByteBuffer buf, final Stack<Integer> bufferStateStack) {
+        bufferStateStack.push(buf.position());
+        bufferStateStack.push(buf.limit());
+    }
+
+    private void pullState(final ByteBuffer buf, final Stack<Integer> bufferStateStack) {
+        buf.limit(bufferStateStack.pop());
+        buf.position(bufferStateStack.pop());
     }
 }
