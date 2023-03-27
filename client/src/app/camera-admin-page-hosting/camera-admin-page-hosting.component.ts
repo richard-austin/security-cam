@@ -19,6 +19,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
   hostServiceUrl!: SafeResourceUrl;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   private readonly defaultPort: number =80; // TODO: Probably need to set the port in the camera info as it may not always be 80
+  private initialised: boolean = false;
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private domSanitizer: DomSanitizer) {
     this.route.paramMap.subscribe((paramMap) => {
       let camera: string = paramMap.get('camera') as string;
@@ -29,6 +30,8 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
           this.cam = cam;
         }
       });
+      if(this.initialised)
+        this.ngOnInit();
     });
   }
 
@@ -38,7 +41,6 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
       this.cameraSvc.getAccessToken(this.cam.address, this.defaultPort).subscribe((result) => {
         this.accessToken = result.accessToken;
         this.hostServiceUrl = this.domSanitizer.bypassSecurityTrustResourceUrl(window.location.protocol+'//'+window.location.hostname+':'+environment.camAdminHostPort+'/?accessToken='+this.accessToken)
-        //window.open('http://192.168.1.207:8446/?accessToken='+this.accessToken);
         this.intervalSubscription = interval(10000).subscribe(() => {
           this.cameraSvc.resetTimer(this.accessToken).subscribe(() => {},
             error => {
@@ -49,6 +51,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
       reason => {
         this.reporting.errorMessage = reason;
       })
+    this.initialised = true;
   }
 
   ngAfterViewInit(): void {
