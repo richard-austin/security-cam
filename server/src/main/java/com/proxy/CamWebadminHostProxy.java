@@ -10,6 +10,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,6 +22,7 @@ public class CamWebadminHostProxy {
     final byte[] colonSpace = {':', ' '};
     final private static Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
     public static final int BUFFER_SIZE = 10000;
+    final ExecutorService requestProcessing = Executors.newCachedThreadPool();
 
     public CamWebadminHostProxy(ILogService logService) {
         accessDetailsMap = new HashMap<>();
@@ -56,7 +58,7 @@ public class CamWebadminHostProxy {
     }
 
     void requestProcessing(@NotNull SocketChannel client) {
-        Executors.newSingleThreadExecutor().execute(() -> handleClientRequest(client));
+        requestProcessing.submit(() -> handleClientRequest(client));
     }
 
     private void handleClientRequest(@NotNull SocketChannel client) {
@@ -72,11 +74,11 @@ public class CamWebadminHostProxy {
                 final AtomicReference<AccessDetails> accessDetails = new AtomicReference<>();
                 // a thread to read the client's requests and pass them
                 // to the server. A separate thread for asynchronous.
-                Executors.newSingleThreadExecutor().execute(() -> {
-                     ByteBuffer request = CamWebadminHostProxy.getBuffer();
-                     ByteBuffer req = null;
-                     try {
-                        int pass = 0;
+                requestProcessing.submit(() -> {
+                    ByteBuffer request = CamWebadminHostProxy.getBuffer();
+                    ByteBuffer req = null;
+                    try {
+                        long pass = 0;
 
                         client.configureBlocking(true);
                         while (client.read(request) != -1) {
@@ -85,9 +87,6 @@ public class CamWebadminHostProxy {
                                 accessDetails.set(getAccessDetails(request));
                                 AccessDetails ad = accessDetails.get();
                                 server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
-                                synchronized (lock) {
-                                    lock.notify();
-                                }
                             }
 
                             String x = "\nRequest before modifyHeader: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
@@ -96,7 +95,7 @@ public class CamWebadminHostProxy {
 //                            if(modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost))
 //                                req = newReq.get();
 //                            else
-                                req = request;
+                            req = request;
                             String xyz = "\nRequest: " + new String(req.array(), 0, req.limit(), StandardCharsets.UTF_8);
                             logService.getCam().trace(xyz);
                             int bytesWritten = 0;
@@ -106,19 +105,17 @@ public class CamWebadminHostProxy {
                                     break;
                                 bytesWritten += val;
                             }
+                            synchronized (lock) {
+                               lock.notify();
+                            }
                             req.clear();
                         }
-                         assert req != null;
-                         CamWebadminHostProxy.recycle(req);
-                    } catch (IOException e) {
-                        request.flip();
-                        try {
-                            server.write(request);
-                        } catch (Exception ex) {
-                            logService.getCam().error(ex.getClass().getName() + " in handleClientRequest when writing request: " + ex.getMessage());
-                        }
-                     } catch (Exception ex) {
+                    } catch (IOException ignore) {
+                    } catch (Exception ex) {
                         logService.getCam().error(ex.getClass().getName() + " in handleClientRequest: " + ex.getMessage());
+                    }
+                    finally {
+                        CamWebadminHostProxy.recycle(req);
                     }
                     // the client closed the connection to us, so close our
                     // connection to the server.
@@ -131,7 +128,7 @@ public class CamWebadminHostProxy {
 
                 try {
                     synchronized (lock) {
-                       lock.wait();
+                        lock.wait();
                     }
                 } catch (Exception ignore) {
                 }
@@ -139,7 +136,7 @@ public class CamWebadminHostProxy {
                 // Read the server's responses
                 // and pass them back to the client.
                 try {
-                    int pass = 0;
+                    long pass = 0;
                     server.configureBlocking(true);
                     while (server.isOpen() && (server.read(reply)) != -1) {
                         reply.flip();
@@ -314,12 +311,12 @@ public class CamWebadminHostProxy {
         boolean retVal = false;
         AtomicReference<ByteBuffer> headerRemoved = new AtomicReference<>();
         // First remove the existing header
-        if(removeHeader(src, headerRemoved, key))
+        if (removeHeader(src, headerRemoved, key))
             // Then add with the required new value
             retVal = addHeader(headerRemoved.get(), arDest, key, newValue);
         CamWebadminHostProxy.recycle(headerRemoved.get());
-     //   System.out.print(new String(headerRemoved.get().array(), 0, headerRemoved.get().limit()));
-         return retVal;
+        //   System.out.print(new String(headerRemoved.get().array(), 0, headerRemoved.get().limit()));
+        return retVal;
     }
 
     String getSessionId(@NotNull String cookies) {
