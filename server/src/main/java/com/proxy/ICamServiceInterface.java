@@ -1,6 +1,6 @@
 package com.proxy;
 
-public interface ICamService {
+public interface ICamServiceInterface {
     String cameraAdminUserName();
     String cameraAdminPassword();
 }

@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class CamWebadminHostProxy {
     ILogService logService;
-    ICamService camService;
+    ICamServiceInterface camService;
     final Map<String, AccessDetails> accessDetailsMap;
     final byte[] crlf = {'\r', '\n'};
     final byte[] crlfcrlf = {'\r', '\n', '\r', '\n'};
@@ -25,7 +25,7 @@ public class CamWebadminHostProxy {
     public static final int BUFFER_SIZE = 10000;
     final ExecutorService requestProcessing = Executors.newCachedThreadPool();
 
-    public CamWebadminHostProxy(ILogService logService, ICamService camService) {
+    public CamWebadminHostProxy(ILogService logService, ICamServiceInterface camService) {
         accessDetailsMap = new HashMap<>();
         this.logService = logService;
         this.camService = camService;

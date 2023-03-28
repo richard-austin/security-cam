@@ -201,9 +201,9 @@ task buildDebFile(type: Exec, dependsOn: [':server:assemble', ':generateProductK
     commandLine './create-deb.sh'
 }
 
-tasks.withType(Copy) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
+//tasks.withType(Copy) {
+//    duplicatesStrategy = DuplicatesStrategy.INHERIT
+//}
 
 tasks.withType(GroovyCompile) {
     configure(groovyOptions) {
