@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.google.gson.internal.LinkedTreeMap
+import com.proxy.ICamService
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import org.apache.commons.io.IOUtils
@@ -17,7 +18,7 @@ import server.Camera
 import server.Stream
 
 @Transactional
-class CamService {
+class CamService implements ICamService{
     GrailsApplication grailsApplication
     LogService logService
     ConfigurationUpdateService configurationUpdateService

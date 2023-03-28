@@ -15,13 +15,14 @@ import javax.annotation.PostConstruct
 @Transactional
 class CameraAdminPageHostingService {
     LogService logService
+    CamService camService
     SocketConfig config
     int port = 8446
     CamWebadminHostProxy proxy
 
     @PostConstruct
     def initialize() {
-        proxy = new CamWebadminHostProxy(logService)
+        proxy = new CamWebadminHostProxy(logService, camService)
         proxy.runServer(port)
     }
 
