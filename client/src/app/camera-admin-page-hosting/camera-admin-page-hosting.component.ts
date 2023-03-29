@@ -35,7 +35,6 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
     });
   }
 
-
   ngOnInit(): void {
     if(this.cam !== undefined)
       this.cameraSvc.getAccessToken(this.cam.address, this.defaultPort).subscribe((result) => {
