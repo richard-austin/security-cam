@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
@@ -65,7 +66,7 @@ public class CamWebadminHostProxy {
 
     private void handleClientRequest(@NotNull SocketChannel client) {
         try {
-            ByteBuffer reply = CamWebadminHostProxy.getBuffer();
+            ByteBuffer reply = getBuffer();
             final Object lock = new Object();
 
             // Create a connection to the real server.
@@ -78,7 +79,7 @@ public class CamWebadminHostProxy {
                 // a thread to read the client's requests and pass them
                 // to the server. A separate thread for asynchronous.
                 requestProcessing.submit(() -> {
-                    ByteBuffer request = CamWebadminHostProxy.getBuffer();
+                    ByteBuffer request = getBuffer();
 //                    ByteBuffer req = null;
                     try {
                         long pass = 0;
@@ -105,13 +106,12 @@ public class CamWebadminHostProxy {
                             long serverPass = 0;
 
                             while (bytesWritten < request.limit()) {
-                                if(++serverPass == 1)
-                                {
+                                if (++serverPass == 1) {
                                     final String username = camService.cameraAdminUserName();
                                     final String password = camService.cameraAdminPassword();
 
-                                    String encodedCredentials = Base64.getEncoder().encodeToString((username+":"+password).getBytes());
-                                    if(addHeader(request, updatedReq, "Authorization", "Basic " + encodedCredentials)) {
+                                    String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+                                    if (addHeader(request, updatedReq, "Authorization", "Basic " + encodedCredentials)) {
                                         request = updatedReq.get();
                                         logService.getCam().trace(new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8));
                                     }
@@ -130,14 +130,14 @@ public class CamWebadminHostProxy {
                     } catch (Exception ex) {
                         logService.getCam().error(ex.getClass().getName() + " in handleClientRequest: " + ex.getMessage());
                     } finally {
-                        CamWebadminHostProxy.recycle(request);
+                        recycle(request);
                     }
                     // the client closed the connection to us, so close our
                     // connection to the server.
                     try {
                         server.close();
                     } catch (IOException e) {
-                        logService.getCam().error("IOException in handleClientRequest when closing server socket: " + e.getMessage());
+                        logService.getCam().error(e.getClass().getName()+" in handleClientRequest when closing server socket: " + e.getMessage());
                     }
                 });
 
@@ -171,6 +171,7 @@ public class CamWebadminHostProxy {
                         reply.clear();
                         accessDetails.get().setHasCookie();
                     }
+                } catch (ClosedChannelException ignore) {
                 } catch (IOException e) {
                     reply.flip();
                     int bytesWritten = 0;
@@ -181,16 +182,16 @@ public class CamWebadminHostProxy {
                         bytesWritten += val;
                     }
 
-                    logService.getCam().error("IOException in handleClientRequest: " + e.getMessage());
+                    logService.getCam().error(e.getClass().getName()+" in handleClientRequest 1: " + e.getMessage());
                 }
                 // The server closed its connection to us, so we close our
                 // connection to our client.
                 client.close();
             } catch (IOException e) {
-                logService.getCam().error("IOException in handleClientRequest when opening socket channel: " + e.getMessage());
+                logService.getCam().error(e.getClass().getName()+" in handleClientRequest when opening socket channel: " + e.getMessage());
             }
 
-            CamWebadminHostProxy.recycle(reply);
+            recycle(reply);
 
         } finally {
             try {
@@ -283,7 +284,7 @@ public class CamWebadminHostProxy {
         final ByteBuffer srcClone = getBuffer();
         srcClone.put(src.array(), 0, src.limit());
         srcClone.flip();
-        ByteBuffer dest = CamWebadminHostProxy.getBuffer();
+        ByteBuffer dest = getBuffer();
         BinarySearcher bs = new BinarySearcher();
         // Find the first CRLF in the source buffer
         List<Integer> indexList = bs.searchBytes(srcClone.array(), crlf, 0, srcClone.limit());
@@ -300,8 +301,9 @@ public class CamWebadminHostProxy {
             dest.put(srcClone.array(), idx1, srcClone.limit() - idx1);
             dest.flip();
             arDest.set(dest);
-            CamWebadminHostProxy.recycle(srcClone);
+            recycle(srcClone);
             retVal = true;
+            recycle(src);
         }
         return retVal;
     }
@@ -316,12 +318,13 @@ public class CamWebadminHostProxy {
             indexList = bs.searchBytes(src.array(), crlf, startIdx, src.limit());
             if (indexList.size() > 0) {
                 final int endIdx = indexList.get(0) + crlf.length;
-                final ByteBuffer dest = CamWebadminHostProxy.getBuffer();
+                final ByteBuffer dest = getBuffer();
                 dest.put(src.array(), 0, startIdx);
                 dest.put(src.array(), endIdx, src.limit() - endIdx);
                 dest.flip();
                 arDest.set(dest);
                 retVal = true;
+                recycle(src);
             }
         }
         return retVal;
@@ -334,11 +337,14 @@ public class CamWebadminHostProxy {
         srcClone.flip();
         AtomicReference<ByteBuffer> headerRemoved = new AtomicReference<>();
         // First remove the existing header
-        if (removeHeader(srcClone, headerRemoved, key))
+        if (removeHeader(srcClone, headerRemoved, key)) {
             // Then add with the required new value
-            retVal = addHeader(headerRemoved.get(), arDest, key, newValue);
-        CamWebadminHostProxy.recycle(headerRemoved.get());
-        CamWebadminHostProxy.recycle(srcClone);
+            if (!(retVal = addHeader(headerRemoved.get(), arDest, key, newValue)))
+                recycle(headerRemoved.get());
+        } else
+            recycle(srcClone);
+
+        recycle(srcClone);
         //   System.out.print(new String(headerRemoved.get().array(), 0, headerRemoved.get().limit()));
         return retVal;
     }
