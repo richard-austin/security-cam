@@ -2,6 +2,7 @@ package security.cam
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import com.proxy.ILogService
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import org.slf4j.LoggerFactory
@@ -9,7 +10,7 @@ import org.slf4j.LoggerFactory
 import javax.annotation.PostConstruct
 
 @Transactional
-class LogService {
+class LogService implements ILogService {
 
     Logger cam = null
     GrailsApplication grailsApplication

@@ -26,6 +26,7 @@ repositories {
 }
 
 //group 'security.cam.onvif'
+//group 'security.cam.onvif'
 //
 //ext {
 //    bintrayRepo = 'ONVIF-Java'
@@ -199,6 +200,10 @@ task buildDebFile(type: Exec, dependsOn: [':server:assemble', ':generateProductK
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'
 }
+
+//tasks.withType(Copy) {
+//    duplicatesStrategy = DuplicatesStrategy.INHERIT
+//}
 
 tasks.withType(GroovyCompile) {
     configure(groovyOptions) {

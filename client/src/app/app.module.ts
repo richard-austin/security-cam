@@ -53,6 +53,7 @@ import {MatDatepickerModule} from "@angular/material/datepicker";
 import {DateAdapter, MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
 import {Platform} from "@angular/cdk/platform";
 import {CustomDateAdapter} from "./cameras/camera.service";
+import { CameraAdminPageHostingComponent } from './camera-admin-page-hosting/camera-admin-page-hosting.component';
 
 @NgModule({
   declarations: [
@@ -80,7 +81,8 @@ import {CustomDateAdapter} from "./cameras/camera.service";
     SetUpGuestAccountComponent,
     PTZControlsComponent,
     PTZButtonComponent,
-    PresetButtonComponent
+    PresetButtonComponent,
+    CameraAdminPageHostingComponent
   ],
   imports: [
     BrowserModule,

@@ -4,8 +4,11 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
 import security.cam.CamService
+import security.cam.CameraAdminPageHostingService
 import security.cam.LogService
 import security.cam.ValidationErrorService
+import security.cam.commands.GetAccessTokenCommand
+import security.cam.commands.ResetTimerCommand
 import security.cam.commands.SetAccessCredentialsCommand
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.commands.UploadMaskFileCommand
@@ -18,13 +21,15 @@ class CamController {
     CamService camService
     LogService logService
     ValidationErrorService validationErrorService
-
+    CameraAdminPageHostingService cameraAdminPageHostingService
     /**
      * getCameras: Get all cameras defined in the application.yml file
      * @return
      */
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getCameras() {
+        cameraAdminPageHostingService.getAccessToken()
+
         ObjectCommandResponse cameras = camService.getCameras()
 
         if(cameras.status != PassFail.PASS)
@@ -98,6 +103,42 @@ class CamController {
                 render (status: 500, text: response.error)
             else
                 render (status: 200, text:'')
+        }
+    }
+
+    /**
+     * getAccessToken: Get an access token for a camera web admin page via the camera admin page hosting server.
+     * @param cmd: Command object containing the camera host address and port.
+     * @return The access token to use as the accessToken parameter in the initial get request to the hosting server,
+     *          or error code.
+     */
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def getAccessToken(GetAccessTokenCommand cmd) {
+        if(cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "getAccessToken")
+            render(status: 400, text: (errorsMap as JSON))
+        }
+        else {
+            ObjectCommandResponse response = cameraAdminPageHostingService.getAccessToken(cmd)
+            if(response.status != PassFail.PASS)
+                render (status: 500, text: response.error)
+            else
+                render (status: 200, text: response.responseObject)
+        }
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def resetTimer(ResetTimerCommand cmd) {
+        if(cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "resetTimer")
+            render(status: 400, text: (errorsMap as JSON))
+        }
+        else {
+            ObjectCommandResponse response = cameraAdminPageHostingService.resetTimer(cmd)
+            if(response.status != PassFail.PASS)
+                render (status: 500, text: response.error)
+            else
+                render (status: 200, text: (response.responseObject as JSON))
         }
     }
 }
