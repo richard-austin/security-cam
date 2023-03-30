@@ -3,7 +3,7 @@ package security.cam.interfaceobjects
 import security.cam.enums.PassFail
 
 class CommandResponse {
-    PassFail status
+    public PassFail status
     int          errno
     String       response
     String       error
