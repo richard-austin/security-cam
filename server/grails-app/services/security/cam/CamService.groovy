@@ -9,6 +9,7 @@ import com.proxy.ICamServiceInterface
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import org.apache.commons.io.IOUtils
+import org.grails.web.json.JSONObject
 import security.cam.commands.SetAccessCredentialsCommand
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.commands.UploadMaskFileCommand
@@ -188,6 +189,20 @@ class CamService implements ICamServiceInterface{
             response.error = ex.getMessage()
         }
         return response
+    }
+
+    Integer getCameraType(String cameraHost) {
+        Integer camType = null
+        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse)getCameras()
+        if(getCamerasResult.status == PassFail.PASS) {
+            JSONObject jo = (JSONObject)getCamerasResult.getResponseObject()
+            jo.forEach((k, cam) -> {
+                Camera camera = (Camera)cam
+                if(Objects.equals(camera.getAddress(), cameraHost))
+                    camType = camera.cameraParamSpecs.camType
+            })
+        }
+        return camType
     }
 
     /**

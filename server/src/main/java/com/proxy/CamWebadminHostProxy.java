@@ -13,9 +13,16 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CamWebadminHostProxy {
+
+    // Camera types
+    final int none = 0;
+    final int sv3c = 1;
+    final int zxtechMCW5B10X =2;
+
     ILogService logService;
     ICamServiceInterface camService;
     final Map<String, AccessDetails> accessDetailsMap;
@@ -37,7 +44,6 @@ public class CamWebadminHostProxy {
      * the provided local port.
      */
     public void runServer(int localport) {
-
         Executors.newSingleThreadExecutor().execute(() -> {
             // Creating a ServerSocket to listen for connections with
             try (ServerSocketChannel s = ServerSocketChannel.open()) {
@@ -80,42 +86,44 @@ public class CamWebadminHostProxy {
                 // to the server. A separate thread for asynchronous.
                 requestProcessing.submit(() -> {
                     ByteBuffer request = getBuffer();
-//                    ByteBuffer req = null;
                     try {
                         long pass = 0;
-
+                        AtomicInteger camType = new AtomicInteger();
                         client.configureBlocking(true);
                         while (client.read(request) != -1) {
                             request.flip();
                             if (++pass == 1) {
                                 accessDetails.set(getAccessDetails(request));
                                 AccessDetails ad = accessDetails.get();
+
+                                Integer ct = camService.getCameraType(ad.cameraHost);
+                                camType.set(ct);
                                 server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
                             }
 
-                            String x = "\nRequest before modifyHeader: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
-                            logService.getCam().trace(x);
-//                            AtomicReference<ByteBuffer> newReq = new AtomicReference<>();
-//                            if(modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost))
-//                                req = newReq.get();
-//                            else
-//                                req = request;
-                            String xyz = "\nRequest: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
-                            logService.getCam().trace(xyz);
+                            AtomicReference<ByteBuffer> newReq = new AtomicReference<>();
+                            if(modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost)) {
+                                request = newReq.get();
+                            }
                             int bytesWritten = 0;
                             long serverPass = 0;
 
                             while (bytesWritten < request.limit()) {
+                                //Only mess with headers on the first pass
                                 if (++serverPass == 1) {
-                                    final String username = camService.cameraAdminUserName();
-                                    final String password = camService.cameraAdminPassword();
+                                    // Camera types sv3c and zxtech use basic auth, only apply to these
+                                    if(camType.get() == sv3c || camType.get() == zxtechMCW5B10X) {
+                                        final String username = camService.cameraAdminUserName();
+                                        final String password = camService.cameraAdminPassword();
 
-                                    String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
-                                    if (addHeader(request, updatedReq, "Authorization", "Basic " + encodedCredentials)) {
-                                        request = updatedReq.get();
-                                        logService.getCam().trace(new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8));
+                                        String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+                                        if (addHeader(request, updatedReq, "Authorization", "Basic " + encodedCredentials)) {
+                                            request = updatedReq.get();
+                                        }
                                     }
                                 }
+                                String xyz = "\nRequest: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
+                                logService.getCam().trace(xyz);
                                 int val = server.write(request);
                                 if (val == -1)
                                     break;
@@ -230,7 +238,6 @@ public class CamWebadminHostProxy {
         return retVal;
     }
 
-
     String getHeader(@NotNull ByteBuffer byteBuffer, @NotNull String key) {
         String retVal = "";
         try {
@@ -281,29 +288,36 @@ public class CamWebadminHostProxy {
 
     boolean addHeader(@NotNull ByteBuffer src, AtomicReference<ByteBuffer> arDest, @NotNull String key, @NotNull String value) {
         boolean retVal = false;
-        final ByteBuffer srcClone = getBuffer();
-        srcClone.put(src.array(), 0, src.limit());
-        srcClone.flip();
-        ByteBuffer dest = getBuffer();
-        BinarySearcher bs = new BinarySearcher();
-        // Find the first CRLF in the source buffer
-        List<Integer> indexList = bs.searchBytes(srcClone.array(), crlf, 0, srcClone.limit());
-        if (indexList.size() > 0) {
-            final int idx1 = indexList.get(0) + crlf.length;
-            // Copy up to just after the first crlf to the dest buffer
-            dest.put(srcClone.array(), 0, idx1);
-            // Append the new header to follow this
-            dest.put(key.getBytes());
-            dest.put(colonSpace);
-            dest.put(value.getBytes());
-            dest.put(crlf);
-            // Append the remainder of the source buffer to follow this
-            dest.put(srcClone.array(), idx1, srcClone.limit() - idx1);
-            dest.flip();
-            arDest.set(dest);
-            recycle(srcClone);
-            retVal = true;
-            recycle(src);
+        // Check if the header is already present
+        if(!getHeader(src, key).equals(value)) {
+            final ByteBuffer srcClone = getBuffer();
+            srcClone.put(src.array(), 0, src.limit());
+            srcClone.flip();
+            ByteBuffer dest = getBuffer();
+            BinarySearcher bs = new BinarySearcher();
+            // Find the first CRLF in the source buffer
+            List<Integer> indexList = bs.searchBytes(srcClone.array(), crlf, 0, srcClone.limit());
+            if (indexList.size() > 0) {
+                final int idx1 = indexList.get(0) + crlf.length;
+                // Copy up to just after the first crlf to the dest buffer
+                dest.put(srcClone.array(), 0, idx1);
+                // Append the new header to follow this
+                dest.put(key.getBytes());
+                dest.put(colonSpace);
+                dest.put(value.getBytes());
+                dest.put(crlf);
+                // Append the remainder of the source buffer to follow this
+                dest.put(srcClone.array(), idx1, srcClone.limit() - idx1);
+                dest.flip();
+                arDest.set(dest);
+                recycle(srcClone);
+                retVal = true;
+                recycle(src);
+            }
+        }
+        else {
+            arDest.set(src);
+            retVal = true; // Header already present, return success
         }
         return retVal;
     }
@@ -339,12 +353,13 @@ public class CamWebadminHostProxy {
         // First remove the existing header
         if (removeHeader(srcClone, headerRemoved, key)) {
             // Then add with the required new value
-            if (!(retVal = addHeader(headerRemoved.get(), arDest, key, newValue)))
+            retVal = addHeader(headerRemoved.get(), arDest, key, newValue);
+            if(!retVal)
                 recycle(headerRemoved.get());
-        } else
+        }
+        else
             recycle(srcClone);
 
-        recycle(srcClone);
         //   System.out.print(new String(headerRemoved.get().array(), 0, headerRemoved.get().limit()));
         return retVal;
     }

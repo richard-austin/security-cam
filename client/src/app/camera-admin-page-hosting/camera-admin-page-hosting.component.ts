@@ -44,6 +44,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
           this.cameraSvc.resetTimer(this.accessToken).subscribe(() => {},
             error => {
                 this.reporting.errorMessage = error;
+                this.intervalSubscription.unsubscribe();
             });
         })
       },

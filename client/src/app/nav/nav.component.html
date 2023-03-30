@@ -54,7 +54,7 @@
       </mat-menu>
       <mat-menu #menuCameraAdmin="matMenu">
         <ng-container *ngFor="let cam of cameras">
-          <button *ngIf="cam.address!=''&&cam.cameraParamSpecs.camType !== cameraTypes.none" mat-menu-item
+          <button *ngIf="cam.address!=''" mat-menu-item
                   (click)="cameraAdmin(cam);menuClosed()">
             {{cam.name}}
           </button>
