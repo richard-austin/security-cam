@@ -142,6 +142,17 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/setupguestaccount';
   }
 
+  getLocalWifiDetails() {
+    window.location.href = '#/getlocalwifidetails';
+  }
+
+  wifiSettings() {
+    window.location.href = '#/wifisettings';
+  }
+  getActiveIPAddresses() {
+    window.location.href = '#/getactiveipaddresses';
+  }
+
   openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
     let data: any = {};
     let remainingSecs: number = timeout - count;

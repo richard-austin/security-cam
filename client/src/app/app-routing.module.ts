@@ -13,6 +13,9 @@ import {CloudProxyComponent} from './cloud-proxy/cloud-proxy.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import {SetUpGuestAccountComponent} from "./set-up-guest-account/set-up-guest-account.component";
 import {CameraAdminPageHostingComponent} from './camera-admin-page-hosting/camera-admin-page-hosting.component';
+import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
+import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-wifi-details.component';
+import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
 
 const routes: Routes = [
   {path: 'live/:streamName', component: LiveContainerComponent},
@@ -27,7 +30,10 @@ const routes: Routes = [
   {path: 'configsetup', component: ConfigSetupComponent},
   {path: 'setupguestaccount', component: SetUpGuestAccountComponent},
   {path: 'dc', component: DrawdownCalcContainerComponent},
-  {path: 'cloudproxy', component: CloudProxyComponent}
+  {path: 'cloudproxy', component: CloudProxyComponent},
+  {path: 'getactiveipaddresses', component: GetActiveIPAddressesComponent},
+  {path: 'getlocalwifidetails', component: GetLocalWifiDetailsComponent},
+  {path: 'wifisettings', component: WifiSettingsComponent}
 ];
 
 @NgModule({

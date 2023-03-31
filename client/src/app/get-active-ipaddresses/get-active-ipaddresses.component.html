@@ -1,0 +1,37 @@
+<div class="ip-addresses">
+  <mat-card>
+    <mat-card-title>Local IP Addresses</mat-card-title>
+    <mat-card-content>
+      <app-reporting [embedded]="true"></app-reporting>
+      <table mat-table [dataSource]="ipDetails" class="mat-elevation-z8">
+        <!-- IP Column -->
+        <ng-container matColumnDef="IP">
+          <th mat-header-cell *matHeaderCellDef> IP Address</th>
+          <td mat-cell *matCellDef="let element"> {{element.ip}} </td>
+        </ng-container>
+
+        <!-- Device Column -->
+        <ng-container matColumnDef="Device">
+          <th mat-header-cell *matHeaderCellDef> Device</th>
+          <td mat-cell *matCellDef="let element"> {{element.cd.device}} </td>
+        </ng-container>
+
+        <!-- Conn type Column -->
+        <ng-container matColumnDef="ConnType">
+          <th mat-header-cell *matHeaderCellDef>Connection Type</th>
+          <td mat-cell *matCellDef="let element"> {{element.cd.con_type}} </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="Name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let element"> {{element.cd.name}} </td>
+        </ng-container>
+
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>
