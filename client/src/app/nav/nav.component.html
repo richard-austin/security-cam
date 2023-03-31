@@ -54,10 +54,13 @@
       </mat-menu>
       <mat-menu #menuCameraAdmin="matMenu">
         <ng-container *ngFor="let cam of cameras">
-          <button *ngIf="cam.address!=''" mat-menu-item
-                  (click)="cameraAdmin(cam);menuClosed()">
-            {{cam.name}}
-          </button>
+          <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+            <button *ngIf="cam.address!=''" mat-menu-item
+                    [disabled]="isGuest"
+                    (click)="cameraAdmin(cam);menuClosed()">
+              {{cam.name}}
+            </button>
+          </span>
         </ng-container>
       </mat-menu>
 
