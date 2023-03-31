@@ -28,8 +28,6 @@ class CamController {
      */
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def getCameras() {
-        cameraAdminPageHostingService.getAccessToken()
-
         ObjectCommandResponse cameras = camService.getCameras()
 
         if(cameras.status != PassFail.PASS)
@@ -112,7 +110,7 @@ class CamController {
      * @return The access token to use as the accessToken parameter in the initial get request to the hosting server,
      *          or error code.
      */
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @Secured(['ROLE_CLIENT'])
     def getAccessToken(GetAccessTokenCommand cmd) {
         if(cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "getAccessToken")
