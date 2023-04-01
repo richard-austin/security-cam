@@ -2,19 +2,24 @@
   <mat-card>
     <mat-card-title>Wifi Settings</mat-card-title>
     <mat-card-content>
-      <div class="alert-warning-embedded" *ngIf="ethernetConnectionStatus == 'NOT_CONNECTED_VIA_ETHERNET'">
-        You have an Ethernet connection, but your NVR is connected to the Cloud service through Wi-Fi.
-        To make changes to the Wi-Fi settings, this connection must be through Ethernet. To switch the connection to
-        Ethernet,
-        click the Reset Connection button, then wait until display shows the current Wi-Fi status again.
-      </div>
+      <div class="alert-warning-embedded" *ngIf="ethernetConnectionStatus == 'NOT_CONNECTED_VIA_ETHERNET' && isReady">
+        <b>You have an Ethernet connection, but you are connecting to the NVR through a Wi-Fi ip address or localhost.</b>
+        <br><br>
+        To Ensure you are connecting through the Ethernet IP address, select Get Active Local IP address(es) to find
+        the IP address for the Ethernet connection.<br>Enter this address (without the subnet mask)
+        into your browser (which should be on the same subnet as the NVR). You may need to log in again
+        Return to WiFi Admin ->  WiFi Settings and you should now be able to change the wifi configuration.
+       </div>
 
-      <div class="alert-warning-embedded" *ngIf="ethernetConnectionStatus == 'NO_ETHERNET'">
-        You have no Ethernet connection available,
-        To make changes to the Wi-Fi settings, you must connect to the NVR through Ethernet.
+      <div class="alert-warning-embedded" *ngIf="ethernetConnectionStatus == 'NO_ETHERNET' && isReady">
+        <b>You have no Ethernet connection available.</b>
+        <br><br>
+        To make changes to the Wi-Fi settings, you must connect to the NVR through Ethernet.<br><br>
         To switch the connection to Ethernet, connect an Ethernet cable between your router and the NVR then
-        select Get Active Local IP address(es) to find the IP address for the Ethernet connection. Enter this address
-        into your browser (which should be on the same subnet as the NVR), and return to WiFi Admin ->  WiFi Settings.
+        select Get Active Local IP address(es) to find the IP address for the Ethernet connection.<br> Enter this address
+        (without the subnet mask) into your browser (which should be on the same subnet as the NVR).
+        You may need to log in again.
+        Return to WiFi Admin ->  WiFi Settings and you should now be able to change the wifi configuration.
       </div>
       <div class="reset-connection-button loading-spinner">
       </div>
@@ -57,8 +62,11 @@
         </mat-form-field>
       </div>
       <div class="connect-cancel">
-        <button [disabled]="!wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting"
+        <button [disabled]="this.isGuest || !wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting"
                 mat-flat-button
+                matTooltip="Disabled for guest"
+                matTooltipClass="tooltip"
+                [matTooltipDisabled]="!isGuest"
                 color="warn"
                 (click)="connect()">Connect
         </button>
