@@ -33,7 +33,7 @@
         {{wifiEnabled ? 'Disable' : 'Enable'}} Wi-Fi
       </mat-checkbox>
       <div>
-        <mat-form-field appearance="fill">
+        <mat-form-field appearance="fill" [style.width.px]="315">
           <mat-label *ngIf="!loading">
             {{wifiEnabled ? 'Select Wi-Fi Access Point' : 'Wi-Fi Is Off'}}
           </mat-label>
