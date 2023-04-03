@@ -65,14 +65,14 @@ export class WifiUtilsService {
 
   setWifiStatus(status: string): Observable<WifiStatus>
   {
-    let param:{status: string} = {status: status};
+    let param:{status: string, isCloud: boolean} = {status: status, isCloud: false};
     return this.http.post<WifiStatus>(this._baseUrl.getLink('wifiUtils', 'setWifiStatus'), JSON.stringify(param), this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }
 
   setUpWifi(ssid: string, password?: string) : Observable<{response: string}>{
-    let param:{ssid: string, password: string | undefined} = {ssid: ssid, password: undefined};
+    let param:{ssid: string, password: string | undefined, isCloud: boolean} = {ssid: ssid, password: undefined, isCloud: false};
     if(password !== undefined && password !== "")
       param.password = password;
 
