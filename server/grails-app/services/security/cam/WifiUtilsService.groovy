@@ -119,7 +119,7 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            EthernetStatusEnum status = isConnectedThroughEthernet()
+            EthernetStatusEnum status = isConnectedThroughEthernet(cmd.isCloud)
 
             if (cmd.status != "off" || status == EthernetStatusEnum.connectedViaEthernet) {
                 RestfulResponse resp =
@@ -215,9 +215,9 @@ class WifiUtilsService {
         return result
     }
 
-    ObjectCommandResponse checkConnectedThroughEthernet() {
+    ObjectCommandResponse checkConnectedThroughEthernet(boolean isCloud = true) {
         ObjectCommandResponse result = new ObjectCommandResponse()
-        EthernetStatusEnum es = isConnectedThroughEthernet()
+        EthernetStatusEnum es = isConnectedThroughEthernet(isCloud)
         if (es != EthernetStatusEnum.error)
             result.responseObject = [status: ethernetConnectionStatus[es]]
         else {
@@ -227,7 +227,7 @@ class WifiUtilsService {
         return result
     }
 
-    private EthernetStatusEnum isConnectedThroughEthernet() {
+    private EthernetStatusEnum isConnectedThroughEthernet(boolean isCloud) {
         try {
             ArrayList<ConnectionDetails> cdList = new ArrayList<>()
 
@@ -266,11 +266,12 @@ class WifiUtilsService {
             // Find the IP address for the Ethernet interface
             String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
             def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
-            Integer cloudPort = (Integer) (grailsApplication.config.cloudProxy.cloudPort)
+            Integer port = (Integer) (isCloud ?grailsApplication.config.cloudProxy.cloudPort :
+                    grailsApplication.config.nvrWebServer.port)
             command = [
                     "/bin/sh",
                     "-c",
-                    "ss -n | grep ${ipAddress} | grep ${cloudPort}"
+                    "ss -n | grep ${ipAddress} | grep ${port}"
             ]
 
             String cloudEtherConn = utilsService.executeLinuxCommand(command)

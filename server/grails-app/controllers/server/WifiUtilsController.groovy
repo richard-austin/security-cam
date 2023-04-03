@@ -100,13 +100,25 @@ class WifiUtilsController {
         }
     }
 
-    @Secured(['ROLE_CLOUD', 'ROLE_CLIENT'])
+    @Secured(['ROLE_CLOUD'])
     def checkConnectedThroughEthernet() {
         ObjectCommandResponse result = wifiUtilsService.checkConnectedThroughEthernet()
         if (result.status == PassFail.PASS) {
             render(status: 200, text: result.responseObject as JSON)
         } else {
             def errMsg = "An error occurred in checkConnectedThroughEthernet:- (${result.error})"
+            logService.cam.error(errMsg)
+            render(status: 500, text: errMsg)
+        }
+    }
+
+    @Secured(['ROLE_CLIENT'])
+    def checkConnectedThroughEthernetNVR() {
+        ObjectCommandResponse result = wifiUtilsService.checkConnectedThroughEthernet(false)
+        if (result.status == PassFail.PASS) {
+            render(status: 200, text: result.responseObject as JSON)
+        } else {
+            def errMsg = "An error occurred in checkConnectedThroughEthernetNVR:- (${result.error})"
             logService.cam.error(errMsg)
             render(status: 500, text: errMsg)
         }

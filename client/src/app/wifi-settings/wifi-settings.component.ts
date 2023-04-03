@@ -153,7 +153,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.isGuest = this.utils.isGuestAccount;
     this.isReady = false;
-    this.wifiUtilsService.checkConnectedThroughEthernet().subscribe(async (result) => {
+    this.wifiUtilsService.checkConnectedThroughEthernetNVR().subscribe(async (result) => {
         this.ethernetConnectionStatus = result.status;
 
         if (result.status !== 'NO_ETHERNET') {

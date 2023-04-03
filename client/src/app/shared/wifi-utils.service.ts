@@ -56,9 +56,9 @@ export class WifiUtilsService {
     );
   }
 
-  checkConnectedThroughEthernet(): Observable<EthernetConnectionStatus>
+  checkConnectedThroughEthernetNVR(): Observable<EthernetConnectionStatus>
   {
-    return this.http.post<WifiStatus>(this._baseUrl.getLink('wifiUtils', 'checkConnectedThroughEthernet'), '', this.httpJSONOptions).pipe(
+    return this.http.post<WifiStatus>(this._baseUrl.getLink('wifiUtils', 'checkConnectedThroughEthernetNVR'), '', this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }

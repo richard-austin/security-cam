@@ -145,6 +145,9 @@ environments:
       webServerPort: 8080
       logLevel: ERROR
 
+    nvrWebServer:
+      port: 4200 # Used to detect whether connected through Ethernet (for Wi-Fi set up)
+
     mail:
       smtp:
         auth: true
@@ -210,11 +213,14 @@ environments:
       productKeyPath: /etc/security-cam/prodKey
       keyStorePassword: B0331e
       trustStorePassword: B0331e
-      cloudHost: 192.168.0.37
+      cloudHost: 192.168.1.207
       cloudPort: 8081
       webServerHost: localhost
       webServerPort: 8088
       logLevel: INFO
+
+    nvrWebServer:
+      port: 443 # Used to detect whether connected through Ethernet (for Wi-Fi set up)
 
     mail:
       smtp:
