@@ -86,15 +86,15 @@
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="setIp();menuClosed()">Save Current Public IP</button>
         </span>
-        <button mat-menu-item (click)="getActiveIPAddresses(); menuClosed()">
+        <button mat-menu-item [disabled]="isGuest" (click)="getActiveIPAddresses(); menuClosed()">
           Get Active Local IP Address(es)
         </button>
         <button mat-menu-item [matMenuTriggerFor]="wifiAdmin">Wifi Admin</button>
           <mat-menu #wifiAdmin="matMenu">
-            <button mat-menu-item (click)="getLocalWifiDetails(); menuClosed()">
+            <button mat-menu-item [disabled]="isGuest" (click)="getLocalWifiDetails(); menuClosed()">
               Local Wifi Details
             </button>
-            <button mat-menu-item (click)="wifiSettings(); menuClosed()">
+            <button mat-menu-item [disabled]="isGuest" (click)="wifiSettings(); menuClosed()">
               Wifi Settings
             </button>
           </mat-menu>
