@@ -6,11 +6,11 @@ import {MatSelect} from '@angular/material/select/select';
 import {timer} from 'rxjs';
 import {HttpErrorResponse} from '@angular/common/http';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import { CurrentWifiConnection } from '../shared/current-wifi-connection';
-import { WifiDetails } from '../shared/wifi-details';
-import { WifiUtilsService } from '../shared/wifi-utils.service';
-import { WifiConnectResult } from '../shared/wifi-connect-result';
-import { IPDetails } from '../shared/IPDetails';
+import {CurrentWifiConnection} from '../shared/current-wifi-connection';
+import {WifiDetails} from '../shared/wifi-details';
+import {WifiUtilsService} from '../shared/wifi-utils.service';
+import {WifiConnectResult} from '../shared/wifi-connect-result';
+import {IPDetails} from '../shared/IPDetails';
 
 @Component({
   selector: 'app-wifi-settings',
@@ -161,15 +161,16 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
             x.forEach((details: IPDetails) => {
               const idxSlash: number = details.ip.indexOf('/');
               const ip: string = details.ip.substring(0, idxSlash);
-              if(details.cd.con_type === 'ethernet' && ip === window.location.hostname)
+              if (details.cd.con_type === 'ethernet' && ip === window.location.hostname) {
                 this.ethernetConnectionStatus = 'CONNECTED_VIA_ETHERNET';
-            })
+              }
+            });
             this.isReady = true;
-          }
-          catch(e) {
-
+          } catch (e) {
+            this.reporting.errorMessage = e;
           }
         }
+        this.isReady = true;
       },
       reason => {
         this.reporting.errorMessage = reason;
