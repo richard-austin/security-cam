@@ -78,6 +78,12 @@ html, body {
   background-color: $danger-background;
 }
 
+@mixin alert-embedded {
+  @include alert;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
 .success{
   @include success;
 }
@@ -102,6 +108,21 @@ html, body {
 
 .alert-danger {
   @include alert;
+  @include danger;
+}
+
+.alert-success-embedded {
+  @include alert-embedded;
+  @include success;
+}
+
+.alert-warning-embedded {
+  @include alert-embedded;
+  @include warning;
+}
+
+.alert-danger-embedded {
+  @include alert-embedded;
   @include danger;
 }
 

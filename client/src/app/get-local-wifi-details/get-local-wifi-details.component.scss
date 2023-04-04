@@ -1,0 +1,26 @@
+.wifi-details {
+  margin-top: 1rem;
+  font-size: 2rem;
+  display: inline-flex;
+  width: 100%;
+  >mat-card
+  {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    >mat-card-content {
+      >table {
+        width: 66rem;
+      }
+    }
+  }
+}
+
+.in-use-check-mark {
+  color: #ffaaaa;
+}
+
+.highlight {
+  background-color: #FFFF00;
+  color: black;
+}

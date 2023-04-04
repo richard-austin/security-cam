@@ -62,23 +62,34 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            RestfulResponse resp = cmd.password != null
-                    ?
-                    restfulInterfaceService.sendRequest("localhost:8000", "/",
-                            "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\", \"password\": \"${cmd.password}\"}",
-                            true, 180)
-                    :
-                    restfulInterfaceService.sendRequest("localhost:8000", "/",
-                            "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\"}",
-                            true, 180)
+            EthernetStatusEnum connStatus = isConnectedThroughEthernet(cmd.isCloud)
 
-            if (resp.responseCode == 200)
-                result.responseObject = resp.responseObject as JSON
-            else {
-                result.errno = resp.responseCode
-                result.responseObject = new WifiConnectResult(resp.getErrorMsg())
-                result.error = resp.getErrorMsg()
+            if (connStatus == EthernetStatusEnum.connectedViaEthernet) {
+                RestfulResponse resp = cmd.password != null
+                        ?
+                        restfulInterfaceService.sendRequest("localhost:8000", "/",
+                                "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\", \"password\": \"${cmd.password}\"}",
+                                true, 180)
+                        :
+                        restfulInterfaceService.sendRequest("localhost:8000", "/",
+                                "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\"}",
+                                true, 180)
+
+                if (resp.responseCode == 200)
+                    result.responseObject = resp.responseObject as JSON
+                else {
+                    result.errno = resp.responseCode
+                    result.responseObject = new WifiConnectResult(resp.getErrorMsg())
+                    result.error = resp.getErrorMsg()
+                    result.status = PassFail.FAIL
+                }
+            } else {
+                final String warningMessage = "setUpWifi: Cannot change Wi-Fi settings when not connected through Ethernet."
+                result.errno = 400
+                logService.cam.warn(warningMessage)
+                result.responseObject = new WifiConnectResult(warningMessage)
                 result.status = PassFail.FAIL
+                result.error = warningMessage
             }
         }
         catch (Exception ex) {
@@ -86,7 +97,6 @@ class WifiUtilsService {
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
-
         return result
     }
 
@@ -119,7 +129,7 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            EthernetStatusEnum status = isConnectedThroughEthernet()
+            EthernetStatusEnum status = isConnectedThroughEthernet(cmd.isCloud)
 
             if (cmd.status != "off" || status == EthernetStatusEnum.connectedViaEthernet) {
                 RestfulResponse resp =
@@ -136,7 +146,7 @@ class WifiUtilsService {
                     result.error = resp.getErrorMsg()
                 }
             } else {
-                result.errno = 403
+                result.errno = 400
                 result.status = PassFail.FAIL
                 result.error = "Must be connected via Ethernet to set Wifi status to off"
             }
@@ -215,9 +225,9 @@ class WifiUtilsService {
         return result
     }
 
-    ObjectCommandResponse checkConnectedThroughEthernet() {
+    ObjectCommandResponse checkConnectedThroughEthernet(boolean isCloud = true) {
         ObjectCommandResponse result = new ObjectCommandResponse()
-        EthernetStatusEnum es = isConnectedThroughEthernet()
+        EthernetStatusEnum es = isConnectedThroughEthernet(isCloud)
         if (es != EthernetStatusEnum.error)
             result.responseObject = [status: ethernetConnectionStatus[es]]
         else {
@@ -227,10 +237,9 @@ class WifiUtilsService {
         return result
     }
 
-    private EthernetStatusEnum isConnectedThroughEthernet() {
+    private EthernetStatusEnum isConnectedThroughEthernet(boolean isCloud) {
         try {
             ArrayList<ConnectionDetails> cdList = new ArrayList<>()
-
             RestfulResponse resp =
                     restfulInterfaceService.sendRequest("localhost:8000", "/",
                             "{\"command\": \"getactiveconnections\"}",
@@ -266,11 +275,12 @@ class WifiUtilsService {
             // Find the IP address for the Ethernet interface
             String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
             def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
-            Integer cloudPort = (Integer) (grailsApplication.config.cloudProxy.cloudPort)
+            Integer port = (Integer) (isCloud ?grailsApplication.config.cloudProxy.cloudPort :
+                    grailsApplication.config.nvrWebServer.port)
             command = [
                     "/bin/sh",
                     "-c",
-                    "ss -n | grep ${ipAddress} | grep ${cloudPort}"
+                    "ss -n | grep ${ipAddress} | grep ${port}"
             ]
 
             String cloudEtherConn = utilsService.executeLinuxCommand(command)

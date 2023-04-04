@@ -54,6 +54,9 @@ import {DateAdapter, MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/materi
 import {Platform} from "@angular/cdk/platform";
 import {CustomDateAdapter} from "./cameras/camera.service";
 import { CameraAdminPageHostingComponent } from './camera-admin-page-hosting/camera-admin-page-hosting.component';
+import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-wifi-details.component';
+import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
+import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
 
 @NgModule({
   declarations: [
@@ -78,11 +81,15 @@ import { CameraAdminPageHostingComponent } from './camera-admin-page-hosting/cam
     CredentialsForCameraAccessComponent,
     CloudProxyComponent,
     ChangeEmailComponent,
+    ChangeEmailComponent,
     SetUpGuestAccountComponent,
     PTZControlsComponent,
     PTZButtonComponent,
     PresetButtonComponent,
-    CameraAdminPageHostingComponent
+    CameraAdminPageHostingComponent,
+    GetActiveIPAddressesComponent,
+    GetLocalWifiDetailsComponent,
+    WifiSettingsComponent
   ],
   imports: [
     BrowserModule,
