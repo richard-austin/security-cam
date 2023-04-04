@@ -5,7 +5,6 @@ import { Subscription } from 'rxjs';
 import { OnDestroy } from '@angular/core';
 import {WifiDetails} from '../shared/wifi-details';
 import {WifiUtilsService} from '../shared/wifi-utils.service';
-import {UtilsService} from '../shared/utils.service';
 import { AfterViewInit } from '@angular/core';
 
 @Component({
@@ -20,9 +19,8 @@ export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDe
   displayedColumns: string[] = ["InUse", "Ssid", "Rate", "Signal", "Channel", "Security", "Mode", "Bssid"];
   subscription!: Subscription;
   private wifiEnabled: boolean = true;
-  private isGuest: boolean = true;
 
-  constructor(private wifiUtilsService: WifiUtilsService, private utils: UtilsService) {
+  constructor(private wifiUtilsService: WifiUtilsService) {
   }
 
   getLocalWifiDetails(): void {
@@ -39,28 +37,24 @@ export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDe
 
 
   ngOnInit(): void {
-    this.isGuest = this.utils.isGuestAccount;
-  }
+    this.wifiUtilsService.checkWifiStatus().subscribe((result) => {
 
-  ngAfterViewInit(): void {
-    if(!this.isGuest) {
-      this.wifiUtilsService.checkWifiStatus().subscribe((result) => {
-          this.wifiEnabled = result.status === 'on';
-          if (this.wifiEnabled)
-            this.subscription = timer(0, 10000).subscribe(() => this.getLocalWifiDetails());
-          else
-            this.reporting.warningMessage = "Wi-Fi is disabled. You should go to Wi-Fi Admin->Wi-Fi Settings to enable it."
-        },
-        reason => {
-          this.reporting.errorMessage = reason;
-        });
-    }
-    else
-      this.reporting.warningMessage = "Not available to guest account";
-  }
+        this.wifiEnabled = result.status === 'on';
+        if(this.wifiEnabled)
+          this.subscription = timer(0, 10000).subscribe(() =>  this.getLocalWifiDetails());
+        else
+          this.reporting.warningMessage = "Wi-Fi is disabled. You should go to Wi-Fi Admin->Wi-Fi Settings to enable it."
+       },
+      reason => {
+        this.reporting.errorMessage = reason;
+      });
+   }
 
   ngOnDestroy(): void {
     if(this.subscription !== undefined)
       this.subscription.unsubscribe();
    }
+
+  ngAfterViewInit(): void {
+  }
 }

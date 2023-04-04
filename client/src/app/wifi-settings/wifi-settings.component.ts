@@ -10,16 +10,14 @@ import { CurrentWifiConnection } from '../shared/current-wifi-connection';
 import { WifiDetails } from '../shared/wifi-details';
 import { WifiUtilsService } from '../shared/wifi-utils.service';
 import { WifiConnectResult } from '../shared/wifi-connect-result';
-import {UtilsService} from '../shared/utils.service';
 import { IPDetails } from '../shared/IPDetails';
-import { AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'app-wifi-settings',
   templateUrl: './wifi-settings.component.html',
   styleUrls: ['./wifi-settings.component.scss']
 })
-export class WifiSettingsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class WifiSettingsComponent implements OnInit, OnDestroy {
   @ViewChild('selector') selector!: MatSelect;
   @ViewChild('wifiStatusCheckbox') wifiStatusCheckbox!: MatCheckbox;
   wifiEnabled: boolean = false;
@@ -33,45 +31,36 @@ export class WifiSettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   enterPasswordForm!: FormGroup;
   private password: string | undefined;
-  isGuest: boolean = true;
   isReady: boolean = false;
 
-  constructor(private wifiUtilsService: WifiUtilsService, private utils: UtilsService) {
+  constructor(private wifiUtilsService: WifiUtilsService) {
   }
 
   showWifi() {
-    if(!this.isGuest) {
-      this.loading = true;
-      this.wifiUtilsService.getCurrentWifiConnection().subscribe((result) => {
-          this.currentWifiConnection = result;
-          this.loading = false;
-          this.selector.value = this.currentWifiConnection.accessPoint;
-        },
-        reason => {
-          this.loading = false;
-          this.reporting.errorMessage = reason;
-        });
-    }
-    else
-      this.reporting.warningMessage = "Not available to the guest account";
+    this.loading = true;
+    this.wifiUtilsService.getCurrentWifiConnection().subscribe((result) => {
+        this.currentWifiConnection = result;
+        this.loading = false;
+        this.selector.value = this.currentWifiConnection.accessPoint;
+      },
+      reason => {
+        this.loading = false;
+        this.reporting.errorMessage = reason;
+      });
   }
 
   getLocalWifiDetails(): void {
-    if(!this.isGuest) {
-      if (this.wifiEnabled) {
-        this.wifiUtilsService.getLocalWifiDetails().subscribe((result) => {
-            this.wifiList = result
-              .filter(this.onlyUnique)
-              .sort((a, b) => parseInt(b.signal) - parseInt(a.signal));
-            this.showWifi();
-          },
-          reason => {
-            this.reporting.errorMessage = reason;
-          });
-      }
+    if (this.wifiEnabled) {
+      this.wifiUtilsService.getLocalWifiDetails().subscribe((result) => {
+          this.wifiList = result
+            .filter(this.onlyUnique)
+            .sort((a, b) => parseInt(b.signal) - parseInt(a.signal));
+          this.showWifi();
+        },
+        reason => {
+          this.reporting.errorMessage = reason;
+        });
     }
-    else
-      this.reporting.warningMessage = "Not available to the guest account";
   }
 
   setWifiStatus($event: MatCheckboxChange) {
@@ -160,51 +149,44 @@ export class WifiSettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.isGuest = this.utils.isGuestAccount;
-  }
-
-  ngAfterViewInit(): void {
     this.isReady = false;
-    if(!this.isGuest) {
-      this.wifiUtilsService.checkConnectedThroughEthernetNVR().subscribe(async (result) => {
-          this.ethernetConnectionStatus = result.status;
+    this.wifiUtilsService.checkConnectedThroughEthernetNVR().subscribe(async (result) => {
+        this.ethernetConnectionStatus = result.status;
 
-          if (result.status !== 'NO_ETHERNET') {
-            // We are overriding the result from the API call from here because that is intended for when the Cloud service is used
-            this.ethernetConnectionStatus = 'NOT_CONNECTED_VIA_ETHERNET';
-            try {
-              let x: IPDetails[] = await this.wifiUtilsService.getActiveIPAddresses().toPromise();
-              x.forEach((details: IPDetails) => {
-                const idxSlash: number = details.ip.indexOf('/');
-                const ip: string = details.ip.substring(0, idxSlash);
-                if (details.cd.con_type === 'ethernet' && ip === window.location.hostname)
-                  this.ethernetConnectionStatus = 'CONNECTED_VIA_ETHERNET';
-              })
-              this.isReady = true;
-            } catch (e) {
-
-            }
+        if (result.status !== 'NO_ETHERNET') {
+          // We are overriding the result from the API call from here because that is intended for when the Cloud service is used
+          this.ethernetConnectionStatus = 'NOT_CONNECTED_VIA_ETHERNET';
+          try {
+            let x: IPDetails[] = await this.wifiUtilsService.getActiveIPAddresses().toPromise();
+            x.forEach((details: IPDetails) => {
+              const idxSlash: number = details.ip.indexOf('/');
+              const ip: string = details.ip.substring(0, idxSlash);
+              if(details.cd.con_type === 'ethernet' && ip === window.location.hostname)
+                this.ethernetConnectionStatus = 'CONNECTED_VIA_ETHERNET';
+            })
+            this.isReady = true;
           }
-        },
-        reason => {
-          this.reporting.errorMessage = reason;
-        });
+          catch(e) {
 
-      this.wifiUtilsService.checkWifiStatus().subscribe((result) => {
-
-          this.wifiEnabled = result.status === 'on';
-          if (this.wifiEnabled) {
-            this.getLocalWifiDetails();
-          } else {
-            this.loading = false;
           }
-        },
-        reason => {
-          this.reporting.errorMessage = reason;
-        });
-    }
-    else
-      this.reporting.warningMessage = "Not available to the guest account";
+        }
+      },
+      reason => {
+        this.reporting.errorMessage = reason;
+      });
+
+    this.wifiUtilsService.checkWifiStatus().subscribe((result) => {
+
+        this.wifiEnabled = result.status === 'on';
+        if (this.wifiEnabled) {
+          this.getLocalWifiDetails();
+        } else {
+          this.loading = false;
+        }
+      },
+      reason => {
+        this.reporting.errorMessage = reason;
+      });
 
     this.enterPasswordForm = new FormGroup({
       password: new FormControl(this.password, [Validators.required, Validators.maxLength(35)]),

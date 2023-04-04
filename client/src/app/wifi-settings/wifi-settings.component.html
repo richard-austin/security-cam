@@ -62,11 +62,8 @@
         </mat-form-field>
       </div>
       <div class="connect-cancel">
-        <button [disabled]="this.isGuest || !wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting"
+        <button [disabled]="!wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting"
                 mat-flat-button
-                matTooltip="Disabled for guest"
-                matTooltipClass="tooltip"
-                [matTooltipDisabled]="!isGuest"
                 color="warn"
                 (click)="connect()">Connect
         </button>

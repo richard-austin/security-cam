@@ -91,16 +91,18 @@
             Get Active Local IP Address(es)
           </button>
         </span>
-        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
-          <button mat-menu-item [matMenuTriggerFor]="wifiAdmin">Wifi Admin</button>
-        </span>
+        <button mat-menu-item [matMenuTriggerFor]="wifiAdmin">Wifi Admin</button>
         <mat-menu #wifiAdmin="matMenu">
+        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="getLocalWifiDetails(); menuClosed()">
             Local Wifi Details
           </button>
+        </span>
+          <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="wifiSettings(); menuClosed()">
             Wifi Settings
           </button>
+        </span>
         </mat-menu>
         <button mat-menu-item (click)="cloudProxy();menuClosed()">Set CloudProxy Status</button>
         <button mat-menu-item (click)="drawdownCalc();menuClosed()">Pension Drawdown Calculator</button>
