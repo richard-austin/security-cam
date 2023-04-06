@@ -1,6 +1,7 @@
 package server
 
 import grails.core.GrailsApplication
+import org.hibernate.cfg.Environment
 import security.cam.CloudProxyService
 import security.cam.RoleService
 import security.cam.Sc_processesService
@@ -41,6 +42,12 @@ class BootStrap {
         // Start CloudProxy if enabled in the config or if there is no local web account other than guest on the NVR
         if(grailsApplication.config.cloudProxy.enabled || User.all.find{it.username != 'guest' && !it.cloudAccount} == null)
             cloudProxyService.start()
+
+        if(grails.util.Environment.isDevelopmentMode()) {
+            User u = new User(username: 'user', password: 'user', cloudAccount: false, enabled: true, passwordExpired: false)
+            u = userService.save(u)
+            userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
+        }
     }
     def destroy = {
         sc_processesService.stopProcesses()

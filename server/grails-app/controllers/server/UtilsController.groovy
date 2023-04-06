@@ -130,4 +130,8 @@ class UtilsController {
             render "success"
 
     }
+
+    def setupUserAccount() {
+        System.out.println("setupUserAccount")
+    }
 }
