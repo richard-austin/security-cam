@@ -67,7 +67,7 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @Secured(['ROLE_CLOUD'])
     def createAccount(CreateAccountCommand cmd) {
         ObjectCommandResponse result
 

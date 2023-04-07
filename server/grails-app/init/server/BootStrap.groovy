@@ -43,6 +43,7 @@ class BootStrap {
         if(grailsApplication.config.cloudProxy.enabled || User.all.find{it.username != 'guest' && !it.cloudAccount} == null)
             cloudProxyService.start()
 
+        // In production, user accounts are always set up manually
         if(grails.util.Environment.isDevelopmentMode()) {
             User u = new User(username: 'user', password: 'user', cloudAccount: false, enabled: true, passwordExpired: false)
             u = userService.save(u)

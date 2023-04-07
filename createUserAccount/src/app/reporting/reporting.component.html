@@ -1,0 +1,64 @@
+<mat-card *ngIf="!embedded &&(error || success || warning)"
+          [ngClass]="{'alert-danger': error, 'alert-success': success, 'alert-warning': warning}"
+          class="reporting mat-elevation-z8">
+  <div *ngIf="success">
+    Success: {{success}}
+  </div>
+  <div *ngIf="error?.status ==400">
+    <div>Validation Error: {{error?.status}}</div>
+    <div *ngFor="let validationError of validationErrors">
+      {{validationError}}
+    </div>
+  </div>
+  <div *ngIf="warning">
+    {{warning}}
+  </div>
+  <div *ngIf="!success && error?.status != 400">
+    <div *ngIf="error !== undefined && error?.status !== undefined && error?.status != 0">Error
+      status: {{error.status}}</div>
+    <br>
+    <div *ngIf="isHtml" [innerHTML]="error?.error"></div>
+    <div *ngIf="showMessageInError && !isHtml">{{error?.error}}</div>
+    <div *ngIf="!showMessageInError">See logs for more information</div>
+  </div>
+  <button mat-flat-button class="dismiss-button" color="default" (click)="dismiss()">Dismiss</button>
+</mat-card>
+
+<ng-container *ngIf="embedded && (error || success || warning)">
+  <div
+    [ngClass]="{'alert-danger-embedded': error, 'alert-success-embedded': success, 'alert-warning-embedded': warning}"
+    (click)="dismiss()">
+    <ng-container *ngIf="success">
+      <div>
+        Success: {{success}}
+      </div>
+    </ng-container>
+    <ng-container *ngIf="error?.status ==400">
+      <div>
+        <div>Validation Error: {{error?.status}}</div>
+        <div *ngFor="let validationError of validationErrors">
+          {{validationError}}
+        </div>
+      </div>
+
+    </ng-container>
+    <ng-container *ngIf="warning">
+      <div>
+        {{warning}}
+      </div>
+    </ng-container>
+    <ng-container *ngIf="!success && !warning && error?.status != 400">
+      <div>
+        <ng-container *ngIf="error && error.status != 0">
+          <div>Error status: {{error.status}}</div>
+        </ng-container>
+        <br>
+        <div *ngIf="isHtml" [innerHTML]="error?.error"></div>
+        <div *ngIf="showMessageInError && !isHtml">{{error?.error}}</div>
+        <ng-container *ngIf="!showMessageInError">
+          <div>See logs for more information</div>
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
+</ng-container>

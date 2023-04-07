@@ -7,9 +7,11 @@ import security.cam.ConfigurationUpdateService
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
 import security.cam.Sc_processesService
+import security.cam.UserAdminService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
+import security.cam.commands.CreateAccountCommand
 import security.cam.commands.SetCameraParamsCommand
 import security.cam.enums.PassFail
 import security.cam.enums.RestfulResponseStatusEnum
@@ -18,6 +20,7 @@ import security.cam.interfaceobjects.RestfulResponse
 
 class UtilsController {
     UtilsService utilsService
+    UserAdminService userAdminService
     RestfulInterfaceService restfulInterfaceService
     LogService logService
     ValidationErrorService validationErrorService
@@ -110,7 +113,7 @@ class UtilsController {
     }
 
     Sc_processesService sc_processesService
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def startProcs()
     {
         ObjectCommandResponse response = sc_processesService.startProcesses()
@@ -120,7 +123,7 @@ class UtilsController {
             render "success"
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def stopProcs()
     {
         ObjectCommandResponse response = sc_processesService.stopProcesses()
@@ -131,7 +134,21 @@ class UtilsController {
 
     }
 
-    def setupUserAccount() {
-        System.out.println("setupUserAccount")
+    def setupUserAccount(CreateAccountCommand cmd) {
+        ObjectCommandResponse result
+
+        if (cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
+            logService.cam.error "setupUserAccount: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        } else {
+            result = userAdminService.createAccount(cmd)
+            if (result.status != PassFail.PASS) {
+                render(status: 500, text: result.error)
+            } else {
+                logService.cam.info("setupUserAccount: success")
+                render ""
+            }
+        }
     }
 }
