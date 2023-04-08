@@ -18,6 +18,10 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {AppRoutingModule} from './app-routing.module';
+import {CommonModule} from '@angular/common';
+import {HttpClientModule} from '@angular/common/http';
+import {BaseUrl} from './shared/BaseUrl/BaseUrl';
 
 @NgModule({
   declarations: [
@@ -26,7 +30,10 @@ import {MatTooltipModule} from '@angular/material/tooltip';
     ReportingComponent
   ],
     imports: [
-        BrowserModule,
+      CommonModule,
+      AppRoutingModule,
+      BrowserModule,
+      HttpClientModule,
       MatCardModule,
       ReactiveFormsModule,
       MatFormFieldModule,
@@ -42,7 +49,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
       MatProgressSpinnerModule,
       RouterOutlet
     ],
-  providers: [],
+  providers: [BaseUrl],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

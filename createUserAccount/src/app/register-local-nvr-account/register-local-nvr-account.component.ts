@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {UtilsService} from '../shared/utils.service';
@@ -8,7 +8,7 @@ import {UtilsService} from '../shared/utils.service';
   templateUrl: './register-local-nvr-account.component.html',
   styleUrls: ['./register-local-nvr-account.component.scss']
 })
-export class RegisterLocalNvrAccountComponent implements OnInit {
+export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   username: string = '';
   password: string = '';
   confirmPassword: string = '';
