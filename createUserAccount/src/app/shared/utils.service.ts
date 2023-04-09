@@ -148,7 +148,7 @@ export class UtilsService {
     );
   }
 
-  registerLocalNVRAccount(username: string, password: string, confirmPassword: string, email: string, confirmEmail: string) {
+  registerLocalNVRAccount(username: string, password: string, confirmPassword: string, email: string, confirmEmail: string) : Observable<void> {
     let details: { username: string, password: string, confirmPassword: string, email: string, confirmEmail: string } =
       {
         username: username,
@@ -157,7 +157,7 @@ export class UtilsService {
         email: email,
         confirmEmail: confirmEmail
       };
-    return this.http.post<any>(this._baseUrl.getLink("user", "createAccount"), details, this.httpJSONOptions).pipe(
+    return this.http.post<void>(this._baseUrl.getLink("user", "createAccount"), details, this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }

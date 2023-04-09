@@ -81,13 +81,13 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
 
     this.username = this.getFormControl('username').value;
 
-    this.utilsService.registerLocalNVRAccount(this.username, this.password, this.confirmPassword, this.email, this.confirmEmail).subscribe(() => {
+    this.utilsService.registerLocalNVRAccount(this.username, this.password, this.confirmPassword, this.email, this.confirmEmail).subscribe( {complete: () => {
         this.utilsService.getHasLocalAccount();
         this.reporting.successMessage = "Account " + this.username + " created successfully";
       },
-      (reason) => {
+      error: (reason) => {
         this.reporting.errorMessage = reason;
-      });
+      }});
   }
 
   getFormControl(fcName: string): FormControl {

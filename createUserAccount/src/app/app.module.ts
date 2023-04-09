@@ -6,7 +6,7 @@ import {RouterOutlet} from '@angular/router';
 import {RegisterLocalNvrAccountComponent} from './register-local-nvr-account/register-local-nvr-account.component';
 import {ReportingComponent} from './reporting/reporting.component';
 import {MatCardModule} from '@angular/material/card';
-import {ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatButtonModule} from '@angular/material/button';
@@ -22,6 +22,9 @@ import {AppRoutingModule} from './app-routing.module';
 import {CommonModule} from '@angular/common';
 import {HttpClientModule} from '@angular/common/http';
 import {BaseUrl} from './shared/BaseUrl/BaseUrl';
+import {MatDividerModule} from '@angular/material/divider';
+import {LayoutModule} from '@angular/cdk/layout';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -33,6 +36,7 @@ import {BaseUrl} from './shared/BaseUrl/BaseUrl';
       CommonModule,
       AppRoutingModule,
       BrowserModule,
+      BrowserAnimationsModule,
       HttpClientModule,
       MatCardModule,
       ReactiveFormsModule,
@@ -47,6 +51,9 @@ import {BaseUrl} from './shared/BaseUrl/BaseUrl';
       MatMenuModule,
       MatTooltipModule,
       MatProgressSpinnerModule,
+      FormsModule,
+      LayoutModule,
+      MatDividerModule,
       RouterOutlet
     ],
   providers: [BaseUrl],

@@ -65,7 +65,7 @@
           <mat-form-field appearance="standard">
             <mat-label>Camera Name</mat-label>
             <input matInput type="text" formControlName="cameraName"
-                   placeholder="Start Date">
+                   placeholder="Camera Name">
             <mat-hint>Change camera name if required</mat-hint>
             <mat-error *ngIf="hasError('cameraName', 'required')">Camera name is required</mat-error>
             <mat-error *ngIf="hasError('cameraName', 'maxlength')">Max camera name length exceeded</mat-error>
@@ -75,10 +75,8 @@
           <mat-form-field appearance="standard">
             <mat-label>Date Format</mat-label>
             <input matInput type="text" formControlName="dateFormat"
-                   placeholder="Start Date">
+                   placeholder="Date Format">
             <mat-hint>Read only value</mat-hint>
-            <mat-error *ngIf="hasError('dateFormat', 'required')">Camera name is required</mat-error>
-            <mat-error *ngIf="hasError('dateFormat', 'maxlength')">Max camera name length exceeded</mat-error>
           </mat-form-field>
           <mat-form-field appearance="standard">
             <mat-label>Start Date</mat-label>

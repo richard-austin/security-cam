@@ -7,6 +7,7 @@ describe('RegisterLocalNvrAccountComponent', () => {
   let fixture: ComponentFixture<RegisterLocalNvrAccountComponent>;
 
   beforeEach(async () => {
+    // @ts-ignore
     await TestBed.configureTestingModule({
       declarations: [ RegisterLocalNvrAccountComponent ]
     })
@@ -14,6 +15,7 @@ describe('RegisterLocalNvrAccountComponent', () => {
   });
 
   beforeEach(() => {
+    // @ts-ignore
     fixture = TestBed.createComponent(RegisterLocalNvrAccountComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

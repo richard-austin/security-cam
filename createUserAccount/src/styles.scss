@@ -1,41 +1,205 @@
 @use '@angular/material' as mat;
-@include mat.core;
+@include mat.core();
 
 // Basic colours used in theme
-$admin-primary: mat.define-palette(mat.$light-green-palette);
-$admin-accent: mat.define-palette(mat.$blue-palette);
-$admin-warn: mat.define-palette(mat.$orange-palette);
+$sec-cam-primary: mat.define-palette(mat.$light-green-palette);
+$sec-cam-accent: mat.define-palette(mat.$blue-palette);
+$sec-cam-warn: mat.define-palette(mat.$orange-palette);
 
 // Colours used for buttons and alter boxes.
-$admin-danger: mat.define-palette(mat.$red-palette);
-$admin-secondary: mat.define-palette(mat.$green-palette, 600);
-$admin-light: mat.define-palette(mat.$yellow-palette, 400);
-$admin-grey: mat.define-palette(mat.$grey-palette);
+$sec-cam-danger: mat.define-palette(mat.$red-palette);
+$sec-cam-secondary: mat.define-palette(mat.$green-palette, 600);
+$sec-cam-light: mat.define-palette(mat.$yellow-palette, 400);
+$sec-cam-grey: mat.define-palette(mat.$grey-palette);
 
-// All the following are defined from the admin- group above
-$success-background: mat.get-color-from-palette($admin-secondary, 100);
-$danger-background: mat.get-color-from-palette($admin-danger, 200);
-$warn-background: mat.get-color-from-palette($admin-warn, 100);
+// All the following are defined from the sec-cam- group above
+$success-background: mat.get-color-from-palette($sec-cam-secondary, 100);
+$danger-background: mat.get-color-from-palette($sec-cam-danger, 200);
+$warn-background: mat.get-color-from-palette($sec-cam-warn, 100);
 
-$success-colour: mat.get-contrast-color-from-palette($admin-secondary, 400);
-$danger-colour:  mat.get-contrast-color-from-palette($admin-danger, 400);
-$warn-colour: mat.get-contrast-color-from-palette($admin-warn, 400);
+$success-colour: mat.get-contrast-color-from-palette($sec-cam-secondary, 400);
+$danger-colour:  mat.get-contrast-color-from-palette($sec-cam-danger, 400);
+$warn-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
 
-$light-button-bkgnd: mat.get-color-from-palette($admin-light, 400);
-$danger-button-bkgnd: mat.get-color-from-palette($admin-danger, A700);
-$warn-button-bkgnd: mat.get-color-from-palette($admin-warn,A400);
-$secondary-button-bkgnd: mat.get-color-from-palette($admin-accent, 900);
-$default-button-bkgnd: mat.get-color-from-palette($admin-grey, 500);
+$light-button-bkgnd: mat.get-color-from-palette($sec-cam-light, 400);
+$danger-button-bkgnd: mat.get-color-from-palette($sec-cam-danger, A700);
+$warn-button-bkgnd: mat.get-color-from-palette($sec-cam-warn,A400);
+$secondary-button-bkgnd: mat.get-color-from-palette($sec-cam-accent, 900);
+$default-button-bkgnd: mat.get-color-from-palette($sec-cam-grey, 500);
 
-$light-button-colour: mat.get-contrast-color-from-palette($admin-light, 900);
-$danger-button-colour: mat.get-contrast-color-from-palette($admin-danger, 900);
-$warn-button-colour: mat.get-contrast-color-from-palette($admin-warn, 400);
-$secondary-button-colour: mat.get-contrast-color-from-palette($admin-accent, 500);
-$default-button-colour: mat.get-contrast-color-from-palette($admin-grey, 500);
+$light-button-colour: mat.get-contrast-color-from-palette($sec-cam-light, 900);
+$danger-button-colour: mat.get-contrast-color-from-palette($sec-cam-danger, 900);
+$warn-button-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
+$secondary-button-colour: mat.get-contrast-color-from-palette($sec-cam-accent, 500);
+$default-button-colour: mat.get-contrast-color-from-palette($sec-cam-grey, 500);
 
-$theme: mat.define-dark-theme((color: (primary: $admin-primary, secondary: $admin-secondary, accent: $admin-accent, warn: $admin-warn)));
+$theme: mat.define-dark-theme((color: (primary: $sec-cam-primary, secondary: $sec-cam-secondary, accent: $sec-cam-accent, warn: $sec-cam-warn)));
 
 $mat-theme-background: map-get($theme, background);
 $background-colour: mat.get-color-from-palette($mat-theme-background, background);
 
+
 @include mat.all-component-themes($theme);
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: $background-colour;
+  //  margin: 0;
+}
+html, body {
+  height: 100%;
+}
+
+
+@mixin alert {
+ // position: relative;
+  width: fit-content;
+  padding: 1.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 4rem;
+  top: 5%;
+  -webkit-box-shadow: 5px 5px 14px 5px #000000;
+  box-shadow: 5px 5px 14px 5px #000000;
+}
+
+@mixin success {
+  color: $success-colour;
+  background-color: $success-background;
+}
+
+@mixin warning {
+  color: $warn-colour;
+  background-color: $warn-background;
+}
+
+@mixin danger {
+  color: $danger-colour;
+  background-color: $danger-background;
+}
+
+@mixin alert-embedded {
+  @include alert;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.success{
+  @include success;
+}
+
+.warning {
+  @include warning;
+}
+
+.danger {
+  @include danger;
+}
+
+.alert-success {
+  @include alert;
+  @include success;
+}
+
+.alert-warning {
+  @include alert;
+  @include warning;
+}
+
+.alert-danger {
+  @include alert;
+  @include danger;
+}
+
+.alert-success-embedded {
+  @include alert-embedded;
+  @include success;
+}
+
+.alert-warning-embedded {
+  @include alert-embedded;
+  @include warning;
+}
+
+.alert-danger-embedded {
+  @include alert-embedded;
+  @include danger;
+}
+
+.mat-danger {
+  background-color: $danger-button-bkgnd;
+  color: $danger-button-colour;
+}
+
+.mat-secondary {
+  background-color: $secondary-button-bkgnd;
+  color: $secondary-button-colour;
+}
+
+.mat-light {
+  background-color: $light-button-bkgnd;
+  color: $light-button-colour;
+}
+
+.mat-warning {
+  background-color: $warn-button-bkgnd;
+  color: $warn-button-colour;
+}
+
+.mat-default {
+  background-color: $default-button-bkgnd;
+  color: $default-button-colour;
+}
+
+mat-card-content.wait-box {
+  >mat-spinner {
+    display: inline;
+  }
+  >span {
+    position: relative;
+    top: 0.4rem;
+    left: 2rem;
+    display: inline;
+  }
+}
+
+mat-card.hide-background {
+  background-color: transparent;
+}
+
+.mat-tooltip.tooltip {
+  background-color: #e3ba4f;
+  color: black;
+  font-size: 12px;
+}
+
+.confirm-group {
+  > span {
+    background: #d9a11a;
+    color: black;
+    padding: 0.9rem;
+    border-radius: 1rem;
+  }
+
+  > button {
+    margin-left: 0.5rem;
+  }
+}
+
+div.message-display {
+  display: flex;
+  margin-bottom: 1rem;
+  > div {
+    margin-bottom: 1rem;
+    flex-grow: 2;
+  }
+}
+
+.email-input {
+  width: 30rem;
+}
+
+.register-account-input {
+  width: 15rem
+}
