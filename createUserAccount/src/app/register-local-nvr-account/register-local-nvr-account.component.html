@@ -1,6 +1,8 @@
 <div class="nvr-register-container">
-  <mat-card class="mat-elevation-z8" xmlns="http://www.w3.org/1999/html">
-    <mat-card-title>Register a New NVR Account</mat-card-title>
+  <mat-card class="mat-elevation-z8">
+    <mat-card-header>
+      <mat-card-title>Register a New NVR Account</mat-card-title>
+    </mat-card-header>
     <mat-card-content>
       <app-reporting [embedded]="true"></app-reporting>
       <div>
@@ -8,6 +10,7 @@
           <input #username matInput type="text" autocomplete="off" maxlength="20"
                  [formControl]="getFormControl('username')"
                  (beforeinput)="confirmOnReturn($event)"
+                 title=""
                  matTooltip="Enter a Cloud Service user name."
                  matTooltipClass="tooltip"
                  placeholder="New User name">
@@ -23,6 +26,7 @@
           <input matInput type="password" autocomplete="off" maxlength="25"
                  [formControl]="getFormControl('password')"
                  (beforeinput)="confirmOnReturn($event)"
+                 title=""
                  matTooltip="Enter your Cloud Service password"
                  matTooltipClass="tooltip"
                  placeholder="Password">
@@ -39,6 +43,7 @@
           <input matInput type="password" autocomplete="off" maxlength="25"
                  [formControl]="getFormControl('confirmPassword')"
                  (beforeinput)="confirmOnReturn($event)"
+                 title=""
                  matTooltip="Confirm your Cloud Service password"
                  matTooltipClass="tooltip"
                  placeholder="Confirm Password">
@@ -54,6 +59,7 @@
           <input matInput type="email" autocomplete="off" maxlength="40"
                  [formControl]="getFormControl('email')"
                  (beforeinput)="confirmOnReturn($event)"
+                 title=""
                  matTooltip="Enter your email address. This is required to provide a means of resetting forgotten passwords"
                  matTooltipClass="tooltip"
                  placeholder="email address">
@@ -69,6 +75,7 @@
           <input matInput type="email" autocomplete="off" maxlength="40"
                  [formControl]="getFormControl('confirmEmail')"
                  (beforeinput)="confirmOnReturn($event)"
+                 title=""
                  matTooltip="Confirm your email address"
                  matTooltipClass="tooltip"
                  placeholder="Confirm email address">
