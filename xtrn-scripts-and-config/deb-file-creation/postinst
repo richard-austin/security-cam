@@ -8,7 +8,10 @@ mv /tmp/server.xml /etc/tomcat9/
 mv /tmp/tomcat9 /etc/default/  # Updated tomcat9 default file to enable use of Java 17
 mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
-rm -r /var/lib/tomcat9/webapps/ROOT
+mv /tmp/cua.war /var/lib/tomcat9/webapps/cua.war
+
+rm -rf /var/lib/tomcat9/webapps/ROOT
+rm -rf /var/lib/tomcat9/webapps/cua
 
 rm -r /tmp/motion.conf
 deb-systemd-invoke stop tomcat9.service  # Stop tomcat before making changes
@@ -27,6 +30,8 @@ chown -R tomcat:security-cam /var/security-cam
 
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
+chown tomcat:tomcat /var/lib/tomcat9/webapps/cua.war
+
 chmod 640 /etc/tomcat9/tomcat-users.xml
 chown root:tomcat /etc/tomcat9/tomcat-users.xml
 chmod 640 /etc/tomcat9/server.xml

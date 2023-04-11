@@ -47,3 +47,11 @@ task buildClientWatch(type: NpmTask, dependsOn: 'npmInstall') {
   description = 'Builds and watches the client side assets for rebuilding'
   args = ['run', 'buildWatch']
 }
+
+task buildWar(type: Exec, dependsOn: 'buildClient') {
+  group = 'build'
+  workingDir "$projectDir/dist/create-user-account"
+  executable "sh"
+  args = ['-c', 'jar -cvf ../cua.war *']
+}
+
