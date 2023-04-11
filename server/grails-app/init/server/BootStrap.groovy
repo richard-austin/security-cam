@@ -44,7 +44,7 @@ class BootStrap {
             cloudProxyService.start()
 
         // In production, user accounts are always set up manually
-        if(grails.util.Environment.isDevelopmentMode()) {
+        if(false && grails.util.Environment.isDevelopmentMode()) {
             User u = new User(username: 'user', password: 'user', cloudAccount: false, enabled: true, passwordExpired: false)
             u = userService.save(u)
             userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))

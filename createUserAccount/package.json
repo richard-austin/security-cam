@@ -5,6 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "startNetwork": "ng serve --host 0.0.0.0",
+    "startProxy": "ng serve --proxy-config src/proxy.conf.js",
+    "startProxyNetwork": "ng serve --host 0.0.0.0 --proxy-config src/proxy.conf.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"

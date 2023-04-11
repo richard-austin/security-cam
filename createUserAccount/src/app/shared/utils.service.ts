@@ -157,7 +157,7 @@ export class UtilsService {
         email: email,
         confirmEmail: confirmEmail
       };
-    return this.http.post<void>(this._baseUrl.getLink("user", "createAccount"), details, this.httpJSONOptions).pipe(
+    return this.http.post<void>(this._baseUrl.getLink("user", "createAccountLocally"), details, this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }

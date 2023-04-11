@@ -133,22 +133,4 @@ class UtilsController {
             render "success"
 
     }
-
-    def setupUserAccount(CreateAccountCommand cmd) {
-        ObjectCommandResponse result
-
-        if (cmd.hasErrors()) {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
-            logService.cam.error "setupUserAccount: Validation error: " + errorsMap.toString()
-            render(status: 400, text: errorsMap as JSON)
-        } else {
-            result = userAdminService.createAccount(cmd)
-            if (result.status != PassFail.PASS) {
-                render(status: 500, text: result.error)
-            } else {
-                logService.cam.info("setupUserAccount: success")
-                render ""
-            }
-        }
-    }
 }

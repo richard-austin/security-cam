@@ -86,7 +86,19 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    /**
+     * createAccountLocally: Unsecured to enable account creation without being logged in.
+     *                       This URL is blocked by nginx to prevent external access, and is
+     *                       accesses on tomcats port 8080.
+     *
+     * @param cmd
+     * @return
+     */
+    def createAccountLocally(CreateAccountCommand cmd){
+        createAccount(cmd)
+    }
+
+    @Secured(['ROLE_CLOUD'])
     /**
      * removeAccount: Remove the local web account used for direct access to to NVR
      */
@@ -101,7 +113,7 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @Secured(['ROLE_CLOUD'])
     def hasLocalAccount() {
         ObjectCommandResponse result = userAdminService.hasLocalAccount()
 

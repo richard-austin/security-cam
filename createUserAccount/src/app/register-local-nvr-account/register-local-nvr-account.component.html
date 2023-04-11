@@ -11,10 +11,10 @@
                  [formControl]="getFormControl('username')"
                  (beforeinput)="confirmOnReturn($event)"
                  title=""
-                 matTooltip="Enter a Cloud Service user name."
+                 matTooltip="Enter user name"
                  matTooltipClass="tooltip"
                  placeholder="New User name">
-          <mat-hint>User name for your Cloud account</mat-hint>
+          <mat-hint>User name for your NVR online account</mat-hint>
           <mat-error *ngIf="nvrAccountRegistrationForm.controls['username'].hasError('pattern')">5 or more characters and numbers
           </mat-error>
           <mat-error *ngIf="nvrAccountRegistrationForm.controls['username'].hasError('required')">User name is required</mat-error>
@@ -27,7 +27,7 @@
                  [formControl]="getFormControl('password')"
                  (beforeinput)="confirmOnReturn($event)"
                  title=""
-                 matTooltip="Enter your Cloud Service password"
+                 matTooltip="Enter your password"
                  matTooltipClass="tooltip"
                  placeholder="Password">
           <mat-hint>Password for the NVR account</mat-hint>
@@ -44,7 +44,7 @@
                  [formControl]="getFormControl('confirmPassword')"
                  (beforeinput)="confirmOnReturn($event)"
                  title=""
-                 matTooltip="Confirm your Cloud Service password"
+                 matTooltip="Confirm your NVR account password"
                  matTooltipClass="tooltip"
                  placeholder="Confirm Password">
           <mat-hint>Confirm the password</mat-hint>
@@ -88,15 +88,15 @@
       <br>
       <span class="cam-creds-confirm-group">
       <button color="default" mat-flat-button (click)="hideRegisterForm()"
-              matTooltip="{{reporting?.success == undefined ? 'Close this dialogue and abandon setting up an account': 'Close this dialogue box'}}"
+              matTooltip="{{reporting.success == undefined ? 'Close this dialogue and abandon setting up an account': 'Close this dialogue box'}}"
               matTooltipClass="tooltip">
-        {{reporting?.success == undefined ? 'Cancel' : 'Exit'}}
+        {{reporting.success == undefined ? 'Cancel' : 'Exit'}}
       </button>
               <span>&nbsp;&nbsp;</span>
       <button color="warning" mat-flat-button
-              [disabled]="anyInvalid() || reporting?.success != undefined"
+              [disabled]="anyInvalid() || reporting.success != undefined"
               (click)="register()"
-              matTooltip="Login into the CCTV Cloud Service with the given username and password"
+              matTooltip="Register the new account"
               matTooltipClass="tooltip">
         Register Account
       </button>

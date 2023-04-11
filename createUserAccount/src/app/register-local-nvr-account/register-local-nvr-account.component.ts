@@ -18,7 +18,10 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   // errorMessage: string = '';
   // successMessage: string = '';
   @ViewChild('username') usernameInput!: ElementRef<HTMLInputElement>;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+
+  // Assigning this here so as not to use ?. in the template when referencing the reporting
+  //  component. Angular 15 complains about ?. when reporting was declared not being null
+  @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
 
   constructor(private utilsService: UtilsService) {
   }
@@ -81,7 +84,8 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
 
     this.username = this.getFormControl('username').value;
 
-    this.utilsService.registerLocalNVRAccount(this.username, this.password, this.confirmPassword, this.email, this.confirmEmail).subscribe( {complete: () => {
+    this.utilsService.registerLocalNVRAccount(this.username, this.password, this.confirmPassword, this.email, this.confirmEmail).subscribe(
+      {complete: () => {
         this.utilsService.getHasLocalAccount();
         this.reporting.successMessage = "Account " + this.username + " created successfully";
       },
