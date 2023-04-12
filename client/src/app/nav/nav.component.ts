@@ -134,6 +134,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.location.href = '#/dc';
   }
 
+  admin() {
+    window.location.href = '#/cua';
+  }
+
   configSetup() {
     window.location.href = '#/configsetup';
   }

@@ -14,7 +14,7 @@
 
   <div #navbarCollapse class="collapse" id="navbarSupportedContent">
     <div>
-      <button mat-button [matMenuTriggerFor]="menuSelectCamera" id="cameraDropdown">
+      <button mat-button [matMenuTriggerFor]="$any(menuSelectCamera)" id="cameraDropdown">
         Select Camera
       </button>
       <mat-menu #menuSelectCamera="matMenu">
@@ -28,7 +28,7 @@
     </div>
 
     <div>
-      <button mat-button [matMenuTriggerFor]="menuSelectRecording">Select Recording</button>
+      <button mat-button [matMenuTriggerFor]="$any(menuSelectRecording)">Select Recording</button>
       <mat-menu #menuSelectRecording="matMenu">
         <ng-container *ngFor="let cs of cameraStreams">
           <button mat-menu-item (click)="showRecording(cs);menuClosed()" *ngIf="cs.stream.recording.enabled">
@@ -39,10 +39,10 @@
     </div>
 
     <div>
-      <button mat-button [matMenuTriggerFor]="cameraSettings">Camera Settings</button>
+      <button mat-button [matMenuTriggerFor]="$any(cameraSettings)">Camera Settings</button>
       <mat-menu #cameraSettings="matMenu">
-        <button mat-menu-item [matMenuTriggerFor]="menuCameraSettings">Quick Camera Setup</button>
-        <button mat-menu-item [matMenuTriggerFor]="menuCameraAdmin">Camera Admin</button>
+        <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraSettings)">Quick Camera Setup</button>
+        <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraAdmin)">Camera Admin</button>
       </mat-menu>
       <mat-menu #menuCameraSettings="matMenu">
         <ng-container *ngFor="let cam of cameras">
@@ -67,7 +67,7 @@
     </div>
 
     <div>
-      <button mat-button [matMenuTriggerFor]="menuGeneral">General</button>
+      <button mat-button [matMenuTriggerFor]="$any(menuGeneral)">General</button>
       <mat-menu #menuGeneral="matMenu">
         <button mat-menu-item (click)="configSetup();menuClosed()">Configure Camera Setup</button>
         <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
@@ -91,7 +91,7 @@
             Get Active Local IP Address(es)
           </button>
         </span>
-        <button mat-menu-item [matMenuTriggerFor]="wifiAdmin">Wifi Admin</button>
+        <button mat-menu-item [matMenuTriggerFor]="$any(wifiAdmin)">Wifi Admin</button>
         <mat-menu #wifiAdmin="matMenu">
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="getLocalWifiDetails(); menuClosed()">
@@ -105,6 +105,7 @@
         </span>
         </mat-menu>
         <button mat-menu-item (click)="cloudProxy();menuClosed()">Set CloudProxy Status</button>
+        <button mat-menu-item (click)="admin();menuClosed()">Admin Functions</button>
         <button mat-menu-item (click)="drawdownCalc();menuClosed()">Pension Drawdown Calculator</button>
         <div class="dropdown-divider"></div>
         <button mat-menu-item (click)="about();menuClosed()">About Security Cam</button>

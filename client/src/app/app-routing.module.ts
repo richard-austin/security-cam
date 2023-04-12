@@ -16,6 +16,7 @@ import {CameraAdminPageHostingComponent} from './camera-admin-page-hosting/camer
 import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-wifi-details.component';
 import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
+import {CreateUserAccountContainerComponent} from './create-user-account-container/create-user-account-container.component';
 
 const routes: Routes = [
   {path: 'live/:streamName', component: LiveContainerComponent},
@@ -29,6 +30,7 @@ const routes: Routes = [
   {path: 'camadmin/:camera', component:  CameraAdminPageHostingComponent},
   {path: 'configsetup', component: ConfigSetupComponent},
   {path: 'setupguestaccount', component: SetUpGuestAccountComponent},
+  {path: 'cua', component: CreateUserAccountContainerComponent},
   {path: 'dc', component: DrawdownCalcContainerComponent},
   {path: 'cloudproxy', component: CloudProxyComponent},
   {path: 'getactiveipaddresses', component: GetActiveIPAddressesComponent},
