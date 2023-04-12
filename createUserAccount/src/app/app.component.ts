@@ -8,6 +8,13 @@ import {AfterViewInit, Component} from '@angular/core';
 export class AppComponent implements AfterViewInit{
   title = 'createUserAccount';
 
+  setUpSMTPClient() {
+    window.location.href = '#/'
+  }
+
+  registerLocalAccount() {
+    window.location.href="#/registerLocalAccount"
+  }
   ngAfterViewInit(): void {
     // window.location.href = '/#/registerLocalAccount';
   }

@@ -107,7 +107,6 @@ import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active
     MatSelectModule,
     MatDialogModule,
     MatMenuModule,
-    MatIconModule,
     MatProgressSpinnerModule,
     FormsModule,
     // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.

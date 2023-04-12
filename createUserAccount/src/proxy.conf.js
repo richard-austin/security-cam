@@ -1,6 +1,7 @@
 const PROXY_CONFIG = [
   {  context: [
       "/user",
+      "/assets"
     ],
     target: "http://localhost:8080/",
     changeOrigin: false,
