@@ -24,6 +24,8 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   //  component. Angular 15 complains about ?. when reporting was declared not being null
   @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
   title!: string;
+  buttonTitle!: string;
+  error: boolean = false;
 
   constructor(private utilsService: UtilsService) {
   }
@@ -113,9 +115,14 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
       next: (value: boolean) => {
         this.updateExisting = value;
         this.title = value ? "Update the existing NVR account" : "Register a New NVR Account";
+        this.buttonTitle = value ? "Update Account" : "Register Account";
+        this.error = false;
       },
       error: (reason) => {
         this.reporting.errorMessage = reason;
+        this.title = "Problem!"
+        this.buttonTitle = "Problem!";
+        this.error = true;
       }
     });
   }

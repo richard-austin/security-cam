@@ -94,11 +94,11 @@
       </button>
               <span>&nbsp;&nbsp;</span>
       <button color="warning" mat-flat-button
-              [disabled]="anyInvalid() || reporting.success != undefined"
+              [disabled]="error || anyInvalid() || reporting.success != undefined"
               (click)="register()"
               matTooltip="Register the new account"
               matTooltipClass="tooltip">
-        Register Account
+        {{buttonTitle}}
       </button>
     </span>
     </mat-card-content>
