@@ -14,6 +14,7 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   confirmPassword: string = '';
   email: string = '';
   confirmEmail: string = '';
+  updateExisting: boolean = false;
   nvrAccountRegistrationForm!: FormGroup;
   // errorMessage: string = '';
   // successMessage: string = '';
@@ -22,6 +23,7 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   // Assigning this here so as not to use ?. in the template when referencing the reporting
   //  component. Angular 15 complains about ?. when reporting was declared not being null
   @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
+  title!: string;
 
   constructor(private utilsService: UtilsService) {
   }
@@ -84,10 +86,10 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
 
     this.username = this.getFormControl('username').value;
 
-    this.utilsService.registerLocalNVRAccount(this.username, this.password, this.confirmPassword, this.email, this.confirmEmail).subscribe(
+    this.utilsService.createOrUpdateLocalNVRAccount(this.username, this.password, this.confirmPassword, this.email, this.confirmEmail, this.updateExisting).subscribe(
       {complete: () => {
         this.utilsService.getHasLocalAccount();
-        this.reporting.successMessage = "Account " + this.username + " created successfully";
+        this.reporting.successMessage = "Local client account " + (this.updateExisting ? " updated":" created") + " successfully"+ (this.updateExisting?" username now: "+this.username:"");
       },
       error: (reason) => {
         this.reporting.errorMessage = reason;
@@ -106,6 +108,18 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
     window.location.href = "#/";
   }
 
+  checkForLocalAccount() {
+    this.utilsService.checkForLocalAccountLocally().subscribe({
+      next: (value: boolean) => {
+        this.updateExisting = value;
+        this.title = value ? "Update the existing NVR account" : "Register a New NVR Account";
+      },
+      error: (reason) => {
+        this.reporting.errorMessage = reason;
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.nvrAccountRegistrationForm = new FormGroup({
       username: new FormControl(this.username, [Validators.required, Validators.maxLength(20), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
@@ -117,6 +131,7 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
 
     // Ensure camera form controls highlight immediately if invalid
     this.nvrAccountRegistrationForm.markAllAsTouched();
+    this.checkForLocalAccount();
   }
 
   ngAfterViewInit(): void {

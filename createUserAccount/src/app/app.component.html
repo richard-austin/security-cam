@@ -1,9 +1,9 @@
 <mat-card>
   <mat-card-content>
-    <button mat-icon-button [matMenuTriggerFor]="setUpUserAccount"><mat-icon>menu</mat-icon></button>
+    <button mat-icon-button [matMenuTriggerFor]="$any(setUpUserAccount)"><mat-icon>menu</mat-icon></button>
     <mat-menu #setUpUserAccount="matMenu">
       <button (click)="registerLocalAccount()" mat-menu-item>
-        Set Up User Account
+        Create or Update User Account
       </button>
       <button (click)="setUpSMTPClient()" mat-menu-item>
         Set Up SMTP Client

@@ -1,12 +1,12 @@
 package security.cam
 
-import grails.converters.JSON
+
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.grails.web.json.JSONObject
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import security.cam.commands.ChangeEmailCommand
-import security.cam.commands.CreateAccountCommand
+import security.cam.commands.CreateOrUpdateAccountCommand
 import security.cam.commands.ResetPasswordCommand
 import security.cam.commands.SetupGuestAccountCommand
 import security.cam.enums.PassFail
@@ -57,12 +57,27 @@ class UserAdminService {
      *
      * @return: Success/error status
      */
-    ObjectCommandResponse createAccount(CreateAccountCommand cmd) {
+    ObjectCommandResponse createOrUpdateAccount(CreateOrUpdateAccountCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            User u = new User(username: cmd.username, password: cmd.password, email: cmd.email, cloudAccount: false, header: null)
-            u = userService.save(u)
-            userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
+            if(cmd.updateExisting)
+            {
+                def roleClient = roleService.findByAuthority('ROLE_CLIENT')
+                def u = User.all.find {
+                    def auth = it.getAuthorities()
+                    return auth.size() == 1 && auth[0] == roleClient
+                }
+                u.username = cmd.username
+                u.password = cmd.password
+                u.email = cmd.email
+                userService.save(u)
+              //  userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
+            }
+            else {
+                User u = new User(username: cmd.username, password: cmd.password, email: cmd.email, cloudAccount: false, header: null)
+                u = userService.save(u)
+                userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
+            }
 
         }
         catch (Exception ex) {

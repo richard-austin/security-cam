@@ -1,10 +1,10 @@
 <div class="nvr-register-container">
   <mat-card class="mat-elevation-z8">
     <mat-card-header>
-      <mat-card-title>Register a New NVR Account</mat-card-title>
+      <mat-card-title>{{title}}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <app-reporting [embedded]="true"></app-reporting>
+      <app-reporting [embedded]="true" (click)="checkForLocalAccount()"></app-reporting>
       <div>
         <mat-form-field appearance="outline" class="register-account-input">
           <input #username matInput type="text" autocomplete="off" maxlength="20"

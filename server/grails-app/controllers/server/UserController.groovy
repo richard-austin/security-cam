@@ -7,7 +7,7 @@ import security.cam.LogService
 import security.cam.UserAdminService
 import security.cam.ValidationErrorService
 import security.cam.commands.ChangeEmailCommand
-import security.cam.commands.CreateAccountCommand
+import security.cam.commands.CreateOrUpdateAccountCommand
 import security.cam.commands.ResetPasswordCommand
 import security.cam.commands.SetupGuestAccountCommand
 import security.cam.enums.PassFail
@@ -68,7 +68,7 @@ class UserController {
     }
 
     @Secured(['ROLE_CLOUD'])
-    def createAccount(CreateAccountCommand cmd) {
+    def createOrUpdateAccount(CreateOrUpdateAccountCommand cmd) {
         ObjectCommandResponse result
 
         if (cmd.hasErrors()) {
@@ -76,7 +76,7 @@ class UserController {
             logService.cam.error "createAccount: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {
-            result = userAdminService.createAccount(cmd)
+            result = userAdminService.createOrUpdateAccount(cmd)
             if (result.status != PassFail.PASS) {
                 render(status: 500, text: result.error)
             } else {
@@ -87,15 +87,23 @@ class UserController {
     }
 
     /**
-     * createAccountLocally: Unsecured to enable account creation without being logged in.
-     *                       This URL is blocked by nginx to prevent external access, and is
-     *                       accesses on tomcats port 8080.
+     * createOrUpdateAccountLocally: Unsecured to enable account creation without being logged in.
+     *                       nginx requires a session to allow access to this url to prevent
+     *                       unauthenticated external access. It is accessed locally tomcats port 8080.
      *
-     * @param cmd
-     * @return
+     * @param cmd: Contains username, password, email, updateExisting
      */
-    def createAccountLocally(CreateAccountCommand cmd){
-        createAccount(cmd)
+    def createOrUpdateAccountLocally(CreateOrUpdateAccountCommand cmd){
+        createOrUpdateAccount(cmd)
+    }
+
+    /**
+     * checkForLocalAccountLocally: Unsecured to enable account creation without being logged in.
+     *                       nginx requires a session to allow access to this url to prevent
+     *                       unauthenticated external access. It is accessed locally tomcats port 8080.
+     */
+    def checkForLocalAccountLocally() {
+        hasLocalAccount()
     }
 
     @Secured(['ROLE_CLOUD'])

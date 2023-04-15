@@ -3,7 +3,6 @@ package server
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
-import security.cam.ConfigurationUpdateService
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
 import security.cam.Sc_processesService
@@ -11,7 +10,6 @@ import security.cam.UserAdminService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
-import security.cam.commands.CreateAccountCommand
 import security.cam.commands.SetCameraParamsCommand
 import security.cam.enums.PassFail
 import security.cam.enums.RestfulResponseStatusEnum

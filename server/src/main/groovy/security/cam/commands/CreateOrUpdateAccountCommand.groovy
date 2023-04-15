@@ -4,19 +4,20 @@ import grails.validation.Validateable
 import security.cam.User
 import security.cam.UtilsService
 
-class CreateAccountCommand implements Validateable{
+class CreateOrUpdateAccountCommand implements Validateable{
     String username
     String password
     String confirmPassword
     String email
     String confirmEmail
+    boolean updateExisting = false
 
     UtilsService utilsService
 
     static constraints = {
         username(nullable: false, blank: false,
         validator: {username, cmd ->
-            if(User.all.find{it.username != 'guest' && !it.cloudAccount} != null)
+            if(!cmd.updateExisting && User.all.find{it.username != 'guest' && !it.cloudAccount} != null)
                 return "There is already a local web account defined"
             else if(!username.matches(cmd.utilsService.usernameRegex))
                 return "Format or length of username is incorrect"
@@ -39,5 +40,6 @@ class CreateAccountCommand implements Validateable{
             if(confirmEmail != cmd.email)
                 return "Email and confirm email do not match"
         })
+        updateExisting(nullable: false, inList:[true, false])
     }
 }
