@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "createOrUpdateAccountLocally": {
+    "initialAdmin": {
       "projectType": "application",
       "schematics": {},
       "root": "",

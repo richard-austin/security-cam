@@ -8,13 +8,14 @@ import {AfterViewInit, Component} from '@angular/core';
 export class AppComponent implements AfterViewInit{
   title = 'initialAdmin';
 
-  setUpSMTPClient() {
-    window.location.href = '#/'
-  }
-
   registerLocalAccount() {
     window.location.href="#/registerLocalAccount"
   }
+
+  setupSMTPClient () {
+    window.location.href = "#/setupSMTPClient"
+  }
+
   ngAfterViewInit(): void {
     // window.location.href = '/#/registerLocalAccount';
   }

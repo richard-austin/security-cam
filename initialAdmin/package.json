@@ -1,5 +1,5 @@
 {
-  "name": "create-user-account",
+  "name": "initial-admin",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",

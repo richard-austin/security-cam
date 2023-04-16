@@ -25,12 +25,14 @@ import {BaseUrl} from './shared/BaseUrl/BaseUrl';
 import {MatDividerModule} from '@angular/material/divider';
 import {LayoutModule} from '@angular/cdk/layout';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { SetupSMTPClientComponent } from './setup-smtpclient/setup-smtpclient.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     RegisterLocalNvrAccountComponent,
-    ReportingComponent
+    ReportingComponent,
+    SetupSMTPClientComponent
   ],
     imports: [
       CommonModule,
