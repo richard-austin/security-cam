@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "createUserAccount": {
+    "createOrUpdateAccountLocally": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -60,10 +60,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "createUserAccount:build:production"
+              "browserTarget": "initialAdmin:build:production"
             },
             "development": {
-              "browserTarget": "createUserAccount:build:development"
+              "browserTarget": "initialAdmin:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -71,7 +71,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "createUserAccount:build"
+            "browserTarget": "initialAdmin:build"
           }
         },
         "test": {
