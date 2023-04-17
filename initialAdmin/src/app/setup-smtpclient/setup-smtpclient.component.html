@@ -1,1 +1,25 @@
-<p>setup-smtpclient works!</p>
+<div class="nvr-register-container">
+  <mat-card class="mat-elevation-z8">
+    <mat-card-header>
+      <mat-card-title>SMTP Server Settings</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-reporting [embedded]="true"></app-reporting>
+      <div>
+        <mat-form-field appearance="outline" class="register-account-input">
+          <input #username matInput type="text" autocomplete="off" maxlength="20"
+                 [formControl]="getFormControl('username')"
+                 (beforeinput)="confirmOnReturn($event)"
+                 title=""
+                 matTooltip="Enter user name"
+                 matTooltipClass="tooltip"
+                 placeholder="New User name">
+          <mat-hint>User name for your NVR online account</mat-hint>
+          <mat-error *ngIf="setupSMTPForm.controls['username'].hasError('pattern')">5 or more characters and numbers
+          </mat-error>
+          <mat-error *ngIf="setupSMTPForm.controls['username'].hasError('required')">User name is required</mat-error>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

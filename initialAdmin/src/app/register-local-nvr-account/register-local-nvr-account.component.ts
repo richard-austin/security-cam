@@ -55,8 +55,8 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   emailValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       this.email = control.value;
-      // Update the validation status of the confirmPassword field
-      if (this.confirmPassword !== "") {
+      // Update the validation status of the confirmEmail field
+      if (this.confirmEmail !== "") {
         let cpControl: AbstractControl | null = this.nvrAccountRegistrationForm.get("confirmEmail");
         cpControl?.updateValueAndValidity();
       }
