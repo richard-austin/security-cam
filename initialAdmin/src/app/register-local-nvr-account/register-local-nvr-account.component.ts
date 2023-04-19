@@ -79,7 +79,6 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
     this.password = this.getFormControl('password').value;
 
     if ($event.inputType == 'insertLineBreak' && !this.anyInvalid())
-      if (!this.anyInvalid())
         this.register();
   }
 

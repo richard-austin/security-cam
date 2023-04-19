@@ -75,9 +75,8 @@ export class SetupSMTPClientComponent implements OnInit {
     // Ensure password field is up-to-date for the confirmPassword validity check
     this.smtpData.password = this.getFormControl('password').value;
 
-    // if ($event.inputType == 'insertLineBreak' && !this.anyInvalid())
-    //   if (!this.anyInvalid())
-    //     this.register();
+    if ($event.inputType == 'insertLineBreak' && !this.anyInvalid())
+        this.confirm();
   }
 
   hideSetupForm() {
