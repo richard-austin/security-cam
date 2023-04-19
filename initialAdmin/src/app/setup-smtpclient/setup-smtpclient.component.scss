@@ -1,0 +1,35 @@
+.setup-smtp-container
+{
+  margin-top: 1rem;
+  // font-size: .8rem;
+  display: inline-flex;
+  width: 100%;
+  >mat-card
+  {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    >mat-card-content {
+      >div {
+        > mat-form-field {
+          margin-bottom: 1rem;
+        }
+        display: flex;
+        flex-direction: column;
+      }
+    }
+  }
+}
+.setup-smtp-input {
+  width: 30rem;
+}
+
+.confirm-group {
+  >button {
+    margin-top: 1rem;
+  }
+  > button:nth-child(2) {
+    margin-left: 1.0rem;
+  }
+}
+
