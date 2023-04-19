@@ -28,6 +28,7 @@ export class SetupSMTPClientComponent implements OnInit {
   error: boolean = false;
 
   @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
+
   passwordMatchValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       this.confirmPassword = control.value;
@@ -35,9 +36,10 @@ export class SetupSMTPClientComponent implements OnInit {
       return ok ? {notMatching: {value: control.value}} : null;
     };
   }
+
   emailValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      this.smtpData.fromAddress= control.value;
+      this.smtpData.fromAddress = control.value;
       // Update the validation status of the confirmPassword field
       // if (this.confirmPassword !== "") {
       //   let cpControl: AbstractControl | null = this.setupSMTPForm.get("confirmEmail");
@@ -54,7 +56,14 @@ export class SetupSMTPClientComponent implements OnInit {
   }
 
   anyInvalid(): boolean {
-    return this.setupSMTPForm.invalid;
+    let retVal: boolean = false;
+    Object.keys(this.setupSMTPForm.controls).forEach(key => {
+      let ctl: FormControl = this.getFormControl(key);
+      if (ctl.enabled) {
+        retVal ||= ctl.invalid;
+      }
+    });
+    return retVal;
   }
 
   confirm() {
@@ -70,6 +79,7 @@ export class SetupSMTPClientComponent implements OnInit {
     //   if (!this.anyInvalid())
     //     this.register();
   }
+
   hideSetupForm() {
     window.location.href = '#/';
   }
@@ -80,12 +90,11 @@ export class SetupSMTPClientComponent implements OnInit {
     let pw: FormControl = this.getFormControl('password');
     let cp: FormControl = this.getFormControl('confirmPassword');
 
-    if(this.smtpData.auth) {
+    if (this.smtpData.auth) {
       un.enable({onlySelf: true, emitEvent: false});
       pw.enable({onlySelf: true, emitEvent: false});
       cp.enable({onlySelf: true, emitEvent: false});
-    }
-    else {
+    } else {
       un.disable({onlySelf: true, emitEvent: false});
       pw.disable({onlySelf: true, emitEvent: false});
       cp.disable({onlySelf: true, emitEvent: false});
@@ -93,26 +102,28 @@ export class SetupSMTPClientComponent implements OnInit {
   }
 
   updateStartTLSState($event: MatCheckboxChange) {
-     this.smtpData.enableStartTLS = $event.checked;
-     let sp: FormControl = this.getFormControl('sslProtocols');
-     let st: FormControl = this.getFormControl('sslTrust');
+    this.smtpData.enableStartTLS = $event.checked;
+    let sp: FormControl = this.getFormControl('sslProtocols');
+    let st: FormControl = this.getFormControl('sslTrust');
 
-     if(this.smtpData.enableStartTLS) {
-       sp.enable({onlySelf: true, emitEvent: false});
-       st.enable({onlySelf: true, emitEvent: false});
-     }
-     else {
-       sp.disable({onlySelf: true, emitEvent: false});
-       st.disable({onlySelf: true, emitEvent: false});
-     }
+    if (this.smtpData.enableStartTLS) {
+      sp.enable({onlySelf: true, emitEvent: false});
+      st.enable({onlySelf: true, emitEvent: false});
+    } else {
+      sp.disable({onlySelf: true, emitEvent: false});
+      st.disable({onlySelf: true, emitEvent: false});
+    }
   }
 
   ngOnInit(): void {
     this.setupSMTPForm = new FormGroup({
-      auth: new FormControl(this.smtpData.auth,[Validators.required]),
-      username: new FormControl({value: this.smtpData.username, disabled: !this.smtpData.auth}, [Validators.required, Validators.maxLength(50)]),
+      auth: new FormControl(this.smtpData.auth, [Validators.required]),
+      username: new FormControl({
+        value: this.smtpData.username,
+        disabled: !this.smtpData.auth
+      }, [Validators.required, Validators.maxLength(50)]),
       password: new FormControl(this.smtpData.password, [Validators.required, Validators.maxLength(50)]),
-      confirmPassword: new FormControl(this.confirmPassword, [Validators.maxLength(50), this.passwordMatchValidator()]),
+      confirmPassword: new FormControl(this.confirmPassword, [Validators.required,Validators.maxLength(50), this.passwordMatchValidator()]),
       enableStartTLS: new FormControl(this.smtpData.enableStartTLS, [Validators.required]),
       sslProtocols: new FormControl(this.smtpData.sslProtocols, [Validators.required]),
       sslTrust: new FormControl(this.smtpData.sslTrust, [Validators.required]),
