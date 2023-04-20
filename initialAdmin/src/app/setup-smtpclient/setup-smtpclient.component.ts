@@ -2,11 +2,13 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {ReportingComponent} from "../reporting/reporting.component";
+import {UtilsService} from "../shared/utils.service";
 
 export class SMTPData {
   auth: boolean = true;
   username!: string;
   password!: string;
+  confirmPassword: string = "";
   enableStartTLS: boolean = true;
   sslProtocols: string = "TLSv1.2";
   sslEnabled!: boolean;
@@ -24,14 +26,32 @@ export class SMTPData {
 export class SetupSMTPClientComponent implements OnInit {
   setupSMTPForm!: FormGroup;
   smtpData: SMTPData = new SMTPData();
-  confirmPassword!: string;
   error: boolean = false;
 
   @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
 
+  constructor(private utilsService: UtilsService) {
+  }
+
+  /**
+   * revalidateConfirmPassword: Called along with the password validators, but does not validate the password. This is
+   *                            used to revalidate the confirmPassword field against the updated password.
+   */
+  revalidateConfirmPassword(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      this.smtpData.password = control.value;
+      // Update the validation status of the confirmPassword field
+      if (this.smtpData.confirmPassword !== "") {
+        let cpControl: AbstractControl | null = this.setupSMTPForm.get("confirmPassword");
+        cpControl?.updateValueAndValidity();
+      }
+      return  null;
+    };
+  }
+
   passwordMatchValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      this.confirmPassword = control.value;
+      this.smtpData.confirmPassword = control.value;
       const ok = this.smtpData.password !== control.value;
       return ok ? {notMatching: {value: control.value}} : null;
     };
@@ -40,12 +60,6 @@ export class SetupSMTPClientComponent implements OnInit {
   emailValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       this.smtpData.fromAddress = control.value;
-      // Update the validation status of the confirmPassword field
-      // if (this.confirmPassword !== "") {
-      //   let cpControl: AbstractControl | null = this.setupSMTPForm.get("confirmEmail");
-      //   cpControl?.updateValueAndValidity();
-      // }
-
       const ok = !new RegExp("^([a-zA-Z0-9_\\-.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(]?)$").test(control.value);
       return ok ? {pattern: {value: control.value}} : null;
     };
@@ -59,6 +73,8 @@ export class SetupSMTPClientComponent implements OnInit {
     let retVal: boolean = false;
     Object.keys(this.setupSMTPForm.controls).forEach(key => {
       let ctl: FormControl = this.getFormControl(key);
+      // While we are about it, update all the fields in the SMTPData object too.
+      (this.smtpData as any)[key] = ctl.value;
       if (ctl.enabled) {
         retVal ||= ctl.invalid;
       }
@@ -67,16 +83,22 @@ export class SetupSMTPClientComponent implements OnInit {
   }
 
   confirm() {
-
+    this.utilsService.setupSMTPClientLocally(this.smtpData).subscribe({
+      complete: () => {
+        this.reporting.successMessage = "SMTP settings updated";
+      },
+      error: (reason) => {
+        this.reporting.errorMessage = reason;
+      }
+    });
   }
-
 
   confirmOnReturn($event: InputEvent) {
     // Ensure password field is up-to-date for the confirmPassword validity check
     this.smtpData.password = this.getFormControl('password').value;
 
     if ($event.inputType == 'insertLineBreak' && !this.anyInvalid())
-        this.confirm();
+      this.confirm();
   }
 
   hideSetupForm() {
@@ -121,8 +143,8 @@ export class SetupSMTPClientComponent implements OnInit {
         value: this.smtpData.username,
         disabled: !this.smtpData.auth
       }, [Validators.required, Validators.maxLength(50)]),
-      password: new FormControl(this.smtpData.password, [Validators.required, Validators.maxLength(50)]),
-      confirmPassword: new FormControl(this.confirmPassword, [Validators.required,Validators.maxLength(50), this.passwordMatchValidator()]),
+      password: new FormControl(this.smtpData.password, [Validators.required, Validators.maxLength(50), this.revalidateConfirmPassword()]),
+      confirmPassword: new FormControl(this.smtpData.confirmPassword, [Validators.required, Validators.maxLength(50), this.passwordMatchValidator()]),
       enableStartTLS: new FormControl(this.smtpData.enableStartTLS, [Validators.required]),
       sslProtocols: new FormControl(this.smtpData.sslProtocols, [Validators.required]),
       sslTrust: new FormControl(this.smtpData.sslTrust, [Validators.required]),

@@ -30,6 +30,10 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   constructor(private utilsService: UtilsService) {
   }
 
+  /**
+   * passwordValidator: Called as the main password validator. This is also used to revalidate
+   *                    the confirmPassword field against the updated password.
+   */
   passwordValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       this.password = control.value;

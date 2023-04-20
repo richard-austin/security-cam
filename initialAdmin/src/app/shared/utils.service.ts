@@ -3,6 +3,7 @@ import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "./BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
+import {SMTPData} from "../setup-smtpclient/setup-smtpclient.component";
 
 export class Temperature {
   temp: string = "";
@@ -124,6 +125,9 @@ export class UtilsService {
     );
   }
 
+  setupSMTPClientLocally(smtpData: SMTPData) {
+    return this.http.post<boolean>(this._baseUrl.getLink("user", "setupSMTPClientLocally"), JSON.stringify(smtpData), this.httpJSONOptions);
+  }
 
   sendResetPasswordLink(email: string, clientUri: string): Observable<void> {
     let em: { email: string, clientUri: string } = {email: email, clientUri: clientUri};
