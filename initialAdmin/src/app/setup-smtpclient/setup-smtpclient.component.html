@@ -7,6 +7,7 @@
       <app-reporting [embedded]="true"></app-reporting>
       <div class="form-container">
         <mat-checkbox (change)="updateAuthState($event)" [checked]="smtpData.auth"
+                      [formControl]="getFormControl('auth')"
                       matTooltip="{{smtpData.auth?'Disable':'Enable'}} authentication on the SMTP serve. ({{smtpData.auth?'Assumes no user credentials required':'User credentials must be provided below'}})"
                       matTooltipClass="tooltip">
           {{smtpData.auth ? 'Authenticated' : 'Unauthenticated'}}
@@ -53,6 +54,7 @@
           </mat-error>
         </mat-form-field>
         <mat-checkbox (change)="updateStartTLSState($event)" [checked]="smtpData.enableStartTLS"
+                      [formControl]="getFormControl('enableStartTLS')"
                       matTooltip="Click to use {{smtpData.enableStartTLS ? 'unencrypted':'TLS encrypted'}} communication with the SMTP server."
                       matTooltipClass="tooltip">
           {{!smtpData.enableStartTLS ? 'Plain Text (unencrypted)' : 'TLS Encrypted'}}

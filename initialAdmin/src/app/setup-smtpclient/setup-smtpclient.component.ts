@@ -11,7 +11,6 @@ export class SMTPData {
   confirmPassword: string = "";
   enableStartTLS: boolean = true;
   sslProtocols: string = "TLSv1.2";
-  sslEnabled!: boolean;
   sslTrust!: string;
   host!: string;
   port: number = 587;
@@ -73,8 +72,6 @@ export class SetupSMTPClientComponent implements OnInit {
     let retVal: boolean = false;
     Object.keys(this.setupSMTPForm.controls).forEach(key => {
       let ctl: FormControl = this.getFormControl(key);
-      // While we are about it, update all the fields in the SMTPData object too.
-      (this.smtpData as any)[key] = ctl.value;
       if (ctl.enabled) {
         retVal ||= ctl.invalid;
       }
@@ -83,6 +80,11 @@ export class SetupSMTPClientComponent implements OnInit {
   }
 
   confirm() {
+    Object.keys(this.setupSMTPForm.controls).forEach(key => {
+      let ctl: FormControl = this.getFormControl(key);
+      (this.smtpData as any)[key] = ctl.value
+      });
+
     this.utilsService.setupSMTPClientLocally(this.smtpData).subscribe({
       complete: () => {
         this.reporting.successMessage = "SMTP settings updated";

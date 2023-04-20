@@ -126,7 +126,7 @@ export class UtilsService {
   }
 
   setupSMTPClientLocally(smtpData: SMTPData) {
-    return this.http.post<boolean>(this._baseUrl.getLink("user", "setupSMTPClientLocally"), JSON.stringify(smtpData), this.httpJSONOptions);
+    return this.http.post<boolean>(this._baseUrl.getLink("utils", "setupSMTPClientLocally"), JSON.stringify(smtpData), this.httpJSONOptions);
   }
 
   sendResetPasswordLink(email: string, clientUri: string): Observable<void> {
