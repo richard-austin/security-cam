@@ -176,7 +176,7 @@ class Sc_processesService {
 
         String msg = """Hi ${userName}.
 <div>
-    I have detected a change of Virgin Media broadband IP address, this is now ${currentIP}
+    I have detected a change of broadband IP address, this is now ${currentIP}
 </div>
 <div>
     Please go to the web application at <a href="https://${currentIP}">https://${currentIP}</a> and use the "Save Current Public IP" option  on the General menu to stop these emails continuing to be sent.
