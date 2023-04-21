@@ -1,7 +1,21 @@
 package security.cam.commands
 
 import grails.validation.Validateable
+
 import security.cam.UtilsService
+
+class SMTPData {
+    boolean auth
+    String username
+    String password
+    String confirmPassword
+    boolean enableStartTLS
+    String sslProtocols
+    String sslTrust
+    String host
+    int port
+    String fromAddress
+}
 
 class SetupSMTPAccountCommand implements Validateable {
     UtilsService utilsService
@@ -15,6 +29,18 @@ class SetupSMTPAccountCommand implements Validateable {
     String host
     int port
     String fromAddress
+
+    SMTPData getData() {
+        return new SMTPData(auth: auth,
+                username: username,
+                password: password,
+                enableStartTLS: enableStartTLS,
+                sslProtocols: sslProtocols,
+                sslTrust: sslTrust,
+                host: host,
+                port: port,
+                fromAddress: fromAddress)
+    }
 
     static constraints = {
         auth(nullable: false, inList: [true, false])

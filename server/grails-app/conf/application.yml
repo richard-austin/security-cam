@@ -150,17 +150,7 @@ environments:
 
     mail:
       smtp:
-        auth: true
-        username: richard.david.austin@gmail.com
-        password: zuwdvhlcodazouzy
-        starttls:
-          enable: true
-        ssl:
-          protocols: TLSv1.2
-          trust: smtp.gmail.com
-        host: smtp.gmail.com
-        port: 587
-        fromaddress: richard.david.austin@gmail.com
+        configFile: /var/security-cam/smtp.json
 
     test:
       dataSource:
@@ -224,14 +214,4 @@ environments:
 
     mail:
       smtp:
-        auth: true
-        username: richard.david.austin@gmail.com
-        password: zuwdvhlcodazouzy
-        starttls:
-          enable: true
-        ssl:
-          protocols: TLSv1.2
-          trust: smtp.gmail.com
-        host: smtp.gmail.com
-        port: 587
-        fromaddress: richard.david.austin@gmail.com
+        configFile: /var/security-cam/smtp.json

@@ -1,8 +1,10 @@
 package security.cam
 
+import com.google.gson.GsonBuilder
 import grails.config.Config
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.util.Environment
+import security.cam.commands.SMTPData
 import security.cam.eventlisteners.IpCheckTimerTask
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
@@ -23,6 +25,8 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -143,36 +147,33 @@ class Sc_processesService {
      */
     private void sendEmail(String userName, String recipientAddress, String currentIP) {
         Config config = grailsApplication.getConfig()
-        def auth = config.getProperty("mail.smtp.auth")
-        def enable = config.getProperty("mail.smtp.starttls.enable")
-        def protocols = config.getProperty("mail.smtp.ssl.protocols")
-        def host = config.getProperty("mail.smtp.host")
-        def port = config.getProperty("mail.smtp.port")
-        def trust = config.getProperty("mail.smtp.ssl.trust")
-        def smtpUsername = config.getProperty("mail.smtp.username")
-        def password = config.getProperty("mail.smtp.password")
-        def fromaddress = config.getProperty("mail.smtp.fromaddress")
+        def configFileName = config.getProperty("mail.smtp.configFile")
+        File file = new File(configFileName)
+        byte[] bytes = file.readBytes()
+        String json = new String(bytes, StandardCharsets.UTF_8)
+        def gson = new GsonBuilder().create()
+        def smtpData = gson.fromJson(json, SMTPData)
 
         Properties prop = new Properties()
-        prop.put("mail.smtp.auth", auth)
-        prop.put("mail.smtp.starttls.enable", enable)
-        prop.put("mail.smtp.ssl.protocols", protocols)
-        prop.put("mail.smtp.host", host)
-        prop.put("mail.smtp.port", port)
-        prop.put("mail.smtp.ssl.trust", trust)
+        prop.put("mail.smtp.auth", smtpData.auth)
+        prop.put("mail.smtp.starttls.enable", smtpData.enableStartTLS)
+        prop.put("mail.smtp.ssl.protocols", smtpData.sslProtocols)
+        prop.put("mail.smtp.host", smtpData.host)
+        prop.put("mail.smtp.port", smtpData.port)
+        prop.put("mail.smtp.ssl.trust", smtpData.sslTrust)
 
-        logService.cam.debug("mail.smtp.auth=${auth}")
-        logService.cam.debug("mail.smtp.starttls.enable=${enable}")
-        logService.cam.debug("mail.smtp.ssl.protocols=${protocols}")
-        logService.cam.debug("mail.smtp.host=${host}")
-        logService.cam.debug("mail.smtp.port=${port}")
-        logService.cam.debug("mail.smtp.ssl.trust=${trust}")
+        logService.cam.debug("mail.smtp.auth=${smtpData.auth}")
+        logService.cam.debug("mail.smtp.starttls.enable=${smtpData.enableStartTLS}")
+        logService.cam.debug("mail.smtp.ssl.protocols=${smtpData.sslProtocols}")
+        logService.cam.debug("mail.smtp.host=${smtpData.host}")
+        logService.cam.debug("mail.smtp.port=${smtpData.port}")
+        logService.cam.debug("mail.smtp.ssl.trust=${smtpData.sslTrust}")
 
         Session session = Session.getInstance(prop, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                logService.cam.trace("Authenticating: ${smtpUsername}:xxxxxxxxxx")
-                return new PasswordAuthentication(smtpUsername, password)
+                logService.cam.trace("Authenticating: ${smtpData.username}:xxxxxxxxxx")
+                return new PasswordAuthentication(smtpData.username, smtpData.password)
             }
         })
         session.setDebug(true)
@@ -180,8 +181,8 @@ class Sc_processesService {
         PrintStream ps = new PrintStream(fs, true)
         session.setDebugOut(ps)
         Message message = new MimeMessage(session)
-        logService.cam.trace("fromaddress: ${fromaddress}")
-        message.setFrom(new InternetAddress(fromaddress))
+        logService.cam.trace("fromaddress: ${smtpData.fromAddress}")
+        message.setFrom(new InternetAddress(smtpData.fromAddress))
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientAddress))
         message.setSubject("Change of public IP address")
 

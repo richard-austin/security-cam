@@ -3,6 +3,7 @@ package server
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
+import com.google.gson.GsonBuilder
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
 import security.cam.Sc_processesService
@@ -10,6 +11,7 @@ import security.cam.UserAdminService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
+import security.cam.commands.SMTPData
 import security.cam.commands.SetCameraParamsCommand
 import security.cam.commands.SetupSMTPAccountCommand
 import security.cam.enums.PassFail
@@ -119,7 +121,11 @@ class UtilsController {
             render(status: 400, text: errorsMap as JSON)
         }
         else {
-            render (status: 200, text: "")
+            ObjectCommandResponse response = utilsService.setupSMTPClient(cmd)
+            if(response.status != PassFail.PASS)
+                render (status: 500, text: response.error)
+            else
+                render ""
         }
     }
 
