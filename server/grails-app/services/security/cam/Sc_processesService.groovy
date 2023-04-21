@@ -1,10 +1,7 @@
 package security.cam
 
-import com.google.gson.GsonBuilder
-import grails.config.Config
-import grails.plugin.springsecurity.SpringSecurityService
+
 import grails.util.Environment
-import security.cam.commands.SMTPData
 import security.cam.eventlisteners.IpCheckTimerTask
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
@@ -25,11 +22,8 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 @Transactional
 class Sc_processesService {
@@ -146,13 +140,7 @@ class Sc_processesService {
      * @return
      */
     private void sendEmail(String userName, String recipientAddress, String currentIP) {
-        Config config = grailsApplication.getConfig()
-        def configFileName = config.getProperty("mail.smtp.configFile")
-        File file = new File(configFileName)
-        byte[] bytes = file.readBytes()
-        String json = new String(bytes, StandardCharsets.UTF_8)
-        def gson = new GsonBuilder().create()
-        def smtpData = gson.fromJson(json, SMTPData)
+        def smtpData = utilsService.getSMTPConfigData()
 
         Properties prop = new Properties()
         prop.put("mail.smtp.auth", smtpData.auth)

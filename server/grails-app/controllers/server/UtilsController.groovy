@@ -129,6 +129,14 @@ class UtilsController {
         }
     }
 
+    def getSMTPClientParamsLocally() {
+        ObjectCommandResponse response = utilsService.getSMTPClientParams()
+        if(response.status != PassFail.PASS)
+            render (status: 500, text: response.error)
+        else
+            render (status: 200, text: response.responseObject as JSON)
+    }
+
     Sc_processesService sc_processesService
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def startProcs()

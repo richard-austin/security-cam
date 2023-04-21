@@ -41,7 +41,7 @@ export class SetupSMTPClientComponent implements OnInit {
       this.smtpData.password = control.value;
       // Update the validation status of the confirmPassword field
       if (this.smtpData.confirmPassword !== "") {
-        let cpControl: AbstractControl | null = this.setupSMTPForm.get("confirmPassword");
+        let cpControl: AbstractControl | null = this.setupSMTPForm?.get("confirmPassword");
         cpControl?.updateValueAndValidity();
       }
       return  null;
@@ -65,7 +65,7 @@ export class SetupSMTPClientComponent implements OnInit {
   }
 
   getFormControl(fcName: string): FormControl {
-    return this.setupSMTPForm.get(fcName) as FormControl;
+    return this?.setupSMTPForm.get(fcName) as FormControl;
   }
 
   anyInvalid(): boolean {
@@ -138,7 +138,7 @@ export class SetupSMTPClientComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {
+  setupFormControls(): void {
     this.setupSMTPForm = new FormGroup({
       auth: new FormControl(this.smtpData.auth, [Validators.required]),
       username: new FormControl({
@@ -156,5 +156,20 @@ export class SetupSMTPClientComponent implements OnInit {
     }, {updateOn: "change"});
     // Ensure camera form controls highlight immediately if invalid
     this.setupSMTPForm.markAllAsTouched();
+  }
+
+  ngOnInit(): void {
+
+    this.utilsService.getSMTPClientParamsLocally().subscribe({
+      next: (smtpData) => {
+        this.smtpData = smtpData;
+        this.smtpData.confirmPassword = this.smtpData.password;
+        this.setupFormControls();
+        },
+      error: (reason) => {
+        this.reporting.errorMessage = reason;
+        this.setupFormControls();
+      }
+    });
   }
 }
