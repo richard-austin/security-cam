@@ -29,7 +29,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/**/images/**',   access: ['permitAll']],
 	[pattern: '/**/favicon.ico', access: ['permitAll']],
 	[pattern: '/user/createOrUpdateAccountLocally', access: ['permitAll']],
-	[pattern: '/user/checkForLocalAccountLocally', access: ['permitAll']],
+	[pattern: '/user/checkForAccountLocally', access: ['permitAll']],
 	[pattern: '/utils/setupSMTPClientLocally', access: ['permitAll']],
 	[pattern: '/utils/getSMTPClientParamsLocally', access: ['permitAll']],
 	[pattern: '/**/index.html',  access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],

@@ -114,7 +114,7 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   }
 
   checkForLocalAccount() {
-    this.utilsService.checkForLocalAccountLocally().subscribe({
+    this.utilsService.checkForAccountLocally().subscribe({
       next: (value: boolean) => {
         this.updateExisting = value;
         this.title = value ? "Update the existing NVR account" : "Register a New NVR Account";

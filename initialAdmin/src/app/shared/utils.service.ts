@@ -119,8 +119,8 @@ export class UtilsService {
     );
   }
 
-  checkForLocalAccountLocally() : Observable<boolean> {
-    return this.http.post<boolean>(this._baseUrl.getLink("user", "checkForLocalAccountLocally"), "", this.httpJSONOptions).pipe(
+  checkForAccountLocally() : Observable<boolean> {
+    return this.http.post<boolean>(this._baseUrl.getLink("user", "checkForAccountLocally"), "", this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }
@@ -172,7 +172,7 @@ export class UtilsService {
   getHasLocalAccount() : void
   {
     this._hasLocalAccount = false;
-    this.http.post<boolean>(this._baseUrl.getLink('user', 'checkForLocalAccountLocally'), '', this.httpJSONOptions).pipe(
+    this.http.post<boolean>(this._baseUrl.getLink('user', 'checkForAccountLocally'), '', this.httpJSONOptions).pipe(
       tap((result) => {
         this._hasLocalAccount = result;
       }),

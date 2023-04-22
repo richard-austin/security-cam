@@ -99,14 +99,14 @@ class UserController {
     }
 
     /**
-     * checkForLocalAccountLocally: Unsecured to enable account creation without being logged in.
+     * checkForAccountLocally: Unsecured to enable account creation without being logged in.
      *                       nginx requires a session to allow access to this url to prevent
      *                       unauthenticated external access. It is accessed locally tomcats port 8080.
      */
-    def checkForLocalAccountLocally(CheckNotGuestCommand cmd) {
+    def checkForAccountLocally(CheckNotGuestCommand cmd) {
         if(cmd.hasErrors()) {  // Just checking user is not guest here
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
-            logService.cam.error "checkForLocalAccountLocally: Validation error: " + errorsMap.toString()
+            logService.cam.error "checkForAccountLocally: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         }
         else
