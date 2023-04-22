@@ -1,9 +1,13 @@
 package security.cam
 
 import asset.pipeline.grails.AssetResourceLocator
+import com.google.gson.GsonBuilder
+import grails.config.Config
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import org.springframework.core.io.Resource
+import security.cam.commands.SMTPData
+import security.cam.commands.SetupSMTPAccountCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 import java.nio.charset.StandardCharsets
@@ -163,5 +167,49 @@ class UtilsService {
             result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
         return result
+    }
+
+    ObjectCommandResponse setupSMTPClient(SetupSMTPAccountCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            def gson = new GsonBuilder()
+                    .setPrettyPrinting()
+                    .create()
+
+            String res = gson.toJson(cmd.getData())
+            def writer = new BufferedWriter(new FileWriter("/var/security-cam/smtp.json"))
+            writer.write(res)
+            writer.close()
+        }
+        catch(Exception e) {
+            logService.cam.error"${e.getClass().getName()} in setupSMTPClient: ${e.getMessage()}"
+            result.status = PassFail.FAIL
+            result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
+        }
+        return result
+    }
+
+    ObjectCommandResponse getSMTPClientParams() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            result.responseObject = getSMTPConfigData()
+        }
+        catch(Exception e) {
+            logService.cam.error"${e.getClass().getName()} in getSMTPClientParams: ${e.getMessage()}"
+            result.status = PassFail.FAIL
+            result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
+        }
+        return result
+    }
+
+    def getSMTPConfigData() {
+        Config config = grailsApplication.getConfig()
+        def configFileName = config.getProperty("mail.smtp.configFile")
+        File file = new File(configFileName)
+        byte[] bytes = file.readBytes()
+        String json = new String(bytes, StandardCharsets.UTF_8)
+        def gson = new GsonBuilder().create()
+        def smtpData = gson.fromJson(json, SMTPData)
+        return  smtpData
     }
 }

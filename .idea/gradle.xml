@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/client" />
             <option value="$PROJECT_DIR$/fmp4-ws-media-server" />
             <option value="$PROJECT_DIR$/generateProductKey" />
+            <option value="$PROJECT_DIR$/initialAdmin" />
             <option value="$PROJECT_DIR$/server" />
           </set>
         </option>

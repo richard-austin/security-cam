@@ -7,7 +7,8 @@ import security.cam.LogService
 import security.cam.UserAdminService
 import security.cam.ValidationErrorService
 import security.cam.commands.ChangeEmailCommand
-import security.cam.commands.CreateAccountCommand
+import security.cam.commands.CheckNotGuestCommand
+import security.cam.commands.CreateOrUpdateAccountCommand
 import security.cam.commands.ResetPasswordCommand
 import security.cam.commands.SetupGuestAccountCommand
 import security.cam.enums.PassFail
@@ -67,8 +68,8 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
-    def createAccount(CreateAccountCommand cmd) {
+    @Secured(['ROLE_CLOUD'])
+    def createOrUpdateAccount(CreateOrUpdateAccountCommand cmd) {
         ObjectCommandResponse result
 
         if (cmd.hasErrors()) {
@@ -76,7 +77,7 @@ class UserController {
             logService.cam.error "createAccount: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {
-            result = userAdminService.createAccount(cmd)
+            result = userAdminService.createOrUpdateAccount(cmd)
             if (result.status != PassFail.PASS) {
                 render(status: 500, text: result.error)
             } else {
@@ -86,7 +87,33 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    /**
+     * createOrUpdateAccountLocally: Unsecured to enable account creation without being logged in.
+     *                       nginx requires a session to allow access to this url to prevent
+     *                       unauthenticated external access. It is accessed locally tomcats port 8080.
+     *
+     * @param cmd: Contains username, password, email, updateExisting
+     */
+    def createOrUpdateAccountLocally(CreateOrUpdateAccountCommand cmd){
+        createOrUpdateAccount(cmd)
+    }
+
+    /**
+     * checkForAccountLocally: Unsecured to enable account creation without being logged in.
+     *                       nginx requires a session to allow access to this url to prevent
+     *                       unauthenticated external access. It is accessed locally tomcats port 8080.
+     */
+    def checkForAccountLocally(CheckNotGuestCommand cmd) {
+        if(cmd.hasErrors()) {  // Just checking user is not guest here
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
+            logService.cam.error "checkForAccountLocally: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else
+            hasLocalAccount()
+    }
+
+    @Secured(['ROLE_CLOUD'])
     /**
      * removeAccount: Remove the local web account used for direct access to to NVR
      */
@@ -101,7 +128,7 @@ class UserController {
         }
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @Secured(['ROLE_CLOUD'])
     def hasLocalAccount() {
         ObjectCommandResponse result = userAdminService.hasLocalAccount()
 
@@ -114,46 +141,42 @@ class UserController {
     }
 
     @Secured(['ROLE_CLIENT'])
-    def setupGuestAccount(SetupGuestAccountCommand cmd)
-    {
+    def setupGuestAccount(SetupGuestAccountCommand cmd) {
         ObjectCommandResponse result
 
-        if(cmd.hasErrors()) {
+        if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'setupGuestAccount')
             logService.cam.error "setupGuestAccount: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
-        }
-        else {
+        } else {
             result = userAdminService.setupGuestAccount(cmd)
 
-            if(result.status != PassFail.PASS)
-                render (ststus: 500, text: result.error)
+            if (result.status != PassFail.PASS)
+                render(ststus: 500, text: result.error)
             else {
                 logService.cam.info("setupGuestAccount: (= ${result.responseObject}) success")
-                render(text: result.responseObject as JSON )
+                render(text: result.responseObject as JSON)
             }
         }
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
-    def isGuest()
-    {
+    def isGuest() {
         ObjectCommandResponse result = userAdminService.isGuest()
 
-        if(result.status != PassFail.PASS)
+        if (result.status != PassFail.PASS)
             render(status: 500, text: result.error)
         else
-            render (status: 200, text: result.responseObject as JSON)
+            render(status: 200, text: result.responseObject as JSON)
     }
 
     @Secured(['ROLE_CLIENT'])
-    def guestAccountEnabled()
-    {
+    def guestAccountEnabled() {
         ObjectCommandResponse result = userAdminService.guestAccountEnabled()
-        if(result.status != PassFail.PASS)
+        if (result.status != PassFail.PASS)
             render(status: 500, text: result.error)
         else
-            render (status: 200, text: result.responseObject as JSON)
+            render(status: 200, text: result.responseObject as JSON)
     }
 }
 

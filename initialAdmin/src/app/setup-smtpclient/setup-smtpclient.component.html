@@ -1,0 +1,140 @@
+<div class="setup-smtp-container">
+  <mat-card class="mat-elevation-z8">
+    <mat-card-header>
+      <mat-card-title>SMTP Client Settings</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-reporting [embedded]="true"></app-reporting>
+      <div class="form-container">
+        <mat-checkbox (change)="updateAuthState($event)" [checked]="smtpData.auth"
+                      [formControl]="getFormControl('auth')"
+                      matTooltip="{{smtpData.auth?'Disable':'Enable'}} authentication on the SMTP serve. ({{smtpData.auth?'Assumes no user credentials required':'User credentials must be provided below'}})"
+                      matTooltipClass="tooltip">
+          {{smtpData.auth ? 'Authenticated' : 'Unauthenticated'}}
+        </mat-checkbox>
+        <mat-form-field appearance="legacy" class="setup-smtp-input">
+          <input matInput type="text" autocomplete="off" maxlength="50"
+                 [formControl]="getFormControl('username')"
+                 (beforeinput)="confirmOnReturn($event)"
+                 title=""
+                 matTooltip="Enter SMTP account user name (this may be the account email address)"
+                 matTooltipClass="tooltip"
+                 placeholder="SMTP User name">
+          <mat-hint>User name for the SMTP account</mat-hint>
+          <mat-error *ngIf="setupSMTPForm.controls['username'].hasError('pattern')">50 or less characters and numbers
+          </mat-error>
+          <mat-error *ngIf="setupSMTPForm.controls['username'].hasError('required')">User name is required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="legacy" class="setup-smtp-input">
+          <input matInput type="password" autocomplete="off" maxlength="50"
+                 [formControl]="getFormControl('password')"
+                 (beforeinput)="confirmOnReturn($event)"
+                 title=""
+                 matTooltip="Enter SMTP account password"
+                 matTooltipClass="tooltip"
+                 placeholder="SMTP Password">
+          <mat-hint>Password for the SMTP account</mat-hint>
+          <mat-error *ngIf="setupSMTPForm.controls['password'].hasError('maxlength')">50 or less characters and numbers
+          </mat-error>
+          <mat-error *ngIf="setupSMTPForm.controls['password'].hasError('required')">Password is required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="legacy" class="setup-smtp-input">
+          <input matInput type="password" autocomplete="off" maxlength="50"
+                 [formControl]="getFormControl('confirmPassword')"
+                 (beforeinput)="confirmOnReturn($event)"
+                 title=""
+                 matTooltip="Confirm SMTP account password"
+                 matTooltipClass="tooltip"
+                 placeholder="Confirm SMTP Password">
+          <mat-hint>Password for the SMTP account</mat-hint>
+          <mat-error *ngIf="setupSMTPForm.controls['confirmPassword'].hasError('maxlength')">50 or less characters and
+            numbers
+          </mat-error>
+          <mat-error *ngIf="setupSMTPForm.controls['confirmPassword'].hasError('notMatching')">Passwords must match
+          </mat-error>
+        </mat-form-field>
+        <mat-checkbox (change)="updateStartTLSState($event)" [checked]="smtpData.enableStartTLS"
+                      [formControl]="getFormControl('enableStartTLS')"
+                      matTooltip="Click to use {{smtpData.enableStartTLS ? 'unencrypted':'TLS encrypted'}} communication with the SMTP server."
+                      matTooltipClass="tooltip">
+          {{!smtpData.enableStartTLS ? 'Plain Text (unencrypted)' : 'TLS Encrypted'}}
+        </mat-checkbox>
+        <mat-form-field appearance="legacy">
+          <!--          <mat-label>Infra Red Status</mat-label>-->
+          <mat-select [formControl]="getFormControl('sslProtocols')"
+                      matTooltip="Select the TLS protocol to use"
+                      matTooltipClass="tooltip">
+            <mat-option [value]="'TLSv1.2'">
+              TLSv1.2
+            </mat-option>
+            <mat-option [value]="'TLSv1.3'">
+              TLSv1.3
+            </mat-option>
+          </mat-select>
+          <mat-hint>Select required TLS protocol</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="legacy" class="setup-smtp-input">
+          <input matInput type="text" autocomplete="off" maxlength="50"
+                 [formControl]="getFormControl('sslTrust')"
+                 (beforeinput)="confirmOnReturn($event)"
+                 title=""
+                 matTooltip="Host name to add to trust list (normally the same as SMTP host)."
+                 matTooltipClass="tooltip"
+                 placeholder="Trust host name">
+          <mat-hint>Trust host name</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="legacy" class="setup-smtp-input">
+          <input matInput type="text" autocomplete="off" maxlength="50"
+                 [formControl]="getFormControl('host')"
+                 (beforeinput)="confirmOnReturn($event)"
+                 title=""
+                 matTooltip="Host name (or IP address) of SMTP server."
+                 matTooltipClass="tooltip"
+                 placeholder="SMTP host name">
+          <mat-hint>SMTP host name</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="legacy" class="setup-smtp-input">
+          <input matInput autocomplete="off" maxlength="6"
+                 [formControl]="getFormControl('port')"
+                 (beforeinput)="confirmOnReturn($event)"
+                 type="number"
+                 min="1"
+                 max="65535"
+                 title=""
+                 matTooltip="Port used by SMTP server."
+                 matTooltipClass="tooltip"
+                 placeholder="SMTP port">
+          <mat-hint>SMTP port</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="legacy" class="setup-smtp-input">
+          <input matInput type="text" autocomplete="off" maxlength="50"
+                 [formControl]="getFormControl('fromAddress')"
+                 (beforeinput)="confirmOnReturn($event)"
+                 title=""
+                 matTooltip="Enter the senders address which warning emails will appear to have come from"
+                 matTooltipClass="tooltip"
+                 placeholder="Warning email sender address">
+          <mat-hint>Senders email address</mat-hint>
+          <mat-error *ngIf="setupSMTPForm.controls['fromAddress'].hasError('pattern')">50 or less characters and numbers
+          </mat-error>
+          <mat-error *ngIf="setupSMTPForm.controls['fromAddress'].hasError('required')">User name is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <span class="confirm-group">
+      <button color="default" mat-flat-button (click)="hideSetupForm()"
+              matTooltip="{{reporting.success == undefined ? 'Close this dialogue and abandon setting up an account': 'Close this dialogue box'}}"
+              matTooltipClass="tooltip">
+        {{reporting.success == undefined ? 'Cancel' : 'Exit'}}
+      </button>
+      <button color="warning" mat-flat-button
+              [disabled]="error || anyInvalid() || reporting.success != undefined"
+              (click)="confirm()"
+              matTooltip="Register the new account"
+              matTooltipClass="tooltip">
+        Confirm
+      </button>
+    </span>
+    </mat-card-content>
+  </mat-card>
+</div>

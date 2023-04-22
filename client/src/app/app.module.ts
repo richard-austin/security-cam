@@ -57,6 +57,7 @@ import { CameraAdminPageHostingComponent } from './camera-admin-page-hosting/cam
 import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-wifi-details.component';
 import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
+import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
 
 @NgModule({
   declarations: [
@@ -89,7 +90,8 @@ import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active
     CameraAdminPageHostingComponent,
     GetActiveIPAddressesComponent,
     GetLocalWifiDetailsComponent,
-    WifiSettingsComponent
+    WifiSettingsComponent,
+    CreateUserAccountContainerComponent
   ],
   imports: [
     BrowserModule,
@@ -107,7 +109,6 @@ import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active
     MatSelectModule,
     MatDialogModule,
     MatMenuModule,
-    MatIconModule,
     MatProgressSpinnerModule,
     FormsModule,
     // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.

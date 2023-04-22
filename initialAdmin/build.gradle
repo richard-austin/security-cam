@@ -1,0 +1,57 @@
+plugins {
+    id "com.github.node-gradle.node" version "3.1.1"
+}
+
+node {
+    version = '16.19.0'
+    yarnVersion = '1.5.1'
+    download = true
+}
+
+task bootRun(type: NpmTask, dependsOn: 'npmInstall') {
+    group = 'application'
+    description = 'Start client side server'
+    args = ['run', 'startProxy']
+}
+// Same as bootRun but binds server to 0.0.0.0 instead of localhost
+task bootRunOnNetwork(type: NpmTask, dependsOn: 'npmInstall') {
+  group = 'application'
+  description = 'Start client side server'
+  args = ['run', 'startProxyNetwork']
+}
+
+task test(type: NpmTask, dependsOn: 'npmInstall') {
+    group = 'verification'
+    description = 'Execute unit tests'
+    args = ['run', 'test']
+}
+
+task integrationTest(type: NpmTask, dependsOn: 'npmInstall') {
+    args = ['run', 'e2e']
+}
+
+task buildClientDev(type: NpmTask, dependsOn: 'npmInstall') {
+  group = 'build'
+  description = 'Compile client side assets for development'
+  args = ['run', 'buildDev']
+}
+
+task buildClient(type: NpmTask, dependsOn: 'npmInstall') {
+  group = 'build'
+  description = 'Compile client side assets for production'
+  args = ['run', 'build']
+}
+
+task buildClientWatch(type: NpmTask, dependsOn: 'npmInstall') {
+  group = 'application'
+  description = 'Builds and watches the client side assets for rebuilding'
+  args = ['run', 'buildWatch']
+}
+
+task buildWar(type: Exec, dependsOn: 'buildClient') {
+  group = 'build'
+  workingDir "$projectDir/dist/create-user-account"
+  executable "sh"
+  args = ['-c', 'jar -cvf ../cua.war *']
+}
+

@@ -1,7 +1,6 @@
 package security.cam
 
-import grails.config.Config
-import grails.plugin.springsecurity.SpringSecurityService
+
 import grails.util.Environment
 import security.cam.eventlisteners.IpCheckTimerTask
 import grails.core.GrailsApplication
@@ -25,7 +24,6 @@ import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 @Transactional
 class Sc_processesService {
@@ -142,37 +140,28 @@ class Sc_processesService {
      * @return
      */
     private void sendEmail(String userName, String recipientAddress, String currentIP) {
-        Config config = grailsApplication.getConfig()
-        def auth = config.getProperty("mail.smtp.auth")
-        def enable = config.getProperty("mail.smtp.starttls.enable")
-        def protocols = config.getProperty("mail.smtp.ssl.protocols")
-        def host = config.getProperty("mail.smtp.host")
-        def port = config.getProperty("mail.smtp.port")
-        def trust = config.getProperty("mail.smtp.ssl.trust")
-        def smtpUsername = config.getProperty("mail.smtp.username")
-        def password = config.getProperty("mail.smtp.password")
-        def fromaddress = config.getProperty("mail.smtp.fromaddress")
+        def smtpData = utilsService.getSMTPConfigData()
 
         Properties prop = new Properties()
-        prop.put("mail.smtp.auth", auth)
-        prop.put("mail.smtp.starttls.enable", enable)
-        prop.put("mail.smtp.ssl.protocols", protocols)
-        prop.put("mail.smtp.host", host)
-        prop.put("mail.smtp.port", port)
-        prop.put("mail.smtp.ssl.trust", trust)
+        prop.put("mail.smtp.auth", smtpData.auth)
+        prop.put("mail.smtp.starttls.enable", smtpData.enableStartTLS)
+        prop.put("mail.smtp.ssl.protocols", smtpData.sslProtocols)
+        prop.put("mail.smtp.host", smtpData.host)
+        prop.put("mail.smtp.port", smtpData.port)
+        prop.put("mail.smtp.ssl.trust", smtpData.sslTrust)
 
-        logService.cam.debug("mail.smtp.auth=${auth}")
-        logService.cam.debug("mail.smtp.starttls.enable=${enable}")
-        logService.cam.debug("mail.smtp.ssl.protocols=${protocols}")
-        logService.cam.debug("mail.smtp.host=${host}")
-        logService.cam.debug("mail.smtp.port=${port}")
-        logService.cam.debug("mail.smtp.ssl.trust=${trust}")
+        logService.cam.debug("mail.smtp.auth=${smtpData.auth}")
+        logService.cam.debug("mail.smtp.starttls.enable=${smtpData.enableStartTLS}")
+        logService.cam.debug("mail.smtp.ssl.protocols=${smtpData.sslProtocols}")
+        logService.cam.debug("mail.smtp.host=${smtpData.host}")
+        logService.cam.debug("mail.smtp.port=${smtpData.port}")
+        logService.cam.debug("mail.smtp.ssl.trust=${smtpData.sslTrust}")
 
         Session session = Session.getInstance(prop, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                logService.cam.trace("Authenticating: ${smtpUsername}:xxxxxxxxxx")
-                return new PasswordAuthentication(smtpUsername, password)
+                logService.cam.trace("Authenticating: ${smtpData.username}:xxxxxxxxxx")
+                return new PasswordAuthentication(smtpData.username, smtpData.password)
             }
         })
         session.setDebug(true)
@@ -180,14 +169,14 @@ class Sc_processesService {
         PrintStream ps = new PrintStream(fs, true)
         session.setDebugOut(ps)
         Message message = new MimeMessage(session)
-        logService.cam.trace("fromaddress: ${fromaddress}")
-        message.setFrom(new InternetAddress(fromaddress))
+        logService.cam.trace("fromaddress: ${smtpData.fromAddress}")
+        message.setFrom(new InternetAddress(smtpData.fromAddress))
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientAddress))
         message.setSubject("Change of public IP address")
 
         String msg = """Hi ${userName}.
 <div>
-    I have detected a change of Virgin Media broadband IP address, this is now ${currentIP}
+    I have detected a change of broadband IP address, this is now ${currentIP}
 </div>
 <div>
     Please go to the web application at <a href="https://${currentIP}">https://${currentIP}</a> and use the "Save Current Public IP" option  on the General menu to stop these emails continuing to be sent.

@@ -3,14 +3,16 @@ package server
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
-import security.cam.ConfigurationUpdateService
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
 import security.cam.Sc_processesService
+import security.cam.UserAdminService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
+import security.cam.commands.CheckNotGuestCommand
 import security.cam.commands.SetCameraParamsCommand
+import security.cam.commands.SetupSMTPAccountCommand
 import security.cam.enums.PassFail
 import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -18,6 +20,7 @@ import security.cam.interfaceobjects.RestfulResponse
 
 class UtilsController {
     UtilsService utilsService
+    UserAdminService userAdminService
     RestfulInterfaceService restfulInterfaceService
     LogService logService
     ValidationErrorService validationErrorService
@@ -109,8 +112,39 @@ class UtilsController {
         }
     }
 
+    def setupSMTPClientLocally(SetupSMTPAccountCommand cmd) {
+        if(cmd.hasErrors())
+        {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'setupSMTPClientLocally')
+            logService.cam.error "setupSMTPClientLocally: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else {
+            ObjectCommandResponse response = utilsService.setupSMTPClient(cmd)
+            if(response.status != PassFail.PASS)
+                render (status: 500, text: response.error)
+            else
+                render ""
+        }
+    }
+
+    def getSMTPClientParamsLocally(CheckNotGuestCommand cmd) {
+        if(cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'setupSMTPClientLocally')
+            logService.cam.error "getSMTPClientParamsLocally: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else {
+            ObjectCommandResponse response = utilsService.getSMTPClientParams()
+            if (response.status != PassFail.PASS)
+                render(status: 500, text: response.error)
+            else
+                render(status: 200, text: response.responseObject as JSON)
+        }
+    }
+
     Sc_processesService sc_processesService
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def startProcs()
     {
         ObjectCommandResponse response = sc_processesService.startProcesses()
@@ -120,7 +154,7 @@ class UtilsController {
             render "success"
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def stopProcs()
     {
         ObjectCommandResponse response = sc_processesService.stopProcesses()
