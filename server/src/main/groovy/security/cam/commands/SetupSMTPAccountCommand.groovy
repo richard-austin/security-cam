@@ -1,7 +1,7 @@
 package security.cam.commands
 
 import grails.validation.Validateable
-
+import security.cam.UserAdminService
 import security.cam.UtilsService
 
 class SMTPData {
@@ -29,6 +29,7 @@ class SetupSMTPAccountCommand implements Validateable {
     String host
     int port
     String fromAddress
+    UserAdminService userAdminService
 
     SMTPData getData() {
         return new SMTPData(auth: auth,
@@ -43,7 +44,12 @@ class SetupSMTPAccountCommand implements Validateable {
     }
 
     static constraints = {
-        auth(nullable: false, inList: [true, false])
+        auth(nullable: false, inList: [true, false],
+        validator: {auth, cmd ->
+            def response = cmd.userAdminService.isGuest()
+            if(response.responseObject.guestAccount)
+                return "Guest not authorised to administer SMTP client account"
+        })
         username(nullable: true,
                 validator: { username, cmd ->
                     if (cmd.auth) {

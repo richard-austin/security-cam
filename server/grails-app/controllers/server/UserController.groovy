@@ -7,6 +7,7 @@ import security.cam.LogService
 import security.cam.UserAdminService
 import security.cam.ValidationErrorService
 import security.cam.commands.ChangeEmailCommand
+import security.cam.commands.CheckNotGuestCommand
 import security.cam.commands.CreateOrUpdateAccountCommand
 import security.cam.commands.ResetPasswordCommand
 import security.cam.commands.SetupGuestAccountCommand
@@ -102,8 +103,14 @@ class UserController {
      *                       nginx requires a session to allow access to this url to prevent
      *                       unauthenticated external access. It is accessed locally tomcats port 8080.
      */
-    def checkForLocalAccountLocally() {
-        hasLocalAccount()
+    def checkForLocalAccountLocally(CheckNotGuestCommand cmd) {
+        if(cmd.hasErrors()) {  // Just checking user is not guest here
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
+            logService.cam.error "checkForLocalAccountLocally: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else
+            hasLocalAccount()
     }
 
     @Secured(['ROLE_CLOUD'])

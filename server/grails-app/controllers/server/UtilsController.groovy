@@ -3,7 +3,6 @@ package server
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
-import com.google.gson.GsonBuilder
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
 import security.cam.Sc_processesService
@@ -11,7 +10,7 @@ import security.cam.UserAdminService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
-import security.cam.commands.SMTPData
+import security.cam.commands.CheckNotGuestCommand
 import security.cam.commands.SetCameraParamsCommand
 import security.cam.commands.SetupSMTPAccountCommand
 import security.cam.enums.PassFail
@@ -129,12 +128,19 @@ class UtilsController {
         }
     }
 
-    def getSMTPClientParamsLocally() {
-        ObjectCommandResponse response = utilsService.getSMTPClientParams()
-        if(response.status != PassFail.PASS)
-            render (status: 500, text: response.error)
-        else
-            render (status: 200, text: response.responseObject as JSON)
+    def getSMTPClientParamsLocally(CheckNotGuestCommand cmd) {
+        if(cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'setupSMTPClientLocally')
+            logService.cam.error "getSMTPClientParamsLocally: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else {
+            ObjectCommandResponse response = utilsService.getSMTPClientParams()
+            if (response.status != PassFail.PASS)
+                render(status: 500, text: response.error)
+            else
+                render(status: 200, text: response.responseObject as JSON)
+        }
     }
 
     Sc_processesService sc_processesService

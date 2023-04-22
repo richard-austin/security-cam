@@ -1,7 +1,9 @@
 package security.cam.commands
 
 import grails.validation.Validateable
+import security.cam.Role
 import security.cam.User
+import security.cam.UserAdminService
 import security.cam.UtilsService
 
 class CreateOrUpdateAccountCommand implements Validateable{
@@ -13,10 +15,27 @@ class CreateOrUpdateAccountCommand implements Validateable{
     boolean updateExisting = false
 
     UtilsService utilsService
+    UserAdminService userAdminService
 
     static constraints = {
         username(nullable: false, blank: false,
         validator: {username, cmd ->
+            def response = cmd.userAdminService.isGuest()
+            if(response.responseObject.guestAccount)
+                return "Guest not authorised to administer user account"
+
+            User user = User.findByUsername(username)
+            if(user) {
+                boolean invalidUserName = false
+
+                Set<Role> roles = user.getAuthorities()
+                roles.forEach {role ->
+                    if(role.authority == 'ROLE_GUEST' || role.authority == 'ROLE_CLOUD')
+                        invalidUserName = true
+                }
+                if (invalidUserName)
+                    return "Invalid user name"
+            }
             if(!cmd.updateExisting && User.all.find{it.username != 'guest' && !it.cloudAccount} != null)
                 return "There is already a local web account defined"
             else if(!username.matches(cmd.utilsService.usernameRegex))

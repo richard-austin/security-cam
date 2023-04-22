@@ -194,11 +194,23 @@ class UserAdminService {
     ObjectCommandResponse isGuest() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
+            boolean isGuest = false
             def principal = springSecurityService.getPrincipal()
-            String userName = principal.getUsername()
+            if(principal) {
+                String userName = principal.getUsername()
 
-            User user = User.findByUsername(userName)
-            result.responseObject = [guestAccount: user.username == "guest" && !user.cloudAccount]
+                User user = User.findByUsername(userName)
+
+                if (user) {
+                    Set<Role> auths = user.getAuthorities()
+
+                    auths.forEach { role ->
+                        if (role.authority == 'ROLE_GUEST')
+                            isGuest = true
+                    }
+                }
+            }
+            result.responseObject = [guestAccount: isGuest]
         }
         catch(Exception ex)
         {

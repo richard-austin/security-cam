@@ -3,6 +3,7 @@ import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, 
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {UtilsService} from "../shared/utils.service";
+import {timer} from "rxjs";
 
 export class SMTPData {
   auth: boolean = true;
@@ -167,8 +168,10 @@ export class SetupSMTPClientComponent implements OnInit {
         this.setupFormControls();
         },
       error: (reason) => {
-        this.reporting.errorMessage = reason;
         this.setupFormControls();
+        timer(200).subscribe(() => {
+          this.reporting.errorMessage = reason;  // Ensure message gets displayed
+        })
       }
     });
   }
