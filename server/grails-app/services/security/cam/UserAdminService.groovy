@@ -1,6 +1,5 @@
 package security.cam
 
-
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.grails.web.json.JSONObject
@@ -8,9 +7,22 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CreateOrUpdateAccountCommand
 import security.cam.commands.ResetPasswordCommand
+import security.cam.commands.SendResetPasswordLinkCommand
 import security.cam.commands.SetupGuestAccountCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
+
+import javax.mail.Authenticator
+import javax.mail.Message
+import javax.mail.Multipart
+import javax.mail.PasswordAuthentication
+import javax.mail.Session
+import javax.mail.Transport
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeBodyPart
+import javax.mail.internet.MimeMessage
+import javax.mail.internet.MimeMultipart
+import java.util.concurrent.ConcurrentHashMap
 
 @Transactional()
 class UserAdminService {
@@ -18,6 +30,7 @@ class UserAdminService {
     LogService logService
 
     UserService userService
+    UtilsService utilsService
     UserRoleService userRoleService
     RoleService roleService
     SimpMessagingTemplate brokerMessagingTemplate
@@ -235,5 +248,116 @@ class UserAdminService {
             result.error = ex.getMessage()
         }
         return result
+    }
+
+    final private resetPasswordParameterTimeout = 20 * 60 * 1000 // 20 minutes
+    final private Map<String, String> passwordResetParameterMap = new ConcurrentHashMap<>()
+    final private Map<String, Timer> timerMap = new ConcurrentHashMap<>()
+
+    ObjectCommandResponse sendResetPasswordLink(SendResetPasswordLinkCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            String uniqueId = generateRandomString()
+            // There should only ever be one entry in the passwordResetParameterMap and timerMap
+            if(passwordResetParameterMap.size() > 0) {
+                passwordResetParameterMap.clear()
+                timerMap.forEach {ignore, timer ->
+                    timer.cancel()
+                }
+                timerMap.clear()
+            }
+
+            passwordResetParameterMap.put(uniqueId, cmd.email)
+            ResetPasswordParameterTimerTask task = new ResetPasswordParameterTimerTask(uniqueId, passwordResetParameterMap, timerMap)
+            Timer timer = new Timer(uniqueId)
+            timer.schedule(task, resetPasswordParameterTimeout)
+            timerMap.put(uniqueId, timer)
+
+            sendEmail(cmd.getEmail(), uniqueId, cmd.getClientUri())
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("${ex.getClass().getName()} in sendResetPasswordLink: ${ex.getCause()} ${ex.getMessage()}")
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    private static String generateRandomString() {
+        int leftLimit = 48 // numeral '0'
+        int rightLimit = 122 // letter 'z'
+        int targetStringLength = 212
+        Random random = new Random()
+
+        String generatedString = random.ints(leftLimit, rightLimit + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString()
+        System.out.println(generatedString)
+        return generatedString
+    }
+
+    private def sendEmail(String email, String idStr, String clientUri)
+    {
+        User user = User.findByEmail(email)
+        if(user != null) {
+            def auths = user.getAuthorities()
+            boolean isClient = false
+            auths.forEach { role ->
+                if (role.authority == 'ROLE_CLIENT')
+                    isClient = true
+            }
+            if (isClient) {   // Correct email name and role is ROLE_CLIENT
+                //noinspection DuplicatedCode
+                def smtpData = utilsService.getSMTPConfigData()
+
+                Properties prop = new Properties()
+                prop.put("mail.smtp.auth", smtpData.auth)
+                prop.put("mail.smtp.starttls.enable", smtpData.enableStartTLS)
+                if(smtpData.enableStartTLS) {
+                    prop.put("mail.smtp.ssl.protocols", smtpData.sslProtocols)
+                    prop.put("mail.smtp.ssl.trust", smtpData.sslTrust)
+                }
+                prop.put("mail.smtp.host", smtpData.host)
+                prop.put("mail.smtp.port", smtpData.port)
+
+                logService.cam.trace("mail.smtp.auth=${smtpData.auth}")
+                logService.cam.trace("mail.smtp.starttls.enable=${smtpData.enableStartTLS}")
+                logService.cam.trace("mail.smtp.ssl.protocols=${smtpData.sslProtocols}")
+                logService.cam.trace("mail.smtp.host=${smtpData.host}")
+                logService.cam.trace("mail.smtp.port=${smtpData.port}")
+                logService.cam.trace("mail.smtp.ssl.trust=${smtpData.sslTrust}")
+
+                Session session = Session.getDefaultInstance(prop, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(smtpData.username, smtpData.password)
+                    }
+                })
+
+                Message message = new MimeMessage(session)
+                message.setFrom(new InternetAddress(smtpData.fromAddress))
+                message.setRecipients(
+                        Message.RecipientType.TO, InternetAddress.parse(email))
+                message.setSubject("Reset Password")
+
+                String msg = "<h2>Reset Password for user: ${user.username}</h2>" +
+                        "An NVR password reset link was requested. If this was not you, please ignore this email.<br> " +
+                        "Please click <a href=\"" + clientUri + "/resetpassword/${idStr}\">here</a> to reset your NVR password."
+
+                MimeBodyPart mimeBodyPart = new MimeBodyPart()
+                mimeBodyPart.setContent(msg, "text/html; charset=utf-8")
+
+                Multipart multipart = new MimeMultipart()
+                multipart.addBodyPart(mimeBodyPart)
+
+                message.setContent(multipart)
+
+                Transport.send(message)
+            }
+        }
+        // No error if email address was wrong, just ignore it
     }
 }
