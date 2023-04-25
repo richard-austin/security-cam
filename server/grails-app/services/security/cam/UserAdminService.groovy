@@ -273,7 +273,7 @@ class UserAdminService {
             timer.schedule(task, resetPasswordParameterTimeout)
             timerMap.put(uniqueId, timer)
 
-            sendEmail(cmd.getEmail(), uniqueId, cmd.getClientUri())
+            sendResetPasswordEmail(cmd.getEmail(), uniqueId, cmd.getClientUri())
         }
         catch(Exception ex)
         {
@@ -299,7 +299,7 @@ class UserAdminService {
         return generatedString
     }
 
-    private def sendEmail(String email, String idStr, String clientUri)
+    private def sendResetPasswordEmail(String email, String idStr, String clientUri)
     {
         User user = User.findByEmail(email)
         if(user != null) {
@@ -339,8 +339,7 @@ class UserAdminService {
 
                 Message message = new MimeMessage(session)
                 message.setFrom(new InternetAddress(smtpData.fromAddress))
-                message.setRecipients(
-                        Message.RecipientType.TO, InternetAddress.parse(email))
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email))
                 message.setSubject("Reset Password")
 
                 String msg = "<h2>Reset Password for user: ${user.username}</h2>" +

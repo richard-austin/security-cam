@@ -19,6 +19,10 @@ class RecoverController {
         render view: '/error.gsp', model: [message: 'See if I can find this']
     }
 
+    def requestResetPasswordLink() {
+        render view: 'requestResetPasswordLink.gsp'
+    }
+
     def sendResetPasswordLink(SendResetPasswordLinkCommand cmd) {
         ObjectCommandResponse result
         if (cmd.hasErrors()) {
