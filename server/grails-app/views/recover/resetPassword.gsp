@@ -15,8 +15,8 @@
 
 <body>
 <div class="row">
-    <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
-        <div class="card card-signin my-5">
+    <div class="mx-auto">
+        <div class="card card-signin my-3">
             <div class="card-body">
                 <h5 class="card-title text-center">Please Enter New Password</h5>
                 <g:if test='${flash.message}'>
@@ -43,7 +43,6 @@
     </div>
 </div>
 <script type="text/javascript">
-    let hiddenxx = true;
     document.addEventListener("DOMContentLoaded", function(ignore) {
         document.forms['updatePasswordForm'].elements['password'].focus();
     });

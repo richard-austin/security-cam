@@ -14,13 +14,8 @@ class RecoverController {
     UserAdminService userAdminService
     ValidationErrorService validationErrorService
 
-    def resetPassword(String key) {
-        [returnVal: true]
-        render view: '/error.gsp', model: [message: 'See if I can find this']
-    }
-
-    def requestResetPasswordLink() {
-        render view: 'requestResetPasswordLink.gsp'
+    def forgotPassword() {
+        render view: 'forgotPassword.gsp'
     }
 
     def sendResetPasswordLink(SendResetPasswordLinkCommand cmd) {
