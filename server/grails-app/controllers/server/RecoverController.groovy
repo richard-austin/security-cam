@@ -65,7 +65,7 @@ class RecoverController {
                 doneOne = true
                 flash.error += (k + ":" + v)
             }
-            redirect(action: "resetPasswordForm")
+            redirect(action: "resetPasswordForm", params: [key: cmd.resetKey])
         } else {
             result = userAdminService.resetPasswordFromLink(cmd)
             if(result.status == PassFail.PASS)
