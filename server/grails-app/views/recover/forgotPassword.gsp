@@ -41,8 +41,8 @@
                     <div class="form-group">
                         <label for="email">Your Email Address</label>
                         <input type="text" class="form-control" name="${emailParameter ?: 'email'}" id="email"
-                            onkeyup="keyup(this)"
-                            autocapitalize="none"/>
+                               onkeyup="keyup(this)"
+                               autocapitalize="none"/>
                     </div>
                     <input type="text" style="visibility: hidden" name="${clientUriParameter ?: 'clientUri'}" id="clientUri">
                     <div class="row flex-sm-nowrap flex-md-nowrap flex-lg-nowrap">
@@ -62,7 +62,15 @@
     (function setUpClientUri() {
         let clientUriInput = document.getElementById('clientUri');
         clientUriInput.value = window.location.protocol+'//'+window.location.hostname+':'+window.location.port;
-    })();
+        let email = document.getElementById('email');
+        email.addEventListener('paste', () => {
+            let button = document.getElementById('submit')
+            setTimeout(() => {
+                continueEnabled = emailRegex.test(email.value);
+                button.disabled = !continueEnabled;
+            }, 2);
+        })
+      })();
 
     function keyup(input) {
         let button = document.getElementById('submit')

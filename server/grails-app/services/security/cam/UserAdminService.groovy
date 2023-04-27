@@ -63,17 +63,25 @@ class UserAdminService {
     def resetPasswordFromLink(ResetPasswordFromLinkCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            String userName
-            def users = User.findAll()
-            users.forEach {user ->
-                def auths = user.getAuthorities()
-                auths.forEach {role ->
-                    if(role.authority == 'ROLE_CLIENT') {
-                        user.setPassword(cmd.getNewPassword())
-                        user.save()
-                        return result
+            if(passwordResetParameterMap.containsKey(cmd.resetKey)) {
+                clearPasswordResetKeyMapAndTimer()
+                String userName
+                def users = User.findAll()
+                users.forEach { user ->
+                    def auths = user.getAuthorities()
+                    auths.forEach { role ->
+                        if (role.authority == 'ROLE_CLIENT') {
+                            user.setPassword(cmd.getNewPassword())
+                            user.save()
+                            return result
+                        }
                     }
                 }
+            }
+            else {
+                logService.cam.error("Invalid password reset key")
+                result.status = PassFail.FAIL
+                result.error = "Invalid password reset key"
             }
         }
         catch (Exception ex) {
@@ -286,11 +294,7 @@ class UserAdminService {
             String uniqueId = generateRandomString()
             // There should only ever be one entry in the passwordResetParameterMap and timerMap
             if(passwordResetParameterMap.size() > 0) {
-                passwordResetParameterMap.clear()
-                timerMap.forEach {ignore, timer ->
-                    timer.cancel()
-                }
-                timerMap.clear()
+                clearPasswordResetKeyMapAndTimer()
             }
 
             passwordResetParameterMap.put(uniqueId, cmd.email)
@@ -384,5 +388,13 @@ class UserAdminService {
             }
         }
         // No error if email address was wrong, just ignore it
+    }
+
+    private def clearPasswordResetKeyMapAndTimer() {
+        passwordResetParameterMap.clear()
+        timerMap.forEach {ignore, timer ->
+            timer.cancel()
+        }
+        timerMap.clear()
     }
 }

@@ -67,8 +67,11 @@ class RecoverController {
             }
             redirect(action: "resetPasswordForm")
         } else {
-            userAdminService.resetPasswordFromLink(cmd)
-            flash.message = "Password reset successfully"
+            result = userAdminService.resetPasswordFromLink(cmd)
+            if(result.status == PassFail.PASS)
+                flash.message = "Password reset successfully"
+            else
+                flash.error = result.error
             redirect(action: "resetPasswordForm")
         }
     }
