@@ -7,6 +7,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CreateOrUpdateAccountCommand
 import security.cam.commands.ResetPasswordCommand
+import security.cam.commands.ResetPasswordFromLinkCommand
 import security.cam.commands.SendResetPasswordLinkCommand
 import security.cam.commands.SetupGuestAccountCommand
 import security.cam.enums.PassFail
@@ -49,6 +50,31 @@ class UserAdminService {
             User user = User.findByUsername(userName)
             user.setPassword(cmd.getNewPassword())
             user.save()
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in resetPassword: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+
+        return result
+    }
+
+    def resetPasswordFromLink(ResetPasswordFromLinkCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            String userName
+            def users = User.findAll()
+            users.forEach {user ->
+                def auths = user.getAuthorities()
+                auths.forEach {role ->
+                    if(role.authority == 'ROLE_CLIENT') {
+                        user.setPassword(cmd.getNewPassword())
+                        user.save()
+                        return result
+                    }
+                }
+            }
         }
         catch (Exception ex) {
             logService.cam.error("Exception in resetPassword: " + ex.getCause() + ' ' + ex.getMessage())
@@ -330,7 +356,7 @@ class UserAdminService {
                 logService.cam.trace("mail.smtp.port=${smtpData.port}")
                 logService.cam.trace("mail.smtp.ssl.trust=${smtpData.sslTrust}")
 
-                Session session = Session.getDefaultInstance(prop, new Authenticator() {
+                Session session = Session.getInstance(prop, new Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(smtpData.username, smtpData.password)
@@ -344,7 +370,7 @@ class UserAdminService {
 
                 String msg = "<h2>Reset Password for user: ${user.username}</h2>" +
                         "An NVR password reset link was requested. If this was not you, please ignore this email.<br> " +
-                        "Please click <a href=\"" + clientUri + "/resetpassword/${idStr}\">here</a> to reset your NVR password."
+                        "Please click <a href=\"" + clientUri + "/recover/resetPasswordForm?key=${idStr}\">here</a> to reset your NVR password."
 
                 MimeBodyPart mimeBodyPart = new MimeBodyPart()
                 mimeBodyPart.setContent(msg, "text/html; charset=utf-8")

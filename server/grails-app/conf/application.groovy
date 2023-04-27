@@ -32,6 +32,8 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/utils/setupSMTPClientLocally', access: ['permitAll']],
 	[pattern: '/utils/getSMTPClientParamsLocally', access: ['permitAll']],
 	[pattern: '/recover/sendResetPasswordLink', access: ['permitAll']],
+	[pattern: '/recover/forgotPassword', access: ['permitAll']],
+	[pattern: '/recover/resetPasswordForm', access: ['permitAll']],
 	[pattern: '/recover/resetPassword', access: ['permitAll']],
 	[pattern: '/**/index.html',  access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],
 	[pattern: '/#/**',           access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],

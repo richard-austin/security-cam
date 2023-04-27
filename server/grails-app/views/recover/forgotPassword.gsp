@@ -35,7 +35,7 @@
                 <g:if test='${flash.error}'>
                     <div class="alert alert-danger" role="alert">${flash.error}</div>
                 </g:if>
-                <form class="form-signin" action="${postUrl ?: '/recover/requestResetPasswordLink'}" method="POST"
+                <form class="form-signin" action="${postUrl ?: '/recover/sendResetPasswordLink'}" method="POST"
                       id="requestResetLink"
                       autocomplete="off">
                     <div class="form-group">
@@ -44,6 +44,7 @@
                             onkeyup="keyup(this)"
                             autocapitalize="none"/>
                     </div>
+                    <input type="text" style="visibility: hidden" name="${clientUriParameter ?: 'clientUri'}" id="clientUri">
                     <div class="row flex-sm-nowrap flex-md-nowrap flex-lg-nowrap">
                         <button id="go-back" onclick="backToLogin()" class="back-to-login-btn btn btn-lg btn-primary btn-outline-info"
                                 type="button">Back to Log in</button>
@@ -58,6 +59,10 @@
 <script>
     let continueEnabled = false;
     const emailRegex = /^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+    (function setUpClientUri() {
+        let clientUriInput = document.getElementById('clientUri');
+        clientUriInput.value = window.location.protocol+'//'+window.location.hostname+':'+window.location.port;
+    })();
 
     function keyup(input) {
         let button = document.getElementById('submit')

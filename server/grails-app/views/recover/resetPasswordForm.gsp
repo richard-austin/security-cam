@@ -20,31 +20,34 @@
             <div class="card-body">
                 <h5 class="card-title text-center">Please Enter New Password</h5>
                 <g:if test='${flash.message}'>
-                    <div class="alert alert-danger" role="alert">${flash.message}</div>
+                    <div class="alert alert-success" role="alert">${flash.message}</div>
                 </g:if>
-                <g:form style="visibility: ${returnVal ? 'hidden' : 'visible'}" action="${postUrl ?: '/recover/resetPassword'}" method="POST" id="updatePasswordForm" autocomplete="off">
+                <g:if test='${flash.error}'>
+                    <div class="alert alert-danger" role="alert">${flash.error}</div>
+                </g:if>
+                <form action="${postUrl ?: '/recover/resetPassword'}" method="POST" id="updatePasswordForm" autocomplete="off">
                     <div class="form-group">
                         <label for="password">New Password</label>
-                        <input type="password" class="form-control" name="${passwordParameter ?: 'password'}" id="password" autocapitalize="none"/>
+                        <input type="password" class="form-control" name="${passwordParameter ?: 'newPassword'}" id="password" autocapitalize="none"/>
                     </div>
 
                     <div class="form-group">
                         <label for="confirmPassword">Confirm New Password</label>
-                        <input type="password" class="form-control" name="${confirmPasswordParameter ?: 'confirmPassword'}" id="confirmPassword"/>
+                        <input type="password" class="form-control" name="${confirmPasswordParameter ?: 'confirmNewPassword'}" id="confirmPassword"/>
                     </div>
                     <div style="visibility: hidden; position: absolute">
                         <label for="resetKey"></label>
                         <input style="visibility: hidden; position: absolute" name="${resetKeyParameter ?: 'resetKey'}" value="${params.key}" id="resetKey">
                     </div>
                     <button id="submit" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
-                </g:form>
+                </form>
             </div>
         </div>
     </div>
 </div>
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function(ignore) {
-        document.forms['updatePasswordForm'].elements['password'].focus();
+ //       document.forms['updatePasswordForm'].elements['password'].focus();
     });
 </script>
 </body>
