@@ -75,7 +75,7 @@
 
     // Check confirmPassword matches password, set confirmPassword field background red and disable submit button if not
     // Also confirm password is invalid if password is invalid.
-    function confirmPasswordKeyUp(cpInput) {
+    function confirmPasswordKeyUp() {
         if(!confirmPasswordOk()) {
             confirmPassword.style =  'background-color: #faa';
             submit.disabled = true;
