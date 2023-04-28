@@ -63,7 +63,7 @@ class UserAdminService {
     def resetPasswordFromLink(ResetPasswordFromLinkCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            if(passwordResetParameterMap.containsKey(cmd.resetKey)) {
+            if (passwordResetParameterMap.containsKey(cmd.resetKey)) {
                 clearPasswordResetKeyMapAndTimer()
                 String userName
                 def users = User.findAll()
@@ -77,8 +77,7 @@ class UserAdminService {
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 logService.cam.error("Invalid password reset key")
                 result.status = PassFail.FAIL
                 result.error = "Invalid password reset key"
@@ -107,8 +106,7 @@ class UserAdminService {
     ObjectCommandResponse createOrUpdateAccount(CreateOrUpdateAccountCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            if(cmd.updateExisting)
-            {
+            if (cmd.updateExisting) {
                 def roleClient = roleService.findByAuthority('ROLE_CLIENT')
                 def u = User.all.find {
                     def auth = it.getAuthorities()
@@ -118,9 +116,8 @@ class UserAdminService {
                 u.password = cmd.password
                 u.email = cmd.email
                 userService.save(u)
-              //  userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
-            }
-            else {
+                //  userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
+            } else {
                 User u = new User(username: cmd.username, password: cmd.password, email: cmd.email, cloudAccount: false, header: null)
                 u = userService.save(u)
                 userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
@@ -191,7 +188,7 @@ class UserAdminService {
             userService.save(u)
 
             // Kick off any guest users who are logged in
-            if(!cmd.enabled)
+            if (!cmd.enabled)
                 brokerMessagingTemplate.convertAndSend("/topic/logoff", logoff)
         }
         catch (Exception ex) {
@@ -243,7 +240,7 @@ class UserAdminService {
         try {
             boolean isGuest = false
             def principal = springSecurityService.getPrincipal()
-            if(principal) {
+            if (principal) {
                 String userName = principal.getUsername()
 
                 User user = User.findByUsername(userName)
@@ -259,8 +256,7 @@ class UserAdminService {
             }
             result.responseObject = [guestAccount: isGuest]
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("Exception in isGuest: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
@@ -268,15 +264,13 @@ class UserAdminService {
         return result
     }
 
-    ObjectCommandResponse guestAccountEnabled()
-    {
+    ObjectCommandResponse guestAccountEnabled() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            User guest = User.all.find{it.username == "guest" && !it.cloudAccount}
+            User guest = User.all.find { it.username == "guest" && !it.cloudAccount }
             result.responseObject = [enabled: guest != null && guest.enabled]
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("Exception in guestAccountEnabled: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
@@ -291,22 +285,24 @@ class UserAdminService {
     ObjectCommandResponse sendResetPasswordLink(SendResetPasswordLinkCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            String uniqueId = generateRandomString()
-            // There should only ever be one entry in the passwordResetParameterMap and timerMap
-            if(passwordResetParameterMap.size() > 0) {
-                clearPasswordResetKeyMapAndTimer()
+            User user = User.findByEmail(cmd.email)
+            if (user != null) {
+                String uniqueId = generateRandomString()
+                // There should only ever be one entry in the passwordResetParameterMap and timerMap
+                if (passwordResetParameterMap.size() > 0) {
+                    clearPasswordResetKeyMapAndTimer()
+                }
+
+                passwordResetParameterMap.put(uniqueId, cmd.email)
+                ResetPasswordParameterTimerTask task = new ResetPasswordParameterTimerTask(uniqueId, passwordResetParameterMap, timerMap)
+                Timer timer = new Timer(uniqueId)
+                timer.schedule(task, resetPasswordParameterTimeout)
+                timerMap.put(uniqueId, timer)
+
+                sendResetPasswordEmail(cmd.getEmail(), uniqueId, cmd.getClientUri())
             }
-
-            passwordResetParameterMap.put(uniqueId, cmd.email)
-            ResetPasswordParameterTimerTask task = new ResetPasswordParameterTimerTask(uniqueId, passwordResetParameterMap, timerMap)
-            Timer timer = new Timer(uniqueId)
-            timer.schedule(task, resetPasswordParameterTimeout)
-            timerMap.put(uniqueId, timer)
-
-            sendResetPasswordEmail(cmd.getEmail(), uniqueId, cmd.getClientUri())
         }
-        catch(Exception ex)
-        {
+        catch (Exception ex) {
             logService.cam.error("${ex.getClass().getName()} in sendResetPasswordLink: ${ex.getCause()} ${ex.getMessage()}")
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
@@ -329,10 +325,9 @@ class UserAdminService {
         return generatedString
     }
 
-    private def sendResetPasswordEmail(String email, String idStr, String clientUri)
-    {
+    private def sendResetPasswordEmail(String email, String idStr, String clientUri) {
         User user = User.findByEmail(email)
-        if(user != null) {
+        if (user != null) {
             def auths = user.getAuthorities()
             boolean isClient = false
             auths.forEach { role ->
@@ -346,7 +341,7 @@ class UserAdminService {
                 Properties prop = new Properties()
                 prop.put("mail.smtp.auth", smtpData.auth)
                 prop.put("mail.smtp.starttls.enable", smtpData.enableStartTLS)
-                if(smtpData.enableStartTLS) {
+                if (smtpData.enableStartTLS) {
                     prop.put("mail.smtp.ssl.protocols", smtpData.sslProtocols)
                     prop.put("mail.smtp.ssl.trust", smtpData.sslTrust)
                 }
@@ -392,7 +387,7 @@ class UserAdminService {
 
     private def clearPasswordResetKeyMapAndTimer() {
         passwordResetParameterMap.clear()
-        timerMap.forEach {ignore, timer ->
+        timerMap.forEach { ignore, timer ->
             timer.cancel()
         }
         timerMap.clear()
