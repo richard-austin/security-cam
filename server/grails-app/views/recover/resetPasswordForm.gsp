@@ -25,22 +25,27 @@
                 <g:if test='${flash.error}'>
                     <div class="alert alert-danger" role="alert">${flash.error}</div>
                 </g:if>
-                <form action="${postUrl ?: '/recover/resetPassword'}" method="POST" id="updatePasswordForm" autocomplete="off">
-                    <div class="form-group">
-                        <label for="password">New Password</label>
-                        <input type="password" onkeyup="passwordKeyup()" class="form-control" name="${passwordParameter ?: 'newPassword'}" id="password" autocapitalize="none"/>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm New Password</label>
-                        <input type="password" onkeyup="confirmPasswordKeyUp()" class="form-control" name="${confirmPasswordParameter ?: 'confirmNewPassword'}" id="confirmPassword"/>
-                    </div>
-                    <div style="visibility: hidden; position: absolute">
-                        <label for="resetKey"></label>
-                        <input style="visibility: hidden; position: absolute" name="${resetKeyParameter ?: 'resetKey'}" value="${params.key}" id="resetKey">
-                    </div>
-                    <button id="submit" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
-                </form>
+                <g:if test='${params.passwordSet != "true"}'>
+                    <form action="${postUrl ?: '/recover/resetPassword'}" method="POST" id="updatePasswordForm" autocomplete="off">
+                        <div class="form-group">
+                            <label for="password">New Password</label>
+                            <input type="password" onkeyup="passwordKeyup()" class="form-control" name="${passwordParameter ?: 'newPassword'}" id="password" autocapitalize="none"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" onkeyup="confirmPasswordKeyUp()" class="form-control" name="${confirmPasswordParameter ?: 'confirmNewPassword'}" id="confirmPassword"/>
+                        </div>
+                        <div style="visibility: hidden; position: absolute">
+                            <label for="resetKey"></label>
+                            <input style="visibility: hidden; position: absolute" name="${resetKeyParameter ?: 'resetKey'}" value="${params.key}" id="resetKey">
+                        </div>
+                        <button id="submit" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+                    </form>
+                </g:if>
+                <g:else>
+                    <button id="go-back" onclick="backToLogin()" class="back-to-login-btn btn btn-lg btn-primary btn-outline-info"
+                            type="button">Back to Log in</button>
+                </g:else>
             </div>
         </div>
     </div>
@@ -92,9 +97,13 @@
         return passwordRegex.test(password.value);
     }
 
-    // Return tru if confirmPassword matches password.
+    // Return true if confirmPassword matches password and password is OK.
     function confirmPasswordOk() {
         return password.value === confirmPassword.value && passwordOk();
+    }
+
+    function backToLogin() {
+        window.location.href = '/login/auth'
     }
 </script>
 </body>
