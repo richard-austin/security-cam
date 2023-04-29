@@ -287,19 +287,26 @@ class UserAdminService {
         try {
             User user = User.findByEmail(cmd.email)
             if (user != null) {
-                String uniqueId = generateRandomString()
-                // There should only ever be one entry in the passwordResetParameterMap and timerMap
-                if (passwordResetParameterMap.size() > 0) {
-                    clearPasswordResetKeyMapAndTimer()
+                def isClient = false
+                user.getAuthorities().forEach {role ->
+                    if(role.authority == 'ROLE_CLIENT')
+                        isClient = true
                 }
+                if(isClient) {
+                    String uniqueId = generateRandomString()
+                    // There should only ever be one entry in the passwordResetParameterMap and timerMap
+                    if (passwordResetParameterMap.size() > 0) {
+                        clearPasswordResetKeyMapAndTimer()
+                    }
 
-                passwordResetParameterMap.put(uniqueId, cmd.email)
-                ResetPasswordParameterTimerTask task = new ResetPasswordParameterTimerTask(uniqueId, passwordResetParameterMap, timerMap)
-                Timer timer = new Timer(uniqueId)
-                timer.schedule(task, resetPasswordParameterTimeout)
-                timerMap.put(uniqueId, timer)
+                    passwordResetParameterMap.put(uniqueId, cmd.email)
+                    ResetPasswordParameterTimerTask task = new ResetPasswordParameterTimerTask(uniqueId, passwordResetParameterMap, timerMap)
+                    Timer timer = new Timer(uniqueId)
+                    timer.schedule(task, resetPasswordParameterTimeout)
+                    timerMap.put(uniqueId, timer)
 
-                sendResetPasswordEmail(cmd.getEmail(), uniqueId, cmd.getClientUri())
+                    sendResetPasswordEmail(cmd.getEmail(), uniqueId, cmd.getClientUri())
+                }
             }
         }
         catch (Exception ex) {
