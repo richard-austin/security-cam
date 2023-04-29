@@ -145,17 +145,19 @@ class Sc_processesService {
         Properties prop = new Properties()
         prop.put("mail.smtp.auth", smtpData.auth)
         prop.put("mail.smtp.starttls.enable", smtpData.enableStartTLS)
-        prop.put("mail.smtp.ssl.protocols", smtpData.sslProtocols)
+        if(smtpData.enableStartTLS) {
+            prop.put("mail.smtp.ssl.protocols", smtpData.sslProtocols)
+            prop.put("mail.smtp.ssl.trust", smtpData.sslTrust)
+        }
         prop.put("mail.smtp.host", smtpData.host)
         prop.put("mail.smtp.port", smtpData.port)
-        prop.put("mail.smtp.ssl.trust", smtpData.sslTrust)
 
-        logService.cam.debug("mail.smtp.auth=${smtpData.auth}")
-        logService.cam.debug("mail.smtp.starttls.enable=${smtpData.enableStartTLS}")
-        logService.cam.debug("mail.smtp.ssl.protocols=${smtpData.sslProtocols}")
-        logService.cam.debug("mail.smtp.host=${smtpData.host}")
-        logService.cam.debug("mail.smtp.port=${smtpData.port}")
-        logService.cam.debug("mail.smtp.ssl.trust=${smtpData.sslTrust}")
+        logService.cam.trace("mail.smtp.auth=${smtpData.auth}")
+        logService.cam.trace("mail.smtp.starttls.enable=${smtpData.enableStartTLS}")
+        logService.cam.trace("mail.smtp.ssl.protocols=${smtpData.sslProtocols}")
+        logService.cam.trace("mail.smtp.host=${smtpData.host}")
+        logService.cam.trace("mail.smtp.port=${smtpData.port}")
+        logService.cam.trace("mail.smtp.ssl.trust=${smtpData.sslTrust}")
 
         Session session = Session.getInstance(prop, new Authenticator() {
             @Override
