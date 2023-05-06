@@ -10,17 +10,16 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer{
     @Override
-    void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/stomp")
-                .setAllowedOriginPatterns("*")
-                .withSockJS()
-        registry.addEndpoint("/stomp").setAllowedOriginPatterns("*")
-       //
+    void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.enableSimpleBroker("/topic")
+        registry.setApplicationDestinationPrefixes("/app")
     }
 
     @Override
-    void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/app")
-                .enableSimpleBroker("/topic")
+    void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/stomp").setAllowedOriginPatterns("*").withSockJS()
+        registry.addEndpoint("/stomp").setAllowedOriginPatterns("*")
+        registry.addEndpoint("/audio").setAllowedOriginPatterns("*").withSockJS()
+        registry.addEndpoint("/audio").setAllowedOriginPatterns("*")
     }
 }

@@ -41,8 +41,7 @@
             "scripts": ["./node_modules/hls.js/dist/hls.light.min.js",
                          "./node_modules/moment/min/moment.min.js",
                         "./node_modules/file-saver/dist/FileSaver.min.js",
-                        "./node_modules/sockjs-client/dist/sockjs.min.js",
-                        "./node_modules/stompjs/lib/stomp.min.js"
+                        "./node_modules/sockjs-client/dist/sockjs.min.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,

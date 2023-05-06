@@ -24,6 +24,7 @@
     "@angular/platform-browser": "~12.0.5",
     "@angular/platform-browser-dynamic": "~12.0.5",
     "@angular/router": "~12.0.5",
+    "@stomp/stompjs": "^7.0.0",
     "file-saver": "^2.0.5",
     "hls.js": "^1.0.7",
     "moment": "^2.29.1",
@@ -31,7 +32,6 @@
     "rxjs": "~6.6.0",
     "rxjs-observe": "^2.1.5",
     "sockjs-client": "^1.6.1",
-    "stompjs": "^2.3.3",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.4"
   },

@@ -1,8 +1,10 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraStream} from '../cameras/Camera';
 import {MatSelect} from '@angular/material/select';
+import {Stomp} from "@stomp/stompjs";
 
 declare let Hls: any;
+//declare let Stomp: any;
 
 @Component({
   selector: 'app-video',
@@ -62,6 +64,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * @private
    */
   private startVideo(): void {
+    this.startAudioOutput();
+
     if (!this.isfmp4) {
       if (this.camstream !== undefined) {
         if (Hls.isSupported()) {
@@ -84,6 +88,64 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       // set mediasource as source of video
       this.video.src = window.URL.createObjectURL(this.ms);
     }
+  }
+
+  startAudioOutput() : boolean {
+    let retVal = true;
+
+    let serverUrl: string = 'ws://'+window.location.host + '/audio';
+
+    let ws = new WebSocket(serverUrl);
+
+   let stompClient = Stomp.over(ws);
+
+    stompClient.connect({}, () => {
+      // let stompSubscription = stompClient.subscribe('/topic/logoff', (message: any) => {
+      // })
+    });
+
+
+
+
+
+
+
+
+    if (navigator.getUserMedia) {
+      navigator.mediaDevices.enumerateDevices().then((dev) => {
+        let x = dev;
+      })
+      navigator.getUserMedia({audio: true, video: false}, (stream) => {
+        // @ts-ignore
+        const recorder = new MediaRecorder(stream);
+        // fires every one second and passes an BlobEvent
+        recorder.ondataavailable = (event: any) => {
+          // get the Blob from the event
+          const blob: Blob = event.data;
+          blob.arrayBuffer().then((buff) => {
+            let data = new Uint8Array(buff);
+            stompClient.publish({
+              destination: '/app/audio',
+              binaryBody: data,
+              headers: {"content-type": "application/octet-stream"}
+            });
+            console.log("Length = "+buff.byteLength);
+          });
+
+          // and send that blob to the server...
+        };
+
+        // make data available event fire every 20th second
+        recorder.start(40);
+        this.video.srcObject = stream;
+      }, errorCallBack);
+    }
+
+    function errorCallBack(e: any) {
+      retVal = false;
+      console.log(e);
+    }
+    return retVal;
   }
 
   toInt(arr: Uint8Array, index: number): number { // From bytes to big-endian 32-bit integer.  Input: Uint8Array, index
@@ -155,6 +217,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     return out;
   }
+
 
   // consider these callbacks:
   // - putPacket : called when websocket receives data

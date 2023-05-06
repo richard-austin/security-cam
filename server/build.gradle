@@ -77,6 +77,7 @@ dependencies {
 //    implementation 'org.projectlombok:lombok:1.18.16'
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation 'org.grails.plugins:spring-security-core:4.0.3'
+    implementation group: 'org.grails.plugins', name: 'grails-spring-websocket', version: '2.4.1'
     implementation "org.springframework.boot:spring-boot-starter-logging"
     implementation "org.springframework.boot:spring-boot-autoconfigure"
     implementation "org.grails:grails-core"

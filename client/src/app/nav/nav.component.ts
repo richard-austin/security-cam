@@ -10,9 +10,9 @@ import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-moda
 import {MatDialogRef} from '@angular/material/dialog/dialog-ref';
 import {UserIdleConfig} from '../angular-user-idle/angular-user-idle.config';
 import {UserIdleService} from '../angular-user-idle/angular-user-idle.service';
+import {Stomp} from "@stomp/stompjs";
 
 declare let SockJS: any;
-declare let Stomp: any;
 
 @Component({
   selector: 'app-nav',

@@ -3,10 +3,12 @@ package server
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
+import org.springframework.messaging.handler.annotation.DestinationVariable
+import org.springframework.messaging.handler.annotation.MessageMapping
+import org.springframework.messaging.handler.annotation.Payload
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
 import security.cam.Sc_processesService
-import security.cam.UserAdminService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
@@ -20,7 +22,6 @@ import security.cam.interfaceobjects.RestfulResponse
 
 class UtilsController {
     UtilsService utilsService
-    UserAdminService userAdminService
     RestfulInterfaceService restfulInterfaceService
     LogService logService
     ValidationErrorService validationErrorService
@@ -163,5 +164,26 @@ class UtilsController {
         else
             render "success"
 
+    }
+    boolean started = false
+    int count = 0
+    OutputStream os
+    boolean done = false
+    @MessageMapping(value = "/audio")
+    protected def audio(@Payload byte[] data) {
+        if(!done) {
+            if (!started) {
+                os = new FileOutputStream("/home/richard/soundfile.bin")
+                started = true
+            }
+            if (++count < 1000)
+                os.write(data)
+            else {
+                os.close()
+                done = true
+            }
+        }
+        else
+            logService.cam.info("Audio message of ${data.length} bytes received")
     }
 }
