@@ -8,6 +8,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.core.io.Resource
 import security.cam.commands.SMTPData
 import security.cam.commands.SetupSMTPAccountCommand
+import security.cam.commands.StartAudioOutCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 import java.nio.charset.StandardCharsets
@@ -37,8 +38,7 @@ class Version {
 }
 
 class MyIP {
-    MyIP(String myIp)
-    {
+    MyIP(String myIp) {
         this.myIp = myIp
     }
 
@@ -60,13 +60,12 @@ class UtilsService {
      * @param command the command and its parameters as a string
      * @return: The returned value
      */
-    String executeLinuxCommand(String command)
-    {
-        Process p = Runtime.getRuntime().exec(command)
+    String executeLinuxCommand(String command) {
+        Process p = new ProcessBuilder(command).inheritIO().start() // Process p = Runtime.getRuntime().exec(command)
         p.waitFor()
 
         return processCommandOutput(p)
-   }
+    }
 
     /**
      * executeLinuxCommand: Execute a linux command
@@ -74,13 +73,12 @@ class UtilsService {
      * @return: The returned value
      */
     String executeLinuxCommand(String[] command) {
-        Process p = Runtime.getRuntime().exec(command)
+        Process p = new ProcessBuilder(command).inheritIO().start() // Runtime.getRuntime().exec(command)
         p.waitFor()
         return processCommandOutput(p)
     }
 
-    private static String processCommandOutput(Process p)
-    {
+    private static String processCommandOutput(Process p) {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(p.getInputStream()))
         StringBuffer sb = new StringBuffer()
@@ -160,9 +158,9 @@ class UtilsService {
             GroupPrincipal group = lookupService.lookupPrincipalByGroupName(secCam)
             Files.getFileAttributeView(myipFile, PosixFileAttributeView.class,
                     LinkOption.NOFOLLOW_LINKS).setGroup(group)
-         }
+        }
         catch (IOException e) {
-            logService.cam.error"${e.getClass().getName()} in setIP: ${e.getMessage()}"
+            logService.cam.error "${e.getClass().getName()} in setIP: ${e.getMessage()}"
             result.status = PassFail.FAIL
             result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
@@ -181,8 +179,8 @@ class UtilsService {
             writer.write(res)
             writer.close()
         }
-        catch(Exception e) {
-            logService.cam.error"${e.getClass().getName()} in setupSMTPClient: ${e.getMessage()}"
+        catch (Exception e) {
+            logService.cam.error "${e.getClass().getName()} in setupSMTPClient: ${e.getMessage()}"
             result.status = PassFail.FAIL
             result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
@@ -194,8 +192,8 @@ class UtilsService {
         try {
             result.responseObject = getSMTPConfigData()
         }
-        catch(Exception e) {
-            logService.cam.error"${e.getClass().getName()} in getSMTPClientParams: ${e.getMessage()}"
+        catch (Exception e) {
+            logService.cam.error "${e.getClass().getName()} in getSMTPClientParams: ${e.getMessage()}"
             result.status = PassFail.FAIL
             result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
@@ -210,6 +208,88 @@ class UtilsService {
         String json = new String(bytes, StandardCharsets.UTF_8)
         def gson = new GsonBuilder().create()
         def smtpData = gson.fromJson(json, SMTPData)
-        return  smtpData
+        return smtpData
     }
+
+    Process audioOutProc
+    File fifo
+    FileOutputStream fos
+    def startAudioOut(StartAudioOutCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            String fifoPath = grailsApplication.config.twoWayAudio.fifo
+            if (fifoPath == null)
+                throw new Exception("No path is specified for twoWayAudio: fifo in the configuration")
+            // Create the fifo
+            fifo = createFifoPipe(fifoPath)
+            // Start ffmpeg to transcode and transfer the audio data
+            new File("/var/security-cam/output.mp3").delete()
+            List<String> command = new ArrayList()
+            command.add("ffmpeg")
+            command.add("-i")
+            command.add(fifoPath)
+            command.add("-acodec")
+            command.add("libmp3lame")
+            command.add("/var/security-cam/output.mp3")
+            audioOutProc = new ProcessBuilder(command).inheritIO().start()
+            // Create a file output stream for the websocket handler to write to the fifo
+            fos = new FileOutputStream(fifo)
+         }
+        catch (Exception ex) {
+            logService.cam.error "${ex.getClass().getName()} in startAudioOut: ${ex.getMessage()}"
+            result.status = PassFail.FAIL
+            result.error = "${ex.getClass().getName()} -- ${ex.getMessage()}"
+        }
+        return result
+    }
+
+    def stopAudioOut() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            // Stop the ffmpeg process
+            new ProcessBuilder("kill", "-INT", audioOutProc.pid().toString()).start()
+
+            // Remove the fifo
+            String fifoPath = grailsApplication.config.twoWayAudio.fifo
+            if (fifoPath == null)
+                throw new Exception("No path is specified for twoWayAudio: fifo in the configuration")
+            removeFifoPipe(fifoPath)
+        }
+        catch (Exception ex) {
+            logService.cam.error "${ex.getClass().getName()} in stopAudioOut: ${ex.getMessage()}"
+            result.status = PassFail.FAIL
+            result.error = "${ex.getClass().getName()} -- ${ex.getMessage()}"
+        }
+        return result
+    }
+
+
+    def audio(byte[] bytes) {
+        fos.write(bytes)
+        def x = 5
+    }
+
+
+    private static File createFifoPipe(String fifoName) throws IOException, InterruptedException {
+        Process process
+        String[] command = new String[] {"mkfifo", fifoName}
+        process =  new ProcessBuilder(command).start()
+        process.waitFor()
+        return new File(fifoName)
+    }
+
+
+    private static File getFifoPipe(String fifoName) {
+        Path fifoPath = Paths.get(fifoName)
+        return new File(fifoPath.toString())
+    }
+
+
+    private static void removeFifoPipe(String fifoName) throws IOException {
+        Path fifoPath = Paths.get(fifoName)
+        Files.delete(fifoPath)
+    }
+
 }

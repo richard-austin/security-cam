@@ -2,8 +2,11 @@ import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChil
 import {CameraStream} from '../cameras/Camera';
 import {MatSelect} from '@angular/material/select';
 import {Stomp} from "@stomp/stompjs";
+import {MatButtonToggle} from "@angular/material/button-toggle";
+import {UtilsService} from '../shared/utils.service';
 
 declare let Hls: any;
+
 //declare let Stomp: any;
 
 @Component({
@@ -15,6 +18,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('latencyLimitSelect') llSelector!: MatSelect;
+  @ViewChild('audioToggle') audioToggle!: MatButtonToggle;
   @Input() isfmp4: boolean = false;
   camstream!: CameraStream;
   video!: HTMLVideoElement;
@@ -24,12 +28,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   recording: boolean = false;
   recordingUri: string = '';
   manifest: string = '';
-
+  // @ts-ignore
+  recorder: MediaRecorder;
 
 
 //  private isFullscreenNow: boolean = false;
 
-  constructor() {
+  constructor(private utilsService: UtilsService) {
   }
 
   /**
@@ -64,8 +69,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * @private
    */
   private startVideo(): void {
-    this.startAudioOutput();
-
     if (!this.isfmp4) {
       if (this.camstream !== undefined) {
         if (Hls.isSupported()) {
@@ -90,26 +93,19 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  startAudioOutput() : boolean {
+  startAudioOutput(): boolean {
     let retVal = true;
 
-    let serverUrl: string = 'ws://'+window.location.host + '/audio';
+    let serverUrl: string = 'ws://' + window.location.host + '/audio';
 
     let ws = new WebSocket(serverUrl);
 
-   let stompClient = Stomp.over(ws);
+    let stompClient = Stomp.over(ws);
 
     stompClient.connect({}, () => {
       // let stompSubscription = stompClient.subscribe('/topic/logoff', (message: any) => {
       // })
     });
-
-
-
-
-
-
-
 
     if (navigator.getUserMedia) {
       navigator.mediaDevices.enumerateDevices().then((dev) => {
@@ -117,9 +113,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       })
       navigator.getUserMedia({audio: true, video: false}, (stream) => {
         // @ts-ignore
-        const recorder = new MediaRecorder(stream);
+        this.recorder = new MediaRecorder(stream);
         // fires every one second and passes an BlobEvent
-        recorder.ondataavailable = (event: any) => {
+        this.recorder.ondataavailable = (event: any) => {
           // get the Blob from the event
           const blob: Blob = event.data;
           blob.arrayBuffer().then((buff) => {
@@ -129,15 +125,14 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
               binaryBody: data,
               headers: {"content-type": "application/octet-stream"}
             });
-            console.log("Length = "+buff.byteLength);
+            console.log("Length = " + buff.byteLength);
           });
 
           // and send that blob to the server...
         };
 
         // make data available event fire every 20th second
-        recorder.start(40);
-        this.video.srcObject = stream;
+        this.recorder.start(40);
       }, errorCallBack);
     }
 
@@ -145,6 +140,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       retVal = false;
       console.log(e);
     }
+
     return retVal;
   }
 
@@ -350,6 +346,18 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  toggleAudio($event: Event) {
+    if (this.audioToggle.checked)
+      this.utilsService.startAudioOut('camera1').subscribe(() => {
+        this.startAudioOutput();
+      });
+    else {
+      this.utilsService.stopAudioOut().subscribe(() => {
+        this.recorder.stop();
+      });
+    }
+  }
+
   ngOnInit(): void {
   }
 
@@ -372,4 +380,5 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.stop();
   }
+
 }

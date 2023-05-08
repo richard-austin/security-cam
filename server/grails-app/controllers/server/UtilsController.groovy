@@ -15,6 +15,7 @@ import security.cam.commands.CameraParamsCommand
 import security.cam.commands.CheckNotGuestCommand
 import security.cam.commands.SetCameraParamsCommand
 import security.cam.commands.SetupSMTPAccountCommand
+import security.cam.commands.StartAudioOutCommand
 import security.cam.enums.PassFail
 import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -165,25 +166,34 @@ class UtilsController {
             render "success"
 
     }
-    boolean started = false
-    int count = 0
-    OutputStream os
-    boolean done = false
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def startAudioOut(StartAudioOutCommand cmd) {
+        if(cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'setupSMTPClientLocally')
+            logService.cam.error "startAudioOut: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else {
+            ObjectCommandResponse response = utilsService.startAudioOut(cmd)
+            if (response.status != PassFail.PASS)
+                render(status: 500, text: response.error)
+            else
+                render(status: 200, text: response.responseObject as JSON)
+        }
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def stopAudioOut() {
+        ObjectCommandResponse response = utilsService.stopAudioOut()
+        if (response.status != PassFail.PASS)
+            render(status: 500, text: response.error)
+        else
+            render(status: 200, text: response.responseObject as JSON)
+    }
+
     @MessageMapping(value = "/audio")
     protected def audio(@Payload byte[] data) {
-        if(!done) {
-            if (!started) {
-                os = new FileOutputStream("/home/richard/soundfile.bin")
-                started = true
-            }
-            if (++count < 1000)
-                os.write(data)
-            else {
-                os.close()
-                done = true
-            }
-        }
-        else
-            logService.cam.info("Audio message of ${data.length} bytes received")
+        utilsService.audio(data)
     }
 }

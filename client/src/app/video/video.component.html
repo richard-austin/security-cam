@@ -2,7 +2,7 @@
   <div class="row">
     <mat-card class="mx-auto hide-background mat-elevation-z0">
       <mat-card-title class="mat-elevation-z8">
-        {{camstream != undefined ? (camstream.camera?.name+" ("+camstream.stream?.descr+")") : ""}}
+        {{camstream != undefined ? (camstream.camera?.name + " (" + camstream.stream?.descr + ")") : ""}}
       </mat-card-title>
     </mat-card>
   </div>
@@ -10,20 +10,25 @@
     <video #video [ngClass]="{'multi': multi}" class="video">
     </video>
     <div *ngIf="isfmp4" class="latency-limit-selector">
-        <div matTooltip="Set upper latency chasing limit" matTooltipClass="tooltip">
-          <label><mat-icon style="color: white">timer</mat-icon></label>
-          <select style="width: 90px;" #latencyLimitSelect [(ngModel)]="buffering_sec" (change)="setlatencyLim()">
-            <option value="0.4">0.4</option>
-            <option value="0.6">0.6</option>
-            <option value="0.8"> 0.8</option>
-            <option value="1">1.0</option>
-            <option value="1.2">1.2</option>
-            <option value="1.4">1.4</option>
-            <option value="1.6">1.6</option>
-            <option value="1.8">1.8</option>
-            <option value="2">2.0</option>
-          </select>
-        </div>
+      <div matTooltip="Set upper latency chasing limit" matTooltipClass="tooltip">
+        <label>
+          <mat-icon style="color: white">timer</mat-icon>
+        </label>
+        <select style="width: 90px;" #latencyLimitSelect [(ngModel)]="buffering_sec" (change)="setlatencyLim()">
+          <option value="0.4">0.4</option>
+          <option value="0.6">0.6</option>
+          <option value="0.8"> 0.8</option>
+          <option value="1">1.0</option>
+          <option value="1.2">1.2</option>
+          <option value="1.4">1.4</option>
+          <option value="1.6">1.6</option>
+          <option value="1.8">1.8</option>
+          <option value="2">2.0</option>
+        </select>
       </div>
+      <mat-button-toggle-group style="transform: scale(0.8); position: relative; top: -12px; border-width: 0" multiple>
+        <mat-button-toggle style="border-radius: 30px" #audioToggle (click)="toggleAudio($event)"><mat-icon>{{audioToggle.checked ? 'mic' : 'mic_off'}}</mat-icon></mat-button-toggle>
+      </mat-button-toggle-group>
     </div>
   </div>
+</div>

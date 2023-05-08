@@ -132,6 +132,9 @@ environments:
       maskFileDir: /var/security-cam/motion
       recordingDir: /var/security-cam
 
+    twoWayAudio:
+      fifo: /tmp/audioFifo
+
     cloudProxy:
       enabled: true
       trustStorePath: ../xtrn-scripts-and-config/cacert.jks
@@ -195,6 +198,9 @@ environments:
       configDir: /var/security-cam/motion/conf.d
       maskFileDir: /var/security-cam/motion
       recordingDir: /var/security-cam
+
+    twoWayAudio:
+      fifo: /tmp/audioFifo
 
     cloudProxy:
       enabled: false

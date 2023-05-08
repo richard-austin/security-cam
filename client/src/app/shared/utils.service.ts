@@ -206,4 +206,15 @@ export class UtilsService {
     return this._messaging.asObservable();
   }
 
+  startAudioOut(camera: string) {
+    return this.http.post<void>(this._baseUrl.getLink("utils", "startAudioOut"), JSON.stringify({camera: camera}), this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  stopAudioOut() {
+    return this.http.post<void>(this._baseUrl.getLink("utils", "stopAudioOut"), "", this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
 }
