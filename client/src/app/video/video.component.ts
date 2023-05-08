@@ -101,6 +101,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     let ws = new WebSocket(serverUrl);
 
     let stompClient = Stomp.over(ws);
+    // @ts-ignore
+    stompClient.debug = (z) => {};
 
     stompClient.connect({}, () => {
       // let stompSubscription = stompClient.subscribe('/topic/logoff', (message: any) => {
@@ -125,7 +127,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
               binaryBody: data,
               headers: {"content-type": "application/octet-stream"}
             });
-            console.log("Length = " + buff.byteLength);
           });
 
           // and send that blob to the server...
@@ -379,6 +380,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stop();
+    this.utilsService.stopAudioOut().subscribe(() => {
+      this.recorder.stop();
+    });
   }
-
 }
