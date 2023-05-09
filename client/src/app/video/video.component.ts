@@ -1,8 +1,7 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraStream} from '../cameras/Camera';
 import {MatSelect} from '@angular/material/select';
-import {CompatClient, Stomp} from "@stomp/stompjs";
-import {MatButtonToggle} from "@angular/material/button-toggle";
+import {Stomp} from "@stomp/stompjs";
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
 
@@ -105,7 +104,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let client = Stomp.client(serverUrl);
 
-    client.debug = (z) => {};
+    client.debug = () => {};
 
     client.connect({}, () => {
       // let stompSubscription = client.subscribe('/topic/logoff', (message: any) => {
