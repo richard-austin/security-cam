@@ -218,6 +218,7 @@ class UtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
+            stopAudioOut()
             String fifoPath = grailsApplication.config.twoWayAudio.fifo
             if (fifoPath == null)
                 throw new Exception("No path is specified for twoWayAudio: fifo in the configuration")
@@ -229,6 +230,8 @@ class UtilsService {
             command.add("ffmpeg")
             command.add("-i")
             command.add(fifoPath)
+            command.add("-c:a")
+            command.add("pcm_alaw")
             command.add("-acodec")
             command.add("libmp3lame")
             command.add("/var/security-cam/output.mp3")
@@ -249,13 +252,11 @@ class UtilsService {
 
         try {
             // Stop the ffmpeg process
-            new ProcessBuilder("kill", "-INT", audioOutProc.pid().toString()).start()
-
+            def proc = new ProcessBuilder("kill", "-INT", audioOutProc.pid().toString()).start()
+            proc.waitFor()
+            fos.close()
             // Remove the fifo
-            String fifoPath = grailsApplication.config.twoWayAudio.fifo
-            if (fifoPath == null)
-                throw new Exception("No path is specified for twoWayAudio: fifo in the configuration")
-            removeFifoPipe(fifoPath)
+            fifo.delete()
         }
         catch (Exception ex) {
             logService.cam.error "${ex.getClass().getName()} in stopAudioOut: ${ex.getMessage()}"
@@ -268,28 +269,17 @@ class UtilsService {
 
     def audio(byte[] bytes) {
         fos.write(bytes)
-        def x = 5
     }
 
-
     private static File createFifoPipe(String fifoName) throws IOException, InterruptedException {
-        Process process
         String[] command = new String[] {"mkfifo", fifoName}
-        process =  new ProcessBuilder(command).start()
+        def process =  new ProcessBuilder(command).start()
         process.waitFor()
         return new File(fifoName)
     }
-
 
     private static File getFifoPipe(String fifoName) {
         Path fifoPath = Paths.get(fifoName)
         return new File(fifoPath.toString())
     }
-
-
-    private static void removeFifoPipe(String fifoName) throws IOException {
-        Path fifoPath = Paths.get(fifoName)
-        Files.delete(fifoPath)
-    }
-
 }

@@ -12,8 +12,6 @@ import {UserIdleConfig} from '../angular-user-idle/angular-user-idle.config';
 import {UserIdleService} from '../angular-user-idle/angular-user-idle.service';
 import {Stomp} from "@stomp/stompjs";
 
-declare let SockJS: any;
-
 @Component({
   selector: 'app-nav',
   templateUrl: './nav.component.html',
@@ -36,7 +34,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   private idleTimeoutActive: boolean = true;
   private messageSubscription!: Subscription;
   isGuest: boolean = true;
-  private stompClient: any;
+  private client: any;
   cameraTypes: typeof cameraType = cameraType;
   stompSubscription: any;
 
@@ -191,15 +189,19 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     navbarCollapse.setAttribute('style', 'max-height: 0');
   }
 
+  /**
+   * initializeWebSocketConnection: Set up the websocket connection which logs off guest users when the guest account
+   *                                is disabled.
+   */
   initializeWebSocketConnection() {
-    let serverUrl: string = window.location.origin + '/stomp';
+    let serverUrl: string = 'ws://' + window.location.host +'/stomp';
 
-    let ws = new SockJS(serverUrl);
-    this.stompClient = Stomp.over(ws);
-    this.stompClient.debug = null;
+    this.client = Stomp.client(serverUrl);
+    this.client.debug = () => {};
+
     let that = this;
-    this.stompClient.connect({}, () => {
-      this.stompSubscription = that.stompClient.subscribe('/topic/logoff', (message: any) => {
+    this.client.connect({}, () => {
+      this.stompSubscription = that.client.subscribe('/topic/logoff', (message: any) => {
         if (message.body) {
           let msgObj = JSON.parse(message.body);
           if (msgObj.message === 'logoff' && this.isGuest) {

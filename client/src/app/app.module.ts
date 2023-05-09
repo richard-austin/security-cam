@@ -58,6 +58,7 @@ import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-w
 import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
 import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
+import { AudioInputPipe } from './video/audio-input.pipe';
 
 @NgModule({
   declarations: [
@@ -91,7 +92,8 @@ import { CreateUserAccountContainerComponent } from './create-user-account-conta
     GetActiveIPAddressesComponent,
     GetLocalWifiDetailsComponent,
     WifiSettingsComponent,
-    CreateUserAccountContainerComponent
+    CreateUserAccountContainerComponent,
+    AudioInputPipe
   ],
   imports: [
     BrowserModule,

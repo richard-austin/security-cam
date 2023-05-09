@@ -1,9 +1,10 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraStream} from '../cameras/Camera';
 import {MatSelect} from '@angular/material/select';
-import {Stomp} from "@stomp/stompjs";
+import {CompatClient, Stomp} from "@stomp/stompjs";
 import {MatButtonToggle} from "@angular/material/button-toggle";
 import {UtilsService} from '../shared/utils.service';
+import {ReportingComponent} from "../reporting/reporting.component";
 
 declare let Hls: any;
 
@@ -18,7 +19,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('latencyLimitSelect') llSelector!: MatSelect;
-  @ViewChild('audioToggle') audioToggle!: MatButtonToggle;
+  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isfmp4: boolean = false;
   camstream!: CameraStream;
   video!: HTMLVideoElement;
@@ -30,9 +31,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   manifest: string = '';
   // @ts-ignore
   recorder: MediaRecorder;
-
+  mediaDevices!: MediaDeviceInfo[];
+  audioToggle: boolean = false;
+  selectedDeviceId!: string;
+  selectedAudioInput!: MediaDeviceInfo;
 
 //  private isFullscreenNow: boolean = false;
+
 
   constructor(private utilsService: UtilsService) {
   }
@@ -98,22 +103,20 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let serverUrl: string = 'ws://' + window.location.host + '/audio';
 
-    let ws = new WebSocket(serverUrl);
+    let client = Stomp.client(serverUrl);
 
-    let stompClient = Stomp.over(ws);
-    // @ts-ignore
-    stompClient.debug = (z) => {};
+    client.debug = (z) => {};
 
-    stompClient.connect({}, () => {
-      // let stompSubscription = stompClient.subscribe('/topic/logoff', (message: any) => {
+    client.connect({}, () => {
+      // let stompSubscription = client.subscribe('/topic/logoff', (message: any) => {
       // })
     });
 
-    if (navigator.getUserMedia) {
-      navigator.mediaDevices.enumerateDevices().then((dev) => {
-        let x = dev;
-      })
-      navigator.getUserMedia({audio: true, video: false}, (stream) => {
+    if (navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({
+        audio: (this.selectedAudioInput == null ? true : {deviceId: this.selectedAudioInput.deviceId}),
+        video: false
+      }).then((stream) => {
         // @ts-ignore
         this.recorder = new MediaRecorder(stream);
         // fires every one second and passes an BlobEvent
@@ -122,26 +125,23 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           const blob: Blob = event.data;
           blob.arrayBuffer().then((buff) => {
             let data = new Uint8Array(buff);
-            stompClient.publish({
+            client.publish({
               destination: '/app/audio',
               binaryBody: data,
               headers: {"content-type": "application/octet-stream"}
             });
           });
-
           // and send that blob to the server...
         };
 
         // make data available event fire every 20th second
         this.recorder.start(40);
-      }, errorCallBack);
+      }).catch((error) => {
+        retVal = false;
+        this.reporting.errorMessage = error;
+        console.log(error);
+      });
     }
-
-    function errorCallBack(e: any) {
-      retVal = false;
-      console.log(e);
-    }
-
     return retVal;
   }
 
@@ -347,8 +347,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  toggleAudio($event: Event) {
-    if (this.audioToggle.checked)
+  toggleAudio() {
+    this.audioToggle = !this.audioToggle;
+    if (this.audioToggle)
       this.utilsService.startAudioOut('camera1').subscribe(() => {
         this.startAudioOutput();
       });
@@ -359,29 +360,44 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  setAudioInput() {
+    // @ts-ignore
+    this.selectedAudioInput =
+      this.mediaDevices.find((dev) => {
+        return dev.deviceId === this.selectedDeviceId
+      })
+  }
+
   ngOnInit(): void {
+    this.utilsService.stopAudioOut().subscribe(() => {
+      if (this.recorder)
+        this.recorder.stop();
+    });
   }
 
   ngAfterViewInit(): void {
-
     this.video = this.videoEl.nativeElement;
     // if(this.isfmp4)
     //   this.llSelector.value = this.buffering_sec.toString();
     this.video.autoplay = true;
     this.video.muted = true;
     this.video.controls = true;
-    // Stop the idle timeout if the video is being viewed full screen
-    // this.video.addEventListener('fullscreenchange', this.fullScreenListener);
-    // this.video.addEventListener('webkitfullscreenchange', this.fullScreenListener);
-
-    // This prevents value changed after it was checked error
-    //timer(10).subscribe(() => this.startVideo());
+    navigator.mediaDevices.enumerateDevices().then((dev) => {
+      this.selectedAudioInput = dev[0];
+      this.selectedDeviceId = this.selectedAudioInput.deviceId;
+      this.mediaDevices = dev;
+    }).catch((error) => {
+      this.reporting.errorMessage = error;
+    });
+    // @ts-ignore
+    this.selectedAudioInput = null;
   }
 
   ngOnDestroy(): void {
     this.stop();
     this.utilsService.stopAudioOut().subscribe(() => {
-      this.recorder.stop();
+      if (this.recorder)
+        this.recorder.stop();
     });
   }
 }

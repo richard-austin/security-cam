@@ -28,37 +28,40 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { SetupSMTPClientComponent } from './setup-smtpclient/setup-smtpclient.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    RegisterLocalNvrAccountComponent,
-    ReportingComponent,
-    SetupSMTPClientComponent
-  ],
-    imports: [
-      CommonModule,
-      AppRoutingModule,
-      BrowserModule,
-      BrowserAnimationsModule,
-      HttpClientModule,
-      MatCardModule,
-      ReactiveFormsModule,
-      MatFormFieldModule,
-      MatCheckboxModule,
-      MatButtonModule,
-      MatButtonToggleModule,
-      MatInputModule,
-      MatIconModule,
-      MatSelectModule,
-      MatDialogModule,
-      MatMenuModule,
-      MatTooltipModule,
-      MatProgressSpinnerModule,
-      FormsModule,
-      LayoutModule,
-      MatDividerModule,
-      RouterOutlet
+    declarations: [
+        AppComponent,
+        RegisterLocalNvrAccountComponent,
+        ReportingComponent,
+        SetupSMTPClientComponent
     ],
-  providers: [BaseUrl],
-  bootstrap: [AppComponent]
+    imports: [
+        CommonModule,
+        AppRoutingModule,
+        BrowserModule,
+        BrowserAnimationsModule,
+        HttpClientModule,
+        MatCardModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatCheckboxModule,
+        MatButtonModule,
+        MatButtonToggleModule,
+        MatInputModule,
+        MatIconModule,
+        MatSelectModule,
+        MatDialogModule,
+        MatMenuModule,
+        MatTooltipModule,
+        MatProgressSpinnerModule,
+        FormsModule,
+        LayoutModule,
+        MatDividerModule,
+        RouterOutlet
+    ],
+    providers: [BaseUrl],
+    exports: [
+        ReportingComponent
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
