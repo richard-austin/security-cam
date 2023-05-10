@@ -194,7 +194,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
    *                                is disabled.
    */
   initializeWebSocketConnection() {
-    let serverUrl: string = 'ws://' + window.location.host +'/stomp';
+    let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host +'/stomp';
 
     this.client = Stomp.client(serverUrl);
     this.client.debug = () => {};

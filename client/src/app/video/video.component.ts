@@ -101,7 +101,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   startAudioOutput(): boolean {
     let retVal = true;
 
-    let serverUrl: string = 'ws://' + window.location.host + '/audio';
+    let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host + '/audio';
 
     this.client  = Stomp.client(serverUrl);
 

@@ -41,6 +41,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/**/*.css',       access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],
 	[pattern: '/**/*.ttf',       access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],
 	[pattern: '/**/stomp/**',    access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']],
+	[pattern: '/**/audio/**',    access: ['ROLE_CLIENT', 'ROLE_CLOUD']],
 	[pattern: '/**/*.woff2',     access: ['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST']]
 ]
 

@@ -98,7 +98,7 @@ class UtilsService {
     def getTemperature() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            Temperature temp = new Temperature(executeLinuxCommand("vcgencmd measure_temp"))
+            Temperature temp = new Temperature(executeLinuxCommand("vcgencmd", "measure_temp"))
             result.responseObject = temp
         }
         catch (Exception ex) {
