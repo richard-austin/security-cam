@@ -10,7 +10,7 @@ import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-moda
 import {MatDialogRef} from '@angular/material/dialog/dialog-ref';
 import {UserIdleConfig} from '../angular-user-idle/angular-user-idle.config';
 import {UserIdleService} from '../angular-user-idle/angular-user-idle.service';
-import {Stomp} from "@stomp/stompjs";
+import {CompatClient, Stomp} from "@stomp/stompjs";
 
 @Component({
   selector: 'app-nav',
@@ -34,7 +34,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   private idleTimeoutActive: boolean = true;
   private messageSubscription!: Subscription;
   isGuest: boolean = true;
-  private client: any;
+  private client!: CompatClient;
   cameraTypes: typeof cameraType = cameraType;
   stompSubscription: any;
 
@@ -260,6 +260,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isGuest = (await this.utilsService.isGuest()).guestAccount;
     } catch (error) {
       this.isGuest = true;
+      // @ts-ignore
       console.error('Error calling isGuest = ' + error.error);
     }
     this.initializeWebSocketConnection();
@@ -281,5 +282,6 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pingHandle.unsubscribe();
     this.timerHandle.unsubscribe();
     this.messageSubscription.unsubscribe();
+    this.client.disconnect();
   }
 }

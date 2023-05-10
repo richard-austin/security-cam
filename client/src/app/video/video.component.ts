@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraStream} from '../cameras/Camera';
 import {MatSelect} from '@angular/material/select';
-import {Stomp} from "@stomp/stompjs";
+import {CompatClient, Stomp} from "@stomp/stompjs";
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
 
@@ -36,6 +36,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedAudioInput!: MediaDeviceInfo;
 
 //  private isFullscreenNow: boolean = false;
+  private client!: CompatClient;
 
 
   constructor(private utilsService: UtilsService) {
@@ -102,11 +103,11 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let serverUrl: string = 'ws://' + window.location.host + '/audio';
 
-    let client = Stomp.client(serverUrl);
+    this.client  = Stomp.client(serverUrl);
 
-    client.debug = () => {};
+    this.client.debug = () => {};
 
-    client.connect({}, () => {
+    this.client.connect({}, () => {
       // let stompSubscription = client.subscribe('/topic/logoff', (message: any) => {
       // })
     });
@@ -124,7 +125,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           const blob: Blob = event.data;
           blob.arrayBuffer().then((buff) => {
             let data = new Uint8Array(buff);
-            client.publish({
+            this.client.publish({
               destination: '/app/audio',
               binaryBody: data,
               headers: {"content-type": "application/octet-stream"}
@@ -355,6 +356,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     else {
       this.utilsService.stopAudioOut().subscribe(() => {
         this.recorder.stop();
+        this.client.disconnect();
       });
     }
   }
