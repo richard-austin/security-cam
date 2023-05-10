@@ -61,10 +61,10 @@ class UtilsService {
      * @return: The returned value
      */
     String executeLinuxCommand(String command) {
-        Process p = new ProcessBuilder(command).inheritIO().start() // Process p = Runtime.getRuntime().exec(command)
+        Process p = new ProcessBuilder(command).start() // Process p = Runtime.getRuntime().exec(command)
+        String retVal = processCommandOutput(p)
         p.waitFor()
-
-        return processCommandOutput(p)
+        retVal
     }
 
     /**
@@ -73,9 +73,10 @@ class UtilsService {
      * @return: The returned value
      */
     String executeLinuxCommand(String[] command) {
-        Process p = new ProcessBuilder(command).inheritIO().start() // Runtime.getRuntime().exec(command)
+        Process p = new ProcessBuilder(command).start() // Runtime.getRuntime().exec(command)
+        String retVal = processCommandOutput(p)
         p.waitFor()
-        return processCommandOutput(p)
+        retVal
     }
 
     private static String processCommandOutput(Process p) {
