@@ -7,13 +7,14 @@
         <processorPath useClasspath="false">
           <entry name="$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/2.7.0/d8b66c3d68ff21cb10bb908cd873c4a6ecd8880f/spring-boot-configuration-processor-2.7.0.jar" />
         </processorPath>
-        <module name="richard.security-cam.server.main" />
+        <module name="server.security-cam.server.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="17">
       <module name="create-user-account" target="18" />
       <module name="create-user-account.main" target="18" />
       <module name="create-user-account.test" target="18" />
+      <module name="richard.security-cam.server.main" target="18" />
       <module name="security-cam.create-user-account" target="18" />
       <module name="security-cam.create-user-account.integrationTest" target="18" />
       <module name="security-cam.create-user-account.main" target="18" />

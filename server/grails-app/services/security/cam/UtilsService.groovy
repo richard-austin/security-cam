@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder
 import grails.config.Config
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import org.grails.web.json.JSONObject
 import org.springframework.core.io.Resource
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import security.cam.commands.SMTPData
 import security.cam.commands.SetupSMTPAccountCommand
 import security.cam.commands.StartAudioOutCommand
@@ -50,6 +52,7 @@ class UtilsService {
     LogService logService
     AssetResourceLocator assetResourceLocator
     GrailsApplication grailsApplication
+    SimpMessagingTemplate brokerMessagingTemplate
 
     public final passwordRegex = /^[A-Za-z0-9][A-Za-z0-9(){\[1*£$\\\]}=@~?^]{7,31}$/
     public final usernameRegex = /^[a-zA-Z0-9](_(?!(.|_))|.(?!(_|.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/
@@ -215,49 +218,73 @@ class UtilsService {
     Process audioOutProc
     File fifo
     FileOutputStream fos
-    def startAudioOut(StartAudioOutCommand cmd) {
+    boolean audioInUse = false
+    synchronized def startAudioOut(StartAudioOutCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
+        if(!audioInUse) {
+            audioInUse = true
+            try {
+                final String talkOff = new JSONObject()
+                        .put("message", "talkOff")
+                        .put("instruction", "on")
+                        .toString()
+                // Disable audio out on clients except the initiator
+                brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
 
-        try {
-            stopAudioOut()
-            String fifoPath = grailsApplication.config.twoWayAudio.fifo
-            if (fifoPath == null)
-                throw new Exception("No path is specified for twoWayAudio: fifo in the configuration")
-            // Create the fifo
-            fifo = createFifoPipe(fifoPath)
-            // Start ffmpeg to transcode and transfer the audio data
-            new File("/var/security-cam/output.mp3").delete()
-            List<String> command = new ArrayList()
-            command.add("ffmpeg")
-            command.add("-i")
-            command.add(fifoPath)
-            command.add("-c:a")
-            command.add("pcm_alaw")
-            command.add("-acodec")
-            command.add("libmp3lame")
-            command.add("/var/security-cam/output.mp3")
-            audioOutProc = new ProcessBuilder(command).inheritIO().start()
-            // Create a file output stream for the websocket handler to write to the fifo
-            fos = new FileOutputStream(fifo)
-         }
-        catch (Exception ex) {
-            logService.cam.error "${ex.getClass().getName()} in startAudioOut: ${ex.getMessage()}"
-            result.status = PassFail.FAIL
-            result.error = "${ex.getClass().getName()} -- ${ex.getMessage()}"
+                stopAudioOut(false)
+                String fifoPath = grailsApplication.config.twoWayAudio.fifo
+                if (fifoPath == null)
+                    throw new Exception("No path is specified for twoWayAudio: fifo in the configuration")
+                // Create the fifo
+                fifo = createFifoPipe(fifoPath)
+                // Start ffmpeg to transcode and transfer the audio data
+                new File("/var/security-cam/output.mp3").delete()
+                List<String> command = new ArrayList()
+                command.add("ffmpeg")
+                command.add("-i")
+                command.add(fifoPath)
+                command.add("-c:a")
+                command.add("pcm_alaw")
+                command.add("-acodec")
+                command.add("libmp3lame")
+                command.add("/var/security-cam/output.mp3")
+                audioOutProc = new ProcessBuilder(command).inheritIO().start()
+                // Create a file output stream for the websocket handler to write to the fifo
+                fos = new FileOutputStream(fifo)
+            }
+            catch (Exception ex) {
+                logService.cam.error "${ex.getClass().getName()} in startAudioOut: ${ex.getMessage()}"
+                result.status = PassFail.FAIL
+                result.error = "${ex.getClass().getName()} -- ${ex.getMessage()}"
+            }
         }
         return result
     }
 
-    def stopAudioOut() {
+    def stopAudioOut(boolean sendTalkOff = true) {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
             // Stop the ffmpeg process
-            def proc = new ProcessBuilder("kill", "-INT", audioOutProc.pid().toString()).start()
-            proc.waitFor()
-            fos.close()
+            if(audioOutProc) {
+                def proc = new ProcessBuilder("kill", "-INT", audioOutProc.pid().toString()).start()
+                proc.waitFor()
+            }
+            if(fos)
+                fos.close()
             // Remove the fifo
-            fifo.delete()
+            if(fifo)
+                fifo.delete()
+
+            if(sendTalkOff) {
+                final String talkOff = new JSONObject()
+                        .put("message", "talkOff")
+                        .put("instruction", "off")
+                        .toString()
+                // Re-enable audio out on clients
+                brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
+                audioInUse = false
+            }
         }
         catch (Exception ex) {
             logService.cam.error "${ex.getClass().getName()} in stopAudioOut: ${ex.getMessage()}"
@@ -267,10 +294,34 @@ class UtilsService {
         return result
     }
 
-
+    private long counter = 0
     def audio(byte[] bytes) {
         fos.write(bytes)
+        if(++counter % 3 == 0)  // Reset the timer every 10 messages
+            resetAudioInSessionTimeout()
     }
+
+    Timer audioInSessionTimer
+    private final long audioInSessionTimeout = 3 * 1000; // Stop audio input session after 3 seconds without a websocket message
+
+    // This timer ends the audio input session if no websocket messages are received for more than 3 seconds
+    private void createAudioInSessionTimer() {
+        if (audioInSessionTimer != null)
+            audioInSessionTimer.cancel();
+        audioInSessionTimer = new Timer("audioInSessionTimeout");
+        audioInSessionTimer.schedule(() -> {
+            stopAudioOut()
+        }, audioInSessionTimeout);
+    }
+
+    // This is called every 3 audio in websocket messages to restart the timer
+    private void resetAudioInSessionTimeout() {
+        if (audioInSessionTimer != null)
+            audioInSessionTimer.cancel();
+
+        createAudioInSessionTimer();
+    }
+
 
     private static File createFifoPipe(String fifoName) throws IOException, InterruptedException {
         String[] command = new String[] {"mkfifo", fifoName}

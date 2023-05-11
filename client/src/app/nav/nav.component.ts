@@ -10,7 +10,7 @@ import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-moda
 import {MatDialogRef} from '@angular/material/dialog/dialog-ref';
 import {UserIdleConfig} from '../angular-user-idle/angular-user-idle.config';
 import {UserIdleService} from '../angular-user-idle/angular-user-idle.service';
-import {CompatClient, Stomp} from "@stomp/stompjs";
+import {CompatClient, Stomp, StompSubscription} from "@stomp/stompjs";
 
 @Component({
   selector: 'app-nav',
@@ -36,7 +36,8 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   isGuest: boolean = true;
   private client!: CompatClient;
   cameraTypes: typeof cameraType = cameraType;
-  stompSubscription: any;
+  logoffSubscription!: StompSubscription;
+  talkOffSubscription!: StompSubscription;
 
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
   }
@@ -199,9 +200,8 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.client = Stomp.client(serverUrl);
     this.client.debug = () => {};
 
-    let that = this;
     this.client.connect({}, () => {
-      this.stompSubscription = that.client.subscribe('/topic/logoff', (message: any) => {
+      this.logoffSubscription = this.client.subscribe('/topic/logoff', (message: any) => {
         if (message.body) {
           let msgObj = JSON.parse(message.body);
           if (msgObj.message === 'logoff' && this.isGuest) {
@@ -210,6 +210,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         }
       });
+      this.talkOffSubscription = this.client.subscribe('/topic/talkoff', (message: any) => this.utilsService.talkOff(message));
     });
   }
 
@@ -282,6 +283,8 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pingHandle.unsubscribe();
     this.timerHandle.unsubscribe();
     this.messageSubscription.unsubscribe();
+    this.logoffSubscription.unsubscribe();
+    this.talkOffSubscription.unsubscribe();
     this.client.disconnect();
   }
 }

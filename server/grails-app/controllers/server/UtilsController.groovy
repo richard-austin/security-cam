@@ -192,6 +192,11 @@ class UtilsController {
             render(status: 200, text: response.responseObject as JSON)
     }
 
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def audioInUse() {
+         render(status: 200, text: [audioInUse: utilsService.getAudioInUse()] as JSON)
+    }
+
     @MessageMapping(value = "/audio")
     protected def audio(@Payload byte[] data) {
         utilsService.audio(data)

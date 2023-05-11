@@ -88,7 +88,10 @@ export class UtilsService {
 
   private _messaging: Subject<any> = new Subject<any>();
   private _isGuestAccount: boolean = true;
+  speakActive: boolean = true;
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
+    // Initialise the speakActive state
+    this.audioInUse().subscribe();
   }
 
   getTemperature(): Observable<Temperature> {
@@ -216,5 +219,27 @@ export class UtilsService {
     return this.http.post<void>(this._baseUrl.getLink("utils", "stopAudioOut"), "", this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
     );
+  }
+
+  audioInUse() {
+    return this.http.post<{audioInUse: boolean }>(this._baseUrl.getLink("utils", "audioInUse"), "", this.httpJSONOptions).pipe(
+      tap((result)=> {
+        this.speakActive = result.audioInUse;
+      }),
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+
+  /**
+   * talkOff: Called on receipt of the talkOff websocket message. This disables audio out to any camera while the channel is in use and
+   *          re-enables it when that usage has finished.
+   * @param message
+   */
+  talkOff(message: any) {
+    if (message.body) {
+      let msgObj = JSON.parse(message.body);
+      if (msgObj.message === 'talkOff') {
+        this.speakActive = msgObj.instruction == "on";
+      }
+    }
   }
 }

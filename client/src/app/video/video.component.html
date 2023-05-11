@@ -13,7 +13,7 @@
     <div *ngIf="isfmp4" class="latency-limit-selector">
       <div>
         <label matTooltip="{{audioToggle ? 'Stop' : 'Start'}} audio to camera" matTooltipClass="tooltip">
-          <mat-icon (click)="toggleAudio()">{{audioToggle ? 'mic' : 'mic_off'}}</mat-icon>
+          <mat-icon [ngStyle]="{'color': !utilsService.speakActive || audioToggle ? 'white' : 'grey'}" (click)="toggleAudio()">{{audioToggle ? 'mic' : 'mic_off'}}</mat-icon>
         </label>
         <select matTooltip="Set audio input device" matTooltipClass="tooltip"
           [(ngModel)]="selectedDeviceId" (change)="setAudioInput()">

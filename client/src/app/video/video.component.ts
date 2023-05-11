@@ -39,7 +39,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   private client!: CompatClient;
 
 
-  constructor(private utilsService: UtilsService) {
+  constructor(public utilsService: UtilsService) {
   }
 
   /**
@@ -348,16 +348,18 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleAudio() {
-    this.audioToggle = !this.audioToggle;
-    if (this.audioToggle)
-      this.utilsService.startAudioOut('camera1').subscribe(() => {
-        this.startAudioOutput();
-      });
-    else {
-      this.utilsService.stopAudioOut().subscribe(() => {
+    if(!this.utilsService.speakActive || this.audioToggle) {
+      this.audioToggle = !this.audioToggle;
+      if (this.audioToggle)
+        this.utilsService.startAudioOut('camera1').subscribe(() => {
+          this.startAudioOutput();
+        });
+      else {
         this.recorder.stop();
-        this.client.disconnect();
-      });
+        this.utilsService.stopAudioOut().subscribe(() => {
+          this.client.disconnect();
+        });
+      }
     }
   }
 
@@ -370,10 +372,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.utilsService.stopAudioOut().subscribe(() => {
-      if (this.recorder)
-        this.recorder.stop();
-    });
   }
 
   ngAfterViewInit(): void {
@@ -396,9 +394,11 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stop();
-    this.utilsService.stopAudioOut().subscribe(() => {
-      if (this.recorder)
-        this.recorder.stop();
-    });
+    if(this.audioToggle) {
+      this.utilsService.stopAudioOut().subscribe(() => {
+        if (this.recorder)
+          this.recorder.stop();
+      });
+    }
   }
 }
