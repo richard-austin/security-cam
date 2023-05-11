@@ -381,13 +381,20 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.video.autoplay = true;
     this.video.muted = true;
     this.video.controls = true;
-    navigator.mediaDevices.enumerateDevices().then((dev) => {
-      this.selectedAudioInput = dev[0];
-      this.selectedDeviceId = this.selectedAudioInput.deviceId;
-      this.mediaDevices = dev;
-    }).catch((error) => {
-      this.reporting.errorMessage = error;
-    });
+    // Call getUserMedia to make the browser ask the user for permission to access the microphones so that
+    //  enumerateDevices can get the microphone list.
+    navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: false
+    }).then (()=> {
+      navigator.mediaDevices.enumerateDevices().then((dev) => {
+        this.selectedAudioInput = dev[0];
+        this.selectedDeviceId = this.selectedAudioInput.deviceId;
+        this.mediaDevices = dev;
+      }).catch((error) => {
+        this.reporting.errorMessage = error;
+      });
+    })
     // @ts-ignore
     this.selectedAudioInput = null;
   }
