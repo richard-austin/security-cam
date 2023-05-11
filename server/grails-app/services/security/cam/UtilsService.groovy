@@ -302,24 +302,24 @@ class UtilsService {
     }
 
     Timer audioInSessionTimer
-    private final long audioInSessionTimeout = 3 * 1000; // Stop audio input session after 3 seconds without a websocket message
+    private final long audioInSessionTimeout = 3 * 1000 // Stop audio input session after 3 seconds without a websocket message
 
     // This timer ends the audio input session if no websocket messages are received for more than 3 seconds
     private void createAudioInSessionTimer() {
         if (audioInSessionTimer != null)
-            audioInSessionTimer.cancel();
-        audioInSessionTimer = new Timer("audioInSessionTimeout");
+            audioInSessionTimer.cancel()
+        audioInSessionTimer = new Timer("audioInSessionTimeout")
         audioInSessionTimer.schedule(() -> {
             stopAudioOut()
-        }, audioInSessionTimeout);
+        }, audioInSessionTimeout)
     }
 
     // This is called every 3 audio in websocket messages to restart the timer
     private void resetAudioInSessionTimeout() {
         if (audioInSessionTimer != null)
-            audioInSessionTimer.cancel();
+            audioInSessionTimer.cancel()
 
-        createAudioInSessionTimer();
+        createAudioInSessionTimer()
     }
 
 
