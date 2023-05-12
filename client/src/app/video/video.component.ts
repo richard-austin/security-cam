@@ -1,13 +1,11 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraStream} from '../cameras/Camera';
 import {MatSelect} from '@angular/material/select';
-import {CompatClient, Stomp} from "@stomp/stompjs";
+import {Client} from "@stomp/stompjs";
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
 
 declare let Hls: any;
-
-//declare let Stomp: any;
 
 @Component({
   selector: 'app-video',
@@ -36,7 +34,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedAudioInput!: MediaDeviceInfo;
 
 //  private isFullscreenNow: boolean = false;
-  private client!: CompatClient;
+  private client!: Client;
 
 
   constructor(public utilsService: UtilsService) {
@@ -91,9 +89,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.ms = new MediaSource();
       this.ms.addEventListener('sourceopen', this.opened, false);
 
-      // get reference to video
-      //video.latencyHint = 0.075
-      // set mediasource as source of video
+      // set MediaSource as source of video
       this.video.src = window.URL.createObjectURL(this.ms);
     }
   }
@@ -103,14 +99,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host + '/audio';
 
-    this.client  = Stomp.client(serverUrl);
-
-    this.client.debug = () => {};
-
-    this.client.connect({}, () => {
-      // let stompSubscription = client.subscribe('/topic/logoff', (message: any) => {
-      // })
+    this.client  = new Client({
+      brokerURL: serverUrl,
+      onConnect: () => {},
+      reconnectDelay: 1000,
+      debug: () => {}
     });
+    this.client.activate();
 
     if (navigator.mediaDevices) {
       navigator.mediaDevices.getUserMedia({
@@ -217,6 +212,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   // consider these callbacks:
+  // - putPacket : called when websocket receives data
   // - putPacket : called when websocket receives data
   // - loadPacket : called when source_buffer is ready for more data
   // Both operate on a common fifo
@@ -357,7 +353,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       else {
         this.recorder.stop();
         this.utilsService.stopAudioOut().subscribe(() => {
-          this.client.disconnect();
+          this.client.deactivate({force: false}).then(()=> {});
         });
       }
     }

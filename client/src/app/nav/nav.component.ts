@@ -10,7 +10,7 @@ import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-moda
 import {MatDialogRef} from '@angular/material/dialog/dialog-ref';
 import {UserIdleConfig} from '../angular-user-idle/angular-user-idle.config';
 import {UserIdleService} from '../angular-user-idle/angular-user-idle.service';
-import {CompatClient, Stomp, StompSubscription} from "@stomp/stompjs";
+import {Client, StompSubscription} from "@stomp/stompjs";
 
 @Component({
   selector: 'app-nav',
@@ -34,7 +34,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   private idleTimeoutActive: boolean = true;
   private messageSubscription!: Subscription;
   isGuest: boolean = true;
-  private client!: CompatClient;
+  private client!: Client;
   cameraTypes: typeof cameraType = cameraType;
   logoffSubscription!: StompSubscription;
   talkOffSubscription!: StompSubscription;
@@ -197,22 +197,25 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   initializeWebSocketConnection() {
     let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host +'/stomp';
 
-    this.client = Stomp.client(serverUrl);
-    this.client.debug = () => {};
-
-    this.client.connect({}, () => {
-      this.logoffSubscription = this.client.subscribe('/topic/logoff', (message: any) => {
-        if (message.body) {
-          let msgObj = JSON.parse(message.body);
-          if (msgObj.message === 'logoff' && this.isGuest) {
-            window.location.href = 'logoff';
-            console.log(message.body);
+    this.client = new Client({
+      brokerURL: serverUrl,
+      reconnectDelay: 2000,
+      onConnect: ()=> {
+        this.logoffSubscription = this.client.subscribe('/topic/logoff', (message: any) => {
+          if (message.body) {
+            let msgObj = JSON.parse(message.body);
+            if (msgObj.message === 'logoff' && this.isGuest) {
+              window.location.href = 'logoff';
+              console.log(message.body);
+            }
           }
-        }
-      });
-      this.talkOffSubscription = this.client.subscribe('/topic/talkoff', (message: any) => this.utilsService.talkOff(message));
+        });
+        this.talkOffSubscription = this.client.subscribe('/topic/talkoff', (message: any) => this.utilsService.talkOff(message));
+      },
+      debug: () => {}
     });
-  }
+    this.client.activate();
+   }
 
   async ngOnInit(): Promise<void> {
     this.cameraStreams = this.cameraSvc.getCameraStreams();
@@ -285,6 +288,6 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.messageSubscription.unsubscribe();
     this.logoffSubscription.unsubscribe();
     this.talkOffSubscription.unsubscribe();
-    this.client.disconnect();
+    this.client.deactivate({force: false}).then(()=> {});
   }
 }
