@@ -51,11 +51,17 @@ class Sc_processesService {
      */
     private String readMyIp() {
         String retVal = ""
-        try (Scanner s = new Scanner(new URL("https://api.ipify.org").openStream(), "UTF-8").useDelimiter("\\A")) {
-            retVal = s.next()
-        } catch (IOException ex) {
-            logService.cam.error "Exception in readMyIp: " + ex.getMessage()
+        boolean ipOk
+        do {
+            try (Scanner s = new Scanner(new URL("https://api.ipify.org").openStream(), "UTF-8").useDelimiter("\\A")) {
+                retVal = s.next()
+            } catch (IOException ex) {
+                logService.cam.error "Exception in readMyIp: " + ex.getMessage()
+            }
+            // We were getting empty IP readings occasionally, so make sure to eliminate these
+            ipOk = retVal != null && retVal.length() >= 6
         }
+        while(!ipOk)
         return retVal
     }
 
