@@ -4,6 +4,7 @@ import {MatSelect} from '@angular/material/select';
 import {Client} from "@stomp/stompjs";
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
+import {interval, Subscription, timer} from "rxjs";
 
 declare let Hls: any;
 
@@ -301,6 +302,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   };
 
+  streamTestInterval!: Subscription;
 
   opened = () => { // MediaSource object is ready to go
     console.log('Called opened');
@@ -318,15 +320,28 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         .replace('https', 'wss') // Change https to wss
         .replace('http', 'ws')  // or change http to ws
       + this.camstream.stream.uri;
-
+    let counter = 0;
+    this.streamTestInterval = interval(1000).subscribe(() => {
+      if(++counter >= 4) {  // If counter gets to 4, the stream messages have stopped, so restart the video
+        console.log("Stream for "+this.camstream.camera.name+" has stalled, attempting restart in 1 second");
+        this.stop();  // Close the existing video set up
+        let timerSubscription = timer(1000).subscribe(() => {
+          timerSubscription.unsubscribe();
+          this.startVideo();  // Start it again after 1-second delay
+        });
+      }
+    });
     this.ws = new WebSocket(url);
     this.ws.binaryType = 'arraybuffer';
     this.ws.onmessage = (event: MessageEvent) => {
       this.putPacket(event.data);
+      counter = 0;
     };
   };
 
   stop(): void {
+    this.streamTestInterval?.unsubscribe();  // Stop the stream test interval, or it will be restarted after
+                                            // we exit the video component
     if (!this.isfmp4 && this.hls !== null) {
       this.video.pause();
       this.hls.stopLoad();
