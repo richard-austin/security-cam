@@ -51,7 +51,6 @@ div.latency-limit-selector {
     > label {
       > mat-icon {
         padding-left: 0.2rem;
-        color: white;
       }
      }
     > label {
@@ -71,3 +70,27 @@ div.latency-limit-selector {
     }
   }
 }
+
+.audio-out-disabled {
+  color: gray !important;
+}
+
+.audio-out-inactive {
+  color: white !important;
+}
+
+.audio-out-active {
+  animation: pulsing 1300ms infinite;
+}
+@keyframes pulsing {
+  0% {
+    color: #800;
+  }
+  50% {
+    color: #f66;
+  }
+  100% {
+    color: #800;
+  }
+}
+

@@ -95,6 +95,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  stopAudioAfterLongTimeSubscription!: Subscription
   startAudioOutput(): boolean {
     let retVal = true;
 
@@ -121,23 +122,54 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           const blob: Blob = event.data;
           blob.arrayBuffer().then((buff) => {
             let data = new Uint8Array(buff);
+            // and send that blob to the server...
             this.client.publish({
               destination: '/app/audio',
               binaryBody: data,
               headers: {"content-type": "application/octet-stream"}
             });
           });
-          // and send that blob to the server...
         };
-
         // make data available event fire every 20th second
         this.recorder.start(40);
+
+        // This stops the audio out after 5 minutes
+        this.stopAudioAfterLongTimeSubscription = timer(300000).subscribe(() => {
+          this.stopAudioOut();
+        });
       }).catch((error) => {
         retVal = false;
         this.reporting.errorMessage = error;
         console.log(error);
       });
     }
+    return retVal;
+  }
+
+  stopAudioOut() {
+    this.utilsService.stopAudioOut().subscribe(() => {
+      this.client.deactivate({force: false}).then(()=> {});
+    });
+    this.stopAudioAfterLongTimeSubscription?.unsubscribe();
+    this.recorder.stop();
+    this.audioToggle = false;
+  }
+
+  audioButtonTooltip() : string {
+    let speakActive = this.utilsService.speakActive;
+    let retVal: string = "";
+    if(speakActive)
+      retVal = this.audioToggle ? "Stop audio to camera" : "Audio to camera is in use in another session. Cannot start audio to camera at this time";
+    else if (!speakActive) {
+        retVal = "Start audio to camera"
+    }
+    return retVal;
+  }
+
+  audioInputSelectorTooltip() {
+    let retVal = "Set audio input device";
+    if(this.utilsService.speakActive)
+      retVal = "Audio to camera is in use, cannot select audio input at this time";
     return retVal;
   }
 
@@ -366,10 +398,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           this.startAudioOutput();
         });
       else {
-        this.recorder.stop();
-        this.utilsService.stopAudioOut().subscribe(() => {
-          this.client.deactivate({force: false}).then(()=> {});
-        });
+        this.stopAudioOut();
       }
     }
   }

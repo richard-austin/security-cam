@@ -5,9 +5,12 @@ import com.google.gson.GsonBuilder
 import grails.config.Config
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import grails.util.Environment
 import org.grails.web.json.JSONObject
 import org.springframework.core.io.Resource
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
 import security.cam.commands.SMTPData
 import security.cam.commands.SetupSMTPAccountCommand
 import security.cam.commands.StartAudioOutCommand
@@ -22,6 +25,9 @@ import java.nio.file.Paths
 import java.nio.file.attribute.GroupPrincipal
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.UserPrincipalLookupService
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 class Temperature {
     Temperature(String temp) {
@@ -48,6 +54,7 @@ class MyIP {
 }
 
 @Transactional
+@EnableScheduling
 class UtilsService {
     LogService logService
     AssetResourceLocator assetResourceLocator
@@ -58,6 +65,7 @@ class UtilsService {
     public final usernameRegex = /^[a-zA-Z0-9](_(?!(.|_))|.(?!(_|.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/
     public final emailRegex = /^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/
     public static final onvifBaseAddressRegex = /^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/
+
     /**
      * executeLinuxCommand: Execute a linux command
      * @param command the command and its parameters as a string
@@ -101,8 +109,15 @@ class UtilsService {
     def getTemperature() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            Temperature temp = new Temperature(executeLinuxCommand("vcgencmd", "measure_temp"))
-            result.responseObject = temp
+            if(Environment.isDevelopmentMode()) {
+                // There is no vcgencmd on a PC, only raspberry pi
+                Temperature temp = new Temperature("temp=45.2'C")
+                result.responseObject = temp
+            }
+            else {
+                Temperature temp = new Temperature(executeLinuxCommand("vcgencmd", "measure_temp"))
+                result.responseObject = temp
+            }
         }
         catch (Exception ex) {
             logService.cam.error("Exception in getTemperature: " + ex.getCause() + ' ' + ex.getMessage())
@@ -215,14 +230,28 @@ class UtilsService {
         return smtpData
     }
 
+
+    // Execute every second. If the audio input feed is running it increments the audioInputStreamCheckCount which is
+    //  zeroed by each time an audio packet is received. If the count gets past 3, the audio feed is assumed to have
+    //  stopped (maybe by the audio session not being closed cleanly), so it stops the feed properly.
+    @Scheduled(fixedRate = 1000L)
+    def audioFeedCheck() {
+        if (audioInUse) {
+            // Shut down the sudio receiver if the websocket data stream has stopped
+            if (++audioInputStreamCheckCount > audioInSessionTimeout) {
+                stopAudioOut()
+            }
+        }
+    }
+
     Process audioOutProc
     File fifo
     FileOutputStream fos
     boolean audioInUse = false
+
     synchronized def startAudioOut(StartAudioOutCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
-        if(!audioInUse) {
-            audioInUse = true
+        if (!audioInUse) {
             try {
                 final String talkOff = new JSONObject()
                         .put("message", "talkOff")
@@ -257,6 +286,7 @@ class UtilsService {
                 result.status = PassFail.FAIL
                 result.error = "${ex.getClass().getName()} -- ${ex.getMessage()}"
             }
+            audioInUse = true
         }
         return result
     }
@@ -266,17 +296,17 @@ class UtilsService {
 
         try {
             // Stop the ffmpeg process
-            if(audioOutProc) {
+            if (audioOutProc) {
                 def proc = new ProcessBuilder("kill", "-INT", audioOutProc.pid().toString()).start()
                 proc.waitFor()
             }
-            if(fos)
+            if (fos)
                 fos.close()
             // Remove the fifo
-            if(fifo)
+            if (fifo)
                 fifo.delete()
 
-            if(sendTalkOff) {
+            if (sendTalkOff) {
                 final String talkOff = new JSONObject()
                         .put("message", "talkOff")
                         .put("instruction", "off")
@@ -294,44 +324,23 @@ class UtilsService {
         return result
     }
 
-    private long counter = 0
-    def audio(byte[] bytes) {
-        fos.write(bytes)
-        if(++counter % 3 == 0)  // Reset the timer every 10 messages
-            resetAudioInSessionTimeout()
-    }
+    private final long audioInSessionTimeout = 3
+    // Stop audio input session after 3 seconds without a websocket message
+    private long audioInputStreamCheckCount = 0
 
-    Timer audioInSessionTimer
-    private final long audioInSessionTimeout = 3 * 1000 // Stop audio input session after 3 seconds without a websocket message
+    def audio(byte[] bytes) {
+        if (fos) {
+            // Reset the stream check count to indicate the stream is still active
+            audioInputStreamCheckCount = 0
+            fos.write(bytes)
+        }
+    }
 
     // This timer ends the audio input session if no websocket messages are received for more than 3 seconds
-    private void createAudioInSessionTimer() {
-        if (audioInSessionTimer != null)
-            audioInSessionTimer.cancel()
-        audioInSessionTimer = new Timer("audioInSessionTimeout")
-        audioInSessionTimer.schedule(() -> {
-            stopAudioOut()
-        }, audioInSessionTimeout)
-    }
-
-    // This is called every 3 audio in websocket messages to restart the timer
-    private void resetAudioInSessionTimeout() {
-        if (audioInSessionTimer != null)
-            audioInSessionTimer.cancel()
-
-        createAudioInSessionTimer()
-    }
-
-
     private static File createFifoPipe(String fifoName) throws IOException, InterruptedException {
-        String[] command = new String[] {"mkfifo", fifoName}
-        def process =  new ProcessBuilder(command).start()
+        String[] command = new String[]{"mkfifo", fifoName}
+        def process = new ProcessBuilder(command).start()
         process.waitFor()
         return new File(fifoName)
-    }
-
-    private static File getFifoPipe(String fifoName) {
-        Path fifoPath = Paths.get(fifoName)
-        return new File(fifoPath.toString())
     }
 }

@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/camera-recordings-service/security-cam.camera-recordings-service.iml" filepath="$PROJECT_DIR$/camera-recordings-service/security-cam.camera-recordings-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/security-cam.server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/server/security-cam.server.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/security-cam.server.test.iml" filepath="$PROJECT_DIR$/.idea/modules/server/security-cam.server.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/wifi-setup-service/security-cam.wifi-setup-service.iml" filepath="$PROJECT_DIR$/wifi-setup-service/security-cam.wifi-setup-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/server.security-cam.server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/server/server.security-cam.server.main.iml" />
     </modules>
