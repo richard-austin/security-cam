@@ -87,6 +87,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     } else {
+      // If an audio output session is running, stop it if we switch video views.
+      if(this.audioToggle)
+        this.stopAudioOut();
+
       this.ms = new MediaSource();
       this.ms.addEventListener('sourceopen', this.opened, false);
 
