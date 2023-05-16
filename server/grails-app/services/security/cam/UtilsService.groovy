@@ -287,6 +287,13 @@ class UtilsService {
         }
         return result
     }
+    @Scheduled(fixedRate= 120000L)
+    def websocketHeartbeats () {
+        // Send heartbeats to keep the websocket link alive
+        final String heartbeat = new JSONObject()
+        .put("message", "heartbeat")
+        brokerMessagingTemplate.convertAndSend("/topic/logoff", heartbeat)
+    }
 
     def stopAudioOut(boolean sendTalkOff = true) {
         ObjectCommandResponse result = new ObjectCommandResponse()

@@ -151,11 +151,11 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   stopAudioOut() {
-    this.utilsService.stopAudioOut().subscribe(() => {
-      this.client.deactivate({force: false}).then(()=> {});
-    });
     this.stopAudioAfterLongTimeSubscription?.unsubscribe();
     this.recorder.stop();
+    this.utilsService.stopAudioOut().subscribe(() => {
+      this.client?.deactivate({force: false}).then(() => {});
+    });
     this.audioToggle = false;
   }
 
@@ -445,11 +445,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stop();
-    if(this.audioToggle) {
-      this.utilsService.stopAudioOut().subscribe(() => {
-        if (this.recorder)
-          this.recorder.stop();
-      });
-    }
+    if (this.audioToggle) {
+      this.stopAudioOut();
+     }
   }
 }
