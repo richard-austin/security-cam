@@ -200,7 +200,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.client = new Client({
       brokerURL: serverUrl,
       reconnectDelay: 2000,
-      heartbeatOutgoing: 0,
+      heartbeatOutgoing: 120000,
       heartbeatIncoming: 120000,
       onConnect: ()=> {
         this.logoffSubscription = this.client.subscribe('/topic/logoff', (message: any) => {
