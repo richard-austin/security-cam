@@ -15,7 +15,7 @@ class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer{
 
         ThreadPoolTaskScheduler te = new ThreadPoolTaskScheduler()
         te.setPoolSize(1)
-        te.setThreadNamePrefix("wss-heartbeat-thread-");
+        te.setThreadNamePrefix("wss-heartbeat-thread-")
         te.initialize()
 
         registry.enableSimpleBroker("/topic")
