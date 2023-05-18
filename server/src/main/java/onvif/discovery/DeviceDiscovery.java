@@ -35,7 +35,7 @@ public class DeviceDiscovery {
       "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" xmlns:tns=\"http://schemas.xmlsoap.org/ws/2005/04/discovery\"><soap:Header><wsa:Action>http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</wsa:Action><wsa:MessageID>urn:uuid:c032cfdd-c3ca-49dc-820e-ee6696ad63e2</wsa:MessageID><wsa:To>urn:schemas-xmlsoap-org:ws:2005:04:discovery</wsa:To></soap:Header><soap:Body><tns:Probe/></soap:Body></soap:Envelope>";
   private static final Random random = new SecureRandom();
 
-  public static void mainX(String[] args) throws InterruptedException {
+  public static void main(String[] args) throws InterruptedException {
     for (URL url : discoverWsDevicesAsUrls()) {
       System.out.println("Device discovered: " + url.toString());
     }
@@ -60,11 +60,16 @@ public class DeviceDiscovery {
   public static Collection<URL> discoverWsDevicesAsUrls(String regexpProtocol, String regexpPath) {
     final Collection<URL> urls =
         new TreeSet<>(
-                (o1, o2) -> o1.toString().compareTo(o2.toString()));
+            new Comparator<URL>() {
+              public int compare(URL o1, URL o2) {
+                return o1.toString().compareTo(o2.toString());
+              }
+            });
     for (String key : discoverWsDevices()) {
       try {
         final URL url = new URL(key);
-        boolean ok = regexpProtocol.length() <= 0 || url.getProtocol().matches(regexpProtocol);
+        boolean ok = true;
+        if (regexpProtocol.length() > 0 && !url.getProtocol().matches(regexpProtocol)) ok = false;
         if (regexpPath.length() > 0 && !url.getPath().matches(regexpPath)) ok = false;
         // ignore ip6 hosts
         if (ok && !enableIPv6 && url.getHost().startsWith("[")) ok = false;
@@ -94,7 +99,7 @@ public class DeviceDiscovery {
           if (!anInterface.isLoopback()) {
             final List<InterfaceAddress> interfaceAddresses = anInterface.getInterfaceAddresses();
             for (InterfaceAddress address : interfaceAddresses) {
-              Class<? extends InetAddress> clz = address.getAddress().getClass();
+              Class clz = address.getAddress().getClass();
 
               if (!enableIPv6 && address.getAddress() instanceof Inet6Address) continue;
               addressList.add(address.getAddress());
@@ -109,76 +114,78 @@ public class DeviceDiscovery {
     ExecutorService executorService = Executors.newCachedThreadPool();
     for (final InetAddress address : addressList) {
       Runnable runnable =
-              () -> {
-                try {
-                  final String uuid = UUID.randomUUID().toString();
-                  final String probe =
-                      WS_DISCOVERY_PROBE_MESSAGE.replaceAll(
-                          "<wsa:MessageID>urn:uuid:.*</wsa:MessageID>",
-                          "<wsa:MessageID>urn:uuid:" + uuid + "</wsa:MessageID>");
-                  final int port = random.nextInt(20000) + 40000;
-                  @SuppressWarnings("SocketOpenedButNotSafelyClosed")
-                  final DatagramSocket server = new DatagramSocket(port, address);
-                  new Thread() {
-                    public void run() {
-                      try {
-                        final DatagramPacket packet = new DatagramPacket(new byte[4096], 4096);
-                        server.setSoTimeout(WS_DISCOVERY_TIMEOUT);
-                        long timerStarted = System.currentTimeMillis();
-                        while (System.currentTimeMillis() - timerStarted < (WS_DISCOVERY_TIMEOUT)) {
-                          serverStarted.countDown();
-                          server.receive(packet);
-                          final Collection<String> collection =
-                              parseSoapResponseForUrls(
-                                  Arrays.copyOf(packet.getData(), packet.getLength()));
-                          for (String key : collection) {
-                            addresses.add(key);
-                          }
+          new Runnable() {
+            public void run() {
+              try {
+                final String uuid = UUID.randomUUID().toString();
+                final String probe =
+                    WS_DISCOVERY_PROBE_MESSAGE.replaceAll(
+                        "<wsa:MessageID>urn:uuid:.*</wsa:MessageID>",
+                        "<wsa:MessageID>urn:uuid:" + uuid + "</wsa:MessageID>");
+                final int port = random.nextInt(20000) + 40000;
+                @SuppressWarnings("SocketOpenedButNotSafelyClosed")
+                final DatagramSocket server = new DatagramSocket(port, address);
+                new Thread() {
+                  public void run() {
+                    try {
+                      final DatagramPacket packet = new DatagramPacket(new byte[4096], 4096);
+                      server.setSoTimeout(WS_DISCOVERY_TIMEOUT);
+                      long timerStarted = System.currentTimeMillis();
+                      while (System.currentTimeMillis() - timerStarted < (WS_DISCOVERY_TIMEOUT)) {
+                        serverStarted.countDown();
+                        server.receive(packet);
+                        final Collection<String> collection =
+                            parseSoapResponseForUrls(
+                                Arrays.copyOf(packet.getData(), packet.getLength()));
+                        for (String key : collection) {
+                          addresses.add(key);
                         }
-                      } catch (SocketTimeoutException ignored) {
-                      } catch (Exception e) {
-                        e.printStackTrace();
-                      } finally {
-                        serverFinished.countDown();
-                        server.close();
                       }
-                    }
-                  }.start();
-                  try {
-                    serverStarted.await(1000, TimeUnit.MILLISECONDS);
-                  } catch (InterruptedException e) {
-                    e.printStackTrace();
-                  }
-                  if (address instanceof Inet4Address) {
-                    server.send(
-                        new DatagramPacket(
-                            probe.getBytes(StandardCharsets.UTF_8),
-                            probe.length(),
-                            InetAddress.getByName(WS_DISCOVERY_ADDRESS_IPv4),
-                            WS_DISCOVERY_PORT));
-                  } else {
-                    if (address instanceof Inet6Address) {
-                      if (enableIPv6)
-                        server.send(
-                            new DatagramPacket(
-                                probe.getBytes(StandardCharsets.UTF_8),
-                                probe.length(),
-                                InetAddress.getByName(WS_DISCOVERY_ADDRESS_IPv6),
-                                WS_DISCOVERY_PORT));
-                    } else {
-                      assert (false); // 	unknown network type.. ignore or warn developer
+                    } catch (SocketTimeoutException ignored) {
+                    } catch (Exception e) {
+                      e.printStackTrace();
+                    } finally {
+                      serverFinished.countDown();
+                      server.close();
                     }
                   }
-
-                } catch (Exception e) {
-                  e.printStackTrace();
-                }
+                }.start();
                 try {
-                  serverFinished.await((WS_DISCOVERY_TIMEOUT), TimeUnit.MILLISECONDS);
+                  serverStarted.await(1000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                   e.printStackTrace();
                 }
-              };
+                if (address instanceof Inet4Address) {
+                  server.send(
+                      new DatagramPacket(
+                          probe.getBytes(StandardCharsets.UTF_8),
+                          probe.length(),
+                          InetAddress.getByName(WS_DISCOVERY_ADDRESS_IPv4),
+                          WS_DISCOVERY_PORT));
+                } else {
+                  if (address instanceof Inet6Address) {
+                    if (enableIPv6)
+                      server.send(
+                          new DatagramPacket(
+                              probe.getBytes(StandardCharsets.UTF_8),
+                              probe.length(),
+                              InetAddress.getByName(WS_DISCOVERY_ADDRESS_IPv6),
+                              WS_DISCOVERY_PORT));
+                  } else {
+                    assert (false); // 	unknown network type.. ignore or warn developer
+                  }
+                }
+
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+              try {
+                serverFinished.await((WS_DISCOVERY_TIMEOUT), TimeUnit.MILLISECONDS);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
+            }
+          };
       executorService.submit(runnable);
     }
     try {

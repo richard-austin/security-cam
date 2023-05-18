@@ -1,20 +1,16 @@
 
 package org.onvif.ver10.advancedsecurity.wsdl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
-import org.w3c.dom.Element;
 
 
 /**
@@ -117,7 +113,7 @@ public class DistinguishedName {
     protected List<DNAttributeTypeAndValue> genericAttribute;
     @XmlElement(name = "MultiValuedRDN")
     protected List<MultiValuedRDN> multiValuedRDN;
-    protected DistinguishedName.AnyAttribute anyAttribute;
+    protected AnyAttribute anyAttribute;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
@@ -590,10 +586,10 @@ public class DistinguishedName {
      * 
      * @return
      *     possible object is
-     *     {@link DistinguishedName.AnyAttribute }
+     *     {@link AnyAttribute }
      *     
      */
-    public DistinguishedName.AnyAttribute getAnyAttribute() {
+    public AnyAttribute getAnyAttribute() {
         return anyAttribute;
     }
 
@@ -602,10 +598,10 @@ public class DistinguishedName {
      * 
      * @param value
      *     allowed object is
-     *     {@link DistinguishedName.AnyAttribute }
+     *     {@link AnyAttribute }
      *     
      */
-    public void setAnyAttribute(DistinguishedName.AnyAttribute value) {
+    public void setAnyAttribute(AnyAttribute value) {
         this.anyAttribute = value;
     }
 

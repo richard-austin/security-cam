@@ -1,19 +1,14 @@
 
 package org.onvif.ver10.device.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 import org.onvif.ver10.schema.SystemLogUriList;
 import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -67,7 +62,7 @@ public class GetSystemUrisResponse {
     @XmlSchemaType(name = "anyURI")
     protected String systemBackupUri;
     @XmlElement(name = "Extension")
-    protected GetSystemUrisResponse.Extension extension;
+    protected Extension extension;
 
     /**
      * Gets the value of the systemLogUris property.
@@ -146,10 +141,10 @@ public class GetSystemUrisResponse {
      * 
      * @return
      *     possible object is
-     *     {@link GetSystemUrisResponse.Extension }
+     *     {@link Extension }
      *     
      */
-    public GetSystemUrisResponse.Extension getExtension() {
+    public Extension getExtension() {
         return extension;
     }
 
@@ -158,10 +153,10 @@ public class GetSystemUrisResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link GetSystemUrisResponse.Extension }
+     *     {@link Extension }
      *     
      */
-    public void setExtension(GetSystemUrisResponse.Extension value) {
+    public void setExtension(Extension value) {
         this.extension = value;
     }
 

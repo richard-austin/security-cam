@@ -30,7 +30,7 @@ public interface ImagingPort {
     public org.onvif.ver10.schema.ImagingStatus20 getStatus(
 
         @WebParam(name = "VideoSourceToken", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
-        java.lang.String videoSourceToken
+        String videoSourceToken
     );
 
     /**
@@ -52,7 +52,7 @@ public interface ImagingPort {
     public org.onvif.ver10.schema.ImagingOptions20 getOptions(
 
         @WebParam(name = "VideoSourceToken", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
-        java.lang.String videoSourceToken
+        String videoSourceToken
     );
 
     /**
@@ -66,7 +66,7 @@ public interface ImagingPort {
     public org.onvif.ver10.schema.ImagingSettings20 getImagingSettings(
 
         @WebParam(name = "VideoSourceToken", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
-        java.lang.String videoSourceToken
+        String videoSourceToken
     );
 
     /**
@@ -100,7 +100,7 @@ public interface ImagingPort {
     public void move(
 
         @WebParam(name = "VideoSourceToken", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
-        java.lang.String videoSourceToken,
+        String videoSourceToken,
         @WebParam(name = "Focus", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
         org.onvif.ver10.schema.FocusMove focus
     );
@@ -118,7 +118,7 @@ public interface ImagingPort {
     public void stop(
 
         @WebParam(name = "VideoSourceToken", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
-        java.lang.String videoSourceToken
+        String videoSourceToken
     );
 
     /**
@@ -130,7 +130,7 @@ public interface ImagingPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl", className = "org.onvif.ver20.imaging.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl", className = "org.onvif.ver20.imaging.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
-    public org.onvif.ver20.imaging.wsdl.Capabilities getServiceCapabilities()
+    public Capabilities getServiceCapabilities()
 ;
 
     /**
@@ -143,11 +143,11 @@ public interface ImagingPort {
     public void setImagingSettings(
 
         @WebParam(name = "VideoSourceToken", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
-        java.lang.String videoSourceToken,
+        String videoSourceToken,
         @WebParam(name = "ImagingSettings", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
         org.onvif.ver10.schema.ImagingSettings20 imagingSettings,
         @WebParam(name = "ForcePersistence", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
-        java.lang.Boolean forcePersistence
+        Boolean forcePersistence
     );
 
     /**
@@ -161,6 +161,6 @@ public interface ImagingPort {
     public org.onvif.ver10.schema.MoveOptions20 getMoveOptions(
 
         @WebParam(name = "VideoSourceToken", targetNamespace = "http://www.onvif.org/ver20/imaging/wsdl")
-        java.lang.String videoSourceToken
+        String videoSourceToken
     );
 }

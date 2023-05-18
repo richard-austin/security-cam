@@ -1,20 +1,15 @@
 
 package org.onvif.ver10.advancedsecurity.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -71,7 +66,7 @@ public class CertPathValidationPolicy {
     protected CertPathValidationParameters parameters;
     @XmlElement(name = "TrustAnchor", required = true)
     protected List<TrustAnchor> trustAnchor;
-    protected CertPathValidationPolicy.AnyParameters anyParameters;
+    protected AnyParameters anyParameters;
 
     /**
      * Gets the value of the certPathValidationPolicyID property.
@@ -179,10 +174,10 @@ public class CertPathValidationPolicy {
      * 
      * @return
      *     possible object is
-     *     {@link CertPathValidationPolicy.AnyParameters }
+     *     {@link AnyParameters }
      *     
      */
-    public CertPathValidationPolicy.AnyParameters getAnyParameters() {
+    public AnyParameters getAnyParameters() {
         return anyParameters;
     }
 
@@ -191,10 +186,10 @@ public class CertPathValidationPolicy {
      * 
      * @param value
      *     allowed object is
-     *     {@link CertPathValidationPolicy.AnyParameters }
+     *     {@link AnyParameters }
      *     
      */
-    public void setAnyParameters(CertPathValidationPolicy.AnyParameters value) {
+    public void setAnyParameters(AnyParameters value) {
         this.anyParameters = value;
     }
 

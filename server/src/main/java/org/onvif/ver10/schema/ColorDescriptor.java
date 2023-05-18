@@ -1,18 +1,15 @@
 
 package org.onvif.ver10.schema;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 
 
 /**
@@ -56,7 +53,7 @@ import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 public class ColorDescriptor {
 
     @XmlElement(name = "ColorCluster")
-    protected List<ColorDescriptor.ColorCluster> colorCluster;
+    protected List<ColorCluster> colorCluster;
     @XmlElement(name = "Extension")
     protected ColorDescriptorExtension extension;
     @XmlAnyAttribute
@@ -80,13 +77,13 @@ public class ColorDescriptor {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ColorDescriptor.ColorCluster }
+     * {@link ColorCluster }
      * 
      * 
      */
-    public List<ColorDescriptor.ColorCluster> getColorCluster() {
+    public List<ColorCluster> getColorCluster() {
         if (colorCluster == null) {
-            colorCluster = new ArrayList<ColorDescriptor.ColorCluster>();
+            colorCluster = new ArrayList<ColorCluster>();
         }
         return this.colorCluster;
     }

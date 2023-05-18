@@ -27,7 +27,7 @@ public interface DisplayPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/display/wsdl", className = "org.onvif.ver10.display.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/display/wsdl", className = "org.onvif.ver10.display.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/display/wsdl")
-    public org.onvif.ver10.display.wsdl.Capabilities getServiceCapabilities()
+    public Capabilities getServiceCapabilities()
 ;
 
     /**

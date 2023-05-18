@@ -1,20 +1,16 @@
 
 package org.onvif.ver10.advancedsecurity.wsdl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
-import org.w3c.dom.Element;
 
 
 /**
@@ -62,7 +58,7 @@ public class AlgorithmIdentifier {
     @XmlElement(required = true)
     protected String algorithm;
     protected byte[] parameters;
-    protected AlgorithmIdentifier.AnyParameters anyParameters;
+    protected AnyParameters anyParameters;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
@@ -117,10 +113,10 @@ public class AlgorithmIdentifier {
      * 
      * @return
      *     possible object is
-     *     {@link AlgorithmIdentifier.AnyParameters }
+     *     {@link AnyParameters }
      *     
      */
-    public AlgorithmIdentifier.AnyParameters getAnyParameters() {
+    public AnyParameters getAnyParameters() {
         return anyParameters;
     }
 
@@ -129,10 +125,10 @@ public class AlgorithmIdentifier {
      * 
      * @param value
      *     allowed object is
-     *     {@link AlgorithmIdentifier.AnyParameters }
+     *     {@link AnyParameters }
      *     
      */
-    public void setAnyParameters(AlgorithmIdentifier.AnyParameters value) {
+    public void setAnyParameters(AnyParameters value) {
         this.anyParameters = value;
     }
 

@@ -26,10 +26,10 @@ public interface DeviceIOPort {
     @RequestWrapper(localName = "GetDigitalInputConfigurationOptions", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetDigitalInputConfigurationOptions")
     @ResponseWrapper(localName = "GetDigitalInputConfigurationOptionsResponse", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetDigitalInputConfigurationOptionsResponse")
     @WebResult(name = "DigitalInputOptions", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-    public org.onvif.ver10.deviceio.wsdl.DigitalInputConfigurationInputOptions getDigitalInputConfigurationOptions(
+    public DigitalInputConfigurationInputOptions getDigitalInputConfigurationOptions(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -47,10 +47,10 @@ public interface DeviceIOPort {
     @RequestWrapper(localName = "GetSerialPortConfiguration", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetSerialPortConfiguration")
     @ResponseWrapper(localName = "GetSerialPortConfigurationResponse", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetSerialPortConfigurationResponse")
     @WebResult(name = "SerialPortConfiguration", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-    public org.onvif.ver10.deviceio.wsdl.SerialPortConfiguration getSerialPortConfiguration(
+    public SerialPortConfiguration getSerialPortConfiguration(
 
         @WebParam(name = "SerialPortToken", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-        java.lang.String serialPortToken
+        String serialPortToken
     );
 
     /**
@@ -91,7 +91,7 @@ public interface DeviceIOPort {
         @WebParam(name = "DataLength", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
         java.math.BigInteger dataLength,
         @WebParam(name = "Delimiter", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-        java.lang.String delimiter
+        String delimiter
     );
 
     /**
@@ -163,10 +163,10 @@ public interface DeviceIOPort {
     @RequestWrapper(localName = "GetRelayOutputOptions", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetRelayOutputOptions")
     @ResponseWrapper(localName = "GetRelayOutputOptionsResponse", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetRelayOutputOptionsResponse")
     @WebResult(name = "RelayOutputOptions", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-    public java.util.List<org.onvif.ver10.deviceio.wsdl.RelayOutputOptions> getRelayOutputOptions(
+    public java.util.List<RelayOutputOptions> getRelayOutputOptions(
 
         @WebParam(name = "RelayOutputToken", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-        java.lang.String relayOutputToken
+        String relayOutputToken
     );
 
     /**
@@ -206,7 +206,7 @@ public interface DeviceIOPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-    public org.onvif.ver10.deviceio.wsdl.Capabilities getServiceCapabilities()
+    public Capabilities getServiceCapabilities()
 ;
 
     /**
@@ -254,10 +254,10 @@ public interface DeviceIOPort {
     @RequestWrapper(localName = "GetSerialPortConfigurationOptions", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetSerialPortConfigurationOptions")
     @ResponseWrapper(localName = "GetSerialPortConfigurationOptionsResponse", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetSerialPortConfigurationOptionsResponse")
     @WebResult(name = "SerialPortOptions", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-    public org.onvif.ver10.deviceio.wsdl.SerialPortConfigurationOptions getSerialPortConfigurationOptions(
+    public SerialPortConfigurationOptions getSerialPortConfigurationOptions(
 
         @WebParam(name = "SerialPortToken", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-        java.lang.String serialPortToken
+        String serialPortToken
     );
 
     /**
@@ -270,7 +270,7 @@ public interface DeviceIOPort {
     @RequestWrapper(localName = "GetAudioOutputs", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.Get")
     @ResponseWrapper(localName = "GetAudioOutputsResponse", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetResponse")
     @WebResult(name = "Token", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-    public java.util.List<java.lang.String> getAudioOutputs()
+    public java.util.List<String> getAudioOutputs()
 ;
 
     @WebMethod(operationName = "SetSerialPortConfiguration", action = "http://www.onvif.org/ver10/deviceio/wsdl/SetSerialPortConfiguration")
@@ -279,7 +279,7 @@ public interface DeviceIOPort {
     public void setSerialPortConfiguration(
 
         @WebParam(name = "SerialPortConfiguration", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-        org.onvif.ver10.deviceio.wsdl.SerialPortConfiguration serialPortConfiguration,
+        SerialPortConfiguration serialPortConfiguration,
         @WebParam(name = "ForcePersistance", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
         boolean forcePersistance
     );
@@ -293,7 +293,7 @@ public interface DeviceIOPort {
     public void setRelayOutputState(
 
         @WebParam(name = "RelayOutputToken", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String relayOutputToken,
+        String relayOutputToken,
         @WebParam(name = "LogicalState", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         org.onvif.ver10.schema.RelayLogicalState logicalState
     );
@@ -331,7 +331,7 @@ public interface DeviceIOPort {
     @RequestWrapper(localName = "GetSerialPorts", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetSerialPorts")
     @ResponseWrapper(localName = "GetSerialPortsResponse", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetSerialPortsResponse")
     @WebResult(name = "SerialPort", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-    public java.util.List<org.onvif.ver10.deviceio.wsdl.SerialPort> getSerialPorts()
+    public java.util.List<SerialPort> getSerialPorts()
 ;
 
     /**
@@ -373,7 +373,7 @@ public interface DeviceIOPort {
     @RequestWrapper(localName = "GetVideoSources", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.Get")
     @ResponseWrapper(localName = "GetVideoSourcesResponse", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetResponse")
     @WebResult(name = "Token", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-    public java.util.List<java.lang.String> getVideoSources()
+    public java.util.List<String> getVideoSources()
 ;
 
     /**
@@ -386,7 +386,7 @@ public interface DeviceIOPort {
     @RequestWrapper(localName = "GetAudioSources", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.Get")
     @ResponseWrapper(localName = "GetAudioSourcesResponse", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl", className = "org.onvif.ver10.deviceio.wsdl.GetResponse")
     @WebResult(name = "Token", targetNamespace = "http://www.onvif.org/ver10/deviceIO/wsdl")
-    public java.util.List<java.lang.String> getAudioSources()
+    public java.util.List<String> getAudioSources()
 ;
 
     /**

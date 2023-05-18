@@ -1,17 +1,13 @@
 
 package org.onvif.ver10.recording.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -59,7 +55,7 @@ public class ExportRecordedDataResponse {
     @XmlElement(name = "FileNames")
     protected List<String> fileNames;
     @XmlElement(name = "Extension")
-    protected ExportRecordedDataResponse.Extension extension;
+    protected Extension extension;
 
     /**
      * Gets the value of the operationToken property.
@@ -119,10 +115,10 @@ public class ExportRecordedDataResponse {
      * 
      * @return
      *     possible object is
-     *     {@link ExportRecordedDataResponse.Extension }
+     *     {@link Extension }
      *     
      */
-    public ExportRecordedDataResponse.Extension getExtension() {
+    public Extension getExtension() {
         return extension;
     }
 
@@ -131,10 +127,10 @@ public class ExportRecordedDataResponse {
      * 
      * @param value
      *     allowed object is
-     *     {@link ExportRecordedDataResponse.Extension }
+     *     {@link Extension }
      *     
      */
-    public void setExtension(ExportRecordedDataResponse.Extension value) {
+    public void setExtension(Extension value) {
         this.extension = value;
     }
 

@@ -31,7 +31,7 @@ public interface Keystore {
     @RequestWrapper(localName = "GetAllKeys", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllKeys")
     @ResponseWrapper(localName = "GetAllKeysResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllKeysResponse")
     @WebResult(name = "KeyAttribute", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.util.List<org.onvif.ver10.advancedsecurity.wsdl.KeyAttribute> getAllKeys()
+    public java.util.List<KeyAttribute> getAllKeys()
 ;
 
     /**
@@ -46,7 +46,7 @@ public interface Keystore {
     @RequestWrapper(localName = "GetAllPassphrases", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllPassphrases")
     @ResponseWrapper(localName = "GetAllPassphrasesResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllPassphrasesResponse")
     @WebResult(name = "PassphraseAttribute", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.util.List<org.onvif.ver10.advancedsecurity.wsdl.PassphraseAttribute> getAllPassphrases()
+    public java.util.List<PassphraseAttribute> getAllPassphrases()
 ;
 
     /**
@@ -60,10 +60,10 @@ public interface Keystore {
     @RequestWrapper(localName = "GetCRL", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetCRL")
     @ResponseWrapper(localName = "GetCRLResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetCRLResponse")
     @WebResult(name = "Crl", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public org.onvif.ver10.advancedsecurity.wsdl.CRL getCRL(
+    public CRL getCRL(
 
         @WebParam(name = "CrlID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String crlID
+        String crlID
     );
 
     /**
@@ -91,12 +91,12 @@ public interface Keystore {
     @RequestWrapper(localName = "CreateCertificationPath", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.CreateCertificationPath")
     @ResponseWrapper(localName = "CreateCertificationPathResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.CreateCertificationPathResponse")
     @WebResult(name = "CertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.lang.String createCertificationPath(
+    public String createCertificationPath(
 
         @WebParam(name = "CertificateIDs", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        org.onvif.ver10.advancedsecurity.wsdl.CertificateIDs certificateIDs,
+        CertificateIDs certificateIDs,
         @WebParam(name = "Alias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String alias
+        String alias
     );
 
     /**
@@ -110,7 +110,7 @@ public interface Keystore {
     @RequestWrapper(localName = "GetAllCertPathValidationPolicies", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllCertPathValidationPolicies")
     @ResponseWrapper(localName = "GetAllCertPathValidationPoliciesResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllCertPathValidationPoliciesResponse")
     @WebResult(name = "CertPathValidationPolicy", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.util.List<org.onvif.ver10.advancedsecurity.wsdl.CertPathValidationPolicy> getAllCertPathValidationPolicies()
+    public java.util.List<CertPathValidationPolicy> getAllCertPathValidationPolicies()
 ;
 
     /**
@@ -145,13 +145,13 @@ public interface Keystore {
     public byte[] createPKCS10CSR(
 
         @WebParam(name = "Subject", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        org.onvif.ver10.advancedsecurity.wsdl.DistinguishedName subject,
+        DistinguishedName subject,
         @WebParam(name = "KeyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String keyID,
+        String keyID,
         @WebParam(name = "CSRAttribute", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.util.List<org.onvif.ver10.advancedsecurity.wsdl.CSRAttribute> csrAttribute,
+        java.util.List<CSRAttribute> csrAttribute,
         @WebParam(name = "SignatureAlgorithm", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        org.onvif.ver10.advancedsecurity.wsdl.AlgorithmIdentifier signatureAlgorithm
+        AlgorithmIdentifier signatureAlgorithm
     );
 
     /**
@@ -172,16 +172,16 @@ public interface Keystore {
     @RequestWrapper(localName = "UploadKeyPairInPKCS8", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.UploadKeyPairInPKCS8")
     @ResponseWrapper(localName = "UploadKeyPairInPKCS8Response", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.UploadKeyPairInPKCS8Response")
     @WebResult(name = "KeyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.lang.String uploadKeyPairInPKCS8(
+    public String uploadKeyPairInPKCS8(
 
         @WebParam(name = "KeyPair", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
         byte[] keyPair,
         @WebParam(name = "Alias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String alias,
+        String alias,
         @WebParam(name = "EncryptionPassphraseID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String encryptionPassphraseID,
+        String encryptionPassphraseID,
         @WebParam(name = "EncryptionPassphrase", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String encryptionPassphrase
+        String encryptionPassphrase
     );
 
     /**
@@ -251,15 +251,15 @@ public interface Keystore {
         @WebParam(name = "Certificate", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
         byte[] certificate,
         @WebParam(name = "Alias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String alias,
+        String alias,
         @WebParam(name = "KeyAlias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String keyAlias,
+        String keyAlias,
         @WebParam(name = "PrivateKeyRequired", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.Boolean privateKeyRequired,
+        Boolean privateKeyRequired,
         @WebParam(mode = WebParam.Mode.OUT, name = "CertificateID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        javax.xml.ws.Holder<java.lang.String> certificateID,
+        javax.xml.ws.Holder<String> certificateID,
         @WebParam(mode = WebParam.Mode.OUT, name = "KeyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        javax.xml.ws.Holder<java.lang.String> keyID
+        javax.xml.ws.Holder<String> keyID
     );
 
     /**
@@ -278,14 +278,14 @@ public interface Keystore {
     @RequestWrapper(localName = "UploadCRL", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.UploadCRL")
     @ResponseWrapper(localName = "UploadCRLResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.UploadCRLResponse")
     @WebResult(name = "CrlID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.lang.String uploadCRL(
+    public String uploadCRL(
 
         @WebParam(name = "Crl", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
         byte[] crl,
         @WebParam(name = "Alias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String alias,
+        String alias,
         @WebParam(name = "anyParameters", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        org.onvif.ver10.advancedsecurity.wsdl.UploadCRL.AnyParameters anyParameters
+        UploadCRL.AnyParameters anyParameters
     );
 
     /**
@@ -311,7 +311,7 @@ public interface Keystore {
     public void deleteCertificationPath(
 
         @WebParam(name = "CertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certificationPathID
+        String certificationPathID
     );
 
     /**
@@ -335,7 +335,7 @@ public interface Keystore {
     public void deleteCertificate(
 
         @WebParam(name = "CertificateID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certificateID
+        String certificateID
     );
 
     /**
@@ -350,10 +350,10 @@ public interface Keystore {
     @RequestWrapper(localName = "GetKeyStatus", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetKeyStatus")
     @ResponseWrapper(localName = "GetKeyStatusResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetKeyStatusResponse")
     @WebResult(name = "KeyStatus", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.lang.String getKeyStatus(
+    public String getKeyStatus(
 
         @WebParam(name = "KeyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String keyID
+        String keyID
     );
 
     /**
@@ -391,9 +391,9 @@ public interface Keystore {
         @WebParam(name = "KeyLength", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
         java.math.BigInteger keyLength,
         @WebParam(name = "Alias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String alias,
+        String alias,
         @WebParam(mode = WebParam.Mode.OUT, name = "KeyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        javax.xml.ws.Holder<java.lang.String> keyID,
+        javax.xml.ws.Holder<String> keyID,
         @WebParam(mode = WebParam.Mode.OUT, name = "EstimatedCreationTime", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
         javax.xml.ws.Holder<javax.xml.datatype.Duration> estimatedCreationTime
     );
@@ -408,7 +408,7 @@ public interface Keystore {
     public void deletePassphrase(
 
         @WebParam(name = "PassphraseID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String passphraseID
+        String passphraseID
     );
 
     /**
@@ -424,10 +424,10 @@ public interface Keystore {
     @RequestWrapper(localName = "GetCertificate", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetCertificate")
     @ResponseWrapper(localName = "GetCertificateResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetCertificateResponse")
     @WebResult(name = "Certificate", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public org.onvif.ver10.advancedsecurity.wsdl.X509Certificate getCertificate(
+    public X509Certificate getCertificate(
 
         @WebParam(name = "CertificateID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certificateID
+        String certificateID
     );
 
     /**
@@ -438,12 +438,12 @@ public interface Keystore {
     @RequestWrapper(localName = "UploadPassphrase", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.UploadPassphrase")
     @ResponseWrapper(localName = "UploadPassphraseResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.UploadPassphraseResponse")
     @WebResult(name = "PassphraseID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.lang.String uploadPassphrase(
+    public String uploadPassphrase(
 
         @WebParam(name = "Passphrase", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String passphrase,
+        String passphrase,
         @WebParam(name = "PassphraseAlias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String passphraseAlias
+        String passphraseAlias
     );
 
     /**
@@ -461,7 +461,7 @@ public interface Keystore {
     public void deleteCRL(
 
         @WebParam(name = "CrlID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String crlID
+        String crlID
     );
 
     /**
@@ -477,10 +477,10 @@ public interface Keystore {
     @RequestWrapper(localName = "GetCertPathValidationPolicy", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetCertPathValidationPolicy")
     @ResponseWrapper(localName = "GetCertPathValidationPolicyResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetCertPathValidationPolicyResponse")
     @WebResult(name = "CertPathValidationPolicy", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public org.onvif.ver10.advancedsecurity.wsdl.CertPathValidationPolicy getCertPathValidationPolicy(
+    public CertPathValidationPolicy getCertPathValidationPolicy(
 
         @WebParam(name = "CertPathValidationPolicyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certPathValidationPolicyID
+        String certPathValidationPolicyID
     );
 
     /**
@@ -503,7 +503,7 @@ public interface Keystore {
     public void deleteKey(
 
         @WebParam(name = "KeyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String keyID
+        String keyID
     );
 
     /**
@@ -523,7 +523,7 @@ public interface Keystore {
     public boolean getPrivateKeyStatus(
 
         @WebParam(name = "KeyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String keyID
+        String keyID
     );
 
     /**
@@ -539,7 +539,7 @@ public interface Keystore {
     @RequestWrapper(localName = "GetAllCertificationPaths", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllCertificationPaths")
     @ResponseWrapper(localName = "GetAllCertificationPathsResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllCertificationPathsResponse")
     @WebResult(name = "CertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.util.List<java.lang.String> getAllCertificationPaths()
+    public java.util.List<String> getAllCertificationPaths()
 ;
 
     /**
@@ -554,10 +554,10 @@ public interface Keystore {
     @RequestWrapper(localName = "GetCertificationPath", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetCertificationPath")
     @ResponseWrapper(localName = "GetCertificationPathResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetCertificationPathResponse")
     @WebResult(name = "CertificationPath", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public org.onvif.ver10.advancedsecurity.wsdl.CertificationPath getCertificationPath(
+    public CertificationPath getCertificationPath(
 
         @WebParam(name = "CertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certificationPathID
+        String certificationPathID
     );
 
     /**
@@ -572,7 +572,7 @@ public interface Keystore {
     @RequestWrapper(localName = "GetAllCertificates", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllCertificates")
     @ResponseWrapper(localName = "GetAllCertificatesResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllCertificatesResponse")
     @WebResult(name = "Certificate", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.util.List<org.onvif.ver10.advancedsecurity.wsdl.X509Certificate> getAllCertificates()
+    public java.util.List<X509Certificate> getAllCertificates()
 ;
 
     /**
@@ -599,16 +599,16 @@ public interface Keystore {
     @RequestWrapper(localName = "CreateCertPathValidationPolicy", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.CreateCertPathValidationPolicy")
     @ResponseWrapper(localName = "CreateCertPathValidationPolicyResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.CreateCertPathValidationPolicyResponse")
     @WebResult(name = "CertPathValidationPolicyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.lang.String createCertPathValidationPolicy(
+    public String createCertPathValidationPolicy(
 
         @WebParam(name = "Alias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String alias,
+        String alias,
         @WebParam(name = "Parameters", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        org.onvif.ver10.advancedsecurity.wsdl.CertPathValidationParameters parameters,
+        CertPathValidationParameters parameters,
         @WebParam(name = "TrustAnchor", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.util.List<org.onvif.ver10.advancedsecurity.wsdl.TrustAnchor> trustAnchor,
+        java.util.List<TrustAnchor> trustAnchor,
         @WebParam(name = "anyParameters", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        org.onvif.ver10.advancedsecurity.wsdl.CreateCertPathValidationPolicy.AnyParameters anyParameters
+        CreateCertPathValidationPolicy.AnyParameters anyParameters
     );
 
     /**
@@ -631,7 +631,7 @@ public interface Keystore {
     public void deleteCertPathValidationPolicy(
 
         @WebParam(name = "CertPathValidationPolicyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certPathValidationPolicyID
+        String certPathValidationPolicyID
     );
 
     /**
@@ -674,21 +674,21 @@ public interface Keystore {
         @WebParam(name = "CertWithPrivateKey", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
         byte[] certWithPrivateKey,
         @WebParam(name = "CertificationPathAlias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certificationPathAlias,
+        String certificationPathAlias,
         @WebParam(name = "KeyAlias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String keyAlias,
+        String keyAlias,
         @WebParam(name = "IgnoreAdditionalCertificates", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.Boolean ignoreAdditionalCertificates,
+        Boolean ignoreAdditionalCertificates,
         @WebParam(name = "IntegrityPassphraseID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String integrityPassphraseID,
+        String integrityPassphraseID,
         @WebParam(name = "EncryptionPassphraseID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String encryptionPassphraseID,
+        String encryptionPassphraseID,
         @WebParam(name = "Passphrase", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String passphrase,
+        String passphrase,
         @WebParam(mode = WebParam.Mode.OUT, name = "CertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        javax.xml.ws.Holder<java.lang.String> certificationPathID,
+        javax.xml.ws.Holder<String> certificationPathID,
         @WebParam(mode = WebParam.Mode.OUT, name = "KeyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        javax.xml.ws.Holder<java.lang.String> keyID
+        javax.xml.ws.Holder<String> keyID
     );
 
     /**
@@ -702,7 +702,7 @@ public interface Keystore {
     @RequestWrapper(localName = "GetAllCRLs", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllCRLs")
     @ResponseWrapper(localName = "GetAllCRLsResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAllCRLsResponse")
     @WebResult(name = "Crl", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.util.List<org.onvif.ver10.advancedsecurity.wsdl.CRL> getAllCRLs()
+    public java.util.List<CRL> getAllCRLs()
 ;
 
     /**
@@ -743,23 +743,23 @@ public interface Keystore {
     @RequestWrapper(localName = "CreateSelfSignedCertificate", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.CreateSelfSignedCertificate")
     @ResponseWrapper(localName = "CreateSelfSignedCertificateResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.CreateSelfSignedCertificateResponse")
     @WebResult(name = "CertificateID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.lang.String createSelfSignedCertificate(
+    public String createSelfSignedCertificate(
 
         @WebParam(name = "X509Version", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
         java.math.BigInteger x509Version,
         @WebParam(name = "Subject", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        org.onvif.ver10.advancedsecurity.wsdl.DistinguishedName subject,
+        DistinguishedName subject,
         @WebParam(name = "KeyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String keyID,
+        String keyID,
         @WebParam(name = "Alias", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String alias,
+        String alias,
         @WebParam(name = "notValidBefore", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
         javax.xml.datatype.XMLGregorianCalendar notValidBefore,
         @WebParam(name = "notValidAfter", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
         javax.xml.datatype.XMLGregorianCalendar notValidAfter,
         @WebParam(name = "SignatureAlgorithm", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        org.onvif.ver10.advancedsecurity.wsdl.AlgorithmIdentifier signatureAlgorithm,
+        AlgorithmIdentifier signatureAlgorithm,
         @WebParam(name = "Extension", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.util.List<org.onvif.ver10.advancedsecurity.wsdl.X509V3Extension> extension
+        java.util.List<X509V3Extension> extension
     );
 }

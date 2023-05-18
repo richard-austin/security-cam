@@ -49,9 +49,9 @@ public interface DoorControlPort {
     public void accessDoor(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token,
+        String token,
         @WebParam(name = "UseExtendedTime", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.Boolean useExtendedTime,
+        Boolean useExtendedTime,
         @WebParam(name = "AccessTime", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
         javax.xml.datatype.Duration accessTime,
         @WebParam(name = "OpenTooLongTime", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
@@ -59,7 +59,7 @@ public interface DoorControlPort {
         @WebParam(name = "PreAlarmTime", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
         javax.xml.datatype.Duration preAlarmTime,
         @WebParam(name = "Extension", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        org.onvif.ver10.doorcontrol.wsdl.AccessDoorExtension extension
+        AccessDoorExtension extension
     );
 
     /**
@@ -80,7 +80,7 @@ public interface DoorControlPort {
     public void unlockDoor(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -97,7 +97,7 @@ public interface DoorControlPort {
     public void lockDownReleaseDoor(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -120,13 +120,13 @@ public interface DoorControlPort {
     public void getDoorInfoList(
 
         @WebParam(name = "Limit", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.Integer limit,
+        Integer limit,
         @WebParam(name = "StartReference", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String startReference,
+        String startReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "NextStartReference", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        javax.xml.ws.Holder<java.lang.String> nextStartReference,
+        javax.xml.ws.Holder<String> nextStartReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "DoorInfo", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        javax.xml.ws.Holder<java.util.List<org.onvif.ver10.doorcontrol.wsdl.DoorInfo>> doorInfo
+        javax.xml.ws.Holder<java.util.List<DoorInfo>> doorInfo
     );
 
     /**
@@ -151,7 +151,7 @@ public interface DoorControlPort {
     public void lockOpenDoor(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -174,7 +174,7 @@ public interface DoorControlPort {
     public void doubleLockDoor(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -195,7 +195,7 @@ public interface DoorControlPort {
     public void lockDoor(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -212,7 +212,7 @@ public interface DoorControlPort {
     public void lockOpenReleaseDoor(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -231,10 +231,10 @@ public interface DoorControlPort {
     @RequestWrapper(localName = "GetDoorInfo", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl", className = "org.onvif.ver10.doorcontrol.wsdl.GetDoorInfo")
     @ResponseWrapper(localName = "GetDoorInfoResponse", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl", className = "org.onvif.ver10.doorcontrol.wsdl.GetDoorInfoResponse")
     @WebResult(name = "DoorInfo", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-    public java.util.List<org.onvif.ver10.doorcontrol.wsdl.DoorInfo> getDoorInfo(
+    public java.util.List<DoorInfo> getDoorInfo(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.util.List<java.lang.String> token
+        java.util.List<String> token
     );
 
     /**
@@ -248,7 +248,7 @@ public interface DoorControlPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl", className = "org.onvif.ver10.doorcontrol.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl", className = "org.onvif.ver10.doorcontrol.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-    public org.onvif.ver10.doorcontrol.wsdl.ServiceCapabilities getServiceCapabilities()
+    public ServiceCapabilities getServiceCapabilities()
 ;
 
     /**
@@ -276,7 +276,7 @@ public interface DoorControlPort {
     public void lockDownDoor(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -297,7 +297,7 @@ public interface DoorControlPort {
     public void blockDoor(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -312,9 +312,9 @@ public interface DoorControlPort {
     @RequestWrapper(localName = "GetDoorState", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl", className = "org.onvif.ver10.doorcontrol.wsdl.GetDoorState")
     @ResponseWrapper(localName = "GetDoorStateResponse", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl", className = "org.onvif.ver10.doorcontrol.wsdl.GetDoorStateResponse")
     @WebResult(name = "DoorState", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-    public org.onvif.ver10.doorcontrol.wsdl.DoorState getDoorState(
+    public DoorState getDoorState(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/doorcontrol/wsdl")
-        java.lang.String token
+        String token
     );
 }

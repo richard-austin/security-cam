@@ -1,17 +1,13 @@
 
 package org.onvif.ver10.advancedsecurity.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -58,7 +54,7 @@ public class UploadCRL {
     protected byte[] crl;
     @XmlElement(name = "Alias")
     protected String alias;
-    protected UploadCRL.AnyParameters anyParameters;
+    protected AnyParameters anyParameters;
 
     /**
      * Gets the value of the crl property.
@@ -111,10 +107,10 @@ public class UploadCRL {
      * 
      * @return
      *     possible object is
-     *     {@link UploadCRL.AnyParameters }
+     *     {@link AnyParameters }
      *     
      */
-    public UploadCRL.AnyParameters getAnyParameters() {
+    public AnyParameters getAnyParameters() {
         return anyParameters;
     }
 
@@ -123,10 +119,10 @@ public class UploadCRL {
      * 
      * @param value
      *     allowed object is
-     *     {@link UploadCRL.AnyParameters }
+     *     {@link AnyParameters }
      *     
      */
-    public void setAnyParameters(UploadCRL.AnyParameters value) {
+    public void setAnyParameters(AnyParameters value) {
         this.anyParameters = value;
     }
 

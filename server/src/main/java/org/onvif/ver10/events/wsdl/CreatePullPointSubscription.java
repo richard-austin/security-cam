@@ -1,20 +1,15 @@
 
 package org.onvif.ver10.events.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.w3c.dom.Element;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -64,7 +59,7 @@ public class CreatePullPointSubscription {
     @XmlElementRef(name = "InitialTerminationTime", namespace = "http://www.onvif.org/ver10/events/wsdl", type = JAXBElement.class, required = false)
     protected JAXBElement<String> initialTerminationTime;
     @XmlElement(name = "SubscriptionPolicy")
-    protected CreatePullPointSubscription.SubscriptionPolicy subscriptionPolicy;
+    protected SubscriptionPolicy subscriptionPolicy;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
 
@@ -121,10 +116,10 @@ public class CreatePullPointSubscription {
      * 
      * @return
      *     possible object is
-     *     {@link CreatePullPointSubscription.SubscriptionPolicy }
+     *     {@link SubscriptionPolicy }
      *     
      */
-    public CreatePullPointSubscription.SubscriptionPolicy getSubscriptionPolicy() {
+    public SubscriptionPolicy getSubscriptionPolicy() {
         return subscriptionPolicy;
     }
 
@@ -133,10 +128,10 @@ public class CreatePullPointSubscription {
      * 
      * @param value
      *     allowed object is
-     *     {@link CreatePullPointSubscription.SubscriptionPolicy }
+     *     {@link SubscriptionPolicy }
      *     
      */
-    public void setSubscriptionPolicy(CreatePullPointSubscription.SubscriptionPolicy value) {
+    public void setSubscriptionPolicy(SubscriptionPolicy value) {
         this.subscriptionPolicy = value;
     }
 

@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.apache.wss4j.common.WSS4JConstants.*;
-
 /*
  Utility class to add user/password onvif credentials to SOAP communications
 */

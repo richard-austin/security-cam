@@ -45,9 +45,9 @@ public interface RecordingPort {
     public void deleteTrack(
 
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String recordingToken,
+        String recordingToken,
         @WebParam(name = "TrackToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String trackToken
+        String trackToken
     );
 
     /**
@@ -71,7 +71,7 @@ public interface RecordingPort {
     public void deleteRecording(
 
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String recordingToken
+        String recordingToken
     );
 
     /**
@@ -88,10 +88,10 @@ public interface RecordingPort {
     @RequestWrapper(localName = "CreateTrack", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl", className = "org.onvif.ver10.recording.wsdl.CreateTrack")
     @ResponseWrapper(localName = "CreateTrackResponse", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl", className = "org.onvif.ver10.recording.wsdl.CreateTrackResponse")
     @WebResult(name = "TrackToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-    public java.lang.String createTrack(
+    public String createTrack(
 
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String recordingToken,
+        String recordingToken,
         @WebParam(name = "TrackConfiguration", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
         org.onvif.ver10.schema.TrackConfiguration trackConfiguration
     );
@@ -123,7 +123,7 @@ public interface RecordingPort {
     public void setRecordingJobConfiguration(
 
         @WebParam(name = "JobToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String jobToken,
+        String jobToken,
         @WebParam(mode = WebParam.Mode.INOUT, name = "JobConfiguration", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
         javax.xml.ws.Holder<org.onvif.ver10.schema.RecordingJobConfiguration> jobConfiguration
     );
@@ -138,7 +138,7 @@ public interface RecordingPort {
     public void setRecordingConfiguration(
 
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String recordingToken,
+        String recordingToken,
         @WebParam(name = "RecordingConfiguration", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
         org.onvif.ver10.schema.RecordingConfiguration recordingConfiguration
     );
@@ -155,7 +155,7 @@ public interface RecordingPort {
     public org.onvif.ver10.schema.RecordingConfiguration getRecordingConfiguration(
 
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String recordingToken
+        String recordingToken
     );
 
     /**
@@ -185,9 +185,9 @@ public interface RecordingPort {
     public void setRecordingJobMode(
 
         @WebParam(name = "JobToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String jobToken,
+        String jobToken,
         @WebParam(name = "Mode", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String mode
+        String mode
     );
 
     /**
@@ -202,9 +202,9 @@ public interface RecordingPort {
     public org.onvif.ver10.schema.TrackConfiguration getTrackConfiguration(
 
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String recordingToken,
+        String recordingToken,
         @WebParam(name = "TrackToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String trackToken
+        String trackToken
     );
 
     /**
@@ -220,15 +220,15 @@ public interface RecordingPort {
         @WebParam(name = "SearchScope", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
         org.onvif.ver10.schema.SearchScope searchScope,
         @WebParam(name = "FileFormat", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String fileFormat,
+        String fileFormat,
         @WebParam(name = "StorageDestination", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
         org.onvif.ver10.schema.StorageReferencePath storageDestination,
         @WebParam(mode = WebParam.Mode.OUT, name = "OperationToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        javax.xml.ws.Holder<java.lang.String> operationToken,
+        javax.xml.ws.Holder<String> operationToken,
         @WebParam(mode = WebParam.Mode.OUT, name = "FileNames", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        javax.xml.ws.Holder<java.util.List<java.lang.String>> fileNames,
+        javax.xml.ws.Holder<java.util.List<String>> fileNames,
         @WebParam(mode = WebParam.Mode.OUT, name = "Extension", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        javax.xml.ws.Holder<org.onvif.ver10.recording.wsdl.ExportRecordedDataResponse.Extension> extension
+        javax.xml.ws.Holder<ExportRecordedDataResponse.Extension> extension
     );
 
     /**
@@ -250,7 +250,7 @@ public interface RecordingPort {
     @RequestWrapper(localName = "CreateRecording", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl", className = "org.onvif.ver10.recording.wsdl.CreateRecording")
     @ResponseWrapper(localName = "CreateRecordingResponse", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl", className = "org.onvif.ver10.recording.wsdl.CreateRecordingResponse")
     @WebResult(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-    public java.lang.String createRecording(
+    public String createRecording(
 
         @WebParam(name = "RecordingConfiguration", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
         org.onvif.ver10.schema.RecordingConfiguration recordingConfiguration
@@ -266,9 +266,9 @@ public interface RecordingPort {
     public void setTrackConfiguration(
 
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String recordingToken,
+        String recordingToken,
         @WebParam(name = "TrackToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String trackToken,
+        String trackToken,
         @WebParam(name = "TrackConfiguration", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
         org.onvif.ver10.schema.TrackConfiguration trackConfiguration
     );
@@ -290,7 +290,7 @@ public interface RecordingPort {
         @WebParam(mode = WebParam.Mode.INOUT, name = "JobConfiguration", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
         javax.xml.ws.Holder<org.onvif.ver10.schema.RecordingJobConfiguration> jobConfiguration,
         @WebParam(mode = WebParam.Mode.OUT, name = "JobToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        javax.xml.ws.Holder<java.lang.String> jobToken
+        javax.xml.ws.Holder<String> jobToken
     );
 
     /**
@@ -305,7 +305,7 @@ public interface RecordingPort {
     public org.onvif.ver10.schema.RecordingJobConfiguration getRecordingJobConfiguration(
 
         @WebParam(name = "JobToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String jobToken
+        String jobToken
     );
 
     /**
@@ -331,10 +331,10 @@ public interface RecordingPort {
     @RequestWrapper(localName = "GetRecordingOptions", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl", className = "org.onvif.ver10.recording.wsdl.GetRecordingOptions")
     @ResponseWrapper(localName = "GetRecordingOptionsResponse", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl", className = "org.onvif.ver10.recording.wsdl.GetRecordingOptionsResponse")
     @WebResult(name = "Options", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-    public org.onvif.ver10.recording.wsdl.RecordingOptions getRecordingOptions(
+    public RecordingOptions getRecordingOptions(
 
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String recordingToken
+        String recordingToken
     );
 
     /**
@@ -352,7 +352,7 @@ public interface RecordingPort {
     public void deleteRecordingJob(
 
         @WebParam(name = "JobToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String jobToken
+        String jobToken
     );
 
     /**
@@ -364,7 +364,7 @@ public interface RecordingPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl", className = "org.onvif.ver10.recording.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl", className = "org.onvif.ver10.recording.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-    public org.onvif.ver10.recording.wsdl.Capabilities getServiceCapabilities()
+    public Capabilities getServiceCapabilities()
 ;
 
     /**
@@ -380,6 +380,6 @@ public interface RecordingPort {
     public org.onvif.ver10.schema.RecordingJobStateInformation getRecordingJobState(
 
         @WebParam(name = "JobToken", targetNamespace = "http://www.onvif.org/ver10/recording/wsdl")
-        java.lang.String jobToken
+        String jobToken
     );
 }

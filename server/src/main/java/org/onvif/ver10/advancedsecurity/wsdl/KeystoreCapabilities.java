@@ -1,23 +1,17 @@
 
 package org.onvif.ver10.advancedsecurity.wsdl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
-import org.w3c.dom.Element;
 
 
 /**
@@ -79,7 +73,7 @@ public class KeystoreCapabilities {
 
     @XmlElement(name = "SignatureAlgorithms")
     protected List<AlgorithmIdentifier> signatureAlgorithms;
-    protected KeystoreCapabilities.AnyElement anyElement;
+    protected AnyElement anyElement;
     @XmlAttribute(name = "MaximumNumberOfKeys")
     @XmlSchemaType(name = "positiveInteger")
     protected BigInteger maximumNumberOfKeys;
@@ -155,10 +149,10 @@ public class KeystoreCapabilities {
      * 
      * @return
      *     possible object is
-     *     {@link KeystoreCapabilities.AnyElement }
+     *     {@link AnyElement }
      *     
      */
-    public KeystoreCapabilities.AnyElement getAnyElement() {
+    public AnyElement getAnyElement() {
         return anyElement;
     }
 
@@ -167,10 +161,10 @@ public class KeystoreCapabilities {
      * 
      * @param value
      *     allowed object is
-     *     {@link KeystoreCapabilities.AnyElement }
+     *     {@link AnyElement }
      *     
      */
-    public void setAnyElement(KeystoreCapabilities.AnyElement value) {
+    public void setAnyElement(AnyElement value) {
         this.anyElement = value;
     }
 

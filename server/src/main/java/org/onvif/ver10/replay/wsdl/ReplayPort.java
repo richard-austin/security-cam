@@ -26,7 +26,7 @@ public interface ReplayPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/replay/wsdl", className = "org.onvif.ver10.replay.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/replay/wsdl", className = "org.onvif.ver10.replay.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/replay/wsdl")
-    public org.onvif.ver10.replay.wsdl.Capabilities getServiceCapabilities()
+    public Capabilities getServiceCapabilities()
 ;
 
     /**
@@ -40,12 +40,12 @@ public interface ReplayPort {
     @RequestWrapper(localName = "GetReplayUri", targetNamespace = "http://www.onvif.org/ver10/replay/wsdl", className = "org.onvif.ver10.replay.wsdl.GetReplayUri")
     @ResponseWrapper(localName = "GetReplayUriResponse", targetNamespace = "http://www.onvif.org/ver10/replay/wsdl", className = "org.onvif.ver10.replay.wsdl.GetReplayUriResponse")
     @WebResult(name = "Uri", targetNamespace = "http://www.onvif.org/ver10/replay/wsdl")
-    public java.lang.String getReplayUri(
+    public String getReplayUri(
 
         @WebParam(name = "StreamSetup", targetNamespace = "http://www.onvif.org/ver10/replay/wsdl")
         org.onvif.ver10.schema.StreamSetup streamSetup,
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/replay/wsdl")
-        java.lang.String recordingToken
+        String recordingToken
     );
 
     /**

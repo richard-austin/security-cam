@@ -90,6 +90,7 @@ class OnvifService {
             logService.cam.info "Camera discovery..."
             sc_processesService.stopProcesses()
             Collection<URL> urls = OnvifDiscovery.discoverOnvifURLs()
+            urls.add(new URL("http://192.168.1.156:8080/onvif/device_service"))
             List<OnvifCredentials> creds = []
             for (URL u : urls) {
                 logService.cam.info(u.toString())
@@ -258,7 +259,7 @@ class OnvifService {
     private synchronized OnvifDevice getDevice(String onvifBaseAddress) {
         try {
             if (!deviceMap.containsKey(onvifBaseAddress))
-                deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, "", ""))
+                deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, "admin", "R@nc1dTapsB0ttom"))
         }
         catch (Exception ex) {
             logService.cam.error("${ex.getClass().getName()} in getDevice ${ex.getMessage()}")

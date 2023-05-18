@@ -1,11 +1,12 @@
 
 package org.onvif.ver10.deviceio.wsdl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 
 
 /**

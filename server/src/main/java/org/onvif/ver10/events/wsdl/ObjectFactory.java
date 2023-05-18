@@ -155,11 +155,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link org.onvif.ver10.events.wsdl.SubscriptionPolicy }
+     * Create an instance of {@link SubscriptionPolicy }
      * 
      */
-    public org.onvif.ver10.events.wsdl.SubscriptionPolicy createSubscriptionPolicy() {
-        return new org.onvif.ver10.events.wsdl.SubscriptionPolicy();
+    public SubscriptionPolicy createSubscriptionPolicy() {
+        return new SubscriptionPolicy();
     }
 
     /**

@@ -1,15 +1,12 @@
 
 package org.onvif.ver10.network.wsdl;
 
+import org.xmlsoap.schemas.ws._2005._04.discovery.*;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
-import org.xmlsoap.schemas.ws._2005._04.discovery.ByeType;
-import org.xmlsoap.schemas.ws._2005._04.discovery.HelloType;
-import org.xmlsoap.schemas.ws._2005._04.discovery.ProbeMatchesType;
-import org.xmlsoap.schemas.ws._2005._04.discovery.ProbeType;
-import org.xmlsoap.schemas.ws._2005._04.discovery.ResolveType;
 
 
 /**

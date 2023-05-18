@@ -1,15 +1,12 @@
 
 package org.onvif.ver10.schema;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -51,7 +48,7 @@ import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 public class ClassDescriptor {
 
     @XmlElement(name = "ClassCandidate")
-    protected List<ClassDescriptor.ClassCandidate> classCandidate;
+    protected List<ClassCandidate> classCandidate;
     @XmlElement(name = "Extension")
     protected ClassDescriptorExtension extension;
 
@@ -73,13 +70,13 @@ public class ClassDescriptor {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ClassDescriptor.ClassCandidate }
+     * {@link ClassCandidate }
      * 
      * 
      */
-    public List<ClassDescriptor.ClassCandidate> getClassCandidate() {
+    public List<ClassCandidate> getClassCandidate() {
         if (classCandidate == null) {
-            classCandidate = new ArrayList<ClassDescriptor.ClassCandidate>();
+            classCandidate = new ArrayList<ClassCandidate>();
         }
         return this.classCandidate;
     }

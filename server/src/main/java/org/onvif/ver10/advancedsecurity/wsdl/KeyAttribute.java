@@ -1,23 +1,18 @@
 
 package org.onvif.ver10.advancedsecurity.wsdl;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.namespace.QName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
-import org.w3c.dom.Element;
 
 
 /**
@@ -86,7 +81,7 @@ public class KeyAttribute {
     protected Boolean externallyGenerated;
     protected Boolean securelyStored;
     @XmlElement(name = "Extension")
-    protected KeyAttribute.Extension extension;
+    protected Extension extension;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
@@ -272,10 +267,10 @@ public class KeyAttribute {
      * 
      * @return
      *     possible object is
-     *     {@link KeyAttribute.Extension }
+     *     {@link Extension }
      *     
      */
-    public KeyAttribute.Extension getExtension() {
+    public Extension getExtension() {
         return extension;
     }
 
@@ -284,10 +279,10 @@ public class KeyAttribute {
      * 
      * @param value
      *     allowed object is
-     *     {@link KeyAttribute.Extension }
+     *     {@link Extension }
      *     
      */
-    public void setExtension(KeyAttribute.Extension value) {
+    public void setExtension(Extension value) {
         this.extension = value;
     }
 

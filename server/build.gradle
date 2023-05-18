@@ -131,18 +131,18 @@ dependencies {
     // Onvif dependencies
 
     implementation group: 'org.apache.cxf', name: 'cxf-rt-frontend-jaxws', version: '3.3.2'
-    implementation group: 'org.apache.cxf', name: 'cxf-rt-transports-http-jetty', version: '3.3.2'
+//    implementation group: 'org.apache.cxf', name: 'cxf-rt-transports-http-jetty', version: '3.3.2'
     implementation group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1'
     implementation group: 'javax.jws', name: 'javax.jws-api', version: '1.1'
     implementation group: 'org.apache.cxf.services.wsn', name: 'cxf-services-wsn-core', version: '3.3.2'
     compileOnly group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
     implementation group: 'commons-codec', name: 'commons-codec', version: '1.10'
     implementation group: 'org.apache.wss4j', name: 'wss4j-ws-security-common', version: '2.2.3'
-    implementation group: 'org.apache.cxf.xjc-utils', name: 'cxf-xjc-runtime', version: '3.3.0'
-    implementation group: 'org.apache.cxf', name: 'cxf-rt-bindings-soap', version: '3.1.0'
-    implementation group: 'org.apache.cxf.xjcplugins', name: 'cxf-xjc-boolean', version: '3.1.0'
-    implementation group: 'org.apache.cxf.xjcplugins', name: 'cxf-xjc-ts', version: '3.1.0'
-    implementation group: 'org.apache.cxf.xjc-utils', name: 'cxf-xjc-runtime', version: '3.3.0'
+//    implementation group: 'org.apache.cxf.xjc-utils', name: 'cxf-xjc-runtime', version: '3.3.0'
+//    implementation group: 'org.apache.cxf', name: 'cxf-rt-bindings-soap', version: '3.1.0'
+//    implementation group: 'org.apache.cxf.xjcplugins', name: 'cxf-xjc-boolean', version: '3.1.0'
+//    implementation group: 'org.apache.cxf.xjcplugins', name: 'cxf-xjc-ts', version: '3.1.0'
+//    implementation group: 'org.apache.cxf.xjc-utils', name: 'cxf-xjc-runtime', version: '3.3.0'
     implementation group: 'org.apache.maven', name: 'maven-model-builder', version: '3.6.1'
     implementation group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
@@ -151,6 +151,20 @@ dependencies {
     implementation group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.0'
     implementation group: 'javax.activation', name: 'activation', version: '1.1.1'
     implementation group: 'com.sun.xml.messaging.saaj', name: 'saaj-impl', version: '1.5.1'
+
+
+    implementation 'org.apache.cxf:cxf-rt-ws-security:3.3.2'
+    implementation 'org.apache.cxf:cxf-rt-transports-http:3.3.2'
+    //   implementation project(':onvif-ws-client')
+    implementation 'commons-io:commons-io:2.7'
+    implementation 'commons-codec:commons-codec:1.10'
+    implementation 'org.apache.commons:commons-lang3:3.4'
+    implementation 'com.sun.xml.messaging.saaj:saaj-impl:1.5.1'
+    implementation 'com.sun.activation:javax.activation:1.2.0'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
+    implementation 'com.sun.xml.bind:jaxb-impl:2.3.1'
+    testImplementation 'org.slf4j:slf4j-simple:1.7.26'
 
     // Annotations
     compileOnly group: 'org.jetbrains', name: 'annotations', version: '15.0'

@@ -32,7 +32,7 @@ public interface AccessRulesPort {
     public void modifyAccessProfile(
 
         @WebParam(name = "AccessProfile", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        org.onvif.ver10.accessrules.wsdl.AccessProfile accessProfile
+        AccessProfile accessProfile
     );
 
     /**
@@ -46,10 +46,10 @@ public interface AccessRulesPort {
     @RequestWrapper(localName = "GetAccessProfiles", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl", className = "org.onvif.ver10.accessrules.wsdl.GetAccessProfiles")
     @ResponseWrapper(localName = "GetAccessProfilesResponse", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl", className = "org.onvif.ver10.accessrules.wsdl.GetAccessProfilesResponse")
     @WebResult(name = "AccessProfile", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-    public java.util.List<org.onvif.ver10.accessrules.wsdl.AccessProfile> getAccessProfiles(
+    public java.util.List<AccessProfile> getAccessProfiles(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        java.util.List<java.lang.String> token
+        java.util.List<String> token
     );
 
     /**
@@ -66,10 +66,10 @@ public interface AccessRulesPort {
     @RequestWrapper(localName = "GetAccessProfileInfo", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl", className = "org.onvif.ver10.accessrules.wsdl.GetAccessProfileInfo")
     @ResponseWrapper(localName = "GetAccessProfileInfoResponse", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl", className = "org.onvif.ver10.accessrules.wsdl.GetAccessProfileInfoResponse")
     @WebResult(name = "AccessProfileInfo", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-    public java.util.List<org.onvif.ver10.accessrules.wsdl.AccessProfileInfo> getAccessProfileInfo(
+    public java.util.List<AccessProfileInfo> getAccessProfileInfo(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        java.util.List<java.lang.String> token
+        java.util.List<String> token
     );
 
     /**
@@ -80,7 +80,7 @@ public interface AccessRulesPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl", className = "org.onvif.ver10.accessrules.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl", className = "org.onvif.ver10.accessrules.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-    public org.onvif.ver10.accessrules.wsdl.ServiceCapabilities getServiceCapabilities()
+    public ServiceCapabilities getServiceCapabilities()
 ;
 
     /**
@@ -99,13 +99,13 @@ public interface AccessRulesPort {
     public void getAccessProfileList(
 
         @WebParam(name = "Limit", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        java.lang.Integer limit,
+        Integer limit,
         @WebParam(name = "StartReference", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        java.lang.String startReference,
+        String startReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "NextStartReference", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        javax.xml.ws.Holder<java.lang.String> nextStartReference,
+        javax.xml.ws.Holder<String> nextStartReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "AccessProfile", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        javax.xml.ws.Holder<java.util.List<org.onvif.ver10.accessrules.wsdl.AccessProfile>> accessProfile
+        javax.xml.ws.Holder<java.util.List<AccessProfile>> accessProfile
     );
 
     /**
@@ -124,7 +124,7 @@ public interface AccessRulesPort {
     public void deleteAccessProfile(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -144,10 +144,10 @@ public interface AccessRulesPort {
     @RequestWrapper(localName = "CreateAccessProfile", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl", className = "org.onvif.ver10.accessrules.wsdl.CreateAccessProfile")
     @ResponseWrapper(localName = "CreateAccessProfileResponse", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl", className = "org.onvif.ver10.accessrules.wsdl.CreateAccessProfileResponse")
     @WebResult(name = "Token", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-    public java.lang.String createAccessProfile(
+    public String createAccessProfile(
 
         @WebParam(name = "AccessProfile", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        org.onvif.ver10.accessrules.wsdl.AccessProfile accessProfile
+        AccessProfile accessProfile
     );
 
     /**
@@ -166,12 +166,12 @@ public interface AccessRulesPort {
     public void getAccessProfileInfoList(
 
         @WebParam(name = "Limit", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        java.lang.Integer limit,
+        Integer limit,
         @WebParam(name = "StartReference", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        java.lang.String startReference,
+        String startReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "NextStartReference", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        javax.xml.ws.Holder<java.lang.String> nextStartReference,
+        javax.xml.ws.Holder<String> nextStartReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "AccessProfileInfo", targetNamespace = "http://www.onvif.org/ver10/accessrules/wsdl")
-        javax.xml.ws.Holder<java.util.List<org.onvif.ver10.accessrules.wsdl.AccessProfileInfo>> accessProfileInfo
+        javax.xml.ws.Holder<java.util.List<AccessProfileInfo>> accessProfileInfo
     );
 }

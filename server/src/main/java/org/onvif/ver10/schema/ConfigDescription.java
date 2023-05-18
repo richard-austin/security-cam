@@ -1,19 +1,15 @@
 
 package org.onvif.ver10.schema;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 
 
 /**
@@ -61,7 +57,7 @@ public class ConfigDescription {
     @XmlElement(name = "Parameters", required = true)
     protected ItemListDescription parameters;
     @XmlElement(name = "Messages")
-    protected List<ConfigDescription.Messages> messages;
+    protected List<Messages> messages;
     @XmlElement(name = "Extension")
     protected ConfigDescriptionExtension extension;
     @XmlAttribute(name = "Name", required = true)
@@ -111,13 +107,13 @@ public class ConfigDescription {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ConfigDescription.Messages }
+     * {@link Messages }
      * 
      * 
      */
-    public List<ConfigDescription.Messages> getMessages() {
+    public List<Messages> getMessages() {
         if (messages == null) {
-            messages = new ArrayList<ConfigDescription.Messages>();
+            messages = new ArrayList<Messages>();
         }
         return this.messages;
     }

@@ -1,21 +1,17 @@
 
 package org.onvif.ver10.schema;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -64,7 +60,7 @@ public class EventSubscription {
     @XmlElement(name = "Filter")
     protected FilterType filter;
     @XmlElement(name = "SubscriptionPolicy")
-    protected EventSubscription.SubscriptionPolicy subscriptionPolicy;
+    protected SubscriptionPolicy subscriptionPolicy;
     @XmlAnyElement(lax = true)
     protected List<java.lang.Object> any;
     @XmlAnyAttribute
@@ -99,10 +95,10 @@ public class EventSubscription {
      * 
      * @return
      *     possible object is
-     *     {@link EventSubscription.SubscriptionPolicy }
+     *     {@link SubscriptionPolicy }
      *     
      */
-    public EventSubscription.SubscriptionPolicy getSubscriptionPolicy() {
+    public SubscriptionPolicy getSubscriptionPolicy() {
         return subscriptionPolicy;
     }
 
@@ -111,10 +107,10 @@ public class EventSubscription {
      * 
      * @param value
      *     allowed object is
-     *     {@link EventSubscription.SubscriptionPolicy }
+     *     {@link SubscriptionPolicy }
      *     
      */
-    public void setSubscriptionPolicy(EventSubscription.SubscriptionPolicy value) {
+    public void setSubscriptionPolicy(SubscriptionPolicy value) {
         this.subscriptionPolicy = value;
     }
 

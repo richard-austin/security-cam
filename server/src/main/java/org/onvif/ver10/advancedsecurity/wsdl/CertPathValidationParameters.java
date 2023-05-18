@@ -1,16 +1,13 @@
 
 package org.onvif.ver10.advancedsecurity.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -56,7 +53,7 @@ public class CertPathValidationParameters {
     protected Boolean requireTLSWWWClientAuthExtendedKeyUsage;
     @XmlElement(name = "UseDeltaCRLs", defaultValue = "false")
     protected Boolean useDeltaCRLs;
-    protected CertPathValidationParameters.AnyParameters anyParameters;
+    protected AnyParameters anyParameters;
 
     /**
      * Gets the value of the requireTLSWWWClientAuthExtendedKeyUsage property.
@@ -113,10 +110,10 @@ public class CertPathValidationParameters {
      * 
      * @return
      *     possible object is
-     *     {@link CertPathValidationParameters.AnyParameters }
+     *     {@link AnyParameters }
      *     
      */
-    public CertPathValidationParameters.AnyParameters getAnyParameters() {
+    public AnyParameters getAnyParameters() {
         return anyParameters;
     }
 
@@ -125,10 +122,10 @@ public class CertPathValidationParameters {
      * 
      * @param value
      *     allowed object is
-     *     {@link CertPathValidationParameters.AnyParameters }
+     *     {@link AnyParameters }
      *     
      */
-    public void setAnyParameters(CertPathValidationParameters.AnyParameters value) {
+    public void setAnyParameters(AnyParameters value) {
         this.anyParameters = value;
     }
 
