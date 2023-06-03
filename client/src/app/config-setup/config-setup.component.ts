@@ -252,7 +252,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         snapshotUri: new FormControl({
           value: camera.snapshotUri,
           disabled: false
-        }, [Validators.maxLength(55)]),
+        }, [Validators.maxLength(150)]),
         ptzControls: new FormControl({
           value: camera.ptzControls,
           disabled: false
