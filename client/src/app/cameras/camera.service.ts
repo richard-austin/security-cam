@@ -3,7 +3,7 @@ import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
-import {Camera, CameraParamSpec, CameraStream, Stream} from "./Camera";
+import {AudioEncoding, Camera, CameraParamSpec, CameraStream, Stream} from "./Camera";
 import {CameraAdminCredentials} from "../credentials-for-camera-access/credentials-for-camera-access.component";
 import { NativeDateAdapter } from '@angular/material/core';
 
@@ -72,7 +72,7 @@ export class CameraService {
 
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
 
-  private _cameraParamSpecs: CameraParamSpec[] =
+  public readonly _cameraParamSpecs: CameraParamSpec[] =
     [new CameraParamSpec(
       cameraType.none,
       "",
@@ -88,9 +88,22 @@ export class CameraService {
         'web/cgi-bin/hi3510/param.cgi',
         "ZTech MCW5B10X")]
 
+  private _audioEncodings: AudioEncoding[] = [
+    new AudioEncoding('None', 'None'),  // No audio in stream
+    new AudioEncoding('Not Listed', 'Not Listed'),  // Audio type not listed, transcode to AAC
+    new AudioEncoding('G711', 'G711'),  // Transcode to AAC
+    new AudioEncoding('G726', 'G726'),  // Transcode to AAC
+    new AudioEncoding('AAC', 'AAC'),    // No transcoding required
+
+  ];
+
   get cameraParamSpecs() {
     return this._cameraParamSpecs;
   };
+
+  get audioEncodings() {
+    return this._audioEncodings;
+  }
 
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     this.loadCameraStreams().subscribe(cameraStreams => {

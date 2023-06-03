@@ -37,7 +37,8 @@ func (c *Config) LogLevel() (err error, level log.Level) {
 
 type StreamC struct {
 	Descr               string `json:"descr"`
-	AudioBitRate        string `json:"audio_bitrate"`
+	Audio               bool   `json:"audio"`
+	AudioEncoding       string `json:"audio_encoding"`
 	NetcamUri           string `json:"netcam_uri"`
 	MediaServerInputUri string `json:"media_server_input_uri"`
 	URI                 string `json:"uri"`

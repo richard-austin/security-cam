@@ -90,11 +90,11 @@ class OnvifService {
             logService.cam.info "Camera discovery..."
             sc_processesService.stopProcesses()
             Collection<URL> urls = OnvifDiscovery.discoverOnvifURLs()
-            urls.add(new URL("http://192.168.1.156:8080/onvif/device_service"))
+            urls.add(new URL("http://192.168.1.43:8000/onvif/device_service"))
             List<OnvifCredentials> creds = []
             for (URL u : urls) {
                 logService.cam.info(u.toString())
-                OnvifCredentials c = new OnvifCredentials(u.host.toString() + ':' + u.port.toString(), '', 'R@', 'MediaProfile000')
+                OnvifCredentials c = new OnvifCredentials(u.host.toString() + ':' + u.port.toString(), 'admin', 'R@nc1dTapsB0ttom', 'MediaProfile000')
                 creds.add(c)
             }
 
@@ -131,8 +131,20 @@ class OnvifService {
                             stream.video_height = resolution.getHeight()
 
                             AudioEncoderConfiguration aec = profile.getAudioEncoderConfiguration()
-                            stream.audio_bitrate = aec.getBitrate()
-                            stream.audio_encoding = aec.getEncoding().value()
+                            int bitRate = aec.getBitrate()
+                            // bitRate should be in Kbps, though it is in bps from SV3C type cameras.
+                            if(bitRate < 200)
+                                bitRate *= 1000
+                            stream.audio_bitrate = bitRate
+                            String encoding = aec.getEncoding().value()
+                            if(isSupportedAudioOutputFmt(encoding)) {
+                                stream.audio_encoding = encoding
+                                stream.audio = true
+                            }
+                            else {
+                                stream.audio_encoding = "None"
+                                stream.audio = false
+                            }
                             stream.audio_sample_rate = aec.getSampleRate()
 
                             //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
@@ -166,6 +178,11 @@ class OnvifService {
             sc_processesService.startProcesses()
         }
         return result
+    }
+
+    private static boolean isSupportedAudioOutputFmt(String format) {
+        final String supportedFmtsRegex = /^(AAC|G711|G726)$/
+        return format.matches(supportedFmtsRegex)
     }
 
     /**
