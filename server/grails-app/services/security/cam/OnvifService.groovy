@@ -2,7 +2,6 @@ package security.cam
 
 import com.google.gson.internal.LinkedTreeMap
 import common.Authentication
-import common.AuthorizationHeaderParser
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
@@ -242,7 +241,7 @@ class OnvifService {
     TrustManager[] trustAllCerts = new TrustManager[]{
             new X509TrustManager() {
                 X509Certificate[] getAcceptedIssuers() {
-                    return null;
+                    return null
                 }
                 void checkClientTrusted(
                         X509Certificate[] certs, String authType) {
@@ -279,7 +278,7 @@ class OnvifService {
         ObjectCommandResponse result = new ObjectCommandResponse()
         SSLContext sc = SSLContext.getInstance("SSL")
         sc.init(null, trustAllCerts, new SecureRandom())
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
         // Create all-trusting host name verifier
         HostnameVerifier allHostsValid = new HostnameVerifier() {
             boolean verify(String hostname, SSLSession session) {

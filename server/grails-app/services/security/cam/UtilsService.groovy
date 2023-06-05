@@ -344,43 +344,4 @@ class UtilsService {
         process.waitFor()
         return new File(fifoName)
     }
-
-    /**
-     * generateAuthString: Generate the authorisation header for a digest authenticated web service
-     * @param username
-     * @param password
-     * @param realm: The realm returned in the 401 response in the WWW-Authenticate header
-     * @param method: The methode (GET, POST DESCRIBE etc)
-     * @param uri: The uri of the call
-     * @param nonce: The nonce value returned in the 401 response in the WWW-Authenticate header
-     * @return: The Authorization header value to use in the request re-try.
-     */
-    String generateAuthString(String username, String password, String realm, String method, String uri, String nonce, String qop) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-
-            md.update((username + ":" + realm + ":" + password).getBytes());
-            String m1 = String.format("%032x", new BigInteger(1, md.digest()));
-            md.reset();
-            md.update((method + ":" + uri).getBytes());
-            String m2 = String.format("%032x", new BigInteger(1, md.digest()))
-
-            md.reset();
-            md.update((m1 + ":" + nonce + ":" + m2).getBytes());
-            String response = String.format("%032x", new BigInteger(1, md.digest()));
-
-            String mapRetInf = "Digest ";
-            mapRetInf += "username=\"" + username + "\", ";
-            mapRetInf += "realm=\"" + realm + "\", ";
-            mapRetInf += "algorithm=\"MD5\", ";
-            mapRetInf += "nonce=\"" + nonce + "\", ";
-            mapRetInf += "uri=\"" + uri + "\", ";
-            mapRetInf += "response=\"" + response + "\"";
-            return mapRetInf;
-        } catch (Exception ignore) {
-
-        }
-        return "";
-    }
-
 }
