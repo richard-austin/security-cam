@@ -1,10 +1,13 @@
 package security.cam
 
 import com.google.gson.internal.LinkedTreeMap
+import common.Authentication
+import common.AuthorizationHeaderParser
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
+import org.apache.http.protocol.BasicHttpContext
 import org.onvif.ver10.schema.PTZNode
 import org.onvif.ver10.schema.PTZPreset
 import org.onvif.ver10.schema.PTZSpaces
@@ -32,6 +35,14 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
 import server.Stream
 
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSession
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -227,32 +238,73 @@ class OnvifService {
             lrs.motion.enabled = true
         }
     }
+// Create a trust manager that does not validate certificate chains
+    TrustManager[] trustAllCerts = new TrustManager[]{
+            new X509TrustManager() {
+                X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+                void checkClientTrusted(
+                        X509Certificate[] certs, String authType) {
+                }
+                void checkServerTrusted(
+                        X509Certificate[] certs, String authType) {
+                }
+            }
+    }
+
+    UtilsService utilsService
+
+    def getSnapshot(String url) {
+        ObjectCommandResponse resp = getSnapshotWithAuth(url, "")
+
+        if(resp.errno == 401) {
+            Authentication auth = new Authentication(null);
+            String username = camService.cameraAdminUserName()
+            String password = camService.cameraAdminPassword()
+
+            var ah = auth.getAuthResponse(username, password, "GET", url, resp.response as String, new BasicHttpContext())
+            String authString = ah.value
+            resp = getSnapshotWithAuth(url, authString)
+        }
+
+        return resp
+    }
 
     /**
      * getSnapshot: Get a snapshot from the given URL and save it as a jpg file to the stream1 recording location
      * @param url
      */
-    def getSnapshot(String strUrl) {
+    private def getSnapshotWithAuth(String strUrl, String authString) {
         ObjectCommandResponse result = new ObjectCommandResponse()
+        SSLContext sc = SSLContext.getInstance("SSL")
+        sc.init(null, trustAllCerts, new SecureRandom())
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        // Create all-trusting host name verifier
+        HostnameVerifier allHostsValid = new HostnameVerifier() {
+            boolean verify(String hostname, SSLSession session) {
+                return true
+            }
+        }
+
+        HttpsURLConnection.setDefaultHostnameVerifier (allHostsValid)
+
         HttpURLConnection uc = null
         try {
             URL url = new URL(strUrl)
             uc = url.openConnection() as HttpURLConnection
-            String username = camService.cameraAdminUserName()
-            String password = camService.cameraAdminPassword()
-
-            String userpass = "${username}:${password}"
-            String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()))
-            uc.setRequestProperty("Authorization", basicAuth)
+            uc.setRequestProperty("Authorization", authString)
             InputStream input = uc.getInputStream()
             result.responseObject = input.readAllBytes()
             input.close()
-//            Files.write(new File("${grailsApplication.config.camerasHomeDirectory}/auto.jpg").toPath(), result.responseObject as byte[])
         }
         catch (IOException ex) {
             result.error = "IO Error connecting to camera at ${strUrl}: ${ex.getMessage()}"
             if (uc != null) {
                 try {
+                    def rm = uc.getRequestMethod()
+                    result.response = uc.getHeaderField("WWW-Authenticate")
+
                     result.errno = uc.getResponseCode()
                 }
                 catch (Exception ignore) {
