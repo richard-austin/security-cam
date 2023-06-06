@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"net/url"
 	"os/exec"
 	"time"
 )
 
-func ffmpegFeed(cameras *Cameras) {
+func ffmpegFeed(cameras *Cameras, creds *CameraCredentials) {
 	for _, camera := range cameras.Cameras {
 		for _, stream := range camera.Streams {
 			go func(camera Camera, stream StreamC) {
@@ -21,7 +22,14 @@ func ffmpegFeed(cameras *Cameras) {
 					} else {
 						audio = "-c:a copy"
 					}
-					cmdStr := fmt.Sprintf("/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -fflags nobuffer -rtsp_transport tcp -i  %s -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_size 10 -preset superfast -tune zerolatency -f mp4 %s", stream.NetcamUri, audio, stream.MediaServerInputUri)
+					uri := stream.NetcamUri
+
+					if camera.CameraParamSpecs.CamType == 0 { // General type, credentials used
+						idx := len("rtsp://")
+						uri = uri[:idx] + url.QueryEscape(creds.CamerasAdminUserName) + ":" + url.QueryEscape(creds.CamerasAdminPassword) + "@" + uri[idx:]
+					}
+
+					cmdStr := fmt.Sprintf("/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -fflags nobuffer -rtsp_transport tcp -i  %s -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_size 10 -preset superfast -tune zerolatency -f mp4 %s", uri, audio, stream.MediaServerInputUri)
 					cmd := exec.Command("bash", "-c", cmdStr)
 					stdout, err := cmd.Output()
 
