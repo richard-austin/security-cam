@@ -27,11 +27,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
     ILogService logService;
     ICamServiceInterface camService;
     final Map<String, AccessDetails> accessDetailsMap;
-    final byte[] crlf = {'\r', '\n'};
-    final byte[] crlfcrlf = {'\r', '\n', '\r', '\n'};
-    final byte[] colonSpace = {':', ' '};
-    final private static Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
-    public static final int BUFFER_SIZE = 10000;
     final ExecutorService requestProcessing = Executors.newCachedThreadPool();
 
     public CamWebadminHostProxy(ILogService logService, ICamServiceInterface camService) {
@@ -97,12 +92,12 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             if (++pass == 1) {
                                 accessDetails.set(getAccessDetails(request));
                                 AccessDetails ad = accessDetails.get();
-                                if(ad != null)
+                                if(ad != null) {
                                     ad.addClient(client);  // Add to the list for forced close on exit from hosting
-
-                                Integer ct = camService.getCameraType(ad.cameraHost);
-                                camType.set(ct);
-                                server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
+                                    Integer ct = camService.getCameraType(ad.cameraHost);
+                                    camType.set(ct);
+                                    server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
+                                }
                             }
 
                             AtomicReference<ByteBuffer> newReq = new AtomicReference<>();

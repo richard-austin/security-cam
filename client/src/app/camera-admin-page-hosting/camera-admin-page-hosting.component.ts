@@ -6,7 +6,6 @@ import {ReportingComponent} from '../reporting/reporting.component';
 import {interval, Subscription} from 'rxjs';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {environment} from '../../environments/environment';
-import { ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-camera-admin-page-hosting',
