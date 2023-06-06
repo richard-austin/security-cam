@@ -4,6 +4,7 @@ import com.proxy.CamWebadminHostProxy
 import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import org.apache.http.config.SocketConfig
+import security.cam.commands.CloseClientsCommand
 import security.cam.commands.GetAccessTokenCommand
 import security.cam.commands.ResetTimerCommand
 import security.cam.enums.PassFail
@@ -56,6 +57,22 @@ class CameraAdminPageHostingService {
         {
             response.status= PassFail.FAIL
             response.error = ex.getClass().getName()+" in resetTimer: "+ex.getMessage()
+            logService.cam.error(response.error)
+        }
+        return response
+    }
+
+    def closeClients(CloseClientsCommand cmd) {
+        final ObjectCommandResponse response = new ObjectCommandResponse()
+
+        try {
+            if(!proxy.closeClientConnections(cmd.accessToken))
+                throw new Exception("No such accessToken "+cmd.accessToken)
+        }
+        catch(Exception ex)
+        {
+            response.status= PassFail.FAIL
+            response.error = ex.getClass().getName()+" in closeClients: "+ex.getMessage()
             logService.cam.error(response.error)
         }
         return response

@@ -7,6 +7,7 @@ import security.cam.CamService
 import security.cam.CameraAdminPageHostingService
 import security.cam.LogService
 import security.cam.ValidationErrorService
+import security.cam.commands.CloseClientsCommand
 import security.cam.commands.GetAccessTokenCommand
 import security.cam.commands.ResetTimerCommand
 import security.cam.commands.SetAccessCredentialsCommand
@@ -133,6 +134,21 @@ class CamController {
         }
         else {
             ObjectCommandResponse response = cameraAdminPageHostingService.resetTimer(cmd)
+            if(response.status != PassFail.PASS)
+                render (status: 500, text: response.error)
+            else
+                render (status: 200, text: (response.responseObject as JSON))
+        }
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def closeClients(CloseClientsCommand cmd) {
+        if(cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "closeClients")
+            render(status: 400, text: (errorsMap as JSON))
+        }
+        else {
+            ObjectCommandResponse response = cameraAdminPageHostingService.closeClients(cmd)
             if(response.status != PassFail.PASS)
                 render (status: 500, text: response.error)
             else

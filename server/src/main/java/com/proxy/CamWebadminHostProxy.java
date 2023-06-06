@@ -1,7 +1,7 @@
 package com.proxy;
 
 import common.HeaderProcessing;
-import org.jetbrains.annotations.NotNull;
+//import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -55,7 +55,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                     try {
                         // Wait for a connection on the local port
                         client = s.accept();
-
                         requestProcessing(client);
                     } catch (Exception ex) {
                         logService.getCam().error(ex.getClass().getName() + " in runServer: " + ex.getMessage());
@@ -68,11 +67,11 @@ public class CamWebadminHostProxy extends HeaderProcessing {
         });
     }
 
-    void requestProcessing(@NotNull SocketChannel client) {
+    void requestProcessing(SocketChannel client) {
         requestProcessing.submit(() -> handleClientRequest(client));
     }
 
-    private void handleClientRequest(@NotNull SocketChannel client) {
+    private void handleClientRequest(SocketChannel client) {
         try {
             ByteBuffer reply = getBuffer();
             final Object lock = new Object();
@@ -84,19 +83,22 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                 SocketChannel server = SocketChannel.open();
                 final AtomicReference<AccessDetails> accessDetails = new AtomicReference<>();
                 final AtomicReference<ByteBuffer> updatedReq = new AtomicReference<>();
+                final AtomicInteger camType = new AtomicInteger();
                 // a thread to read the client's requests and pass them
                 // to the server. A separate thread for asynchronous.
                 requestProcessing.submit(() -> {
                     ByteBuffer request = getBuffer();
                     try {
                         long pass = 0;
-                        AtomicInteger camType = new AtomicInteger();
+
                         client.configureBlocking(true);
                         while (client.read(request) != -1) {
                             request.flip();
                             if (++pass == 1) {
                                 accessDetails.set(getAccessDetails(request));
                                 AccessDetails ad = accessDetails.get();
+                                if(ad != null)
+                                    ad.addClient(client);  // Add to the list for forced close on exit from hosting
 
                                 Integer ct = camService.getCameraType(ad.cameraHost);
                                 camType.set(ct);
@@ -165,6 +167,13 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                     server.configureBlocking(true);
                     while (server.isOpen() && (server.read(reply)) != -1) {
                         reply.flip();
+                        AtomicReference<ByteBuffer> arNoXFrame = new AtomicReference<>();
+                        if(camType.get() == none) {
+                            if (removeHeader(reply, arNoXFrame, "X-Frame-Options"))
+                                reply = arNoXFrame.get();
+                            if (removeHeader(reply, arNoXFrame, "X-Xss-Protection"))
+                                reply = arNoXFrame.get();
+                       }
                         // Only set the session cookie if it's not already set
                         if (++pass == 1) {
                             if (!accessDetails.get().getHasCookie()) {
@@ -172,7 +181,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
 
                                 if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + accessDetails.get().getAccessToken() + "; path=/; HttpOnly"))
                                     reply = arReply.get();
-
                             }
                         }
                         String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
@@ -240,7 +248,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
         return retVal;
     }
 
-    String getSessionId(@NotNull String cookies) {
+    String getSessionId(String cookies) {
         String retVal = "";
         final String semiColon = ";";
         final String key = "SESSION-ID=";
@@ -275,6 +283,19 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                 ad.resetTimer();
             } else
                 retVal = false;
+            return retVal;
+        }
+    }
+
+    public boolean closeClientConnections(String accessToken) {
+        synchronized (accessDetailsMap) {
+            boolean retVal = true;
+            AccessDetails ad = accessDetailsMap.get(accessToken);
+            if (ad != null)
+                ad.closeClients();
+            else
+                retVal = false;
+
             return retVal;
         }
     }

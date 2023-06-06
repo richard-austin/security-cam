@@ -286,4 +286,9 @@ export class CameraService {
     return this.http.post<void>(this._baseUrl.getLink("cam", "resetTimer"), params, this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
+  closeClients(accessToken: string): Observable<void> {
+    let params:{} = {accessToken: accessToken}
+    return this.http.post<void>(this._baseUrl.getLink("cam", "closeClients"), params, this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
 }
