@@ -23,13 +23,15 @@ func ffmpegFeed(cameras *Cameras, creds *CameraCredentials) {
 						audio = "-c:a copy"
 					}
 					uri := stream.NetcamUri
+					rtsp_transport := "tcp"
 
 					if camera.CameraParamSpecs.CamType == 0 { // General type, credentials used
+						rtsp_transport = "udp"
 						idx := len("rtsp://")
 						uri = uri[:idx] + url.QueryEscape(creds.CamerasAdminUserName) + ":" + url.QueryEscape(creds.CamerasAdminPassword) + "@" + uri[idx:]
 					}
 
-					cmdStr := fmt.Sprintf("/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -fflags nobuffer -rtsp_transport tcp -i  %s -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_size 10 -preset superfast -tune zerolatency -f mp4 %s", uri, audio, stream.MediaServerInputUri)
+					cmdStr := fmt.Sprintf("/usr/bin/ffmpeg -hide_banner -loglevel error -stimeout 1000000 -fflags nobuffer -rtsp_transport %s -i  %s -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_size 10 -preset superfast -tune zerolatency -f mp4 %s", rtsp_transport, uri, audio, stream.MediaServerInputUri)
 					cmd := exec.Command("bash", "-c", cmdStr)
 					stdout, err := cmd.Output()
 
