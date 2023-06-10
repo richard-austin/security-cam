@@ -193,7 +193,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     if (camera?.cameraParamSpecs?.camType === undefined)
       return true;
     else
-      return this.motionSet(camera) || (camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X);
+      return this.motionSet(camera);
   }
 
   /**

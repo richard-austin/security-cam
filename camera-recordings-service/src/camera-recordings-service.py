@@ -89,9 +89,6 @@ class FTPAndVideoFileProcessor(FTPHandler):
     def create_recording_path(self, ftp_file_path: str):
         recording_path: str = ftp_file_path.replace(self.ftpPath, '')
 
-    """
-        convert264File: Convert an .264 file received from a camera to an hls file
-    """
     def finish_recording(self, subproc: subprocess, location: str):
         subproc.send_signal(signal.SIGINT)
         subproc.wait()
@@ -99,12 +96,11 @@ class FTPAndVideoFileProcessor(FTPHandler):
         self.processDict.pop(location)
 
     def triggerRecordingFromFTPFile(self, path: str):
-        f = open("/var/security-cam/cameras.json")
+        cams_file = open("/var/security-cam/cameras.json")
         location: str = ""
 
         try:
-            cams = json.load(f)
-
+            cams = json.load(cams_file)
             camera_name: str = path.replace(self.ftpPath, '', 1)
             camera_name = camera_name[1: camera_name.index('/', 1)]
             camera = cams[camera_name]
@@ -112,27 +108,21 @@ class FTPAndVideoFileProcessor(FTPHandler):
             if camera is not None and camera["ftp"]:
                 if path.endswith('.jpg'):  # Only dealing with jpg files
                     cam_type: CameraType = camera['cameraParamSpecs']['camType']
+
                     first_stream = next(iter(camera['streams']))
                     location = camera['streams'][first_stream]['recording']['location']
+                    audio = camera["streams"][first_stream]["audio"]
                     recording_src_url = camera['streams'][first_stream]['recording']['recording_src_url']
                     epoch_time = int(time.time())
                     match cam_type:
-                        case CameraType.sv3c.value:
+                        case CameraType.sv3c.value | CameraType.zxtechMCW5B10X.value | CameraType.none.value:
                             ffmpeg_cmd = (
-                                f"ffmpeg -i {recording_src_url} -t 01:00:00 -an -c:v copy -level 3.0" 
-                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type fmp4"
-                                f" -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
-                                f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")
-
-                        case CameraType.zxtechMCW5B10X.value:
-                            ffmpeg_cmd = (
-                                f"ffmpeg -i {recording_src_url} -t 01:00:00 -c:a copy -c:v copy -level 3.0"
-                                f" -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type fmp4"
-                                f" -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
+                                f"ffmpeg -i {recording_src_url} -t 01:00:00 {'-c:a copy' if audio else '-an'}"
+                                f" -c:v copy -level 3.0 -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type"
+                                f" fmp4 -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
                                 f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")
                         case _:
-                            logger.warning(f"No camera type for file {path}, deleting it")
-                            os.remove(path)
+                            logger.warning(f"No camera type for file {path}")
 
                     if ffmpeg_cmd != "":
                         if self.processDict.__contains__(location):
