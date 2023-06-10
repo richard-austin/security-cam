@@ -17,7 +17,7 @@ public class HeaderProcessing {
     final byte[] crlfcrlf = {'\r', '\n', '\r', '\n'};
     final byte[] colonSpace = {':', ' '};
     final private Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
-    public final int BUFFER_SIZE = 10000;
+    public final int BUFFER_SIZE = 5000;
     protected ILogService logService;
 
     protected HeaderProcessing(ILogService logService) {
@@ -31,12 +31,13 @@ public class HeaderProcessing {
             // Check that the double CRLF is present
             List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf, 0, byteBuffer.limit());
             if (indexList.size() > 0) {
+                final int endOfHeadersIdx = indexList.get(0)+crlfcrlf.length-1;
                 // OK so look for the header key
-                indexList = bs.searchBytes(byteBuffer.array(), key.getBytes(StandardCharsets.UTF_8), 0, byteBuffer.limit());
+                indexList = bs.searchBytes(byteBuffer.array(), key.getBytes(StandardCharsets.UTF_8), 0, endOfHeadersIdx);
                 if (indexList.size() > 0) {
                     final int idx1 = indexList.get(0);
                     // Find the CRLF at the end of this header
-                    indexList = bs.searchBytes(byteBuffer.array(), crlf, idx1, byteBuffer.limit());
+                    indexList = bs.searchBytes(byteBuffer.array(), crlf, idx1, endOfHeadersIdx);
                     if (indexList.size() > 0) {
                         final int endIdx = indexList.get(0);
                         //Find the start of the header value
@@ -137,10 +138,11 @@ public class HeaderProcessing {
         BinarySearcher bs = new BinarySearcher();
         List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf, 0, byteBuffer.limit());
         if (indexList.size() > 0) {
+            final int endOfHeadersIdx = indexList.get(0)+crlfcrlf.length-1;
             // Find the first crlf
-            indexList = bs.searchBytes(byteBuffer.array(), crlf, 0, byteBuffer.limit());
+            indexList = bs.searchBytes(byteBuffer.array(), crlf, 0, endOfHeadersIdx);
             if (indexList.size() > 0) {
-                String firstLine = new String(byteBuffer.array(), 0, indexList.get(0));
+                String firstLine = new String(byteBuffer.array(), 0, endOfHeadersIdx);
                 if (firstLine.contains("HTTP"))
                     httpHeader = firstLine;
             }
@@ -156,8 +158,9 @@ public class HeaderProcessing {
         BinarySearcher bs = new BinarySearcher();
         List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf, 0, byteBuffer.limit());
         if (indexList.size() > 0) {
+            final int endOfHeadersIdx = indexList.get(0)+crlfcrlf.length-1;
             // Find the first crlf
-            indexList = bs.searchBytes(byteBuffer.array(), crlf, 0, byteBuffer.limit());
+            indexList = bs.searchBytes(byteBuffer.array(), crlf, 0, endOfHeadersIdx);
             if (indexList.size() > 0) {
                 String firstLine = new String(byteBuffer.array(), 0, indexList.get(0));
                 if (firstLine.contains("RTSP/"))

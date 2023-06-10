@@ -277,7 +277,7 @@ class UtilsService {
                 command.add("8K")
                 command.add("-f")
                 command.add("rtp")
-                command.add("rtp://192.168.1.43:6970\\?localaddr=192.168.1.207\\&localport=45178\\&streamtype=unicast")
+                command.add("rtp://192.168.1.43:6974\\?localaddr=192.168.1.207\\&localport=45178\\&streamtype=unicast")
                 audioOutProc = new ProcessBuilder(command).inheritIO().start()
                 // Create a file output stream for the websocket handler to write to the fifo
                 fos = new FileOutputStream(fifo)

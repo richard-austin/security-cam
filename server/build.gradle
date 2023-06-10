@@ -74,6 +74,8 @@ configurations {
 
 
 dependencies {
+    implementation 'org.jetbrains:annotations:24.0.0'
+
 //    implementation 'org.projectlombok:lombok:1.18.16'
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation 'org.grails.plugins:spring-security-core:4.0.3'
@@ -100,6 +102,8 @@ dependencies {
     implementation "org.grails.plugins:hibernate5"
     implementation "org.hibernate:hibernate-core"
     implementation 'com.google.code.gson:gson:2.8.9'
+// https://mvnrepository.com/artifact/javax.sdp/nist-sdp
+    implementation 'javax.sdp:nist-sdp:1.0'
 
     implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.1'
     implementation "org.grails.plugins:gsp"

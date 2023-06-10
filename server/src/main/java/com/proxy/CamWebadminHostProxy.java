@@ -98,7 +98,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                     server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
                                 }
                             }
-
+                            logService.getCam().trace("pass = "+pass);
                             AtomicReference<ByteBuffer> newReq = new AtomicReference<>();
                             if(modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost)) {
                                 request = newReq.get();
@@ -114,11 +114,15 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                         final String username = camService.cameraAdminUserName();
                                         final String password = camService.cameraAdminPassword();
 
-                                        String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
-                                        if (addHeader(request, updatedReq, "Authorization", "Basic " + encodedCredentials)) {
-                                            request = updatedReq.get();
+                                        if(camType.get() != none) {
+                                            String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+                                            if (addHeader(request, updatedReq, "Authorization", "Basic " + encodedCredentials)) {
+                                                request = updatedReq.get();
+                                            }
                                         }
                                     }
+
+                                    logService.getCam().trace("serverPass = "+serverPass);
                                 }
                                 String xyz = "\nRequest: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
                                 logService.getCam().trace(xyz);
@@ -162,21 +166,21 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                     while (server.isOpen() && (server.read(reply)) != -1) {
                         reply.flip();
                         AtomicReference<ByteBuffer> arNoXFrame = new AtomicReference<>();
-                        if(camType.get() == none) {
-                            if (removeHeader(reply, arNoXFrame, "X-Frame-Options"))
-                                reply = arNoXFrame.get();
-                            if (removeHeader(reply, arNoXFrame, "X-Xss-Protection"))
-                                reply = arNoXFrame.get();
-                       }
                         // Only set the session cookie if it's not already set
                         if (++pass == 1) {
+                            if(camType.get() == none) {
+                                if (removeHeader(reply, arNoXFrame, "X-Frame-Options"))
+                                    reply = arNoXFrame.get();
+                                if (removeHeader(reply, arNoXFrame, "X-Xss-Protection"))
+                                    reply = arNoXFrame.get();
+                            }
                             if (!accessDetails.get().getHasCookie()) {
                                 AtomicReference<ByteBuffer> arReply = new AtomicReference<>();
-
                                 if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + accessDetails.get().getAccessToken() + "; path=/; HttpOnly"))
                                     reply = arReply.get();
                             }
                         }
+                        logService.getCam().trace("server.read pass = "+pass);
                         String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
                         logService.getCam().trace(x);
                         client.write(reply);
