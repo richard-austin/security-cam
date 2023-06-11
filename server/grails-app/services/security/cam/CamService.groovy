@@ -169,7 +169,7 @@ class CamService implements ICamServiceInterface{
         return response
     }
 
-    private def getCameraCredentials()
+    def getCameraCredentials()
     {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
