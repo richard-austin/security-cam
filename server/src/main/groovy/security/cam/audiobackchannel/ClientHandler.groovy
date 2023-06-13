@@ -291,6 +291,6 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             throws Exception {
 
         System.out.println("${cause.getClass().getName()}: ${cause.getMessage()}")        //do more exception handling
-        ctx.close();
+        ctx.close()
     }
 }
