@@ -17,19 +17,30 @@ import javax.sdp.SdpParseException
 import javax.sdp.SessionDescription
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
 class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
-    final Queue<HttpRequest> requestQueue
+    Timer keepaliveTimer
+    Timer endTime
+    ExecutorService writeExec
+    HttpRequest request
+    final Object requestLock = new Object()
     final String url
     AtomicReference<Vector<AttributeField>> backChannel = new AtomicReference<>()
     int server_port
+    final String userAgent = "JAVA_Client"
+    HttpMessage lastMessage
+    ChannelHandlerContext context
+
     ClientHandler(final String url) {
         this.url = url
-        requestQueue = new ConcurrentLinkedQueue<>()
         HttpRequest options = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.OPTIONS, url)
-        requestQueue.add(options)
+        request = options
+        endTime =new Timer()
+        keepaliveTimer = new Timer()
+        writeExec = Executors.newFixedThreadPool(45)
     }
 
     private void handleOptions(HttpResponse msg) {
@@ -47,15 +58,14 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         else if (!pub.contains("SET_PARAMETER"))
             throw new RtspException("No SET_PARAMETER option")
         else {
-            final String userAgent = "JAVA_Client"
             HttpRequest describe = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0,
                     RtspMethods.DESCRIBE, url)
             // The ZXTech camera won't accept the all lower case header names in RtspHeaderNames
-            describe.headers().add("User-Agent"/*"RtspHeaderNames.USER_AGENT"*/, userAgent)
+            describe.headers().add("User-Agent", userAgent)
             describe.headers().add("Accept", "application/sdp")
             describe.headers().add("Require", "www.onvif.org/ver20/backchannel")
             describe.headers().add(RtspHeaderNames.ACCEPT, "application/sdp")
-            requestQueue.add(describe)
+            request = describe
         }
     }
 
@@ -67,34 +77,35 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             AttributeField controlAttr = backChannel.get().find(x -> {
                 x.name == "control"
             })
-            if(controlAttr == null)
+            if (controlAttr == null)
                 throw new RtspException("No control attribute found for backchannel")
             HttpRequest setup = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0,
                     RtspMethods.SETUP, url + "/${controlAttr.value}")
             setup.headers().add("Transport", "RTP/AVP;unicast;client_port=45178-45179")
+            setup.headers().add("User-Agent", userAgent)
             setup.headers().add("Require", "www.onvif.org/ver20/backchannel")
-            requestQueue.add(setup)
+            request = setup
         } else {
             throw new RtspException("DESCRIBE returned error code ${msg.status().code()}")
         }
     }
 
-    private void setupTransport(FullHttpResponse msg){
-        if(!msg.headers().contains("transport"))
+    private void setupTransport(FullHttpResponse msg) {
+        if (!msg.headers().contains("transport"))
             throw new RtspException("No transport header in SETUP response")
         String transport = msg.headers().get("transport")
-        if(!transport.contains("RTP"))
+        if (!transport.contains("RTP"))
             throw new RtspException("RTP transport not specified")
 
         final String server_portEq = "server_port="
         final int idxSp = transport.indexOf(server_portEq)
-        if(idxSp == -1)
+        if (idxSp == -1)
             throw new RtspException("Server port not specified")
         final int idxSpEnd = transport.indexOf("-", idxSp)
-        if(idxSpEnd == -1 || (idxSpEnd-idxSp <= server_portEq.length()))
+        if (idxSpEnd == -1 || (idxSpEnd - idxSp <= server_portEq.length()))
             throw new RtspException("Server port numbers cannot be found")
 
-        server_port = Integer.valueOf(transport.substring(idxSp+server_portEq.length(), idxSpEnd))
+        server_port = Integer.valueOf(transport.substring(idxSp + server_portEq.length(), idxSpEnd))
         int q = server_port
     }
 
@@ -107,32 +118,59 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             setupTransport(msg)
             HttpRequest play = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.PLAY, url)
             play.headers().add("Require", "www.onvif.org/ver20/backchannel")
+            play.headers().add("User-Agent", userAgent)
             play.headers().add("Date", date)
             play.headers().add("Range", "npt=0.000-")
-            requestQueue.add(play)
+            request = play
         } else {
             throw new RtspException("SETUP returned error code ${msg.status().code()}")
         }
     }
 
-    private void handlePlay(FullHttpResponse msg) {
+    private sendKeepAlive(ChannelHandlerContext ctx, HttpResponse msg) {
+        HttpRequest get_parameter = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.GET_PARAMETER, url)
+        get_parameter.headers().add("User-Agent", userAgent)
+        request = get_parameter
+        addGeneralHeaders(msg)
+        ctx.writeAndFlush(request)
+    }
+
+    private void handlePlay(final ChannelHandlerContext ctx, FullHttpResponse msg) {
         if (msg.status() == HttpResponseStatus.OK) {
-            Thread.sleep(10000)
-            HttpRequest tearDown = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.TEARDOWN, url)
-            tearDown.headers().add("Require", "www.onvif.org/ver20/backchannel")
-            requestQueue.add(tearDown)
+            endTime.schedule(() -> {
+                endSession()
+            }, 70000)
+
+            keepaliveTimer.scheduleAtFixedRate(() -> sendKeepAlive(ctx, msg), 10000, 10000)
+            request = null
         } else {
-            throw new RtspException("SETUP returned error code ${msg.status().code()}")
+            throw new RtspException("PLAY returned error code ${msg.status().code()}")
+        }
+    }
+
+    void handleTeardown(FullHttpResponse msg) {
+        request = null
+    }
+
+    private void handleGetParameter(FullHttpResponse msg) {
+        if (msg.status() == HttpResponseStatus.OK) {
+            request = null
+        } else {
+            throw new RtspException("GET_PARAMETER returned error code ${msg.status().code()}")
         }
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpObject obj) throws Exception {
         HttpResponse msg = (HttpResponse) obj
+        lastMessage = msg
+        context = ctx
+        
+        System.out.println("Response -" + msg.toString())
+        System.out.println("CTX -" + ctx.toString())
 
         if (msg.status() != HttpResponseStatus.UNAUTHORIZED) {
-            if (obj instanceof FullHttpResponse) {
-                HttpRequest request = requestQueue.peek();
+            if (obj instanceof FullHttpResponse && request != null) {
                 switch (request.method()) {
                     case RtspMethods.OPTIONS:
                         handleOptions(obj)
@@ -147,40 +185,45 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
                         break
 
                     case RtspMethods.PLAY:
-                        handlePlay(obj)
+                        handlePlay(ctx, obj)
                         break
+
+                    case RtspMethods.GET_PARAMETER:
+                        handleGetParameter(obj)
+                        break
+
+                    case RtspMethods.TEARDOWN:
+                        handleTeardown(obj)
+                        break
+
+                    default:
+                        return
+                 }
+
+                if (request != null) {
+                    addGeneralHeaders(msg)
+                    ctx.writeAndFlush(request)
                 }
-
             }
-
-            requestQueue.remove()
-            HttpRequest req = requestQueue.peek()
-
-            if (msg.headers().contains("Session")) {
-                String sessionId = msg.headers().get("Session")
-                int idxOfSemiColon = sessionId.indexOf(";")
-                if (idxOfSemiColon != -1)
-                    sessionId = sessionId.substring(0, idxOfSemiColon)
-
-                req.headers().add("Session", sessionId)
+        } else {  // Unauthorised, run the request again
+            if (request != null) {
+                request.headers().remove("CSeq")
+                request.headers().add("CSeq", getSeqNumber())
             }
-
-            if (req != null) {
-                req.headers().add("CSeq", getSeqNumber())
-            }
-            ctx.channel().writeAndFlush(requestQueue.peek())
-
-            Set<String> names = msg.headers().names()
-            System.out.println("Response -" + msg.toString())
-            System.out.println("CTX -" + ctx.toString())
-        } else {
-            HttpRequest req = requestQueue.peek()
-            if (req != null) {
-                req.headers().remove("CSeq")
-                req.headers().add("CSeq", getSeqNumber())
-            }
-            ctx.channel().writeAndFlush(req)
+            ctx.writeAndFlush(request)
         }
+    }
+
+    void addGeneralHeaders(HttpMessage msg) {
+        if (msg.headers().contains("Session")) {
+            String sessionId = msg.headers().get("Session")
+            int idxOfSemiColon = sessionId.indexOf(";")
+            if (idxOfSemiColon != -1)
+                sessionId = sessionId.substring(0, idxOfSemiColon)
+
+            request.headers().add("Session", sessionId)
+        }
+        request.headers().add("CSeq", getSeqNumber())
     }
 
     void parseDescribeSdp(String sdpContent) {
@@ -219,6 +262,15 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         }
     }
 
+    void endSession() {
+        keepaliveTimer.cancel()  // Stop the keep alive (GET_PARAMETER) calls
+        endTime.cancel()
+        HttpRequest tearDown = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.TEARDOWN, url)
+        tearDown.headers().add("Require", "www.onvif.org/ver20/backchannel")
+        request = tearDown
+        addGeneralHeaders(lastMessage)
+        context.writeAndFlush(request)
+    }
 
     static int seq = 0
 
@@ -228,10 +280,10 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
 
     void start(Channel ch) {
-        if (requestQueue.peek() != null) {
-            requestQueue.peek().headers().add("CSeq", getSeqNumber())
+        if (request != null) {
+            request.headers().add("CSeq", getSeqNumber())
         }
-        ch.writeAndFlush(requestQueue.peek())
+        ch.writeAndFlush(request)
     }
 
     @Override
