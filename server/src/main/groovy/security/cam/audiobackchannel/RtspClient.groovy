@@ -40,13 +40,13 @@ class RtspClient {
 
     void sendReq() {
         final String pipeName = "/home/richard/opfifo"
-        Channel ch = start(host, port)
+        start(host, port)
     }
 
     void start(String ip, int port) {
         try {
             Bootstrap rtspClient = new Bootstrap()
-            EventLoopGroup workerGroup = new NioEventLoopGroup(1); // todo: avoid possible nonceCount race
+            EventLoopGroup workerGroup = new NioEventLoopGroup(1) // todo: avoid possible nonceCount race
             final ClientHandler handler = new ClientHandler(url)
             Channel ch
             handler.setMessageCallback(new MessageCallback() {

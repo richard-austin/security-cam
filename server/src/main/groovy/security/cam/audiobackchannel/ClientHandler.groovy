@@ -330,7 +330,6 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         netType = origin.getNetworkType()
         addrType = origin.getAddressType()
 
-
         final Vector<MediaDescriptionImpl> md = sessionDescription.getMediaDescriptions(true)
         Vector<AttributeField> audio
         md.forEach((mediaDescription -> {

@@ -30,6 +30,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.*;
 import org.apache.http.protocol.BasicHttpContext;
+import org.jetbrains.annotations.NotNull;
 
 @ChannelHandler.Sharable
 public class NettyHttpAuthenticator extends ChannelDuplexHandler {
@@ -44,9 +45,8 @@ public class NettyHttpAuthenticator extends ChannelDuplexHandler {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof HttpResponse) {
-            HttpResponse httpResponse = (HttpResponse) msg;
+    public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) throws Exception {
+        if (msg instanceof HttpResponse httpResponse) {
             HttpResponseStatus status = httpResponse.status();
 
             String authenticateHeader = httpResponse.headers().get(HttpHeaderNames.WWW_AUTHENTICATE);
