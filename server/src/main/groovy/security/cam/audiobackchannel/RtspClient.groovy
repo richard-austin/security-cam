@@ -47,7 +47,7 @@ class RtspClient {
         try {
             Bootstrap rtspClient = new Bootstrap()
             EventLoopGroup workerGroup = new NioEventLoopGroup(1) // todo: avoid possible nonceCount race
-            final ClientHandler handler = new ClientHandler(url)
+            final BackchannelClientHandler handler = new BackchannelClientHandler(url)
             Channel ch
             handler.setMessageCallback(new MessageCallback() {
                 @Override
@@ -76,8 +76,9 @@ class RtspClient {
                 ch = rtspClient.connect(ip, port).sync().channel()
                 handler.setOnReady(new OnReady() {
                     @Override
-                    void ready(ClientHandler h) {
+                    void ready(BackchannelClientHandler h) {
                         System.out.println("Ready! ${h.getRTPAudioEncoding()}")
+                        def x = h.getMediaField()
                     }
                 })
                 handler.start(ch)

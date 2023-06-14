@@ -1,7 +1,7 @@
 package security.cam.interfaceobjects
 
-import security.cam.audiobackchannel.ClientHandler
+import security.cam.audiobackchannel.BackchannelClientHandler
 
 interface OnReady {
-    void ready(ClientHandler handler)
+    void ready(BackchannelClientHandler handler)
 }

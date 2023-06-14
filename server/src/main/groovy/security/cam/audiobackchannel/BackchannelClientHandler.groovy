@@ -21,12 +21,13 @@ import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.concurrent.atomic.AtomicReference
 
-class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
+class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     private Timer keepaliveTimer
     private Timer endTime
     private HttpRequest request
     private final String url
     private  AtomicReference<Vector<AttributeField>> backChannel = new AtomicReference<>()
+    private MediaField mediaField = null
     private  String address
     private  String netType
     private  String addrType
@@ -44,7 +45,7 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
     public final VacantPorts vacantPorts
 
-    ClientHandler(final String url) {
+    BackchannelClientHandler(final String url) {
         this.url = url
         HttpRequest options = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.OPTIONS, url)
         request = options
@@ -52,6 +53,10 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         keepaliveTimer = new Timer()
         vacantPorts = findClientPorts()
         unauthorisedCount = 0
+    }
+
+    MediaField getMediaField() {
+        return mediaField
     }
 
     String getOriginAddress() {
@@ -331,19 +336,15 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         addrType = origin.getAddressType()
 
         final Vector<MediaDescriptionImpl> md = sessionDescription.getMediaDescriptions(true)
-        Vector<AttributeField> audio
         md.forEach((mediaDescription -> {
             final Vector<AttributeField> attributeFields = mediaDescription.getAttributeFields()
             attributeFields.forEach(attributeField -> {
                 // Save the backchannel details
                 if (Objects.equals(attributeField.getName(), "sendonly")) {
                     backChannel.set(attributeFields)
+                    mediaField = mediaDescription.getMediaField()
                 }
            })
-
-            final MediaField mediaField = mediaDescription.getMediaField()
-            def g = mediaField
-
         }))
 
         if (backChannel.get() == null)
