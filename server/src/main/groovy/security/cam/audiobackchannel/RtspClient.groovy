@@ -14,6 +14,7 @@ import io.netty.handler.codec.rtsp.RtspEncoder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import security.cam.interfaceobjects.MessageCallback
+import security.cam.interfaceobjects.OnReady
 
 class RtspClient {
     private final String username
@@ -37,7 +38,7 @@ class RtspClient {
         client.sendReq()
     }
 
-    void sendReq() throws InterruptedException {
+    void sendReq() {
         final String pipeName = "/home/richard/opfifo"
         Channel ch = start(host, port)
     }
@@ -73,6 +74,12 @@ class RtspClient {
             rtspClient.remoteAddress(ip, port)
             try {
                 ch = rtspClient.connect(ip, port).sync().channel()
+                handler.setOnReady(new OnReady() {
+                    @Override
+                    void ready(ClientHandler h) {
+                        System.out.println("Ready! ${h.getRTPAudioEncoding()}")
+                    }
+                })
                 handler.start(ch)
             } catch (Exception e) {
                 System.out.println("Error " + e)

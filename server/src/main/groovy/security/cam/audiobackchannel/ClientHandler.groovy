@@ -2,6 +2,7 @@ package security.cam.audiobackchannel
 
 import gov.nist.javax.sdp.MediaDescriptionImpl
 import gov.nist.javax.sdp.fields.AttributeField
+import gov.nist.javax.sdp.fields.MediaField
 import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
@@ -11,30 +12,37 @@ import io.netty.handler.codec.rtsp.RtspHeaderNames
 import io.netty.handler.codec.rtsp.RtspMethods
 import io.netty.handler.codec.rtsp.RtspVersions
 import security.cam.interfaceobjects.MessageCallback
+import security.cam.interfaceobjects.OnReady
 
 import javax.sdp.Origin
 import javax.sdp.SdpFactory
 import javax.sdp.SessionDescription
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
 class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
-    Timer keepaliveTimer
-    Timer endTime
-    ExecutorService writeExec
-    HttpRequest request
-    final String url
-    AtomicReference<Vector<AttributeField>> backChannel = new AtomicReference<>()
-    int server_port
-    int server_port2
+    private Timer keepaliveTimer
+    private Timer endTime
+    private HttpRequest request
+    private final String url
+    private  AtomicReference<Vector<AttributeField>> backChannel = new AtomicReference<>()
+    private  String address
+    private  String netType
+    private  String addrType
+
+    private int server_port
+    private int server_port2
+    private AttributeField rtpmap
+
     final String userAgent = "JAVA_Client"
     HttpMessage lastMessage
     ChannelHandlerContext context
     int unauthorisedCount
     MessageCallback messageCallback
+    OnReady onReady
+
+    public final VacantPorts vacantPorts
 
     ClientHandler(final String url) {
         this.url = url
@@ -42,14 +50,70 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         request = options
         endTime = new Timer()
         keepaliveTimer = new Timer()
-        writeExec = Executors.newFixedThreadPool(45)
+        vacantPorts = findClientPorts()
         unauthorisedCount = 0
+    }
+
+    String getOriginAddress() {
+        return address
+    }
+
+    String getOriginAddrType() {
+        return addrType
+    }
+
+    String getOriginNetType() {
+        return netType
+    }
+
+    int getServerPort() {
+        return server_port
+    }
+
+    int getServerPort2() {
+        return server_port2
+    }
+
+    int getRTPPayloadType() {
+        if(rtpmap != null) {
+            final int spaceIdx = rtpmap.value.indexOf(' ')
+            if(spaceIdx == -1)
+                throw new RtspException("Unexpected rtpmap format")
+            return Integer.valueOf(rtpmap.value.substring(0, spaceIdx))
+        }
+        else
+            throw new RtspException("No rtpmap found")
+    }
+    String getRTPAudioEncoding() {
+        if(rtpmap != null) {
+            final int spaceIdx = rtpmap.value.indexOf(' ')
+            final int fwdSlashIdx = rtpmap.value.indexOf("/")
+            if(spaceIdx == -1 || fwdSlashIdx == -1)
+                throw new RtspException("Unexpected rtpmap format")
+            return rtpmap.value.substring(spaceIdx+1, fwdSlashIdx)
+        }
+        else
+            throw new RtspException("No rtpmap found")
+    }
+
+    String getRTPAudioClockRate() {
+        if(rtpmap != null) {
+            final int fwdSlashIdx = rtpmap.value.indexOf("/")
+            if(fwdSlashIdx == -1)
+                throw new RtspException("Unexpected rtpmap format")
+            return rtpmap.value.substring(fwdSlashIdx+1)
+        }
+        else
+            throw new RtspException("No rtpmap found")
     }
 
     void setMessageCallback(MessageCallback callback) {
         messageCallback = callback
     }
 
+    void setOnReady(OnReady callback) {
+        onReady = callback
+    }
 
     private void handleOptions(HttpResponse msg) {
         HttpHeaders hdrs = msg.headers()
@@ -83,14 +147,24 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             ByteBuf content = msg.content()
             String sdp = content.toString(Charset.defaultCharset())
             parseDescribeSdp(sdp)
+
             AttributeField controlAttr = backChannel.get().find(x -> {
                 x.name == "control"
             })
             if (controlAttr == null)
                 throw new RtspException("No control attribute found for backchannel")
+            rtpmap = backChannel.get().find(x -> {
+                x.name == "rtpmap"
+            })
+            if(rtpmap == null)
+                throw new RtspException("No rtpmap attribute found for backchannel")
+
+            if(vacantPorts.port1 == 0)
+                throw new RtspException("No vacant client ports were found")
+
             HttpRequest setup = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0,
                     RtspMethods.SETUP, url + "/${controlAttr.value}")
-            setup.headers().add("Transport", "RTP/AVP;unicast;client_port=45178-45179")
+            setup.headers().add("Transport", "RTP/AVP;unicast;client_port=${vacantPorts.port1}-${vacantPorts.port2}")
             setup.headers().add("User-Agent", userAgent)
             setup.headers().add("Require", "www.onvif.org/ver20/backchannel")
             request = setup
@@ -99,7 +173,7 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         }
     }
 
-    private void setupTransport(FullHttpResponse msg) {
+    private void setupTransport(HttpResponse msg) {
         if (!msg.headers().contains("transport"))
             throw new RtspException("No transport header in SETUP response")
         String transport = msg.headers().get("transport")
@@ -112,19 +186,22 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             throw new RtspException("Server port not specified")
         final int idxSpEnd = transport.indexOf("-", idxSp)
         if (idxSpEnd == -1 || (idxSpEnd - idxSp <= server_portEq.length()))
-            throw new RtspException("Server port numbers cannot be found")
-
+            throw new RtspException("Server ports cannot be found")
+        int idxSp2End = transport.indexOf(";", idxSpEnd)
+        if(idxSp2End == -1)
+            idxSp2End = transport.length()
         server_port = Integer.valueOf(transport.substring(idxSp + server_portEq.length(), idxSpEnd))
-        int q = server_port
+        server_port2 = Integer.valueOf(transport.substring(idxSpEnd+1, idxSp2End))
     }
 
-    private void handleSetup(FullHttpResponse msg) {
+    private void handleSetup(HttpResponse msg) {
         if (msg.status() == HttpResponseStatus.OK) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM dd yyyy HH:mm:ss 'GMT'")
             TimeZone tz = TimeZone.getTimeZone("GMT")
             dateFormat.setTimeZone(tz)
             String date = dateFormat.format(new Date())
             setupTransport(msg)
+
             HttpRequest play = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.PLAY, url)
             play.headers().add("Require", "www.onvif.org/ver20/backchannel")
             play.headers().add("User-Agent", userAgent)
@@ -144,7 +221,7 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         ctx.writeAndFlush(request)
     }
 
-    private void handlePlay(final ChannelHandlerContext ctx, FullHttpResponse msg) {
+    private void handlePlay(final ChannelHandlerContext ctx, HttpResponse msg) {
         if (msg.status() == HttpResponseStatus.OK) {
             endTime.schedule(() -> {
                 endSession()
@@ -152,16 +229,18 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
             keepaliveTimer.scheduleAtFixedRate(() -> sendKeepAlive(ctx, msg), 10000, 10000)
             request = null
+            if(onReady != null)
+                onReady.ready(this)
         } else {
             throw new RtspException("PLAY returned error code ${msg.status().code()}")
         }
     }
 
-    void handleTeardown(FullHttpResponse msg) {
+    void handleTeardown(HttpResponse ignore) {
         request = null
     }
 
-    private void handleGetParameter(FullHttpResponse msg) {
+    private void handleGetParameter(HttpResponse msg) {
         if (msg.status() == HttpResponseStatus.OK) {
             request = null
         } else {
@@ -181,14 +260,17 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         }
 
         if (msg.status() != HttpResponseStatus.UNAUTHORIZED) {
-            if (obj instanceof FullHttpResponse && request != null) {
+            if (obj instanceof HttpResponse && request != null) {
                 switch (request.method()) {
                     case RtspMethods.OPTIONS:
                         handleOptions(obj)
                         break
 
                     case RtspMethods.DESCRIBE:
-                        handleDescribe(obj)
+                        if(obj instanceof FullHttpResponse)
+                            handleDescribe(obj)
+                        else
+                            throw new RtspException("Response to DESCRIBE was not FullHttpResponse")
                         break
 
                     case RtspMethods.SETUP:
@@ -244,14 +326,13 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         SdpFactory sdpFactory = SdpFactory.getInstance()
         SessionDescription sessionDescription = sdpFactory.createSessionDescription(sdpContent)
         Origin origin = sessionDescription.getOrigin()
-        String address = origin.getAddress()
-        String userName = origin.getUsername()
-        String netType = origin.getNetworkType()
-        String addrType = origin.getAddressType()
+        address = origin.getAddress()
+        netType = origin.getNetworkType()
+        addrType = origin.getAddressType()
 
 
         final Vector<MediaDescriptionImpl> md = sessionDescription.getMediaDescriptions(true)
-
+        Vector<AttributeField> audio
         md.forEach((mediaDescription -> {
             final Vector<AttributeField> attributeFields = mediaDescription.getAttributeFields()
             attributeFields.forEach(attributeField -> {
@@ -259,7 +340,11 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
                 if (Objects.equals(attributeField.getName(), "sendonly")) {
                     backChannel.set(attributeFields)
                 }
-            })
+           })
+
+            final MediaField mediaField = mediaDescription.getMediaField()
+            def g = mediaField
+
         }))
 
         if (backChannel.get() == null)
@@ -296,4 +381,34 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             messageCallback.callback(cause.getMessage(), cause)
         ctx.close()
     }
+    class VacantPorts {
+        final int port1, port2
+        VacantPorts(int port1, int port2) {
+            this.port1 = port1
+            this.port2 = port2
+        }
+    }
+
+    /**
+     * findClientPorts: Find two successive vacant ports with the first having an even number
+     * @return VacantPorts object, if both are 0, none was found
+     */
+    private VacantPorts findClientPorts() {
+        int port1=0, port2=0
+        for(int i = 4000; i < 5000; i+=2) {
+            try {
+                ServerSocket skt1 = new ServerSocket(i)
+                ServerSocket skt2 = new ServerSocket(i+1)
+                skt1.close()
+                skt2.close()
+                port1 = i
+                port2 = i+1
+                break
+            }
+            catch (Exception ignore){}
+        }
+
+        return new VacantPorts(port1, port2)
+    }
+
 }
