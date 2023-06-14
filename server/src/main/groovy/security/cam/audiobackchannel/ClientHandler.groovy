@@ -10,10 +10,10 @@ import io.netty.handler.codec.http.*
 import io.netty.handler.codec.rtsp.RtspHeaderNames
 import io.netty.handler.codec.rtsp.RtspMethods
 import io.netty.handler.codec.rtsp.RtspVersions
+import security.cam.interfaceobjects.MessageCallback
 
 import javax.sdp.Origin
 import javax.sdp.SdpFactory
-import javax.sdp.SdpParseException
 import javax.sdp.SessionDescription
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
@@ -26,22 +26,30 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     Timer endTime
     ExecutorService writeExec
     HttpRequest request
-    final Object requestLock = new Object()
     final String url
     AtomicReference<Vector<AttributeField>> backChannel = new AtomicReference<>()
     int server_port
+    int server_port2
     final String userAgent = "JAVA_Client"
     HttpMessage lastMessage
     ChannelHandlerContext context
+    int unauthorisedCount
+    MessageCallback messageCallback
 
     ClientHandler(final String url) {
         this.url = url
         HttpRequest options = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.OPTIONS, url)
         request = options
-        endTime =new Timer()
+        endTime = new Timer()
         keepaliveTimer = new Timer()
         writeExec = Executors.newFixedThreadPool(45)
+        unauthorisedCount = 0
     }
+
+    void setMessageCallback(MessageCallback callback) {
+        messageCallback = callback
+    }
+
 
     private void handleOptions(HttpResponse msg) {
         HttpHeaders hdrs = msg.headers()
@@ -68,6 +76,7 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             request = describe
         }
     }
+
 
     private void handleDescribe(FullHttpResponse msg) {
         if (msg.status() == HttpResponseStatus.OK) {
@@ -165,9 +174,11 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         HttpResponse msg = (HttpResponse) obj
         lastMessage = msg
         context = ctx
-        
-        System.out.println("Response -" + msg.toString())
-        System.out.println("CTX -" + ctx.toString())
+
+        if (messageCallback != null) {
+            messageCallback.callback("Response -" + msg.toString(), null)
+            messageCallback.callback("CTX -" + ctx.toString(), null)
+        }
 
         if (msg.status() != HttpResponseStatus.UNAUTHORIZED) {
             if (obj instanceof FullHttpResponse && request != null) {
@@ -198,7 +209,7 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
                     default:
                         return
-                 }
+                }
 
                 if (request != null) {
                     addGeneralHeaders(msg)
@@ -206,11 +217,14 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
                 }
             }
         } else {  // Unauthorised, run the request again
-            if (request != null) {
+            if (++unauthorisedCount < 2 && request != null) {
                 request.headers().remove("CSeq")
                 request.headers().add("CSeq", getSeqNumber())
+                ctx.writeAndFlush(request)
+            } else {
+                request = null
+                unauthorisedCount = 0
             }
-            ctx.writeAndFlush(request)
         }
     }
 
@@ -227,39 +241,29 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     }
 
     void parseDescribeSdp(String sdpContent) {
-        try {
-            SdpFactory sdpFactory = SdpFactory.getInstance()
-            SessionDescription sessionDescription = sdpFactory.createSessionDescription(sdpContent)
-            Origin origin = sessionDescription.getOrigin()
-            String address = origin.getAddress()
-            String userName = origin.getUsername()
-            String netType = origin.getNetworkType()
-            String addrType = origin.getAddressType()
+        SdpFactory sdpFactory = SdpFactory.getInstance()
+        SessionDescription sessionDescription = sdpFactory.createSessionDescription(sdpContent)
+        Origin origin = sessionDescription.getOrigin()
+        String address = origin.getAddress()
+        String userName = origin.getUsername()
+        String netType = origin.getNetworkType()
+        String addrType = origin.getAddressType()
 
 
-            final Vector<MediaDescriptionImpl> md = sessionDescription.getMediaDescriptions(true)
+        final Vector<MediaDescriptionImpl> md = sessionDescription.getMediaDescriptions(true)
 
-            md.forEach((mediaDescription -> {
-                final Vector<AttributeField> attributeFields = mediaDescription.getAttributeFields()
-                attributeFields.forEach(attributeField -> {
-                    try {
-                        // Save the backchannel details
-                        if (Objects.equals(attributeField.getName(), "sendonly")) {
-                            backChannel.set(attributeFields)
-                        }
-                    }
-                    catch (SdpParseException sdppe) {
-                        System.out.println(sdppe.getClass().getName() + ":" + sdppe.getMessage())
-                    }
-                })
-            }))
+        md.forEach((mediaDescription -> {
+            final Vector<AttributeField> attributeFields = mediaDescription.getAttributeFields()
+            attributeFields.forEach(attributeField -> {
+                // Save the backchannel details
+                if (Objects.equals(attributeField.getName(), "sendonly")) {
+                    backChannel.set(attributeFields)
+                }
+            })
+        }))
 
-            if (backChannel.get() == null)
-                throw new RtspException("No backchannel information found on this device")
-        }
-        catch (Exception ex) {
-            System.out.println(ex.getClass().getName() + ":" + ex.getMessage())
-        }
+        if (backChannel.get() == null)
+            throw new RtspException("No backchannel information found on this device")
     }
 
     void endSession() {
@@ -278,7 +282,6 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         return ++seq
     }
 
-
     void start(Channel ch) {
         if (request != null) {
             request.headers().add("CSeq", getSeqNumber())
@@ -289,8 +292,8 @@ class ClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     @Override
     void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {
-
-        System.out.println("${cause.getClass().getName()}: ${cause.getMessage()}")        //do more exception handling
+        if (messageCallback != null)
+            messageCallback.callback(cause.getMessage(), cause)
         ctx.close()
     }
 }

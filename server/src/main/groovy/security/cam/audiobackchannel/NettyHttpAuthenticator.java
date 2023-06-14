@@ -34,8 +34,13 @@ import org.apache.http.protocol.BasicHttpContext;
 @ChannelHandler.Sharable
 public class NettyHttpAuthenticator extends ChannelDuplexHandler {
     private String challenge;
+    private final String username;
+    private final String password;
 
-    public NettyHttpAuthenticator() {
+
+    public NettyHttpAuthenticator(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
     @Override
@@ -63,7 +68,7 @@ public class NettyHttpAuthenticator extends ChannelDuplexHandler {
             String uri = req.uri();
 
             Authentication auth = new Authentication(null);
-            String header = auth.getAuthResponse("admin", "R@nc1dTapsB0ttom", method, uri, challenge, new BasicHttpContext()).getValue();
+            String header = auth.getAuthResponse(username, password, method, uri, challenge, new BasicHttpContext()).getValue();
             if (header != null) {
                 if (!header.contains("\"MD5\"") && header.contains("MD5"))
                     header = header.replace("MD5", "\"MD5\"");

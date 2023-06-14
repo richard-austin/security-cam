@@ -13,30 +13,50 @@ import io.netty.handler.codec.rtsp.RtspDecoder
 import io.netty.handler.codec.rtsp.RtspEncoder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import security.cam.interfaceobjects.MessageCallback
 
 class RtspClient {
-    private static final String USERNAME = "user"
-    private static final String PASSWORD = "pass"
+    private final String username
+    private final String password
     private final static Logger LOGGER = LoggerFactory.getLogger(RtspClient.class)
-    private final static String url = "rtsp://192.168.1.43:554"
+    private final String host
+    private final int port
+
+    private final String url
+
+    RtspClient(String host, int port, String username, String password) {
+        this.username = username
+        this.password = password
+        this.host = host
+        this.port = port
+        url = "rtsp://" + host + ":" + port.toString()
+    }
 
     static void main(String[] args) throws InterruptedException, UnsupportedEncodingException {
-        sendReq()
+        RtspClient client = new RtspClient("192.168.1.43", 554, "admin", "R@nc1dTapsB0ttom")
+        client.sendReq()
     }
 
-    static void sendReq() throws InterruptedException {
+    void sendReq() throws InterruptedException {
         final String pipeName = "/home/richard/opfifo"
-        final int BUFFER_SIZE = 2048
-
-        Channel ch = start("192.168.1.43", 554)
+        Channel ch = start(host, port)
     }
 
-    static Channel start(String ip, int port) {
+    void start(String ip, int port) {
         try {
             Bootstrap rtspClient = new Bootstrap()
             EventLoopGroup workerGroup = new NioEventLoopGroup(1); // todo: avoid possible nonceCount race
             final ClientHandler handler = new ClientHandler(url)
-            Channel ch = null
+            Channel ch
+            handler.setMessageCallback(new MessageCallback() {
+                @Override
+                void callback(String message, Throwable ex) {
+                    System.out.println(message)
+                    if (ex != null) {
+                        System.out.println(ex.getClass().getName() + ": " + ex.getMessage())
+                    }
+                }
+            })
 
             rtspClient.group(workerGroup).channel(NioSocketChannel.class)
                     .handler(new ChannelInitializer<SocketChannel>() {
@@ -45,8 +65,8 @@ class RtspClient {
                             ChannelPipeline p = ch1.pipeline()
                             p.addLast("decoder", new RtspDecoder())
                             p.addLast("encoder", new RtspEncoder())
-                            p.addLast("aggregator", new HttpObjectAggregator(512 * 1024))
-                            p.addLast(new NettyHttpAuthenticator())
+                            p.addLast("aggregator", new HttpObjectAggregator(4 * 1024))
+                            p.addLast(new NettyHttpAuthenticator(username, password))
                             p.addLast(handler)
                         }
                     })
@@ -57,11 +77,9 @@ class RtspClient {
             } catch (Exception e) {
                 System.out.println("Error " + e)
             }
-            return ch
         }
-        catch(Exception ex) {
+        catch (Exception ex) {
             System.out.println("${ex.getClass().getName()}: ${ex.getMessage()}")
         }
     }
-
 }
