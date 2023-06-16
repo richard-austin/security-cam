@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicReference
 
 class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     private Timer keepaliveTimer
-    private Timer endTime
     private HttpRequest request
     private final String url
     private  AtomicReference<Vector<AttributeField>> backChannel = new AtomicReference<>()
@@ -41,7 +40,8 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     ChannelHandlerContext context
     int unauthorisedCount
     MessageCallback messageCallback
-    OnReady onReady
+    private OnReady onReady
+    private String timeout
 
     public final VacantPorts vacantPorts
 
@@ -49,7 +49,6 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         this.url = url
         HttpRequest options = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.OPTIONS, url)
         request = options
-        endTime = new Timer()
         keepaliveTimer = new Timer()
         vacantPorts = findClientPorts()
         unauthorisedCount = 0
@@ -89,6 +88,7 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         else
             throw new RtspException("No rtpmap found")
     }
+
     String getRTPAudioEncoding() {
         if(rtpmap != null) {
             final int spaceIdx = rtpmap.value.indexOf(' ')
@@ -110,6 +110,10 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         }
         else
             throw new RtspException("No rtpmap found")
+    }
+
+    String getTimeout() {
+        return timeout
     }
 
     void setMessageCallback(MessageCallback callback) {
@@ -228,11 +232,18 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
     private void handlePlay(final ChannelHandlerContext ctx, HttpResponse msg) {
         if (msg.status() == HttpResponseStatus.OK) {
-            endTime.schedule(() -> {
-                endSession()
-            }, 70000)
+            int intTimeout = 10
+            // Set the keep alive period to 10s less than the device timeout
+            if(timeout != "") {
+                intTimeout = Integer.valueOf(timeout)
+                if(intTimeout > 20)
+                    intTimeout -= 10
+                else
+                    intTimeout -= 3
+            }
+            intTimeout *= 1000
 
-            keepaliveTimer.scheduleAtFixedRate(() -> sendKeepAlive(ctx, msg), 10000, 10000)
+            keepaliveTimer.scheduleAtFixedRate(() -> sendKeepAlive(ctx, msg), intTimeout, intTimeout)
             request = null
             if(onReady != null)
                 onReady.ready(this)
@@ -319,8 +330,18 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         if (msg.headers().contains("Session")) {
             String sessionId = msg.headers().get("Session")
             int idxOfSemiColon = sessionId.indexOf(";")
-            if (idxOfSemiColon != -1)
-                sessionId = sessionId.substring(0, idxOfSemiColon)
+            if (idxOfSemiColon != -1) {
+                String sessionHeader = sessionId
+                sessionId = sessionHeader.substring(0, idxOfSemiColon)
+                int idxOfEq = sessionHeader.indexOf("=", idxOfSemiColon)
+                if(idxOfEq != -1) {
+                    idxOfSemiColon = sessionHeader.indexOf(";", idxOfEq)
+                    if(idxOfSemiColon == -1)
+                        timeout = sessionHeader.substring(idxOfEq + 1)
+                    else
+                        timeout = sessionHeader.substring(idxOfEq+1, idxOfSemiColon)
+                }
+            }
 
             request.headers().add("Session", sessionId)
         }
@@ -353,7 +374,6 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
     void endSession() {
         keepaliveTimer.cancel()  // Stop the keep alive (GET_PARAMETER) calls
-        endTime.cancel()
         HttpRequest tearDown = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.TEARDOWN, url)
         tearDown.headers().add("Require", "www.onvif.org/ver20/backchannel")
         request = tearDown
@@ -379,7 +399,7 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             throws Exception {
         if (messageCallback != null)
             messageCallback.callback(cause.getMessage(), cause)
-        ctx.close()
+//        ctx.close()
     }
     class VacantPorts {
         final int port1, port2

@@ -6,12 +6,12 @@ import grails.config.Config
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
-import org.apache.http.impl.auth.DigestScheme
 import org.grails.web.json.JSONObject
 import org.springframework.core.io.Resource
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
+import security.cam.audiobackchannel.RtspClient
 import security.cam.commands.SMTPData
 import security.cam.commands.SetupSMTPAccountCommand
 import security.cam.commands.StartAudioOutCommand
@@ -26,7 +26,6 @@ import java.nio.file.Paths
 import java.nio.file.attribute.GroupPrincipal
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.UserPrincipalLookupService
-import java.security.MessageDigest
 
 class Temperature {
     Temperature(String temp) {
@@ -247,6 +246,7 @@ class UtilsService {
     File fifo
     FileOutputStream fos
     boolean audioInUse = false
+    RtspClient client
 
     synchronized def startAudioOut(StartAudioOutCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
@@ -265,20 +265,9 @@ class UtilsService {
                     throw new Exception("No path is specified for twoWayAudio: fifo in the configuration")
                 // Create the fifo
                 fifo = createFifoPipe(fifoPath)
-                // Start ffmpeg to transcode and transfer the audio data
-                new File("/var/security-cam/output.mp3").delete()
-                List<String> command = new ArrayList()
-                command.add("ffmpeg")
-                command.add("-i")
-                command.add(fifoPath)
-                command.add("-c:a")
-                command.add("pcm_mulaw")
-                command.add("-ar")
-                command.add("8K")
-                command.add("-f")
-                command.add("rtp")
-                command.add("rtp://192.168.1.43:6974?localaddr=192.168.1.207&localport=45178&streamtype=unicast")
-                audioOutProc = new ProcessBuilder(command).inheritIO().start()
+                client = new RtspClient("192.168.1.43", 554, "admin", "R@nc1dTapsB0ttom", logService)
+                client.sendReq(grailsApplication)
+
                 // Create a file output stream for the websocket handler to write to the fifo
                 fos = new FileOutputStream(fifo)
             }
@@ -296,11 +285,6 @@ class UtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            // Stop the ffmpeg process
-            if (audioOutProc) {
-                def proc = new ProcessBuilder("kill", "-INT", audioOutProc.pid().toString()).start()
-                proc.waitFor()
-            }
             if (fos)
                 fos.close()
             // Remove the fifo
@@ -315,6 +299,8 @@ class UtilsService {
                 // Re-enable audio out on clients
                 brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
                 audioInUse = false
+                client.stop()
+                client = null
             }
         }
         catch (Exception ex) {
@@ -333,7 +319,10 @@ class UtilsService {
         if (fos) {
             // Reset the stream check count to indicate the stream is still active
             audioInputStreamCheckCount = 0
-            fos.write(bytes)
+            try {
+                fos.write(bytes)
+            }
+            catch(Exception ignore) {}
         }
     }
 
