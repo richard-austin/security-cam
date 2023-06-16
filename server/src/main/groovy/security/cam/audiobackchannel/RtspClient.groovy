@@ -82,8 +82,8 @@ class RtspClient {
                         String localAddr
                         // Get preferred local address
                         try(final DatagramSocket socket = new DatagramSocket()){
-                            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-                            localAddr = socket.getLocalAddress().getHostAddress();
+                            socket.connect(InetAddress.getByName("8.8.8.8"), 10002)
+                            localAddr = socket.getLocalAddress().getHostAddress()
                         }
                         final
                         String fifoPath = grailsApplication.config.twoWayAudio.fifo
