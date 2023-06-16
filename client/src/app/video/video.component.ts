@@ -72,7 +72,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * startVideo: Start the video (assumes appropriate uri and camera is set up).
    * @private
    */
-  private startVideo(): void {
+  private startVideo(keepAudioStream: boolean = false): void {
     if (!this.isfmp4) {
       if (this.camstream !== undefined) {
         if (Hls.isSupported()) {
@@ -88,7 +88,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else {
       // If an audio output session is running, stop it if we switch video views.
-      if(this.audioToggle)
+      if(!keepAudioStream && this.audioToggle)
         this.stopAudioOut();
 
       this.ms = new MediaSource();
@@ -363,7 +363,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.stop();  // Close the existing video set up
         let timerSubscription = timer(1000).subscribe(() => {
           timerSubscription.unsubscribe();
-          this.startVideo();  // Start it again after 1-second delay
+          this.startVideo(true);  // Start it again after 1-second delay
         });
       }
     });
