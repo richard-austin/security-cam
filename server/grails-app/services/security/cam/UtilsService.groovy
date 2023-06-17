@@ -58,6 +58,7 @@ class UtilsService {
     AssetResourceLocator assetResourceLocator
     GrailsApplication grailsApplication
     SimpMessagingTemplate brokerMessagingTemplate
+    CamService camService
 
     public final passwordRegex = /^[A-Za-z0-9][A-Za-z0-9(){\[1*£$\\\]}=@~?^]{7,31}$/
     public final usernameRegex = /^[a-zA-Z0-9](_(?!(.|_))|.(?!(_|.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/
@@ -242,7 +243,6 @@ class UtilsService {
         }
     }
 
-    Process audioOutProc
     File fifo
     FileOutputStream fos
     boolean audioInUse = false
@@ -258,14 +258,20 @@ class UtilsService {
                         .toString()
                 // Disable audio out on clients except the initiator
                 brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
-
+                final URI netcam_uri = new URI(cmd.camera.streams["stream1"].netcam_uri)
+                ObjectCommandResponse resp = camService.getCameraCredentials()
+                String user = "", pass = ""
+                if(resp.status == PassFail.PASS) {
+                    user = resp.responseObject.camerasAdminUserName
+                    pass = resp.responseObject.camerasAdminPassword
+                }
                 stopAudioOut(false)
                 String fifoPath = grailsApplication.config.twoWayAudio.fifo
                 if (fifoPath == null)
                     throw new Exception("No path is specified for twoWayAudio: fifo in the configuration")
                 // Create the fifo
                 fifo = createFifoPipe(fifoPath)
-                client = new RtspClient("192.168.1.43", 554, "admin", "R@nc1dTapsB0ttom", logService)
+                client = new RtspClient(netcam_uri.getHost(), netcam_uri.getPort(), user, pass, logService)
                 client.sendReq(grailsApplication)
 
                 // Create a file output stream for the websocket handler to write to the fifo

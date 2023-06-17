@@ -18,6 +18,8 @@ import security.cam.LogService
 import security.cam.interfaceobjects.MessageCallback
 import security.cam.interfaceobjects.OnReady
 
+import java.util.concurrent.TimeUnit
+
 class RtspClient {
     private final String username
     private final String password
@@ -121,7 +123,11 @@ class RtspClient {
         // Stop the ffmpeg process
         if (audioOutProc) {
             def proc = new ProcessBuilder("kill", "-INT", audioOutProc.pid().toString()).start()
-            proc.waitFor()
+            if(!proc.waitFor(2, TimeUnit.SECONDS)) {
+                // OK so it won't die so get out the heavy mob
+                new ProcessBuilder("kill", "-KILL", audioOutProc.pid().toString()).start()
+                proc.waitFor()
+            }
         }
         ch.close().sync()
         workerGroup.shutdownGracefully()

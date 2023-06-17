@@ -120,7 +120,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       }).then((stream) => {
         // @ts-ignore
         this.recorder = new MediaRecorder(stream);
-        // fires every one second and passes an BlobEvent
+        // fires every one second and passes a BlobEvent
         this.recorder.ondataavailable = (event: any) => {
           // get the Blob from the event
           const blob: Blob = event.data;
@@ -398,7 +398,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     if(!this.utilsService.speakActive || this.audioToggle) {
       this.audioToggle = !this.audioToggle;
       if (this.audioToggle)
-        this.utilsService.startAudioOut('camera1').subscribe(() => {
+        this.utilsService.startAudioOut(this.camstream.camera).subscribe(() => {
           this.startAudioOutput();
         });
       else {
