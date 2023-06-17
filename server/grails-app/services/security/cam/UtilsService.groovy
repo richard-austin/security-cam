@@ -258,7 +258,10 @@ class UtilsService {
                         .toString()
                 // Disable audio out on clients except the initiator
                 brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
-                final URI netcam_uri = new URI(cmd.camera.streams["stream1"].netcam_uri)
+                if(!cmd.camera?.streams?.entrySet()?.iterator()?.hasNext())
+                    throw new Exception("No streams for ${cmd.camera.name}")
+
+                final URI netcam_uri = new URI(cmd.camera.streams.entrySet().iterator().next().value.netcam_uri)
                 ObjectCommandResponse resp = camService.getCameraCredentials()
                 String user = "", pass = ""
                 if(resp.status == PassFail.PASS) {
