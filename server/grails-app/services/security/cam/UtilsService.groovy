@@ -245,10 +245,10 @@ class UtilsService {
 
     File fifo
     FileOutputStream fos
+    Thread t
     boolean audioInUse = false
     RtspClient client
-
-    synchronized def startAudioOut(StartAudioOutCommand cmd) {
+    def startAudioOut(StartAudioOutCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         if (!audioInUse) {
             try {
@@ -278,7 +278,21 @@ class UtilsService {
                 client.sendReq(grailsApplication)
 
                 // Create a file output stream for the websocket handler to write to the fifo
-                fos = new FileOutputStream(fifo)
+                // Creating the file output stream for the fifo blocks until the websocket handler starts
+                //  writing to it. If this writing does not occur for any reason the execution would be stuck here
+                //  so we run it in a thread to prevent blocking. The thread is interrupted in the stopAudioOut call.
+                t = new Thread() {
+                    @Override
+                    void run() {
+                        try {
+                            fos = new FileOutputStream(fifo)
+                        }
+                        catch(Exception ex) {
+                            System.out.println("${ex.getClass().getName()}: ${ex.getMessage()}")
+                        }
+                    }
+                }
+                t.run()
             }
             catch (Exception ex) {
                 logService.cam.error "${ex.getClass().getName()} in startAudioOut: ${ex.getMessage()}"
@@ -294,8 +308,13 @@ class UtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            if (fos)
+            if (fos) {
                 fos.close()
+                t.interrupt()
+                while(!t.interrupted) {
+                    Thread.sleep(10)
+                }
+            }
             // Remove the fifo
             if (fifo)
                 fifo.delete()

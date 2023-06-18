@@ -152,7 +152,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   stopAudioOut() {
     this.stopAudioAfterLongTimeSubscription?.unsubscribe();
-    this.recorder.stop();
+    this.recorder?.stop();
     this.utilsService.stopAudioOut().subscribe(() => {
       this.client?.deactivate({force: false}).then(() => {});
     });
