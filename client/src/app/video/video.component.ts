@@ -398,7 +398,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     if(!this.utilsService.speakActive || this.audioToggle) {
       this.audioToggle = !this.audioToggle;
       if (this.audioToggle)
-        this.utilsService.startAudioOut(this.camstream.camera).subscribe(() => {
+        this.utilsService.startAudioOut(this.camstream.stream).subscribe(() => {
           this.startAudioOutput();
         });
       else {

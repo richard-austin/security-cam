@@ -2,11 +2,12 @@ package security.cam.commands
 
 import grails.validation.Validateable
 import server.Camera
+import server.Stream
 
 class StartAudioOutCommand implements Validateable{
-    Camera camera
+    Stream stream
 
     static constraints = {
-        camera(nullable: false, blank: false)
+        stream(nullable: false, blank: false)
     }
 }

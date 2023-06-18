@@ -3,9 +3,10 @@ import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "./BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
 import {catchError,tap} from "rxjs/operators";
-import {Camera, CameraParams} from "../cameras/Camera";
+import {Stream, CameraParams} from "../cameras/Camera";
 import {environment} from "../../environments/environment";
 import {cameraType} from '../cameras/camera.service';
+
 
 export class Temperature {
   temp: string = "";
@@ -209,8 +210,8 @@ export class UtilsService {
     return this._messaging.asObservable();
   }
 
-  startAudioOut(camera: Camera) {
-    return this.http.post<void>(this._baseUrl.getLink("utils", "startAudioOut"), JSON.stringify({camera: camera}), this.httpJSONOptions).pipe(
+  startAudioOut(stream: Stream) {
+    return this.http.post<void>(this._baseUrl.getLink("utils", "startAudioOut"), JSON.stringify({stream: stream}), this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }
