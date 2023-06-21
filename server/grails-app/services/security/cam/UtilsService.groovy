@@ -26,6 +26,7 @@ import java.nio.file.Paths
 import java.nio.file.attribute.GroupPrincipal
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.UserPrincipalLookupService
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class Temperature {
     Temperature(String temp) {
@@ -59,6 +60,7 @@ class UtilsService {
     GrailsApplication grailsApplication
     SimpMessagingTemplate brokerMessagingTemplate
     CamService camService
+    Queue<byte[]> audioQueue = new ConcurrentLinkedQueue<>()
 
     public final passwordRegex = /^[A-Za-z0-9][A-Za-z0-9(){\[1*£$\\\]}=@~?^]{7,31}$/
     public final usernameRegex = /^[a-zA-Z0-9](_(?!(.|_))|.(?!(_|.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/
@@ -108,12 +110,11 @@ class UtilsService {
     def getTemperature() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            if(Environment.isDevelopmentMode()) {
+            if (Environment.isDevelopmentMode()) {
                 // There is no vcgencmd on a PC, only raspberry pi
                 Temperature temp = new Temperature("temp=45.2'C")
                 result.responseObject = temp
-            }
-            else {
+            } else {
                 Temperature temp = new Temperature(executeLinuxCommand("vcgencmd", "measure_temp"))
                 result.responseObject = temp
             }
@@ -243,15 +244,27 @@ class UtilsService {
         }
     }
 
-    File fifo
-    FileOutputStream fos
-    Thread t
     boolean audioInUse = false
     RtspClient client
+
+    private ServerSocket serverSocket
+    private Socket clientSocket
+    private OutputStream out
+    Thread serverThread
+
     def startAudioOut(StartAudioOutCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         if (!audioInUse) {
             try {
+                // Set up the socket for
+                serverSocket = new ServerSocket(8881);
+                serverThread = new Thread(() -> {
+                    clientSocket = serverSocket.accept()
+                    out = clientSocket.getOutputStream()
+                })
+                serverThread.start()
+
+                audioQueue.clear()
                 final String talkOff = new JSONObject()
                         .put("message", "talkOff")
                         .put("instruction", "on")
@@ -262,35 +275,13 @@ class UtilsService {
                 final URI netcam_uri = new URI(cmd.stream.netcam_uri)
                 ObjectCommandResponse resp = camService.getCameraCredentials()
                 String user = "", pass = ""
-                if(resp.status == PassFail.PASS) {
+                if (resp.status == PassFail.PASS) {
                     user = resp.responseObject.camerasAdminUserName
                     pass = resp.responseObject.camerasAdminPassword
                 }
                 stopAudioOut(false)
-                String fifoPath = grailsApplication.config.twoWayAudio.fifo
-                if (fifoPath == null)
-                    throw new Exception("No path is specified for twoWayAudio: fifo in the configuration")
-                // Create the fifo
-                fifo = createFifoPipe(fifoPath)
                 client = new RtspClient(netcam_uri.getHost(), netcam_uri.getPort(), user, pass, logService)
                 client.sendReq(grailsApplication)
-
-                // Create a file output stream for the websocket handler to write to the fifo
-                // Creating the file output stream for the fifo blocks until the websocket handler starts
-                //  writing to it. If this writing does not occur for any reason the execution would be stuck here
-                //  so we run it in a thread to prevent blocking. The thread is interrupted in the stopAudioOut call.
-                t = new Thread() {
-                    @Override
-                    void run() {
-                        try {
-                            fos = new FileOutputStream(fifo)
-                        }
-                        catch(Exception ex) {
-                            System.out.println("${ex.getClass().getName()}: ${ex.getMessage()}")
-                        }
-                    }
-                }
-                t.run()
             }
             catch (Exception ex) {
                 logService.cam.error "${ex.getClass().getName()} in startAudioOut: ${ex.getMessage()}"
@@ -306,17 +297,6 @@ class UtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            if (fos) {
-                fos.close()
-                t.interrupt()
-                while(!t.interrupted) {
-                    Thread.sleep(10)
-                }
-            }
-            // Remove the fifo
-            if (fifo)
-                fifo.delete()
-
             if (sendTalkOff) {
                 final String talkOff = new JSONObject()
                         .put("message", "talkOff")
@@ -325,8 +305,16 @@ class UtilsService {
                 // Re-enable audio out on clients
                 brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
                 audioInUse = false
-                client.stop()
+                client?.stop()
                 client = null
+                audioQueue.clear()
+
+
+                out?.close()
+                serverSocket.close()
+                clientSocket?.close()
+                serverThread.interrupt()
+                out = null
             }
         }
         catch (Exception ex) {
@@ -342,21 +330,19 @@ class UtilsService {
     private long audioInputStreamCheckCount = 0
 
     def audio(byte[] bytes) {
-        if (fos) {
-            // Reset the stream check count to indicate the stream is still active
-            audioInputStreamCheckCount = 0
+        audioQueue.add(bytes)
+        // Reset the stream check count to indicate the stream is still active
+        audioInputStreamCheckCount = 0
+        if (out) {
             try {
-                fos.write(bytes)
+                while (!audioQueue.empty) {
+                    out.write(audioQueue.poll())
+                 //   System.out.println("Writing ${audioQueue.poll().length} bytes")
+                }
             }
-            catch(Exception ignore) {}
+            catch (Exception ex) {
+                System.out.println("${ex.getClass().getName()} in audio handler: ${ex.getMessage()}")
+            }
         }
-    }
-
-    // This timer ends the audio input session if no websocket messages are received for more than 3 seconds
-    private static File createFifoPipe(String fifoName) throws IOException, InterruptedException {
-        String[] command = new String[]{"mkfifo", fifoName}
-        def process = new ProcessBuilder(command).start()
-        process.waitFor()
-        return new File(fifoName)
     }
 }

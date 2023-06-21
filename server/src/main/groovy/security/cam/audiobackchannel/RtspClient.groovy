@@ -18,6 +18,7 @@ import security.cam.LogService
 import security.cam.interfaceobjects.MessageCallback
 import security.cam.interfaceobjects.OnReady
 
+import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 class RtspClient {
@@ -34,6 +35,7 @@ class RtspClient {
 
     Process audioOutProc
     BackchannelClientHandler handler
+
     RtspClient(String host, int port, String username, String password, LogService logService) {
         this.username = username
         this.password = password
@@ -43,7 +45,7 @@ class RtspClient {
         this.logService = logService
     }
 
-   void sendReq(GrailsApplication grailApplication) {
+    void sendReq(GrailsApplication grailApplication) {
         this.grailsApplication = grailApplication
         start(host, port)
     }
@@ -83,19 +85,19 @@ class RtspClient {
                     void ready(BackchannelClientHandler h) {
                         String localAddr
                         // Get preferred local address
-                        try(final DatagramSocket socket = new DatagramSocket()){
+                        try (final DatagramSocket socket = new DatagramSocket()) {
                             socket.connect(InetAddress.getByName("8.8.8.8"), 10002)
                             localAddr = socket.getLocalAddress().getHostAddress()
                         }
                         final
-                        String fifoPath = grailsApplication.config.twoWayAudio.fifo
+
                         def audioEncoding = h.getRTPAudioEncoding() == "PCMU" ? "pcm_mulaw" :
                                 h.getRTPAudioEncoding() == "PCMA" ? "pcm_alaw" : "copy"
                         // Start ffmpeg to transcode and transfer the audio data
                         List<String> command = new ArrayList()
                         command.add("ffmpeg")
                         command.add("-i")
-                        command.add(fifoPath)
+                        command.add("tcp://localhost:8881")
                         command.add("-af")
                         command.add("silenceremove=1:0:-50dB")
                         command.add("-c:a")
@@ -111,27 +113,27 @@ class RtspClient {
                         command.add("-f")
                         command.add("rtp")
                         command.add("rtp://${h.getOriginAddress()}:${h.getServerPort()}?localaddr=${localAddr}&localport=${h.vacantPorts.port1}&streamtype=unicast".toString())
-                        audioOutProc = new ProcessBuilder(command).inheritIO().start()
-
+                        // Using host rather than h.getOriginAddress() as the latter often came wrong from the device
+                        audioOutProc = new ProcessBuilder(command).start()
                         System.out.println("Ready! ${h.getRTPAudioEncoding()}")
                     }
                 })
                 handler.start(ch)
             } catch (Exception e) {
-                System.out.println(e.getClass().getName()+": in start, "+e.getMessage() +"\n"+e.getStackTrace())
+                System.out.println(e.getClass().getName() + ": in start, " + e.getMessage() + "\n" + e.getStackTrace())
             }
         }
         catch (Exception ex) {
             System.out.println("${ex.getClass().getName()}: ${ex.getMessage()}")
         }
-     }
+    }
 
     void stop() {
         handler.endSession()
         // Stop the ffmpeg process
         if (audioOutProc) {
             def proc = new ProcessBuilder("kill", "-INT", audioOutProc.pid().toString()).start()
-            if(!proc.waitFor(2, TimeUnit.SECONDS)) {
+            if (!proc.waitFor(2, TimeUnit.SECONDS)) {
                 // OK so it won't die so get out the heavy mob
                 new ProcessBuilder("kill", "-KILL", audioOutProc.pid().toString()).start()
                 proc.waitFor()

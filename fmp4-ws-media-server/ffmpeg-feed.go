@@ -26,7 +26,6 @@ func ffmpegFeed(cameras *Cameras, creds *CameraCredentials) {
 					rtsp_transport := "tcp"
 
 					if camera.CameraParamSpecs.CamType == 0 { // General type, credentials used
-						rtsp_transport = "udp"
 						idx := len("rtsp://")
 						uri = uri[:idx] + url.QueryEscape(creds.CamerasAdminUserName) + ":" + url.QueryEscape(creds.CamerasAdminPassword) + "@" + uri[idx:]
 					}

@@ -5,6 +5,7 @@ import {Client} from "@stomp/stompjs";
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
 import {interval, Subscription, timer} from "rxjs";
+import {frameCallbackType} from "@stomp/stompjs/src/types";
 
 declare let Hls: any;
 
@@ -126,16 +127,19 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           const blob: Blob = event.data;
           blob.arrayBuffer().then((buff) => {
             let data = new Uint8Array(buff);
-            // and send that blob to the server...
-            this.client.publish({
-              destination: '/app/audio',
-              binaryBody: data,
-              headers: {"content-type": "application/octet-stream"}
-            });
+
+            if(data.length > 0) {
+              // and send that blob to the server...
+              this.client.publish({
+                destination: '/app/audio',
+                binaryBody: data,
+                headers: {"content-type": "application/octet-stream"}
+              });
+            }
           });
         };
-        // make data available event fire every 20th second
-        this.recorder.start(40);
+
+       this.client.onConnect = () => this.recorder.start(40);
 
         // This stops the audio out after 5 minutes
         this.stopAudioAfterLongTimeSubscription = timer(300000).subscribe(() => {
@@ -151,12 +155,17 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   stopAudioOut() {
-    this.stopAudioAfterLongTimeSubscription?.unsubscribe();
-    this.recorder?.stop();
-    this.utilsService.stopAudioOut().subscribe(() => {
-      this.client?.deactivate({force: false}).then(() => {});
+    // 1 second delay on stopping to allow for the latency in the audio. The end of the speech could get cut off otherwise
+    timer(1000).subscribe(() => {
+      this.stopAudioAfterLongTimeSubscription?.unsubscribe();
+      this.recorder?.stop();
+      this.utilsService.stopAudioOut().subscribe(() => {
+        this.client?.deactivate({force: false}).then(() => {});
+      }, reason => {
+        this.reporting.errorMessage = reason;
+      });
+      this.audioToggle = false;
     });
-    this.audioToggle = false;
   }
 
   audioButtonTooltip() : string {
@@ -397,10 +406,14 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleAudio() {
     if(!this.utilsService.speakActive || this.audioToggle) {
       this.audioToggle = !this.audioToggle;
-      if (this.audioToggle)
+      if (this.audioToggle) {
         this.utilsService.startAudioOut(this.camstream.stream).subscribe(() => {
-          this.startAudioOutput();
+        }, reason => {
+          this.reporting.errorMessage = reason
+          this.stopAudioOut();
         });
+        this.startAudioOutput();
+      }
       else {
         this.stopAudioOut();
       }
