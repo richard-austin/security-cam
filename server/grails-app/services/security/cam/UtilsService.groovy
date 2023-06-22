@@ -257,7 +257,7 @@ class UtilsService {
         if (!audioInUse) {
             try {
                 // Set up the socket for ffmpeg backchannel feed to source from
-                serverSocket = new ServerSocket(8881);
+                serverSocket = new ServerSocket(8881)
                 serverThread = new Thread(() -> {
                     clientSocket = serverSocket.accept()
                     out = clientSocket.getOutputStream()

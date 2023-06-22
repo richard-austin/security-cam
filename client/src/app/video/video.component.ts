@@ -5,7 +5,6 @@ import {Client} from "@stomp/stompjs";
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
 import {interval, Subscription, timer} from "rxjs";
-import {frameCallbackType} from "@stomp/stompjs/src/types";
 
 declare let Hls: any;
 
