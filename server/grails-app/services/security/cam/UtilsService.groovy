@@ -256,7 +256,7 @@ class UtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
         if (!audioInUse) {
             try {
-                // Set up the socket for
+                // Set up the socket for ffmpeg backchannel feed to source from
                 serverSocket = new ServerSocket(8881);
                 serverThread = new Thread(() -> {
                     clientSocket = serverSocket.accept()
@@ -279,9 +279,8 @@ class UtilsService {
                     user = resp.responseObject.camerasAdminUserName
                     pass = resp.responseObject.camerasAdminPassword
                 }
-                stopAudioOut(false)
                 client = new RtspClient(netcam_uri.getHost(), netcam_uri.getPort(), user, pass, logService)
-                client.sendReq(grailsApplication)
+                client.sendReq()
             }
             catch (Exception ex) {
                 logService.cam.error "${ex.getClass().getName()} in startAudioOut: ${ex.getMessage()}"
@@ -293,29 +292,27 @@ class UtilsService {
         return result
     }
 
-    def stopAudioOut(boolean sendTalkOff = true) {
+    def stopAudioOut() {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            if (sendTalkOff) {
-                final String talkOff = new JSONObject()
-                        .put("message", "talkOff")
-                        .put("instruction", "off")
-                        .toString()
-                // Re-enable audio out on clients
-                brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
-                audioInUse = false
-                client?.stop()
-                client = null
-                audioQueue.clear()
+            final String talkOff = new JSONObject()
+                    .put("message", "talkOff")
+                    .put("instruction", "off")
+                    .toString()
+            // Re-enable audio out on clients
+            brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
+            audioInUse = false
+            client?.stop()
+            client = null
+            audioQueue.clear()
 
 
-                out?.close()
-                serverSocket.close()
-                clientSocket?.close()
-                serverThread.interrupt()
-                out = null
-            }
+            serverSocket.close()
+            clientSocket?.close()
+            serverThread.interrupt()
+            out?.close()
+            out = null
         }
         catch (Exception ex) {
             logService.cam.error "${ex.getClass().getName()} in stopAudioOut: ${ex.getMessage()}"
@@ -337,7 +334,7 @@ class UtilsService {
             try {
                 while (!audioQueue.empty) {
                     out.write(audioQueue.poll())
-                 //   System.out.println("Writing ${audioQueue.poll().length} bytes")
+                    //   System.out.println("Writing ${audioQueue.poll().length} bytes")
                 }
             }
             catch (Exception ex) {

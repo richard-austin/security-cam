@@ -112,7 +112,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       reconnectDelay: 1000,
       debug: () => {}
     });
-    this.client.activate();
 
     if (navigator.mediaDevices) {
       navigator.mediaDevices.getUserMedia({
@@ -129,6 +128,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
             let data = new Uint8Array(buff);
 
             if(data.length > 0) {
+              console.log("Message length "+data.length)
               // and send that blob to the server...
               this.client.publish({
                 destination: '/app/audio',
@@ -139,7 +139,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           });
         };
 
-       this.client.onConnect = () => this.recorder.start(40);
+       this.client.onConnect = () => this.recorder.start(100);
+       this.client.activate();
 
         // This stops the audio out after 5 minutes
         this.stopAudioAfterLongTimeSubscription = timer(300000).subscribe(() => {

@@ -28,7 +28,6 @@ class RtspClient {
     private final int port
 
     private final String url
-    GrailsApplication grailsApplication
     Channel ch
     EventLoopGroup workerGroup
     LogService logService
@@ -45,8 +44,7 @@ class RtspClient {
         this.logService = logService
     }
 
-    void sendReq(GrailsApplication grailApplication) {
-        this.grailsApplication = grailApplication
+    void sendReq() {
         start(host, port)
     }
 
