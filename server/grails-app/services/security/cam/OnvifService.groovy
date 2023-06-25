@@ -100,7 +100,6 @@ class OnvifService {
             logService.cam.info "Camera discovery..."
             sc_processesService.stopProcesses()
             Collection<URL> urls = OnvifDiscovery.discoverOnvifURLs()
-            urls.add(new URL("http://192.168.1.43:8000/onvif/device_service"))
             List<OnvifCredentials> creds = []
             for (URL u : urls) {
                 logService.cam.info(u.toString())
