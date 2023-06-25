@@ -119,52 +119,51 @@ public class DeviceDiscovery {
                                             "<wsa:MessageID>urn:uuid:.*</wsa:MessageID>",
                                             "<wsa:MessageID>urn:uuid:" + uuid + "</wsa:MessageID>");
                             final int port = random.nextInt(20000) + 40000;
-                            try (final DatagramSocket server = new DatagramSocket(port, address)) {
-                                new Thread(() -> {
-                                    try {
-                                        final DatagramPacket packet = new DatagramPacket(new byte[4096], 4096);
-                                        server.setSoTimeout(WS_DISCOVERY_TIMEOUT);
-                                        long timerStarted = System.currentTimeMillis();
-                                        while (System.currentTimeMillis() - timerStarted < (WS_DISCOVERY_TIMEOUT)) {
-                                            serverStarted.countDown();
-                                            server.receive(packet);
-                                            final Collection<String> collection =
-                                                    parseSoapResponseForUrls(
-                                                            Arrays.copyOf(packet.getData(), packet.getLength()));
-                                            addresses.addAll(collection);
-                                        }
-                                    } catch (SocketTimeoutException ignored) {
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    } finally {
-                                        serverFinished.countDown();
-                                        server.close();
-                                    }
-                                }).start();
+                            final DatagramSocket server = new DatagramSocket(port, address);
+                            new Thread(() -> {
                                 try {
-                                    serverStarted.await(1000, TimeUnit.MILLISECONDS);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                if (address instanceof Inet4Address) {
-                                    server.send(
-                                            new DatagramPacket(
-                                                    probe.getBytes(StandardCharsets.UTF_8),
-                                                    probe.length(),
-                                                    InetAddress.getByName(WS_DISCOVERY_ADDRESS_IPv4),
-                                                    WS_DISCOVERY_PORT));
-                                } else {
-                                    if (address instanceof Inet6Address) {
-                                        if (enableIPv6)
-                                            server.send(
-                                                    new DatagramPacket(
-                                                            probe.getBytes(StandardCharsets.UTF_8),
-                                                            probe.length(),
-                                                            InetAddress.getByName(WS_DISCOVERY_ADDRESS_IPv6),
-                                                            WS_DISCOVERY_PORT));
-                                    } else {
-                                        assert (false); // 	unknown network type.. ignore or warn developer
+                                    final DatagramPacket packet = new DatagramPacket(new byte[4096], 4096);
+                                    server.setSoTimeout(WS_DISCOVERY_TIMEOUT);
+                                    long timerStarted = System.currentTimeMillis();
+                                    while (System.currentTimeMillis() - timerStarted < (WS_DISCOVERY_TIMEOUT)) {
+                                        serverStarted.countDown();
+                                        server.receive(packet);
+                                        final Collection<String> collection =
+                                                parseSoapResponseForUrls(
+                                                        Arrays.copyOf(packet.getData(), packet.getLength()));
+                                        addresses.addAll(collection);
                                     }
+                                } catch (SocketTimeoutException ignored) {
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                } finally {
+                                    serverFinished.countDown();
+                                    server.close();
+                                }
+                            }).start();
+                            try {
+                                serverStarted.await(1000, TimeUnit.MILLISECONDS);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            if (address instanceof Inet4Address) {
+                                server.send(
+                                        new DatagramPacket(
+                                                probe.getBytes(StandardCharsets.UTF_8),
+                                                probe.length(),
+                                                InetAddress.getByName(WS_DISCOVERY_ADDRESS_IPv4),
+                                                WS_DISCOVERY_PORT));
+                            } else {
+                                if (address instanceof Inet6Address) {
+                                    if (enableIPv6)
+                                        server.send(
+                                                new DatagramPacket(
+                                                        probe.getBytes(StandardCharsets.UTF_8),
+                                                        probe.length(),
+                                                        InetAddress.getByName(WS_DISCOVERY_ADDRESS_IPv6),
+                                                        WS_DISCOVERY_PORT));
+                                } else {
+                                    assert (false); // 	unknown network type.. ignore or warn developer
                                 }
                             }
 
