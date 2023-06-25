@@ -33,6 +33,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   audioToggle: boolean = false;
   selectedDeviceId!: string;
   selectedAudioInput!: MediaDeviceInfo;
+  stopAudioAfterLongTimeSubscription!: Subscription
 
 //  private isFullscreenNow: boolean = false;
   private client!: Client;
@@ -98,103 +99,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.video.src = window.URL.createObjectURL(this.ms);
     }
   }
-
-  stopAudioAfterLongTimeSubscription!: Subscription
-  startAudioOutput(): boolean {
-    let retVal = true;
-
-    let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host + '/audio';
-
-    this.client  = new Client({
-      brokerURL: serverUrl,
-      onConnect: () => {},
-      reconnectDelay: 1000,
-      debug: () => {}
-    });
-
-    if (navigator.mediaDevices) {
-      navigator.mediaDevices.getUserMedia({
-        audio: (this.selectedAudioInput == null ? true : {deviceId: this.selectedAudioInput.deviceId}),
-        video: false
-      }).then((stream) => {
-        // @ts-ignore
-        this.recorder = new MediaRecorder(stream);
-        // fires every one second and passes a BlobEvent
-        this.recorder.ondataavailable = (event: any) => {
-          // get the Blob from the event
-          const blob: Blob = event.data;
-          blob.arrayBuffer().then((buff) => {
-            let data = new Uint8Array(buff);
-
-            if(data.length > 0) {
-              console.log("Message length "+data.length)
-              // and send that blob to the server...
-              this.client.publish({
-                destination: '/app/audio',
-                binaryBody: data,
-                headers: {"content-type": "application/octet-stream"}
-              });
-            }
-          });
-        };
-
-       this.client.onConnect = () => this.recorder.start(100);
-       this.client.activate();
-
-        // This stops the audio out after 5 minutes
-        this.stopAudioAfterLongTimeSubscription = timer(300000).subscribe(() => {
-          this.stopAudioOut();
-        });
-      }).catch((error) => {
-        retVal = false;
-        this.reporting.errorMessage = error;
-        console.log(error);
-      });
-    }
-    return retVal;
-  }
-
-  stopAudioOut() {
-    // 1 second delay on stopping to allow for the latency in the audio. The end of the speech could get cut off otherwise
-    timer(1000).subscribe(() => {
-      this.stopAudioAfterLongTimeSubscription?.unsubscribe();
-      this.recorder?.stop();
-      this.utilsService.stopAudioOut().subscribe(() => {
-        this.client?.deactivate({force: false}).then(() => {});
-      }, reason => {
-        this.reporting.errorMessage = reason;
-      });
-      this.audioToggle = false;
-    });
-  }
-
-  audioButtonTooltip() : string {
-    let speakActive = this.utilsService.speakActive;
-    let retVal: string = "";
-    if(speakActive)
-      retVal = this.audioToggle ? "Stop audio to camera" : "Audio to camera is in use in another session. Cannot start audio to camera at this time";
-    else if (!speakActive) {
-        retVal = "Start audio to camera"
-    }
-    return retVal;
-  }
-
-  audioInputSelectorTooltip() {
-    let retVal = "Set audio input device";
-    if(this.utilsService.speakActive)
-      retVal = "Audio to camera is in use, cannot select audio input at this time";
-    return retVal;
-  }
-
-  toInt(arr: Uint8Array, index: number): number { // From bytes to big-endian 32-bit integer.  Input: Uint8Array, index
-    let dv = new DataView(arr.buffer, 0);
-    return dv.getInt32(index, false); // big endian
-  }
-
-  // toString(arr:number[], fr: number, to: number) { // From bytes to string.  Input: Uint8Array, start index, stop index.
-  //   // https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
-  //   return String.fromCharCode.apply(null, arr.slice(fr, to));
-  // }
 
   verbose: boolean = false;
   multi: boolean = false;
@@ -403,7 +307,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  toggleAudio() {
+  toggleAudioOut() {
     if(!this.utilsService.speakActive || this.audioToggle) {
       this.audioToggle = !this.audioToggle;
       if (this.audioToggle) {
@@ -415,7 +319,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.startAudioOutput();
       }
       else {
-        this.stopAudioOut();
+        this.beginStopAudioOut();
       }
     }
   }
@@ -426,6 +330,96 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.mediaDevices.find((dev) => {
         return dev.deviceId === this.selectedDeviceId
       })
+  }
+
+  startAudioOutput(): boolean {
+    let retVal = true;
+    this.video.muted = true;
+    let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host + '/audio';
+
+    this.client  = new Client({
+      brokerURL: serverUrl,
+      onConnect: () => {},
+      reconnectDelay: 1000,
+      debug: () => {}
+    });
+
+    if (navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({
+        audio: (this.selectedAudioInput == null ? true : {deviceId: this.selectedAudioInput.deviceId}),
+        video: false
+      }).then((stream) => {
+        // @ts-ignore
+        this.recorder = new MediaRecorder(stream);
+        // fires every one second and passes a BlobEvent
+        this.recorder.ondataavailable = (event: any) => {
+          // get the Blob from the event
+          const blob: Blob = event.data;
+          blob.arrayBuffer().then((buff) => {
+            let data = new Uint8Array(buff);
+
+            if(data.length > 0) {
+              // and send that blob to the server...
+              this.client.publish({
+                destination: '/app/audio',
+                binaryBody: data,
+                headers: {"content-type": "application/octet-stream"}
+              });
+            }
+          });
+        };
+
+        this.client.onConnect = () => this.recorder.start(100);
+        this.client.activate();
+
+        // This stops the audio out after 5 minutes
+        this.stopAudioAfterLongTimeSubscription = timer(300000).subscribe(() => {
+          this.stopAudioOut();
+        });
+      }).catch((error) => {
+        retVal = false;
+        this.reporting.errorMessage = error;
+        console.log(error);
+      });
+    }
+    return retVal;
+  }
+
+  beginStopAudioOut() {
+    // 1.7 second delay on stopping to allow for the latency in the audio and prevent the end of the speech getting get cut off
+    timer(1700).subscribe(() => {
+      this.stopAudioOut();
+    });
+  }
+
+  private stopAudioOut() : void {
+    this.video.muted = false;
+    this.stopAudioAfterLongTimeSubscription?.unsubscribe();
+    this.recorder?.stop();
+    this.utilsService.stopAudioOut().subscribe(() => {
+      this.client?.deactivate({force: false}).then(() => {});
+    }, reason => {
+      this.reporting.errorMessage = reason;
+    });
+    this.audioToggle = false;
+  }
+
+  audioButtonTooltip() : string {
+    let speakActive = this.utilsService.speakActive;
+    let retVal: string = "";
+    if(speakActive)
+      retVal = this.audioToggle ? "Stop audio to camera" : "Audio to camera is in use in another session. Cannot start audio to camera at this time";
+    else if (!speakActive) {
+      retVal = "Start audio to camera"
+    }
+    return retVal;
+  }
+
+  audioInputSelectorTooltip() {
+    let retVal = "Set audio input device";
+    if(this.utilsService.speakActive)
+      retVal = "Audio to camera is in use, cannot select audio input at this time";
+    return retVal;
   }
 
   ngOnInit(): void {

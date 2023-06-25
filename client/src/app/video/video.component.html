@@ -13,7 +13,7 @@
     <div *ngIf="isfmp4" class="latency-limit-selector">
       <div>
         <label [matTooltip]="audioButtonTooltip()" matTooltipClass="tooltip">
-          <mat-icon [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioToggle, 'audio-out-active':  utilsService.speakActive && audioToggle, 'audio-out-disabled': utilsService.speakActive && !audioToggle}" (click)="toggleAudio()">{{audioToggle ? 'mic' : 'mic_off'}}</mat-icon>
+          <mat-icon [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioToggle, 'audio-out-active':  utilsService.speakActive && audioToggle, 'audio-out-disabled': utilsService.speakActive && !audioToggle}" (click)="toggleAudioOut()">{{audioToggle ? 'mic' : 'mic_off'}}</mat-icon>
         </label>
         <select [disabled]="utilsService.speakActive" [matTooltip]="audioInputSelectorTooltip()" matTooltipClass="tooltip"
           [(ngModel)]="selectedDeviceId" (change)="setAudioInput()">
