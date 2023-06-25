@@ -96,7 +96,7 @@ public class DeviceDiscovery {
                     if (!anInterface.isLoopback()) {
                         final List<InterfaceAddress> interfaceAddresses = anInterface.getInterfaceAddresses();
                         for (InterfaceAddress address : interfaceAddresses) {
-                            Class clz = address.getAddress().getClass();
+                            Class<? extends InetAddress> clz = address.getAddress().getClass();
 
                             if (!enableIPv6 && address.getAddress() instanceof Inet6Address) continue;
                             addressList.add(address.getAddress());
