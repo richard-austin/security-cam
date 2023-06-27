@@ -23,17 +23,19 @@ import java.util.concurrent.atomic.AtomicReference
 
 class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     private Timer keepaliveTimer
-    private HttpRequest request
+    protected HttpRequest request
     private final String url
-    private  AtomicReference<Vector<AttributeField>> backChannel = new AtomicReference<>()
+    boolean discoveryMode
+    protected  AtomicReference<Vector<AttributeField>> backChannel = new AtomicReference<>()
     private MediaField mediaField = null
     private  String address
     private  String netType
     private  String addrType
+    boolean backchannelAudioSupported = false
 
     private int server_port
     private int server_port2
-    private AttributeField rtpmap
+    protected AttributeField rtpmap
 
     final String userAgent = "JAVA_Client"
     HttpMessage lastMessage
@@ -45,13 +47,15 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
     public final VacantPorts vacantPorts
 
-    BackchannelClientHandler(final String url) {
+    BackchannelClientHandler(final String url, final OnReady onReady = null, boolean discoveryMode = false) {
         this.url = url
         HttpRequest options = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.OPTIONS, url)
         request = options
         keepaliveTimer = new Timer()
         vacantPorts = findClientPorts()
         unauthorisedCount = 0
+        this.onReady = onReady
+        this.discoveryMode = discoveryMode
     }
 
     MediaField getMediaField() {
@@ -151,7 +155,7 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     }
 
 
-    private void handleDescribe(FullHttpResponse msg) {
+    protected void handleDescribe(ChannelHandlerContext ctx, FullHttpResponse msg) {
         if (msg.status() == HttpResponseStatus.OK) {
             ByteBuf content = msg.content()
             String sdp = content.toString(Charset.defaultCharset())
@@ -165,18 +169,26 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             rtpmap = backChannel.get().find(x -> {
                 x.name == "rtpmap"
             })
-            if(rtpmap == null)
-                throw new RtspException("No rtpmap attribute found for backchannel")
+            if(discoveryMode) {
+                request = null
+                backchannelAudioSupported = rtpmap != null
+                onReady.ready(this)
+                endSession()
+            }
+            else {
+                if(rtpmap == null)
+                    throw new RtspException("No rtpmap attribute found for backchannel")
 
-            if(vacantPorts.port1 == 0)
-                throw new RtspException("No vacant client ports were found")
+                if(vacantPorts.port1 == 0)
+                    throw new RtspException("No vacant client ports were found")
 
-            HttpRequest setup = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0,
-                    RtspMethods.SETUP, url + "/${controlAttr.value}")
-            setup.headers().add("Transport", "RTP/AVP;unicast;client_port=${vacantPorts.port1}-${vacantPorts.port2}")
-            setup.headers().add("User-Agent", userAgent)
-            setup.headers().add("Require", "www.onvif.org/ver20/backchannel")
-            request = setup
+                HttpRequest setup = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0,
+                        RtspMethods.SETUP, url + "/${controlAttr.value}")
+                setup.headers().add("Transport", "RTP/AVP;unicast;client_port=${vacantPorts.port1}-${vacantPorts.port2}")
+                setup.headers().add("User-Agent", userAgent)
+                setup.headers().add("Require", "www.onvif.org/ver20/backchannel")
+                request = setup
+            }
         } else {
             throw new RtspException("DESCRIBE returned error code ${msg.status().code()}")
         }
@@ -284,7 +296,7 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
                     case RtspMethods.DESCRIBE:
                         if(obj instanceof FullHttpResponse)
-                            handleDescribe(obj)
+                            handleDescribe(ctx, obj)
                         else
                             throw new RtspException("Response to DESCRIBE was not FullHttpResponse")
                         break
@@ -379,6 +391,7 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         request = tearDown
         addGeneralHeaders(lastMessage)
         context.writeAndFlush(request)
+        context.close()
     }
 
     static int seq = 0
@@ -397,6 +410,7 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     @Override
     void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {
+        ctx.close()
         if (messageCallback != null)
             messageCallback.callback(cause.getMessage(), cause)
 //        ctx.close()

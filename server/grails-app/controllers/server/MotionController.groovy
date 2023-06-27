@@ -72,6 +72,7 @@ class Camera {
     boolean ptzControls = false
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
     String onvifHost=''
+    boolean backchannelAudioSupported = false
 }
 
 class MotionController {

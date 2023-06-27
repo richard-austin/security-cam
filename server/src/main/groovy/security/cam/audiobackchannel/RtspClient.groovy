@@ -1,6 +1,5 @@
 package security.cam.audiobackchannel
 
-import grails.core.GrailsApplication
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
@@ -12,13 +11,11 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.rtsp.RtspDecoder
 import io.netty.handler.codec.rtsp.RtspEncoder
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import security.cam.LogService
 import security.cam.interfaceobjects.MessageCallback
 import security.cam.interfaceobjects.OnReady
+import server.Camera
 
-import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 class RtspClient {
@@ -26,32 +23,32 @@ class RtspClient {
     private final String password
     private final String host
     private final int port
-
+    private final Camera cam
     private final String url
+    private final boolean discoveryMode
     Channel ch
     EventLoopGroup workerGroup
     LogService logService
 
     Process audioOutProc
-    BackchannelClientHandler handler
+    BackchannelClientHandler handler = null
 
-    RtspClient(String host, int port, String username, String password, LogService logService) {
+    RtspClient(String host, int port, String username, String password, LogService logService, Camera cam = null) {
         this.username = username
         this.password = password
         this.host = host
         this.port = port
         url = "rtsp://" + host + ":" + port.toString()
         this.logService = logService
+        this.cam = cam
+        this.discoveryMode = cam != null
     }
 
-    void sendReq() {
-        start(host, port)
-    }
-
-    void start(String ip, int port) {
+    void start() {
         try {
             Bootstrap rtspClient = new Bootstrap()
             handler = new BackchannelClientHandler(url)
+            handler.discoveryMode = discoveryMode
             handler.setMessageCallback(new MessageCallback() {
                 @Override
                 void callback(String message, Throwable ex) {
@@ -74,48 +71,58 @@ class RtspClient {
                             p.addLast(handler)
                         }
                     })
-            rtspClient.remoteAddress(ip, port)
+            rtspClient.remoteAddress(host, port)
             rtspClient.validate()
             try {
                 ch = rtspClient.connect().sync().channel()
-                handler.setOnReady(new OnReady() {
-                    @Override
-                    void ready(BackchannelClientHandler h) {
-                        String localAddr
-                        // Get preferred local address
-                        try (final DatagramSocket socket = new DatagramSocket()) {
-                            socket.connect(InetAddress.getByName("8.8.8.8"), 10002)
-                            localAddr = socket.getLocalAddress().getHostAddress()
-                        }
-                        final
+                if (!discoveryMode) {
+                    handler.setOnReady(new OnReady() {
+                        @Override
+                        void ready(BackchannelClientHandler h) {
+                            String localAddr
+                            // Get preferred local address
+                            try (final DatagramSocket socket = new DatagramSocket()) {
+                                socket.connect(InetAddress.getByName("8.8.8.8"), 10002)
+                                localAddr = socket.getLocalAddress().getHostAddress()
+                            }
+                            final
 
-                        def audioEncoding = h.getRTPAudioEncoding() == "PCMU" ? "pcm_mulaw" :
-                                h.getRTPAudioEncoding() == "PCMA" ? "pcm_alaw" : "copy"
-                        // Start ffmpeg to transcode and transfer the audio data
-                        List<String> command = new ArrayList()
-                        command.add("ffmpeg")
-                        command.add("-i")
-                        command.add("tcp://localhost:8881")
-                        command.add("-af")
-                        command.add("silenceremove=1:0:-50dB")
-                        command.add("-c:a")
-                        command.add(audioEncoding)
-                        command.add("-ar")
-                        command.add("${h.getRTPAudioClockRate()}".toString())
-                        command.add("-ac")
-                        command.add("1")
-                        command.add("-preset")
-                        command.add("superfast")
-                        command.add("-tune")
-                        command.add("zerolatency")
-                        command.add("-f")
-                        command.add("rtp")
-                        command.add("rtp://${h.getOriginAddress()}:${h.getServerPort()}?localaddr=${localAddr}&localport=${h.vacantPorts.port1}&streamtype=unicast".toString())
-                        // Using host rather than h.getOriginAddress() as the latter often came wrong from the device
-                        audioOutProc = new ProcessBuilder(command).start()
-                        System.out.println("Ready! ${h.getRTPAudioEncoding()}")
-                    }
-                })
+                            def audioEncoding = h.getRTPAudioEncoding() == "PCMU" ? "pcm_mulaw" :
+                                    h.getRTPAudioEncoding() == "PCMA" ? "pcm_alaw" : "copy"
+                            // Start ffmpeg to transcode and transfer the audio data
+                            List<String> command = new ArrayList()
+                            command.add("ffmpeg")
+                            command.add("-i")
+                            command.add("tcp://localhost:8881")
+                            command.add("-af")
+                            command.add("silenceremove=1:0:-50dB")
+                            command.add("-c:a")
+                            command.add(audioEncoding)
+                            command.add("-ar")
+                            command.add("${h.getRTPAudioClockRate()}".toString())
+                            command.add("-ac")
+                            command.add("1")
+                            command.add("-preset")
+                            command.add("superfast")
+                            command.add("-tune")
+                            command.add("zerolatency")
+                            command.add("-f")
+                            command.add("rtp")
+                            command.add("rtp://${h.getOriginAddress()}:${h.getServerPort()}?localaddr=${localAddr}&localport=${h.vacantPorts.port1}&streamtype=unicast".toString())
+                            // Using host rather than h.getOriginAddress() as the latter often came wrong from the device
+                            audioOutProc = new ProcessBuilder(command).start()
+                            System.out.println("Ready! ${h.getRTPAudioEncoding()}")
+                        }
+                    })
+                } else {
+                    handler.setOnReady(new OnReady() {
+                        @Override
+                        void ready(BackchannelClientHandler handler) {
+                            if (cam != null)
+                                cam.backchannelAudioSupported = handler.backchannelAudioSupported
+                        }
+                    })
+                }
                 handler.start(ch)
             } catch (Exception e) {
                 System.out.println(e.getClass().getName() + ": in start, " + e.getMessage() + "\n" + e.getStackTrace())

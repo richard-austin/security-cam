@@ -280,7 +280,7 @@ class UtilsService {
                     pass = resp.responseObject.camerasAdminPassword
                 }
                 client = new RtspClient(netcam_uri.getHost(), netcam_uri.getPort(), user, pass, logService)
-                client.sendReq()
+                client.start()
             }
             catch (Exception ex) {
                 logService.cam.error "${ex.getClass().getName()} in startAudioOut: ${ex.getMessage()}"

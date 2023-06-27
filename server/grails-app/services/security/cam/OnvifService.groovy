@@ -12,6 +12,8 @@ import org.onvif.ver10.schema.PTZPreset
 import org.onvif.ver10.schema.PTZSpaces
 import org.onvif.ver10.schema.Space1DDescription
 import org.onvif.ver10.schema.Space2DDescription
+import security.cam.audiobackchannel.RtspClient
+
 import security.cam.commands.MoveCommand
 import security.cam.commands.MoveCommand.eMoveDirections
 import security.cam.commands.PTZPresetsInfoCommand
@@ -68,7 +70,7 @@ class SC_PTZData {
 @Transactional
 class OnvifService {
     LogService logService
-    GrailsApplication grailsApplication
+  //  GrailsApplication grailsApplication
     CamService camService
     Sc_processesService sc_processesService
     private ExecutorService deviceUpdateExecutor = Executors.newSingleThreadExecutor()
@@ -115,13 +117,21 @@ class OnvifService {
                     Camera cam = new Camera()
                     cam.onvifHost = credentials.host
                     cam.streams = new LinkedTreeMap<String, Stream>()
+                    RtspClient rtspClient =
+                            new RtspClient(
+                                    getHostFromHostPort(credentials.getHost()),
+                                    554,
+                                    credentials.user,
+                                    credentials.password,
+                                    logService,
+                                    cam)
+                    rtspClient.start()
 
                     try {
                         logService.cam.info "Creating onvif device for ${credentials.getHost()} ..."
                         device = getDevice(credentials.getHost())
 
                         Media media = device.getMedia()
-                        // def options =media.getVideoSources()
                         List<Profile> profiles = media.getProfiles()
 
                         int streamNum = 0
@@ -133,7 +143,6 @@ class OnvifService {
                             String streamUrl = device.getStreamUri(profileToken)
                             cam.address = getIPFromUrl(streamUrl)
                             stream.netcam_uri = streamUrl
-
                             VideoEncoderConfiguration vec = profile.getVideoEncoderConfiguration()
                             VideoResolution resolution = vec.resolution
                             stream.video_width = resolution.getWidth()
@@ -204,13 +213,49 @@ class OnvifService {
             throws Exception {
         String[] urlParts = url.split('//')
         int indexOfColon = urlParts[1].indexOf(':')
-        int indexOfForwrdSlash = urlParts[1].indexOf('/')
-        if (indexOfColon == -1 || indexOfForwrdSlash < indexOfColon)
-            return urlParts[1].substring(0, indexOfForwrdSlash)
+        int indexOfForwardSlash = urlParts[1].indexOf('/')
+        if(indexOfForwardSlash == -1)
+            indexOfForwardSlash = urlParts[1].length()
+        if (indexOfColon == -1 || indexOfForwardSlash < indexOfColon)
+            return urlParts[1].substring(0, indexOfForwardSlash)
 
         return urlParts[1].substring(0, indexOfColon)
     }
 
+    /**
+     * getPortFromHost: Get the rtsp p[ort number for host string of the form, <host or ip>:<port>
+     *                  If port is not present, return the default rtsp port 554
+     * @param host: Host (format <host or ip>:<port> or <host or ip>
+     * @return The rtsp port number
+     * @throws Exception
+     */
+    private static int getPortFromHost(String host)
+            throws Exception {
+        String port = 554
+        String[] hostParts = host.split(':')
+        if(hostParts.length == 2)
+            port = hostParts[1]
+        return Integer.parseInt(port)
+      }
+
+    private static String getHostFromHostPort(String hostPort) throws Exception {
+        String[] hostParts = hostPort.split(':')
+        if(hostParts.length > 0)
+            return hostParts[0]
+        else
+            throw new Exception("Host incorrect in getHostFromHostPort")
+    }
+
+    /**
+     * getBaseUrl: Get the protocol/address/port part of the url with no uri
+     * @param url: The rtsp url
+     * @return: The base url
+     */
+    private String getBaseUrl(String url) {
+        String[] urlParts = url.split('//')
+        String[] urlBreakDown = urlParts[1].split("/")
+        return urlParts[0]+"//"+urlBreakDown[0]
+    }
     /**
      * setDefaults: Set default values for video_height and width, motion enabled (on the lowest res stream) and
      *              defaultOnMultiDisplay (also on the lowest res stream).
@@ -236,7 +281,8 @@ class OnvifService {
             lrs.motion.enabled = true
         }
     }
-// Create a trust manager that does not validate certificate chains
+
+    // Create a trust manager that does not validate certificate chains
     TrustManager[] trustAllCerts = new TrustManager[]{
             new X509TrustManager() {
                 X509Certificate[] getAcceptedIssuers() {
@@ -250,8 +296,6 @@ class OnvifService {
                 }
             }
     }
-
-    UtilsService utilsService
 
     def getSnapshot(String url) {
         ObjectCommandResponse resp = getSnapshotWithAuth(url, "")
