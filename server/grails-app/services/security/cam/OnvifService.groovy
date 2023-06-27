@@ -251,7 +251,7 @@ class OnvifService {
      * @param url: The rtsp url
      * @return: The base url
      */
-    private String getBaseUrl(String url) {
+    private static String getBaseUrl(String url) {
         String[] urlParts = url.split('//')
         String[] urlBreakDown = urlParts[1].split("/")
         return urlParts[0]+"//"+urlBreakDown[0]
