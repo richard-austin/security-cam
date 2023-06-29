@@ -143,7 +143,7 @@ public class DeviceDiscovery {
                                 }
                             }).start();
                             try {
-                                serverStarted.await(1000, TimeUnit.MILLISECONDS);
+                                boolean ignore = serverStarted.await(1000, TimeUnit.MILLISECONDS);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -172,7 +172,7 @@ public class DeviceDiscovery {
                             e.printStackTrace();
                         }
                         try {
-                            serverFinished.await((WS_DISCOVERY_TIMEOUT), TimeUnit.MILLISECONDS);
+                            boolean ignore = serverFinished.await((WS_DISCOVERY_TIMEOUT), TimeUnit.MILLISECONDS);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -181,7 +181,7 @@ public class DeviceDiscovery {
         }
         try {
             executorService.shutdown();
-            executorService.awaitTermination(WS_DISCOVERY_TIMEOUT + 2000, TimeUnit.MILLISECONDS);
+            boolean ignore = executorService.awaitTermination(WS_DISCOVERY_TIMEOUT + 2000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignored) {
         }
         return addresses;
