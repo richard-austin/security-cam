@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraStream} from '../cameras/Camera';
-import {Subscription} from 'rxjs';
+import {Subscription, timer} from 'rxjs';
 import {VideoComponent} from '../video/video.component';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import {HttpErrorResponse} from '@angular/common/http';
@@ -23,15 +23,22 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
   constructor(private route: ActivatedRoute, public cameraSvc: CameraService, private utilsService: UtilsService) {
     this.initialised = false;
+    // Use route.paramMap to get the stream name correctly if we switch directly between live streams
     this.route.paramMap.subscribe((paramMap) => {
       let streamName: string = paramMap.get('streamName') as string;
-      cameraSvc.getCameraStreams().forEach((cam) => {
-        if (cam.stream.media_server_input_uri.endsWith(streamName)) {
-          this.cs = cam;
-          if (this.initialised) {
-            this.setupVideo();
+      // The timer is used to allow the (await ed) call to loadAndUpdateCameraStreams to complete if switching directly
+      //  from the config-setup component having run discovery and (quite legitimately) not saved changes. Without this,
+      //  getCameraStreams would pick up the data from the discovery scan rather than the proper data from cameras.json
+      let timerSubscription = timer(50).subscribe(() => {
+        cameraSvc.getCameraStreams().forEach((cam) => {
+          if (cam.stream.media_server_input_uri.endsWith(streamName)) {
+            this.cs = cam;
+            if (this.initialised) {
+              this.setupVideo();
+            }
           }
-        }
+        });
+        timerSubscription.unsubscribe();
       });
     });
   }

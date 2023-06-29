@@ -114,10 +114,11 @@ public class DeviceDiscovery {
                     () -> {
                         try {
                             final String uuid = UUID.randomUUID().toString();
+                            final String uuid2 = UUID.randomUUID().toString();
                             final String probe =
-                                    WS_DISCOVERY_PROBE_MESSAGE.replaceAll(
-                                            "<wsa:MessageID>urn:uuid:.*</wsa:MessageID>",
-                                            "<wsa:MessageID>urn:uuid:" + uuid + "</wsa:MessageID>");
+                                    WS_DISCOVERY_PROBE_MESSAGE
+                                            .replaceAll("732fb73a-5681-19f5-0ad8-522c31113505", uuid)
+                                            .replaceAll("67c2f758-d8a9-111c-5b92-00fa926a3416", uuid2);
                             final int port = random.nextInt(20000) + 40000;
                             final DatagramSocket server = new DatagramSocket(port, address);
                             new Thread(() -> {

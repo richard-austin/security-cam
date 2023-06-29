@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, isDevMode, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, isDevMode, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService, cameraType} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -82,7 +82,7 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
     ])
   ],
 })
-export class ConfigSetupComponent implements OnInit, AfterViewInit {
+export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
   @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
   downloading: boolean = true;
@@ -708,5 +708,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+  }
+
+  async ngOnDestroy() {
+    await this.cameraSvc.loadAndUpdateCameraStreams()
   }
 }
