@@ -711,6 +711,5 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ngOnDestroy() {
-    await this.cameraSvc.loadAndUpdateCameraStreams()
   }
 }

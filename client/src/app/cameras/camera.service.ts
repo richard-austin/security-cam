@@ -143,7 +143,7 @@ export class CameraService {
     return this.configUpdates.asObservable();
   }
 
-  /**
+ /**
    * getCameraStreams: Get details for all cameraStreams
    */
   public getCameraStreams(): CameraStream[] {
@@ -245,14 +245,6 @@ export class CameraService {
 
   discover(): Observable<Map<string, Camera>> {
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discover"), '', this.httpJSONOptions).pipe(
-      tap((cams) => {
-        this.cameras = [];
-
-        for (const key in cams)
-          this.cameras.push(cams[key] as Camera);
-
-        this.cameraStreams = CameraService.createCameraStreams(cams);
-      }),
       map(cams => {
         return CameraService.convertCamsObjectToMap(cams);
       })
