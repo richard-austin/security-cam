@@ -89,7 +89,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;

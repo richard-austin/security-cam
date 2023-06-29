@@ -154,6 +154,17 @@
         </td>
       </ng-container>
 
+      <ng-container matColumnDef="backchannelAudioSupported">
+        <th mat-header-cell *matHeaderCellDef>Audio Backchannel.</th>
+        <td mat-cell *matCellDef="let cam; let i = dataIndex">
+          <mat-icon [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
+           [matTooltip]="cam.value.backchannelAudioSupported ? 'This device supports two way audio' : 'Two way audio is not supported on this device'"
+           matTooltipClass="tooltip">
+            {{cam.value.backchannelAudioSupported ? "check_circle" : "cancel"}}
+          </mat-icon>
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="ptzControls">
         <th mat-header-cell *matHeaderCellDef>PTZ Controls.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
