@@ -89,7 +89,8 @@ export class Camera
     ftp: boolean = false;
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
- }
+    backchannelAudioSupported: boolean = false
+}
 
 export class CameraStream
 {
