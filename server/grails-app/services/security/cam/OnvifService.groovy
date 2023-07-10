@@ -172,6 +172,11 @@ class OnvifService {
 
                         String snapshotUri = device.getSnapshotUri()
                         if (!snapshotUri.isEmpty()) {
+                            // If port 80 is specified for an http url, this will cause digest auth to fail,
+                            //  so remove it as it's implied by the http:// protocol heading
+                            if(snapshotUri.startsWith("http://"))
+                                snapshotUri = snapshotUri.replace(":80/", "/")
+
                             cam.snapshotUri = snapshotUri
                         }
 

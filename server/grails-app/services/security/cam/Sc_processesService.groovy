@@ -182,7 +182,7 @@ class Sc_processesService {
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientAddress))
         message.setSubject("Change of public IP address")
 
-        String msg = """Hi ${userName}.
+        String msg = """Dear NVR user.
 <div>
     I have detected a change of broadband IP address, this is now ${currentIP}
 </div>

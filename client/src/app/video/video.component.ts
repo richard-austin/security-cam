@@ -37,6 +37,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
 //  private isFullscreenNow: boolean = false;
   private client!: Client;
+  private timeForStartAudioOutResponse: number = 0;
 
 
   constructor(public utilsService: UtilsService) {
@@ -80,9 +81,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           this.hls = new Hls();
           this.hls.loadSource(this.recording ? this.recordingUri : this.camstream.stream.uri);
           this.hls.attachMedia(this.video);
-
-          //hls.on(Hls.Events.MANIFEST_PARSED, this.video.play());
-          // this.video.play();
         } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
           this.video.src = this.camstream.stream.uri;
         }
@@ -311,7 +309,12 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     if(!this.utilsService.speakActive || this.audioToggle) {
       this.audioToggle = !this.audioToggle;
       if (this.audioToggle) {
+        this.timeForStartAudioOutResponse = 0;
+        // Time the response and add this to the audio off delay time, this is a bodge to mitigate cutting the audio
+        //  off before outgoing voice message was complete.
+        let intervalSubscription: Subscription = interval(1).subscribe(() => ++this.timeForStartAudioOutResponse)
         this.utilsService.startAudioOut(this.camstream.stream).subscribe(() => {
+          intervalSubscription.unsubscribe();
         }, reason => {
           this.reporting.errorMessage = reason
           this.stopAudioOut();
@@ -377,6 +380,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           this.stopAudioOut();
         });
       }).catch((error) => {
+        this.stopAudioOut();
         retVal = false;
         this.reporting.errorMessage = error;
         console.log(error);
@@ -386,8 +390,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   beginStopAudioOut() {
-    // 1.7 second delay on stopping to allow for the latency in the audio and prevent the end of the speech getting get cut off
-    timer(1700).subscribe(() => {
+    // 1.6 second plus timeForStartAudioOutResponse delay on stopping to allow for the latency in the audio and prevent
+    //  the end of the speech getting get cut off
+    timer(1600+this.timeForStartAudioOutResponse).subscribe(() => {
       this.stopAudioOut();
     });
   }
