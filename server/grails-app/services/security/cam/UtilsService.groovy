@@ -264,7 +264,6 @@ class UtilsService {
                 })
                 serverThread.start()
 
-                audioQueue.clear()
                 final String talkOff = new JSONObject()
                         .put("message", "talkOff")
                         .put("instruction", "on")
@@ -283,6 +282,7 @@ class UtilsService {
                 client.start()
             }
             catch (Exception ex) {
+                stopAudioOut()
                 logService.cam.error "${ex.getClass().getName()} in startAudioOut: ${ex.getMessage()}"
                 result.status = PassFail.FAIL
                 result.error = "${ex.getClass().getName()} -- ${ex.getMessage()}"
@@ -307,10 +307,9 @@ class UtilsService {
             client = null
             audioQueue.clear()
 
-
-            serverSocket.close()
+            serverSocket?.close()
             clientSocket?.close()
-            serverThread.interrupt()
+            serverThread?.interrupt()
             out?.close()
             out = null
         }

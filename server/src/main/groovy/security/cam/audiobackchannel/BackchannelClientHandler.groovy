@@ -404,7 +404,8 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         if (request != null) {
             request.headers().add("CSeq", getSeqNumber())
         }
-        ch.writeAndFlush(request)
+        def fut = ch.writeAndFlush(request)
+        fut.sync()
     }
 
     @Override
