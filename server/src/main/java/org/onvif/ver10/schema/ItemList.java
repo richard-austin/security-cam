@@ -1,21 +1,15 @@
 
 package org.onvif.ver10.schema;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 
 
 /**
@@ -74,9 +68,9 @@ import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 public class ItemList {
 
     @XmlElement(name = "SimpleItem")
-    protected List<ItemList.SimpleItem> simpleItem;
+    protected List<SimpleItem> simpleItem;
     @XmlElement(name = "ElementItem")
-    protected List<ItemList.ElementItem> elementItem;
+    protected List<ElementItem> elementItem;
     @XmlElement(name = "Extension")
     protected ItemListExtension extension;
     @XmlAnyAttribute
@@ -100,13 +94,13 @@ public class ItemList {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ItemList.SimpleItem }
+     * {@link SimpleItem }
      * 
      * 
      */
-    public List<ItemList.SimpleItem> getSimpleItem() {
+    public List<SimpleItem> getSimpleItem() {
         if (simpleItem == null) {
-            simpleItem = new ArrayList<ItemList.SimpleItem>();
+            simpleItem = new ArrayList<SimpleItem>();
         }
         return this.simpleItem;
     }
@@ -129,13 +123,13 @@ public class ItemList {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ItemList.ElementItem }
+     * {@link ElementItem }
      * 
      * 
      */
-    public List<ItemList.ElementItem> getElementItem() {
+    public List<ElementItem> getElementItem() {
         if (elementItem == null) {
-            elementItem = new ArrayList<ItemList.ElementItem>();
+            elementItem = new ArrayList<ElementItem>();
         }
         return this.elementItem;
     }

@@ -3,16 +3,19 @@ package server
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationErrors
+import org.springframework.messaging.handler.annotation.DestinationVariable
+import org.springframework.messaging.handler.annotation.MessageMapping
+import org.springframework.messaging.handler.annotation.Payload
 import security.cam.LogService
 import security.cam.RestfulInterfaceService
 import security.cam.Sc_processesService
-import security.cam.UserAdminService
 import security.cam.UtilsService
 import security.cam.ValidationErrorService
 import security.cam.commands.CameraParamsCommand
 import security.cam.commands.CheckNotGuestCommand
 import security.cam.commands.SetCameraParamsCommand
 import security.cam.commands.SetupSMTPAccountCommand
+import security.cam.commands.StartAudioOutCommand
 import security.cam.enums.PassFail
 import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -20,7 +23,6 @@ import security.cam.interfaceobjects.RestfulResponse
 
 class UtilsController {
     UtilsService utilsService
-    UserAdminService userAdminService
     RestfulInterfaceService restfulInterfaceService
     LogService logService
     ValidationErrorService validationErrorService
@@ -138,6 +140,8 @@ class UtilsController {
             ObjectCommandResponse response = utilsService.getSMTPClientParams()
             if (response.status != PassFail.PASS)
                 render(status: 500, text: response.error)
+            else if (response.response != null)
+                render(status: 400, text: response.response)  // Warning, no config file present
             else
                 render(status: 200, text: response.responseObject as JSON)
         }
@@ -163,5 +167,40 @@ class UtilsController {
         else
             render "success"
 
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def startAudioOut(StartAudioOutCommand cmd) {
+        if(cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'setupSMTPClientLocally')
+            logService.cam.error "startAudioOut: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else {
+            ObjectCommandResponse response = utilsService.startAudioOut(cmd)
+            if (response.status != PassFail.PASS)
+                render(status: 500, text: response.error)
+            else
+                render(status: 200, text: response.responseObject as JSON)
+        }
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def stopAudioOut() {
+        ObjectCommandResponse response = utilsService.stopAudioOut()
+        if (response.status != PassFail.PASS)
+            render(status: 500, text: response.error)
+        else
+            render(status: 200, text: response.responseObject as JSON)
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def audioInUse() {
+         render(status: 200, text: [audioInUse: utilsService.getAudioInUse()] as JSON)
+    }
+
+    @MessageMapping(value = "/audio")
+    protected def audio(@Payload byte[] data) {
+        utilsService.audio(data)
     }
 }

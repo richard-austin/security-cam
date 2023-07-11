@@ -37,20 +37,35 @@ func (c *Config) LogLevel() (err error, level log.Level) {
 
 type StreamC struct {
 	Descr               string `json:"descr"`
-	AudioBitRate        string `json:"audio_bitrate"`
+	Audio               bool   `json:"audio"`
+	AudioEncoding       string `json:"audio_encoding"`
 	NetcamUri           string `json:"netcam_uri"`
 	MediaServerInputUri string `json:"media_server_input_uri"`
 	URI                 string `json:"uri"`
 }
 
+type CameraParamSpecs struct {
+	CamType int    `json:"camType"`
+	Params  string `json:"params"`
+	Uri     string `json:"uri"`
+	Name    string `json:"name"`
+}
+
 type Camera struct {
-	Name    string             `json:"name"`
-	Address string             `json:"address"`
-	Streams map[string]StreamC `json:"streams"`
+	Name             string             `json:"name"`
+	Address          string             `json:"address"`
+	Streams          map[string]StreamC `json:"streams"`
+	CamType          int                `json:"camType"`
+	CameraParamSpecs CameraParamSpecs   `json:"cameraParamSpecs"`
 }
 
 type Cameras struct {
 	Cameras map[string]Camera `json:"{}"`
+}
+
+type CameraCredentials struct {
+	CamerasAdminUserName string `json:"camerasAdminUserName"`
+	CamerasAdminPassword string `json:"camerasAdminPassword"`
 }
 
 func (c *Cameras) Suuids() (suuids map[string]string) {
@@ -63,9 +78,10 @@ func (c *Cameras) Suuids() (suuids map[string]string) {
 	return
 }
 
-func loadConfig() (config *Config, cameras *Cameras) {
+func loadConfig() (config *Config, cameras *Cameras, credentials *CameraCredentials) {
 	var cams Cameras
 	var conf Config
+	var creds CameraCredentials
 
 	cameras = &cams
 	// Read config.json from the executables directory
@@ -82,6 +98,15 @@ func loadConfig() (config *Config, cameras *Cameras) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	data, err = os.ReadFile("/var/security-cam/cameraCredentials.json")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = json.Unmarshal(data, &creds)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	data, err = os.ReadFile(conf.CamerasJsonPath)
 	if err != nil {
 		log.Fatalln(err)
@@ -92,5 +117,6 @@ func loadConfig() (config *Config, cameras *Cameras) {
 	}
 
 	config = &conf
+	credentials = &creds
 	return
 }

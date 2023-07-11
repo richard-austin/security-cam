@@ -31,7 +31,7 @@ public interface Media {
     public void removePTZConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -49,7 +49,7 @@ public interface Media {
     public void removeVideoSourceConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -63,7 +63,7 @@ public interface Media {
     public void stopMulticastStreaming(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -81,9 +81,9 @@ public interface Media {
     public org.onvif.ver10.schema.Profile createProfile(
 
         @WebParam(name = "Name", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String name,
+        String name,
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -99,9 +99,9 @@ public interface Media {
     public void addVideoSourceConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -116,7 +116,7 @@ public interface Media {
     public org.onvif.ver10.schema.VideoEncoderConfiguration getVideoEncoderConfiguration(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -128,7 +128,7 @@ public interface Media {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/media/wsdl", className = "org.onvif.ver10.media.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/media/wsdl", className = "org.onvif.ver10.media.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-    public org.onvif.ver10.media.wsdl.Capabilities getServiceCapabilities()
+    public Capabilities getServiceCapabilities()
 ;
 
     /**
@@ -156,9 +156,9 @@ public interface Media {
     public org.onvif.ver10.schema.VideoEncoderConfigurationOptions getVideoEncoderConfigurationOptions(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken,
+        String configurationToken,
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -171,7 +171,7 @@ public interface Media {
     public java.util.List<org.onvif.ver10.schema.OSDConfiguration> getOSDs(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -187,7 +187,7 @@ public interface Media {
     public void removeAudioEncoderConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -204,7 +204,7 @@ public interface Media {
     public java.util.List<org.onvif.ver10.schema.AudioEncoderConfiguration> getCompatibleAudioEncoderConfigurations(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -219,7 +219,7 @@ public interface Media {
     public org.onvif.ver10.schema.AudioEncoderConfiguration getAudioEncoderConfiguration(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -234,7 +234,7 @@ public interface Media {
     public org.onvif.ver10.schema.AudioOutputConfiguration getAudioOutputConfiguration(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -273,7 +273,7 @@ public interface Media {
     public org.onvif.ver10.schema.MediaUri getSnapshotUri(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -289,7 +289,7 @@ public interface Media {
     public void removeVideoEncoderConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -322,7 +322,7 @@ public interface Media {
         @WebParam(name = "StreamSetup", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
         org.onvif.ver10.schema.StreamSetup streamSetup,
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -370,9 +370,9 @@ public interface Media {
     public void addVideoAnalyticsConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -392,7 +392,7 @@ public interface Media {
     public void startMulticastStreaming(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -422,7 +422,7 @@ public interface Media {
     public void setSynchronizationPoint(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -438,9 +438,9 @@ public interface Media {
     public void addAudioSourceConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -455,9 +455,9 @@ public interface Media {
     public void addAudioOutputConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -474,7 +474,7 @@ public interface Media {
     public java.util.List<org.onvif.ver10.schema.MetadataConfiguration> getCompatibleMetadataConfigurations(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -489,9 +489,9 @@ public interface Media {
     public org.onvif.ver10.schema.MetadataConfigurationOptions getMetadataConfigurationOptions(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken,
+        String configurationToken,
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -523,9 +523,9 @@ public interface Media {
     public org.onvif.ver10.schema.AudioOutputConfigurationOptions getAudioOutputConfigurationOptions(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken,
+        String configurationToken,
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -562,7 +562,7 @@ public interface Media {
     public java.util.List<org.onvif.ver10.schema.AudioOutputConfiguration> getCompatibleAudioOutputConfigurations(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -614,9 +614,9 @@ public interface Media {
     public org.onvif.ver10.schema.AudioEncoderConfigurationOptions getAudioEncoderConfigurationOptions(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken,
+        String configurationToken,
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -648,9 +648,9 @@ public interface Media {
     public void addMetadataConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -691,9 +691,9 @@ public interface Media {
     public org.onvif.ver10.schema.VideoSourceConfigurationOptions getVideoSourceConfigurationOptions(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken,
+        String configurationToken,
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -709,15 +709,15 @@ public interface Media {
     public void getGuaranteedNumberOfVideoEncoderInstances(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken,
+        String configurationToken,
         @WebParam(mode = WebParam.Mode.OUT, name = "TotalNumber", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        javax.xml.ws.Holder<java.lang.Integer> totalNumber,
+        javax.xml.ws.Holder<Integer> totalNumber,
         @WebParam(mode = WebParam.Mode.OUT, name = "JPEG", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        javax.xml.ws.Holder<java.lang.Integer> jpeg,
+        javax.xml.ws.Holder<Integer> jpeg,
         @WebParam(mode = WebParam.Mode.OUT, name = "H264", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        javax.xml.ws.Holder<java.lang.Integer> h264,
+        javax.xml.ws.Holder<Integer> h264,
         @WebParam(mode = WebParam.Mode.OUT, name = "MPEG4", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        javax.xml.ws.Holder<java.lang.Integer> mpeg4
+        javax.xml.ws.Holder<Integer> mpeg4
     );
 
     /**
@@ -732,7 +732,7 @@ public interface Media {
     public org.onvif.ver10.schema.Profile getProfile(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -747,7 +747,7 @@ public interface Media {
     public org.onvif.ver10.schema.VideoAnalyticsConfiguration getVideoAnalyticsConfiguration(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -789,9 +789,9 @@ public interface Media {
     public void addPTZConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -820,7 +820,7 @@ public interface Media {
     public java.util.List<org.onvif.ver10.schema.VideoAnalyticsConfiguration> getCompatibleVideoAnalyticsConfigurations(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -850,7 +850,7 @@ public interface Media {
     public java.util.List<org.onvif.ver10.schema.AudioSourceConfiguration> getCompatibleAudioSourceConfigurations(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -863,10 +863,10 @@ public interface Media {
     @RequestWrapper(localName = "GetVideoSourceModes", targetNamespace = "http://www.onvif.org/ver10/media/wsdl", className = "org.onvif.ver10.media.wsdl.GetVideoSourceModes")
     @ResponseWrapper(localName = "GetVideoSourceModesResponse", targetNamespace = "http://www.onvif.org/ver10/media/wsdl", className = "org.onvif.ver10.media.wsdl.GetVideoSourceModesResponse")
     @WebResult(name = "VideoSourceModes", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-    public java.util.List<org.onvif.ver10.media.wsdl.VideoSourceMode> getVideoSourceModes(
+    public java.util.List<VideoSourceMode> getVideoSourceModes(
 
         @WebParam(name = "VideoSourceToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String videoSourceToken
+        String videoSourceToken
     );
 
     /**
@@ -885,9 +885,9 @@ public interface Media {
     public org.onvif.ver10.schema.AudioSourceConfigurationOptions getAudioSourceConfigurationOptions(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken,
+        String configurationToken,
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -924,7 +924,7 @@ public interface Media {
     public org.onvif.ver10.schema.AudioDecoderConfiguration getAudioDecoderConfiguration(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -939,7 +939,7 @@ public interface Media {
     public org.onvif.ver10.schema.AudioSourceConfiguration getAudioSourceConfiguration(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -957,7 +957,7 @@ public interface Media {
     public java.util.List<org.onvif.ver10.schema.VideoSourceConfiguration> getCompatibleVideoSourceConfigurations(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -974,7 +974,7 @@ public interface Media {
     public java.util.List<org.onvif.ver10.schema.AudioDecoderConfiguration> getCompatibleAudioDecoderConfigurations(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -993,9 +993,9 @@ public interface Media {
     public void addVideoEncoderConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -1055,7 +1055,7 @@ public interface Media {
     public void removeAudioDecoderConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -1069,7 +1069,7 @@ public interface Media {
     public void deleteProfile(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -1087,7 +1087,7 @@ public interface Media {
     public java.util.List<org.onvif.ver10.schema.VideoEncoderConfiguration> getCompatibleVideoEncoderConfigurations(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -1102,7 +1102,7 @@ public interface Media {
     public org.onvif.ver10.schema.MetadataConfiguration getMetadataConfiguration(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -1142,9 +1142,9 @@ public interface Media {
     public org.onvif.ver10.schema.AudioDecoderConfigurationOptions getAudioDecoderConfigurationOptions(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken,
+        String configurationToken,
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -1175,9 +1175,9 @@ public interface Media {
     public void addAudioEncoderConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -1192,9 +1192,9 @@ public interface Media {
     public void addAudioDecoderConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -1210,7 +1210,7 @@ public interface Media {
     public void removeVideoAnalyticsConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -1225,7 +1225,7 @@ public interface Media {
     public void removeMetadataConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -1240,7 +1240,7 @@ public interface Media {
     public void removeAudioOutputConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -1290,7 +1290,7 @@ public interface Media {
     public org.onvif.ver10.schema.VideoSourceConfiguration getVideoSourceConfiguration(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 
     /**
@@ -1321,7 +1321,7 @@ public interface Media {
     public void removeAudioSourceConfiguration(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -1363,8 +1363,8 @@ public interface Media {
     public boolean setVideoSourceMode(
 
         @WebParam(name = "VideoSourceToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String videoSourceToken,
+        String videoSourceToken,
         @WebParam(name = "VideoSourceModeToken", targetNamespace = "http://www.onvif.org/ver10/media/wsdl")
-        java.lang.String videoSourceModeToken
+        String videoSourceModeToken
     );
 }

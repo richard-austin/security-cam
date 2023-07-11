@@ -42,6 +42,7 @@ class Stream {
     boolean defaultOnMultiDisplay=false
     String netcam_uri=''
     String uri=''
+    boolean audio = false
     String audio_bitrate="0"
     String audio_encoding = null
     Integer audio_sample_rate = 0
@@ -71,6 +72,7 @@ class Camera {
     boolean ptzControls = false
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
     String onvifHost=''
+    boolean backchannelAudioSupported = false
 }
 
 class MotionController {

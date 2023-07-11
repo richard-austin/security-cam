@@ -28,10 +28,10 @@ public interface PACSPort {
     @RequestWrapper(localName = "GetAccessPointState", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl", className = "org.onvif.ver10.accesscontrol.wsdl.GetAccessPointState")
     @ResponseWrapper(localName = "GetAccessPointStateResponse", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl", className = "org.onvif.ver10.accesscontrol.wsdl.GetAccessPointStateResponse")
     @WebResult(name = "AccessPointState", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-    public org.onvif.ver10.accesscontrol.wsdl.AccessPointState getAccessPointState(
+    public AccessPointState getAccessPointState(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -47,13 +47,13 @@ public interface PACSPort {
     public void externalAuthorization(
 
         @WebParam(name = "AccessPointToken", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.String accessPointToken,
+        String accessPointToken,
         @WebParam(name = "CredentialToken", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.String credentialToken,
+        String credentialToken,
         @WebParam(name = "Reason", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.String reason,
+        String reason,
         @WebParam(name = "Decision", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        org.onvif.ver10.accesscontrol.wsdl.Decision decision
+        Decision decision
     );
 
     /**
@@ -70,7 +70,7 @@ public interface PACSPort {
     public void enableAccessPoint(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -87,7 +87,7 @@ public interface PACSPort {
     public void disableAccessPoint(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -101,7 +101,7 @@ public interface PACSPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl", className = "org.onvif.ver10.accesscontrol.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl", className = "org.onvif.ver10.accesscontrol.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-    public org.onvif.ver10.accesscontrol.wsdl.ServiceCapabilities getServiceCapabilities()
+    public ServiceCapabilities getServiceCapabilities()
 ;
 
     /**
@@ -121,10 +121,10 @@ public interface PACSPort {
     @RequestWrapper(localName = "GetAccessPointInfo", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl", className = "org.onvif.ver10.accesscontrol.wsdl.GetAccessPointInfo")
     @ResponseWrapper(localName = "GetAccessPointInfoResponse", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl", className = "org.onvif.ver10.accesscontrol.wsdl.GetAccessPointInfoResponse")
     @WebResult(name = "AccessPointInfo", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-    public java.util.List<org.onvif.ver10.accesscontrol.wsdl.AccessPointInfo> getAccessPointInfo(
+    public java.util.List<AccessPointInfo> getAccessPointInfo(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.util.List<java.lang.String> token
+        java.util.List<String> token
     );
 
     /**
@@ -144,10 +144,10 @@ public interface PACSPort {
     @RequestWrapper(localName = "GetAreaInfo", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl", className = "org.onvif.ver10.accesscontrol.wsdl.GetAreaInfo")
     @ResponseWrapper(localName = "GetAreaInfoResponse", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl", className = "org.onvif.ver10.accesscontrol.wsdl.GetAreaInfoResponse")
     @WebResult(name = "AreaInfo", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-    public java.util.List<org.onvif.ver10.accesscontrol.wsdl.AreaInfo> getAreaInfo(
+    public java.util.List<AreaInfo> getAreaInfo(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.util.List<java.lang.String> token
+        java.util.List<String> token
     );
 
     /**
@@ -169,13 +169,13 @@ public interface PACSPort {
     public void getAccessPointInfoList(
 
         @WebParam(name = "Limit", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.Integer limit,
+        Integer limit,
         @WebParam(name = "StartReference", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.String startReference,
+        String startReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "NextStartReference", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        javax.xml.ws.Holder<java.lang.String> nextStartReference,
+        javax.xml.ws.Holder<String> nextStartReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "AccessPointInfo", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        javax.xml.ws.Holder<java.util.List<org.onvif.ver10.accesscontrol.wsdl.AccessPointInfo>> accessPointInfo
+        javax.xml.ws.Holder<java.util.List<AccessPointInfo>> accessPointInfo
     );
 
     /**
@@ -198,12 +198,12 @@ public interface PACSPort {
     public void getAreaInfoList(
 
         @WebParam(name = "Limit", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.Integer limit,
+        Integer limit,
         @WebParam(name = "StartReference", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        java.lang.String startReference,
+        String startReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "NextStartReference", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        javax.xml.ws.Holder<java.lang.String> nextStartReference,
+        javax.xml.ws.Holder<String> nextStartReference,
         @WebParam(mode = WebParam.Mode.OUT, name = "AreaInfo", targetNamespace = "http://www.onvif.org/ver10/accesscontrol/wsdl")
-        javax.xml.ws.Holder<java.util.List<org.onvif.ver10.accesscontrol.wsdl.AreaInfo>> areaInfo
+        javax.xml.ws.Holder<java.util.List<AreaInfo>> areaInfo
     );
 }

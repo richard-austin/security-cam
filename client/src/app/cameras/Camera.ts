@@ -45,6 +45,7 @@ export class Stream {
   netcam_uri: string = "";
   uri: string = "";
   media_server_input_uri: string = "";
+  audio: boolean = false;
   audio_bitrate: string="0";
   audio_encoding:string = "";
   audio_sample_rate:string = "0";
@@ -69,6 +70,15 @@ export class CameraParamSpec {
   name: string;
 }
 
+export class AudioEncoding {
+  constructor(name: string, value: string) {
+    this.name = name;
+    this.value = value;
+  }
+  name: string="";
+  value: string=";"
+}
+
 export class Camera
 {
     name: string = "";
@@ -79,7 +89,8 @@ export class Camera
     ftp: boolean = false;
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
- }
+    backchannelAudioSupported: boolean = false
+}
 
 export class CameraStream
 {

@@ -11,6 +11,7 @@ import (
 
 var cameras *Cameras
 var config *Config
+var creds *CameraCredentials
 
 func main() {
 	var customFormatter = log.TextFormatter{}
@@ -19,7 +20,7 @@ func main() {
 	var formatter log.Formatter = &customFormatter
 	log.SetFormatter(formatter)
 
-	config, cameras = loadConfig()
+	config, cameras, creds = loadConfig()
 	_, level := config.LogLevel()
 	log.SetLevel(level)
 	lumberjackLogger := &lumberjack.Logger{
@@ -31,6 +32,6 @@ func main() {
 	}
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, lumberjackLogger)
 	log.SetOutput(io.MultiWriter(os.Stdout, lumberjackLogger))
-	ffmpegFeed(cameras)
+	ffmpegFeed(cameras, creds)
 	serveHTTP()
 }

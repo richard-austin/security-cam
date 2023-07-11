@@ -3,9 +3,9 @@ import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
-import {Camera, CameraParamSpec, CameraStream, Stream} from "./Camera";
+import {AudioEncoding, Camera, CameraParamSpec, CameraStream, Stream} from "./Camera";
 import {CameraAdminCredentials} from "../credentials-for-camera-access/credentials-for-camera-access.component";
-import { NativeDateAdapter } from '@angular/material/core';
+import {NativeDateAdapter} from '@angular/material/core';
 
 
 /**
@@ -43,9 +43,10 @@ export class CustomDateAdapter extends NativeDateAdapter {
     const days = date.getDate();
     const months = date.getMonth() + 1;
     const year = date.getFullYear();
-    return ("00"+days).slice(-2) + '-' + this.months[months-1] + '-' + year;
+    return ("00" + days).slice(-2) + '-' + this.months[months - 1] + '-' + year;
   }
 }
+
 export enum cameraType {none, sv3c, zxtechMCW5B10X}
 
 @Injectable({
@@ -72,43 +73,60 @@ export class CameraService {
 
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
 
-  private _cameraParamSpecs: CameraParamSpec[] =
+  public readonly _cameraParamSpecs: CameraParamSpec[] =
     [new CameraParamSpec(
       cameraType.none,
       "",
       '',
       "Not Listed"),
       new CameraParamSpec(cameraType.sv3c,
-      "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1",
-      'web/cgi-bin/hi3510/param.cgi',
-      "SV3C (General)"),
+        "cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1",
+        'web/cgi-bin/hi3510/param.cgi',
+        "SV3C (General)"),
       new CameraParamSpec(
         cameraType.zxtechMCW5B10X,
         "cmd=getvideoattr&cmd=getlampattrex&cmd=getimageattr&cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1",
         'web/cgi-bin/hi3510/param.cgi',
         "ZTech MCW5B10X")]
 
+  private _audioEncodings: AudioEncoding[] = [
+    new AudioEncoding('None', 'None'),  // No audio in stream
+    new AudioEncoding('Not Listed', 'Not Listed'),  // Audio type not listed, transcode to AAC
+    new AudioEncoding('G711', 'G711'),  // Transcode to AAC
+    new AudioEncoding('G726', 'G726'),  // Transcode to AAC
+    new AudioEncoding('AAC', 'AAC'),    // No transcoding required
+
+  ];
+
   get cameraParamSpecs() {
     return this._cameraParamSpecs;
   };
 
-  constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
-    this.loadCameraStreams().subscribe(cameraStreams => {
-        // Build up a cameraStreams array which excludes the addition guff which comes from
-        // having the cameraStreams set up configured in application.yml
-        for (const i in cameraStreams) {
-          const c = cameraStreams[i];
-          this.cameraStreams.push(c);
+  get audioEncodings() {
+    return this._audioEncodings;
+  }
 
-          if (!this.cameras.find((cs: Camera) => {
-            return cs.name === c.camera.name
-          }))
-            this.cameras.push(c.camera);
-        }
-      },
-      // Error messages would be shown by the nav component
-      reason => this.errorEmitter.emit(reason)
-    );
+  constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
+    this.loadAndUpdateCameraStreams().then(() => {});
+  }
+
+  async loadAndUpdateCameraStreams(): Promise<void> {
+    try {
+      let cameraStreams: CameraStream[] = await this.loadCameraStreams().toPromise();
+      // Build up a cameraStreams array which excludes the addition guff which comes from
+      // having the cameraStreams set up configured in application.yml
+      for (const i in cameraStreams) {
+        const c = cameraStreams[i];
+        this.cameraStreams.push(c);
+
+        if (!this.cameras.find((cs: Camera) => {
+          return cs.name === c.camera.name
+        }))
+          this.cameras.push(c.camera);
+      }
+    } catch (reason) {
+      this.errorEmitter.emit(reason)
+    }
   }
 
   /**
@@ -125,7 +143,7 @@ export class CameraService {
     return this.configUpdates.asObservable();
   }
 
-  /**
+ /**
    * getCameraStreams: Get details for all cameraStreams
    */
   public getCameraStreams(): CameraStream[] {
@@ -227,14 +245,6 @@ export class CameraService {
 
   discover(): Observable<Map<string, Camera>> {
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discover"), '', this.httpJSONOptions).pipe(
-      tap((cams) => {
-        this.cameras = [];
-
-        for (const key in cams)
-          this.cameras.push(cams[key] as Camera);
-
-        this.cameraStreams = CameraService.createCameraStreams(cams);
-      }),
       map(cams => {
         return CameraService.convertCamsObjectToMap(cams);
       })
@@ -263,14 +273,23 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getAccessToken(cameraHost:string, port:number) :Observable<{accessToken: string}> {
-    let params:{} = {host: cameraHost, port: port}
-    return this.http.post<{accessToken: string}>(this._baseUrl.getLink("cam", "getAccessToken"), params, this.httpJSONOptions).pipe(
+  getAccessToken(cameraHost: string, port: number): Observable<{ accessToken: string }> {
+    let params: {} = {host: cameraHost, port: port}
+    return this.http.post<{
+      accessToken: string
+    }>(this._baseUrl.getLink("cam", "getAccessToken"), params, this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
+
   resetTimer(accessToken: string): Observable<void> {
-    let params:{} = {accessToken: accessToken}
+    let params: {} = {accessToken: accessToken}
     return this.http.post<void>(this._baseUrl.getLink("cam", "resetTimer"), params, this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+
+  closeClients(accessToken: string): Observable<void> {
+    let params: {} = {accessToken: accessToken}
+    return this.http.post<void>(this._baseUrl.getLink("cam", "closeClients"), params, this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 }

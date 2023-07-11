@@ -53,7 +53,7 @@ public interface ReceiverPort {
     public void configureReceiver(
 
         @WebParam(name = "ReceiverToken", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl")
-        java.lang.String receiverToken,
+        String receiverToken,
         @WebParam(name = "Configuration", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl")
         org.onvif.ver10.schema.ReceiverConfiguration configuration
     );
@@ -71,7 +71,7 @@ public interface ReceiverPort {
     public org.onvif.ver10.schema.ReceiverStateInformation getReceiverState(
 
         @WebParam(name = "ReceiverToken", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl")
-        java.lang.String receiverToken
+        String receiverToken
     );
 
     /**
@@ -83,7 +83,7 @@ public interface ReceiverPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl", className = "org.onvif.ver10.receiver.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl", className = "org.onvif.ver10.receiver.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl")
-    public org.onvif.ver10.receiver.wsdl.Capabilities getServiceCapabilities()
+    public Capabilities getServiceCapabilities()
 ;
 
     /**
@@ -98,7 +98,7 @@ public interface ReceiverPort {
     public void deleteReceiver(
 
         @WebParam(name = "ReceiverToken", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl")
-        java.lang.String receiverToken
+        String receiverToken
     );
 
     /**
@@ -112,7 +112,7 @@ public interface ReceiverPort {
     public void setReceiverMode(
 
         @WebParam(name = "ReceiverToken", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl")
-        java.lang.String receiverToken,
+        String receiverToken,
         @WebParam(name = "Mode", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl")
         org.onvif.ver10.schema.ReceiverMode mode
     );
@@ -128,6 +128,6 @@ public interface ReceiverPort {
     public org.onvif.ver10.schema.Receiver getReceiver(
 
         @WebParam(name = "ReceiverToken", targetNamespace = "http://www.onvif.org/ver10/receiver/wsdl")
-        java.lang.String receiverToken
+        String receiverToken
     );
 }

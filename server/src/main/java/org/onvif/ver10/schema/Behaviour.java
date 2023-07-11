@@ -1,19 +1,15 @@
 
 package org.onvif.ver10.schema;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 
 
 /**
@@ -67,9 +63,9 @@ import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 public class Behaviour {
 
     @XmlElement(name = "Removed")
-    protected Behaviour.Removed removed;
+    protected Removed removed;
     @XmlElement(name = "Idle")
-    protected Behaviour.Idle idle;
+    protected Idle idle;
     @XmlElement(name = "Extension")
     protected BehaviourExtension extension;
     @XmlAnyAttribute
@@ -80,10 +76,10 @@ public class Behaviour {
      * 
      * @return
      *     possible object is
-     *     {@link Behaviour.Removed }
+     *     {@link Removed }
      *     
      */
-    public Behaviour.Removed getRemoved() {
+    public Removed getRemoved() {
         return removed;
     }
 
@@ -92,10 +88,10 @@ public class Behaviour {
      * 
      * @param value
      *     allowed object is
-     *     {@link Behaviour.Removed }
+     *     {@link Removed }
      *     
      */
-    public void setRemoved(Behaviour.Removed value) {
+    public void setRemoved(Removed value) {
         this.removed = value;
     }
 
@@ -104,10 +100,10 @@ public class Behaviour {
      * 
      * @return
      *     possible object is
-     *     {@link Behaviour.Idle }
+     *     {@link Idle }
      *     
      */
-    public Behaviour.Idle getIdle() {
+    public Idle getIdle() {
         return idle;
     }
 
@@ -116,10 +112,10 @@ public class Behaviour {
      * 
      * @param value
      *     allowed object is
-     *     {@link Behaviour.Idle }
+     *     {@link Idle }
      *     
      */
-    public void setIdle(Behaviour.Idle value) {
+    public void setIdle(Idle value) {
         this.idle = value;
     }
 

@@ -1,6 +1,10 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraStream} from '../cameras/Camera';
 import {MatSelect} from '@angular/material/select';
+import {Client} from "@stomp/stompjs";
+import {UtilsService} from '../shared/utils.service';
+import {ReportingComponent} from "../reporting/reporting.component";
+import {interval, Subscription, timer} from "rxjs";
 
 declare let Hls: any;
 
@@ -12,7 +16,7 @@ declare let Hls: any;
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
-  @ViewChild('latencyLimitSelect') llSelector!: MatSelect;
+  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isfmp4: boolean = false;
   camstream!: CameraStream;
   video!: HTMLVideoElement;
@@ -22,12 +26,20 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   recording: boolean = false;
   recordingUri: string = '';
   manifest: string = '';
-
-
+  // @ts-ignore
+  recorder: MediaRecorder;
+  mediaDevices!: MediaDeviceInfo[];
+  audioToggle: boolean = false;
+  selectedDeviceId!: string;
+  selectedAudioInput!: MediaDeviceInfo;
+  stopAudioAfterLongTimeSubscription!: Subscription
 
 //  private isFullscreenNow: boolean = false;
+  private client!: Client;
+  private timeForStartAudioOutResponse: number = 0;
 
-  constructor() {
+
+  constructor(public utilsService: UtilsService) {
   }
 
   /**
@@ -43,6 +55,23 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.recordingUri[this.recordingUri.length - 1] !== '/') {
       this.recordingUri += '/';
+    }
+
+    if(camStream.camera.backchannelAudioSupported) {
+      // Call getUserMedia to make the browser ask the user for permission to access the microphones so that
+      //  enumerateDevices can get the microphone list.
+      navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false
+      }).then(() => {
+        navigator.mediaDevices.enumerateDevices().then((dev) => {
+          this.selectedAudioInput = dev[0];
+          this.selectedDeviceId = this.selectedAudioInput.deviceId;
+          this.mediaDevices = dev;
+        }).catch((error) => {
+          this.reporting.errorMessage = error;
+        });
+      })
     }
 
     this.recordingUri += manifest;
@@ -61,40 +90,29 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * startVideo: Start the video (assumes appropriate uri and camera is set up).
    * @private
    */
-  private startVideo(): void {
+  private startVideo(keepAudioStream: boolean = false): void {
     if (!this.isfmp4) {
       if (this.camstream !== undefined) {
         if (Hls.isSupported()) {
           this.hls = new Hls();
           this.hls.loadSource(this.recording ? this.recordingUri : this.camstream.stream.uri);
           this.hls.attachMedia(this.video);
-
-          //hls.on(Hls.Events.MANIFEST_PARSED, this.video.play());
-          // this.video.play();
         } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
           this.video.src = this.camstream.stream.uri;
         }
       }
     } else {
+      // If an audio output session is running, stop it if we switch video views.
+      if(!keepAudioStream && this.audioToggle)
+        this.stopAudioOut();
+
       this.ms = new MediaSource();
       this.ms.addEventListener('sourceopen', this.opened, false);
 
-      // get reference to video
-      //video.latencyHint = 0.075
-      // set mediasource as source of video
+      // set MediaSource as source of video
       this.video.src = window.URL.createObjectURL(this.ms);
     }
   }
-
-  toInt(arr: Uint8Array, index: number): number { // From bytes to big-endian 32-bit integer.  Input: Uint8Array, index
-    let dv = new DataView(arr.buffer, 0);
-    return dv.getInt32(index, false); // big endian
-  }
-
-  // toString(arr:number[], fr: number, to: number) { // From bytes to string.  Input: Uint8Array, start index, stop index.
-  //   // https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
-  //   return String.fromCharCode.apply(null, arr.slice(fr, to));
-  // }
 
   verbose: boolean = false;
   multi: boolean = false;
@@ -156,7 +174,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     return out;
   }
 
+
   // consider these callbacks:
+  // - putPacket : called when websocket receives data
   // - putPacket : called when websocket receives data
   // - loadPacket : called when source_buffer is ready for more data
   // Both operate on a common fifo
@@ -245,6 +265,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   };
 
+  streamTestInterval!: Subscription;
 
   opened = () => { // MediaSource object is ready to go
     console.log('Called opened');
@@ -262,15 +283,28 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         .replace('https', 'wss') // Change https to wss
         .replace('http', 'ws')  // or change http to ws
       + this.camstream.stream.uri;
-
+    let counter = 0;
+    this.streamTestInterval = interval(1000).subscribe(() => {
+      if(++counter >= 4) {  // If counter gets to 4, the stream messages have stopped, so restart the video
+        console.log("Stream for "+this.camstream.camera.name+" has stalled, attempting restart in 1 second");
+        this.stop();  // Close the existing video set up
+        let timerSubscription = timer(1000).subscribe(() => {
+          timerSubscription.unsubscribe();
+          this.startVideo(true);  // Start it again after 1-second delay
+        });
+      }
+    });
     this.ws = new WebSocket(url);
     this.ws.binaryType = 'arraybuffer';
     this.ws.onmessage = (event: MessageEvent) => {
       this.putPacket(event.data);
+      counter = 0;
     };
   };
 
   stop(): void {
+    this.streamTestInterval?.unsubscribe();  // Stop the stream test interval, or it will be restarted after
+                                            // we exit the video component
     if (!this.isfmp4 && this.hls !== null) {
       this.video.pause();
       this.hls.stopLoad();
@@ -287,26 +321,144 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  toggleAudioOut() {
+    if(!this.utilsService.speakActive || this.audioToggle) {
+      this.audioToggle = !this.audioToggle;
+      if (this.audioToggle) {
+        this.timeForStartAudioOutResponse = 0;
+        // Time the response and add this to the audio off delay time, this is a bodge to mitigate cutting the audio
+        //  off before outgoing voice message was complete.
+        let intervalSubscription: Subscription = interval(1).subscribe(() => ++this.timeForStartAudioOutResponse)
+        this.utilsService.startAudioOut(this.camstream.stream).subscribe(() => {
+          intervalSubscription.unsubscribe();
+        }, reason => {
+          this.reporting.errorMessage = reason
+          this.stopAudioOut();
+        });
+        this.startAudioOutput();
+      }
+      else {
+        this.beginStopAudioOut();
+      }
+    }
+  }
+
+  setAudioInput() {
+    // @ts-ignore
+    this.selectedAudioInput =
+      this.mediaDevices.find((dev) => {
+        return dev.deviceId === this.selectedDeviceId
+      })
+  }
+
+  startAudioOutput(): boolean {
+    let retVal = true;
+    this.video.muted = true;
+    let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host + '/audio';
+
+    this.client  = new Client({
+      brokerURL: serverUrl,
+      onConnect: () => {},
+      reconnectDelay: 1000,
+      debug: () => {}
+    });
+
+    if (navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({
+        audio: (this.selectedAudioInput == null ? true : {deviceId: this.selectedAudioInput.deviceId}),
+        video: false
+      }).then((stream) => {
+        // @ts-ignore
+        this.recorder = new MediaRecorder(stream);
+        // fires every one second and passes a BlobEvent
+        this.recorder.ondataavailable = (event: any) => {
+          // get the Blob from the event
+          const blob: Blob = event.data;
+          blob.arrayBuffer().then((buff) => {
+            let data = new Uint8Array(buff);
+
+            if(data.length > 0) {
+              // and send that blob to the server...
+              this.client.publish({
+                destination: '/app/audio',
+                binaryBody: data,
+                headers: {"content-type": "application/octet-stream"}
+              });
+            }
+          });
+        };
+
+        this.client.onConnect = () => this.recorder.start(100);
+        this.client.activate();
+
+        // This stops the audio out after 5 minutes
+        this.stopAudioAfterLongTimeSubscription = timer(300000).subscribe(() => {
+          this.stopAudioOut();
+        });
+      }).catch((error) => {
+        this.stopAudioOut();
+        retVal = false;
+        this.reporting.errorMessage = error;
+        console.log(error);
+      });
+    }
+    return retVal;
+  }
+
+  beginStopAudioOut() {
+    // 1.6 second plus timeForStartAudioOutResponse delay on stopping to allow for the latency in the audio and prevent
+    //  the end of the speech getting get cut off
+    timer(1600+this.timeForStartAudioOutResponse).subscribe(() => {
+      this.stopAudioOut();
+    });
+  }
+
+  private stopAudioOut() : void {
+    this.video.muted = false;
+    this.stopAudioAfterLongTimeSubscription?.unsubscribe();
+    this.recorder?.stop();
+    this.utilsService.stopAudioOut().subscribe(() => {
+      this.client?.deactivate({force: false}).then(() => {});
+    }, reason => {
+      this.reporting.errorMessage = reason;
+    });
+    this.audioToggle = false;
+  }
+
+  audioButtonTooltip() : string {
+    let speakActive = this.utilsService.speakActive;
+    let retVal: string = "";
+    if(speakActive)
+      retVal = this.audioToggle ? "Stop audio to camera" : "Audio to camera is in use in another session. Cannot start audio to camera at this time";
+    else if (!speakActive) {
+      retVal = "Start audio to camera"
+    }
+    return retVal;
+  }
+
+  audioInputSelectorTooltip() {
+    let retVal = "Set audio input device";
+    if(this.utilsService.speakActive)
+      retVal = "Audio to camera is in use, cannot select audio input at this time";
+    return retVal;
+  }
+
   ngOnInit(): void {
   }
 
   ngAfterViewInit(): void {
-
     this.video = this.videoEl.nativeElement;
-    // if(this.isfmp4)
-    //   this.llSelector.value = this.buffering_sec.toString();
     this.video.autoplay = true;
     this.video.muted = true;
     this.video.controls = true;
-    // Stop the idle timeout if the video is being viewed full screen
-    // this.video.addEventListener('fullscreenchange', this.fullScreenListener);
-    // this.video.addEventListener('webkitfullscreenchange', this.fullScreenListener);
-
-    // This prevents value changed after it was checked error
-    //timer(10).subscribe(() => this.startVideo());
+    // @ts-ignore
+    this.selectedAudioInput = null;
   }
 
   ngOnDestroy(): void {
     this.stop();
+    if (this.audioToggle) {
+      this.stopAudioOut();
+     }
   }
 }

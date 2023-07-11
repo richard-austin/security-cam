@@ -5,9 +5,16 @@ import com.google.gson.GsonBuilder
 import grails.config.Config
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import grails.util.Environment
+import org.grails.web.json.JSONObject
 import org.springframework.core.io.Resource
+import org.springframework.messaging.simp.SimpMessagingTemplate
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
+import security.cam.audiobackchannel.RtspClient
 import security.cam.commands.SMTPData
 import security.cam.commands.SetupSMTPAccountCommand
+import security.cam.commands.StartAudioOutCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
 import java.nio.charset.StandardCharsets
@@ -19,6 +26,7 @@ import java.nio.file.Paths
 import java.nio.file.attribute.GroupPrincipal
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.UserPrincipalLookupService
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class Temperature {
     Temperature(String temp) {
@@ -37,8 +45,7 @@ class Version {
 }
 
 class MyIP {
-    MyIP(String myIp)
-    {
+    MyIP(String myIp) {
         this.myIp = myIp
     }
 
@@ -46,27 +53,31 @@ class MyIP {
 }
 
 @Transactional
+@EnableScheduling
 class UtilsService {
     LogService logService
     AssetResourceLocator assetResourceLocator
     GrailsApplication grailsApplication
+    SimpMessagingTemplate brokerMessagingTemplate
+    CamService camService
+    Queue<byte[]> audioQueue = new ConcurrentLinkedQueue<>()
 
     public final passwordRegex = /^[A-Za-z0-9][A-Za-z0-9(){\[1*£$\\\]}=@~?^]{7,31}$/
     public final usernameRegex = /^[a-zA-Z0-9](_(?!(.|_))|.(?!(_|.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/
     public final emailRegex = /^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/
     public static final onvifBaseAddressRegex = /^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/
+
     /**
      * executeLinuxCommand: Execute a linux command
      * @param command the command and its parameters as a string
      * @return: The returned value
      */
-    String executeLinuxCommand(String command)
-    {
-        Process p = Runtime.getRuntime().exec(command)
+    String executeLinuxCommand(String command) {
+        Process p = new ProcessBuilder(command).start() // Process p = Runtime.getRuntime().exec(command)
+        String retVal = processCommandOutput(p)
         p.waitFor()
-
-        return processCommandOutput(p)
-   }
+        retVal
+    }
 
     /**
      * executeLinuxCommand: Execute a linux command
@@ -74,13 +85,13 @@ class UtilsService {
      * @return: The returned value
      */
     String executeLinuxCommand(String[] command) {
-        Process p = Runtime.getRuntime().exec(command)
+        Process p = new ProcessBuilder(command).start() // Runtime.getRuntime().exec(command)
+        String retVal = processCommandOutput(p)
         p.waitFor()
-        return processCommandOutput(p)
+        retVal
     }
 
-    private static String processCommandOutput(Process p)
-    {
+    private static String processCommandOutput(Process p) {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(p.getInputStream()))
         StringBuffer sb = new StringBuffer()
@@ -99,8 +110,14 @@ class UtilsService {
     def getTemperature() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            Temperature temp = new Temperature(executeLinuxCommand("vcgencmd measure_temp"))
-            result.responseObject = temp
+            if (Environment.isDevelopmentMode()) {
+                // There is no vcgencmd on a PC, only raspberry pi
+                Temperature temp = new Temperature("temp=45.2'C")
+                result.responseObject = temp
+            } else {
+                Temperature temp = new Temperature(executeLinuxCommand("vcgencmd", "measure_temp"))
+                result.responseObject = temp
+            }
         }
         catch (Exception ex) {
             logService.cam.error("Exception in getTemperature: " + ex.getCause() + ' ' + ex.getMessage())
@@ -160,9 +177,9 @@ class UtilsService {
             GroupPrincipal group = lookupService.lookupPrincipalByGroupName(secCam)
             Files.getFileAttributeView(myipFile, PosixFileAttributeView.class,
                     LinkOption.NOFOLLOW_LINKS).setGroup(group)
-         }
+        }
         catch (IOException e) {
-            logService.cam.error"${e.getClass().getName()} in setIP: ${e.getMessage()}"
+            logService.cam.error "${e.getClass().getName()} in setIP: ${e.getMessage()}"
             result.status = PassFail.FAIL
             result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
@@ -181,8 +198,8 @@ class UtilsService {
             writer.write(res)
             writer.close()
         }
-        catch(Exception e) {
-            logService.cam.error"${e.getClass().getName()} in setupSMTPClient: ${e.getMessage()}"
+        catch (Exception e) {
+            logService.cam.error "${e.getClass().getName()} in setupSMTPClient: ${e.getMessage()}"
             result.status = PassFail.FAIL
             result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
@@ -194,9 +211,17 @@ class UtilsService {
         try {
             result.responseObject = getSMTPConfigData()
         }
-        catch(Exception e) {
-            logService.cam.error"${e.getClass().getName()} in getSMTPClientParams: ${e.getMessage()}"
+        catch(FileNotFoundException fnf) {
+            final String noConfigFile = "No existing config file for SMTP client. It will be created when the SMTP parameters are entered and saved."
+            logService.cam.warn(noConfigFile)
+            result.status = PassFail.PASS
+            result.response = noConfigFile
+            result.error = "${fnf.getClass().getName()} -- ${fnf.getMessage()}"
+        }
+        catch (Exception e) {
+            logService.cam.error "${e.getClass().getName()} in getSMTPClientParams: ${e.getMessage()}"
             result.status = PassFail.FAIL
+            result.response = null
             result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
         return result
@@ -210,6 +235,118 @@ class UtilsService {
         String json = new String(bytes, StandardCharsets.UTF_8)
         def gson = new GsonBuilder().create()
         def smtpData = gson.fromJson(json, SMTPData)
-        return  smtpData
+        return smtpData
+    }
+
+
+    // Execute every second. If the audio input feed is running it increments the audioInputStreamCheckCount which is
+    //  zeroed by each time an audio packet is received. If the count gets past 3, the audio feed is assumed to have
+    //  stopped (maybe by the audio session not being closed cleanly), so it stops the feed properly.
+    @Scheduled(fixedRate = 1000L)
+    def audioFeedCheck() {
+        if (audioInUse) {
+            // Shut down the sudio receiver if the websocket data stream has stopped
+            if (++audioInputStreamCheckCount > audioInSessionTimeout) {
+                stopAudioOut()
+            }
+        }
+    }
+
+    boolean audioInUse = false
+    RtspClient client
+
+    private ServerSocket serverSocket
+    private Socket clientSocket
+    private OutputStream out
+    Thread serverThread
+
+    def startAudioOut(StartAudioOutCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        if (!audioInUse) {
+            try {
+                // Set up the socket for ffmpeg backchannel feed to source from
+                serverSocket = new ServerSocket(8881)
+                serverThread = new Thread(() -> {
+                    clientSocket = serverSocket.accept()
+                    out = clientSocket.getOutputStream()
+                })
+                serverThread.start()
+
+                final String talkOff = new JSONObject()
+                        .put("message", "talkOff")
+                        .put("instruction", "on")
+                        .toString()
+                // Disable audio out on clients except the initiator
+                brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
+
+                final URI netcam_uri = new URI(cmd.stream.netcam_uri)
+                ObjectCommandResponse resp = camService.getCameraCredentials()
+                String user = "", pass = ""
+                if (resp.status == PassFail.PASS) {
+                    user = resp.responseObject.camerasAdminUserName
+                    pass = resp.responseObject.camerasAdminPassword
+                }
+                client = new RtspClient(netcam_uri.getHost(), netcam_uri.getPort(), user, pass, logService)
+                client.start()
+            }
+            catch (Exception ex) {
+                stopAudioOut()
+                logService.cam.error "${ex.getClass().getName()} in startAudioOut: ${ex.getMessage()}"
+                result.status = PassFail.FAIL
+                result.error = "${ex.getClass().getName()} -- ${ex.getMessage()}"
+            }
+            audioInUse = true
+        }
+        return result
+    }
+
+    def stopAudioOut() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            final String talkOff = new JSONObject()
+                    .put("message", "talkOff")
+                    .put("instruction", "off")
+                    .toString()
+            // Re-enable audio out on clients
+            brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
+            audioInUse = false
+            client?.stop()
+            client = null
+            audioQueue.clear()
+
+            serverSocket?.close()
+            clientSocket?.close()
+            serverThread?.interrupt()
+            out?.close()
+            out = null
+        }
+        catch (Exception ex) {
+            logService.cam.error "${ex.getClass().getName()} in stopAudioOut: ${ex.getMessage()}"
+            result.status = PassFail.FAIL
+            result.error = "${ex.getClass().getName()} -- ${ex.getMessage()}"
+        }
+        return result
+    }
+
+    private final long audioInSessionTimeout = 3
+    // Stop audio input session after 3 seconds without a websocket message
+    private long audioInputStreamCheckCount = 0
+
+    def audio(byte[] bytes) {
+        audioQueue.add(bytes)
+        // Reset the stream check count to indicate the stream is still active
+        audioInputStreamCheckCount = 0
+        if (out) {
+            try {
+                while (!audioQueue.empty) {
+                    out.write(audioQueue.poll())
+                    //   System.out.println("Writing ${audioQueue.poll().length} bytes")
+                }
+            }
+            catch (Exception ex) {
+                System.out.println("${ex.getClass().getName()} in audio handler: ${ex.getMessage()}")
+            }
+        }
     }
 }

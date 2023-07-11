@@ -8,6 +8,7 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
 import server.Stream
 
+import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 
 @Transactional
@@ -80,6 +81,16 @@ class ConfigurationUpdateService {
                     f.mkdir()
                 }
                 if (stream.motion.enabled) {
+                    String netcam_url =  stream.netcam_uri
+                    if(cam.cameraParamSpecs.camType == 0) {
+                        ObjectCommandResponse response = camService.getCameraCredentials()
+                        if(response.status == PassFail.PASS) {
+                            def encoded_username = URLEncoder.encode(response.responseObject.camerasAdminUserName as String, StandardCharsets.UTF_8.toString())
+                            def encoded_password = URLEncoder.encode(response.responseObject.camerasAdminPassword as String, StandardCharsets.UTF_8.toString())
+                            def idx = "rtsp://".length()
+                            netcam_url = stream.netcam_uri.substring(0, idx)+encoded_username+":"+encoded_password+"@"+stream.netcam_uri.substring(idx)
+                        }
+                    }
                     String motionConf =
                             """
 # ${Paths.get(motionConfigDir, it.key).toString()}.conf
@@ -103,7 +114,7 @@ ${stream.motion.mask_file != '' ? "mask_file ${Paths.get(motionMaskFileDir,strea
 camera_id ${++camId}
 
 # The full URL of the network camera stream.
-netcam_url ${stream.netcam_uri}
+netcam_url ${netcam_url}
 
 # Image width in pixels.
 width $stream.video_width

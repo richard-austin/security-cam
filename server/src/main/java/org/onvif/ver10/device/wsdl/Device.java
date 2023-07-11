@@ -41,7 +41,7 @@ public interface Device {
     public void startFirmwareUpgrade(
 
         @WebParam(mode = WebParam.Mode.OUT, name = "UploadUri", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.lang.String> uploadUri,
+        javax.xml.ws.Holder<String> uploadUri,
         @WebParam(mode = WebParam.Mode.OUT, name = "UploadDelay", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         javax.xml.ws.Holder<javax.xml.datatype.Duration> uploadDelay,
         @WebParam(mode = WebParam.Mode.OUT, name = "ExpectedDownTime", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
@@ -215,7 +215,7 @@ public interface Device {
     public void setScopes(
 
         @WebParam(name = "Scopes", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.util.List<java.lang.String> scopes
+        java.util.List<String> scopes
     );
 
     /**
@@ -291,7 +291,7 @@ public interface Device {
     public boolean setNetworkInterfaces(
 
         @WebParam(name = "InterfaceToken", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String interfaceToken,
+        String interfaceToken,
         @WebParam(name = "NetworkInterface", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         org.onvif.ver10.schema.NetworkInterfaceSetConfiguration networkInterface
     );
@@ -456,11 +456,11 @@ public interface Device {
         @WebParam(mode = WebParam.Mode.OUT, name = "SystemLogUris", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         javax.xml.ws.Holder<org.onvif.ver10.schema.SystemLogUriList> systemLogUris,
         @WebParam(mode = WebParam.Mode.OUT, name = "SupportInfoUri", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.lang.String> supportInfoUri,
+        javax.xml.ws.Holder<String> supportInfoUri,
         @WebParam(mode = WebParam.Mode.OUT, name = "SystemBackupUri", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.lang.String> systemBackupUri,
+        javax.xml.ws.Holder<String> systemBackupUri,
         @WebParam(mode = WebParam.Mode.OUT, name = "Extension", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<org.onvif.ver10.device.wsdl.GetSystemUrisResponse.Extension> extension
+        javax.xml.ws.Holder<GetSystemUrisResponse.Extension> extension
     );
 
     /**
@@ -478,7 +478,7 @@ public interface Device {
     public void removeScopes(
 
         @WebParam(mode = WebParam.Mode.INOUT, name = "ScopeItem", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.util.List<java.lang.String>> scopeItem
+        javax.xml.ws.Holder<java.util.List<String>> scopeItem
     );
 
     /**
@@ -557,15 +557,15 @@ public interface Device {
     public void getDeviceInformation(
 
         @WebParam(mode = WebParam.Mode.OUT, name = "Manufacturer", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.lang.String> manufacturer,
+        javax.xml.ws.Holder<String> manufacturer,
         @WebParam(mode = WebParam.Mode.OUT, name = "Model", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.lang.String> model,
+        javax.xml.ws.Holder<String> model,
         @WebParam(mode = WebParam.Mode.OUT, name = "FirmwareVersion", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.lang.String> firmwareVersion,
+        javax.xml.ws.Holder<String> firmwareVersion,
         @WebParam(mode = WebParam.Mode.OUT, name = "SerialNumber", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.lang.String> serialNumber,
+        javax.xml.ws.Holder<String> serialNumber,
         @WebParam(mode = WebParam.Mode.OUT, name = "HardwareId", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.lang.String> hardwareId
+        javax.xml.ws.Holder<String> hardwareId
     );
 
     /**
@@ -630,9 +630,9 @@ public interface Device {
     public org.onvif.ver10.schema.Certificate createCertificate(
 
         @WebParam(name = "CertificateID", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String certificateID,
+        String certificateID,
         @WebParam(name = "Subject", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String subject,
+        String subject,
         @WebParam(name = "ValidNotBefore", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         javax.xml.datatype.XMLGregorianCalendar validNotBefore,
         @WebParam(name = "ValidNotAfter", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
@@ -690,9 +690,9 @@ public interface Device {
     public void setNetworkDefaultGateway(
 
         @WebParam(name = "IPv4Address", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.util.List<java.lang.String> iPv4Address,
+        java.util.List<String> iPv4Address,
         @WebParam(name = "IPv6Address", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.util.List<java.lang.String> iPv6Address
+        java.util.List<String> iPv6Address
     );
 
     /**
@@ -705,7 +705,7 @@ public interface Device {
     public void setStorageConfiguration(
 
         @WebParam(name = "StorageConfiguration", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        org.onvif.ver10.device.wsdl.StorageConfiguration storageConfiguration
+        StorageConfiguration storageConfiguration
     );
 
     /**
@@ -752,7 +752,7 @@ public interface Device {
     public void deleteUsers(
 
         @WebParam(name = "Username", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.util.List<java.lang.String> username
+        java.util.List<String> username
     );
 
     /**
@@ -767,7 +767,7 @@ public interface Device {
     @RequestWrapper(localName = "UpgradeSystemFirmware", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.UpgradeSystemFirmware")
     @ResponseWrapper(localName = "UpgradeSystemFirmwareResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.UpgradeSystemFirmwareResponse")
     @WebResult(name = "Message", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-    public java.lang.String upgradeSystemFirmware(
+    public String upgradeSystemFirmware(
 
         @WebParam(name = "Firmware", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         org.onvif.ver10.schema.AttachmentData firmware
@@ -786,7 +786,7 @@ public interface Device {
     public void addScopes(
 
         @WebParam(name = "ScopeItem", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.util.List<java.lang.String> scopeItem
+        java.util.List<String> scopeItem
     );
 
     /**
@@ -800,7 +800,7 @@ public interface Device {
     public void setRelayOutputSettings(
 
         @WebParam(name = "RelayOutputToken", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String relayOutputToken,
+        String relayOutputToken,
         @WebParam(name = "Properties", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         org.onvif.ver10.schema.RelayOutputSettings properties
     );
@@ -850,7 +850,7 @@ public interface Device {
     public void startSystemRestore(
 
         @WebParam(mode = WebParam.Mode.OUT, name = "UploadUri", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        javax.xml.ws.Holder<java.lang.String> uploadUri,
+        javax.xml.ws.Holder<String> uploadUri,
         @WebParam(mode = WebParam.Mode.OUT, name = "ExpectedDownTime", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         javax.xml.ws.Holder<javax.xml.datatype.Duration> expectedDownTime
     );
@@ -871,7 +871,7 @@ public interface Device {
     public void setHostname(
 
         @WebParam(name = "Name", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String name
+        String name
     );
 
     /**
@@ -925,10 +925,10 @@ public interface Device {
     @RequestWrapper(localName = "SendAuxiliaryCommand", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.SendAuxiliaryCommand")
     @ResponseWrapper(localName = "SendAuxiliaryCommandResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.SendAuxiliaryCommandResponse")
     @WebResult(name = "AuxiliaryCommandResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-    public java.lang.String sendAuxiliaryCommand(
+    public String sendAuxiliaryCommand(
 
         @WebParam(name = "AuxiliaryCommand", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String auxiliaryCommand
+        String auxiliaryCommand
     );
 
     /**
@@ -940,7 +940,7 @@ public interface Device {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-    public org.onvif.ver10.device.wsdl.DeviceServiceCapabilities getServiceCapabilities()
+    public DeviceServiceCapabilities getServiceCapabilities()
 ;
 
     /**
@@ -995,9 +995,9 @@ public interface Device {
     public org.onvif.ver10.schema.BinaryData getPkcs10Request(
 
         @WebParam(name = "CertificateID", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String certificateID,
+        String certificateID,
         @WebParam(name = "Subject", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String subject,
+        String subject,
         @WebParam(name = "Attributes", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         org.onvif.ver10.schema.BinaryData attributes
     );
@@ -1023,7 +1023,7 @@ public interface Device {
     @RequestWrapper(localName = "GetStorageConfigurations", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetStorageConfigurations")
     @ResponseWrapper(localName = "GetStorageConfigurationsResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetStorageConfigurationsResponse")
     @WebResult(name = "StorageConfigurations", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-    public java.util.List<org.onvif.ver10.device.wsdl.StorageConfiguration> getStorageConfigurations()
+    public java.util.List<StorageConfiguration> getStorageConfigurations()
 ;
 
     /**
@@ -1067,7 +1067,7 @@ public interface Device {
     public void setRelayOutputState(
 
         @WebParam(name = "RelayOutputToken", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String relayOutputToken,
+        String relayOutputToken,
         @WebParam(name = "LogicalState", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         org.onvif.ver10.schema.RelayLogicalState logicalState
     );
@@ -1120,7 +1120,7 @@ public interface Device {
         @WebParam(name = "FromDHCP", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         boolean fromDHCP,
         @WebParam(name = "SearchDomain", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.util.List<java.lang.String> searchDomain,
+        java.util.List<String> searchDomain,
         @WebParam(name = "DNSManual", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         java.util.List<org.onvif.ver10.schema.IPAddress> dnsManual
     );
@@ -1143,7 +1143,7 @@ public interface Device {
     public org.onvif.ver10.schema.CertificateInformation getCertificateInformation(
 
         @WebParam(name = "CertificateID", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String certificateID
+        String certificateID
     );
 
     /**
@@ -1153,7 +1153,7 @@ public interface Device {
     @RequestWrapper(localName = "SystemReboot", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.SystemReboot")
     @ResponseWrapper(localName = "SystemRebootResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.SystemRebootResponse")
     @WebResult(name = "Message", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-    public java.lang.String systemReboot()
+    public String systemReboot()
 ;
 
     /**
@@ -1197,7 +1197,7 @@ public interface Device {
     public void deleteDot1XConfiguration(
 
         @WebParam(name = "Dot1XConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.util.List<java.lang.String> dot1XConfigurationToken
+        java.util.List<String> dot1XConfigurationToken
     );
 
     /**
@@ -1259,10 +1259,10 @@ public interface Device {
     @RequestWrapper(localName = "GetStorageConfiguration", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetStorageConfiguration")
     @ResponseWrapper(localName = "GetStorageConfigurationResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetStorageConfigurationResponse")
     @WebResult(name = "StorageConfiguration", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-    public org.onvif.ver10.device.wsdl.StorageConfiguration getStorageConfiguration(
+    public StorageConfiguration getStorageConfiguration(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -1307,7 +1307,7 @@ public interface Device {
     public org.onvif.ver10.schema.Dot1XConfiguration getDot1XConfiguration(
 
         @WebParam(name = "Dot1XConfigurationToken", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String dot1XConfigurationToken
+        String dot1XConfigurationToken
     );
 
     /**
@@ -1366,10 +1366,10 @@ public interface Device {
     @RequestWrapper(localName = "CreateStorageConfiguration", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.CreateStorageConfiguration")
     @ResponseWrapper(localName = "CreateStorageConfigurationResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.CreateStorageConfigurationResponse")
     @WebResult(name = "Token", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-    public java.lang.String createStorageConfiguration(
+    public String createStorageConfiguration(
 
         @WebParam(name = "StorageConfiguration", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        org.onvif.ver10.device.wsdl.StorageConfigurationData storageConfiguration
+        StorageConfigurationData storageConfiguration
     );
 
     /**
@@ -1385,7 +1385,7 @@ public interface Device {
     public java.util.List<org.onvif.ver10.schema.Dot11AvailableNetworks> scanAvailableDot11Networks(
 
         @WebParam(name = "InterfaceToken", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String interfaceToken
+        String interfaceToken
     );
 
     /**
@@ -1420,7 +1420,7 @@ public interface Device {
     public void deleteCertificates(
 
         @WebParam(name = "CertificateID", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.util.List<java.lang.String> certificateID
+        java.util.List<String> certificateID
     );
 
     /**
@@ -1435,7 +1435,7 @@ public interface Device {
     @RequestWrapper(localName = "GetWsdlUrl", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetWsdlUrl")
     @ResponseWrapper(localName = "GetWsdlUrlResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetWsdlUrlResponse")
     @WebResult(name = "WsdlUrl", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-    public java.lang.String getWsdlUrl()
+    public String getWsdlUrl()
 ;
 
     /**
@@ -1449,7 +1449,7 @@ public interface Device {
     public void deleteStorageConfiguration(
 
         @WebParam(name = "Token", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String token
+        String token
     );
 
     /**
@@ -1478,7 +1478,7 @@ public interface Device {
     public void setZeroConfiguration(
 
         @WebParam(name = "InterfaceToken", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String interfaceToken,
+        String interfaceToken,
         @WebParam(name = "Enabled", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         boolean enabled
     );
@@ -1530,7 +1530,7 @@ public interface Device {
     public org.onvif.ver10.schema.Dot11Status getDot11Status(
 
         @WebParam(name = "InterfaceToken", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String interfaceToken
+        String interfaceToken
     );
 
     /**
@@ -1540,7 +1540,7 @@ public interface Device {
     @RequestWrapper(localName = "GetServices", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetServices")
     @ResponseWrapper(localName = "GetServicesResponse", targetNamespace = "http://www.onvif.org/ver10/device/wsdl", className = "org.onvif.ver10.device.wsdl.GetServicesResponse")
     @WebResult(name = "Service", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-    public java.util.List<org.onvif.ver10.device.wsdl.Service> getServices(
+    public java.util.List<Service> getServices(
 
         @WebParam(name = "IncludeCapability", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         boolean includeCapability
@@ -1561,7 +1561,7 @@ public interface Device {
         @WebParam(name = "Type", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         org.onvif.ver10.schema.DynamicDNSType type,
         @WebParam(name = "Name", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
-        java.lang.String name,
+        String name,
         @WebParam(name = "TTL", targetNamespace = "http://www.onvif.org/ver10/device/wsdl")
         javax.xml.datatype.Duration ttl
     );

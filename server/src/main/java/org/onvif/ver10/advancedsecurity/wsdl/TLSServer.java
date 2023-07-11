@@ -34,7 +34,7 @@ public interface TLSServer {
     public void removeServerCertificateAssignment(
 
         @WebParam(name = "CertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certificationPathID
+        String certificationPathID
     );
 
     /**
@@ -91,9 +91,9 @@ public interface TLSServer {
     public void replaceServerCertificateAssignment(
 
         @WebParam(name = "OldCertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String oldCertificationPathID,
+        String oldCertificationPathID,
         @WebParam(name = "NewCertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String newCertificationPathID
+        String newCertificationPathID
     );
 
     /**
@@ -116,7 +116,7 @@ public interface TLSServer {
     public void addCertPathValidationPolicyAssignment(
 
         @WebParam(name = "CertPathValidationPolicyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certPathValidationPolicyID
+        String certPathValidationPolicyID
     );
 
     /**
@@ -133,7 +133,7 @@ public interface TLSServer {
     public void removeCertPathValidationPolicyAssignment(
 
         @WebParam(name = "CertPathValidationPolicyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certPathValidationPolicyID
+        String certPathValidationPolicyID
     );
 
     /**
@@ -155,9 +155,9 @@ public interface TLSServer {
     public void replaceCertPathValidationPolicyAssignment(
 
         @WebParam(name = "OldCertPathValidationPolicyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String oldCertPathValidationPolicyID,
+        String oldCertPathValidationPolicyID,
         @WebParam(name = "NewCertPathValidationPolicyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String newCertPathValidationPolicyID
+        String newCertPathValidationPolicyID
     );
 
     /**
@@ -202,7 +202,7 @@ public interface TLSServer {
     public void addServerCertificateAssignment(
 
         @WebParam(name = "CertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-        java.lang.String certificationPathID
+        String certificationPathID
     );
 
     /**
@@ -218,7 +218,7 @@ public interface TLSServer {
     @RequestWrapper(localName = "GetAssignedServerCertificates", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAssignedServerCertificates")
     @ResponseWrapper(localName = "GetAssignedServerCertificatesResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAssignedServerCertificatesResponse")
     @WebResult(name = "CertificationPathID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.util.List<java.lang.String> getAssignedServerCertificates()
+    public java.util.List<String> getAssignedServerCertificates()
 ;
 
     /**
@@ -230,7 +230,7 @@ public interface TLSServer {
     @RequestWrapper(localName = "GetAssignedCertPathValidationPolicies", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAssignedCertPathValidationPolicies")
     @ResponseWrapper(localName = "GetAssignedCertPathValidationPoliciesResponse", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl", className = "org.onvif.ver10.advancedsecurity.wsdl.GetAssignedCertPathValidationPoliciesResponse")
     @WebResult(name = "CertPathValidationPolicyID", targetNamespace = "http://www.onvif.org/ver10/advancedsecurity/wsdl")
-    public java.util.List<java.lang.String> getAssignedCertPathValidationPolicies()
+    public java.util.List<String> getAssignedCertPathValidationPolicies()
 ;
 
     /**

@@ -1,16 +1,13 @@
 
 package org.onvif.ver10.device.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 import org.w3c.dom.Element;
+
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -57,7 +54,7 @@ public class UserCredential {
     @XmlElement(name = "Password")
     protected String password;
     @XmlElement(name = "Extension")
-    protected UserCredential.Extension extension;
+    protected Extension extension;
 
     /**
      * Gets the value of the userName property.
@@ -112,10 +109,10 @@ public class UserCredential {
      * 
      * @return
      *     possible object is
-     *     {@link UserCredential.Extension }
+     *     {@link Extension }
      *     
      */
-    public UserCredential.Extension getExtension() {
+    public Extension getExtension() {
         return extension;
     }
 
@@ -124,10 +121,10 @@ public class UserCredential {
      * 
      * @param value
      *     allowed object is
-     *     {@link UserCredential.Extension }
+     *     {@link Extension }
      *     
      */
-    public void setExtension(UserCredential.Extension value) {
+    public void setExtension(Extension value) {
         this.extension = value;
     }
 

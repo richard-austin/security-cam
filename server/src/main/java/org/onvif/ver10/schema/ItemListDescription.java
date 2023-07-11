@@ -1,19 +1,15 @@
 
 package org.onvif.ver10.schema;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 
 
 /**
@@ -71,9 +67,9 @@ import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
 public class ItemListDescription {
 
     @XmlElement(name = "SimpleItemDescription")
-    protected List<ItemListDescription.SimpleItemDescription> simpleItemDescription;
+    protected List<SimpleItemDescription> simpleItemDescription;
     @XmlElement(name = "ElementItemDescription")
-    protected List<ItemListDescription.ElementItemDescription> elementItemDescription;
+    protected List<ElementItemDescription> elementItemDescription;
     @XmlElement(name = "Extension")
     protected ItemListDescriptionExtension extension;
     @XmlAnyAttribute
@@ -97,13 +93,13 @@ public class ItemListDescription {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ItemListDescription.SimpleItemDescription }
+     * {@link SimpleItemDescription }
      * 
      * 
      */
-    public List<ItemListDescription.SimpleItemDescription> getSimpleItemDescription() {
+    public List<SimpleItemDescription> getSimpleItemDescription() {
         if (simpleItemDescription == null) {
-            simpleItemDescription = new ArrayList<ItemListDescription.SimpleItemDescription>();
+            simpleItemDescription = new ArrayList<SimpleItemDescription>();
         }
         return this.simpleItemDescription;
     }
@@ -126,13 +122,13 @@ public class ItemListDescription {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ItemListDescription.ElementItemDescription }
+     * {@link ElementItemDescription }
      * 
      * 
      */
-    public List<ItemListDescription.ElementItemDescription> getElementItemDescription() {
+    public List<ElementItemDescription> getElementItemDescription() {
         if (elementItemDescription == null) {
-            elementItemDescription = new ArrayList<ItemListDescription.ElementItemDescription>();
+            elementItemDescription = new ArrayList<ElementItemDescription>();
         }
         return this.elementItemDescription;
     }

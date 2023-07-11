@@ -1,11 +1,11 @@
 
 package org.xmlsoap.schemas.ws._2005._04.discovery;
 
-import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
+import java.util.List;
 
 
 /**

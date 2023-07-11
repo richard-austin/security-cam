@@ -12,10 +12,12 @@ const PROXY_CONFIG = [
       "/cloudProxy",
       "/ptz",
       "/stomp",
+      "/audio",
       "/login",
       "/dc"
     ],
     target: "http://localhost:8080/",
+    ws: true,
     changeOrigin: false,
     secure: false
   }

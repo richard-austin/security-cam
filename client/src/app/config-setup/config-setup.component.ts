@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, isDevMode, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, isDevMode, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService, cameraType} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -82,18 +82,18 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
     ])
   ],
 })
-export class ConfigSetupComponent implements OnInit, AfterViewInit {
+export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
   @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
   downloading: boolean = true;
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
-  streamColumns = ['stream_id', 'delete', 'descr', 'audio_bitrate', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
+  streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
   streamFooterColumns = ['buttons']
 //  camSetupFormGroup!: FormGroup;
   camControls!: FormArray;
@@ -163,6 +163,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
+  updateAudioEncoding($event: MatSelectChange, stream: Stream) {
+    stream.audio_encoding = $event.value;
+    stream.audio = $event.value !== "None";
+
+  }
+
   /**
    *
    * @param camera
@@ -187,7 +193,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     if (camera?.cameraParamSpecs?.camType === undefined)
       return true;
     else
-      return this.motionSet(camera) || (camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X);
+      return this.motionSet(camera);
   }
 
   /**
@@ -205,7 +211,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
             value: stream.descr,
             disabled: false
           }, [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9\\ ]{2,20}$/)]),
-          audio_bitrate: new FormControl(stream.audio_bitrate, [Validators.required, Validators.pattern(/^(0|8000|16000|24000|32000|40000|48000)$/)]),
+          audio: new FormControl(stream.audio, [Validators.required]),
+          audio_encoding: new FormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|G726|None|Not Listed)$/)]),
           netcam_uri: new FormControl(stream.netcam_uri, [Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
           video_width: new FormControl({
             value: stream.video_width,
@@ -245,7 +252,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
         snapshotUri: new FormControl({
           value: camera.snapshotUri,
           disabled: false
-        }, [Validators.maxLength(55)]),
+        }, [Validators.maxLength(150)]),
         ptzControls: new FormControl({
           value: camera.ptzControls,
           disabled: false
@@ -325,6 +332,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
     let recNo: number = 1;  // Recording number to be set in the stream object
     this.cameras.forEach((camera: Camera) => {
       let streamMap: Map<string, Stream> = new Map<string, Stream>();
+      if(camera.cameraParamSpecs === undefined || camera.cameraParamSpecs === null)
+         camera.cameraParamSpecs = this.cameraSvc._cameraParamSpecs[0];
 
       // First clear the recording objects in all the streams as we will set them up in the stream processing which follows.
       // Also set the absolute stream number
@@ -335,6 +344,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       let streamKeyNum: number = 1;
       // Process the streams
       camera.streams.forEach((stream) => {
+        if(stream.audio_encoding === "")
+          stream.audio_encoding = "None";
+
         if (isDevMode()) {  // Development mode
           stream.media_server_input_uri = "http://localhost:8085/live/stream?suuid=stream" + streamNum;
           stream.uri = "ws://localhost:8085/ws/stream?suuid=stream" + streamNum;
@@ -466,6 +478,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
       stream.defaultOnMultiDisplay = true;
     } else
       $event.source.checked = true;
+  }
+
+  setAudioInEnabledStatus($event: MatCheckboxChange, stream: Stream) {
+    stream.audio = $event.checked;
+    this.FixUpCamerasData();
   }
 
   setRecordingTrigger($event: MatSelectChange, stream: Stream) {
@@ -691,5 +708,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+  }
+
+  async ngOnDestroy() {
   }
 }

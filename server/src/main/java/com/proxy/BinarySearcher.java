@@ -92,13 +92,7 @@ public class BinarySearcher {
 
         final int maxScanStartPosIdx = srcBytesLeng - searchBytesLeng;
 
-        final int loopEndIdx;
-
-        if (endIndex < maxScanStartPosIdx) {
-            loopEndIdx = endIndex;
-        } else {
-            loopEndIdx = maxScanStartPosIdx;
-        }
+        final int loopEndIdx = Math.min(endIndex, maxScanStartPosIdx);
 
         int lastScanIdx = -1;
 

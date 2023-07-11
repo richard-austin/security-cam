@@ -37,11 +37,11 @@ public interface PTZ {
     public void setPreset(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "PresetName", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String presetName,
+        String presetName,
         @WebParam(mode = WebParam.Mode.INOUT, name = "PresetToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        javax.xml.ws.Holder<java.lang.String> presetToken
+        javax.xml.ws.Holder<String> presetToken
     );
 
     /**
@@ -56,7 +56,7 @@ public interface PTZ {
     public void continuousMove(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "Velocity", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
         org.onvif.ver10.schema.PTZSpeed velocity,
         @WebParam(name = "Timeout", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
@@ -75,7 +75,7 @@ public interface PTZ {
     public org.onvif.ver10.schema.PTZStatus getStatus(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -89,9 +89,9 @@ public interface PTZ {
     public void operatePresetTour(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "PresetTourToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String presetTourToken,
+        String presetTourToken,
         @WebParam(name = "Operation", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
         org.onvif.ver10.schema.PTZPresetTourOperation operation
     );
@@ -109,7 +109,7 @@ public interface PTZ {
     public void setHomePosition(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -120,10 +120,10 @@ public interface PTZ {
     @RequestWrapper(localName = "CreatePresetTour", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl", className = "org.onvif.ver20.ptz.wsdl.CreatePresetTour")
     @ResponseWrapper(localName = "CreatePresetTourResponse", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl", className = "org.onvif.ver20.ptz.wsdl.CreatePresetTourResponse")
     @WebResult(name = "PresetTourToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-    public java.lang.String createPresetTour(
+    public String createPresetTour(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -136,7 +136,7 @@ public interface PTZ {
     public void modifyPresetTour(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "PresetTour", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
         org.onvif.ver10.schema.PresetTour presetTour
     );
@@ -154,11 +154,11 @@ public interface PTZ {
     public void stop(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "PanTilt", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.Boolean panTilt,
+        Boolean panTilt,
         @WebParam(name = "Zoom", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.Boolean zoom
+        Boolean zoom
     );
 
     /**
@@ -203,7 +203,7 @@ public interface PTZ {
     public java.util.List<org.onvif.ver10.schema.PresetTour> getPresetTours(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -221,9 +221,9 @@ public interface PTZ {
     public void removePreset(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "PresetToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String presetToken
+        String presetToken
     );
 
     /**
@@ -238,9 +238,9 @@ public interface PTZ {
     public org.onvif.ver10.schema.PresetTour getPresetTour(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "PresetTourToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String presetTourToken
+        String presetTourToken
     );
 
     /**
@@ -260,7 +260,7 @@ public interface PTZ {
     public void relativeMove(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "Translation", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
         org.onvif.ver10.schema.PTZVector translation,
         @WebParam(name = "Speed", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
@@ -278,7 +278,7 @@ public interface PTZ {
     public void gotoHomePosition(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "Speed", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
         org.onvif.ver10.schema.PTZSpeed speed
     );
@@ -292,7 +292,7 @@ public interface PTZ {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl", className = "org.onvif.ver20.ptz.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl", className = "org.onvif.ver20.ptz.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-    public org.onvif.ver20.ptz.wsdl.Capabilities getServiceCapabilities()
+    public Capabilities getServiceCapabilities()
 ;
 
     /**
@@ -327,7 +327,7 @@ public interface PTZ {
     public org.onvif.ver10.schema.PTZConfiguration getConfiguration(
 
         @WebParam(name = "PTZConfigurationToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String ptzConfigurationToken
+        String ptzConfigurationToken
     );
 
     /**
@@ -341,12 +341,12 @@ public interface PTZ {
     @RequestWrapper(localName = "SendAuxiliaryCommand", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl", className = "org.onvif.ver20.ptz.wsdl.SendAuxiliaryCommand")
     @ResponseWrapper(localName = "SendAuxiliaryCommandResponse", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl", className = "org.onvif.ver20.ptz.wsdl.SendAuxiliaryCommandResponse")
     @WebResult(name = "AuxiliaryResponse", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-    public java.lang.String sendAuxiliaryCommand(
+    public String sendAuxiliaryCommand(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "AuxiliaryData", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String auxiliaryData
+        String auxiliaryData
     );
 
     /**
@@ -377,7 +377,7 @@ public interface PTZ {
     public java.util.List<org.onvif.ver10.schema.PTZPreset> getPresets(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -392,7 +392,7 @@ public interface PTZ {
     public org.onvif.ver10.schema.PTZNode getNode(
 
         @WebParam(name = "NodeToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String nodeToken
+        String nodeToken
     );
 
     /**
@@ -407,9 +407,9 @@ public interface PTZ {
     public void gotoPreset(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "PresetToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String presetToken,
+        String presetToken,
         @WebParam(name = "Speed", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
         org.onvif.ver10.schema.PTZSpeed speed
     );
@@ -424,9 +424,9 @@ public interface PTZ {
     public void removePresetTour(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "PresetTourToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String presetTourToken
+        String presetTourToken
     );
 
     /**
@@ -456,9 +456,9 @@ public interface PTZ {
     public org.onvif.ver10.schema.PTZPresetTourOptions getPresetTourOptions(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "PresetTourToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String presetTourToken
+        String presetTourToken
     );
 
     /**
@@ -477,7 +477,7 @@ public interface PTZ {
     public void absoluteMove(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken,
+        String profileToken,
         @WebParam(name = "Position", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
         org.onvif.ver10.schema.PTZVector position,
         @WebParam(name = "Speed", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
@@ -503,7 +503,7 @@ public interface PTZ {
     public java.util.List<org.onvif.ver10.schema.PTZConfiguration> getCompatibleConfigurations(
 
         @WebParam(name = "ProfileToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String profileToken
+        String profileToken
     );
 
     /**
@@ -523,6 +523,6 @@ public interface PTZ {
     public org.onvif.ver10.schema.PTZConfigurationOptions getConfigurationOptions(
 
         @WebParam(name = "ConfigurationToken", targetNamespace = "http://www.onvif.org/ver20/ptz/wsdl")
-        java.lang.String configurationToken
+        String configurationToken
     );
 }

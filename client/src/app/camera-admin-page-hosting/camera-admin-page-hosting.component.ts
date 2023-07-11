@@ -23,6 +23,8 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private domSanitizer: DomSanitizer) {
     this.route.paramMap.subscribe((paramMap) => {
+      if(this.accessToken !== undefined)
+        cameraSvc.closeClients(this.accessToken).subscribe();
       let camera: string = paramMap.get('camera') as string;
       camera = atob(camera);
       let cams = cameraSvc.getCameras();
@@ -63,6 +65,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
   }
 
   ngOnDestroy(): void {
+    this.cameraSvc.closeClients(this.accessToken).subscribe();
     this.intervalSubscription?.unsubscribe();
   }
 }

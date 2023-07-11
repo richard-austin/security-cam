@@ -99,7 +99,7 @@
       <ng-container matColumnDef="cameraParamSpecs">
         <th mat-header-cell *matHeaderCellDef>Camera Type.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-form-field appearance="legacy" [style.width.px]="200">
+          <mat-form-field appearance="legacy" [style.width.px]="150">
             <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
                 enabled state is updated.-->
             <mat-select [formControl]="getCamControl(i, 'cameraParamSpecs')"
@@ -107,7 +107,7 @@
                         matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'None' to disable this feature, or if the camera type is not listed."
                         matTooltipClass="tooltip">
               <mat-option *ngFor="let spec of cameraSvc.cameraParamSpecs" [value]="spec">
-                  {{spec.name}}
+                {{spec.name}}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -144,13 +144,24 @@
         <th mat-header-cell *matHeaderCellDef>Snapshot URI.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
           <mat-form-field appearance="legacy" [style.width.px]="300">
-            <input matInput type="text" autocomplete="off" maxlength="55"
+            <input matInput type="text" autocomplete="off" maxlength="150"
                    [formControl]="getCamControl(i, 'snapshotUri')"
                    matTooltip="The URI for snapshots for {{cam.key}}. This is used to view the image from the camera by clicking on the camera ID in the Cameras Configuration editor."
                    matTooltipClass="tooltip"
                    placeholder="Snapshot URI" (change)="updateCamField(i, 'snapshotUri')">
             <mat-error *ngIf="getCamControl(i, 'snapshotUri').invalid">Enter the URI</mat-error>
           </mat-form-field>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="backchannelAudioSupported">
+        <th mat-header-cell *matHeaderCellDef>Audio Backchannel.</th>
+        <td mat-cell *matCellDef="let cam; let i = dataIndex">
+          <mat-icon [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
+           [matTooltip]="cam.value.backchannelAudioSupported ? 'This device supports two way audio' : 'Two way audio is not supported on this device'"
+           matTooltipClass="tooltip">
+            {{cam.value.backchannelAudioSupported ? "check_circle" : "cancel"}}
+          </mat-icon>
         </td>
       </ng-container>
 
@@ -223,21 +234,37 @@
                   </mat-form-field>
                 </td>
               </ng-container>
-              <ng-container matColumnDef="audio_bitrate">
-                <th mat-header-cell *matHeaderCellDef>Audio Bitrate</th>
+              <ng-container matColumnDef="audio">
+                <th mat-header-cell *matHeaderCellDef>Audio</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
-                  <mat-form-field appearance="legacy" [style.width.px]="115">
-                    <input matInput type="text" autocomplete="off" maxlength="20"
-                           [formControl]="getStreamControl(camIndex, streamIndex, 'audio_bitrate')"
-                           matTooltip="Set the audio bitrate for {{stream.key}}. If in doubt use 48000, or use zero if no audio on the camera."
-                           matTooltipClass="tooltip"
-                           placeholder="Audio Bitrate"
-                           (change)="updateStreamField(camIndex, streamIndex, 'audio_bitrate')">
-                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_bitrate').hasError('required')">
-                      Audio bitrate is required
+                  <mat-checkbox [color]="'primary'" [checked]="stream.value.audio"
+                                (change)="setAudioInEnabledStatus($event, stream.value)"
+                                [disabled]="stream.value.audio_encoding == 'None'"
+                                matTooltip="If checked, audio will be enabled on {{stream.key}} for {{cam.key}}."
+                                matTooltipClass="tooltip">
+                  </mat-checkbox>
+                  <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio').hasError('required')">
+                    audio is required
+                  </mat-error>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="audio_encoding">
+                <th mat-header-cell *matHeaderCellDef>Audio Encoding</th>
+                <td mat-cell *matCellDef="let stream; let streamIndex = index">
+                  <mat-form-field appearance="legacy" [style.width.px]="90">
+                    <mat-select [formControl]="getStreamControl(camIndex, streamIndex, 'audio_encoding')"
+                                (selectionChange)="updateAudioEncoding($event, stream.value)"
+                                matTooltip="Set the audio encoding (G711 or AAC) for {{stream.key}}. If you are unsure, select 'Not Listed'"
+                                matTooltipClass="tooltip">
+                      <mat-option *ngFor="let enc of cameraSvc.audioEncodings" [value]="enc.value">
+                        {{enc.name}}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('required')">
+                      Audio encoding is required
                     </mat-error>
-                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_bitrate').hasError('pattern')">
-                      Values 0,8000,16000,24000,32000,40000 or 48000 accepted
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('pattern')">
+                      Error
                     </mat-error>
                   </mat-form-field>
                 </td>
@@ -246,7 +273,7 @@
                 <th mat-header-cell *matHeaderCellDef> Netcam URI.</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
                   <mat-form-field appearance="legacy">
-                    <input matInput type="text" autocomplete="off" maxlength="55"
+                    <input matInput type="text" autocomplete="off" maxlength="105"
                            [formControl]="getStreamControl(camIndex, streamIndex, 'netcam_uri')"
                            matTooltip="Set the URI for connection to the camera stream. This is in the form 'rtsp://<ip address>/<uri>"
                            matTooltipClass="tooltip"

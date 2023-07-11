@@ -26,7 +26,7 @@ public interface SearchPort {
     @RequestWrapper(localName = "GetServiceCapabilities", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.GetServiceCapabilities")
     @ResponseWrapper(localName = "GetServiceCapabilitiesResponse", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.GetServiceCapabilitiesResponse")
     @WebResult(name = "Capabilities", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-    public org.onvif.ver10.search.wsdl.Capabilities getServiceCapabilities()
+    public Capabilities getServiceCapabilities()
 ;
 
     /**
@@ -46,7 +46,7 @@ public interface SearchPort {
     @RequestWrapper(localName = "FindPTZPosition", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.FindPTZPosition")
     @ResponseWrapper(localName = "FindPTZPositionResponse", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.FindPTZPositionResponse")
     @WebResult(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-    public java.lang.String findPTZPosition(
+    public String findPTZPosition(
 
         @WebParam(name = "StartPoint", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.XMLGregorianCalendar startPoint,
@@ -57,7 +57,7 @@ public interface SearchPort {
         @WebParam(name = "SearchFilter", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         org.onvif.ver10.schema.PTZPositionFilter searchFilter,
         @WebParam(name = "MaxMatches", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer maxMatches,
+        Integer maxMatches,
         @WebParam(name = "KeepAliveTime", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.Duration keepAliveTime
     );
@@ -80,7 +80,7 @@ public interface SearchPort {
     @RequestWrapper(localName = "FindEvents", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.FindEvents")
     @ResponseWrapper(localName = "FindEventsResponse", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.FindEventsResponse")
     @WebResult(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-    public java.lang.String findEvents(
+    public String findEvents(
 
         @WebParam(name = "StartPoint", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.XMLGregorianCalendar startPoint,
@@ -93,7 +93,7 @@ public interface SearchPort {
         @WebParam(name = "IncludeStartState", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         boolean includeStartState,
         @WebParam(name = "MaxMatches", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer maxMatches,
+        Integer maxMatches,
         @WebParam(name = "KeepAliveTime", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.Duration keepAliveTime
     );
@@ -120,11 +120,11 @@ public interface SearchPort {
     public org.onvif.ver10.schema.FindRecordingResultList getRecordingSearchResults(
 
         @WebParam(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.String searchToken,
+        String searchToken,
         @WebParam(name = "MinResults", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer minResults,
+        Integer minResults,
         @WebParam(name = "MaxResults", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer maxResults,
+        Integer maxResults,
         @WebParam(name = "WaitTime", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.Duration waitTime
     );
@@ -162,11 +162,11 @@ public interface SearchPort {
     public org.onvif.ver10.schema.FindPTZPositionResultList getPTZPositionSearchResults(
 
         @WebParam(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.String searchToken,
+        String searchToken,
         @WebParam(name = "MinResults", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer minResults,
+        Integer minResults,
         @WebParam(name = "MaxResults", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer maxResults,
+        Integer maxResults,
         @WebParam(name = "WaitTime", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.Duration waitTime
     );
@@ -183,7 +183,7 @@ public interface SearchPort {
     public org.onvif.ver10.schema.SearchState getSearchState(
 
         @WebParam(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.String searchToken
+        String searchToken
     );
 
     /**
@@ -204,7 +204,7 @@ public interface SearchPort {
     @RequestWrapper(localName = "FindMetadata", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.FindMetadata")
     @ResponseWrapper(localName = "FindMetadataResponse", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.FindMetadataResponse")
     @WebResult(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-    public java.lang.String findMetadata(
+    public String findMetadata(
 
         @WebParam(name = "StartPoint", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.XMLGregorianCalendar startPoint,
@@ -215,7 +215,7 @@ public interface SearchPort {
         @WebParam(name = "MetadataFilter", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         org.onvif.ver10.schema.MetadataFilter metadataFilter,
         @WebParam(name = "MaxMatches", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer maxMatches,
+        Integer maxMatches,
         @WebParam(name = "KeepAliveTime", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.Duration keepAliveTime
     );
@@ -241,11 +241,11 @@ public interface SearchPort {
     public org.onvif.ver10.schema.FindEventResultList getEventSearchResults(
 
         @WebParam(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.String searchToken,
+        String searchToken,
         @WebParam(name = "MinResults", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer minResults,
+        Integer minResults,
         @WebParam(name = "MaxResults", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer maxResults,
+        Integer maxResults,
         @WebParam(name = "WaitTime", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.Duration waitTime
     );
@@ -271,7 +271,7 @@ public interface SearchPort {
     public javax.xml.datatype.XMLGregorianCalendar endSearch(
 
         @WebParam(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.String searchToken
+        String searchToken
     );
 
     /**
@@ -293,7 +293,7 @@ public interface SearchPort {
     public java.util.List<org.onvif.ver10.schema.MediaAttributes> getMediaAttributes(
 
         @WebParam(name = "RecordingTokens", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.util.List<java.lang.String> recordingTokens,
+        java.util.List<String> recordingTokens,
         @WebParam(name = "Time", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.XMLGregorianCalendar time
     );
@@ -321,11 +321,11 @@ public interface SearchPort {
     public org.onvif.ver10.schema.FindMetadataResultList getMetadataSearchResults(
 
         @WebParam(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.String searchToken,
+        String searchToken,
         @WebParam(name = "MinResults", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer minResults,
+        Integer minResults,
         @WebParam(name = "MaxResults", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer maxResults,
+        Integer maxResults,
         @WebParam(name = "WaitTime", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.Duration waitTime
     );
@@ -343,7 +343,7 @@ public interface SearchPort {
     public org.onvif.ver10.schema.RecordingInformation getRecordingInformation(
 
         @WebParam(name = "RecordingToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.String recordingToken
+        String recordingToken
     );
 
     /**
@@ -363,12 +363,12 @@ public interface SearchPort {
     @RequestWrapper(localName = "FindRecordings", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.FindRecordings")
     @ResponseWrapper(localName = "FindRecordingsResponse", targetNamespace = "http://www.onvif.org/ver10/search/wsdl", className = "org.onvif.ver10.search.wsdl.FindRecordingsResponse")
     @WebResult(name = "SearchToken", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-    public java.lang.String findRecordings(
+    public String findRecordings(
 
         @WebParam(name = "Scope", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         org.onvif.ver10.schema.SearchScope scope,
         @WebParam(name = "MaxMatches", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
-        java.lang.Integer maxMatches,
+        Integer maxMatches,
         @WebParam(name = "KeepAliveTime", targetNamespace = "http://www.onvif.org/ver10/search/wsdl")
         javax.xml.datatype.Duration keepAliveTime
     );

@@ -10,9 +10,7 @@ import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-moda
 import {MatDialogRef} from '@angular/material/dialog/dialog-ref';
 import {UserIdleConfig} from '../angular-user-idle/angular-user-idle.config';
 import {UserIdleService} from '../angular-user-idle/angular-user-idle.service';
-
-declare let SockJS: any;
-declare let Stomp: any;
+import {Client, StompSubscription} from "@stomp/stompjs";
 
 @Component({
   selector: 'app-nav',
@@ -36,9 +34,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   private idleTimeoutActive: boolean = true;
   private messageSubscription!: Subscription;
   isGuest: boolean = true;
-  private stompClient: any;
+  private client!: Client;
   cameraTypes: typeof cameraType = cameraType;
-  stompSubscription: any;
+  logoffSubscription!: StompSubscription;
+  talkOffSubscription!: StompSubscription;
 
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
   }
@@ -191,25 +190,34 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     navbarCollapse.setAttribute('style', 'max-height: 0');
   }
 
+  /**
+   * initializeWebSocketConnection: Set up the websocket connection which logs off guest users when the guest account
+   *                                is disabled.
+   */
   initializeWebSocketConnection() {
-    let serverUrl: string = window.location.origin + '/stomp';
+    let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host +'/stomp';
 
-    let ws = new SockJS(serverUrl);
-    this.stompClient = Stomp.over(ws);
-    this.stompClient.debug = null;
-    let that = this;
-    this.stompClient.connect({}, () => {
-      this.stompSubscription = that.stompClient.subscribe('/topic/logoff', (message: any) => {
-        if (message.body) {
-          let msgObj = JSON.parse(message.body);
-          if (msgObj.message === 'logoff' && this.isGuest) {
-            window.location.href = 'logoff';
-            console.log(message.body);
+    this.client = new Client({
+      brokerURL: serverUrl,
+      reconnectDelay: 2000,
+      heartbeatOutgoing: 120000,
+      heartbeatIncoming: 120000,
+      onConnect: ()=> {
+        this.logoffSubscription = this.client.subscribe('/topic/logoff', (message: any) => {
+          if (message.body) {
+            let msgObj = JSON.parse(message.body);
+            if (msgObj.message === 'logoff' && this.isGuest) {
+              window.location.href = 'logoff';
+              console.log(message.body);
+            }
           }
-        }
-      });
+        });
+        this.talkOffSubscription = this.client.subscribe('/topic/talkoff', (message: any) => this.utilsService.talkOff(message));
+      },
+      debug: () => {}
     });
-  }
+    this.client.activate();
+   }
 
   async ngOnInit(): Promise<void> {
     this.cameraStreams = this.cameraSvc.getCameraStreams();
@@ -258,6 +266,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isGuest = (await this.utilsService.isGuest()).guestAccount;
     } catch (error) {
       this.isGuest = true;
+      // @ts-ignore
       console.error('Error calling isGuest = ' + error.error);
     }
     this.initializeWebSocketConnection();
@@ -279,5 +288,8 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pingHandle.unsubscribe();
     this.timerHandle.unsubscribe();
     this.messageSubscription.unsubscribe();
+    this.logoffSubscription.unsubscribe();
+    this.talkOffSubscription.unsubscribe();
+    this.client.deactivate({force: false}).then(()=> {});
   }
 }

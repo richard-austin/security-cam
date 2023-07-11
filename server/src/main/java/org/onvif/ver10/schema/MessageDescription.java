@@ -1,18 +1,13 @@
 
 package org.onvif.ver10.schema;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -47,7 +42,7 @@ import org.apache.cxf.xjc.runtime.JAXBToStringStyle;
     "extension"
 })
 @XmlSeeAlso({
-    org.onvif.ver10.schema.ConfigDescription.Messages.class
+    ConfigDescription.Messages.class
 })
 public class MessageDescription {
 
