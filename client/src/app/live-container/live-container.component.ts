@@ -19,10 +19,8 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
   timerHandle!: Subscription;
   cs!: CameraStream;
-  initialised: boolean;
 
   constructor(private route: ActivatedRoute, public cameraSvc: CameraService, private utilsService: UtilsService) {
-    this.initialised = false;
     // Use route.paramMap to get the stream name correctly if we switch directly between live streams
     this.route.paramMap.subscribe((paramMap) => {
       let streamName: string = paramMap.get('streamName') as string;
@@ -33,9 +31,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
         cameraSvc.getCameraStreams().forEach((cam) => {
           if (cam.stream.media_server_input_uri.endsWith(streamName)) {
             this.cs = cam;
-            if (this.initialised) {
-              this.setupVideo();
-            }
+            this.setupVideo();
           }
         });
         timerSubscription.unsubscribe();
@@ -53,8 +49,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
         this.video.setSource(this.cs);
         this.video.visible = true;
       }
-    }
-    else
+    } else
       this.showInvalidInput();
   }
 
@@ -87,10 +82,6 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit(): void {
-    if(!this.initialised) {
-      this.initialised = true;
-      this.setupVideo();
-    }
   }
 
 
