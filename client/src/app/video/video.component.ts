@@ -16,7 +16,6 @@ declare let Hls: any;
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
-  @ViewChild('latencyLimitSelect') llSelector!: MatSelect;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isfmp4: boolean = false;
   camstream!: CameraStream;
@@ -56,6 +55,23 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.recordingUri[this.recordingUri.length - 1] !== '/') {
       this.recordingUri += '/';
+    }
+
+    if(camStream.camera.backchannelAudioSupported) {
+      // Call getUserMedia to make the browser ask the user for permission to access the microphones so that
+      //  enumerateDevices can get the microphone list.
+      navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false
+      }).then(() => {
+        navigator.mediaDevices.enumerateDevices().then((dev) => {
+          this.selectedAudioInput = dev[0];
+          this.selectedDeviceId = this.selectedAudioInput.deviceId;
+          this.mediaDevices = dev;
+        }).catch((error) => {
+          this.reporting.errorMessage = error;
+        });
+      })
     }
 
     this.recordingUri += manifest;
@@ -432,25 +448,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    // if(this.isfmp4)
-    //   this.llSelector.value = this.buffering_sec.toString();
     this.video.autoplay = true;
     this.video.muted = true;
     this.video.controls = true;
-    // Call getUserMedia to make the browser ask the user for permission to access the microphones so that
-    //  enumerateDevices can get the microphone list.
-    navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: false
-    }).then (()=> {
-      navigator.mediaDevices.enumerateDevices().then((dev) => {
-        this.selectedAudioInput = dev[0];
-        this.selectedDeviceId = this.selectedAudioInput.deviceId;
-        this.mediaDevices = dev;
-      }).catch((error) => {
-        this.reporting.errorMessage = error;
-      });
-    })
     // @ts-ignore
     this.selectedAudioInput = null;
   }
