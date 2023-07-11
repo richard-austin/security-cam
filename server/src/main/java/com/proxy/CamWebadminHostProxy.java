@@ -21,7 +21,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
     // Camera types
     final int none = 0;
     final int sv3c = 1;
-    final int zxtechMCW5B10X =2;
+    final int zxtechMCW5B10X = 2;
 
     ILogService logService;
     ICamServiceInterface camService;
@@ -91,16 +91,16 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             if (++pass == 1) {
                                 accessDetails.set(getAccessDetails(request));
                                 AccessDetails ad = accessDetails.get();
-                                if(ad != null) {
+                                if (ad != null) {
                                     ad.addClient(client);  // Add to the list for forced close on exit from hosting
                                     Integer ct = camService.getCameraType(ad.cameraHost);
                                     camType.set(ct);
                                     server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
                                 }
                             }
-                            logService.getCam().trace("pass = "+pass);
+                            logService.getCam().trace("pass = " + pass);
                             AtomicReference<ByteBuffer> newReq = new AtomicReference<>();
-                            if(modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost)) {
+                            if (modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost)) {
                                 request = newReq.get();
                             }
                             int bytesWritten = 0;
@@ -110,19 +110,16 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                 //Only mess with headers on the first pass
                                 if (++serverPass == 1) {
                                     // Camera types sv3c and zxtech use basic auth, only apply to these
-                                    if(camType.get() == sv3c || camType.get() == zxtechMCW5B10X) {
+                                    if (camType.get() == sv3c || camType.get() == zxtechMCW5B10X) {
                                         final String username = camService.cameraAdminUserName();
                                         final String password = camService.cameraAdminPassword();
-
-                                        if(camType.get() != none) {
-                                            String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
-                                            if (addHeader(request, updatedReq, "Authorization", "Basic " + encodedCredentials)) {
-                                                request = updatedReq.get();
-                                            }
+                                        String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+                                        if (addHeader(request, updatedReq, "Authorization", "Basic " + encodedCredentials)) {
+                                            request = updatedReq.get();
                                         }
                                     }
 
-                                    logService.getCam().trace("serverPass = "+serverPass);
+                                    logService.getCam().trace("serverPass = " + serverPass);
                                 }
                                 String xyz = "\nRequest: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
                                 logService.getCam().trace(xyz);
@@ -130,9 +127,11 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                 if (val == -1)
                                     break;
                                 bytesWritten += val;
-                            }
-                            synchronized (lock) {
-                                lock.notify();
+                                if (serverPass == 1) {
+                                    synchronized (lock) {
+                                        lock.notify();
+                                    }
+                                }
                             }
                             request.clear();
                         }
@@ -147,7 +146,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                     try {
                         server.close();
                     } catch (IOException e) {
-                        logService.getCam().error(e.getClass().getName()+" in handleClientRequest when closing server socket: " + e.getMessage());
+                        logService.getCam().error(e.getClass().getName() + " in handleClientRequest when closing server socket: " + e.getMessage());
                     }
                 });
 
@@ -168,7 +167,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                         AtomicReference<ByteBuffer> arNoXFrame = new AtomicReference<>();
                         // Only set the session cookie if it's not already set
                         if (++pass == 1) {
-                            if(camType.get() == none) {
+                            if (camType.get() == none) {
                                 if (removeHeader(reply, arNoXFrame, "X-Frame-Options"))
                                     reply = arNoXFrame.get();
                                 if (removeHeader(reply, arNoXFrame, "X-Xss-Protection"))
@@ -180,7 +179,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                     reply = arReply.get();
                             }
                         }
-                        logService.getCam().trace("server.read pass = "+pass);
+                        logService.getCam().trace("server.read pass = " + pass);
                         String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
                         logService.getCam().trace(x);
                         client.write(reply);
@@ -198,13 +197,13 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                         bytesWritten += val;
                     }
 
-                    logService.getCam().error(e.getClass().getName()+" in handleClientRequest 1: " + e.getMessage());
+                    logService.getCam().error(e.getClass().getName() + " in handleClientRequest 1: " + e.getMessage());
                 }
                 // The server closed its connection to us, so we close our
                 // connection to our client.
                 client.close();
             } catch (IOException e) {
-                logService.getCam().error(e.getClass().getName()+" in handleClientRequest when opening socket channel: " + e.getMessage());
+                logService.getCam().error(e.getClass().getName() + " in handleClientRequest when opening socket channel: " + e.getMessage());
             }
 
             recycle(reply);
