@@ -45,7 +45,7 @@ export class SetupSMTPClientComponent implements OnInit {
         let cpControl: AbstractControl | null = this.setupSMTPForm?.get("confirmPassword");
         cpControl?.updateValueAndValidity();
       }
-      return  null;
+      return null;
     };
   }
 
@@ -84,7 +84,7 @@ export class SetupSMTPClientComponent implements OnInit {
     Object.keys(this.setupSMTPForm.controls).forEach(key => {
       let ctl: FormControl = this.getFormControl(key);
       (this.smtpData as any)[key] = ctl.value
-      });
+    });
 
     this.utilsService.setupSMTPClientLocally(this.smtpData).subscribe({
       complete: () => {
@@ -166,11 +166,15 @@ export class SetupSMTPClientComponent implements OnInit {
         this.smtpData = smtpData;
         this.smtpData.confirmPassword = this.smtpData.password;
         this.setupFormControls();
-        },
+      },
       error: (reason) => {
         this.setupFormControls();
-        timer(200).subscribe(() => {
-          this.reporting.errorMessage = reason;  // Ensure message gets displayed
+        timer(200).subscribe(() => { // Ensure message gets displayed
+          if (reason.status == 400) {
+            this.reporting.warningMessage = reason.error;
+          } else {
+            this.reporting.errorMessage = reason;
+          }
         })
       }
     });

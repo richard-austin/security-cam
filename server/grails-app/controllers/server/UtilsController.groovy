@@ -140,6 +140,8 @@ class UtilsController {
             ObjectCommandResponse response = utilsService.getSMTPClientParams()
             if (response.status != PassFail.PASS)
                 render(status: 500, text: response.error)
+            else if (response.response != null)
+                render(status: 400, text: response.response)  // Warning, no config file present
             else
                 render(status: 200, text: response.responseObject as JSON)
         }

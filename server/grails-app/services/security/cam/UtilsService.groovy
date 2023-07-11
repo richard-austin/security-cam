@@ -211,9 +211,17 @@ class UtilsService {
         try {
             result.responseObject = getSMTPConfigData()
         }
+        catch(FileNotFoundException fnf) {
+            final String noConfigFile = "No existing config file for SMTP client. It will be created when the SMTP parameters are entered and saved."
+            logService.cam.warn(noConfigFile)
+            result.status = PassFail.PASS
+            result.response = noConfigFile
+            result.error = "${fnf.getClass().getName()} -- ${fnf.getMessage()}"
+        }
         catch (Exception e) {
             logService.cam.error "${e.getClass().getName()} in getSMTPClientParams: ${e.getMessage()}"
             result.status = PassFail.FAIL
+            result.response = null
             result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
         return result
