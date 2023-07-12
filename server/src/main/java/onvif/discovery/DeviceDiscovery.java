@@ -33,8 +33,28 @@ public class DeviceDiscovery {
     public static final boolean enableIPv6 = false;
 
     public static final String WS_DISCOVERY_ADDRESS_IPv6 = "[FF02::C]";
-    public static final String WS_DISCOVERY_PROBE_MESSAGE =
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?><Envelope xmlns:tds=\"http://www.onvif.org/ver10/device/wsdl\" xmlns=\"http://www.w3.org/2003/05/soap-envelope\"><Header><wsa:MessageID xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">uuid:732fb73a-5681-19f5-0ad8-522c31113505</wsa:MessageID><wsa:To xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">urn:schemas-xmlsoap-org:ws:2005:04:discovery</wsa:To><wsa:Action xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</wsa:Action></Header><Body><Probe xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://schemas.xmlsoap.org/ws/2005/04/discovery\"><Types>tds:Device</Types><Scopes /></Probe></Body></Envelope><?xml version=\"1.0\" encoding=\"utf-8\"?><Envelope xmlns:dn=\"http://www.onvif.org/ver10/network/wsdl\" xmlns=\"http://www.w3.org/2003/05/soap-envelope\"><Header><wsa:MessageID xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">uuid:67c2f758-d8a9-111c-5b92-00fa926a3416</wsa:MessageID><wsa:To xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">urn:schemas-xmlsoap-org:ws:2005:04:discovery</wsa:To><wsa:Action xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</wsa:Action></Header><Body><Probe xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://schemas.xmlsoap.org/ws/2005/04/discovery\"><Types>dn:NetworkVideoTransmitter</Types><Scopes /></Probe></Body></Envelope>";
+    public static final String WS_DISCOVERY_PROBE_MESSAGE = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <Envelope xmlns:tds="http://www.onvif.org/ver10/device/wsdl" xmlns="http://www.w3.org/2003/05/soap-envelope">
+                <Header>
+                    <wsa:MessageID xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+                        uuid:732fb73a-5681-19f5-0ad8-522c31113505
+                    </wsa:MessageID>
+                    <wsa:To xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+                        urn:schemas-xmlsoap-org:ws:2005:04:discovery
+                    </wsa:To>
+                    <wsa:Action xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+                        http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe
+                    </wsa:Action>
+                </Header>
+                <Body>
+                    <Probe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                           xmlns="http://schemas.xmlsoap.org/ws/2005/04/discovery">
+                        <Types>tds:Device</Types>
+                        <Scopes/>
+                    </Probe>
+                </Body>
+            </Envelope><?xml version="1.0" encoding="utf-8"?>""";
     private static final Random random = new SecureRandom();
 
     public static void main(String[] args) throws InterruptedException {
@@ -90,17 +110,15 @@ public class DeviceDiscovery {
         final Collection<InetAddress> addressList = new ArrayList<>();
         try {
             final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            if (interfaces != null) {
-                while (interfaces.hasMoreElements()) {
-                    NetworkInterface anInterface = interfaces.nextElement();
-                    if (!anInterface.isLoopback()) {
-                        final List<InterfaceAddress> interfaceAddresses = anInterface.getInterfaceAddresses();
-                        for (InterfaceAddress address : interfaceAddresses) {
-                            Class<? extends InetAddress> clz = address.getAddress().getClass();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface anInterface = interfaces.nextElement();
+                if (!anInterface.isLoopback()) {
+                    final List<InterfaceAddress> interfaceAddresses = anInterface.getInterfaceAddresses();
+                    for (InterfaceAddress address : interfaceAddresses) {
+                        Class<? extends InetAddress> clz = address.getAddress().getClass();
 
-                            if (!enableIPv6 && address.getAddress() instanceof Inet6Address) continue;
-                            addressList.add(address.getAddress());
-                        }
+                        if (!enableIPv6 && address.getAddress() instanceof Inet6Address) continue;
+                        addressList.add(address.getAddress());
                     }
                 }
             }
@@ -117,8 +135,7 @@ public class DeviceDiscovery {
                             final String uuid2 = UUID.randomUUID().toString();
                             final String probe =
                                     WS_DISCOVERY_PROBE_MESSAGE
-                                            .replaceAll("732fb73a-5681-19f5-0ad8-522c31113505", uuid)
-                                            .replaceAll("67c2f758-d8a9-111c-5b92-00fa926a3416", uuid2);
+                                            .replaceAll("732fb73a-5681-19f5-0ad8-522c31113505", uuid);
                             final int port = random.nextInt(20000) + 40000;
                             final DatagramSocket server = new DatagramSocket(port, address);
                             new Thread(() -> {
