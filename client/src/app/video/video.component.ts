@@ -175,8 +175,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  // consider these callbacks:
-  // - putPacket : called when websocket receives data
+  // Callbacks:
   // - putPacket : called when websocket receives data
   // - loadPacket : called when source_buffer is ready for more data
   // Both operate on a common fifo
