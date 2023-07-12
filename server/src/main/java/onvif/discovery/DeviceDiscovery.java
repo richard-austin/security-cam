@@ -54,8 +54,7 @@ public class DeviceDiscovery {
                         <Scopes/>
                     </Probe>
                 </Body>
-            </Envelope><?xml version="1.0" encoding="utf-8"?>            
-                        """;
+            </Envelope><?xml version="1.0" encoding="utf-8"?>""";
     private static final Random random = new SecureRandom();
 
     public static void main(String[] args) throws InterruptedException {
@@ -111,17 +110,15 @@ public class DeviceDiscovery {
         final Collection<InetAddress> addressList = new ArrayList<>();
         try {
             final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            if (interfaces != null) {
-                while (interfaces.hasMoreElements()) {
-                    NetworkInterface anInterface = interfaces.nextElement();
-                    if (!anInterface.isLoopback()) {
-                        final List<InterfaceAddress> interfaceAddresses = anInterface.getInterfaceAddresses();
-                        for (InterfaceAddress address : interfaceAddresses) {
-                            Class<? extends InetAddress> clz = address.getAddress().getClass();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface anInterface = interfaces.nextElement();
+                if (!anInterface.isLoopback()) {
+                    final List<InterfaceAddress> interfaceAddresses = anInterface.getInterfaceAddresses();
+                    for (InterfaceAddress address : interfaceAddresses) {
+                        Class<? extends InetAddress> clz = address.getAddress().getClass();
 
-                            if (!enableIPv6 && address.getAddress() instanceof Inet6Address) continue;
-                            addressList.add(address.getAddress());
-                        }
+                        if (!enableIPv6 && address.getAddress() instanceof Inet6Address) continue;
+                        addressList.add(address.getAddress());
                     }
                 }
             }
