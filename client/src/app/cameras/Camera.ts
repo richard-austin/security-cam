@@ -90,6 +90,7 @@ export class Camera
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
     backchannelAudioSupported: boolean = false
+    rtspTransport: string = "tcp";
 }
 
 export class CameraStream

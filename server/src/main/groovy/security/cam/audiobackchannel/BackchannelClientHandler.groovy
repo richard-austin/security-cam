@@ -339,7 +339,7 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     }
 
     void addGeneralHeaders(HttpMessage msg) {
-        if (msg.headers().contains("Session")) {
+        if (msg != null && msg.headers().contains("Session")) {
             String sessionId = msg.headers().get("Session")
             int idxOfSemiColon = sessionId.indexOf(";")
             if (idxOfSemiColon != -1) {
@@ -354,10 +354,11 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
                         timeout = sessionHeader.substring(idxOfEq+1, idxOfSemiColon)
                 }
             }
-
-            request.headers().add("Session", sessionId)
+            if(request != null)
+                request.headers().add("Session", sessionId)
         }
-        request.headers().add("CSeq", getSeqNumber())
+        if(request != null)
+            request.headers().add("CSeq", getSeqNumber())
     }
 
     void parseDescribeSdp(String sdpContent) {
@@ -390,8 +391,10 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         tearDown.headers().add("Require", "www.onvif.org/ver20/backchannel")
         request = tearDown
         addGeneralHeaders(lastMessage)
-        context.writeAndFlush(request)
-        context.close()
+        if(context != null) {
+            context.writeAndFlush(request)
+            context.close()
+        }
     }
 
     static int seq = 0

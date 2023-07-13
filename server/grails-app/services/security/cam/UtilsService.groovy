@@ -211,7 +211,7 @@ class UtilsService {
         try {
             result.responseObject = getSMTPConfigData()
         }
-        catch(FileNotFoundException fnf) {
+        catch (FileNotFoundException fnf) {
             final String noConfigFile = "No existing config file for SMTP client. It will be created when the SMTP parameters are entered and saved."
             logService.cam.warn(noConfigFile)
             result.status = PassFail.PASS
@@ -311,8 +311,6 @@ class UtilsService {
             // Re-enable audio out on clients
             brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
             audioInUse = false
-            client?.stop()
-            client = null
             audioQueue.clear()
 
             serverSocket?.close()
@@ -320,6 +318,8 @@ class UtilsService {
             serverThread?.interrupt()
             out?.close()
             out = null
+            client?.stop()
+            client = null
         }
         catch (Exception ex) {
             logService.cam.error "${ex.getClass().getName()} in stopAudioOut: ${ex.getMessage()}"

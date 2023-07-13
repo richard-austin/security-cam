@@ -89,7 +89,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -261,7 +261,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           value: camera.onvifHost,
           disabled: !camera.ptzControls,
         }, [Validators.maxLength(22),
-          Validators.pattern(/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/)])
+          Validators.pattern(/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/)]),
+        rtspTransport: new FormControl({
+          value: camera.rtspTransport,
+          disabled: false,
+        }, [Validators.required, Validators.pattern(/^(udp|tcp)$/)])
       }, {updateOn: "change"});
     });
     this.camControls = new FormArray(toCameraGroups);
@@ -332,8 +336,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     let recNo: number = 1;  // Recording number to be set in the stream object
     this.cameras.forEach((camera: Camera) => {
       let streamMap: Map<string, Stream> = new Map<string, Stream>();
-      if(camera.cameraParamSpecs === undefined || camera.cameraParamSpecs === null)
-         camera.cameraParamSpecs = this.cameraSvc._cameraParamSpecs[0];
+      if (camera.cameraParamSpecs === undefined || camera.cameraParamSpecs === null)
+        camera.cameraParamSpecs = this.cameraSvc._cameraParamSpecs[0];
 
       // First clear the recording objects in all the streams as we will set them up in the stream processing which follows.
       // Also set the absolute stream number
@@ -344,7 +348,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
       let streamKeyNum: number = 1;
       // Process the streams
       camera.streams.forEach((stream) => {
-        if(stream.audio_encoding === "")
+        if (stream.audio_encoding === "")
           stream.audio_encoding = "None";
 
         if (isDevMode()) {  // Development mode
@@ -387,14 +391,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
             stream.netcam_uri = 'rtsp://';
           if (camera.ftp && streamKeyNum++ === 1) {
             stream.recording.enabled = true
-            stream.recording.recording_src_url ='http://localhost:8085/h/stream?suuid=stream' + streamNum;
+            stream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = '/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
             stream.motion.trigger_recording_on = '';
           } else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true
-            stream.recording.recording_src_url ='http://localhost:8085/h/stream?suuid=stream' + streamNum;
+            stream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = '/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
             if (stream.motion.trigger_recording_on !== '') {
@@ -406,7 +410,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
                 // Set up the recording
                 if (recStream !== undefined) {
                   recStream.recording.enabled = true;
-                  recStream.recording.recording_src_url ='http://localhost:8085/h/stream?suuid=stream' + recStream.rec_num;
+                  recStream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + recStream.rec_num;
                   recStream.recording.uri = '/recording/rec' + recStream.rec_num + '/';
                   recStream.recording.location = 'rec' + recStream.rec_num;
                 }
@@ -423,9 +427,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
       ++camNum;
     })
 
-    // Renumber trigger_recording_on references so that the camera number is always the same as the camera key
-    // Deleting a camera other than the last will cause the camera keys not to tie up with any previously set
-    // reference in trigger_recording_on.
+// Renumber trigger_recording_on references so that the camera number is always the same as the camera key
+// Deleting a camera other than the last will cause the camera keys not to tie up with any previously set
+// reference in trigger_recording_on.
     retVal.forEach((camera: Camera, camKey: string) => {
       camera.streams.forEach((stream: Stream) => {
         if (stream.motion.trigger_recording_on !== '') {

@@ -52,11 +52,13 @@ type CameraParamSpecs struct {
 }
 
 type Camera struct {
-	Name             string             `json:"name"`
-	Address          string             `json:"address"`
-	Streams          map[string]StreamC `json:"streams"`
-	CamType          int                `json:"camType"`
-	CameraParamSpecs CameraParamSpecs   `json:"cameraParamSpecs"`
+	Name                      string             `json:"name"`
+	Address                   string             `json:"address"`
+	Streams                   map[string]StreamC `json:"streams"`
+	CamType                   int                `json:"camType"`
+	CameraParamSpecs          CameraParamSpecs   `json:"cameraParamSpecs"`
+	BackChannelAudioSupported bool               `json:"backChannelAudioSupported"`
+	RtspTransport             string             `json:"rtspTransport"`
 }
 
 type Cameras struct {
