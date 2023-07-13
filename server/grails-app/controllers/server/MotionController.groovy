@@ -73,6 +73,7 @@ class Camera {
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
     String onvifHost=''
     boolean backchannelAudioSupported = false
+    String rtspTransport = "tcp"
 }
 
 class MotionController {

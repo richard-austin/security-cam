@@ -52,7 +52,7 @@ class RtspClient {
             handler.setMessageCallback(new MessageCallback() {
                 @Override
                 void callback(String message, Throwable ex) {
-                    System.out.println(message)
+                  //  System.out.println(message)
                     if (ex != null) {
                         System.out.println(ex.getClass().getName() + ": " + ex.getMessage())
                     }
@@ -118,8 +118,10 @@ class RtspClient {
                     handler.setOnReady(new OnReady() {
                         @Override
                         void ready(BackchannelClientHandler handler) {
-                            if (cam != null)
+                            if (cam != null) {
                                 cam.backchannelAudioSupported = handler.backchannelAudioSupported
+                                cam.rtspTransport = handler.backchannelAudioSupported ? "udp" : "tcp"
+                            }
                         }
                     })
                 }
