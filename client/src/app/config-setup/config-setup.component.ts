@@ -696,6 +696,18 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showPasswordDialogue = !this.showPasswordDialogue;
   }
 
+  /**
+   * toggleBackChannelAudio: Called when the back channel audio icon (camera row) is clicked on.
+   *                         There is no validation as to whether 2 way audio is supported on the device.
+   *                         Onvif device discovery sets this to the correct state initially, this gives a means
+   *                         of overriding that result if required.
+   * @param cam
+   */
+  toggleBackChannelAudio(cam: Camera) {
+    cam.backchannelAudioSupported = !cam.backchannelAudioSupported;
+    this.reporting.warningMessage = "Click the commit button to save this configuration change."
+  }
+
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the checkboxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
@@ -714,6 +726,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
   }
 
-  async ngOnDestroy() {
+  ngOnDestroy() {
   }
 }

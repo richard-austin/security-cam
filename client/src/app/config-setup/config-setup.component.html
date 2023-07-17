@@ -178,8 +178,8 @@
       <ng-container matColumnDef="backchannelAudioSupported">
         <th mat-header-cell *matHeaderCellDef>Audio Backchannel.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-icon [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
-           [matTooltip]="cam.value.backchannelAudioSupported ? 'This device supports two way audio' : 'Two way audio is not supported on this device'"
+          <mat-icon (click)="toggleBackChannelAudio(cam.value)" [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
+           [matTooltip]="cam.value.backchannelAudioSupported ? 'Two way audio enabled for this device (please ensure the device supports 2 way audio)' : 'Two way audio is not enabled for this device'"
            matTooltipClass="tooltip">
             {{cam.value.backchannelAudioSupported ? "check_circle" : "cancel"}}
           </mat-icon>
