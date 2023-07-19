@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, isDevMode, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {CameraService, cameraType} from '../cameras/camera.service';
+import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
@@ -183,10 +183,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getCameraAddressDisabledState(camera: Camera): boolean {
-    if (camera?.cameraParamSpecs?.camType === undefined)
-      return true;
-    else
-      return camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X;
+    return false; // Never disabled now
+    // if (camera?.cameraParamSpecs?.camType === undefined)
+    //   return true;
+    // else
+    //   return camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X;
   }
 
   getFTPDisabledState(camera: Camera): boolean {
