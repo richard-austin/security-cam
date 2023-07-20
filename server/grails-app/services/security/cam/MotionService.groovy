@@ -112,7 +112,7 @@ class MotionService {
             // Remove the underscore from the end of the name to avoid a clash of this file name with the downloaded file name
             Path pathToMp4 = Paths.get(cmd.folder.toString(), fileBaseName.substring(0, fileBaseName.length()-1)+".mp4")
             // Create a single .mp4 file from the hls file set
-            utilsService.executeLinuxCommand("ffmpeg -y  -i ${pathToHls.toString()} -c copy -level 3.0  -f mp4 ${pathToMp4.toString()}")
+            utilsService.executeLinuxCommand("ffmpeg", "-y",  "-i", pathToHls.toString(), "-c", "copy", "-level", "3.0", "-f", "mp4", pathToMp4.toString())
 
             File mp4File = new File(pathToMp4.toString())
             if(!mp4File.exists())
