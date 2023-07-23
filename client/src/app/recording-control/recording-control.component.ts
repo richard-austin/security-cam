@@ -213,7 +213,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       this.downloading = true;
       let blob: Blob = await this.motionService.downloadRecording(this.cs.stream, this.manifest);
       saveAs(blob, this.manifest.replace('_.m3u8', '.mp4'));
-    } catch (error) {
+    } catch (error: any) {
       let reader: FileReader = new FileReader();
       reader.onload = () => {
         this.reporting.errorMessage = new HttpErrorResponse({

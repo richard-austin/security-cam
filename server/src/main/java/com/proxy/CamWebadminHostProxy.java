@@ -97,6 +97,8 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                     camType.set(ct);
                                     server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
                                 }
+                                else
+                                    logService.getCam().error("No accessToken found for request");
                             }
                             logService.getCam().trace("pass = " + pass);
                             AtomicReference<ByteBuffer> newReq = new AtomicReference<>();
