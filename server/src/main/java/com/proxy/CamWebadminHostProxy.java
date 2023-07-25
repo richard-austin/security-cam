@@ -27,6 +27,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
     ICamServiceInterface camService;
     final Map<String, AccessDetails> accessDetailsMap;
     final ExecutorService requestProcessing = Executors.newCachedThreadPool();
+    final ExecutorService serverThread = Executors.newSingleThreadExecutor();
 
     public CamWebadminHostProxy(ILogService logService, ICamServiceInterface camService) {
         super(logService);
@@ -35,34 +36,35 @@ public class CamWebadminHostProxy extends HeaderProcessing {
         this.camService = camService;
     }
 
+    private boolean running = false;
+
     /**
      * It will run a single-threaded proxy server on
      * the provided local port.
      */
-    public void runServer(int localport) {
-        Executors.newSingleThreadExecutor().execute(() -> {
+    public void runServer(int localPort) {
+        serverThread.execute(() -> {
+            running = true;
             // Creating a ServerSocket to listen for connections with
-            try (ServerSocketChannel s = ServerSocketChannel.open()) {
-                s.bind(new InetSocketAddress(localport));
-                while (true) {
-                    SocketChannel client;
-                    try {
+            while (running) {
+                try (ServerSocketChannel s = ServerSocketChannel.open()) {
+                    s.bind(new InetSocketAddress(localPort));
+                    while (running) {
+                        SocketChannel client;
                         // Wait for a connection on the local port
                         client = s.accept();
-                        requestProcessing(client);
-                    } catch (Exception ex) {
-                        logService.getCam().error(ex.getClass().getName() + " in runServer: " + ex.getMessage());
-                        break;
+                        handleClientRequest(client);
                     }
+                } catch (Exception ex) {
+                    logService.getCam().error(ex.getClass().getName() + " in runServer: " + ex.getMessage());
                 }
-            } catch (Exception ex) {
-                logService.getCam().error(ex.getClass().getName() + " in runServer (exiting thread): " + ex.getMessage());
             }
         });
     }
 
-    void requestProcessing(SocketChannel client) {
-        requestProcessing.submit(() -> handleClientRequest(client));
+    public void stopServer() {
+        running = false;
+        serverThread.shutdownNow();
     }
 
     private void handleClientRequest(SocketChannel client) {
@@ -75,6 +77,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
             // client, disconnect, and continue waiting for connections.
             try {
                 SocketChannel server = SocketChannel.open();
+                //server.configureBlocking(true);
                 final AtomicReference<AccessDetails> accessDetails = new AtomicReference<>();
                 final AtomicReference<ByteBuffer> updatedReq = new AtomicReference<>();
                 final AtomicInteger camType = new AtomicInteger();
@@ -86,6 +89,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                         long pass = 0;
 
                         client.configureBlocking(true);
+                        logService.getCam().trace("handleClientRequest: Ready to read client request");
                         while (client.read(request) != -1) {
                             request.flip();
                             if (++pass == 1) {
@@ -96,8 +100,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                     Integer ct = camService.getCameraType(ad.cameraHost);
                                     camType.set(ct);
                                     server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
-                                }
-                                else
+                                } else
                                     logService.getCam().error("No accessToken found for request");
                             }
                             logService.getCam().trace("pass = " + pass);
@@ -123,32 +126,27 @@ public class CamWebadminHostProxy extends HeaderProcessing {
 
                                     logService.getCam().trace("serverPass = " + serverPass);
                                 }
-                                String xyz = "\nRequest: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
-                                logService.getCam().trace(xyz);
+                                // String xyz = "\nRequest: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
+                                // logService.getCam().trace(xyz);
                                 int val = server.write(request);
-                                if (val == -1)
-                                    break;
-                                bytesWritten += val;
                                 if (serverPass == 1) {
                                     synchronized (lock) {
                                         lock.notify();
                                     }
                                 }
+                                if (val == -1)
+                                    break;
+                                bytesWritten += val;
                             }
                             request.clear();
                         }
+                        server.close();
+                        logService.getCam().trace("handleClientRequest: Out of client request loop");
                     } catch (IOException ignore) {
                     } catch (Exception ex) {
                         logService.getCam().error(ex.getClass().getName() + " in handleClientRequest: " + ex.getMessage());
                     } finally {
                         recycle(request);
-                    }
-                    // the client closed the connection to us, so close our
-                    // connection to the server.
-                    try {
-                        server.close();
-                    } catch (IOException e) {
-                        logService.getCam().error(e.getClass().getName() + " in handleClientRequest when closing server socket: " + e.getMessage());
                     }
                 });
 
@@ -163,7 +161,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                 // and pass them back to the client.
                 try {
                     long pass = 0;
-                    server.configureBlocking(true);
+                    logService.getCam().trace("handleClientRequest: Ready to read device response");
                     while (server.isOpen() && (server.read(reply)) != -1) {
                         reply.flip();
                         AtomicReference<ByteBuffer> arNoXFrame = new AtomicReference<>();
@@ -182,12 +180,13 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             }
                         }
                         logService.getCam().trace("server.read pass = " + pass);
-                        String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
-                        logService.getCam().trace(x);
+                        // String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
+                        // logService.getCam().trace(x);
                         client.write(reply);
                         reply.clear();
                         accessDetails.get().setHasCookie();
                     }
+                    logService.getCam().trace("\"handleClientRequest: Out of device response loop");
                 } catch (ClosedChannelException ignore) {
                 } catch (IOException e) {
                     reply.flip();

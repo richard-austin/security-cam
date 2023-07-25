@@ -17,7 +17,7 @@ public class HeaderProcessing {
     final byte[] crlfcrlf = {'\r', '\n', '\r', '\n'};
     final byte[] colonSpace = {':', ' '};
     final private Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
-    public final int BUFFER_SIZE = 5000;
+    public final int BUFFER_SIZE = 50000;
     protected ILogService logService;
 
     protected HeaderProcessing(ILogService logService) {
@@ -200,9 +200,7 @@ public class HeaderProcessing {
      * @return: The buffer
      */
     public ByteBuffer getBuffer() {
-        ByteBuffer buf = Objects.requireNonNullElseGet(bufferQueue.poll(), () -> ByteBuffer.allocate(BUFFER_SIZE));
-        buf.clear();
-        return buf;
+        return Objects.requireNonNullElseGet(bufferQueue.poll(), () -> ByteBuffer.allocate(BUFFER_SIZE));
     }
 
     public synchronized void recycle(ByteBuffer buf) {
