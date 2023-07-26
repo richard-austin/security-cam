@@ -177,8 +177,8 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             // String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
                             // logService.getCam().trace(x);
                             client.write(reply);
-                            reply.clear();
                             accessDetails.get().setHasCookie();
+                            reply.clear();
                         }
                         logService.getCam().trace("\"handleClientRequest: Out of device response loop");
                     } catch (ClosedChannelException ignore) {
@@ -197,12 +197,13 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                     // The server closed its connection to us, so we close our
                     // connection to our client.
                     client.close();
-                } catch (IOException e) {
-                    logService.getCam().error(e.getClass().getName() + " in handleClientRequest when opening socket channel: " + e.getMessage());
+                } catch (Exception ex) {
+                    logService.getCam().error(ex.getClass().getName() + " in handleClientRequest (inner) when opening socket channel: " + ex.getMessage());
                 }
-
                 recycle(reply);
 
+            } catch (Exception ex) {
+                logService.getCam().error(ex.getClass().getName() + " in handleClientRequest (outer) when opening socket channel: " + ex.getMessage());
             } finally {
                 try {
                     client.close();
