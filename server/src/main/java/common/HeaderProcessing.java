@@ -17,7 +17,9 @@ public class HeaderProcessing {
     final byte[] crlfcrlf = {'\r', '\n', '\r', '\n'};
     final byte[] colonSpace = {':', ' '};
     final private Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
-    public final int BUFFER_SIZE = 50000;
+    final private Queue<ByteBuffer> largerBufferQueue = new ConcurrentLinkedQueue<>();
+    public final int BUFFER_SIZE = 5000;
+    public final int LARGER_BUFFER_SIZE = 6000;  // Extra space to slip in headers if required
     protected ILogService logService;
 
     protected HeaderProcessing(ILogService logService) {
@@ -31,7 +33,7 @@ public class HeaderProcessing {
             // Check that the double CRLF is present
             List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf, 0, byteBuffer.limit());
             if (indexList.size() > 0) {
-                final int endOfHeadersIdx = indexList.get(0)+crlfcrlf.length-1;
+                final int endOfHeadersIdx = indexList.get(0) + crlfcrlf.length - 1;
                 // OK so look for the header key
                 indexList = bs.searchBytes(byteBuffer.array(), key.getBytes(StandardCharsets.UTF_8), 0, endOfHeadersIdx);
                 if (indexList.size() > 0) {
@@ -54,14 +56,15 @@ public class HeaderProcessing {
         }
         return retVal;
     }
+
     protected boolean addHeader(@NotNull ByteBuffer src, AtomicReference<ByteBuffer> arDest, @NotNull String key, @NotNull String value) {
         boolean retVal = false;
         // Check if the header is already present
-        if(!getHeader(src, key).equals(value)) {
-            final ByteBuffer srcClone = getBuffer();
+        if (!getHeader(src, key).equals(value)) {
+            final ByteBuffer srcClone = getBuffer(true);
             srcClone.put(src.array(), 0, src.limit());
             srcClone.flip();
-            ByteBuffer dest = getBuffer();
+            ByteBuffer dest = getBuffer(true);
             BinarySearcher bs = new BinarySearcher();
             // Find the first CRLF in the source buffer
             List<Integer> indexList = bs.searchBytes(srcClone.array(), crlf, 0, srcClone.limit());
@@ -82,8 +85,7 @@ public class HeaderProcessing {
                 retVal = true;
                 recycle(src);
             }
-        }
-        else {
+        } else {
             arDest.set(src);
             retVal = true; // Header already present, return success
         }
@@ -100,7 +102,7 @@ public class HeaderProcessing {
             indexList = bs.searchBytes(src.array(), crlf, startIdx, src.limit());
             if (indexList.size() > 0) {
                 final int endIdx = indexList.get(0) + crlf.length;
-                final ByteBuffer dest = getBuffer();
+                final ByteBuffer dest = getBuffer(false);
                 dest.put(src.array(), 0, startIdx);
                 dest.put(src.array(), endIdx, src.limit() - endIdx);
                 dest.flip();
@@ -114,7 +116,7 @@ public class HeaderProcessing {
 
     protected boolean modifyHeader(@NotNull ByteBuffer src, AtomicReference<ByteBuffer> arDest, @NotNull String key, @NotNull String newValue) {
         boolean retVal = false;
-        final ByteBuffer srcClone = getBuffer();
+        final ByteBuffer srcClone = getBuffer(false);
         srcClone.put(src.array(), 0, src.limit());
         srcClone.flip();
         AtomicReference<ByteBuffer> headerRemoved = new AtomicReference<>();
@@ -122,10 +124,9 @@ public class HeaderProcessing {
         if (removeHeader(srcClone, headerRemoved, key)) {
             // Then add with the required new value
             retVal = addHeader(headerRemoved.get(), arDest, key, newValue);
-            if(!retVal)
+            if (!retVal)
                 recycle(headerRemoved.get());
-        }
-        else
+        } else
             recycle(srcClone);
 
         //   System.out.print(new String(headerRemoved.get().array(), 0, headerRemoved.get().limit()));
@@ -138,7 +139,7 @@ public class HeaderProcessing {
         BinarySearcher bs = new BinarySearcher();
         List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf, 0, byteBuffer.limit());
         if (indexList.size() > 0) {
-            final int endOfHeadersIdx = indexList.get(0)+crlfcrlf.length-1;
+            final int endOfHeadersIdx = indexList.get(0) + crlfcrlf.length - 1;
             // Find the first crlf
             indexList = bs.searchBytes(byteBuffer.array(), crlf, 0, endOfHeadersIdx);
             if (indexList.size() > 0) {
@@ -158,7 +159,7 @@ public class HeaderProcessing {
         BinarySearcher bs = new BinarySearcher();
         List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf, 0, byteBuffer.limit());
         if (indexList.size() > 0) {
-            final int endOfHeadersIdx = indexList.get(0)+crlfcrlf.length-1;
+            final int endOfHeadersIdx = indexList.get(0) + crlfcrlf.length - 1;
             // Find the first crlf
             indexList = bs.searchBytes(byteBuffer.array(), crlf, 0, endOfHeadersIdx);
             if (indexList.size() > 0) {
@@ -175,8 +176,8 @@ public class HeaderProcessing {
         String retVal = "";
         final String header = getRTSPHeader(byteBuffer);
         final int idxOfSpace = header.indexOf(" ");
-        if(idxOfSpace != -1) {
-            retVal = header.substring(0, idxOfSpace-1);
+        if (idxOfSpace != -1) {
+            retVal = header.substring(0, idxOfSpace - 1);
         }
         return retVal;
     }
@@ -184,11 +185,11 @@ public class HeaderProcessing {
     protected String getRTSPUri(@NotNull ByteBuffer byteBuffer) {
         String retVal = "";
         final String header = getRTSPHeader(byteBuffer);
-        final int startIdx = header.indexOf(" ")+1;
-        if(startIdx > 0) {
+        final int startIdx = header.indexOf(" ") + 1;
+        if (startIdx > 0) {
             final int endIdx = header.indexOf(" ", startIdx);
-            if(endIdx != -1) {
-                retVal = header.substring(startIdx, endIdx-1);
+            if (endIdx != -1) {
+                retVal = header.substring(startIdx, endIdx - 1);
             }
         }
         return retVal;
@@ -199,12 +200,24 @@ public class HeaderProcessing {
      *
      * @return: The buffer
      */
-    public ByteBuffer getBuffer() {
-        return Objects.requireNonNullElseGet(bufferQueue.poll(), () -> ByteBuffer.allocate(BUFFER_SIZE));
+    public ByteBuffer getBuffer(boolean largerBuffer) {
+        logService.getCam().trace("Getting " + (largerBuffer ? "large": "standard")+ " size buffer");
+        return largerBuffer
+                ?
+                (Objects.requireNonNullElseGet(largerBufferQueue.poll(), () -> ByteBuffer.allocate(LARGER_BUFFER_SIZE)))
+                :
+                (Objects.requireNonNullElseGet(bufferQueue.poll(), () -> ByteBuffer.allocate(BUFFER_SIZE)));
     }
 
     public synchronized void recycle(ByteBuffer buf) {
         buf.clear();
-        bufferQueue.add(buf);
+        if(buf.capacity() == BUFFER_SIZE) {
+            logService.getCam().trace("Standard size buffer recycled");
+            bufferQueue.add(buf);
+        }
+        else if(buf.capacity() == LARGER_BUFFER_SIZE) {
+            logService.getCam().trace("Large size buffer recycled");
+            largerBufferQueue.add(buf);
+        }
     }
 }
