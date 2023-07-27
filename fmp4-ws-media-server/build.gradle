@@ -1,9 +1,9 @@
 task build (type: Exec) {
     group = 'build'
-    description = 'Builds an arm64 executable file for media server'
+    description = 'Builds an armhf executable file for media server'
     workingDir "$projectDir"
     executable "sh"
-    args = ['-c', 'env GOOS=linux GOARCH=arm64 go build -o ../xtrn-scripts-and-config/fmp4-ws-media-server/fmp4-ws-media-server_arm64']
+    args = ['-c', 'env GOOS=linux GOARCH=arm go build -o ../xtrn-scripts-and-config/fmp4-ws-media-server/fmp4-ws-media-server_arm64']
 }
 
 task deploy (type: Copy) {

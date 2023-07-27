@@ -25,9 +25,10 @@ func ffmpegFeed(cameras *Cameras, creds *CameraCredentials) {
 					}
 
 					// Currently the development machine has ffmpeg version 5.1.2-3, while live has version 4.4.2-0.
-					// 5.1.2-3 does not support the -stimeout parameter for rtsp. Until the versions are in line again
+					// 5
+					//.1.2-3 does not support the -stimeout parameter for rtsp. Until the versions are in line again
 					// only use -stimer for live and not dev.
-					var stimeout string = "-stimeout 1000000 "
+					var stimeout string = "-timeout 1000000 "
 					if strings.HasPrefix(stream.URI, "ws://") {
 						stimeout = "-timeout 1000000 "
 					}
