@@ -29,6 +29,9 @@ cp ../wifimanagement.service  security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../camera-recordings.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../fmp4-ws-media-server.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 
+mkdir -p security-cam_"${VERSION}"_arm64/usr/local/bin
+cp ../ffmpeg-v4.4.4/ffmpeg security-cam_"${VERSION}"_arm64/usr/local/bin
+
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
@@ -71,7 +74,6 @@ Architecture: arm64
 Maintainer: Richard Austin <richard.david.austin@gmail.com>
 Description: A security camera system accessed through a secure web based interface.
 Depends: openjdk-18-jre-headless (>=18.0.2), openjdk-18-jre-headless (<< 18.9.9),
- ffmpeg (>=7:5.1.2), ffmpeg (<<7:6.0.0),
  motion (>=4.5.1-2), motion(<<5.0.0-0),
  nginx (>=1.22.0), nginx(<=1.23.9),
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
