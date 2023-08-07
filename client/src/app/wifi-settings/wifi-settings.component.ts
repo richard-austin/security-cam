@@ -100,7 +100,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
     this.connecting = true;
     this.needPassword = false;
     this.wifiUtilsService.setUpWifi(this.selector.value, this.password).subscribe((result) => {
-        this.reporting.successMessage = JSON.parse(result.response)?.message;;
+        this.reporting.successMessage = JSON.parse(result.response)?.message;
         this.currentWifiConnection.accessPoint = this.selector.value;
         this.connecting = false;
       },

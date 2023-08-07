@@ -260,7 +260,7 @@ class Handler(BaseHTTPRequestHandler):
                     logger.info(f"Setting up wifi for SSID {ssid}")
                     password: str = cmd['password'] if cmd.__contains__('password') else None
                     message: str
-                    returncode: int
+                    returncode: int = -1
                     try:
                         if password is None:
                             message, returncode = executeOsCommand2(f"nmcli dev wifi connect {ssid}")
