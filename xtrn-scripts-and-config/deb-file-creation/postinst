@@ -68,12 +68,14 @@ chmod +x /etc/security-cam/processmotionrecordings.sh || true
 chmod +x /etc/security-cam/productKeyGen.sh || true
 
 pushd /etc/security-cam/camera-recordings-service || true
-sudo -u tomcat pip install -r requirements.txt
+sudo -u tomcat python3 -m venv .  # Create Python3 virtual environment
+sudo -u tomcat bin/pip install -r requirements.txt --use-pep517
 
-#pushd /etc/security-cam/wifi-setup-service || true
-#pip install -r requirements.txt
-#popd || true
-#popd || true
+pushd /etc/security-cam/wifi-setup-service || true
+python3 -m venv .  # Create Python3 virtual environment
+bin/pip install -r requirements.txt
+popd || true
+popd || true
 
 
 # Change the motion service user to tomcat

@@ -83,7 +83,7 @@ Depends: openjdk-18-jre-headless (>=18.0.2), openjdk-18-jre-headless (<< 18.9.9)
  network-manager (>= 1.42.4), network-manager (<< 2.0.0),
  wireless-tools (>=30~pre9-13), wireless-tools (<< 40),
  moreutils,
- python3-pip
+ python3-pip, python3.11-venv
 EOF
 
 dpkg-deb --build --root-owner-group security-cam_"${VERSION}"_arm64

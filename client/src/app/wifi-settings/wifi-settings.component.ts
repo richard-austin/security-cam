@@ -100,20 +100,25 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
     this.connecting = true;
     this.needPassword = false;
     this.wifiUtilsService.setUpWifi(this.selector.value, this.password).subscribe((result) => {
-        this.reporting.successMessage = result.response;
+        this.reporting.successMessage = JSON.parse(result.response)?.message;;
         this.currentWifiConnection.accessPoint = this.selector.value;
         this.connecting = false;
       },
       (reason) => {
         this.connecting = false;
         let err: WifiConnectResult = reason.error;
-        if (err.errorCode === 7) {
-          this.needPassword = true;
-          this.reporting.warningMessage = 'Please enter the password for ' + this.selector.value;
-        } else if (err.errorCode == 11) {
-          this.reporting.warningMessage = err.message;
+        let response: any = JSON.parse(err.message);
+
+        if (err.errorCode === 400) {
+          if (response.returncode == 4) // nmcli return code 4: "Connection activation failed.",
+          {
+            this.needPassword = true;
+            this.reporting.warningMessage = 'Please enter the password for ' + this.selector.value;
+          }
+          else if (response.returncode == 11)
+            this.reporting.warningMessage = response.message;
         } else {
-          this.reporting.errorMessage = new HttpErrorResponse({error: err.message});
+          this.reporting.errorMessage = new HttpErrorResponse({error: response.message});
         }
       });
   }
@@ -166,7 +171,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
               }
             });
             this.isReady = true;
-          } catch (e) {
+          } catch (e: any) {
             this.reporting.errorMessage = e;
           }
         }

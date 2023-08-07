@@ -116,15 +116,26 @@ def checkConnectionState(ssid: str):  # This works on a fresh install headless s
 def executeOsCommand(command: str, exception_messages: {int, str}) -> str:
     stream = os.popen(command)
     message = stream.read()
-    exitcode = stream.close()
-    if exitcode is not None:
-        exitcode = os.WEXITSTATUS(exitcode)
-        if exitcode in exception_messages:
-            error_message = exception_messages[exitcode]
-            raise Exception(f"{error_message}")
-        else:
-            raise Exception(f"Unknown error code {exitcode}")
+    status: int = stream.close()
+    if status is not None:
+        exitcode: int = os.waitstatus_to_exitcode(status)
+        if exitcode is not None:
+            if exitcode in exception_messages:
+                error_message = exception_messages[exitcode]
+                raise Exception(f"{error_message}")
+            else:
+                raise Exception(f"Unknown error code {exitcode}")
     return message
+
+
+def executeOsCommand2(command: str) -> {str, int}:
+    stream = os.popen(command)
+    message = stream.read()
+    status = stream.close()
+    exitcode: int = 0
+    if status is not None:
+        exitcode = os.waitstatus_to_exitcode(status)
+    return message, exitcode
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -249,23 +260,29 @@ class Handler(BaseHTTPRequestHandler):
                     logger.info(f"Setting up wifi for SSID {ssid}")
                     password: str = cmd['password'] if cmd.__contains__('password') else None
                     message: str
+                    returncode: int
                     try:
                         if password is None:
-                            message = executeOsCommand(f"nmcli dev wifi connect {ssid}",
-                                                       self.nmcli_errors)
+                            message, returncode = executeOsCommand2(f"nmcli dev wifi connect {ssid}")
                         else:
-                            message = executeOsCommand(f"nmcli dev wifi connect {ssid} password {password}",
-                                                       self.nmcli_errors)
+                            message, returncode = executeOsCommand2(f"nmcli dev wifi connect {ssid} password {password}")
+
+                        if returncode != 0 and returncode != 4:
+                            if returncode in self.nmcli_errors:
+                                error_message = self.nmcli_errors[returncode]
+                                raise Exception(f"{error_message}")
+                            else:
+                                raise Exception(f"Unknown error code {returncode}")
                     except Exception as ex:
                         logger.error(f"Exception when trying to set Wifi: {ex}")
-                        self.returnResponse(500, f"An error occurred: {ex}")
+                        self.returnResponse(500, {"returncode": returncode, "message": f"An error occurred: {ex}"})
                         return
 
                     activated = checkConnectionState(cmd['ssid'])
                     if activated:
-                        self.returnResponse(200, f"Wifi connection to {cmd['ssid']} is active")
+                        self.returnResponse(200, {"returncode": returncode, "message": f"Wifi connection to {cmd['ssid']} is active"})
                     else:
-                        self.returnResponse(400, f"Failed to activate Wifi connection to {cmd['ssid']}. {message}")
+                        self.returnResponse(400, {"returncode": returncode, "message": f"Failed to activate Wifi connection to {cmd['ssid']}. {message}"})
                     return
 
                 case 'checkwifistatus':
@@ -332,5 +349,5 @@ class Handler(BaseHTTPRequestHandler):
         return postvars
 
 
-with HTTPServer(('localhost', 8000), Handler) as server:
+with HTTPServer(('0.0.0.0', 8000), Handler) as server:
     server.serve_forever()
