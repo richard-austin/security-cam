@@ -5,7 +5,7 @@ import {OnDestroy} from '@angular/core';
 import {MatSelect} from '@angular/material/select/select';
 import {timer} from 'rxjs';
 import {HttpErrorResponse} from '@angular/common/http';
-import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {CurrentWifiConnection} from '../shared/current-wifi-connection';
 import {WifiDetails} from '../shared/wifi-details';
 import {WifiUtilsService} from '../shared/wifi-utils.service';
