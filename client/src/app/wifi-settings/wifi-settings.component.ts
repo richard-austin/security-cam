@@ -5,7 +5,7 @@ import {OnDestroy} from '@angular/core';
 import {MatSelect} from '@angular/material/select/select';
 import {timer} from 'rxjs';
 import {HttpErrorResponse} from '@angular/common/http';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
 import {CurrentWifiConnection} from '../shared/current-wifi-connection';
 import {WifiDetails} from '../shared/wifi-details';
 import {WifiUtilsService} from '../shared/wifi-utils.service';
@@ -157,6 +157,12 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
     return formGroup.get(fcName) as FormControl;
   }
 
+   hasError = (controlName: string, errorName: string): boolean => {
+    return this.enterPasswordForm.controls[controlName].hasError(errorName);
+  }
+  anyInvalid(): boolean {
+    return this.enterPasswordForm.invalid && this.needPassword;
+  }
   ngOnInit(): void {
     this.isReady = false;
     this.needPassword = false;
@@ -200,8 +206,9 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
       });
 
     this.enterPasswordForm = new FormGroup({
-      password: new FormControl(this.password, [Validators.required, Validators.maxLength(35)]),
+      password: new FormControl(this.password, [Validators.required, Validators.minLength(8), Validators.maxLength(35)]),
     }, {updateOn: 'change'});
+    this.enterPasswordForm.markAllAsTouched();
   }
 
   ngOnDestroy(): void {
