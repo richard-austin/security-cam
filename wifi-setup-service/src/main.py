@@ -349,5 +349,5 @@ class Handler(BaseHTTPRequestHandler):
         return postvars
 
 
-with HTTPServer(('0.0.0.0', 8000), Handler) as server:
+with HTTPServer(('localhost', 8000), Handler) as server:
     server.serve_forever()
