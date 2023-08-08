@@ -98,11 +98,11 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
       this.password = undefined;
     }
     this.connecting = true;
-    this.needPassword = false;
     this.wifiUtilsService.setUpWifi(this.selector.value, this.password).subscribe((result) => {
         this.reporting.successMessage = JSON.parse(result.response)?.message;
         this.currentWifiConnection.accessPoint = this.selector.value;
         this.connecting = false;
+        this.needPassword = false;
       },
       (reason) => {
         this.connecting = false;
@@ -112,8 +112,12 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
         if (err.errorCode === 400) {
           if (response.returncode == 4) // nmcli return code 4: "Connection activation failed.",
           {
-            this.needPassword = true;
-            this.reporting.warningMessage = 'Please enter the password for ' + this.selector.value;
+            if(this.needPassword)
+              this.reporting.warningMessage = 'Incorrect password for ' + this.selector.value + ", Please try again";
+            else {
+              this.reporting.warningMessage = 'Please enter the password for ' + this.selector.value;
+              this.needPassword = true;
+            }
           }
           else if (response.returncode == 11)
             this.reporting.warningMessage = response.message;
@@ -155,6 +159,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isReady = false;
+    this.needPassword = false;
     this.wifiUtilsService.checkConnectedThroughEthernetNVR().subscribe(async (result) => {
         this.ethernetConnectionStatus = result.status;
 
