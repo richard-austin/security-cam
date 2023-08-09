@@ -10,6 +10,15 @@ mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
 mv /tmp/cua.war /var/lib/tomcat9/webapps/cua.war
 
+# Make sure there is a cameraCredentials.json file present. If there is one, don't overwrite it with the default.
+if [[ ! -f /var/security-cam/cameraCredentials.json ]]
+then
+  mv /tmp/cameraCredentials.json /var/security-cam
+  chown tomcat:tomcat /var/security-cam/cameraCredentials.json
+else
+  rm /tmp/cameraCredentials.json
+fi
+
 rm -rf /var/lib/tomcat9/webapps/ROOT
 rm -rf /var/lib/tomcat9/webapps/cua
 
