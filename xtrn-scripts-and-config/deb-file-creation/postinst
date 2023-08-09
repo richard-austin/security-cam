@@ -10,6 +10,15 @@ mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
 mv /tmp/cua.war /var/lib/tomcat9/webapps/cua.war
 
+# Make sure there is a cameraCredentials.json file present. If there is one, don't overwrite it with the default.
+if [[ ! -f /var/security-cam/cameraCredentials.json ]]
+then
+  mv /tmp/cameraCredentials.json /var/security-cam
+  chown tomcat:tomcat /var/security-cam/cameraCredentials.json
+else
+  rm /tmp/cameraCredentials.json
+fi
+
 rm -rf /var/lib/tomcat9/webapps/ROOT
 rm -rf /var/lib/tomcat9/webapps/cua
 
@@ -68,12 +77,14 @@ chmod +x /etc/security-cam/processmotionrecordings.sh || true
 chmod +x /etc/security-cam/productKeyGen.sh || true
 
 pushd /etc/security-cam/camera-recordings-service || true
-sudo -u tomcat pip install -r requirements.txt
+sudo -u tomcat python3 -m venv .  # Create Python3 virtual environment
+sudo -u tomcat bin/pip install -r requirements.txt --use-pep517
 
-#pushd /etc/security-cam/wifi-setup-service || true
-#pip install -r requirements.txt
-#popd || true
-#popd || true
+pushd /etc/security-cam/wifi-setup-service || true
+python3 -m venv .  # Create Python3 virtual environment
+bin/pip install -r requirements.txt
+popd || true
+popd || true
 
 
 # Change the motion service user to tomcat

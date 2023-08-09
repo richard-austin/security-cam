@@ -59,10 +59,12 @@
                  matTooltipClass="tooltip"
                  placeholder="Password for {{selector.value}}">
           <mat-hint>New password for {{selector.value}}</mat-hint>
+          <mat-error *ngIf="hasError('password', 'minlength')">Password must be at least 8 characters in length</mat-error>
+          <mat-error *ngIf="hasError('password', 'required')">Password is required</mat-error>
         </mat-form-field>
       </div>
       <div class="connect-cancel">
-        <button [disabled]="!wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting"
+        <button [disabled]="!wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting || anyInvalid()"
                 mat-flat-button
                 color="warn"
                 (click)="connect()">Connect

@@ -35,10 +35,11 @@ class WifiUtilsService {
         getActiveIPAddresses()
 
         try {
+            final int scanWifiTimeout = 60
             RestfulResponse resp =
                     restfulInterfaceService.sendRequest("localhost:8000", "/",
                             "{\"command\": \"scanwifi\"}",
-                            true, 60)
+                            true, scanWifiTimeout)
 
             if (resp.responseCode == 200) {
                 JsonSlurper parser = new JsonSlurper()
@@ -63,23 +64,23 @@ class WifiUtilsService {
 
         try {
             EthernetStatusEnum connStatus = isConnectedThroughEthernet(cmd.isCloud)
-
+            final int setUpWifiTimeout = 180
             if (connStatus == EthernetStatusEnum.connectedViaEthernet) {
                 RestfulResponse resp = cmd.password != null
                         ?
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
                                 "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\", \"password\": \"${cmd.password}\"}",
-                                true, 180)
+                                true, setUpWifiTimeout)
                         :
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
                                 "{\"command\": \"setupwifi\", \"ssid\": \"${cmd.ssid}\"}",
-                                true, 180)
+                                true, setUpWifiTimeout)
 
                 if (resp.responseCode == 200)
                     result.responseObject = resp.responseObject as JSON
                 else {
                     result.errno = resp.responseCode
-                    result.responseObject = new WifiConnectResult(resp.getErrorMsg())
+                    result.responseObject = new WifiConnectResult(resp.responseCode, resp.errorMsg)
                     result.error = resp.getErrorMsg()
                     result.status = PassFail.FAIL
                 }
@@ -87,7 +88,7 @@ class WifiUtilsService {
                 final String warningMessage = "setUpWifi: Cannot change Wi-Fi settings when not connected through Ethernet."
                 result.errno = 400
                 logService.cam.warn(warningMessage)
-                result.responseObject = new WifiConnectResult(warningMessage)
+                result.responseObject = new WifiConnectResult(-1, warningMessage)  // -1 as return code
                 result.status = PassFail.FAIL
                 result.error = warningMessage
             }
@@ -104,10 +105,11 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
+            final int checkwifistatusTimeout = 60
             RestfulResponse resp =
                     restfulInterfaceService.sendRequest("localhost:8000", "/",
                             "{\"command\": \"checkwifistatus\"}",
-                            true, 60)
+                            true, checkwifistatusTimeout)
             if (resp.responseCode == 200) {
                 JsonSlurper parser = new JsonSlurper()
                 def json = parser.parseText(resp.responseObject['response'] as String)
@@ -132,10 +134,11 @@ class WifiUtilsService {
             EthernetStatusEnum status = isConnectedThroughEthernet(cmd.isCloud)
 
             if (cmd.status != "off" || status == EthernetStatusEnum.connectedViaEthernet) {
+                final int setwifistatusTimeout = 60
                 RestfulResponse resp =
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
                                 "{\"command\": \"setwifistatus\", \"status\": \"" + cmd.status + "\"}",
-                                true, 60)
+                                true, setwifistatusTimeout)
                 if (resp.responseCode == 200) {
                     JsonSlurper parser = new JsonSlurper()
                     def json = parser.parseText(resp.responseObject['response'] as String)
@@ -192,10 +195,11 @@ class WifiUtilsService {
         ArrayList<IpAddressDetails> ipDets = new ArrayList<>()
 
         try {
+            final int getactiveconnectionsTimeout = 60
             RestfulResponse resp =
                     restfulInterfaceService.sendRequest("localhost:8000", "/",
                             "{\"command\": \"getactiveconnections\"}",
-                            true, 60)
+                            true, getactiveconnectionsTimeout)
             if (resp.responseCode == 200) {
                 JsonSlurper parser = new JsonSlurper()
                 def json = parser.parseText(resp.responseObject['response'] as String)
@@ -239,11 +243,12 @@ class WifiUtilsService {
 
     private EthernetStatusEnum isConnectedThroughEthernet(boolean isCloud) {
         try {
+            final int getactiveconnectionsTimeout = 60
             ArrayList<ConnectionDetails> cdList = new ArrayList<>()
             RestfulResponse resp =
                     restfulInterfaceService.sendRequest("localhost:8000", "/",
                             "{\"command\": \"getactiveconnections\"}",
-                            true, 60)
+                            true, getactiveconnectionsTimeout)
             if (resp.responseCode == 200) {
                 JsonSlurper parser = new JsonSlurper()
                 def json = parser.parseText(resp.responseObject['response'] as String)

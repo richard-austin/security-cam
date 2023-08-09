@@ -7,7 +7,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=tomcat
-ExecStart=/usr/bin/python3 /etc/security-cam/camera-recordings-service/camera-recordings-service.py
+ExecStart=/etc/security-cam/camera-recordings-service/bin/python3 /etc/security-cam/camera-recordings-service/camera-recordings-service.py
 
 [Install]
 WantedBy=multi-user.target

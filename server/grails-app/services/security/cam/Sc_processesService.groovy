@@ -237,11 +237,12 @@ class Sc_processesService {
         try {
             setupIpCheckTimer()
             running = true
+            final int startServicesTimeout = 12000
             processExecutors = Executors.newCachedThreadPool()
              // Start motion and media servers and reload config to take on any changes
             RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
                     "{\"command\": \"start_services\"}",
-                    true, 12000)
+                    true, startServicesTimeout)
 
             // Populate the onvif device map so the devices don't have to be created each time a PTZ operation is done
             onvifService.populateDeviceMap()
@@ -270,9 +271,10 @@ class Sc_processesService {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
             running = false
+            final int stopServicesTimeout = 15000
             RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
                     "{\"command\": \"stop_services\"}",
-                    true, 15000)
+                    true, stopServicesTimeout)
             if (restResponse.responseCode != 200) {
                 logService.cam.error("Error stopping motion service: ${restResponse.errorMsg}")
                 response.status = PassFail.FAIL

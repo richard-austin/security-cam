@@ -98,22 +98,31 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
       this.password = undefined;
     }
     this.connecting = true;
-    this.needPassword = false;
     this.wifiUtilsService.setUpWifi(this.selector.value, this.password).subscribe((result) => {
-        this.reporting.successMessage = result.response;
+        this.reporting.successMessage = JSON.parse(result.response)?.message;
         this.currentWifiConnection.accessPoint = this.selector.value;
         this.connecting = false;
+        this.needPassword = false;
       },
       (reason) => {
         this.connecting = false;
         let err: WifiConnectResult = reason.error;
-        if (err.errorCode === 7) {
-          this.needPassword = true;
-          this.reporting.warningMessage = 'Please enter the password for ' + this.selector.value;
-        } else if (err.errorCode == 11) {
-          this.reporting.warningMessage = err.message;
+        let response: any = JSON.parse(err.message);
+
+        if (err.errorCode === 400) {
+          if (response.returncode == 4) // nmcli return code 4: "Connection activation failed.",
+          {
+            if(this.needPassword)
+              this.reporting.warningMessage = 'Incorrect password for ' + this.selector.value + ", Please try again";
+            else {
+              this.reporting.warningMessage = 'Please enter the password for ' + this.selector.value;
+              this.needPassword = true;
+            }
+          }
+          else if (response.returncode == 11)
+            this.reporting.warningMessage = response.message;
         } else {
-          this.reporting.errorMessage = new HttpErrorResponse({error: err.message});
+          this.reporting.errorMessage = new HttpErrorResponse({error: response.message});
         }
       });
   }
@@ -148,8 +157,15 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
     return formGroup.get(fcName) as FormControl;
   }
 
+   hasError = (controlName: string, errorName: string): boolean => {
+    return this.enterPasswordForm.controls[controlName].hasError(errorName);
+  }
+  anyInvalid(): boolean {
+    return this.enterPasswordForm.invalid && this.needPassword;
+  }
   ngOnInit(): void {
     this.isReady = false;
+    this.needPassword = false;
     this.wifiUtilsService.checkConnectedThroughEthernetNVR().subscribe(async (result) => {
         this.ethernetConnectionStatus = result.status;
 
@@ -166,7 +182,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
               }
             });
             this.isReady = true;
-          } catch (e) {
+          } catch (e: any) {
             this.reporting.errorMessage = e;
           }
         }
@@ -190,8 +206,9 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
       });
 
     this.enterPasswordForm = new FormGroup({
-      password: new FormControl(this.password, [Validators.required, Validators.maxLength(35)]),
+      password: new FormControl(this.password, [Validators.required, Validators.minLength(8), Validators.maxLength(35)]),
     }, {updateOn: 'change'});
+    this.enterPasswordForm.markAllAsTouched();
   }
 
   ngOnDestroy(): void {

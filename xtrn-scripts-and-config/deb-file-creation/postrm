@@ -1,6 +1,18 @@
 #!/bin/bash
 
+pushd /etc/security-cam/camera-recordings-service || true
+#sudo -u tomcat bin/pip uninstall -y -r requirements.txt
+sudo -u tomcat rm -rf bin include lib lib64 pyvenv.cfg
+#
+pushd /etc/security-cam/wifi-setup-service || true
+#bin/pip uninstall -r requirements.txt
+rm -rf bin include lib lib64 pyvenv.cfg
+#
+popd || true
+popd || true
+
 # This will clear out the unit file refs for wifimanagement service
 systemctl daemon-reload
 userdel sec-cam || true
 groupdel security-cam || true
+
