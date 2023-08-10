@@ -15,6 +15,7 @@ cp ../start_hd_recording.sh ../end_hd_recording.sh ../processmotionrecordings.sh
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service &&
 cp ../../wifi-setup-service/src/*.py security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
 cp ../../wifi-setup-service/src/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
+cp ../install-cert.sh security-cam_"${VERSION}"_arm64/etc/security-cam
 
 mkdir -p security-cam_"${VERSION}"_arm64/etc/fmp4-ws-media-server &&
 cp  ../fmp4-ws-media-server/fmp4-ws-media-server_arm64 security-cam_"${VERSION}"_arm64/etc/fmp4-ws-media-server
@@ -63,7 +64,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
 cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
-cp ../install-cert.sh ../tomcat9 security-cam_"${VERSION}"_arm64/tmp
+cp ../tomcat9 security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-7.3.war security-cam_"${VERSION}"_arm64/tmp
 cp ../../initialAdmin/dist/cua.war  security-cam_"${VERSION}"_arm64/tmp
 cp ../cameraCredentials.json security-cam_"${VERSION}"_arm64/tmp
