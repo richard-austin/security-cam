@@ -60,9 +60,8 @@ find /etc/security-cam -type d -print0 | xargs -0 chmod 775
 # Give files permission 664
 find /etc/security-cam -type f -print0 | xargs -0 chmod 664
 
-# Copy install-cert.sh with executable attribs unaffected by previous command
-mv /tmp/install-cert.sh /etc/security-cam/
-chown root:root /etc/security-cam/install-cert.sh
+# Make install-cert.sh executable
+chmod +x /etc/security-cam/install-cert.sh
 
 chgrp -R security-cam /etc/security-cam/
 chown sec-cam:security-cam /var/log/motion
@@ -138,7 +137,7 @@ else
    deb-systemd-invoke stop nginx.service  # On initial install, the certificate won't be present so
                                           # stop
                                           # nginx as it can't work till that is set up.
-   echo "To add or update the site key/certificate, run sudo install-cert.sh at www-root."
+   echo "To add or update the site key/certificate, run sudo install-cert.sh at /etc/security-cam"
    echo "Use sudo systemctl start nginx to run nginx."
 fi
 
