@@ -8,7 +8,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 from pytz import timezone
-from cgi import parse_header
+from email.message import EmailMessage
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from wifi_details import WifiDetails
 from connection_state_details import ConnectionStateDetails
@@ -339,7 +339,10 @@ class Handler(BaseHTTPRequestHandler):
             return
 
     def parse_POST(self):
-        ctype, pdict = parse_header(self.headers['content-type'])
+        msg = EmailMessage()
+        msg['content-type'] = self.headers['content-type']
+        ctype = msg.get_content_type()
+
         if ctype == 'application/json':
             length = int(self.headers['content-length'])
             json_params = self.rfile.read(length)
