@@ -91,7 +91,7 @@ class RtspClient {
                                     h.getRTPAudioEncoding() == "PCMA" ? "pcm_alaw" : "copy"
                             // Start ffmpeg to transcode and transfer the audio data
                             List<String> command = new ArrayList()
-                            command.add("ffmpeg")
+                            command.add("/usr/local/bin/ffmpeg")
                             command.add("-i")
                             command.add("tcp://localhost:8881")
                             command.add("-af")
@@ -102,14 +102,11 @@ class RtspClient {
                             command.add("${h.getRTPAudioClockRate()}".toString())
                             command.add("-ac")
                             command.add("1")
-                            command.add("-preset")
-                            command.add("superfast")
-                            command.add("-tune")
-                            command.add("zerolatency")
                             command.add("-f")
                             command.add("rtp")
                             command.add("rtp://${h.getOriginAddress()}:${h.getServerPort()}?localaddr=${localAddr}&localport=${h.vacantPorts.port1}&streamtype=unicast".toString())
                             // Using host rather than h.getOriginAddress() as the latter often came wrong from the device
+
                             audioOutProc = new ProcessBuilder(command).start()
                             System.out.println("Ready! ${h.getRTPAudioEncoding()}")
                         }
