@@ -294,6 +294,7 @@ class UtilsService {
                 }
                 client = new RtspClient(netcam_uri.getHost(), netcam_uri.getPort(), user, pass, logService)
                 client.start()
+                result = client.await()
             }
             catch (Exception ex) {
                 stopAudioOut()

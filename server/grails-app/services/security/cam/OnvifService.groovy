@@ -126,6 +126,7 @@ class OnvifService {
                                     logService,
                                     cam)
                     rtspClient.start()
+                    rtspClient.await()
 
                     try {
                         logService.cam.info "Creating onvif device for ${credentials.getHost()} ..."

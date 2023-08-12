@@ -12,10 +12,14 @@ import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.rtsp.RtspDecoder
 import io.netty.handler.codec.rtsp.RtspEncoder
 import security.cam.LogService
+import security.cam.enums.PassFail
 import security.cam.interfaceobjects.MessageCallback
+import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.interfaceobjects.OnReady
 import server.Camera
 
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedTransferQueue
 import java.util.concurrent.TimeUnit
 
 class RtspClient {
@@ -32,6 +36,8 @@ class RtspClient {
 
     Process audioOutProc
     BackchannelClientHandler handler = null
+    final BlockingQueue awaitLock = new LinkedTransferQueue<ObjectCommandResponse>()
+    final ObjectCommandResponse response = new ObjectCommandResponse()
 
     RtspClient(String host, int port, String username, String password, LogService logService, Camera cam = null) {
         this.username = username
@@ -47,7 +53,7 @@ class RtspClient {
     void start() {
         try {
             Bootstrap rtspClient = new Bootstrap()
-            handler = new BackchannelClientHandler(url)
+            handler = new BackchannelClientHandler(url, awaitLock, response)
             handler.discoveryMode = discoveryMode
             handler.setMessageCallback(new MessageCallback() {
                 @Override
@@ -109,7 +115,8 @@ class RtspClient {
                             // Left this comment here for future reference
 
                             audioOutProc = new ProcessBuilder(command).start()
-                            System.out.println("Ready! ${h.getRTPAudioEncoding()}")
+                            logService.getCam().info("RTSPClient ready, backchannel stream set up with ${h.getRTPAudioEncoding()}")
+                            awaitLock.put(response)
                         }
                     })
                 } else {
@@ -120,6 +127,7 @@ class RtspClient {
                                 cam.backchannelAudioSupported = handler.backchannelAudioSupported
                                 cam.rtspTransport = handler.backchannelAudioSupported ? "udp" : "tcp"
                             }
+                            awaitLock.put(response)
                         }
                     })
                 }
@@ -131,6 +139,17 @@ class RtspClient {
         catch (Exception ex) {
             System.out.println("${ex.getClass().getName()}: ${ex.getMessage()}")
         }
+    }
+
+    // Wait till complete then return the response
+    ObjectCommandResponse await() {
+        def response = awaitLock.poll(10000, TimeUnit.MILLISECONDS)
+        if(response == null) {
+            response = new ObjectCommandResponse()
+            response.status = PassFail.FAIL
+            response.error = "RTSP backchannel client has timed out"
+        }
+        response
     }
 
     void stop() {
