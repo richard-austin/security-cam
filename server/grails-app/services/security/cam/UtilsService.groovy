@@ -267,8 +267,14 @@ class UtilsService {
                 // Set up the socket for ffmpeg backchannel feed to source from
                 serverSocket = new ServerSocket(8881)
                 serverThread = new Thread(() -> {
-                    clientSocket = serverSocket.accept()
-                    out = clientSocket.getOutputStream()
+                    try {
+                        clientSocket = serverSocket.accept()
+                        out = clientSocket.getOutputStream()
+                    }
+                    catch(Exception ex) {
+                        stopAudioOut()
+                        logService.cam.error "${ex.getClass().getName()} in startAudioOut accept thread: ${ex.getMessage()}"
+                    }
                 })
                 serverThread.start()
 

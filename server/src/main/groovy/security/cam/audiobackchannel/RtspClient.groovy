@@ -105,7 +105,8 @@ class RtspClient {
                             command.add("-f")
                             command.add("rtp")
                             command.add("rtp://${h.getOriginAddress()}:${h.getServerPort()}?localaddr=${localAddr}&localport=${h.vacantPorts.port1}&streamtype=unicast".toString())
-                            // Using host rather than h.getOriginAddress() as the latter often came wrong from the device
+                            // Was using host rather than h.getOriginAddress() as the latter often came wrong from the device
+                            // Left this comment here for future reference
 
                             audioOutProc = new ProcessBuilder(command).start()
                             System.out.println("Ready! ${h.getRTPAudioEncoding()}")
