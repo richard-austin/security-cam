@@ -11,7 +11,9 @@ import io.netty.handler.codec.http.*
 import io.netty.handler.codec.rtsp.RtspHeaderNames
 import io.netty.handler.codec.rtsp.RtspMethods
 import io.netty.handler.codec.rtsp.RtspVersions
+import security.cam.enums.PassFail
 import security.cam.interfaceobjects.MessageCallback
+import security.cam.interfaceobjects.ObjectCommandResponse
 import security.cam.interfaceobjects.OnReady
 
 import javax.sdp.Origin
@@ -19,6 +21,7 @@ import javax.sdp.SdpFactory
 import javax.sdp.SessionDescription
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
+import java.util.concurrent.BlockingQueue
 import java.util.concurrent.atomic.AtomicReference
 
 class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
@@ -44,18 +47,21 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     MessageCallback messageCallback
     private OnReady onReady
     private String timeout
-
     public final VacantPorts vacantPorts
+    final BlockingQueue awaitLock
+    ObjectCommandResponse response
 
-    BackchannelClientHandler(final String url, final OnReady onReady = null, boolean discoveryMode = false) {
+    BackchannelClientHandler(final String url, final BlockingQueue awaitLock, final ObjectCommandResponse response) {
         this.url = url
+        this.awaitLock = awaitLock
+        this.response = response
         HttpRequest options = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0, RtspMethods.OPTIONS, url)
         request = options
         keepaliveTimer = new Timer()
         vacantPorts = findClientPorts()
         unauthorisedCount = 0
-        this.onReady = onReady
-        this.discoveryMode = discoveryMode
+        this.onReady = null
+        this.discoveryMode = false
     }
 
     MediaField getMediaField() {
@@ -417,6 +423,10 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
         ctx.close()
         if (messageCallback != null)
             messageCallback.callback(cause.getMessage(), cause)
+
+        response.status = PassFail.FAIL
+        response.error = "${cause.getClass().getName()}  in BackChannelClientHandler: ${cause.getMessage()}"
+        awaitLock.put(response)
 //        ctx.close()
     }
     class VacantPorts {
@@ -448,5 +458,4 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
         return new VacantPorts(port1, port2)
     }
-
 }
