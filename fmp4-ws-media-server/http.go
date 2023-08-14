@@ -183,7 +183,7 @@ func serveHTTP() {
 	addr := fmt.Sprintf(":%d", config.ServerPort)
 	err := router.Run(addr)
 	if err != nil {
-		log.Fatalln(err)
+		log.Errorln(err)
 	}
 }
 
