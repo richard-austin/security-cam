@@ -115,17 +115,17 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.camControls.at(index).get(fieldName) as FormControl;
   }
 
-  setOnvifHostDisabledState(index: number): void {
-    let fc: FormControl = this.getCamControl(index, 'onvifHost');
+  setPTZControlsCheckboxDisabledState(index: number): boolean {
+    let fc: FormControl = this.getCamControl(index, 'ptzControls');
 
-    this.getCamControl(index, 'ptzControls').value ?
-      fc.enable({onlySelf: true, emitEvent: false}) :
-      fc.disable({onlySelf: true, emitEvent: false});
+    let cc: FormControl = this.getCamControl(index, 'onvifHost')
+    if(cc.value == '')
+      fc.setValue(false);  // Ensure PTZ is set to "off" if onvifHost has the (valid) value empty
+    return cc.value == '' || !cc.valid;
   }
 
   updateCam(index: number, field: string, value: any) {
     console.log(index, field, value);
-
     Array.from(this.cameras.values()).forEach((cam: Camera, i) => {
       if (i === index) { // @ts-ignore
         cam[field] = value;
@@ -138,8 +138,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     if (control) {
       this.updateCam(index, field, control.value);
     }
-    if (field === 'ptzControls')
-      this.setOnvifHostDisabledState(index);
   }
 
   getStreamControl(camIndex: number, streamIndex: number, fieldName: string): FormControl {
@@ -260,7 +258,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         }, [validateTrueOrFalse({ptzControls: true})]),
         onvifHost: new FormControl({
           value: camera.onvifHost,
-          disabled: !camera.ptzControls,
+          disabled: false,
         }, [Validators.maxLength(22),
           Validators.pattern(/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/)]),
         rtspTransport: new FormControl({
@@ -706,7 +704,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   toggleBackChannelAudio(cam: Camera) {
     cam.backchannelAudioSupported = !cam.backchannelAudioSupported;
-    this.reporting.warningMessage = "Click the commit button to save this configuration change."
   }
 
   ngOnInit(): void {
