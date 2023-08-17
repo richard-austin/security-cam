@@ -178,9 +178,10 @@
       <ng-container matColumnDef="backchannelAudioSupported">
         <th mat-header-cell *matHeaderCellDef>Audio Backchannel.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-icon (click)="toggleBackChannelAudio(cam.value)" [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
-           [matTooltip]="cam.value.backchannelAudioSupported ? 'Two way audio enabled for this device (please ensure the device supports 2 way audio)' : 'Two way audio is not enabled for this device'"
-           matTooltipClass="tooltip">
+          <mat-icon (click)="toggleBackChannelAudio(cam.value)"
+                    [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
+                    [matTooltip]="cam.value.backchannelAudioSupported ? 'Two way audio enabled for this device (please ensure the device supports 2 way audio)' : 'Two way audio is not enabled for this device'"
+                    matTooltipClass="tooltip">
             {{cam.value.backchannelAudioSupported ? "check_circle" : "cancel"}}
           </mat-icon>
         </td>
@@ -206,7 +207,8 @@
                    [formControl]="getCamControl(i, 'onvifHost')"
                    matTooltip="The IP address and port (if not 80) for {{cam.key}} ONVIF operations. This is required if PTZ control is enabled for {{cam.key}}."
                    matTooltipClass="tooltip"
-                   placeholder="ONVIF Host">
+                   placeholder="ONVIF Host"
+                   (change)="updateCamField(i, 'onvifHost')">
             <mat-error *ngIf="getCamControl(i, 'onvifHost').invalid">Enter the ONVIF base address</mat-error>
           </mat-form-field>
         </td>

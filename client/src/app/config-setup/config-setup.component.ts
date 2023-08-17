@@ -116,12 +116,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPTZControlsCheckboxDisabledState(index: number): boolean {
-    let fc: FormControl = this.getCamControl(index, 'ptzControls');
+    let ptzc: FormControl = this.getCamControl(index, 'ptzControls');
 
-    let cc: FormControl = this.getCamControl(index, 'onvifHost')
-    if(cc.value == '')
-      fc.setValue(false);  // Ensure PTZ is set to "off" if onvifHost has the (valid) value empty
-    return cc.value == '' || !cc.valid;
+    let ovhc: FormControl = this.getCamControl(index, 'onvifHost')
+    if(ovhc.value == '')
+      ptzc.setValue(false);  // Ensure PTZ is set to "off" if onvifHost has the (valid) value empty
+    return ovhc.value == '' || !ovhc.valid;
   }
 
   updateCam(index: number, field: string, value: any) {
