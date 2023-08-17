@@ -180,6 +180,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             accessDetails.get().setHasCookie();
                             reply.clear();
                         }
+                        server.close();
                         logService.getCam().trace("\"handleClientRequest: Out of device response loop");
                     } catch (ClosedChannelException ignore) {
                     } catch (IOException e) {
