@@ -284,7 +284,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * deleteCamera: Delete a camera from the cameras map
-   * @param key: The key of the map entry to be deleted
+   * @param key
    */
   deleteCamera(key: string): boolean {
     let retVal: boolean = Array.from(this.cameras.keys()).find(k => k === key) !== undefined;
@@ -449,9 +449,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * setMotionStatus: Enable/disable motion sensing on the stream according to the checkbox state.
-   * @param $event: MatCheckboxChange event
-   * @param stream: The stream
-   * @param cam: The  parent camera
+   * @param $event
+   * @param stream
+   * @param cam
    */
   setMotionStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
     if ($event.checked) {
