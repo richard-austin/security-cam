@@ -69,6 +69,7 @@ cleanLogs: Clean ffmpeg logs older than 3 weeks
 func cleanLogs() {
 	path, _ := filepath.Split(config.LogPath)
 	for range time.Tick(time.Second * 3600) {
+		log.Info("Checking for ffmpeg logs old enough to delete")
 		cmd := exec.Command("bash", "-c", "nice -10 find "+path+"ffmpeg_* -mtime +21 -delete")
 		_, err := cmd.Output()
 		if err != nil {
