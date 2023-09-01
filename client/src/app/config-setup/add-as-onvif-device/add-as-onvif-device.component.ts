@@ -13,7 +13,7 @@ export class AddAsOnvifDeviceComponent implements OnInit {
   @Output() startFindCameraDetails: EventEmitter<string> = new EventEmitter<string>();
 
   constructor() { }
-  onvifUrl: string = 'http://192.168.1.43:8000/onvif/device_service';
+  onvifUrl: string = 'http://192.168.1.1:8080/onvif/device_service';
   addCameraForm!: FormGroup;
 
   startCapabilitiesDiscovery() {

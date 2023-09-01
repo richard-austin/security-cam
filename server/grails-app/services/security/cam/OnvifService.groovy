@@ -44,6 +44,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -96,13 +97,20 @@ class OnvifService {
      * getMediaProfiles: Get the details of Onvif compliant cameras which are online on the LAN.
      * @return: LinkedHashMap<String, Camera> containing discovered cameras with all fields populated which can be.
      */
-    def getMediaProfiles() {
+    def getMediaProfiles(String onvifUrl = null) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            logService.cam.info "Camera discovery..."
-            sc_processesService.stopProcesses()
-            Collection<URL> urls = OnvifDiscovery.discoverOnvifURLs()
             List<OnvifCredentials> creds = []
+            sc_processesService.stopProcesses()
+            Collection<URL> urls = new CopyOnWriteArrayList<>()
+
+            if(onvifUrl == null) {  // Discover cameras on LAN with multicast probe
+                logService.cam.info "Camera discovery..."
+                urls = OnvifDiscovery.discoverOnvifURLs()
+            }
+            else  // Get the details for the camera with the given Onvif URL
+                urls.add(new URL(onvifUrl))
+
             for (URL u : urls) {
                 logService.cam.info(u.toString())
                 OnvifCredentials c = new OnvifCredentials(u.host.toString() + ':' + u.port.toString(), 'admin', 'R@nc1dTapsB0ttom', 'MediaProfile000')
