@@ -223,3 +223,25 @@ mat-icon.no-backchannel {
   color: #858585;
   cursor: pointer;
 }
+
+div.add-onvif-url-dialogue {
+  display: inline;
+  position: relative;
+  > div {
+    width: 27rem;
+    > div {
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+
+      border-bottom: 10px solid #646363;
+      z-index: 3;
+    }
+    z-index: 2;
+    left: -2rem;
+    overflow: hidden;
+    position: absolute;
+  }
+}
+

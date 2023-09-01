@@ -104,7 +104,7 @@
                 enabled state is updated.-->
             <mat-select [formControl]="getCamControl(i, 'cameraParamSpecs')"
                         (selectionChange)="updateCamField(i, 'cameraParamSpecs'); setUpTableFormControls()"
-                        matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'None' to disable this feature, or if the camera type is not listed."
+                        matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'Not Listed' to disable this feature, or if the camera type is not listed."
                         matTooltipClass="tooltip">
               <mat-option *ngFor="let spec of cameraSvc.cameraParamSpecs" [value]="spec">
                 {{spec.name}}
@@ -448,10 +448,29 @@
             [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10"
             mat-icon-button
             (click)="addCamera()"
-            matTooltip="Add another camera."
+            matTooltip="Add another camera, and enter the details manually."
             matTooltipClass="tooltip">
             <mat-icon>add</mat-icon>
           </button>
+          <button
+            [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10"
+            mat-icon-button
+            (click)="toggleAddCameraOnvifUriDialogue()"
+            matTooltip="Add another camera getting details through Onvif."
+            matTooltipClass="tooltip">
+            <mat-icon>add_circle</mat-icon>
+          </button>
+          <div class="add-onvif-url-dialogue">
+            <div class="mat-elevation-z15" [@detailExpand]="showAddCameraDialogue ? 'expanded' : 'collapsed'">
+              <div>
+              </div>
+              <app-add-as-onvif-device
+                (hideDialogue)="toggleAddCameraOnvifUriDialogue()"
+                [reporting]="errorReporting"
+                (startFindCameraDetails)="startFindCameraDetails($event)">
+              </app-add-as-onvif-device>
+            </div>
+          </div>
           <button [disabled]="anyInvalid() || confirmSave" mat-icon-button (click)="confirmNew=true"
                   matTooltip="Start a new configuration"
                   matTooltipClass="tooltip"

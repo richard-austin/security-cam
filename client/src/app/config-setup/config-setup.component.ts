@@ -106,6 +106,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   snapshot: SafeResourceUrl | String = '';
   snapShotKey: string = '';
   showPasswordDialogue: boolean = false;
+  showAddCameraDialogue: boolean = false;
   isGuest: boolean = true;
 
   constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
@@ -693,6 +694,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
   togglePasswordDialogue() {
     this.showPasswordDialogue = !this.showPasswordDialogue;
+    this.showAddCameraDialogue = false;
+  }
+  toggleAddCameraOnvifUriDialogue() {
+    this.showAddCameraDialogue =!this.showAddCameraDialogue;
+    this.showPasswordDialogue = false;
+  }
+  startFindCameraDetails(onvifUrl: string) {
+    let ovu = onvifUrl;
   }
 
   /**
