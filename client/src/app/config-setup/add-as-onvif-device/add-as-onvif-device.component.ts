@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {CameraAdminCredentials} from "../../credentials-for-camera-access/credentials-for-camera-access.component";
 import {ReportingComponent} from "../../reporting/reporting.component";
 
 @Component({
