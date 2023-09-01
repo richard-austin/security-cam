@@ -139,7 +139,8 @@ class OnvifService {
                     try {
                         logService.cam.info "Creating onvif device for ${credentials.getHost()} ..."
                         device = getDevice(credentials.getHost())
-
+                        if(device == null)
+                            throw new Exception("No camera found at ${credentials.host}")
                         Media media = device.getMedia()
                         List<Profile> profiles = media.getProfiles()
 
