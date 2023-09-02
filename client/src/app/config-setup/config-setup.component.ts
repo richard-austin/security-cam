@@ -108,6 +108,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   showPasswordDialogue: boolean = false;
   showAddCameraDialogue: boolean = false;
   isGuest: boolean = true;
+  gettingCameraDetails: boolean = false;
 
   constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
   }
@@ -701,7 +702,16 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showPasswordDialogue = false;
   }
   startFindCameraDetails(onvifUrl: string) {
-    let ovu = onvifUrl;
+    this.gettingCameraDetails = true;
+    this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe((cam: Camera) => {
+        this.cameras.set('camera' + (this.cameras.size + 1), cam);
+        this.FixUpCamerasData();
+        this.gettingCameraDetails = false;
+    },
+      reason => {
+        this.reporting.errorMessage = reason;
+        this.gettingCameraDetails = false;
+    });
   }
 
   /**

@@ -18,6 +18,7 @@ export class AddAsOnvifDeviceComponent implements OnInit {
 
   startCapabilitiesDiscovery() {
     this.startFindCameraDetails.emit(this.onvifUrl);
+    this.hideAddCameraDialogue();
   }
 
   hideAddCameraDialogue() {

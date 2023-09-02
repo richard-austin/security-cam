@@ -443,48 +443,50 @@
 
       <!-- Cameras table Footer with the control buttons -->
       <ng-container matColumnDef="buttons">
+
         <td mat-footer-cell [attr.colspan]="cameraColumns.length" *matFooterCellDef>
-          <button
-            [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10"
-            mat-icon-button
-            (click)="addCamera()"
-            matTooltip="Add another camera, and enter the details manually."
-            matTooltipClass="tooltip">
-            <mat-icon>add</mat-icon>
-          </button>
-          <button
-            [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10"
-            mat-icon-button
-            (click)="toggleAddCameraOnvifUriDialogue()"
-            matTooltip="Add another camera getting details through Onvif."
-            matTooltipClass="tooltip">
-            <mat-icon>add_circle</mat-icon>
-          </button>
-          <div class="add-onvif-url-dialogue">
-            <div class="mat-elevation-z15" [@detailExpand]="showAddCameraDialogue ? 'expanded' : 'collapsed'">
-              <div>
+          <ng-container *ngIf="!gettingCameraDetails">
+            <button
+              [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10"
+              mat-icon-button
+              (click)="addCamera()"
+              matTooltip="Add another camera, and enter the details manually."
+              matTooltipClass="tooltip">
+              <mat-icon>add</mat-icon>
+            </button>
+            <button
+              [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10"
+              mat-icon-button
+              (click)="toggleAddCameraOnvifUriDialogue()"
+              matTooltip="Add another camera getting details through Onvif."
+              matTooltipClass="tooltip">
+              <mat-icon>add_circle</mat-icon>
+            </button>
+            <div class="add-onvif-url-dialogue">
+              <div class="mat-elevation-z15" [@detailExpand]="showAddCameraDialogue ? 'expanded' : 'collapsed'">
+                <div>
+                </div>
+                <app-add-as-onvif-device
+                  (hideDialogue)="toggleAddCameraOnvifUriDialogue()"
+                  [reporting]="errorReporting"
+                  (startFindCameraDetails)="startFindCameraDetails($event)">
+                </app-add-as-onvif-device>
               </div>
-              <app-add-as-onvif-device
-                (hideDialogue)="toggleAddCameraOnvifUriDialogue()"
-                [reporting]="errorReporting"
-                (startFindCameraDetails)="startFindCameraDetails($event)">
-              </app-add-as-onvif-device>
             </div>
-          </div>
-          <button [disabled]="anyInvalid() || confirmSave" mat-icon-button (click)="confirmNew=true"
-                  matTooltip="Start a new configuration"
-                  matTooltipClass="tooltip"
-                  *ngIf="!confirmNew && !confirmNewLookup">
-            <mat-icon>note</mat-icon>
-          </button>
-          <button [disabled]="confirmSave || confirmNewLookup" mat-icon-button (click)="confirmNewLookup=true"
-                  matTooltip="Perform onvif LAN search for cameras"
-                  matTooltipClass="tooltip"
-                  *ngIf="!confirmNewLookup && !confirmNewLookup">
-            <mat-icon>explore</mat-icon>
-          </button>
-          <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
-                matTooltipClass="tooltip">
+            <button [disabled]="anyInvalid() || confirmSave" mat-icon-button (click)="confirmNew=true"
+                    matTooltip="Start a new configuration"
+                    matTooltipClass="tooltip"
+                    *ngIf="!confirmNew && !confirmNewLookup">
+              <mat-icon>note</mat-icon>
+            </button>
+            <button [disabled]="confirmSave || confirmNewLookup" mat-icon-button (click)="confirmNewLookup=true"
+                    matTooltip="Perform onvif LAN search for cameras"
+                    matTooltipClass="tooltip"
+                    *ngIf="!confirmNewLookup && !confirmNewLookup">
+              <mat-icon>explore</mat-icon>
+            </button>
+            <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
+                  matTooltipClass="tooltip">
             <button [disabled]="anyInvalid() || confirmNew || confirmNewLookup || isGuest" mat-icon-button
                     (click)="confirmSave=true"
                     *ngIf="!confirmSave && !confirmNewLookup">
@@ -492,7 +494,7 @@
             </button>
           </span>
 
-          <span class="confirm-group" *ngIf="confirmNew">
+            <span class="confirm-group" *ngIf="confirmNew">
             <span>Start a new configuration, are you sure?</span>
             <button color="default" mat-flat-button (click)="confirmNew=false">
               Cancel
@@ -501,7 +503,7 @@
               New
             </button>
           </span>
-          <span class="confirm-group" *ngIf="confirmNewLookup">
+            <span class="confirm-group" *ngIf="confirmNewLookup">
             <span>Start Onvif camera search, are you sure?</span>
             <button color="default" mat-flat-button (click)="confirmNewLookup=false">
               Cancel
@@ -510,7 +512,7 @@
               Search
             </button>
           </span>
-          <span class="confirm-group" *ngIf="confirmSave">
+            <span class="confirm-group" *ngIf="confirmSave">
             <span>Save this as the working configuration, are you sure?</span>
             <button color="default" mat-flat-button (click)="confirmSave=false">
               Cancel
@@ -519,6 +521,11 @@
               Save
             </button>
           </span>
+          </ng-container>
+          <mat-card-content class="wait-box mat-form-field-flex" *ngIf="gettingCameraDetails">
+            <mat-spinner [diameter]="25"></mat-spinner>
+            <span>Getting camera details, Please wait..</span>
+          </mat-card-content>
         </td>
       </ng-container>
 
