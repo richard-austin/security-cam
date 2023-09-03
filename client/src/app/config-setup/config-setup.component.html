@@ -469,7 +469,9 @@
                 <app-add-as-onvif-device
                   (hideDialogue)="toggleAddCameraOnvifUriDialogue()"
                   [reporting]="errorReporting"
-                  (startFindCameraDetails)="startFindCameraDetails($event)">
+                  (startFindCameraDetails)="startFindCameraDetails($event)"
+                  [cameras]="cameras"
+                >
                 </app-add-as-onvif-device>
               </div>
             </div>

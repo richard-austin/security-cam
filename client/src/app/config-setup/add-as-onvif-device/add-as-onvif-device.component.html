@@ -3,7 +3,7 @@
   <mat-card-subtitle>As Onvif Device</mat-card-subtitle>
   <mat-card-content>
     <div>
-      <mat-form-field appearance="legacy" [style.width.px]="450">
+      <mat-form-field appearance="legacy" [style.width.px]="400">
         <input matInput type="text" autocomplete="off" maxlength="60"
                [formControl]="getFormControl('onvifUrl')"
                matTooltip="Enter the URL for the Onvif device."
@@ -13,6 +13,8 @@
         <mat-hint>Onvif device URL</mat-hint>
         <mat-error *ngIf="addCameraForm.controls['onvifUrl'].hasError('pattern')">Must be a valid url starting with http://</mat-error>
         <mat-error *ngIf="addCameraForm.controls['onvifUrl'].hasError('required')">Onvif URL is required</mat-error>
+        <mat-error *ngIf="addCameraForm.controls['onvifUrl'].hasError('onvifUrl')">Onvif URL is already used</mat-error>
+        <mat-error *ngIf="addCameraForm.controls['onvifUrl'].hasError('badHost')">Invalid host:port</mat-error>
       </mat-form-field>
     </div>
     <br>
