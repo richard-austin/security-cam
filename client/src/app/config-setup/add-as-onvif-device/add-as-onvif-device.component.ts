@@ -13,7 +13,7 @@ export function isValidDeviceIP(cameras: Map<string, Camera>): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     let cams = cameras;
     let retVal: boolean = false;
-    let badHost: boolean = true;
+    let badHost: boolean;
     try {
       let url: URL = new URL(control.value);
       badHost = !/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]):[0-9]+$/.test(url.host);
@@ -54,7 +54,7 @@ export class AddAsOnvifDeviceComponent implements OnInit {
     this.hideDialogue.emit();
   }
 
-  getFormControl(fcName: string) {
+  getFormControl(fcName: string): any {
     return this.addCameraForm.get(fcName) as FormControl;
   }
   updateField() {
