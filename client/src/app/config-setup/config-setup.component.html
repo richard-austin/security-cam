@@ -41,6 +41,29 @@
     <table mat-table
            [dataSource]="cameras | mapToKeyValue" multiTemplateDataRows
            class="mat-elevation-z8">
+      <ng-container matColumnDef="sorting">
+        <th mat-header-cell *matHeaderCellDef>Sorting</th>
+        <td mat-cell
+            class="sort-buttons"
+            *matCellDef="let cam">
+          <span>
+            <button [disabled]="lastElement(cam) || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
+                    mat-icon-button (click)="moveDown(cam)"
+                    [matTooltip]="lastElement(cam) ? '' : 'Click to move '+cam.value.name+' down 1 step'"
+                    matTooltipClass="tooltip"
+                    class="sort-button-icon">
+              <mat-icon class="sort-button-icon">arrow_downward</mat-icon>
+            </button>
+            <button [disabled]="cam.key=='camera1' || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
+                    mat-icon-button (click)="moveUp(cam)"
+                    [matTooltip]="cam.key=='camera1' ? '' : 'Click to move '+cam.value.name+' up 1 step'"
+                    matTooltipClass="tooltip"
+                    class="sort-button-icon">
+              <mat-icon class="sort-button-icon">arrow_upward</mat-icon>
+            </button>
+          </span>
+        </td>
+      </ng-container>
 
       <ng-container matColumnDef="camera_id">
         <th mat-header-cell *matHeaderCellDef>Camera ID</th>
