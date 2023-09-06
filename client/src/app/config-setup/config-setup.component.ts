@@ -20,6 +20,8 @@ import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {KeyValue} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
 
+declare let objectHash: (obj: Object) => string;
+
 export function isValidMaskFileName(cameras: Map<string, Camera>): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
 
@@ -109,6 +111,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   showAddCameraDialogue: boolean = false;
   isGuest: boolean = true;
   gettingCameraDetails: boolean = false;
+  savedDataHash: string = "";
 
   constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
   }
@@ -573,6 +576,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     return retVal;
   }
 
+  dataHasChanged() : boolean {
+    return objectHash(this.cameras) !== this.savedDataHash;
+  }
   commitConfig() {
     this.updating = true;
     this.reporting.dismiss();
@@ -603,6 +609,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reporting.successMessage = "Update Cameras Successful!";
         this.cameraSvc.configUpdated();  // Tell nav component to reload the camera data
         this.updating = false;
+        // Update the saved data hash
+        this.savedDataHash = objectHash(this.cameras);
       },
       reason => {
         this.reporting.errorMessage = reason
@@ -770,6 +778,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cameraSvc.loadCameras().subscribe(cameras => {
         this.cameras = cameras;
         this.FixUpCamerasData()
+        this.savedDataHash = objectHash(this.cameras);
         this.downloading = false;
       },
       () => {

@@ -512,7 +512,7 @@
             </button>
             <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
                   matTooltipClass="tooltip">
-            <button [disabled]="anyInvalid() || confirmNew || confirmNewLookup || isGuest" mat-icon-button
+            <button [disabled]="!dataHasChanged() || anyInvalid() || confirmNew || confirmNewLookup || isGuest" mat-icon-button
                     (click)="confirmSave=true"
                     *ngIf="!confirmSave && !confirmNewLookup">
               <mat-icon>save</mat-icon>

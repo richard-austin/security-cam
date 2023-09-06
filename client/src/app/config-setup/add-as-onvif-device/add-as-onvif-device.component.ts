@@ -7,11 +7,11 @@ import {Camera} from "../../cameras/Camera";
  * isValidDeviceIP: Custom validator to check that the onvif URL presented for getting camera details does not have
  *                  the same ip:port as any already in the camera list.
  *                  Also checks that the ip:port is valid IP4.
- * @param cameras
+ * @param componentObject The AddAsOnvifDeviceComponent component object
  */
-export function isValidDeviceIP(cameras: Map<string, Camera>): ValidatorFn {
+export function isValidDeviceIP(componentObject: AddAsOnvifDeviceComponent): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    let cams = cameras;
+    let cams = componentObject.cameras;
     let retVal: boolean = false;
     let badHost: boolean;
     try {
@@ -69,7 +69,7 @@ export class AddAsOnvifDeviceComponent implements OnInit {
 
   ngOnInit(): void {
     this.addCameraForm = new FormGroup({
-      onvifUrl: new FormControl(this.onvifUrl, [Validators.required, Validators.maxLength(60), Validators.pattern("^(http:\\/\\/)[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"), isValidDeviceIP(this.cameras)]),
+      onvifUrl: new FormControl(this.onvifUrl, [Validators.required, Validators.maxLength(60), Validators.pattern("^(http:\\/\\/)[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"), isValidDeviceIP(this)]),
     }, {updateOn: "change"});
 
     // Ensure camera form controls highlight immediately if invalid
