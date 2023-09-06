@@ -20,6 +20,8 @@ import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {KeyValue} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
 
+declare let objectHash: (obj: Object) => string;
+
 export function isValidMaskFileName(cameras: Map<string, Camera>): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
 
@@ -89,7 +91,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['sorting', 'camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -106,7 +108,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   snapshot: SafeResourceUrl | String = '';
   snapShotKey: string = '';
   showPasswordDialogue: boolean = false;
+  showAddCameraDialogue: boolean = false;
   isGuest: boolean = true;
+  gettingCameraDetails: boolean = false;
+  savedDataHash: string = "";
 
   constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
   }
@@ -446,6 +451,46 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   toggle(el: { key: string, value: Camera }) {
     this.expandedElement = this.expandedElement === el.value ? null : el.value;
   }
+  lastElement(cam: KeyValue<string, Camera>) {
+    let key =  Array.from(this.cameras.keys()).pop();
+    return cam.key == key;
+  }
+  moveUp(cam: KeyValue<string, Camera>) {
+    let prevKey: string = "";
+    let gotPrevKey = false;
+    this.cameras.forEach((v, k) => {
+        if(k == cam.key)
+          gotPrevKey = true;
+
+        if(!gotPrevKey)
+          prevKey = k;
+    });
+    let temp = this.cameras.get(prevKey);
+    if(temp != undefined) {
+      this.cameras.set(prevKey, cam.value);
+      this.cameras.set(cam.key, temp);
+    }
+    this.FixUpCamerasData();
+  }
+
+  moveDown(cam: KeyValue<string, Camera>) {
+    let nextKey: string = "";
+    let getNextKey = false;
+    this.cameras.forEach((v, k) => {
+      if(getNextKey) {
+        nextKey = k;
+        getNextKey = false;
+      }
+      if(k == cam.key)
+        getNextKey = true;
+    });
+    let temp = this.cameras.get(nextKey);
+    if(temp != undefined) {
+      this.cameras.set(nextKey, cam.value);
+      this.cameras.set(cam.key, temp);
+    }
+    this.FixUpCamerasData();
+  }
 
   /**
    * setMotionStatus: Enable/disable motion sensing on the stream according to the checkbox state.
@@ -531,6 +576,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     return retVal;
   }
 
+  dataHasChanged() : boolean {
+    return objectHash(this.cameras) !== this.savedDataHash;
+  }
   commitConfig() {
     this.updating = true;
     this.reporting.dismiss();
@@ -561,6 +609,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reporting.successMessage = "Update Cameras Successful!";
         this.cameraSvc.configUpdated();  // Tell nav component to reload the camera data
         this.updating = false;
+        // Update the saved data hash
+        this.savedDataHash = objectHash(this.cameras);
       },
       reason => {
         this.reporting.errorMessage = reason
@@ -693,6 +743,23 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
   togglePasswordDialogue() {
     this.showPasswordDialogue = !this.showPasswordDialogue;
+    this.showAddCameraDialogue = false;
+  }
+  toggleAddCameraOnvifUriDialogue() {
+    this.showAddCameraDialogue =!this.showAddCameraDialogue;
+    this.showPasswordDialogue = false;
+  }
+  startFindCameraDetails(onvifUrl: string) {
+    this.gettingCameraDetails = true;
+    this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe((cam: Camera) => {
+        this.cameras.set('camera' + (this.cameras.size + 1), cam);
+        this.FixUpCamerasData();
+        this.gettingCameraDetails = false;
+    },
+      reason => {
+        this.reporting.errorMessage = reason;
+        this.gettingCameraDetails = false;
+    });
   }
 
   /**
@@ -711,6 +778,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cameraSvc.loadCameras().subscribe(cameras => {
         this.cameras = cameras;
         this.FixUpCamerasData()
+        this.savedDataHash = objectHash(this.cameras);
         this.downloading = false;
       },
       () => {

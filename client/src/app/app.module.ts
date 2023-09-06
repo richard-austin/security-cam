@@ -59,6 +59,7 @@ import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
 import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
 import { AudioInputPipe } from './video/audio-input.pipe';
+import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/add-as-onvif-device.component';
 
 @NgModule({
   declarations: [
@@ -93,7 +94,8 @@ import { AudioInputPipe } from './video/audio-input.pipe';
     GetLocalWifiDetailsComponent,
     WifiSettingsComponent,
     CreateUserAccountContainerComponent,
-    AudioInputPipe
+    AudioInputPipe,
+    AddAsOnvifDeviceComponent
   ],
   imports: [
     BrowserModule,

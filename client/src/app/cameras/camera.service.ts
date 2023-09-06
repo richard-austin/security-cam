@@ -251,6 +251,18 @@ export class CameraService {
     );
   }
 
+  discoverCameraDetails(onvifUrl: string): Observable<Camera> {
+    const formData: FormData = new FormData();
+    formData.append('onvifUrl', onvifUrl)
+    return this.http.post<any>(this._baseUrl.getLink("onvif", "discoverCameraDetails"), formData, this.httpUploadOptions).pipe(
+      map(cams => {
+        let map: Map<string, Camera>  = CameraService.convertCamsObjectToMap(cams);
+        if(map.size == 1)
+          return map.entries().next().value[1];
+      })
+    );
+  }
+
   uploadMaskFile(uploadFile: any): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('maskFile', uploadFile);

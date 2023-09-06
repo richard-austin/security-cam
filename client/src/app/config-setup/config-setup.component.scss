@@ -73,7 +73,7 @@ td, th {
   width: 12%;
 }
 
-.mat-column-cameraParamSpecs{
+.mat-column-cameraParamSpecs {
   width: 14%;
 }
 
@@ -148,21 +148,24 @@ td, th {
 
   > button:nth-of-type(2) {
     position: absolute;
+
     mat-icon {
       font-size: medium;
     }
+
     right: -0.9rem;
     top: -0.85rem;
+
     &:enabled {
       color: red;
     }
   }
 }
 
-.snapshot
-{
+.snapshot {
   > div {
     position: relative;
+
     > div {
       position: absolute;
       z-index: 2;
@@ -170,12 +173,14 @@ td, th {
       top: -2rem;
       border: 2px solid #2a2929;
       border-radius: 2px;
-       > img {
+
+      > img {
         height: 352px;
         width: 640px;
       }
     }
-     > mat-spinner {
+
+    > mat-spinner {
       position: absolute;
       z-index: 2;
       left: 5rem;
@@ -183,8 +188,7 @@ td, th {
   }
 }
 
-button.change-password-button
-{
+button.change-password-button {
   position: relative;
   top: -0.4rem;
 }
@@ -192,8 +196,10 @@ button.change-password-button
 div.password-dialogue {
   display: inline;
   position: relative;
+
   > div {
     width: 17rem;
+
     > div {
       width: 0;
       height: 0;
@@ -203,6 +209,7 @@ div.password-dialogue {
       border-bottom: 10px solid #646363;
       z-index: 3;
     }
+
     z-index: 2;
     left: -2rem;
     overflow: hidden;
@@ -222,4 +229,51 @@ mat-icon.backchannel {
 mat-icon.no-backchannel {
   color: #858585;
   cursor: pointer;
+}
+
+div.add-onvif-url-dialogue {
+  display: inline;
+  position: relative;
+
+  > div {
+    width: 27rem;
+
+    > div {
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+
+      border-bottom: 10px solid #646363;
+      z-index: 3;
+    }
+
+    z-index: 2;
+    left: -2rem;
+    overflow: hidden;
+    position: absolute;
+  }
+}
+
+td.sort-buttons {
+  > span {
+    display: inline-flex;
+
+    > button:nth-of-type(1) {
+      margin-left: -0.5rem;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+    }
+
+    > button:nth-of-type(2) {
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+    }
+  }
+}
+
+mat-icon.sort-button-icon {
+  font-size: 18px;
 }
