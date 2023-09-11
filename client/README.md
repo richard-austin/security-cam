@@ -21,31 +21,27 @@ https://github.com/richard-austin/cloud-server.
 * Get Local Wi-Fi details.
 * Set/unset NVR Wi-Fi access.
 * Enable/Disable access through Cloud server.
-* 
-# Client
+* All parts of project and dependencies deployed using deb file.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.1.2.
-
-## Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
+# Web Front End
+The Web Front End (client) is an Angular application using [Angular CLI](https://github.com/angular/angular-cli) version 12.0.5 or later.
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+# Web Back End
+The Web Back End (server) is a Grails application which provides
+a Restful API for the Angular Web Front End. 
+It provides the calls to get and set application data as
+well as configuring the Camera setup.
+
+# Media Server
+This provides a fragmented MP4 stream for each camera which forms the source for 
+the Media Source Extensions video implementation used on the Web Front End.
+ffmpeg connects to a camera RTSP output and converts that to fmp4 which can optionally include the audio stream.
+
+The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi.
+# Wi-Fi Setup Service
+This runs as a Linux service with root access. It is aa web application written in Python,
+used to list Wi-Fi access points, list the NVR's LAN IP addresses and set up the NVR Wi-Fi and credentials.
+It also can stop and start the media server, recording service and the motion service
+during configuration updates.
+
