@@ -1,11 +1,22 @@
 <h2 style="text-align: center">NVR for CCTV Access Via Web Browser</h2>
 
 ### Introduction
-This is a Network Video Recorder accessed through ta web browser. designed to run on a Raspberry pi.
+This is a Network Video Recorder accessed through a web browser. designed to run on a Raspberry pi.
 Access can be either direct or through a Cloud service. There is no live implementation
 of the Cloud Service, but the source code is freely available at
 https://github.com/richard-austin/cloud-server.
+It requires network cameras providing RTSP streams with the video encoded as H264 or H265. No
+encoding of video streams is done as, running on a Raspberry pi, this
+would be too CPU intensive. Audio streams in any format other than AAC are encoded to AAC.
+### Security
+The NVR is designed to run on a LAN which is protected from unauthorised
+external access. From within the LAN, access to administrative functions is possible.
+Secure authenticated access is obtained through ports 443 and 446 via nginx.
+These ports, plus port 80,  are set up for port forwarding on the router when direct access is used.
 
+When the NVR is accessed through the Cloud service, port forwarding is not required
+as all communication is through a client connection that the NVR makes to the
+Cloud service.
 #### NVR features
 * Secure authenticated web access.
 * Live, low latency (approx 1 second) video from network cameras with RTSP source.
@@ -15,6 +26,7 @@ https://github.com/richard-austin/cloud-server.
 * Recordings triggered by FTP of an image from camera (can be used with cameras which can ftp an image on detecting motion).  
 * Quick setup of certain camera parameters for SV3C type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
+This feature requires access through port 446 as well as the usual https port 443.
 * Configuration editor supporting Onvif camera discovery.
 * email notification if public IP address changes (when using port forwarding).
 * Initial set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
@@ -66,6 +78,15 @@ trigger a recording on another (usually the higher resolution) stream so that re
 in both resolutions are made. 
 
 This is configurable from the cameras configuration page.
+### nginx
+nginx is a reverse proxy which all client access to the NVR passes through.
+#### <span style="color: gray">nginx functions on the NVR</span>
+* TLS encryption of traffic.
+* Makes the webserver, live and recorded streams available through a single port (443).
+* Makes the unauthenticated live and recorded stream dependent on the web application authentication so that they 
+cannot be accessed without the user having logged in.
+* Port translation to 443.
+* HTTP redirect from port 80.
 
 ## Development
 
@@ -83,50 +104,67 @@ This is configurable from the cameras configuration page.
 * Gradle 7.4.2
 * Python 3.11.4
 ### Build for deployment to Raspberry pi
-```
-git clone git@github.com:richard-austin/security-cam.git
-cd security-cam
-gradle init
-./gradlew buildDebFile
-```
+* git clone git@github.com:richard-austin/security-cam.git
+* cd security-cam
+* gradle init
+* ./gradlew buildDebFile
+
 When the build completes navigate to where the .deb file was created:-
-```
-cd xtrn-scripts-and-config/deb-file-creation
 
-scp the .deb file to the Raspberry pi
-```
+* cd xtrn-scripts-and-config/deb-file-creation
+
+
 ## Installation
-```
-On the Raspberry pi, navigate to where the .deb file is located
-sudo apt update
-sudo apt upgrade
-sudo apt install ./security-cam_6.0.0_arm64.deb 
+
+* On the Raspberry pi, navigate to where the .deb file is located
+* sudo apt update
+* sudo apt upgrade
+* sudo apt install ./security-cam_6.0.0_arm64.deb 
 (use the actual name of the .deb file)
-
-Wait for installation to complete.
-
-Make a note of the product key (a few lines up). 
+* Wait for installation to complete.
+* The Tomcat web server will take 1 - 2 minutes to start
+  the application.
+* <i>If this is the first installation on the Raspberry pi..</i>
+  * Make a note of the product key (a few lines up). 
 This will be required if you use the Cloud Service to connect
 to the NVR.
+  * <i>Generate the site certificate..</i>
+    * cd /etc/security-cam
+    * sudo ./install-cert.sh
+    * Fill in the details it requests (don't put in any information you are not happy with being publicly visible, for 
+example you may want to put in a fake email address etc.)
 
-The Tomcat web server will take 1 - 2 munutes to start 
-the application.
-```
 ## Setup for Direct Access (Browser to NVR)
 #### Set up user account
-```
-From a separate device on the LAN, open a browser and go to
-
+To log into the NVR when accessing it directly, 
+a user account must be set up as follows:-
+* From a separate device on the LAN, open a browser and go to
 http://ip.of.ras.pi:8080/cua
+* Click on the hamburger icon at the top left of the page.
+* Select "Create or Update User Account" from the menu.
+* Enter the required user name.
+* Enter the password, then again in Confirm Password
+* Enter the email address you will use for forgotten password etc.
+* Enter email again in Confirm email address.
+* Click Update Account to confirm
 
-Click on the hamburger icon at the top left of the page.
-Select Create or Update User Account
-Enter the required user name.
-Enter the password, then again in Confirm Password
-Enter the email address you will use for forgotten password etc.
-Enter email again in Confirm email address.
-Click Update Account to confirm
-```
 ## Setup SMTP email Client
-
+The email address set up in the previous section is where warning emails 
+are sent if the public IP address changes (when NVR is used on an
+internet connection with dynamic IP), or for reset password links to
+be sent when password is forgotten. To do this,
+the NVR email client must be logged into an SMTP client
+* Click on the hamburger icon at the top left of the page.
+* Select Set Up "SMTP Client" from the menu.
+* If the SMTP connection is to be authenticated (normally the case)...
+  * Check the Authenticated checkbox.
+  * Enter the SMTP password.
+  * Enter the SMTP password again to confirm.
+* If TLS encryption is to be used (normally the case)...
+  * Check the TLS Encrypted checkbox.
+  * Enter the host name for the SMTP client to trust 
+(normally the SMTP host name).
+* Enter the SMTP host name
+* Enter the SMTP port
+* Enter the "from" (sender) address these email will appear to come from
 
