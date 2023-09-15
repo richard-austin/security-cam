@@ -8,6 +8,10 @@ https://github.com/richard-austin/cloud-server.
 It requires network cameras providing RTSP streams with the video encoded as H264 or H265. No
 encoding of video streams is done as, running on a Raspberry pi, this
 would be too CPU intensive. Audio streams in any format other than AAC are encoded to AAC.
+
+### Run Time Platform for NVR
+Raspberry pi running headless (server) version of Ubuntu 23.04 (Lunar Lobster).
+
 ### Security
 The NVR is designed to run on a LAN which is protected from unauthorised
 external access. From within the LAN, access to administrative functions is possible.
@@ -90,7 +94,7 @@ cannot be accessed without the user having logged in.
 
 ## Development
 
-#### Platform 
+#### Platform for Development
 * Ubuntu 23.04 (Lunar Lobster) on PC
 
 #### The following are what I use to build this project:-
@@ -112,15 +116,15 @@ cannot be accessed without the user having logged in.
 When the build completes navigate to where the .deb file was created:-
 
 * cd xtrn-scripts-and-config/deb-file-creation
+* scp the .deb file to the Raspberry pi
 
-
-## Installation
-
-* On the Raspberry pi, navigate to where the .deb file is located
+## Installation 
+#### On the Raspberry pi
 * sudo apt update
-* sudo apt upgrade
-* sudo apt install ./security-cam_6.0.0_arm64.deb 
-(use the actual name of the .deb file)
+* sudo apt upgrade (restart if advised to after upgrade)
+* Navigate to where the .deb file is located
+* sudo apt install ./<i>deb_file_name</i>.deb 
+
 * Wait for installation to complete.
 * The Tomcat web server will take 1 - 2 minutes to start
   the application.
@@ -137,9 +141,13 @@ example you may want to put in a fake email address etc.)
 ## Setup for Direct Access (Browser to NVR)
 #### Set up user account
 To log into the NVR when accessing it directly, 
-a user account must be set up as follows:-
+a user account must be set up. This is done using the Create User Account
+application (cua) which is accessible from the LAN without being 
+logged in. Be sure port 8080 on the Raspberry pi is not 
+accessible from outside the secure LAN. cua is also available when logged
+into the NVT from "Admin Functions" on the General menu.
 * From a separate device on the LAN, open a browser and go to
-http://ip.of.ras.pi:8080/cua
+<a>http://<i>raspberry_pi_ip_addr</i>:8080/cua</a>
 * Click on the hamburger icon at the top left of the page.
 * Select "Create or Update User Account" from the menu.
 * Enter the required user name.
@@ -147,7 +155,6 @@ http://ip.of.ras.pi:8080/cua
 * Enter the email address you will use for forgotten password etc.
 * Enter email again in Confirm email address.
 * Click Update Account to confirm
-
 ## Setup SMTP email Client
 The email address set up in the previous section is where warning emails 
 are sent if the public IP address changes (when NVR is used on an
@@ -167,4 +174,47 @@ the NVR email client must be logged into an SMTP client
 * Enter the SMTP host name
 * Enter the SMTP port
 * Enter the "from" (sender) address these email will appear to come from
+* Click confirm.
 
+## Login to the NVR
+* Set a browser to <a>https://<i>ip_addrs_of_raspberry_pi</i></a>
+* Ignore the warning which may be given as a result of the homer generated
+site certificate and continue to the log in dialogue box.
+* Enter the username and password set up under "Set up user account". 
+You can check "Remember me" to skip having to log in in future.
+
+## Set Up Cameras
+Your network cameras must be set up in the configuration.
+
+#### Cameras
+| Parameter/Control  | Function                                                                                                                                                                  | Set by Onvif Discovery |
+|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| Sorting            | Up and down arrows move camera position in the list, and correspondingly on the menus.                                                                                    | N/A                    |
+| Camera ID          | Map key of the camera. Clicking on this displays a snapshot from that camera.                                                                                             | N/A                    |
+| Delete             | Delete this camera and its streams from the configuration.                                                                                                                | N/A                    |
+| Expand             | Show/hide the cameras streams.                                                                                                                                            | N/A                    |
+| Name               | The name of the camera as it will appear on the menus.                                                                                                                    | No                     |
+| Camera Type        | Select SV3C, ZTech MCW5B10X or Not Listed. The named options enable some admin functions under Camera Settings -> Quick camera Setup                                      | No                     |
+| FTP From camera    | If checked, the camera ftp-ing an image to ./<i>camera_map_key</i> will trigger a recording. This is not available if Motion Sensing is set on any of the camera streams. | No                     |
+| Address            | Camera IP address                                                                                                                                                         | Yes                    |
+| Snapshot URI       | The URL which returns a snapshot image from the camera.                                                                                                                   | Yes                    |
+| RTSP Transport     | Determine whether to use TCP or UDP for the RTSP video/audio stream.                                                                                                      | No                     |
+| Audio Backchannel  | Enable use of the cameras Audio backchannel for two way audio (if camera supports Onvif Profile T backchannel).                                                           | Yes                    |
+| PTZ Controls       | Enable PTZ cameras on the live stream view. This requires that the camera supports Onvif PTZ control.                                                                     | No                     |
+| Onvif Base Address | IP address and port of the cameras Onvif SOAP web service.                                                                                                                | Yes                    |
+
+#### Streams
+| Parameter/Control        | Function                                                                                                                                                                                                           | Set by Onvif Discovery |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| Stream ID                | Map key of the stream                                                                                                                                                                                              | N/A                    |
+| Delete                   | Delete this stream from the camera.                                                                                                                                                                                | N/A                    |
+| Descr.                   | Description of the stream (typically HD/SD). This is appended to the camera name on the menus.                                                                                                                     | No                     |
+| Audio                    | Check to include the cameras audio with the video (if present).                                                                                                                                                    | No                     |
+| Audio Encoding           | Set to the audio encoding on the cameras RTSP stream. If the audio format is AAC, it will be passed through as is, otherwise it will be encoded to AAC.                                                            | Yes                    |
+| Netcam URI,              | The RTSP url used for the video/audio feed from the stream.                                                                                                                                                        | Yes                    |
+| Default On Multi Display | Sets the stream for this camera which is shown by default on the Multi C amera View. Other camera streams can be selected from the Multi Camera View.                                                              | N/A                    |
+| Motion Sensing           | If checked, the motion service will be used to detect motion from this stream. To keep CPU usage down, it's best to select a lower resolution stream. Not available if FTP is selected on the camera.              | N/A                    |
+| Trigger Recording On     | When Motion Sensing is selected for the stream, you can select another (usually higher resolution) stream to record from in addition to this stream. Both streams will be selectable on the Select Recording menu. | N/A                    |
+| Mask File                | Select a mask file for this stream in the motion service. (see https://motion-project.github.io/motion_config.html#mask_file).                                                                                     | N/A                    |
+| Video Width              | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                        | Yes                    |
+| Video Height             | For Motion Service, the height vidoed stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                            | Yes                    |
