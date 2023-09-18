@@ -184,18 +184,32 @@ site certificate and continue to the log in dialogue box.
 You can check "Remember me" to skip having to log in in future.
 
 ## Set Up Cameras
-Your network cameras must be set up in the configuration. The NVR
-includes a configuration editor for this purpose/
-
+The NVR must be configured to use your cameras.
+The configuration editor can be found at General ->
+Cameras Configuration.
 ![config editor buttons](config-editor-buttons.png)
-
+*Cameras Configuration Editor button numbering*
 ### Onvif
+The NVR supports Onvif camera discovery and population of parameters. This should be used
+when supported by your cameras. Click on button 11 
+(Perform onvif LAN search for cameras) to locate cameras on the LAN. Before you can save
+the configuration you need to complete any missing fields (typically
+the camera names and stream descriptions). When done, click
+on button 11 to commit the current configuration
 
-The NVR supports Onvif discovery and population of camera parameters
+#### Camera not found
+If any cameras do not respond to the multicast probe, they will not
+be listed after Onvif discovery. Where Onvif is supported you can
+search for individual cameras by their Onvif URL
+Click button 7, enter the Onvif URL (for example http://192.168.1.43:8080/onvif/device_service, where the IP
+address is the IP of the camera). This will add the parameters
+for the specified camera to the list. You then just need to complete the name and description fields.
 
+Cameras can also be added manually by clicking on button 6. In this
+case yow will have to enter all parameters yourself, so iot's
+not recommended unless Onvif is not supported on the device.
 
-
-#### Cameras
+#### Camera Parameters
 | Parameter/Control  | Function                                                                                                                                                                  | Set by Onvif Discovery |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
 | Sorting            | Up and down arrows move camera position in the list, and correspondingly on the menus.                                                                                    | N/A                    |
@@ -212,7 +226,7 @@ The NVR supports Onvif discovery and population of camera parameters
 | PTZ Controls       | Enable PTZ cameras on the live stream view. This requires that the camera supports Onvif PTZ control.                                                                     | No                     |
 | Onvif Base Address | IP address and port of the cameras Onvif SOAP web service.                                                                                                                | Yes                    |
 
-#### Streams
+#### Stream Parameters
 | Parameter/Control        | Function                                                                                                                                                                                                           | Set by Onvif Discovery |
 |--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
 | Stream ID                | Map key of the stream                                                                                                                                                                                              | N/A                    |

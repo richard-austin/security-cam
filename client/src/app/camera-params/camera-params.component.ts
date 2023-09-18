@@ -110,7 +110,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
         reason => {
           if (reason.status == 401) {
             this.reporting.warningMessage = `
-             Unauthorised: The credentials for this camera are not correctly set. Please go to General -> Configure Camera Setup and
+             Unauthorised: The credentials for this camera are not correctly set. Please go to General -> Cameras Configuration and
              click on the shield icon beside the title (Cameras Configuration). You can then set the the user name and
              password which must be set the same on all cameras.
              `;

@@ -46,7 +46,7 @@ class CamService implements ICamServiceInterface{
         catch (Throwable ex) {
             logService.cam.error "Exception in getCameras -> parse: " + ex.getMessage()
             result.status = PassFail.FAIL
-            result.error = "The config file is corrupt, empty or does not exist. You can create a new config file using the Configure Camera Setup option under the General menu.   ....   " + ex.getMessage()
+            result.error = "The config file is corrupt, empty or does not exist. You can create a new config file using the Cameras Configuration option under the General menu.   ....   " + ex.getMessage()
         }
 
         return result
