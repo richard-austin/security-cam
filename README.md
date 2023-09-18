@@ -184,7 +184,16 @@ site certificate and continue to the log in dialogue box.
 You can check "Remember me" to skip having to log in in future.
 
 ## Set Up Cameras
-Your network cameras must be set up in the configuration.
+Your network cameras must be set up in the configuration. The NVR
+includes a configuration editor for this purpose/
+
+![config editor buttons](config-editor-buttons.png)
+
+### Onvif
+
+The NVR supports Onvif discovery and population of camera parameters
+
+
 
 #### Cameras
 | Parameter/Control  | Function                                                                                                                                                                  | Set by Onvif Discovery |
