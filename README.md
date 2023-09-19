@@ -189,6 +189,23 @@ The configuration editor can be found at General ->
 Cameras Configuration.
 ![config editor buttons](config-editor-buttons.png)
 *Cameras Configuration Editor button numbering*
+
+#### Config page button functions
+| Button <br/>Number | Function                                                                                                                                                                                        |
+|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1                  | Delete the corresponding camera and its streams. Disabled when there is only one camera                                                                                                         |
+| 2                  | Delete the corresponding stream. Disabled when the stream is the only one on the camera.                                                                                                        |
+| 3                  | Add a new stream. This will be unpopulated and all fields will; need manual entry/setup.                                                                                                        |
+| 4                  | Move the corresponding camera down one place in the list. The camera streams will be listed on the selection menus in the same order as they appear on this list.                               |
+| 5                  | Move the corresponding camera up one place in the list. The camera streams will be listed on the selection menus in the same order as they appear on this list.                                 |                                                                                                                                                                  |
+| 6                  | Add a new camera. This will add an unpopulated camera with one unpopulated stream. All fields will need to be populated manually.                                                               |
+| 7                  | Add a new camera. You enter the Onvif URL for the required camera, and the camera details will be returned with camera specif data populated. This is the preferred way to add a single camera. |
+| 8                  | Start a new configuration. After conformation, any camera data will be cleared and a single unpopulated camera/stream will be added.                                                            |
+| 9                  | General Onvif discovery. After confirmation, the Onvif function will try to discover cameras on the network. Any that are found will have their characteristics populated.                      |
+| 10                 | Save configuration. Any changes made with the editor will only become active after saving with this function.                                                                                   |
+| 11                 | Show/Hide the cameras streams                                                                                                                                                                   |
+| 12                 | Camera ID. Click on this to show a snapshot from the camera. Note that this will require that the camera credentials are set up correctly                                                       |
+| 13                 | Set or change the user name and password used to access features on the cameras. Note that this currently requires all the cameras on the network to have the same credentials.                 |
 ### Onvif
 The NVR supports Onvif camera discovery and population of parameters. This should be used
 when supported by your cameras. Click on button 11 
@@ -206,7 +223,7 @@ address is the IP of the camera). This will add the parameters
 for the specified camera to the list. You then just need to complete the name and description fields.
 
 Cameras can also be added manually by clicking on button 6. In this
-case yow will have to enter all parameters yourself, so iot's
+case yow will have to enter all parameters yourself, so it's
 not recommended unless Onvif is not supported on the device.
 
 #### Camera Parameters
