@@ -1,8 +1,3 @@
-<style>
-  .bg {background-color: #000000;}
-</style>
-<div class="bg">
-
 <h2 style="text-align: center">NVR for CCTV Access Via Web Browser</h2>
 
 ### Introduction
@@ -280,4 +275,4 @@ not recommended unless Onvif is not supported on the device.
 | Mask File                | Select a mask file for this stream in the motion service. (see https://motion-project.github.io/motion_config.html#mask_file).                                                                                     | N/A                    |
 | Video Width              | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                        | Yes                    |
 | Video Height             | For Motion Service, the height vidoed stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                            | Yes                    |
-</div>
+
