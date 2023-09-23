@@ -1,3 +1,8 @@
+<style>
+  .bg {background-color: #000000;}
+</style>
+<div class="bg">
+
 <h2 style="text-align: center">NVR for CCTV Access Via Web Browser</h2>
 
 ### Introduction
@@ -191,9 +196,10 @@ Cameras Configuration.
 *Cameras Configuration Editor button numbering*
 
 #### Config page button functions
+
 | Button <br/>Number | Button                                                                                                     | Function                                                                                                                                                                                        |
 |--------------------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1                  | <img src="README.images/simple-trash-svgrepo-com.svg" width="20"></img>                                    | Delete the corresponding camera and its streams. Disabled when there is only one camera                                                                                                         |
+| 1                  | <img src="README.images/simple-trash-svgrepo-com.svg" width="20"/></img>                                   | Delete the corresponding camera and its streams. Disabled when there is only one camera                                                                                                         |
 | 2                  | <img src="README.images/simple-trash-svgrepo-com.svg" width="20"></img>                                    | Delete the corresponding stream. Disabled when the stream is the only one on the camera.                                                                                                        |
 | 3                  | <img src="README.images/add-svgrepo-com.svg" width="20"></img>                                             | Add a new stream. This will be unpopulated and all fields will need manual entry/setup.                                                                                                         |
 | 4                  | <img src="README.images/arrow-sm-down-svgrepo-com.svg" width="20"></img>                                   | Move the corresponding camera down one place in the list. The camera streams will be listed on the selection menus in the same order as they appear on this list.                               |
@@ -213,7 +219,7 @@ Cameras Configuration.
 <img src="README.images/add-svgrepo-com.svg" width="20"></img>
 <img src="README.images/add-circle-solid-svgrepo-com.svg" width="20"></img>
 <img src="README.images/compass-circular-tool-svgrepo-com.svg" width="20"></img>
-<img src="README.images/blank-document-svgrepo-com.svg" width="20" style="transform: rotate(90deg)></img>
+<img src="README.images/blank-document-svgrepo-com.svg" width="20" style="transform: rotate(90deg)"></img>
 <img src="README.images/simple-trash-svgrepo-com.svg" width="20"></img>
 <img src="README.images/arrow-sm-down-svgrepo-com.svg" width="20"></img>
 <img src="README.images/arrow-sm-up-svgrepo-com.svg" width="20"></img>
@@ -274,3 +280,4 @@ not recommended unless Onvif is not supported on the device.
 | Mask File                | Select a mask file for this stream in the motion service. (see https://motion-project.github.io/motion_config.html#mask_file).                                                                                     | N/A                    |
 | Video Width              | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                        | Yes                    |
 | Video Height             | For Motion Service, the height vidoed stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                            | Yes                    |
+</div>
