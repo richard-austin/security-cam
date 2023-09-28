@@ -1,7 +1,7 @@
-<h2 style="text-align: center">NVR for CCTV Access Via Web Browser</h2>
+<h2 style="text-align: center">Security Cam, CCTV Via Web Browser</h2>
 
 ### Introduction
-This is a Network Video Recorder accessed through a web browser. designed to run on a Raspberry pi.
+This is a Network Video Recorder accessed through a web browser, designed to run on a Raspberry pi.
 Access can be either direct or through a Cloud service. There is no live implementation
 of the Cloud Service, but the source code is freely available at
 https://github.com/richard-austin/cloud-server.
@@ -24,6 +24,7 @@ Cloud service.
 #### NVR features
 * Secure authenticated web access.
 * Live, low latency (approx 1 second) video from network cameras with RTSP source.
+* Onvif device and capabilities discovery.
 * View individual or all cameras on one page.
 * Recordings of motion events, selectable by date and time.
 * Recordings triggered by Motion service (https://github.com/Motion-Project/motion)
@@ -45,7 +46,7 @@ The Web Front End (client) is an Angular application using [Angular CLI](https:/
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
 
 ### Web Back End
-The Web Back End (server) is a Grails application which provides
+The Web Back End (server) is a Grails application, running on Tomcat 9, which provides
 a Restful API for the Angular Web Front End.
 It provides the calls to get and set application data as
 well as configuring the Camera setup.
@@ -66,38 +67,36 @@ It also stops and starts the media server, recording service and the motion serv
 during and after configuration updates.
 
 ### Camera Recordings Service
-This is an ftp server to which cameras can be set up to ftp an image file
+This is an FTP server to which cameras can be set up to ftp an image file
 when they detect motion. In response to receiving the image file, this
 server starts recording from the appropriate (http output) stream on the
 media server, making a recording of minimum length 30 seconds, but extended by a further 
-30 seconds when another image file is ftp'd before a recording is completed.
+30 seconds when another image file is FTP'd before a recording is completed.
 
-This is configurable from the cameras configuration page.
-
-This is an alternative to recording being triggered by the Motion service.
+Use of the Camera Recordings Service is configurable from the cameras configuration page and
+is an alternative to the recording being triggered by the Motion service.
 ### Motion Service
 Provides motion detection and recording. <a href="https://github.com/Motion-Project/motion">Motion</a> is a third party project. 
 On this NVR, Motion can detect and record motion on one stream (usually the lower resolution stream to keep CPU usage down) and
 trigger a recording on another (usually the higher resolution) stream so that recordings
 in both resolutions are made. 
 
-This is configurable from the cameras configuration page.
+Configurable from the cameras configuration page.
 ### nginx
 nginx is a reverse proxy which all client access to the NVR passes through.
 #### <span style="color: gray">nginx functions on the NVR</span>
 * TLS encryption of traffic.
-* Makes the webserver, live and recorded streams available through a single port (443).
+* Translation from Tomcat port 8080 to HTTPS port 443.
+* HTTP redirect from port 80.
+* Webserver, live and recorded streams made available through a single port (443) at their designated URLs.
 * Makes the unauthenticated live and recorded stream dependent on the web application authentication so that they 
 cannot be accessed without the user having logged in.
-* Port translation to 443.
-* HTTP redirect from port 80.
-
 ## Development
 
 #### Platform for Development
 * Ubuntu 23.04 (Lunar Lobster) on PC
 
-#### The following are what I use to build this project:-
+#### The following are what is used to build this project:-
 * go version go1.20.1
 * Angular CLI: 15.2.0 or greater
 * Node: 18.17.1
@@ -107,19 +106,21 @@ cannot be accessed without the user having logged in.
 * JVM Version: 18.0.2-ea
 * Gradle 7.4.2
 * Python 3.11.4
-### Build for deployment to Raspberry pi
+
+### Set up build environment
 * git clone git@github.com:richard-austin/security-cam.git
 * cd security-cam
 * gradle init
-* ./gradlew buildDebFile
+
+### Build for deployment to Raspberry pi
+* ./gradlew buildDebFile 
 
 When the build completes navigate to where the .deb file was created:-
 
 * cd xtrn-scripts-and-config/deb-file-creation
 * scp the .deb file to the Raspberry pi
 
-## Installation 
-#### On the Raspberry pi
+## Installation on the Raspberry pi
 * sudo apt update
 * sudo apt upgrade (restart if advised to after upgrade)
 * Navigate to where the .deb file is located
@@ -192,73 +193,63 @@ Cameras Configuration.
 
 #### Config page button functions
 
-| Button <br/>Number | Button                                                                                                     | Function                                                                                                                                                                                        |
-|--------------------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1                  | <img src="README.images/simple-trash-svgrepo-com.svg" width="20"/></img>                                   | Delete the corresponding camera and its streams. Disabled when there is only one camera                                                                                                         |
-| 2                  | <img src="README.images/simple-trash-svgrepo-com.svg" width="20"></img>                                    | Delete the corresponding stream. Disabled when the stream is the only one on the camera.                                                                                                        |
-| 3                  | <img src="README.images/add-svgrepo-com.svg" width="20"></img>                                             | Add a new stream. This will be unpopulated and all fields will need manual entry/setup.                                                                                                         |
-| 4                  | <img src="README.images/arrow-sm-down-svgrepo-com.svg" width="20"></img>                                   | Move the corresponding camera down one place in the list. The camera streams will be listed on the selection menus in the same order as they appear on this list.                               |
-| 5                  | <img src="README.images/arrow-sm-up-svgrepo-com.svg" width="20"></img>                                     | Move the corresponding camera up one place in the list. The camera streams will be listed on the selection menus in the same order as they appear on this list.                                 |                                                                                                                                                                  |
-| 6                  | <img src="README.images/add-svgrepo-com.svg" width="20"></img>                                             | Add a new camera. This will add an unpopulated camera with one unpopulated stream. All fields will need to be populated manually.                                                               |
-| 7                  | <img src="README.images/add-circle-solid-svgrepo-com.svg" width="20"></img>                                | Add a new camera. You enter the Onvif URL for the required camera, and the camera details will be returned with camera specif data populated. This is the preferred way to add a single camera. |
-| 8                  | <img src="README.images/blank-document-svgrepo-com.svg" width="20" style="transform: rotate(90deg)"></img> | Start a new configuration. After conformation, any camera data will be cleared and a single unpopulated camera/stream will be added.                                                            |
-| 9                  | <img src="README.images/compass-circular-tool-svgrepo-com.svg" width="20"></img>                           | General Onvif discovery. After confirmation, the Onvif function will try to discover cameras on the network. Any that are found will have their characteristics populated.                      |
-| 10                 | <img src="README.images/floppy-svgrepo-com.svg" width="20"></img>                                          | Save configuration. Any changes made with the editor will only become active after saving with this function.                                                                                   |
-| 11                 | <img src="README.images/caret-right-svgrepo-com.svg" width="20"></img>                                     | Show the cameras streams                                                                                                                                                                        |
-| 11 *               | <img src="README.images/caret-bottom-svgrepo-com.svg" width="20"></img>                                    | Hide the cameras streams                                                                                                                                                                        |
-| 12                 | camera(<i>n</i>)                                                                                           | Camera ID. Click on this to show a snapshot from the camera. Note that this will require that the camera credentials are set up correctly                                                       |
-| 13                 | <img src="README.images/security-svgrepo-com.svg" width="20"></img>                                        | Set or change the user name and password used to access features on the cameras. Note that this currently requires all the cameras on the network to have the same credentials.                 |
+| Button <br/>Number | Button                                                                                                     | Function                                                                                                                                                                                                                                                                                                                |
+|--------------------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1                  | <img src="README.images/simple-trash-svgrepo-com.svg" width="20"/></img>                                   | Delete the corresponding camera and its streams. Disabled when there is only one camera                                                                                                                                                                                                                                 |
+| 2                  | <img src="README.images/simple-trash-svgrepo-com.svg" width="20"></img>                                    | Delete the corresponding stream. Disabled when the stream is the only one on the camera.                                                                                                                                                                                                                                |
+| 3                  | <img src="README.images/add-svgrepo-com.svg" width="20"></img>                                             | Add a new stream. This will be unpopulated and all fields will need manual entry/setup.                                                                                                                                                                                                                                 |
+| 4                  | <img src="README.images/arrow-sm-down-svgrepo-com.svg" width="20"></img>                                   | Move the corresponding camera down one place in the list. The camera streams will be listed on the selection menus in the same order as they appear on this list.                                                                                                                                                       |
+| 5                  | <img src="README.images/arrow-sm-up-svgrepo-com.svg" width="20"></img>                                     | Move the corresponding camera up one place in the list. The camera streams will be listed on the selection menus in the same order as they appear on this list.                                                                                                                                                         |                                                                                                                                                                  |
+| 6                  | <img src="README.images/add-svgrepo-com.svg" width="20"></img>                                             | Add a new camera. This will add a camera with one stream, with all fields unpopulated. All fields will need to be populated manually.                                                                                                                                                                                   |
+| 7                  | <img src="README.images/add-circle-solid-svgrepo-com.svg" width="20"></img>                                | Add a new camera. You enter the Onvif URL for the required camera, and the camera details will be returned with camera specific data populated. Intended for when General Onvif Discovery has not picked up the camera or a new camera is added to an existing setup. This is the preferred way to add a single camera. |
+| 8                  | <img src="README.images/blank-document-svgrepo-com.svg" width="20" style="transform: rotate(90deg)"></img> | Start a new configuration. After conformation, any camera data will be cleared and a single unpopulated camera/stream will be added.                                                                                                                                                                                    |
+| 9                  | <img src="README.images/compass-circular-tool-svgrepo-com.svg" width="20"></img>                           | General Onvif discovery. After confirmation, the Onvif function will try to discover cameras on the network. Any that are found will have their characteristics populated.                                                                                                                                              |
+| 10                 | <img src="README.images/floppy-svgrepo-com.svg" width="20"></img>                                          | Save configuration. Any changes made with the editor will only become active after saving with this function.                                                                                                                                                                                                           |
+| 11                 | <img src="README.images/caret-right-svgrepo-com.svg" width="20"></img>                                     | Show the cameras streams                                                                                                                                                                                                                                                                                                |
+| 11 *               | <img src="README.images/caret-bottom-svgrepo-com.svg" width="20"></img>                                    | Hide the cameras streams                                                                                                                                                                                                                                                                                                |
+| 12                 | camera(<i>n</i>)                                                                                           | Camera ID. Click on this to show a snapshot from the camera. Note that this will require that the camera credentials are set up correctly (button 13 <img src="README.images/security-svgrepo-com.svg" width="20"></img>)                                                                                               |
+| 13                 | <img src="README.images/security-svgrepo-com.svg" width="20"></img>                                        | Set or change the user name and password used to access features on the cameras. Note that this currently requires all the cameras on the network to have the same credentials.                                                                                                                                         |
 
 &ast; Button style toggles with context
 
-<img src="README.images/add-svgrepo-com.svg" width="20"></img>
-<img src="README.images/add-circle-solid-svgrepo-com.svg" width="20"></img>
-<img src="README.images/compass-circular-tool-svgrepo-com.svg" width="20"></img>
-<img src="README.images/blank-document-svgrepo-com.svg" width="20" style="transform: rotate(90deg)"></img>
-<img src="README.images/simple-trash-svgrepo-com.svg" width="20"></img>
-<img src="README.images/arrow-sm-down-svgrepo-com.svg" width="20"></img>
-<img src="README.images/arrow-sm-up-svgrepo-com.svg" width="20"></img>
-<img src="README.images/caret-right-svgrepo-com.svg" width="20"></img>
-<img src="README.images/caret-right-svgrepo-com.svg" width="20" style="transform: rotate(90deg)"></img>
-<img src="README.images/security-svgrepo-com.svg" width="20"></img>
-<img src="README.images/floppy-svgrepo-com.svg" width="20"></img>
-
 ### Onvif
+With thanks to https://github.com/fpompermaier/onvif
+
 The NVR supports Onvif camera discovery and population of parameters. This should be used
-when supported by your cameras. Click on button 11 
+when supported by your cameras. Click on button 9 <img src="README.images/compass-circular-tool-svgrepo-com.svg" width="20"></img>
 (Perform onvif LAN search for cameras) to locate cameras on the LAN. Before you can save
 the configuration you need to complete any missing fields (typically
 the camera names and stream descriptions). When done, click
-on button 11 to commit the current configuration
+on button 10 <img src="README.images/floppy-svgrepo-com.svg" width="20"></img> to commit the current configuration
 
 #### Camera not found
 If any cameras do not respond to the multicast probe, they will not
 be listed after Onvif discovery. Where Onvif is supported you can
 search for individual cameras by their Onvif URL
-Click button 7, enter the Onvif URL (for example http://192.168.1.43:8080/onvif/device_service, where the IP
+Click button 7 <img src="README.images/add-circle-solid-svgrepo-com.svg" width="20">, enter the Onvif URL (for example http://192.168.1.43:8080/onvif/device_service, where the IP
 address is the IP of the camera). This will add the parameters
 for the specified camera to the list. You then just need to complete the name and description fields.
 
-Cameras can also be added manually by clicking on button 6. In this
-case yow will have to enter all parameters yourself, so it's
+Cameras can also be added manually by clicking on button 6 <img src="README.images/add-svgrepo-com.svg" width="20"></img>
+. In this case you will have to enter all parameters yourself, so it's
 not recommended unless Onvif is not supported on the device.
 
 #### Camera Parameters
-| Parameter/Control  | Function                                                                                                                                                                  | Set by Onvif Discovery |
-|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
-| Sorting            | Up and down arrows move camera position in the list, and correspondingly on the menus.                                                                                    | N/A                    |
-| Camera ID          | Map key of the camera. Clicking on this displays a snapshot from that camera.                                                                                             | N/A                    |
-| Delete             | Delete this camera and its streams from the configuration.                                                                                                                | N/A                    |
-| Expand             | Show/hide the cameras streams.                                                                                                                                            | N/A                    |
-| Name               | The name of the camera as it will appear on the menus.                                                                                                                    | No                     |
-| Camera Type        | Select SV3C, ZTech MCW5B10X or Not Listed. The named options enable some admin functions under Camera Settings -> Quick camera Setup                                      | No                     |
-| FTP From camera    | If checked, the camera ftp-ing an image to ./<i>camera_map_key</i> will trigger a recording. This is not available if Motion Sensing is set on any of the camera streams. | No                     |
-| Address            | Camera IP address                                                                                                                                                         | Yes                    |
-| Snapshot URI       | The URL which returns a snapshot image from the camera.                                                                                                                   | Yes                    |
-| RTSP Transport     | Determine whether to use TCP or UDP for the RTSP video/audio stream.                                                                                                      | No                     |
-| Audio Backchannel  | Enable use of the cameras Audio backchannel for two way audio (if camera supports Onvif Profile T backchannel).                                                           | Yes                    |
-| PTZ Controls       | Enable PTZ cameras on the live stream view. This requires that the camera supports Onvif PTZ control.                                                                     | No                     |
-| Onvif Base Address | IP address and port of the cameras Onvif SOAP web service.                                                                                                                | Yes                    |
+| Parameter/Control  | Function                                                                                                                                                                                                                                                                                            | Set by Onvif Discovery |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| Sorting            | Up and down arrows move camera position in the list, and correspondingly on the menus.                                                                                                                                                                                                              | N/A                    |
+| Camera ID          | Map key of the camera. Clicking on this displays a snapshot from that camera.                                                                                                                                                                                                                       | N/A                    |
+| Delete             | Delete this camera and its streams from the configuration.                                                                                                                                                                                                                                          | N/A                    |
+| Expand             | Show/hide the cameras streams.                                                                                                                                                                                                                                                                      | N/A                    |
+| Name               | The name of the camera as it will appear on the menus.                                                                                                                                                                                                                                              | No                     |
+| Camera Type        | Select SV3C, ZTech MCW5B10X or Not Listed. The named options enable some admin functions under Camera Settings -> Quick camera Setup                                                                                                                                                                | No                     |
+| FTP From camera    | If checked, the camera ftp-ing an image to ./<i>camera_map_key</i> will trigger a recording. This is not available if Motion Sensing is set on any of the camera streams.                                                                                                                           | No                     |
+| Address            | Camera IP address                                                                                                                                                                                                                                                                                   | Yes                    |
+| Snapshot URI       | The URL which returns a snapshot image from the camera.                                                                                                                                                                                                                                             | Yes                    |
+| RTSP Transport     | Determine whether to use TCP or UDP for the RTSP video/audio stream.                                                                                                                                                                                                                                | No                     |
+| Audio Backchannel  | Enable use of the cameras Audio backchannel for two way audio (if camera supports Onvif Profile T backchannel). (<img src="README.images/xmark-circle-svgrepo-com.svg" width="20"> inactive, <img src="README.images/tick-circle-svgrepo-com.svg" width="20"></img> active. Click to toggle).</img> | Yes                    |
+| PTZ Controls       | Enable PTZ cameras on the live stream view. This requires that the camera supports Onvif PTZ control.                                                                                                                                                                                               | No                     |
+| Onvif Base Address | IP address and port of the cameras Onvif SOAP web service.                                                                                                                                                                                                                                          | Yes                    |
 
 #### Stream Parameters
 | Parameter/Control        | Function                                                                                                                                                                                                           | Set by Onvif Discovery |
@@ -274,5 +265,36 @@ not recommended unless Onvif is not supported on the device.
 | Trigger Recording On     | When Motion Sensing is selected for the stream, you can select another (usually higher resolution) stream to record from in addition to this stream. Both streams will be selectable on the Select Recording menu. | N/A                    |
 | Mask File                | Select a mask file for this stream in the motion service. (see https://motion-project.github.io/motion_config.html#mask_file).                                                                                     | N/A                    |
 | Video Width              | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                        | Yes                    |
-| Video Height             | For Motion Service, the height vidoed stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                            | Yes                    |
+| Video Height             | For Motion Service, the height of the video stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                      | Yes                    |
 
+## Using the NVR
+
+### The Menus 
+
+The NVR has a menu bar at the top of the page. On a PC screen
+this menu bar will normally show the menu names, though on a mobile
+device a hamburger icon must be tapped to reveal them.
+
+If no function is selected, the
+page below will be blank.
+
+#### Select Camera
+This menu allows selection of live video/audio camera streams. The names
+are listed in the form <i>Camera Name(Stream Description)</i>
+so there can be more than one stream per camera
+
+<i>Multi Camera View</i>
+
+The last option on the Select Camera menu is Multi Camera View. This shows one stream
+from each camera in the configuration. The default stream shown
+for a camera will be the one selected as Default On Multi Display.
+Camera streams can be switched from the menu shown when you click the
+<img src="README.images/settings-svgrepo-com.svg" width="20"></img>
+button at the top left of the page.
+## Select Recording
+This menu allows selection of recordings made on camera streams.
+The names
+are listed in the form <i>Camera Name(Stream Description)</i>
+On selection, the latest recording on that stream will be shown. 
+Earlier recordings can be selected from the date control and Motion
+Events selector in the top left of the page.
