@@ -112,6 +112,11 @@ cannot be accessed without the user having logged in.
 * cd security-cam
 * gradle init
 
+### If intending to access through the Cloud Server.
+* If you intend to access the NVR via the Cloud Server (If not, ignore this)
+  * In application.yml, ensure that environments -> production -> cloudProxy -> cloudHost
+    is set to the correct IP for your Cloud server (cloudPort will normally be 8081)
+
 ### Build for deployment to Raspberry pi
 * ./gradlew buildDebFile 
 
@@ -184,10 +189,24 @@ site certificate and continue to the log in dialogue box.
 * Enter the username and password set up under "Set up user account". 
 You can check "Remember me" to skip having to log in in future.
 
+## Set up Wi-Fi (if required)
+If you want to use Wi-Fi, and it hasn't previously been set up on the Raspberry pi, it can be done from the NVR. Note
+that Wi-Fi settings can only be changed when the Raspberry pi is connected to the LAN and you are accessing the web server
+through the Ethernet (eth0 on Raspberry pi) IP address.
+* Connect a browser to the Raspberry pi's Ethernet LAN address.
+* From the menu select General -> Wifi Admin -> Wifi Settings.
+* Select your Wi-Fi access point on the dropdown
+* Click connect.
+* Enter the password if required.
+* Click connect.
+The Wi-Fi will now be set up, You can check the IP address for the Wi-Connection using the General -> 
+Get Active Local IP Address(es) option.
+
 ## Set Up Cameras
 The NVR must be configured to use your cameras.
 The configuration editor can be found at General ->
 Cameras Configuration.
+
 ![config editor buttons](README.images/config-editor-buttons.png)
 *Cameras Configuration Editor button numbering*
 
@@ -203,12 +222,12 @@ Cameras Configuration.
 | 6                  | <img src="README.images/add-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                     | Add a new camera. This will add a camera with one stream, with all fields unpopulated. All fields will need to be populated manually.                                                                                                                                                                                   |
 | 7                  | <img src="README.images/add-circle-solid-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                        | Add a new camera. You enter the Onvif URL for the required camera, and the camera details will be returned with camera specific data populated. Intended for when General Onvif Discovery has not picked up the camera or a new camera is added to an existing setup. This is the preferred way to add a single camera. |
 | 8                  | <img src="README.images/blank-document-svgrepo-com.svg" width="20" style="transform: rotate(90deg); position: relative; top: 5px"></img> | Start a new configuration. After conformation, any camera data will be cleared and a single unpopulated camera/stream will be added.                                                                                                                                                                                    |
-| 9                  | <img src="README.images/compass-circular-tool-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                                         | General Onvif discovery. After confirmation, the Onvif function will try to discover cameras on the network. Any that are found will have their characteristics populated.                                                                                                                                              |
-| 10                 | <img src="README.images/floppy-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                                                        | Save configuration. Any changes made with the editor will only become active after saving with this function.                                                                                                                                                                                                           |
-| 11                 | <img src="README.images/caret-right-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                                                   | Show the cameras streams                                                                                                                                                                                                                                                                                                |
-| 11 *               | <img src="README.images/caret-bottom-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                                                  | Hide the cameras streams                                                                                                                                                                                                                                                                                                |
-| 12                 | camera(<i>n</i>)                                                                                                                         | Camera ID. Click on this to show a snapshot from the camera. Note that this will require that the camera credentials are set up correctly (button 13 <img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>)                                                                                               |
-| 13                 | <img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                                                      | Set or change the user name and password used to access features on the cameras. Note that this currently requires all the cameras on the network to have the same credentials.                                                                                                                                         |
+| 9                  | <img src="README.images/compass-circular-tool-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                   | General Onvif discovery. After confirmation, the Onvif function will try to discover cameras on the network. Any that are found will have their characteristics populated.                                                                                                                                              |
+| 10                 | <img src="README.images/floppy-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                  | Save configuration. Any changes made with the editor will only become active after saving with this function.                                                                                                                                                                                                           |
+| 11 *               | <img src="README.images/caret-right-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                             | Show the cameras streams                                                                                                                                                                                                                                                                                                |
+| 11 *               | <img src="README.images/caret-bottom-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                            | Hide the cameras streams                                                                                                                                                                                                                                                                                                |
+| 12                 | camera(<i>n</i>)                                                                                                                         | Camera ID. Click on this to show a snapshot from the camera. Note that this will require that the camera credentials are set up correctly (button 13 <img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>)                                                         |
+| 13                 | <img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                | Set or change the user name and password used to access features on the cameras. Note that this currently requires all the cameras on the network to have the same credentials.                                                                                                                                         |
 
 &ast; Button style toggles with context
 
