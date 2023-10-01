@@ -310,10 +310,82 @@ for a camera will be the one selected as Default On Multi Display.
 Camera streams can be switched from the menu shown when you click the
 <img src="README.images/settings-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
 button at the top left of the page.
-## Select Recording
+#### Select Recording
 This menu allows selection of recordings made on camera streams.
 The names
 are listed in the form <i>Camera Name(Stream Description)</i>
 On selection, the latest recording on that stream will be shown. 
 Earlier recordings can be selected from the date control and Motion
 Events selector in the top left of the page.
+
+#### Camera Settings
+* Quick Camera Setup
+
+  <i>Quick Camera Setup is available only for SV3C and ZXTech cameras (as set in the 
+configuration for Camera Type)</i>
+
+  This provides a convenient means of setting the night lighting mode, and Camera Name.
+  The camera can also be rebooted if required.
+* Camera Admin 
+
+  Note that for this function to be accessible outside the LAN, port forwarding must be set up for port 446.
+
+  Provides access to camera web admin page through the NVR. Access is 
+protected by the NVR authentication system (Spring Security) as well as the cameras own authentication. SV3C 
+and ZXTech camera credentials are provided by the NVR if they
+were set up in the camera configuration page, otherwise they will need to be entered after selecting the camera.
+Any other camera types will need their credentials entered after the camera is selected.
+
+#### General
+* Configure Camera Setup
+
+  Set up the NVR for your camera set (which must be on the same LAN as the NVR).
+
+  This is described in more detail under the section "Set Up Cameras" above.
+* Log Off
+
+  Log off from the NVR, a dialogue box allows confirmation or cancel of this operation.
+* Change Password
+
+  User must first enter the current password, then enter and confirm a new one.
+* Change Account Email
+
+  The email address is where password reset links will be sent when requesting from the login page. It is also where warnings messages are sent if the public IP address has changed (when used with port forwarding).
+
+  User must first enter the password, then enter and confirm the new email address.
+* Set Up Guest Account
+
+  The guest account allows viewing the live streams and recordings, but does not allow any sort of admin access which could alter the configuration.
+
+  Enter and confirm a password for the guest account. This password
+is used with the username "guest" to log in. The checkbox allows the guest account to be enabled and disabled, while the password remains unaltered.
+ 
+* Save current IP
+  
+  Save the current public IP that the NVR appears at (with port forwarding set up).
+
+  If the public IP subsequently changes from this, a warning email will be sent to the registered 
+email address, giving the new public IP address.
+
+  This function is only used after setting up a new NVR or after the public IP has changed.
+* Get Active Local IP Addresses
+
+  Get the LAN addresses of the NVR. There are IP addresses for the Wi-Fi and Ethernet interfaces.
+* Wifi Admin
+  * Local Wifi Details
+
+    Lists the Wi-Fi access points in the area along with signal strength and other information.
+  * Wifi Settings
+    Setup or enable/disable the NVR Wi-Fi connection.
+
+    To use this the NVR must have an Ethernet connection, and the browser must be connected to the NVR through the Ethernet IP address. 
+* Set CloudProxy Status
+
+  Checkbox is checked to enable the Cloud Proxy, otherwise the Cloud Proxy will not connect to the Cloud Service.
+  The Cloud Proxy is used to provide a connection to the Cloud Service from the NVR.
+This is a client connection and so doesn't require port forwarding to be set up. Most functions 
+of the NVR will be available via the Cloud Service. The Camera Admin page functionality is not available via the Cloud Service.
+This defaults to "on" when the local NVR account is not set up.
+
+  The NVR must have the correct cloudHost/cloudPort set up in application.yml if the Cloud Service is used.
+
