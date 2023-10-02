@@ -319,14 +319,14 @@ Earlier recordings can be selected from the date control and Motion
 Events selector in the top left of the page.
 
 #### Camera Settings
-* Quick Camera Setup
+* **Quick Camera Setup**
 
   <i>Quick Camera Setup is available only for SV3C and ZXTech cameras (as set in the 
 configuration for Camera Type)</i>
 
   This provides a convenient means of setting the night lighting mode, and Camera Name.
   The camera can also be rebooted if required.
-* Camera Admin 
+* **Camera Admin** 
 
   Note that for this function to be accessible outside the LAN, port forwarding must be set up for port 446.
 
@@ -337,30 +337,30 @@ were set up in the camera configuration page, otherwise they will need to be ent
 Any other camera types will need their credentials entered after the camera is selected.
 
 #### General
-* Configure Camera Setup
+* **Configure Camera Setup**
 
   Set up the NVR for your camera set (which must be on the same LAN as the NVR).
 
   This is described in more detail under the section "Set Up Cameras" above.
-* Log Off
+* **Log Off**
 
   Log off from the NVR, a dialogue box allows confirmation or cancel of this operation.
-* Change Password
+* **Change Password**
 
   User must first enter the current password, then enter and confirm a new one.
-* Change Account Email
+* **Change Account Email**
 
   The email address is where password reset links will be sent when requesting from the login page. It is also where warnings messages are sent if the public IP address has changed (when used with port forwarding).
 
   User must first enter the password, then enter and confirm the new email address.
-* Set Up Guest Account
+* **Set Up Guest Account**
 
   The guest account allows viewing the live streams and recordings, but does not allow any sort of admin access which could alter the configuration.
 
   Enter and confirm a password for the guest account. This password
 is used with the username "guest" to log in. The checkbox allows the guest account to be enabled and disabled, while the password remains unaltered.
  
-* Save current IP
+* **Save current IP**
   
   Save the current public IP that the NVR appears at (with port forwarding set up).
 
@@ -368,18 +368,19 @@ is used with the username "guest" to log in. The checkbox allows the guest accou
 email address, giving the new public IP address.
 
   This function is only used after setting up a new NVR or after the public IP has changed.
-* Get Active Local IP Addresses
+* **Get Active Local IP Addresses**
 
   Get the LAN addresses of the NVR. There are IP addresses for the Wi-Fi and Ethernet interfaces.
-* Wifi Admin
-  * Local Wifi Details
+* **Wifi Admin**
+  * **Local Wifi Details**
 
     Lists the Wi-Fi access points in the area along with signal strength and other information.
-  * Wifi Settings
+  * **Wifi Settings**
+
     Setup or enable/disable the NVR Wi-Fi connection.
 
     To use this the NVR must have an Ethernet connection, and the browser must be connected to the NVR through the Ethernet IP address. 
-* Set CloudProxy Status
+* **Set CloudProxy Status**
 
   Checkbox is checked to enable the Cloud Proxy, otherwise the Cloud Proxy will not connect to the Cloud Service.
   The Cloud Proxy is used to provide a connection to the Cloud Service from the NVR.
@@ -388,4 +389,24 @@ of the NVR will be available via the Cloud Service. The Camera Admin page functi
 This defaults to "on" when the local NVR account is not set up.
 
   The NVR must have the correct cloudHost/cloudPort set up in application.yml if the Cloud Service is used.
+* **Admin Functions**
+  
+  The initial setup functions used to set credentials for a direct access account.
+This can be accessed on the LAN without authentication at http://nvr_lan_ip_addr:8080/cua/.
 
+  Click on the hamburger icon at the top left for the menu options·
+  * **Create or Update User Account**
+
+    When accessed via the General -> Admin Functions menu, a user account will already exist. 
+    In this case you can use this to modify the username and/or password and/or email address for the account.
+In any case, all those fields must be entered before clicking Update Account.
+  * **Set Up SMTP Client**
+
+    The SMTP Client must be set up for the NVR to send emails (reset password and changed public IP notification).
+
+    Use this if you need to set up or change the settings for the NVR's SMTP client.
+    All fields must be entered before clicking Confirm. Any existing values will be
+    shown in their fields.
+* **About**
+
+  version information for the NVR.
