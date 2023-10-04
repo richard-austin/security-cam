@@ -38,6 +38,7 @@ This feature requires access through port 446 as well as the usual https port 44
 * Get NVR LAN IP addresses.
 * Get Local Wi-Fi details.
 * Set/unset NVR Wi-Fi access.
+* NTP server runs on NVR for cameras to sync time to without the need for them to connect to the internet.
 * Enable/Disable access through Cloud server.
 * All parts of project and dependencies deployed using deb file.
 
@@ -46,7 +47,7 @@ The Web Front End (client) is an Angular application using [Angular CLI](https:/
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
 
 ### Web Back End
-The Web Back End (server) is a Grails application, running on Tomcat 9, which provides
+The Web Back End (server) is a Grails application, running on Tomcat 9 (https://tomcat.apache.org/), which provides
 a Restful API for the Angular Web Front End.
 It provides the calls to get and set application data as
 well as configuring the Camera setup.
@@ -83,14 +84,21 @@ in both resolutions are made.
 
 Configurable from the cameras configuration page.
 ### nginx
-nginx is a reverse proxy which all client access to the NVR passes through.
-#### <span style="color: gray">nginx functions on the NVR</span>
+nginx (https://nginx.org/en/linux_packages.html) is a reverse proxy through which client access to all the NVR services are accessed through a single port (443).
+An additional port (446) provides access to the proxy host for the camera admin web pages.
+
+#### What nginx is used for on the NVR
 * TLS encryption of traffic.
 * Translation from Tomcat port 8080 to HTTPS port 443.
 * HTTP redirect from port 80.
 * Webserver, live and recorded streams made available through a single port (443) at their designated URLs.
 * Makes the unauthenticated live and recorded stream dependent on the web application authentication so that they 
 cannot be accessed without the user having logged in.
+* Access to the proxy to the cameras web admin pages provided through port 446.
+
+### NTP Server
+The NVR runs an NTP server (https://chrony-project.org/) to provide time synchronisation for cameras without them needing to be connected 
+to the internet.
 ## Development
 
 #### Platform for Development
@@ -331,7 +339,7 @@ configuration for Camera Type)</i>
   Note that for this function to be accessible outside the LAN, port forwarding must be set up for port 446.
 
   Provides access to camera web admin page through the NVR. Access is 
-protected by the NVR authentication system (Spring Security) as well as the cameras own authentication. SV3C 
+protected by the NVR authentication system (Spring Security) as well as the NVR's access token system. SV3C 
 and ZXTech camera credentials are provided by the NVR if they
 were set up in the camera configuration page, otherwise they will need to be entered after selecting the camera.
 Any other camera types will need their credentials entered after the camera is selected.
