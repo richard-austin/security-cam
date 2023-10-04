@@ -44,25 +44,29 @@ This feature requires access through port 446 as well as the usual https port 44
 
 ### Web Front End
 The Web Front End (client) is an Angular application using [Angular CLI](https://github.com/angular/angular-cli) version 12.0.5 or later.
+This forms the user interface of the web application.
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-
+### Tomcat Web Server
+Tomcat 9 (https://tomcat.apache.org/) hosts the server side of the web application (Web Back End).
 ### Web Back End
-The Web Back End (server) is a Grails application, running on Tomcat 9 (https://tomcat.apache.org/), which provides
+The Web Back End (server) is a Grails application (https://grails.org/), which provides
 a Restful API for the Angular Web Front End.
 It provides the calls to get and set application data as
 well as configuring the Camera setup.
 
 ### Media Server
-This provides a fragmented MP4 stream for each camera which forms the media source for
+Provides a fragmented MP4 stream for each camera which forms the media source for
 the Media Source Extensions video implementation used on the Web Front End.
 ffmpeg connects to a camera RTSP output and converts that to fmp4 which can optionally include the audio stream.
 ffmpeg feeds the input to the media server with an http stream while the media server supports web socket
 connections through which the media streams are read. The media streams are
-also available through http connections which are used when recordings are made. 
+also available through http connections which are used when recordings are made.
+
+nginx provides access to this through the same port as the Web Back End (https port 443).
 
 The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi.
 ### Wi-Fi Setup Service
-This runs as a Linux service as root user. It is a web application written in Python,
+Runs as a Linux service as root user. It is a web application written in Python,
 used to list Wi-Fi access points, list the NVR's LAN IP addresses and set up the NVR Wi-Fi and credentials.
 It also stops and starts the media server, recording service and the motion service
 during and after configuration updates.
@@ -99,6 +103,11 @@ cannot be accessed without the user having logged in.
 ### NTP Server
 The NVR runs an NTP server (https://chrony-project.org/) to provide time synchronisation for cameras without them needing to be connected 
 to the internet.
+
+If you want to isolate cameras from their cloud service, you can either block their IP
+addresses from internet access on your router, or set the camera to a fixed IP and set the 
+default gateway to the cameras own IP address. This will leave access to the LAN, but not external addresses.
+For the NTP time control to work, you must then set the cameras NTP server address to the NVR IP address.
 ## Development
 
 #### Platform for Development
@@ -116,28 +125,32 @@ to the internet.
 * Python 3.11.4
 
 ### Set up build environment
-* git clone git@github.com:richard-austin/security-cam.git
-* cd security-cam
-* gradle init
-
+```
+git clone git@github.com:richard-austin/security-cam.git
+cd security-cam
+gradle init
+```
 ### If intending to access through the Cloud Server.
 * If you intend to access the NVR via the Cloud Server (If not, ignore this)
   * In application.yml, ensure that environments -> production -> cloudProxy -> cloudHost
     is set to the correct IP for your Cloud server (cloudPort will normally be 8081)
 
 ### Build for deployment to Raspberry pi
-* ./gradlew buildDebFile 
-
+```
+./gradlew buildDebFile 
+```
 When the build completes navigate to where the .deb file was created:-
-
-* cd xtrn-scripts-and-config/deb-file-creation
-* scp the .deb file to the Raspberry pi
-
+```
+cd xtrn-scripts-and-config/deb-file-creation
+scp the .deb file to the Raspberry pi
+```
 ## Installation on the Raspberry pi
-* sudo apt update
-* sudo apt upgrade (restart if advised to after upgrade)
-* Navigate to where the .deb file is located
-* sudo apt install ./<i>deb_file_name</i>.deb 
+<pre>
+sudo apt update
+sudo apt upgrade (restart if advised to after upgrade)
+Navigate to where the .deb file is located
+sudo apt install ./<i>deb_file_name</i>.deb
+</pre>
 
 * Wait for installation to complete.
 * The Tomcat web server will take 1 - 2 minutes to start
@@ -147,9 +160,11 @@ When the build completes navigate to where the .deb file was created:-
 This will be required if you use the Cloud Service to connect
 to the NVR.
   * <i>Generate the site certificate..</i>
-    * cd /etc/security-cam
-    * sudo ./install-cert.sh
-    * Fill in the details it requests (don't put in any information you are not happy with being publicly visible, for 
+    ```
+    cd /etc/security-cam
+    sudo ./install-cert.sh
+    ```
+    Fill in the details it requests (don't put in any information you are not happy with being publicly visible, for 
 example you may want to put in a fake email address etc.)
 
 ## Setup for Direct Access (Browser to NVR)
@@ -164,7 +179,7 @@ into the NVT from "Admin Functions" on the General menu.
 <a>http://<i>raspberry_pi_ip_addr</i>:8080/cua</a>
 * Click on the hamburger icon at the top left of the page.
 * Select "Create or Update User Account" from the menu.
-* Enter the required user name.
+* Enter the required username.
 * Enter the password, then again in Confirm Password
 * Enter the email address you will use for forgotten password etc.
 * Enter email again in Confirm email address.
