@@ -113,7 +113,7 @@ For the NTP time control to work, you must then set the cameras NTP server addre
 #### Platform for Development
 * Ubuntu 23.04 (Lunar Lobster) on PC
 
-#### The following are what is used to build this project:-
+#### The following are required to build this project:-
 * go version go1.20.1
 * Angular CLI: 15.2.0 or greater
 * Node: 18.17.1
@@ -123,6 +123,8 @@ For the NTP time control to work, you must then set the cameras NTP server addre
 * JVM Version: 18.0.2-ea
 * Gradle 7.4.2
 * Python 3.11.4
+
+Using other versions may cause build issues in some cases.
 
 ### Set up build environment
 ```
@@ -140,10 +142,10 @@ gradle init
 ./gradlew buildDebFile 
 ```
 When the build completes navigate to where the .deb file was created:-
-```
+<pre>
 cd xtrn-scripts-and-config/deb-file-creation
 scp the .deb file to the Raspberry pi
-```
+</pre>
 ## Installation on the Raspberry pi
 <pre>
 sudo apt update
@@ -177,7 +179,7 @@ accessible from outside the secure LAN. cua is also available when logged
 into the NVT from "Admin Functions" on the General menu.
 * From a separate device on the LAN, open a browser and go to
 <a>http://<i>raspberry_pi_ip_addr</i>:8080/cua</a>
-* Click on the hamburger icon at the top left of the page.
+* Click on the <img src="README.images/hamburger-2-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> icon at the top left of the page.
 * Select "Create or Update User Account" from the menu.
 * Enter the required username.
 * Enter the password, then again in Confirm Password
@@ -190,7 +192,7 @@ are sent if the public IP address changes (when NVR is used on an
 internet connection with dynamic IP), or for reset password links to
 be sent when password is forgotten. To do this,
 the NVR email client must be logged into an SMTP client
-* Click on the hamburger icon at the top left of the page.
+* Click on the <img src="README.images/hamburger-2-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> icon at the top left of the page.
 * Select Set Up "SMTP Client" from the menu.
 * If the SMTP connection is to be authenticated (normally the case)...
   * Check the Authenticated checkbox.
@@ -315,24 +317,38 @@ not recommended unless Onvif is not supported on the device.
 
 The NVR has a menu bar at the top of the page. On a PC screen
 this menu bar will normally show the menu names, though on a mobile
-device a hamburger icon must be tapped to reveal them.
+device a <img src="README.images/hamburger-2-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> icon must be tapped to reveal them.
 
-If no function is selected, the
-page below will be blank.
+Before any option is selected, the
+page below the menu bar will be blank.
 
 #### Select Camera
 This menu allows selection of live video/audio camera streams. The names
 are listed in the form <i>Camera Name(Stream Description)</i>
-so there can be more than one stream per camera
+so there can be more than one stream per camera.
+  
+> On selecting the live stream, the video will be shown with a 
+<img src="README.images/stopwatch-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
+icon and a selector just below it. The selection option is the maximum
+> latency in seconds. You can set this to the lowest setting where the video remains stable. 
+> The lowest usable setting is dependent on various factors and won't
+> necessarily be the same for all your cameras.
+> 
+> If two-way audio is enabled, a <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
+> button will also be present below the video. Select the required audio input
+> device and click the <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button to
+> speak. While audio output is active, the button changes to <img src="README.images/microphone-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
+> , click it again to turn audio output off.
 
-<i>Multi Camera View</i>
-
+##### Multi Camera View
 The last option on the Select Camera menu is Multi Camera View. This shows one stream
 from each camera in the configuration. The default stream shown
 for a camera will be the one selected as Default On Multi Display.
 Camera streams can be switched from the menu shown when you click the
 <img src="README.images/settings-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
 button at the top left of the page.
+> Each video on multi camera view will have the latency chasing setter below it. Any
+> cameras with two-way audio enabled will also have the <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button and device selector.
 #### Select Recording
 This menu allows selection of recordings made on camera streams.
 The names
@@ -417,7 +433,7 @@ This defaults to "on" when the local NVR account is not set up.
   The initial setup functions used to set credentials for a direct access account.
 This can be accessed on the LAN without authentication at http://nvr_lan_ip_addr:8080/cua/.
 
-  Click on the hamburger icon at the top left for the menu options·
+  Click on the <img src="README.images/hamburger-2-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> icon at the top left for the menu options·
   * **Create or Update User Account**
 
     When accessed via the General -> Admin Functions menu, a user account will already exist. 
