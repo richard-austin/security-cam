@@ -14,31 +14,34 @@ Raspberry pi running headless (server) version of Ubuntu 23.04 (Lunar Lobster).
 
 ### Security
 The NVR is designed to run on a LAN which is protected from unauthorised
-external access. From within the LAN, access to administrative functions is possible.
+external access. From within the LAN, access to administrative functions is possible without authentication.
 Secure authenticated access is obtained through ports 443 and 446 via nginx.
-These ports, plus port 80,  are set up for port forwarding on the router when direct access is used.
+These ports, plus port 80,  are set up for port forwarding on the router when direct access
+from outside the LAN is required.
 
 When the NVR is accessed through the Cloud service, port forwarding is not required
 as all communication is through a client connection that the NVR makes to the
-Cloud service.
+Cloud service. This does not include camera web admin pages which are
+available with direct access.
 #### NVR features
 * Secure authenticated web access.
-* Live, low latency (approx 1 second) video from network cameras with RTSP source.
-* Onvif device and capabilities discovery.
+* Live, low latency (approx 1 second or less) video from network cameras with RTSP source.
+* Onvif support for device and capabilities discovery.
 * View individual or all cameras on one page.
 * Recordings of motion events, selectable by date and time.
 * Recordings triggered by Motion service (https://github.com/Motion-Project/motion)
 * Recordings triggered by FTP of an image from camera (can be used with cameras which can ftp an image on detecting motion).  
-* Quick setup of certain camera parameters for SV3C type cameras.
+* Quick reboot or setup of key camera parameters for SV3C type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
-This feature requires access through port 446 as well as the usual https port 443.
-* Configuration editor supporting Onvif camera discovery.
+This feature requires access through port 446 as well as the usual https port 443. *This is not available when connecting 
+via the Cloud Service.*
+* Configuration editor supporting Onvif discovery of all or specific cameras.
 * email notification if public IP address changes (when using port forwarding).
 * Initial set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
 * Get NVR LAN IP addresses.
-* Get Local Wi-Fi details.
-* Set/unset NVR Wi-Fi access.
-* NTP server runs on NVR for cameras to sync time to without the need for them to connect to the internet.
+* Get Local Wi-Fi source details.
+* Set up Wi-Fi connection.
+* NTP server runs on NVR for cameras to sync time without the need for them to connect to the internet.
 * Enable/Disable access through Cloud server.
 * All parts of project and dependencies deployed using deb file.
 
@@ -60,33 +63,32 @@ the Media Source Extensions video implementation used on the Web Front End.
 ffmpeg connects to a camera RTSP output and converts that to fmp4 which can optionally include the audio stream.
 ffmpeg feeds the input to the media server with an http stream while the media server supports web socket
 connections through which the media streams are read. The media streams are
-also available through http connections which are used when recordings are made.
+also available through http connections which are used for recording.
 
-nginx provides access to this through the same port as the Web Back End (https port 443).
+###### nginx provides access to this through the same port as the Web Back End (https port 443).
 
-The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi.
+###### The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi.
 ### Wi-Fi Setup Service
-Runs as a Linux service as root user. It is a web application written in Python,
+Runs as a root Linux service. It is a web application written in Python,
 used to list Wi-Fi access points, list the NVR's LAN IP addresses and set up the NVR Wi-Fi and credentials.
 It also stops and starts the media server, recording service and the motion service
 during and after configuration updates.
 
 ### Camera Recordings Service
-This is an FTP server to which cameras can be set up to ftp an image file
-when they detect motion. In response to receiving the image file, this
-server starts recording from the appropriate (http output) stream on the
-media server, making a recording of minimum length 30 seconds, but extended by a further 
-30 seconds when another image file is FTP'd before a recording is completed.
-
-Use of the Camera Recordings Service is configurable from the cameras configuration page and
-is an alternative to the recording being triggered by the Motion service.
+Records a section of video in response to an FTP image upload from a camera.
+The ftp upload is to a specific path which the Camera Recordings Service uses
+to determine which camera to initiate a recording on. The path corresponds to the cameras
+cameraID.
+Recordings are of minimum length 30 seconds, but extended by a further 30 seconds whenever a further FTP upload is received 
+before the recording is complete.
+###### Cameras which can ftp an image on detecting motion may use this service. The camera ftp client should connect to port 2121 on the NVR with credentials user and password 12345. The remote directory should be set to the camera ID (camera*n* as appropriate).
 ### Motion Service
 Provides motion detection and recording. <a href="https://github.com/Motion-Project/motion">Motion</a> is a third party project. 
-On this NVR, Motion can detect and record motion on one stream (usually the lower resolution stream to keep CPU usage down) and
+On this NVR, Motion can detect and record motion on one stream of each camera, (usually the lower resolution stream to keep CPU usage lower) and
 trigger a recording on another (usually the higher resolution) stream so that recordings
 in both resolutions are made. 
 
-Configurable from the cameras configuration page.
+###### Configurable from the cameras configuration page. You can select either FTP or Motion Service triggered recording or none for any camera, but not both together.
 ### nginx
 nginx (https://nginx.org/en/linux_packages.html) is a reverse proxy through which client access to all the NVR services are accessed through a single port (443).
 An additional port (446) provides access to the proxy host for the camera admin web pages.
@@ -104,10 +106,8 @@ cannot be accessed without the user having logged in.
 The NVR runs an NTP server (https://chrony-project.org/) to provide time synchronisation for cameras without them needing to be connected 
 to the internet.
 
-If you want to isolate cameras from their cloud service, you can either block their IP
-addresses from internet access on your router, or set the camera to a fixed IP and set the 
-default gateway to the cameras own IP address. This will leave access to the LAN, but not external addresses.
-For the NTP time control to work, you must then set the cameras NTP server address to the NVR IP address.
+###### If you want to isolate cameras from their cloud service, you can either block their IP addresses from internet access on your router, or set the camera to a fixed IP and set the default gateway to the cameras own IP address. This will leave access to the LAN, but not external addresses.
+###### For the NTP time control to work, you must then set the cameras NTP server address to the NVR IP address.
 ## Development
 
 #### Platform for Development
