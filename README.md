@@ -5,10 +5,31 @@ This is a Network Video Recorder accessed through a web browser, designed to run
 Access can be either direct or through a Cloud service. There is no live implementation
 of the Cloud Service, but the source code is freely available at
 https://github.com/richard-austin/cloud-server.
-It requires network cameras providing RTSP streams with the video encoded as H264 or H265. No
-encoding of video streams is done as, running on a Raspberry pi, this
-would be too CPU intensive. Audio streams in any format other than AAC are encoded to AAC.
+It requires network cameras providing RTSP streams with the video encoded as H264 or H265. Audio on the RTSP streams
+is supported. The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on the browser using Media Source Extensions (MSE).
 
+#### NVR features
+* Secure authenticated web access.
+* Live, low latency (approx 1 second or less) video and audio from network cameras with RTSP source.
+* Onvif support for device and capabilities discovery.
+* View individual or all cameras on one page.
+* Recordings triggered by Motion service (https://github.com/Motion-Project/motion)
+*OR*
+Recordings triggered by FTP of an image from camera (can be used with cameras which can ftp an image on detecting motion). 
+* Recordings of motion events, selectable by date and time.
+* Quick reboot or setup of key camera parameters for SV3C type cameras.
+* Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
+  This feature requires access through port 446 as well as the usual https port 443. *This is not available when connecting
+  via the Cloud Service.*
+* Configuration editor supporting Onvif discovery of all, or specific cameras.
+* email notification if public IP address changes (when using port forwarding).
+* Initial set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
+* Get NVR LAN IP addresses.
+* Get Local Wi-Fi source details.
+* Set up Wi-Fi connection.
+* NTP server runs on NVR for cameras to sync time without the need for them to connect to the internet.
+* Enable/Disable access through Cloud server.
+* All parts of project and dependencies deployed using deb file.
 ### Run Time Platform for NVR
 Raspberry pi running headless (server) version of Ubuntu 23.04 (Lunar Lobster).
 
@@ -23,28 +44,6 @@ When the NVR is accessed through the Cloud service, port forwarding is not requi
 as all communication is through a client connection that the NVR makes to the
 Cloud service. This does not include camera web admin pages which are
 available with direct access.
-#### NVR features
-* Secure authenticated web access.
-* Live, low latency (approx 1 second or less) video from network cameras with RTSP source.
-* Onvif support for device and capabilities discovery.
-* View individual or all cameras on one page.
-* Recordings of motion events, selectable by date and time.
-* Recordings triggered by Motion service (https://github.com/Motion-Project/motion)
-* Recordings triggered by FTP of an image from camera (can be used with cameras which can ftp an image on detecting motion).  
-* Quick reboot or setup of key camera parameters for SV3C type cameras.
-* Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
-This feature requires access through port 446 as well as the usual https port 443. *This is not available when connecting 
-via the Cloud Service.*
-* Configuration editor supporting Onvif discovery of all or specific cameras.
-* email notification if public IP address changes (when using port forwarding).
-* Initial set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
-* Get NVR LAN IP addresses.
-* Get Local Wi-Fi source details.
-* Set up Wi-Fi connection.
-* NTP server runs on NVR for cameras to sync time without the need for them to connect to the internet.
-* Enable/Disable access through Cloud server.
-* All parts of project and dependencies deployed using deb file.
-
 ### Web Front End
 The Web Front End (client) is an Angular application using [Angular CLI](https://github.com/angular/angular-cli) version 12.0.5 or later.
 This forms the user interface of the web application.
@@ -60,9 +59,8 @@ well as configuring the Camera setup.
 ### Media Server
 Provides a fragmented MP4 stream for each camera which forms the media source for
 the Media Source Extensions video implementation used on the Web Front End.
-ffmpeg connects to a camera RTSP output and converts that to fmp4 which can optionally include the audio stream.
-ffmpeg feeds the input to the media server with an http stream while the media server supports web socket
-connections through which the media streams are read. The media streams are
+ffmpeg is used for camera RTSP connections and multiplexing to fMP4 and feeding this to the media server. 
+The media server supports web socket client connections through which the media streams are read. The media streams are
 also available through http connections which are used for recording.
 
 ###### nginx provides access to this through the same port as the Web Back End (https port 443).
@@ -113,7 +111,7 @@ to the internet.
 #### Platform for Development
 * Ubuntu 23.04 (Lunar Lobster) on PC
 
-#### The following are required to build this project:-
+#### The project is verified to build with the following:-
 * go version go1.20.1
 * Angular CLI: 15.2.0 or greater
 * Node: 18.17.1
