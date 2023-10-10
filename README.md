@@ -31,8 +31,7 @@ Recordings triggered by FTP of an image from camera (can be used with cameras wh
 * Enable/Disable access through Cloud server.
 * All parts of project and dependencies deployed using deb file.
 ### Run Time Platform for NVR
-Raspberry pi running headless (server) version of Ubuntu 23.04 (Lunar Lobster).
-
+The current build configuration (./gradlew buildDebFile) is for Raspberry pi running headless (server) version of Ubuntu 23.04 (Lunar Lobster).
 ### Security
 The NVR is designed to run on a LAN which is protected from unauthorised
 external access. From within the LAN, access to administrative functions is possible without authentication.
@@ -139,6 +138,13 @@ gradle init
 ```
 ./gradlew buildDebFile 
 ```
+This will create a deb file with a name of the form security-cam_*VERSION*-*nn*-*ID-dirty*_arm64.deb
+Where:-
+* *VERSION* is the most recent git repo tag
+* *nn* Is the number of commits since the last git tag (not present if no commits since last tag.)
+* *ID* The last git commit ID (not present if no commits since last tag.)
+* *dirty* "dirty" is included in the name if there were uncommitted changes to the source code when built.
+
 When the build completes navigate to where the .deb file was created:-
 <pre>
 cd xtrn-scripts-and-config/deb-file-creation
@@ -158,7 +164,7 @@ sudo apt install ./<i>deb_file_name</i>.deb
 * <i>If this is the first installation on the Raspberry pi..</i>
   * Make a note of the product key (a few lines up). 
 This will be required if you use the Cloud Service to connect
-to the NVR.
+to the NVR, otherwise it is not required.
   * <i>Generate the site certificate..</i>
     ```
     cd /etc/security-cam
@@ -171,8 +177,7 @@ example you may want to put in a fake email address etc.)
 #### Set up user account
 To log into the NVR when accessing it directly, 
 a user account must be set up. This is done using the Create User Account
-application (cua) which is accessible from the LAN without being 
-logged in. Be sure port 8080 on the Raspberry pi is not 
+application (cua) which is accessible from the LAN without authentication. Be sure port 8080 on the Raspberry pi is not 
 accessible from outside the secure LAN. cua is also available when logged
 into the NVT from "Admin Functions" on the General menu.
 * From a separate device on the LAN, open a browser and go to
@@ -207,10 +212,10 @@ the NVR email client must be logged into an SMTP client
 
 ## Login to the NVR
 * Set a browser to <a>https://<i>ip_addrs_of_raspberry_pi</i></a>
-* Ignore the warning which may be given as a result of the homer generated
+* Ignore the warning which may be given as a result of the home generated
 site certificate and continue to the log in dialogue box.
 * Enter the username and password set up under "Set up user account". 
-You can check "Remember me" to skip having to log in in future.
+You can check "Remember me" to enable auto login in the future.
 
 ## Set up Wi-Fi (if required)
 If you want to use Wi-Fi, and it hasn't previously been set up on the Raspberry pi, it can be done from the NVR. Note
