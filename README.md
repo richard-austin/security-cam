@@ -64,7 +64,7 @@ also available through http connections which are used for recording.
 
 ###### nginx provides access to this through the same port as the Web Back End (https port 443).
 
-###### The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi.
+###### The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi. To change to a different architecture, edit the build task in fmp4-ws-media-server/build.gradle
 ### Wi-Fi Setup Service
 Runs as a root Linux service. It is a web application written in Python,
 used to list Wi-Fi access points, list the NVR's LAN IP addresses and set up the NVR Wi-Fi and credentials.
@@ -172,7 +172,11 @@ to the NVR, otherwise it is not required.
     ```
     Fill in the details it requests (don't put in any information you are not happy with being publicly visible, for 
 example you may want to put in a fake email address etc.)
-
+## Use with the Cloud Service
+#### If you don't want to use a Cloud Service for access, ignore this section and see "Setup for Direct Access (Browser to NVR)"
+The NVR will have the Cloud Proxy enabled by default on initial setup, and provided that the correct Cloud Server address/port
+was entered in application.yml, you should be able to set up a cloud account from your cloud browser session, using the product
+key which was shown near the end of the NVR installation process. Please see the README.md for the Cloud Service for details on setting up a cloud account.
 ## Setup for Direct Access (Browser to NVR)
 #### Set up user account
 To log into the NVR when accessing it directly, 
