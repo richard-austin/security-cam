@@ -28,6 +28,22 @@ export class Motion {
   trigger_recording_on: string ='';  // The name of the camera stream on which recordings will be triggered following
                                      // Motion events on this camera stream (usually another stream on the same physical
                                      // camera).
+  threshold: number = 1500;  //Threshold for declaring motion.
+                             // The threshold is the number of changed pixels counted after noise filtering, masking, despeckle, and labelling.
+                             // The 'threshold' option is the most important detection setting.
+                             // When motion runs it compares the current image frame with the previous and counts the number
+                             // of changed pixels after having processed the image with noise filtering,
+                             // masking, despeckle and labeling.
+                             // If more pixels than defined by 'threshold' have changed we assume that we have detected motion.
+                             // Set the threshold as low as possible so that you get the motion you want detected but
+                             // large enough so that you do not get detections from noise and plants moving.
+                             // Note that the larger your frames are, the more pixels you have. So for large picture frame
+                             // sizes you need a higher threshold. Use the -s (setup mode) command line option and/or the
+                             // text_changes config file option to experiment to find the right threshold value.
+                             // If you do not get small movements detected (see the mouse on the kitchen floor)
+                             // lower the value. If motion detects too many birds or moving trees, increase the number.
+                             // (Unless of course you are one of the many many users who use Motion to bird watch!)
+                             // Practical values would be from a few hundred to thousands.
 }
 
 export class Recording

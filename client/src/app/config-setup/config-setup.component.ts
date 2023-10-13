@@ -95,7 +95,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
-  streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
+  streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'threshold', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
   streamFooterColumns = ['buttons']
 //  camSetupFormGroup!: FormGroup;
   camControls!: FormArray;
@@ -227,6 +227,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
             disabled: !stream.motion?.enabled
           }, [Validators.required, Validators.min(90), Validators.max(3000)]),
           //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
+          threshold: new FormControl({
+            value: stream.motion?.threshold,
+            disabled: !stream.motion.enabled
+          }, [Validators.min(1), Validators.max(2147483647)]),
           trigger_recording_on: new FormControl({
             value: stream.motion.trigger_recording_on,
             disabled: !stream.motion.enabled
@@ -533,6 +537,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.FixUpCamerasData();
   }
 
+  setThreshold($event: Event, stream: Stream) {
+    if(stream.motion.enabled) {
+      let input: HTMLInputElement = $event.target as HTMLInputElement;
+      stream.motion.threshold =  Number(input.value);
+    }
+  }
+
   setRecordingTrigger($event: MatSelectChange, stream: Stream) {
     if (stream.motion.enabled) {
       stream.motion.trigger_recording_on = $event.value;
@@ -717,7 +728,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   ftpSet(cam: Camera): boolean {
     return cam.ftp;
   }
-
   motionSet(cam: Camera): boolean {
     let hasMotionSet: boolean = false;
     if (cam?.streams !== undefined) {
