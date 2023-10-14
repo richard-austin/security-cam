@@ -230,7 +230,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           threshold: new FormControl({
             value: stream.motion?.threshold,
             disabled: !stream.motion.enabled
-          }, [Validators.min(1), Validators.max(2147483647)]),
+          }, [Validators.required, Validators.min(1), Validators.max(2147483647)]),
           trigger_recording_on: new FormControl({
             value: stream.motion.trigger_recording_on,
             disabled: !stream.motion.enabled
@@ -673,13 +673,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         Array.from( // Cameras
           this.cameras.values())[camIndex].streams.values())[streamIndex];
 
-      stream.motion.mask_file = fileUploadInput.files[0].name;
+      stream.motion.mask_file = fileUploadInput?.files[0].name;
 
       let control: FormControl = this.getStreamControl(camIndex, streamIndex, 'mask_file');
       control.setValue(stream.motion.mask_file);
       if (control.valid) {
         // Upload file to server
-        this.cameraSvc.uploadMaskFile(fileUploadInput.files[0])
+        this.cameraSvc.uploadMaskFile(fileUploadInput?.files[0])
           .subscribe(() => {
               this.reporting.successMessage = stream.motion.mask_file + ' uploaded successfully'
             },

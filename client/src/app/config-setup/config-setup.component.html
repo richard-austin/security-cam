@@ -360,10 +360,6 @@
                   </mat-checkbox>
                 </td>
               </ng-container>
-
-
-
-
               <ng-container matColumnDef="threshold">
                 <th mat-header-cell *matHeaderCellDef>Motion Threshold</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index" [style.width.px]="100">
@@ -375,18 +371,18 @@
                            matTooltip="Threshold for declaring motion. The threshold is the number of changed pixels counted after noise filtering, masking, despeckle, and labelling"
                            matTooltipClass="tooltip"
                            placeholder="Threshold">
-                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'threshold').hasError('pattern')">
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'threshold').hasError('max')">
                       Should be a number between 1 and 2147483647
+                    </mat-error>
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'threshold').hasError('min')">
+                      Should be a number between 1 and 2147483647
+                    </mat-error>
+                    <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'threshold').hasError('required')">
+                      Threshold is required
                     </mat-error>
                   </mat-form-field>
                 </td>
               </ng-container>
-
-
-
-
-
-
               <ng-container matColumnDef="trigger_recording_on">
                 <th mat-header-cell *matHeaderCellDef>Trigger Recording On</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
