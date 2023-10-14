@@ -12,6 +12,7 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 #### NVR features
 * Secure authenticated web access.
 * Live, low latency (approx 1 second or less) video and audio.
+* Supports network cameras with RTSP streams H264/H265/audio (not USB cameras).
 * Onvif support for device and capabilities discovery.
 * View live stream from individual or all cameras.
 * Recordings triggered by Motion service (https://github.com/Motion-Project/motion)
@@ -329,6 +330,7 @@ not recommended unless Onvif is not supported on the device.
 | Netcam URI               | The cameras RTSP video/audio url.                                                                                                                                                                                                           | Yes                    |
 | Default On Multi Display | Sets the stream as this cameras default on the Multi Camera View. The multi camera view allows switching to other streams than the default.                                                                                                 | N/A                    |
 | Motion Sensing           | If checked, the motion service will be used to detect motion from this stream. To keep CPU usage down, it's best to select a lower resolution stream. Not available if FTP is selected on the camera.                                       | N/A                    |
+| Motion Threshold         | See Motion project documentation <a href="https://motion-project.github.io/motion_config.html#threshold">here</a>                                                                                                                           | N/A                    |
 | Trigger Recording On     | When Motion Sensing is selected for the stream, you can select another (usually higher resolution) stream to record from in addition to the stream used for motion detection. Both streams will be selectable on the Select Recording menu. | N/A                    |
 | Mask File                | Select a mask file for this stream in the motion service. (see https://motion-project.github.io/motion_config.html#mask_file).                                                                                                              | N/A                    |
 | Video Width              | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                                                 | Yes                    |
