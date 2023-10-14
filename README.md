@@ -1,4 +1,5 @@
-<h2 style="text-align: center">Security Cam, CCTV Via Web Browser</h2>
+<h2 style="text-align: center">Security Cam</h2>
+<h2 style="text-align: center">CCTV on Raspberry Pi 4 Via Web Browser</h2>
 
 ### Introduction
 This is a Network Video Recorder accessed through a web browser, designed to run on a Raspberry pi.
