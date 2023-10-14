@@ -34,7 +34,8 @@ class Motion {
     boolean enabled=false    // If true, motion detection is enabled for the stream
     String mask_file=''  // Mask file which defines area used in motion sensing
     String trigger_recording_on=''  // The name of the camera stream on which recordings will be triggered following
-    // Motion events on this camera stream (usually another stream on the same physical camera).
+                                    // Motion events on this camera stream (usually another stream on the same physical camera).
+    Integer threshold = 1500// Threshold for declaring motion.
 }
 
 class Stream {
