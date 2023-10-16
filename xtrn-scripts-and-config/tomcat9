@@ -5,8 +5,8 @@
 
 # shellcheck disable=SC2034  // Used to suppress warning in IntelliJ IDEA
 
-# Set JDK to version 18
-JAVA_HOME=/usr/lib/jvm/java-18-openjdk-arm64
+# Set JRE to version 19
+JAVA_HOME=/usr/lib/jvm/java-1.19.0-openjdk-arm64
 
 # You may pass JVM startup parameters to Java here. If you run Tomcat with
 # Java 8 instead of 9 or newer, add "-XX:+UseG1GC" to select a suitable GC.

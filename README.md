@@ -121,8 +121,8 @@ to the internet.
 * npm: 9.9.7
 * Package Manager: npm 9.6.7
 * Grails Version: 5.3.2
-* OpenJDK version "18.0.2-ea"
-* Gradle 7.4.2
+* openjdk version "19.0.2" 2023-01-17
+* Gradle 7.6
 * Python 3.11.4
 
 Using other versions may cause build issues in some cases.
