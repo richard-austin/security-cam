@@ -13,11 +13,12 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * Secure authenticated web access.
 * Live, low latency (approx 1 second or less) video and audio.
 * Supports network cameras with RTSP streams H264/H265/audio (not USB cameras).
-* Onvif support for device and capabilities discovery.
+* Onvif support for device and capabilities discovery and PTZ control.
 * View live stream from individual or all cameras.
 * Recordings triggered by Motion service (https://github.com/Motion-Project/motion)
 *OR* by FTP of an image from camera (can be used with cameras which can ftp an image on detecting motion). 
 * Recordings of motion events, selectable by date and time.
+* PTZ for cameras supporting this feature through Onvif.
 * Quick reboot or setup of key camera parameters for SV3C type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
   This feature requires access through port 446 as well as the usual https port 443. *This is not available when connecting
