@@ -3,9 +3,9 @@
 
 ### Introduction
 This is a Network Video Recorder accessed through a web browser, designed to run on a Raspberry pi.
-Access can be either direct or through a Cloud service. There is no live implementation
-of the Cloud Service, but the source code is freely available at
-https://github.com/richard-austin/cloud-server.
+Access can be either direct ~~or through a Cloud service~~. ~~There is no live implementation
+of the Cloud Service, but the source code is freely available at~~
+~~https://github.com/richard-austin/cloud-server.~~
 It requires network cameras providing RTSP streams with the video encoded as H264 or H265. Audio is supported. 
 The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on the browser using Media Source Extensions (MSE).
 
@@ -21,8 +21,8 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * PTZ for cameras supporting this feature through Onvif.
 * Quick reboot or setup of key camera parameters for SV3C type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
-  This feature requires access through port 446 as well as the usual https port 443. *This is not available when connecting
-  via the Cloud Service.*
+  This feature requires access through port 446 as well as the usual https port 443. ~~*This is not available when connecting
+  via the Cloud Service.*~~
 * Configuration editor supporting Onvif discovery of cameras and their capabilities. Cam also find capabilities of specific cameras.
 * email notification if public IP address changes (for when port forwarding is used).
 * Initial unauthenticated set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
@@ -41,9 +41,9 @@ Secure authenticated access is through ports 443 and 446 via nginx.
 These ports, plus port 80,  are set up for port forwarding on the router when direct access
 from outside the LAN is required.
 
-When the NVR is accessed through the Cloud service, port forwarding is not required
+~~When the NVR is accessed through the Cloud service, port forwarding is not required
 as all communication is through a client connection that the NVR makes to the
-Cloud service. Camera web admin pages are not accessible through the Cloud Service.
+Cloud service. Camera web admin pages are not accessible through the Cloud Service.~~
 ### Tomcat Web Server
 Tomcat 9 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
 to these through port 8080.
@@ -202,10 +202,10 @@ git clone git@github.com:richard-austin/security-cam.git
 cd security-cam
 gradle init
 ```
-### If accessing through the Cloud Server.
-* *Skip this if only using direct NVR access from the browser* 
-  * In application.yml, ensure that environments -> production -> cloudProxy -> cloudHost
-    is set to the correct IP for your Cloud server (cloudPort will normally be 8081)
+~~### If accessing through the Cloud Server.~~
+~~* *Skip this if only using direct NVR access from the browser*~~ 
+~~* In application.yml, ensure that environments -> production -> cloudProxy -> cloudHost
+    is set to the correct IP for your Cloud server (cloudPort will normally be 8081)~~
 
 ### Build for deployment to Raspberry pi
 ```
@@ -238,9 +238,9 @@ sudo apt install ./<i>deb_file_name</i>.deb
 * The Tomcat web server will take 1 - 2 minutes to start
   the application.
 * <i>If this is the first installation on the Raspberry pi..</i>
-  * Make a note of the product key (a few lines up). 
-This will be required if you use the Cloud Service to connect
-to the NVR, otherwise it is not required.
+  ~~* Make a note of the product key (a few lines up).~~ 
+~~This will be required if you use the Cloud Service to connect
+to the NVR, otherwise it is not required.~~
   * <i>Generate the site certificate..</i>
     ```
     cd /etc/security-cam
@@ -253,11 +253,11 @@ to the NVR, otherwise it is not required.
     sudo systemctl restart nginx
     ```
 
-## Use with the Cloud Service
-#### If you don't want to use a Cloud Service for access, ignore this section and see "Setup for Direct Access (Browser to NVR)"
-The NVR will have the Cloud Proxy enabled by default on initial setup, and provided that the correct Cloud Server address/port
+~~## Use with the Cloud Service~~
+~~#### If you don't want to use a Cloud Service for access, ignore this section and see "Setup for Direct Access (Browser to NVR)"~~
+~~The NVR will have the Cloud Proxy enabled by default on initial setup, and provided that the correct Cloud Server address/port
 was entered in application.yml, you will be able to set up a cloud account from your cloud browser session, using the product
-key which was shown near the end of the NVR installation text. Please see the README.md for the Cloud Service for details on setting up a cloud account.
+key which was shown near the end of the NVR installation text. Please see the README.md for the Cloud Service for details on setting up a cloud account.~~
 ## Setup for Direct Access (Browser to NVR)
 #### Set up user account
 To log into the NVR when accessing it directly, 
