@@ -3,9 +3,9 @@
 
 ### Introduction
 This is a Network Video Recorder accessed through a web browser, designed to run on a Raspberry pi.
-Access can be either direct or through a Cloud service. There is no live implementation
-of the Cloud Service, but the source code is freely available at
-https://github.com/richard-austin/cloud-server.
+Access can be either direct ~~or through a Cloud service~~. ~~There is no live implementation
+of the Cloud Service, but the source code is freely available at~~
+~~https://github.com/richard-austin/cloud-server.~~
 It requires network cameras providing RTSP streams with the video encoded as H264 or H265. Audio is supported. 
 The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on the browser using Media Source Extensions (MSE).
 
@@ -13,15 +13,16 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * Secure authenticated web access.
 * Live, low latency (approx 1 second or less) video and audio.
 * Supports network cameras with RTSP streams H264/H265/audio (not USB cameras).
-* Onvif support for device and capabilities discovery.
+* Onvif support for device and capabilities discovery and PTZ control.
 * View live stream from individual or all cameras.
 * Recordings triggered by Motion service (https://github.com/Motion-Project/motion)
 *OR* by FTP of an image from camera (can be used with cameras which can ftp an image on detecting motion). 
 * Recordings of motion events, selectable by date and time.
+* PTZ for cameras supporting this feature through Onvif.
 * Quick reboot or setup of key camera parameters for SV3C type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
-  This feature requires access through port 446 as well as the usual https port 443. *This is not available when connecting
-  via the Cloud Service.*
+  This feature requires access through port 446 as well as the usual https port 443. ~~*This is not available when connecting
+  via the Cloud Service.*~~
 * Configuration editor supporting Onvif discovery of cameras and their capabilities. Cam also find capabilities of specific cameras.
 * email notification if public IP address changes (for when port forwarding is used).
 * Initial unauthenticated set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
@@ -40,9 +41,9 @@ Secure authenticated access is through ports 443 and 446 via nginx.
 These ports, plus port 80,  are set up for port forwarding on the router when direct access
 from outside the LAN is required.
 
-When the NVR is accessed through the Cloud service, port forwarding is not required
+~~When the NVR is accessed through the Cloud service, port forwarding is not required
 as all communication is through a client connection that the NVR makes to the
-Cloud service. Camera web admin pages are not accessible through the Cloud Service.
+Cloud service. Camera web admin pages are not accessible through the Cloud Service.~~
 ### Tomcat Web Server
 Tomcat 9 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
 to these through port 8080.
@@ -65,15 +66,83 @@ ffmpeg is used for camera RTSP connections and multiplexing to fragmented MP4, t
 The media server supports web socket client connections through which the media streams are read. The media streams are
 also available through http connections which are used for recording.
 
-###### nginx provides access to this through the same port as the Web Back End (https port 443).
+nginx provides access to this service with common origin (port 443) to the Web Back End (https port 443).
 
-###### The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi. To change to a different architecture, edit the build task in fmp4-ws-media-server/build.gradle
+The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi. To change to a different architecture, edit the build task in fmp4-ws-media-server/build.gradle
 ### Wi-Fi Setup Service
 Runs as a root Linux service. It is a web application written in Python,
 used to list Wi-Fi access points, list the NVR's LAN IP addresses and set up the NVR Wi-Fi and credentials.
 It also stops and starts the media server, recording service and the motion service
 during configuration updates.
 
+### ffmpeg
+ffmpeg version 4 is used in the NVR as versions 5 and above will not correctly mux the rtsp to fmp4 when audio is present. 
+The problem is due to a lack of timestamps in one or both of the streams, and whereas ffmpeg4
+deals with it satisfactorily, version 5 and above don't want to know, giving the below error messages continuously.
+<pre>
+pts has no value
+Packet duration: -1131 / dts: 152727 is out of range
+</pre>
+
+As ffmpeg 4 is not available as standard on Ubuntu 23.04, I have built an ffmpeg v4 executable
+for ARM64 architecture (at xtrn-scripts-and-config/ffmpeg-v4.4.4) which is deployed on installation of the 
+main project deb file. 
+
+If you are deploying to a Raspberry pi, you can skip to the *Camera Recordings Service* section.
+
+If you are deploying the NVR to a non ARM64 platform, you will need to
+build ffmpeg 4 on that platform as follows:-. 
+
+
+```bash
+wget https://ffmpeg.org/releases/ffmpeg-4.4.4.tar.xz
+tar -xvf ffmpeg-4.4.4.tar.xz
+cd ffmpeg-4.4.4/
+./configure
+make
+```
+The executable ffmpeg will be in the ffmpeg-4.4.4 directory. To deploy it in the deb file with the rest of the 
+NVR, copy it to the project at xtrn-scripts-and-config/ffmpeg-v4.4.4.
+##### ffmpeg Build problem
+On Ubuntu 23.10, I got the following compilation error when building ffmpeg 4: -
+<pre>
+CC      libavformat/adtsenc.o
+./libavcodec/x86/mathops.h: Assembler messages:
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error:ffmpeg-4.4.4 operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+./libavcodec/x86/mathops.h:125: Error: operand type mismatch for `shr'
+make: *** [ffbuild/common.mak:81: libavformat/adtsenc.o] Error 1
+</pre>
+
+To fix this, copy xtrn-scripts-and-config/ffmpeg-v4.4.4/mathopts.patch to
+your ffmpeg-4.4.4 build directory and (from theffmpeg-4.4.4 build directory) run
+
+```text
+patch -u -b  ./libavcodec/x86/mathops.h ffmpeg4.patch 
+```
+Run 
+```text
+make clean
+make
+```
+
+and it should now build OK.
 ### Camera Recordings Service
 Records a section of video in response to an FTP image upload from a camera.
 The ftp upload is to a specific path which the Camera Recordings Service uses
@@ -133,10 +202,10 @@ git clone git@github.com:richard-austin/security-cam.git
 cd security-cam
 gradle init
 ```
-### If accessing through the Cloud Server.
-* *Skip this if only using direct NVR access from the browser* 
-  * In application.yml, ensure that environments -> production -> cloudProxy -> cloudHost
-    is set to the correct IP for your Cloud server (cloudPort will normally be 8081)
+~~### If accessing through the Cloud Server.~~
+~~* *Skip this if only using direct NVR access from the browser*~~ 
+~~* In application.yml, ensure that environments -> production -> cloudProxy -> cloudHost
+    is set to the correct IP for your Cloud server (cloudPort will normally be 8081)~~
 
 ### Build for deployment to Raspberry pi
 ```
@@ -169,9 +238,9 @@ sudo apt install ./<i>deb_file_name</i>.deb
 * The Tomcat web server will take 1 - 2 minutes to start
   the application.
 * <i>If this is the first installation on the Raspberry pi..</i>
-  * Make a note of the product key (a few lines up). 
-This will be required if you use the Cloud Service to connect
-to the NVR, otherwise it is not required.
+  ~~* Make a note of the product key (a few lines up).~~ 
+~~This will be required if you use the Cloud Service to connect
+to the NVR, otherwise it is not required.~~
   * <i>Generate the site certificate..</i>
     ```
     cd /etc/security-cam
@@ -184,11 +253,11 @@ to the NVR, otherwise it is not required.
     sudo systemctl restart nginx
     ```
 
-## Use with the Cloud Service
-#### If you don't want to use a Cloud Service for access, ignore this section and see "Setup for Direct Access (Browser to NVR)"
-The NVR will have the Cloud Proxy enabled by default on initial setup, and provided that the correct Cloud Server address/port
+~~## Use with the Cloud Service~~
+~~#### If you don't want to use a Cloud Service for access, ignore this section and see "Setup for Direct Access (Browser to NVR)"~~
+~~The NVR will have the Cloud Proxy enabled by default on initial setup, and provided that the correct Cloud Server address/port
 was entered in application.yml, you will be able to set up a cloud account from your cloud browser session, using the product
-key which was shown near the end of the NVR installation text. Please see the README.md for the Cloud Service for details on setting up a cloud account.
+key which was shown near the end of the NVR installation text. Please see the README.md for the Cloud Service for details on setting up a cloud account.~~
 ## Setup for Direct Access (Browser to NVR)
 #### Set up user account
 To log into the NVR when accessing it directly, 
