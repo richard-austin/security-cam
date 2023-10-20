@@ -62,7 +62,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
-cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf ../ssmtp.conf security-cam_"${VERSION}"_arm64/tmp
+cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9.0.46/conf/server.xml ../apache-tomcat-9.0.46/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../tomcat9 security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-7.3.war security-cam_"${VERSION}"_arm64/tmp
@@ -81,7 +81,7 @@ Depends: openjdk-19-jre-headless (>=19.0.2), openjdk-19-jre-headless (<< 19.9.9)
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
  tomcat9-admin (>=9.0.70-1), tomcat9-admin (<= 10.0.0),
  libraspberrypi-bin, chrony,
- nodejs, ssmtp,
+ nodejs,
  network-manager (>= 1.42.4), network-manager (<< 2.0.0),
  wireless-tools (>=30~pre9-13), wireless-tools (<< 40),
  moreutils,
