@@ -21,7 +21,7 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * Quick reboot or setup of key camera parameters for SV3C type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
   This feature requires access through port 446 as well as the usual https port 443.
-* Configuration editor supporting Onvif discovery of cameras and their capabilities. Cam also find capabilities of specific cameras.
+* Configuration editor supporting Onvif discovery of cameras and their capabilities. Can also find capabilities of specific cameras.
 * email notification if public IP address changes (for when port forwarding is used).
 * Initial unauthenticated set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
 * Get NVR LAN IP addresses.
