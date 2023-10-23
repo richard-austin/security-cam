@@ -118,8 +118,6 @@ export class UtilsService {
   getOpenSourceInfo(): Observable<string> {
     return this.http.post(this._baseUrl.getLink("utils", "getOpenSourceInfo"), '', {responseType: 'text'}).pipe(
       tap(val => {
-        let x = val;
-        return x;
       }),
       catchError((err: HttpErrorResponse) => throwError(err))
     );

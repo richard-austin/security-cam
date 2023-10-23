@@ -55,7 +55,7 @@ class UtilsController {
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
-    String getOpenSourceInfo() {
+    def getOpenSourceInfo() {
         ObjectCommandResponse response = utilsService.getOpenSourceInfo()
         if (response.status != PassFail.PASS)
             render(status: 500, text: response.error)
