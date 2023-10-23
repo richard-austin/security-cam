@@ -85,8 +85,15 @@ export class UtilsService {
       'Content-Type': 'application/json',
       'Authorization': 'my-auth-token'
     })
-  };
+   };
 
+  readonly httpTextOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'text/plain',
+      'Authorization': 'my-auth-token'
+    }),
+    responseType: 'texty'
+  };
   private _messaging: Subject<any> = new Subject<any>();
   private _isGuestAccount: boolean = true;
   speakActive: boolean = true;
@@ -108,7 +115,15 @@ export class UtilsService {
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }
-
+  getOpenSourceInfo(): Observable<string> {
+    return this.http.post(this._baseUrl.getLink("utils", "getOpenSourceInfo"), '', {responseType: 'text'}).pipe(
+      tap(val => {
+        let x = val;
+        return x;
+      }),
+      catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
   setIp(): Observable<MyIp> {
     return this.http.post<MyIp>(this._baseUrl.getLink("utils", "setIP"), '', this.httpJSONOptions).pipe(
       tap(),

@@ -148,6 +148,72 @@ class UtilsService {
         return result
     }
 
+    def getOpenSourceInfo() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            result.response = '''
+        <h2>Angular web framework v12.0.5</h2>
+        <a href="https://angular.io" target="_blank">Angular</a>
+        <hr>
+        <h2>Angular Material v12.0.5</h2>
+        <a href="https://material.angular.io/" target="_blank">Angular Material</a>
+        <hr>
+        <h2>Angular Forms v12.0.5</h2>
+        <a href="https://angular.io/guide/forms-overview/" target="_blank">Angular Forms</a>
+        <hr>
+        <h2>Stomp.js v7.0.0</h2>
+        <a href="https://www.npmjs.com/package/@stomp/stompjs" target="_blank">Stomp.js</a>
+        <hr>
+        <h2>File Saver v2.0.5</h2>
+        <a href="https://www.npmjs.com/package/@types/file-saver" target="_blank">File Saver</a>
+        <hr>
+        <h2>hls.js v1.0.7</h2>
+        <a href="https://www.npmjs.com/package/hls.js?utm_source=cdnjs&utm_medium=cdnjs_link&utm_campaign=cdnjs_library" target="_blank">Hls.js</a>
+        <hr>
+        <h2>moment v2.29.1</h2>
+        <a href="https://www.npmjs.com/package/moment" target="_blank">moment</a>
+        <hr>
+        <h2>Object Hash v3.0.0</h2>
+        <a href="https://www.npmjs.com/package/object-hash" target="_blank">Object Hash</a>
+        <hr>
+        <h2>rx v4.1.0</h2>
+        <a href="https://www.npmjs.com/package/rx" target="_blank">rx</a>
+        <hr>
+        <h2>rxjs v6.6.0</h2>
+        <a href="https://www.npmjs.com/package/rxjs" target="_blank">rxjs</a>
+        <hr>
+        <h2>rxjs-observe v2.1.5</h2>
+        <a href="https://www.npmjs.com/package/rxjs-observe" target="_blank">rxjs-observ</a>
+        <hr>
+        <h2>tslib v2.0.0</h2>
+        <a href="https://www.npmjs.com/package/tslib" target="_blank">tslib</a>
+        <hr>
+        <h2>zone.js v0.11.4</h2>
+        <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
+        <hr>
+        <h2>Grails v5.3.2</h2>
+        <a href="https://grails.org/" target="_blank">Grails</a>
+        <hr>
+        <h2>Java OpenJDK v19.0.2</h2>
+        <a href="https://openjdk.org/" target="_blank">Java OpenJDK</a>
+        <hr>
+        <h2>ffmpeg v4.4.4</h2>
+        <a href="https://www.ffmpeg.org/" target="_blank">ffmpeg</a>
+        <hr>
+        <h2>Onvif for Java</h2>
+        <a href="https://github.com/fpompermaier/onvif" target="_blank">Onvif for Java</a>
+        <hr>
+    '''
+
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in getOpenSourceInfo: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
     /**
      * setIP: Set the file myip to contain our current public ip address.
      * @return: Our public ip address
