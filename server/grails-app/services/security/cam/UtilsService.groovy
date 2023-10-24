@@ -7,6 +7,7 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.grails.web.json.JSONObject
+import org.intellij.lang.annotations.Language
 import org.springframework.core.io.Resource
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -151,7 +152,8 @@ class UtilsService {
     def getOpenSourceInfo() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            result.response = '''
+            @Language("HTML")
+            String response = '''
         <h2>Angular web framework v12.0.5</h2>
         <a href="https://angular.io" target="_blank">Angular</a>
         <hr>
@@ -203,7 +205,35 @@ class UtilsService {
         <h2>Onvif for Java</h2>
         <a href="https://github.com/fpompermaier/onvif" target="_blank">Onvif for Java</a>
         <hr>
+        <h2>Motion Service v4.5.1 (for motion detection)</h2>
+        <a href="https://motion-project.github.io/" target="_blank">Motion Service</a>
+        <hr>
+        <h2>nginx v1.22.0 (Reverse proxy)</h2>
+        <a href="https://nginx.org/en/" target="_blank">nginx</a>
+        <hr>
+        <h2>Apache Tomcat vTomcat/9.0.70 (Web Server)</h2>
+        <a href="https://tomcat.apache.org/" target="_blank">Apache Tomcat</a>
+        <hr>
+        <h2>libraspberrypi-bin</h2>
+        <a href="https://packages.ubuntu.com/focal-updates/misc/libraspberrypi-bin" target="_blank">libraspberrypi-bin</a>
+        <hr>
+        <h2>Chrony v4.3 (NTP Server)</h2>
+        <a href="https://chrony-project.org/news.html" target="_blank">Chrony</a>
+        <hr>
+        <h2>Ubuntu network-manager v1.42.4</h2>
+        <a href="https://ubuntu.com/core/docs/networkmanager" target="_blank">Network Manager</a>
+        <hr>
+        <h2>wireless-tools v30 (Wireless Tools for Linux)</h2>
+        <a href="https://hewlettpackard.github.io/wireless-tools/Tools.html" target="_blank">Wireless Tools</a>
+        <hr>
+        <h2>moreutils</h2>
+        <a href="https://ostechnix.com/moreutils-collection-useful-unix-utilities/" target="_blank">Moreutils</a>
+        <hr>
+        <h2>Python3 v 3.11.4</h2>
+        <a href="https://www.python.org/" target="_blank">Python3</a>
+        <hr>
     '''
+            result.response = response
 
         }
         catch (Exception ex) {
