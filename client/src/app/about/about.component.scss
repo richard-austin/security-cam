@@ -1,14 +1,29 @@
-.about-box-container
-{
+$menu-bar-height: 80px;
+$about-box-fixed-content-height: 250px;
+
+.about-box-container {
   margin-top: 1rem;
   display: inline-flex;
   width: 100%;
-  >mat-card
-  {
+  height: calc(100vh - #{$menu-bar-height});
+
+  > mat-card {
     background-color: white;
     color: black;
-    width: fit-content;
+    width: 450px;
     margin-left: auto;
     margin-right: auto;
+    > mat-card-content {
+      > :nth-child(6) {
+        margin: 0.3rem;
+        padding: 0.1rem 1rem 1rem;
+        background-color: #c7cef3;
+        border-color: #000000;
+        border-style: solid;
+        border-width: 0.1rem;
+        overflow-y: auto;
+        height: calc(100vh - #{$menu-bar-height} - #{$about-box-fixed-content-height});
+      }
+    }
   }
 }

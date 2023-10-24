@@ -11,6 +11,7 @@ import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 export class AboutComponent implements OnInit {
   @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
   version: string = "Unknown";
+  openSourceInfo: string = "Loading...";
 
   constructor(private utils: UtilsService, private _baseUrl: BaseUrl) {
   }
@@ -25,6 +26,10 @@ export class AboutComponent implements OnInit {
       },
       reason => this.errorReporting.errorMessage = reason
       );
+    this.utils.getOpenSourceInfo().subscribe((info: string) => {
+        this.openSourceInfo = info;
+      },
+      reason => this.errorReporting.errorMessage = reason
+    );
   }
-
 }

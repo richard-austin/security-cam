@@ -129,10 +129,11 @@ class FTPAndVideoFileProcessor(FTPHandler):
                             self.processDict[location].reset()
                         else:
                             subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
-                            timer: ResettableTimer = ResettableTimer(30, lambda: self.finish_recording(subproc, location))
+                            timer: ResettableTimer = ResettableTimer(camera['retriggerWindow'], lambda: self.finish_recording(subproc, location))
                             timer.start()
                             self.processDict[location] = timer
-                            logger.info(f"Started recording for {location}")
+                            logger.info(f"Started recording for {location}, retriggerWindow = {camera['retriggerWindow']}")
+
 
             os.remove(path)
 

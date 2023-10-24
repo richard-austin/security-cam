@@ -54,6 +54,15 @@ class UtilsController {
             render response.responseObject as JSON
     }
 
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    def getOpenSourceInfo() {
+        ObjectCommandResponse response = utilsService.getOpenSourceInfo()
+        if (response.status != PassFail.PASS)
+            render(status: 500, text: response.error)
+        else
+            render response.response as String
+    }
+
     /**
      * setIP: Set the file myip to contain our current public ip address.
      * @return: Our public ip address

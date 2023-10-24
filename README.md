@@ -21,7 +21,7 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * Quick reboot or setup of key camera parameters for SV3C type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
   This feature requires access through port 446 as well as the usual https port 443.
-* Configuration editor supporting Onvif discovery of cameras and their capabilities. Cam also find capabilities of specific cameras.
+* Configuration editor supporting Onvif discovery of cameras and their capabilities. Can also find capabilities of specific cameras.
 * email notification if public IP address changes (for when port forwarding is used).
 * Initial unauthenticated set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
 * Get NVR LAN IP addresses.
@@ -174,6 +174,8 @@ to the internet.
 ###### For the NTP time control to work, you must then set the cameras NTP server address to the NVR IP address.
 
 ## Development
+Pre built .deb files for deployment on a Raspberry pi 4 are available in the Releases section. 
+The requirements to build the project yourself are detailed below: -
 #### Platform for Development
 * Ubuntu 23.04 (Lunar Lobster) on PC (Windows WSL2 or direct boot)
 
@@ -525,4 +527,4 @@ In any case, all those fields must be entered before clicking Update Account.
     shown in their fields.
 * **About**
 
-  version information for the NVR.
+  Version information for the NVR and open source software used in the project..

@@ -81,7 +81,6 @@ Depends: openjdk-19-jre-headless (>=19.0.2), openjdk-19-jre-headless (<< 19.9.9)
  tomcat9 (>=9.0.43-1), tomcat9 (<= 10.0.0),
  tomcat9-admin (>=9.0.70-1), tomcat9-admin (<= 10.0.0),
  libraspberrypi-bin, chrony,
- nodejs,
  network-manager (>= 1.42.4), network-manager (<< 2.0.0),
  wireless-tools (>=30~pre9-13), wireless-tools (<< 40),
  moreutils,

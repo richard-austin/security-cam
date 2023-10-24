@@ -150,6 +150,27 @@
         </td>
       </ng-container>
 
+
+
+      <ng-container matColumnDef="retrigger-window">
+        <th mat-header-cell *matHeaderCellDef>Retrigger Window.</th>
+        <td mat-cell *matCellDef="let cam; let i = dataIndex">
+          <mat-form-field appearance="legacy" [style.width.px]="50">
+            <mat-select [formControl]="getCamControl(i, 'retriggerWindow')"
+                        (selectionChange)="updateCamField(i, 'retriggerWindow')"
+                        [disabled]="!cam.value.ftp"
+                        matTooltip="Select the maximum time in seconds that can elapse between FTP uploads from the camere for the recording to be extended further by this selected time. The absence of another FTP within this window will result in the recording being completed."
+                        matTooltipClass="tooltip">
+              <mat-option *ngFor="let win of cameraSvc.ftpRetriggerWindows" [value]="win.value">
+                {{win.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </td>
+      </ng-container>
+
+
+
       <ng-container matColumnDef="address">
         <th mat-header-cell *matHeaderCellDef>Address.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">

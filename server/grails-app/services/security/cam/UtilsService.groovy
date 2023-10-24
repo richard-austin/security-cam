@@ -7,6 +7,7 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.grails.web.json.JSONObject
+import org.intellij.lang.annotations.Language
 import org.springframework.core.io.Resource
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -142,6 +143,101 @@ class UtilsService {
         }
         catch (Exception ex) {
             logService.cam.error("Exception in getVersion: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    def getOpenSourceInfo() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            @Language("HTML")
+            String response = '''
+        <h2>Angular web framework v12.0.5</h2>
+        <a href="https://angular.io" target="_blank">Angular</a>
+        <hr>
+        <h2>Angular Material v12.0.5</h2>
+        <a href="https://material.angular.io/" target="_blank">Angular Material</a>
+        <hr>
+        <h2>Angular Forms v12.0.5</h2>
+        <a href="https://angular.io/guide/forms-overview/" target="_blank">Angular Forms</a>
+        <hr>
+        <h2>Stomp.js v7.0.0</h2>
+        <a href="https://www.npmjs.com/package/@stomp/stompjs" target="_blank">Stomp.js</a>
+        <hr>
+        <h2>File Saver v2.0.5</h2>
+        <a href="https://www.npmjs.com/package/@types/file-saver" target="_blank">File Saver</a>
+        <hr>
+        <h2>hls.js v1.0.7</h2>
+        <a href="https://www.npmjs.com/package/hls.js?utm_source=cdnjs&utm_medium=cdnjs_link&utm_campaign=cdnjs_library" target="_blank">Hls.js</a>
+        <hr>
+        <h2>moment v2.29.1</h2>
+        <a href="https://www.npmjs.com/package/moment" target="_blank">moment</a>
+        <hr>
+        <h2>Object Hash v3.0.0</h2>
+        <a href="https://www.npmjs.com/package/object-hash" target="_blank">Object Hash</a>
+        <hr>
+        <h2>rx v4.1.0</h2>
+        <a href="https://www.npmjs.com/package/rx" target="_blank">rx</a>
+        <hr>
+        <h2>rxjs v6.6.0</h2>
+        <a href="https://www.npmjs.com/package/rxjs" target="_blank">rxjs</a>
+        <hr>
+        <h2>rxjs-observe v2.1.5</h2>
+        <a href="https://www.npmjs.com/package/rxjs-observe" target="_blank">rxjs-observ</a>
+        <hr>
+        <h2>tslib v2.0.0</h2>
+        <a href="https://www.npmjs.com/package/tslib" target="_blank">tslib</a>
+        <hr>
+        <h2>zone.js v0.11.4</h2>
+        <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
+        <hr>
+        <h2>Grails v5.3.2</h2>
+        <a href="https://grails.org/" target="_blank">Grails</a>
+        <hr>
+        <h2>Java OpenJDK v19.0.2</h2>
+        <a href="https://openjdk.org/" target="_blank">Java OpenJDK</a>
+        <hr>
+        <h2>ffmpeg v4.4.4</h2>
+        <a href="https://www.ffmpeg.org/" target="_blank">ffmpeg</a>
+        <hr>
+        <h2>Onvif for Java</h2>
+        <a href="https://github.com/fpompermaier/onvif" target="_blank">Onvif for Java</a>
+        <hr>
+        <h2>Motion Service v4.5.1 (for motion detection)</h2>
+        <a href="https://motion-project.github.io/" target="_blank">Motion Service</a>
+        <hr>
+        <h2>nginx v1.22.0 (Reverse proxy)</h2>
+        <a href="https://nginx.org/en/" target="_blank">nginx</a>
+        <hr>
+        <h2>Apache Tomcat vTomcat/9.0.70 (Web Server)</h2>
+        <a href="https://tomcat.apache.org/" target="_blank">Apache Tomcat</a>
+        <hr>
+        <h2>libraspberrypi-bin</h2>
+        <a href="https://packages.ubuntu.com/focal-updates/misc/libraspberrypi-bin" target="_blank">libraspberrypi-bin</a>
+        <hr>
+        <h2>Chrony v4.3 (NTP Server)</h2>
+        <a href="https://chrony-project.org/news.html" target="_blank">Chrony</a>
+        <hr>
+        <h2>Ubuntu network-manager v1.42.4</h2>
+        <a href="https://ubuntu.com/core/docs/networkmanager" target="_blank">Network Manager</a>
+        <hr>
+        <h2>wireless-tools v30 (Wireless Tools for Linux)</h2>
+        <a href="https://hewlettpackard.github.io/wireless-tools/Tools.html" target="_blank">Wireless Tools</a>
+        <hr>
+        <h2>moreutils</h2>
+        <a href="https://ostechnix.com/moreutils-collection-useful-unix-utilities/" target="_blank">Moreutils</a>
+        <hr>
+        <h2>Python3 v 3.11.4</h2>
+        <a href="https://www.python.org/" target="_blank">Python3</a>
+        <hr>
+    '''
+            result.response = response
+
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in getOpenSourceInfo: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }

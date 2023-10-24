@@ -107,6 +107,7 @@ export class Camera
     onvifHost: string="";
     backchannelAudioSupported: boolean = false
     rtspTransport: string = "tcp";
+    retriggerWindow: number = 30;
 }
 
 export class CameraStream
