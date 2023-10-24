@@ -10,15 +10,6 @@
         <module name="security-cam.server.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="18">
-      <module name="create-user-account" target="18" />
-      <module name="create-user-account.main" target="18" />
-      <module name="create-user-account.test" target="18" />
-      <module name="richard.security-cam.server.main" target="18" />
-      <module name="security-cam.create-user-account" target="18" />
-      <module name="security-cam.create-user-account.integrationTest" target="18" />
-      <module name="security-cam.create-user-account.main" target="18" />
-      <module name="security-cam.create-user-account.test" target="18" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="19" />
   </component>
 </project>
