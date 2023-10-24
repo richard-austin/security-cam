@@ -174,6 +174,8 @@ to the internet.
 ###### For the NTP time control to work, you must then set the cameras NTP server address to the NVR IP address.
 
 ## Development
+Pre built .deb files for deployment on a Raspberry pi 4 are available in the Releases section. 
+The requirements to build the project yourself are detailed below: -
 #### Platform for Development
 * Ubuntu 23.04 (Lunar Lobster) on PC (Windows WSL2 or direct boot)
 
@@ -525,4 +527,4 @@ In any case, all those fields must be entered before clicking Update Account.
     shown in their fields.
 * **About**
 
-  version information for the NVR.
+  Version information for the NVR and open source software used in the project..
