@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/sirupsen/logrus v1.9.0
-	golang.org/x/net v0.10.0
+	golang.org/x/net v0.17.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
