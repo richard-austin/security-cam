@@ -89,13 +89,26 @@ export class CameraService {
         'web/cgi-bin/hi3510/param.cgi',
         "ZTech MCW5B10X")]
 
-  private _audioEncodings: AudioEncoding[] = [
+  private readonly _audioEncodings: AudioEncoding[] = [
     new AudioEncoding('None', 'None'),  // No audio in stream
     new AudioEncoding('Not Listed', 'Not Listed'),  // Audio type not listed, transcode to AAC
     new AudioEncoding('G711', 'G711'),  // Transcode to AAC
     new AudioEncoding('G726', 'G726'),  // Transcode to AAC
     new AudioEncoding('AAC', 'AAC'),    // No transcoding required
 
+  ];
+
+  private readonly _ftpRetriggerWindows: {name: string, value: number}[] = [
+    {name: "10", value: 10},
+    {name: "20", value: 20},
+    {name: "30", value: 30},
+    {name: "40", value: 40},
+    {name: "50", value: 50},
+    {name: "60", value: 60},
+    {name: "70", value: 70},
+    {name: "80", value: 80},
+    {name: "90", value: 90},
+    {name: "100", value: 100}
   ];
 
   get cameraParamSpecs() {
@@ -106,6 +119,9 @@ export class CameraService {
     return this._audioEncodings;
   }
 
+  get ftpRetriggerWindows() {
+    return this._ftpRetriggerWindows;
+  }
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     this.loadAndUpdateCameraStreams().then(() => {});
   }

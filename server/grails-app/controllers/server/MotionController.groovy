@@ -75,6 +75,7 @@ class Camera {
     String onvifHost=''
     boolean backchannelAudioSupported = false
     String rtspTransport = "tcp"
+    int retriggerWindow = 30
 }
 
 class MotionController {

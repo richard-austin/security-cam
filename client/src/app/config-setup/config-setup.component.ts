@@ -91,7 +91,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['sorting', 'camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'address', 'snapshotUri', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['sorting', 'camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -228,7 +228,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           }, [Validators.required, Validators.min(90), Validators.max(3000)]),
           //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
           threshold: new FormControl({
-            value: stream.motion?.threshold,
+            value: stream.motion?.threshold != undefined ? stream.motion.threshold : 1500,
             disabled: !stream.motion.enabled
           }, [Validators.required, Validators.min(1), Validators.max(2147483647)]),
           trigger_recording_on: new FormControl({
@@ -257,6 +257,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           value: camera.ftp,
           disabled: this.getFTPDisabledState(camera),
         }, [validateTrueOrFalse({ftp: true})]),
+        retriggerWindow: new FormControl({
+            value: camera?.retriggerWindow != undefined ? camera.retriggerWindow : 30,
+            disabled: false,
+          }, [Validators.pattern(/^10$|20|30|40|50|60|70|80|100/)]
+        ),
         snapshotUri: new FormControl({
           value: camera.snapshotUri,
           disabled: false
