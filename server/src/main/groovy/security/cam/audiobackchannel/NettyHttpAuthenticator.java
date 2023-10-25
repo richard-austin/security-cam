@@ -38,7 +38,7 @@ public class NettyHttpAuthenticator extends ChannelDuplexHandler {
     private String challenge;
     private final String username;
     private final String password;
-    private ILogService logService;
+    private final ILogService logService;
 
     public NettyHttpAuthenticator(String username, String password, ILogService logService) {
         this.username = username;
