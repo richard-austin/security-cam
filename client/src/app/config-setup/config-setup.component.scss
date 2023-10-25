@@ -209,3 +209,18 @@ td.sort-buttons {
 mat-icon.sort-button-icon {
   font-size: 18px;
 }
+
+.no-camera-credentials {
+  animation: pulsing 1300ms infinite;
+}
+@keyframes pulsing {
+  0% {
+    color: #800;
+  }
+  50% {
+    color: #f66;
+  }
+  100% {
+    color: #800;
+  }
+}

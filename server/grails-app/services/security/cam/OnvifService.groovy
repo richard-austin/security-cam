@@ -316,7 +316,7 @@ class OnvifService {
         ObjectCommandResponse resp = getSnapshotWithAuth(url, "")
 
         if(resp.errno == 401) {
-            Authentication auth = new Authentication(null)
+            Authentication auth = new Authentication(logService)
             String username = camService.cameraAdminUserName()
             String password = camService.cameraAdminPassword()
 

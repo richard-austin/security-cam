@@ -112,6 +112,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   isGuest: boolean = true;
   gettingCameraDetails: boolean = false;
   savedDataHash: string = "";
+  haveCameraCredentials: boolean = false;
 
   constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
   }
@@ -755,10 +756,19 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     return window.btoa(binary);
   }
+  private checkIfCameraCredentialsPresent() {
+    this.cameraSvc.haveCameraCredentials().subscribe(result => {
+        this.haveCameraCredentials = result == "true";
+      },
+      () => {
+        this.reporting.errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
+      });
+  }
 
   togglePasswordDialogue() {
     this.showPasswordDialogue = !this.showPasswordDialogue;
     this.showAddCameraDialogue = false;
+    this.checkIfCameraCredentialsPresent();
   }
   toggleAddCameraOnvifUriDialogue() {
     this.showAddCameraDialogue =!this.showAddCameraDialogue;
@@ -801,6 +811,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
         this.downloading = false;
       })
+    this.checkIfCameraCredentialsPresent();
     this.isGuest = this.utils.isGuestAccount;
   }
 

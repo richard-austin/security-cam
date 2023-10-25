@@ -230,6 +230,11 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
+  haveCameraCredentials(): Observable<string> {
+    return this.http.post(this._baseUrl.getLink("cam", "haveCameraCredentials"), '',{responseType: 'text'}).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+
   /**
    * loadCameraStreams: Get camera streams from the server
    */

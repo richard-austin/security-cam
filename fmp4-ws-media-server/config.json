@@ -1,6 +1,7 @@
 {
   "log_path": "/var/log/fmp4-ws-media-service/fmp4-server.log",
   "cameras_json_path": "/var/security-cam/cameras.json",
+  "camera_credentials_path": "/var/security-cam/cameraCredentials.json",
   "log_level": "INFO",
   "server_port": 8085,
   "default_latency_limit": 0.8,

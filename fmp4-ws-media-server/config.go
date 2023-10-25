@@ -7,12 +7,13 @@ import (
 )
 
 type Config struct {
-	LogPath             string  `json:"log_path"`
-	LogLevelStr         string  `json:"log_level"`
-	CamerasJsonPath     string  `json:"cameras_json_path"`
-	ServerPort          int     `json:"server_port"`
-	DefaultLatencyLimit float32 `json:"default_latency_limit"`
-	GopCache            bool    `json:"gop_cache"`
+	LogPath               string  `json:"log_path"`
+	LogLevelStr           string  `json:"log_level"`
+	CamerasJsonPath       string  `json:"cameras_json_path"`
+	CameraCredentialsPath string  `json:"camera_credentials_path"`
+	ServerPort            int     `json:"server_port"`
+	DefaultLatencyLimit   float32 `json:"default_latency_limit"`
+	GopCache              bool    `json:"gop_cache"`
 }
 
 func (c *Config) LogLevel() (err error, level log.Level) {
@@ -94,28 +95,28 @@ func loadConfig() (config *Config, cameras *Cameras, credentials *CameraCredenti
 	}
 	data, err := os.ReadFile(exPath + "/config.json")
 	if err != nil {
-		log.Fatalln(err)
+		log.Errorln(err)
 	}
 	err = json.Unmarshal(data, &conf)
 	if err != nil {
-		log.Fatalln(err)
+		log.Errorln(err)
 	}
-	data, err = os.ReadFile("/var/security-cam/cameraCredentials.json")
+	data, err = os.ReadFile(conf.CameraCredentialsPath)
 	if err != nil {
-		log.Fatalln(err)
+		log.Errorln(err)
 	}
 	err = json.Unmarshal(data, &creds)
 	if err != nil {
-		log.Fatalln(err)
+		log.Errorln(err)
 	}
 
 	data, err = os.ReadFile(conf.CamerasJsonPath)
 	if err != nil {
-		log.Fatalln(err)
+		log.Errorln(err)
 	}
 	err = json.Unmarshal(data, &cams.Cameras)
 	if err != nil {
-		log.Fatalln(err)
+		log.Errorln(err)
 	}
 
 	config = &conf
