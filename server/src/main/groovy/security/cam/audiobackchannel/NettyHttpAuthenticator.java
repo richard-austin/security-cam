@@ -23,6 +23,7 @@
  */
 package security.cam.audiobackchannel;
 
+import com.proxy.ILogService;
 import common.Authentication;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -37,11 +38,12 @@ public class NettyHttpAuthenticator extends ChannelDuplexHandler {
     private String challenge;
     private final String username;
     private final String password;
+    private final ILogService logService;
 
-
-    public NettyHttpAuthenticator(String username, String password) {
+    public NettyHttpAuthenticator(String username, String password, ILogService logService) {
         this.username = username;
         this.password = password;
+        this.logService = logService;
     }
 
     @Override
@@ -67,7 +69,7 @@ public class NettyHttpAuthenticator extends ChannelDuplexHandler {
             String method = req.method().name();
             String uri = req.uri();
 
-            Authentication auth = new Authentication(null);
+            Authentication auth = new Authentication(logService);
             String header = auth.getAuthResponse(username, password, method, uri, challenge, new BasicHttpContext()).getValue();
             if (header != null) {
                 if (!header.contains("\"MD5\"") && header.contains("MD5"))

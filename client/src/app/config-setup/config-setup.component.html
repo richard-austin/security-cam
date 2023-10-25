@@ -5,13 +5,13 @@
 <mat-card>
   <mat-card-title>Cameras Configuration
     <span
-      matTooltip="{{isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'}}"
+      [matTooltip]="!haveCameraCredentials ? 'Camera credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'"
       matTooltipClass="tooltip">
       <button class="change-password-button"
               mat-icon-button
               [disabled]="isGuest"
               (click)="togglePasswordDialogue()">
-        <mat-icon>security</mat-icon>
+        <mat-icon [ngClass]="{'no-camera-credentials': !haveCameraCredentials}">security</mat-icon>
       </button>
     </span>
     <div class="password-dialogue">

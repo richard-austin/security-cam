@@ -154,11 +154,19 @@ class CamService implements ICamServiceInterface{
     \"camerasAdminPassword\": \"${cmd.camerasAdminPassword}\"
 }
 """
+            // Stop media server etc
+            ObjectCommandResponse stopResult = sc_processesService.stopProcesses()
             String fileName = "${grailsApplication.config.camerasHomeDirectory}/cameraCredentials.json"
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
             writer.write(json)
-
             writer.close()
+            // Restart media server etc to pic]=k up new credentials
+            ObjectCommandResponse startResult = sc_processesService.startProcesses()
+
+            if(stopResult.status == PassFail.FAIL)
+                response = stopResult
+            else if (startResult.status == PassFail.FAIL)
+                response = startResult
         }
         catch (Exception ex) {
             logService.cam.error "setCameraAccessCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()

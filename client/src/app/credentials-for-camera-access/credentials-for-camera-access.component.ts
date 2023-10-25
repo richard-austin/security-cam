@@ -24,6 +24,7 @@ export class CredentialsForCameraAccessComponent implements OnInit {
   camerasUsername: string = '';
   camerasPassword: string = '';
   setPasswordForm!: FormGroup;
+  updating: boolean = false;
 
 
   hidePasswordDialogue() {
@@ -37,12 +38,15 @@ export class CredentialsForCameraAccessComponent implements OnInit {
     let creds: CameraAdminCredentials = new CameraAdminCredentials();
     creds.camerasAdminPassword = this.camerasPassword;
     creds.camerasAdminUserName = this.camerasUsername;
+    this.updating = true;
     this.camSvc.setCameraAdminCredentials(creds).subscribe(() =>{
         this.hidePasswordDialogue();
         this.reporting.successMessage="Camera Access Credentials Updated";
+        this.updating = false;
     },
       (reason) => {
         this.reporting.errorMessage = reason;
+        this.updating = false;
       })
   }
 

@@ -155,4 +155,23 @@ class CamController {
                 render (status: 200, text: (response.responseObject as JSON))
         }
     }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    def haveCameraCredentials() {
+        try {
+            String pw, un
+            pw = camService.cameraAdminPassword()
+            un = camService.cameraAdminUserName()
+
+            if (un == null || pw == null)
+                render(status: 200, text: "false")
+            else
+                render(status: 200, text: "true")
+        }
+        catch(Exception ex) {
+            String msg = "${ex.getClass().getName()} in haveCameraCredentials: ${ex.getMessage()}"
+            logService.getCam().error(msg)
+            render (status: 500, text: msg)
+        }
+    }
 }

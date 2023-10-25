@@ -73,7 +73,7 @@ class RtspClient {
                             p.addLast("encoder", new RtspEncoder())
                             p.addLast("decoder", new RtspDecoder())
                             p.addLast("aggregator", new HttpObjectAggregator(4 * 1024))
-                            p.addLast(new NettyHttpAuthenticator(username, password))
+                            p.addLast(new NettyHttpAuthenticator(username, password, logService))
                             p.addLast(handler)
                         }
                     })
