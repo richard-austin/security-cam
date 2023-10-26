@@ -35,7 +35,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
 					uri := stream.NetcamUri
 					rtspTransport := camera.RtspTransport
 
-					if camera.CameraParamSpecs.CamType == 0 { // General type, credentials used
+					if camera.UseRtspAuth { // Use credentials if required
 						idx := len("rtsp://")
 						uri = uri[:idx] + url.QueryEscape(creds.CamerasAdminUserName) + ":" + url.QueryEscape(creds.CamerasAdminPassword) + "@" + uri[idx:]
 					}

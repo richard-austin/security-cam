@@ -149,9 +149,6 @@
           <mat-error *ngIf="getCamControl(i, 'ftp').invalid">Set the FTP status</mat-error>
         </td>
       </ng-container>
-
-
-
       <ng-container matColumnDef="retrigger-window">
         <th mat-header-cell *matHeaderCellDef>Retrigger Window.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
@@ -168,8 +165,6 @@
           </mat-form-field>
         </td>
       </ng-container>
-
-
 
       <ng-container matColumnDef="address">
         <th mat-header-cell *matHeaderCellDef>Address.</th>
@@ -195,6 +190,18 @@
                    placeholder="Snapshot URI" (change)="updateCamField(i, 'snapshotUri')">
             <mat-error *ngIf="getCamControl(i, 'snapshotUri').invalid">Enter the URI</mat-error>
           </mat-form-field>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="useRtspAuth">
+        <th mat-header-cell *matHeaderCellDef>RTSP Authentication.</th>
+        <td mat-cell *matCellDef="let cam; let i = dataIndex">
+          <mat-checkbox [formControl]="getCamControl(i, 'useRtspAuth')"
+                        matTooltip="{{'Use authentication on the RTSP streams on '+ cam.key + ' If checked. The username and password for all cameras are entered on the cameras configuration page by clicking the button to the right of the page title.'}}"
+                        matTooltipClass="tooltip"
+                        (change)="updateCamField(i, 'useRtspAuth')">
+          </mat-checkbox>
+          <mat-error *ngIf="getCamControl(i, 'useRtspAuth').invalid">Set the RTSP auth status</mat-error>
         </td>
       </ng-container>
 

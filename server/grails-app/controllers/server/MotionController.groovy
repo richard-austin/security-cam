@@ -75,6 +75,7 @@ class Camera {
     String onvifHost=''
     boolean backchannelAudioSupported = false
     String rtspTransport = "tcp"
+    boolean useRtspAuth = false
     int retriggerWindow = 30
 }
 

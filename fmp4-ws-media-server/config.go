@@ -60,6 +60,7 @@ type Camera struct {
 	CameraParamSpecs          CameraParamSpecs   `json:"cameraParamSpecs"`
 	BackChannelAudioSupported bool               `json:"backChannelAudioSupported"`
 	RtspTransport             string             `json:"rtspTransport"`
+	UseRtspAuth               bool               `json:"useRtspAuth"`
 }
 
 type Cameras struct {
