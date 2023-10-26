@@ -91,7 +91,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['sorting', 'camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['sorting', 'camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'useRtspAuth', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -276,6 +276,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           disabled: false,
         }, [Validators.maxLength(22),
           Validators.pattern(/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/)]),
+        useRtspAuth: new FormControl({
+          value: camera.useRtspAuth == undefined ? false : camera.useRtspAuth,
+          disabled: false,
+        }, [validateTrueOrFalse({useRtspAuth: true})]),
         rtspTransport: new FormControl({
           value: camera.rtspTransport,
           disabled: false,
