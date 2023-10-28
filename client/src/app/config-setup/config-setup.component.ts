@@ -261,7 +261,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         retriggerWindow: new FormControl({
             value: camera?.retriggerWindow != undefined ? camera.retriggerWindow : 30,
             disabled: false,
-          }, [Validators.pattern(/^10$|20|30|40|50|60|70|80|100/)]
+          }, [Validators.pattern(/^10$|20|30|40|50|60|70|80|90|100/)]
         ),
         snapshotUri: new FormControl({
           value: camera.snapshotUri,
