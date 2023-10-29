@@ -32,20 +32,18 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedDeviceId!: string;
   selectedAudioInput!: MediaDeviceInfo;
   stopAudioAfterLongTimeSubscription!: Subscription
-  readonly isGuest: boolean;
 //  private isFullscreenNow: boolean = false;
   private client!: Client;
   private timeForStartAudioOutResponse: number = 0;
 
 
   constructor(public utilsService: UtilsService) {
-    this.isGuest = utilsService.isGuestAccount;
   }
 
   /**
    * setSource: Set up to play the given manifest file and display the camera details
-   * @param camStream: The camera
-   * @param manifest: The manifest file
+   * @param camStream
+   * @param manifest
    */
   setSource(camStream: CameraStream, manifest: string = ''): void {
     this.stop();
@@ -321,7 +319,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleAudioOut() {
-    if(!this.isGuest && (!this.utilsService.speakActive || this.audioToggle)) {
+    if(!this.utilsService.isGuestAccount && (!this.utilsService.speakActive || this.audioToggle)) {
       this.audioToggle = !this.audioToggle;
       if (this.audioToggle) {
         this.timeForStartAudioOutResponse = 0;
@@ -427,7 +425,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   audioButtonTooltip() : string {
     let speakActive = this.utilsService.speakActive;
     let retVal: string = "";
-    if(this.isGuest)
+    if(this.utilsService.isGuestAccount)
       retVal = "Not available to guest"
     else if(speakActive)
       retVal = this.audioToggle ? "Stop audio to camera" : "Audio to camera is in use in another session. Cannot start audio to camera at this time";

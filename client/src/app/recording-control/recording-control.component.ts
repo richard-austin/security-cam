@@ -36,8 +36,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   @ViewChild(VideoComponent) video!: VideoComponent;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @ViewChild('selector') selector!: MatSelect;
-  @ViewChild('recordingButtonGroup') recordingButtonGroup!: ElementRef<MatButtonToggle>;
-  timerHandle!: Subscription;
   motionEvents!: LocalMotionEvent[];
   cs!: CameraStream;
   manifest: string = '';

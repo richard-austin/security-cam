@@ -13,7 +13,7 @@
     <div *ngIf="isfmp4" class="latency-limit-selector">
       <div>
         <label *ngIf="camstream != undefined ? camstream?.camera?.backchannelAudioSupported : false" [matTooltip]="audioButtonTooltip()" matTooltipClass="tooltip">
-          <mat-icon [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioToggle && !isGuest, 'audio-out-active':  utilsService.speakActive && audioToggle && !isGuest, 'audio-out-disabled': (utilsService.speakActive && !audioToggle) || isGuest}" (click)="toggleAudioOut()">{{audioToggle ? 'mic' : 'mic_off'}}</mat-icon>
+          <mat-icon [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioToggle) || utilsService.isGuestAccount}" (click)="toggleAudioOut()">{{audioToggle ? 'mic' : 'mic_off'}}</mat-icon>
         </label>
         <select *ngIf="camstream != undefined ? camstream.camera?.backchannelAudioSupported : false" [disabled]="utilsService.speakActive" [matTooltip]="audioInputSelectorTooltip()" matTooltipClass="tooltip"
           [(ngModel)]="selectedDeviceId" (change)="setAudioInput()">
