@@ -19,17 +19,17 @@ export class CloudProxyService {
   }
 
   getStatus(): Observable<boolean> {
-    return this.http.post<boolean>(this._baseUrl.getLink('CloudProxy', 'status'), '', this.httpJSONOptions).pipe(
+    return this.http.post<boolean>(this._baseUrl.getLink('cloudProxy', 'status'), '', this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
   start(): Observable<void> {
-    return this.http.post<void>(this._baseUrl.getLink('CloudProxy', 'start'), '', this.httpJSONOptions).pipe(
+    return this.http.post<void>(this._baseUrl.getLink('cloudProxy', 'start'), '', this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
   stop(): Observable<void> {
-    return this.http.post<void>(this._baseUrl.getLink('CloudProxy', 'stop'), '', this.httpJSONOptions).pipe(
+    return this.http.post<void>(this._baseUrl.getLink('cloudProxy', 'stop'), '', this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 }

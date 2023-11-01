@@ -526,11 +526,15 @@ public class CloudProxy implements SslContextProvider {
      * @return: The token
      */
     private int getToken(ByteBuffer buf) {
-        int position = buf.position();
-        buf.position(0);
-        int token = buf.getInt();
-        buf.position(position);
-        return token;
+        if(buf.limit() >= Integer.BYTES) {
+            int position = buf.position();
+            buf.position(0);
+            int token = buf.getInt();
+            buf.position(position);
+            return token;
+        }
+        else
+            return 0;
     }
 
     public long getCRC32Checksum(ByteBuffer buf) {
