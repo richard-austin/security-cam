@@ -139,7 +139,7 @@ environments:
       productKeyPath: /etc/security-cam/prodKey
       keyStorePassword: B0331e
       trustStorePassword: B0331e
-      cloudHost: 192.168.0.37
+      cloudHost: 192.168.1.82
       cloudPort: 8081
       webServerHost: localhost
       webServerPort: 8080
@@ -206,7 +206,7 @@ environments:
       cloudHost: 192.168.1.207
       cloudPort: 8081
       webServerHost: localhost
-      webServerPort: 8088
+      webServerPort: 8080
       logLevel: INFO
 
     nvrWebServer:

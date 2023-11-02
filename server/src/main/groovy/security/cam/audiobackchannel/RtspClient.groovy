@@ -100,8 +100,10 @@ class RtspClient {
                             command.add("/usr/local/bin/ffmpeg")
                             command.add("-i")
                             command.add("tcp://localhost:8881")
-                            command.add("-af")
-                            command.add("silenceremove=1:0:-50dB")
+                            // silenceremove prevents ffmpeg starting output until the input sound exceeds the given level. I'm
+                            //  not sure this is helpful. Will need to reassess when I next have an audio backchannel device handy.
+//                            command.add("-af")
+//                            command.add("silenceremove=1:0:-50dB")
                             command.add("-c:a")
                             command.add(audioEncoding)
                             command.add("-ar")
