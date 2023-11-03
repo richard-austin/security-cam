@@ -40,8 +40,8 @@ public class CloudProxy implements SslContextProvider {
     final Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
     SSLSocket cloudChannel;
     private boolean running = false;
-    private final String webserverHost;
-    private final int webserverPort;
+    private final String webServerForCloudProxyHost;
+    private final int webServerForCloudProxyPort;
     private final String cloudHost;
     private final int cloudPort;
     CloudProxyProperties cloudProxyProperties = CloudProxyProperties.getInstance();
@@ -54,9 +54,9 @@ public class CloudProxy implements SslContextProvider {
     private ScheduledExecutorService cloudConnectionCheckExecutor;
     private ExecutorService startCloudInputProcessExecutor;
 
-    public CloudProxy(String webServerHost, int webServerPort, String cloudHost, int cloudPort) {
-        this.webserverHost = webServerHost;
-        this.webserverPort = webServerPort;
+    public CloudProxy(String webServerForCloudProxyHost, int webServerForCloudProxyPort, String cloudHost, int cloudPort) {
+        this.webServerForCloudProxyHost = webServerForCloudProxyHost;
+        this.webServerForCloudProxyPort = webServerForCloudProxyPort;
         this.cloudHost = cloudHost;
         this.cloudPort = cloudPort;
     }
@@ -338,7 +338,7 @@ public class CloudProxy implements SslContextProvider {
             } else  // Make a new connection to the webserver
             {
                 final SocketChannel webserverChannel = SocketChannel.open();
-                webserverChannel.connect(new InetSocketAddress(webserverHost, webserverPort));
+                webserverChannel.connect(new InetSocketAddress(webServerForCloudProxyHost, webServerForCloudProxyPort));
                 webserverChannel.configureBlocking(true);
                 tokenSocketMap.put(token, webserverChannel);
                 logger.debug("writeRequestToWebserver(1) length: " + getDataLengthFullRestore(buf));
@@ -533,8 +533,10 @@ public class CloudProxy implements SslContextProvider {
             buf.position(position);
             return token;
         }
-        else
+        else {
+            logger.error("getToken was called with buffer length less than "+Integer.BYTES+" ("+buf.limit()+")");
             return 0;
+        }
     }
 
     public long getCRC32Checksum(ByteBuffer buf) {

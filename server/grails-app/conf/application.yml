@@ -141,8 +141,8 @@ environments:
       trustStorePassword: B0331e
       cloudHost: 192.168.1.82
       cloudPort: 8081
-      webServerHost: localhost
-      webServerPort: 8080
+      webServerForCloudProxyHost: localhost
+      webServerForCloudProxyPort: 8088
       logLevel: ERROR
 
     nvrWebServer:
@@ -203,10 +203,10 @@ environments:
       productKeyPath: /etc/security-cam/prodKey
       keyStorePassword: B0331e
       trustStorePassword: B0331e
-      cloudHost: 192.168.1.207
+      cloudHost: 192.168.1.82
       cloudPort: 8081
-      webServerHost: localhost
-      webServerPort: 8080
+      webServerForCloudProxyHost: localhost
+      webServerForCloudProxyPort: 8088
       logLevel: INFO
 
     nvrWebServer:
