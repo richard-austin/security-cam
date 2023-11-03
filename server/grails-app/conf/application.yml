@@ -141,8 +141,8 @@ environments:
       trustStorePassword: B0331e
       cloudHost: 192.168.1.82
       cloudPort: 8081
-      webServerHost: localhost
-      webServerPort: 8088
+      webServerForCloudProxyHost: localhost
+      webServerForCloudProxyPort: 8088
       logLevel: ERROR
 
     nvrWebServer:
@@ -205,8 +205,8 @@ environments:
       trustStorePassword: B0331e
       cloudHost: 192.168.1.82
       cloudPort: 8081
-      webServerHost: localhost
-      webServerPort: 8088
+      webServerForCloudProxyHost: localhost
+      webServerForCloudProxyPort: 8088
       logLevel: INFO
 
     nvrWebServer:

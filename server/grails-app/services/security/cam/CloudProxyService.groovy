@@ -18,8 +18,8 @@ class CloudProxyService {
         if(cloudProxy == null)
         {
             cloudProxy = new CloudProxy(
-                    (String)(grailsApplication.config.cloudProxy.webServerHost),
-                    (Integer)(grailsApplication.config.cloudProxy.webServerPort),
+                    (String)(grailsApplication.config.cloudProxy.webServerForCloudProxyHost),
+                    (Integer)(grailsApplication.config.cloudProxy.webServerForCloudProxyPort),
                     (String)(grailsApplication.config.cloudProxy.cloudHost),
                     (Integer)(grailsApplication.config.cloudProxy.cloudPort))
         }
