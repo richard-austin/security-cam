@@ -533,8 +533,10 @@ public class CloudProxy implements SslContextProvider {
             buf.position(position);
             return token;
         }
-        else
+        else {
+            logger.error("getToken was called with buffer length less than "+Integer.BYTES+" ("+buf.limit()+")");
             return 0;
+        }
     }
 
     public long getCRC32Checksum(ByteBuffer buf) {
