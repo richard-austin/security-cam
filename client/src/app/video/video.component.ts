@@ -365,8 +365,19 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         audio: (this.selectedAudioInput == null ? true : {deviceId: this.selectedAudioInput.deviceId}),
         video: false
       }).then((stream) => {
+        const mimeType = 'video/webm;codecs=vp8,opus';
         // @ts-ignore
-        this.recorder = new MediaRecorder(stream);
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          alert('vp8/opus mime type is not supported');
+          return;
+        }
+        const options = {
+          audioBitsPerSecond: 48000,
+          mimeType,
+        }
+
+        // @ts-ignore
+        this.recorder = new MediaRecorder(stream, options);
         // fires every one second and passes a BlobEvent
         this.recorder.ondataavailable = (event: any) => {
           // get the Blob from the event
@@ -384,6 +395,11 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           });
         };
+
+        this.recorder.onstop = () => {
+          this.recorder.ondataavailable = undefined;
+          this.recorder.onstop = undefined;
+        }
 
         this.client.onConnect = () => this.recorder.start(100);
         this.client.activate();
