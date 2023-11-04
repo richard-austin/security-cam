@@ -98,6 +98,8 @@ class RtspClient {
                             // Start ffmpeg to transcode and transfer the audio data
                             List<String> command = new ArrayList()
                             command.add("/usr/local/bin/ffmpeg")
+                            command.add("-loglevel")
+                            command.add("info")
                             command.add("-i")
                             command.add("tcp://localhost:8881")
                             // silenceremove prevents ffmpeg starting output until the input sound exceeds the given level. I'm
@@ -117,6 +119,14 @@ class RtspClient {
                             // Left this comment here for future reference
 
                             audioOutProc = new ProcessBuilder(command).start()
+                            BufferedReader reader = audioOutProc.errorReader()
+                            String line
+                            new Thread().start(() -> {
+                                while ((line = reader.readLine()) != null) {
+                                    logService.getCam().info(line)
+                                }
+                            })
+
                             logService.getCam().info("RTSPClient ready, backchannel stream set up with ${h.getRTPAudioEncoding()}")
                             awaitLock.put(response)
                         }

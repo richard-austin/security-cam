@@ -444,6 +444,7 @@ class UtilsService {
             try {
                 while (!audioQueue.empty) {
                     out.write(audioQueue.poll())
+                    Thread.sleep(3)
                     //   System.out.println("Writing ${audioQueue.poll().length} bytes")
                 }
             }
