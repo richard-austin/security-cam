@@ -31,7 +31,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   audioToggle: boolean = false;
   selectedDeviceId!: string;
   selectedAudioInput!: MediaDeviceInfo;
-  stopAudioAfterLongTimeSubscription!: Subscription
 //  private isFullscreenNow: boolean = false;
   private client!: Client;
   private timeForStartAudioOutResponse: number = 0;
@@ -405,8 +404,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.client.activate();
 
         // This stops the audio out after 5 minutes
-        this.stopAudioAfterLongTimeSubscription = timer(300000).subscribe(() => {
+        let stopAudioAfterLongTimeSubscription = timer(300000).subscribe(() => {
           this.stopAudioOut();
+          stopAudioAfterLongTimeSubscription.unsubscribe();
         });
       }).catch((error) => {
         this.stopAudioOut();
@@ -421,14 +421,14 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   beginStopAudioOut() {
     // 1.6 second plus timeForStartAudioOutResponse delay on stopping to allow for the latency in the audio and prevent
     //  the end of the speech getting get cut off
-    timer(1600+this.timeForStartAudioOutResponse).subscribe(() => {
+    let timerSubscription = timer(1600+this.timeForStartAudioOutResponse).subscribe(() => {
       this.stopAudioOut();
+      timerSubscription.unsubscribe();
     });
   }
 
   private stopAudioOut() : void {
     this.video.muted = false;
-    this.stopAudioAfterLongTimeSubscription?.unsubscribe();
     this.recorder?.stop();
     this.utilsService.stopAudioOut().subscribe(() => {
       this.client?.deactivate({force: false}).then(() => {});
@@ -473,7 +473,12 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.stop();
     if (this.audioToggle) {
-      this.stopAudioOut();
+      // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
+      //  ffmpeg to the backchannel device. The problem does not occur when done like this
+      let timerSubscription: Subscription =  timer(20).subscribe( () => {
+        this.stopAudioOut();
+        timerSubscription.unsubscribe();
+      });
      }
   }
 }
