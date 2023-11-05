@@ -74,14 +74,14 @@ class UserController {
 
         if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
-            logService.cam.error "createAccount: Validation error: " + errorsMap.toString()
+            logService.cam.error "createOrUpdateAccount: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {
             result = userAdminService.createOrUpdateAccount(cmd)
             if (result.status != PassFail.PASS) {
                 render(status: 500, text: result.error)
             } else {
-                logService.cam.info("createAccount: success")
+                logService.cam.info("createOrUpdateAccount: success")
                 render ""
             }
         }
