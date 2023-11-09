@@ -31,7 +31,7 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * Enable/Disable client connection to Cloud server.
 * Complete project deployment using a single deb file
 ### Run Time Platform for NVR
-The current build configuration (./gradlew buildDebFile) is for Raspberry pi V4 running headless (server) version of Ubuntu 23.04 (Lunar Lobster).
+The current build configuration (as created with ./gradlew buildDebFile) is for Raspberry pi V4 running headless (server) version of Ubuntu 23.10 (Mantic Minotaur).
 ### Security
 The NVR is designed to run on a LAN which is protected from unauthorised
 external access. From within the LAN, access to administrative functions is possible without authentication.
@@ -78,7 +78,7 @@ pts has no value
 Packet duration: -1131 / dts: 152727 is out of range
 </pre>
 
-As ffmpeg 4 is not available as standard on Ubuntu 23.04, I have built an ffmpeg v4 executable
+As ffmpeg 4 is not available as standard on Ubuntu 23.10, I have built an ffmpeg v4 executable
 for ARM64 architecture (at xtrn-scripts-and-config/ffmpeg-v4.4.4) which is deployed on installation of the 
 main project deb file. 
 
@@ -177,7 +177,7 @@ to the internet.
 Pre built .deb files for deployment on a Raspberry pi 4 are available in the Releases section. 
 The requirements to build the project yourself are detailed below: -
 #### Platform for Development
-* Ubuntu 23.04 (Lunar Lobster) on PC (Windows WSL2 or direct boot)
+* Ubuntu 23.10 (Mantic Minotaur) on PC (Windows WSL2 or direct boot)
 
 #### The project is verified to build with the following:-
 * go version go1.20.1
