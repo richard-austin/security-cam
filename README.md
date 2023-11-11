@@ -199,6 +199,7 @@ cd security-cam
 gradle init
 ```
 ### Build for deployment to Raspberry pi
+The Raspberry pi should be running Ubuntu 23.10 (Mantic Minotaur) OS.
 ```
 ./gradlew buildDebFile 
 ```
