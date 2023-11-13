@@ -123,7 +123,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   mimeType: string = 'video/mp4';
 
-  stream_started = false; // is the source_buffer updateend callback active nor not
+  stream_started = false; // is the source_buffer updateend callback active or not
 
   // create media source instance
   ms!: MediaSource;
@@ -223,14 +223,16 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       data = arr;
-      if (!this.stream_started) {
-        this.source_buffer.appendBuffer(data);
+      if (!this.stream_started && this.video.error == null) {
+            this.source_buffer.appendBuffer(data);
         this.stream_started = true;
         this.cc += 1;
         return;
       }
+      else if( this.video.error != null)
+        console.log(this.video.error.message)
 
-      this.queue.push(data); // add to the end
+        this.queue.push(data); // add to the end
       if (this.verbose) {
         console.log('queue push:', this.queue.length);
       }
@@ -252,7 +254,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           console.log(' ==> writing buffer with', memview[0], memview[1], memview[2], memview[3]);
         }
 
-        this.source_buffer.appendBuffer(inp as BufferSource);
+          this.source_buffer.appendBuffer(inp as BufferSource);
         this.cc += 1;
       } else { // the this.queue runs empty, so the next packet is fed directly
         this.stream_started = false;

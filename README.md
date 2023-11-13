@@ -247,7 +247,7 @@ To log into the NVR when accessing it directly,
 a user account must be set up. This is done using the Create User Account
 application (cua) which is accessible from the LAN without authentication. Be sure port 8080 on the Raspberry pi is not 
 accessible from outside the secure LAN. cua is also available when logged
-into the NVT from "Admin Functions" on the General menu.
+into the NVR (from "Admin Functions" on the General menu).
 * From a separate device on the LAN, open a browser and go to
 <a>http://<i>nvr_ip_addr</i>:8080/cua</a>
 * Click on the <img src="README.images/hamburger-2-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> icon at the top left of the page.

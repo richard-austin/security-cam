@@ -24,7 +24,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
 					} else if stream.AudioEncoding != "AAC" {
 						audio = "-c:a aac"
 					} else {
-						audio = "-c:a copy"
+						audio = "-c:a aac" //Don't use copy when source is AAC, it caused errors in the MSE media element
 					}
 
 					// Currently the development machine has ffmpeg version 5.1.2-3, while live has version 4.4.2-0.
