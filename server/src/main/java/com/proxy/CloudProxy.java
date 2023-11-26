@@ -650,7 +650,7 @@ public class CloudProxy implements SslContextProvider {
 
     @Override
     public TrustManager[] getTrustManagers() throws GeneralSecurityException, IOException {
-        return createTrustManagers(cloudProxyProperties.getTRUSTSTORE_PATH(), cloudProxyProperties.getTRUSTSTORE_PASSWORD().toCharArray());
+        return createTrustManagers(cloudProxyProperties.getMQ_TRUSTSTORE_PATH(), cloudProxyProperties.getMQ_TRUSTSTORE_PASSWORD().toCharArray());
     }
 
     private String log(ByteBuffer buf) {
