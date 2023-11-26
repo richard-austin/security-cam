@@ -32,6 +32,12 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * NVR includes NTP server for cameras to sync time without the need for them to connect to the internet.
 * Enable/Disable client connection to Cloud server.
 * Complete project deployment using a single deb file
+#### Limitations
+* Requires network cameras which provide H264 or 265 video, and optionally audio via RTSP (G711/AAC). *No video transcoding
+is done on the raspberry pi to keep CPU utilisation low*
+* The browser used must be able to display the video format used. Most browsers will support H264, but on some
+older machines, the GPU may not support H265 (HEVC) decoding. There are special chromium forks which can render H265
+with software decoding (see <a href="https://thorium.rocks/">Thorium</a> and <a href="https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding">Special Chromium Build</a>)
 ### Run Time Platform for NVR
 The current build configuration (as created with ./gradlew buildDebFile) is for Raspberry pi V4 running headless (server) version of Ubuntu 23.10 (Mantic Minotaur).
 ### Security
