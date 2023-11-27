@@ -6,9 +6,7 @@ import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
-import javax.net.ssl.SSLSocket;
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
