@@ -6,10 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.util.TimerTask;
 
 public class CloudSessionTimerTask extends TimerTask {
-    CloudProxy thisCP;
+    CloudAMQProxy thisCP;
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
 
-    public CloudSessionTimerTask(CloudProxy thisCP)
+    public CloudSessionTimerTask(CloudAMQProxy thisCP)
     {
         this.thisCP = thisCP;
     }

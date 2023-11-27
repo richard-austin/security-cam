@@ -177,9 +177,9 @@ public class CloudProxy implements SslContextProvider {
     private void createCloudProxySessionTimer() {
         if (cloudProxySessionTimer != null)
             cloudProxySessionTimer.cancel();
-        CloudSessionTimerTask cstt = new CloudSessionTimerTask(this);
-        cloudProxySessionTimer = new Timer("cloudProxySessionTimer");
-        cloudProxySessionTimer.schedule(cstt, cloudProxySessionTimeout);
+//        CloudSessionTimerTask cstt = new CloudSessionTimerTask(this);
+//        cloudProxySessionTimer = new Timer("cloudProxySessionTimer");
+//        cloudProxySessionTimer.schedule(cstt, cloudProxySessionTimeout);
     }
 
     public void resetCloudProxySessionTimeout() {
@@ -640,7 +640,8 @@ public class CloudProxy implements SslContextProvider {
 
     @Override
     public KeyManager[] getKeyManagers() throws GeneralSecurityException, IOException {
-        return createKeyManagers(cloudProxyProperties.getCLOUD_PROXY_KEYSTORE_PATH(), cloudProxyProperties.getCLOUD_PROXY_KEYSTORE_PASSWORD().toCharArray());
+ //       return createKeyManagers(cloudProxyProperties.getCLOUD_PROXY_KEYSTORE_PATH(), cloudProxyProperties.getCLOUD_PROXY_KEYSTORE_PASSWORD().toCharArray());
+        return null;
     }
 
     @Override
