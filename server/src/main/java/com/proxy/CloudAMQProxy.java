@@ -16,10 +16,11 @@ import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.proxy.SslUtil.createSSLSocket;
 
 public class CloudAMQProxy implements MessageListener {
     private boolean running = false;
+    private final long cloudProxySessionTimeout = 50 * 1000; // Restart CloudProxy after 50 seconds without a heartbeat
+
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     private ExecutorService cloudProxyExecutor;
     AdvisoryMonitor am;
@@ -27,6 +28,7 @@ public class CloudAMQProxy implements MessageListener {
 
     CloudProxyProperties cloudProxyProperties = CloudProxyProperties.getInstance();
     final Object LOCK = new Object();
+    private Session session = null;
 
     public void start() {
         if (!running) {
@@ -59,12 +61,11 @@ public class CloudAMQProxy implements MessageListener {
 
     private void createConnectionToCloud() {
         try {
-            if (this.cloudChannel == null || !this.cloudChannel.isConnected() || this.cloudChannel.isClosed()) {
-
                 Session session = getSession();
+
                 // Create the destination
                 Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
-                am = new AdvisoryMonitor(session, destination);
+    //            am = new AdvisoryMonitor(session, destination);
 
 
                 createCloudProxySessionTimer();   // Start the connection timer, if heartbeats are not received for the
@@ -73,23 +74,30 @@ public class CloudAMQProxy implements MessageListener {
                 // after the timeout period.
 
                 if (productKeyAccepted(session, destination)) {
-                    this.cloudChannel = cloudChannel;
+                    this.session = session;
                     logger.info("Connected successfully to the Cloud");
-                    startCloudInputProcess(cloudChannel);
+                    startCloudInputProcess(session);
                 } else
                     logger.error("Product key was not accepted by the Cloud server");
-            }
 
         } catch (Exception e) {
             logger.warn("Exception in createConnectionToCloud: " + e.getMessage() + ": Couldn't connect to Cloud");
-            if (this.cloudChannel != null) {
+            if (this.session != null) {
                 try {
-                    this.cloudChannel.close();
-                } catch (IOException ignored) {
+                    this.session.close();
+                    this.session = null;
+                } catch (JMSException ignored) {
                 }
             }
         }
         startCloudConnectionCheck();
+    }
+
+    private void startCloudConnectionCheck() {
+
+    }
+    private void startCloudInputProcess(Session  session) {
+
     }
 
     private Session getSession() throws Exception {
@@ -124,7 +132,7 @@ public class CloudAMQProxy implements MessageListener {
             MessageProducer producer = session.createProducer(destination);
             producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
             BytesMessage message = session.createBytesMessage();
-            message.writeBytes(prodKey.getBytes(StandardCharsets.UTF_8);
+            message.writeBytes(prodKey.getBytes(StandardCharsets.UTF_8));
             message.setBooleanProperty("INIT", true);
             Destination replyQ = session.createTemporaryQueue();
             message.setJMSReplyTo(replyQ);
@@ -159,6 +167,26 @@ public class CloudAMQProxy implements MessageListener {
                                                         Objects.equals(level, "ALL") ? Level.ALL : Level.OFF);
     }
 
+
+    private void createCloudProxySessionTimer() {
+        if (cloudProxySessionTimer != null)
+            cloudProxySessionTimer.cancel();
+        CloudSessionTimerTask cstt = new CloudSessionTimerTask(this);
+        cloudProxySessionTimer = new Timer("cloudProxySessionTimer");
+        cloudProxySessionTimer.schedule(cstt, cloudProxySessionTimeout);
+    }
+
+    public void resetCloudProxySessionTimeout() {
+
+        if (cloudProxySessionTimer != null)
+            cloudProxySessionTimer.cancel();
+
+        createCloudProxySessionTimer();
+    }
+    void restart() {
+        if (running) {
+        }
+    }
     void showExceptionDetails(Throwable t, String functionName) {
         logger.error(t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
 //        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
