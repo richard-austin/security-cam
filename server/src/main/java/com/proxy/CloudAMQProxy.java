@@ -51,6 +51,8 @@ public class CloudAMQProxy implements MessageListener {
             });
         }
     }
+    public void stop() {
+    }
 
     @Override
     public void onMessage(Message message) {
@@ -101,7 +103,7 @@ public class CloudAMQProxy implements MessageListener {
     private Session getSession() throws Exception {
         ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory("failover://ssl://localhost:61617?socket.verifyHostName=false");
         connectionFactory.setKeyStore(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PATH());
-        connectionFactory.setKeyStoreKeyPassword(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PASSWORD());
+        connectionFactory.setKeyStorePassword(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PASSWORD());
         connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
         connectionFactory.setTrustStorePassword(cloudProxyProperties.getMQ_TRUSTSTORE_PASSWORD());
         // Create a Connection
@@ -135,7 +137,7 @@ public class CloudAMQProxy implements MessageListener {
             Destination replyQ = session.createTemporaryQueue();
             message.setJMSReplyTo(replyQ);
             message.setJMSCorrelationID("initCorrelationId");
-            producer.send(message);
+            producer.send(message, DeliveryMode.NON_PERSISTENT, 4, 1000);
             // Get thew response from the Cloud
             MessageConsumer consumer = session.createConsumer(replyQ);
             Message response = consumer.receive(1000);
@@ -191,4 +193,5 @@ public class CloudAMQProxy implements MessageListener {
 //            System.err.println(stackTraceElement.toString());
 //        }
     }
+
 }

@@ -27,8 +27,8 @@ public final class CloudProxyProperties {
         Config config = grailsApplication.getConfig();
         MQ_TRUSTSTORE_PATH = config.getProperty("cloudProxy.mqTrustStorePath");
         MQ_CLOUD_PROXY_KEYSTORE_PATH = config.getProperty("cloudProxy.mqKeyStorePath");
-        MQ_TRUSTSTORE_PASSWORD = config.getProperty("cloudProxy.trustStorePassword");
-        MQ_CLOUD_PROXY_KEYSTORE_PASSWORD = config.getProperty("cloudProxy.keyStorePassword");
+        MQ_TRUSTSTORE_PASSWORD = config.getProperty("cloudProxy.mqTrustStorePassword");
+        MQ_CLOUD_PROXY_KEYSTORE_PASSWORD = config.getProperty("cloudProxy.mqKeyStorePassword");
         PRODUCT_KEY_PATH = config.getProperty("cloudProxy.productKeyPath");
         CLOUD_PROXY_ACTIVE_MQ_URL = config.getProperty("cloudProxy.cloudActiveMQUrl");
         ACTIVE_MQ_INIT_QUEUE = config.getProperty("cloudProxy.activeMQInitQueue");

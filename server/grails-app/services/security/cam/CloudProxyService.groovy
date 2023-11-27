@@ -1,5 +1,6 @@
 package security.cam
 
+import com.proxy.CloudAMQProxy
 import com.proxy.CloudProxy
 import security.cam.interfaceobjects.CloudProxyRestartTask
 import grails.core.GrailsApplication
@@ -12,16 +13,16 @@ class CloudProxyService {
     LogService logService
     GrailsApplication grailsApplication
 
-    CloudProxy cloudProxy = null
+    CloudAMQProxy cloudProxy = null
 
     ObjectCommandResponse start() {
         if(cloudProxy == null)
         {
-            cloudProxy = new CloudProxy(
-                    (String)(grailsApplication.config.cloudProxy.webServerForCloudProxyHost),
-                    (Integer)(grailsApplication.config.cloudProxy.webServerForCloudProxyPort),
-                    (String)(grailsApplication.config.cloudProxy.cloudHost),
-                    (Integer)(grailsApplication.config.cloudProxy.cloudPort))
+            cloudProxy = new CloudAMQProxy();
+//                    (String)(grailsApplication.config.cloudProxy.webServerForCloudProxyHost),
+//                    (Integer)(grailsApplication.config.cloudProxy.webServerForCloudProxyPort),
+//                    (String)(grailsApplication.config.cloudProxy.cloudHost),
+//                    (Integer)(grailsApplication.config.cloudProxy.cloudPort))
         }
 
         ObjectCommandResponse response = new ObjectCommandResponse()
