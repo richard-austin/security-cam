@@ -3,6 +3,7 @@ package com.proxy;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import org.apache.activemq.ActiveMQSslConnectionFactory;
+import org.apache.activemq.command.ActiveMQTextMessage;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
@@ -13,7 +14,7 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+import java.util.concurrent.ScheduledExecutorService;
 
 public class CloudAMQProxy implements MessageListener {
     private boolean running = false;
@@ -23,10 +24,10 @@ public class CloudAMQProxy implements MessageListener {
     private ExecutorService cloudProxyExecutor;
     AdvisoryMonitor am;
     private static final String productIdRegex = "^(?:[A-Z0-9]{4}-){3}[A-Z0-9]{4}$";
-
     CloudProxyProperties cloudProxyProperties = CloudProxyProperties.getInstance();
     final Object LOCK = new Object();
     private Session session = null;
+    private String productId = "";
 
     public void start() {
         if (!running) {
@@ -67,7 +68,6 @@ public class CloudAMQProxy implements MessageListener {
                 Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
     //            am = new AdvisoryMonitor(session, destination);
 
-
                 createCloudProxySessionTimer();   // Start the connection timer, if heartbeats are not received for the
                 // timout period, this will trigger a retry.
                 // If we fail to connect,this time, the timeout will trigger a retry
@@ -77,6 +77,7 @@ public class CloudAMQProxy implements MessageListener {
                     this.session = session;
                     logger.info("Connected successfully to the Cloud");
                     startCloudInputProcess(session);
+                    startCloudConnectionCheck();
                 } else
                     logger.error("Product key was not accepted by the Cloud server");
 
@@ -90,14 +91,14 @@ public class CloudAMQProxy implements MessageListener {
                 }
             }
         }
-        startCloudConnectionCheck();
     }
 
     private void startCloudConnectionCheck() {
 
     }
-    private void startCloudInputProcess(Session  session) {
 
+    private void startCloudInputProcess(Session  session) {
+        String x = productId;
     }
 
     private Session getSession() throws Exception {
@@ -111,8 +112,7 @@ public class CloudAMQProxy implements MessageListener {
         connection.start();
 
         // Create a Session
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        return session;
+        return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
     /**
@@ -138,17 +138,15 @@ public class CloudAMQProxy implements MessageListener {
             message.setJMSReplyTo(replyQ);
             message.setJMSCorrelationID("initCorrelationId");
             producer.send(message, DeliveryMode.NON_PERSISTENT, 4, 1000);
-            // Get thew response from the Cloud
+            // Get the response from the Cloud
             MessageConsumer consumer = session.createConsumer(replyQ);
             Message response = consumer.receive(1000);
-            if (response instanceof BytesMessage && message.getBooleanProperty("INIT_RESPONSE") && Objects.equals(message.getJMSCorrelationID(), "initResponseCorrelationId")) {
-                final byte[] result = new byte[10];
-                final int bytesRead = message.readBytes(result);
-                final String productId = new String(result, 0, bytesRead);
-                if (productId.matches(productIdRegex))
+            if (response instanceof ActiveMQTextMessage tm && response.getBooleanProperty("INIT_RESPONSE") && Objects.equals(response.getJMSCorrelationID(), "initResponseCorrelationId")) {
+                productId = tm.getText();
+                if (productId.matches(productIdRegex)) {
                     retVal = true;
+                }
             }
-
         } catch (Exception ex) {
             logger.error(ex.getClass().getName()+" in productKeyAccepted: "+ex.getMessage());
         }
@@ -193,5 +191,4 @@ public class CloudAMQProxy implements MessageListener {
 //            System.err.println(stackTraceElement.toString());
 //        }
     }
-
 }
