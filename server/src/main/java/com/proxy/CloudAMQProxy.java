@@ -29,7 +29,7 @@ public class CloudAMQProxy implements MessageListener {
         HEARTBEAT("heartbeat"),
         REQUEST_RESPONSE("requestResponse"),
         TOKEN("token"),
-        CONNECTION_CLOSED
+        CONNECTION_CLOSED("connectionClosed");
 
         final String value;
         MessageMetadata(String value)  {
