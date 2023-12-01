@@ -216,7 +216,7 @@ public class CloudProxy implements SslContextProvider {
                     while (read(is, buf) != -1) {
                         logger.trace("startCloudInputProcess read pos: " + buf.position() + " length: " + buf.limit());
                         if (!isHeartbeat(buf))
-                            splitMessages(buf);
+                            writeRequestToWebserver(buf);
                         else {
                             resetCloudProxySessionTimeout();
                             logger.debug("Heartbeat received");
@@ -567,57 +567,7 @@ public class CloudProxy implements SslContextProvider {
 
     ByteBuffer remainsOfPreviousBuffer = null;
 
-    void splitMessages(ByteBuffer buf) {
-        logger.trace("splitMessages (pre thread) input buf pos: " + buf.position() + " length: " + buf.limit());
-        splitMessagesExecutor.submit(() -> {
-            try {
-                buf.flip();
-                ByteBuffer combinedBuf;
-                logger.trace("splitMessages input buf pos: " + buf.position() + " length: " + buf.limit());
-                if (remainsOfPreviousBuffer != null) {
-                    // Append the new buffer onto the previous ones remaining content
-                    combinedBuf = ByteBuffer.allocate(buf.limit() + remainsOfPreviousBuffer.limit() - remainsOfPreviousBuffer.position());
-                    combinedBuf.put(remainsOfPreviousBuffer);
-                    combinedBuf.put(buf);
-                    remainsOfPreviousBuffer = null;
-
-                } else {
-                    combinedBuf = getBuffer();
-                    combinedBuf.put(buf);
-                }
-                combinedBuf.flip();
-                recycle(buf);
-
-
-                while (combinedBuf.position() < combinedBuf.limit()) {
-                    int lengthThisMessage = getMessageLengthFromPosition(combinedBuf);
-                    if (combinedBuf.limit() - combinedBuf.position() < headerLength) {
-                        remainsOfPreviousBuffer = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.limit()));
-                        remainsOfPreviousBuffer.rewind();
-                        combinedBuf.position(combinedBuf.limit());
-                    } else {
-                        if (lengthThisMessage > combinedBuf.limit() - combinedBuf.position()) {
-                            remainsOfPreviousBuffer = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.limit()));
-                            remainsOfPreviousBuffer.rewind();
-                            combinedBuf.position(combinedBuf.limit());
-                        } else {
-                            ByteBuffer newBuf = ByteBuffer.wrap(Arrays.copyOfRange(combinedBuf.array(), combinedBuf.position(), combinedBuf.position() + lengthThisMessage));
-                            newBuf.rewind();
-                            //     logger.log(Level.INFO, "Buffer size " + newBuf.limit() + " lengthThisMessage= " + lengthThisMessage);
-                            combinedBuf.position(combinedBuf.position() + lengthThisMessage);
-                            logger.debug("splitMessages length: " + getDataLengthFullRestore(newBuf));
-                            writeRequestToWebserver(newBuf);
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                showExceptionDetails(ex, "splitMessages");
-                restart();
-            }
-        });
-    }
-
-    void setLogLevel(String level) {
+     void setLogLevel(String level) {
         logger.setLevel(Objects.equals(level, "INFO") ? Level.INFO :
                 Objects.equals(level, "DEBUG") ? Level.DEBUG :
                         Objects.equals(level, "TRACE") ? Level.TRACE :
@@ -627,11 +577,7 @@ public class CloudProxy implements SslContextProvider {
                                                         Objects.equals(level, "ALL") ? Level.ALL : Level.OFF);
     }
 
-    private int getMessageLengthFromPosition(ByteBuffer buf) {
-        return buf.getInt(buf.position() + tokenLength) + headerLength;
-    }
-
-    void showExceptionDetails(Throwable t, String functionName) {
+     void showExceptionDetails(Throwable t, String functionName) {
         logger.error(t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
 //        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
 //            System.err.println(stackTraceElement.toString());

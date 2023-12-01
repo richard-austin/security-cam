@@ -8,20 +8,44 @@ import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
 import java.io.File;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+
+import static com.proxy.CloudAMQProxy.MessageMetadata.HEARTBEAT;
+import static org.apache.cxf.ws.security.SecurityConstants.TOKEN;
 
 public class CloudAMQProxy implements MessageListener {
+    public enum MessageMetadata {
+        HEARTBEAT("heartbeat"),
+        REQUEST_RESPONSE("requestResponse"),
+        TOKEN("token"),
+        CONNECTION_CLOSED
+
+        final String value;
+        MessageMetadata(String value)  {
+            this.value = value;
+        }
+    }
+    final Map<Integer, SocketChannel> tokenSocketMap = new ConcurrentHashMap<>();
+
     private boolean running = false;
+    private final String webServerForCloudProxyHost;
+    private final int webServerForCloudProxyPort;
     private final long cloudProxySessionTimeout = 50 * 1000; // Restart CloudProxy after 50 seconds without a heartbeat
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     private ExecutorService cloudProxyExecutor;
+    private ExecutorService webserverWriteExecutor;
     AdvisoryMonitor am;
     private static final String productIdRegex = "^(?:[A-Z0-9]{4}-){3}[A-Z0-9]{4}$";
     CloudProxyProperties cloudProxyProperties = CloudProxyProperties.getInstance();
@@ -29,11 +53,17 @@ public class CloudAMQProxy implements MessageListener {
     private Session session = null;
     private String productId = "";
 
+    public CloudAMQProxy(String webServerForCloudProxyHost, int webServerForCloudProxyPort) {
+        this.webServerForCloudProxyHost = webServerForCloudProxyHost;
+        this.webServerForCloudProxyPort = webServerForCloudProxyPort;
+    }
+
     public void start() {
         if (!running) {
             setLogLevel(cloudProxyProperties.getLOG_LEVEL());
 
             cloudProxyExecutor = Executors.newSingleThreadExecutor();
+            webserverWriteExecutor = Executors.newSingleThreadExecutor();
             cloudProxyExecutor.execute(() -> {
                 running = true;
                 try {
@@ -50,9 +80,13 @@ public class CloudAMQProxy implements MessageListener {
                     showExceptionDetails(ex, "start");
                 }
             });
+
         }
     }
     public void stop() {
+    }
+
+    private void sendResponseToCloud(Message msg) {
     }
 
     @Override
@@ -97,8 +131,98 @@ public class CloudAMQProxy implements MessageListener {
 
     }
 
+    private void writeRequestToWebserver(Message message) {
+        try {
+            logger.info("Received message ");
+            int token = message.getIntProperty(TOKEN);
+            if (tokenSocketMap.containsKey(token)) {
+                if (getConnectionClosedFlag(message) != 0) {
+                    tokenSocketMap.get(token).close();
+                    removeSocket(token);
+                } else {
+                    SocketChannel webserverChannel = tokenSocketMap.get(token);
+                    writeRequestToWebserver(message, webserverChannel);
+                }
+            } else  // Make a new connection to the webserver
+            {
+                final SocketChannel webserverChannel = SocketChannel.open();
+                webserverChannel.connect(new InetSocketAddress(webServerForCloudProxyHost, webServerForCloudProxyPort));
+                webserverChannel.configureBlocking(true);
+                tokenSocketMap.put(token, webserverChannel);
+                logger.debug("writeRequestToWebserver(1) length: " + getDataLengthFullRestore(message));
+                writeRequestToWebserver(message, webserverChannel);
+                readResponseFromWebserver(webserverChannel, token);
+            }
+        } catch (Exception ex) {
+            showExceptionDetails(ex, "writeRequestToWebserver");
+            restart();
+        }
+    }
+    private void writeRequestToWebserver(final ByteBuffer buf, final SocketChannel webserverChannel) {
+        this.webserverWriteExecutor.submit(() -> {
+            //  logMessageMetadata(buf, "To webserv");
+            try {
+                int length = getDataLength(buf);
+                buf.position(headerLength);
+                buf.limit(headerLength + length);
+                int result;
+                logger.debug("writeRequestToWebserver(2) length: " + getDataLengthFullRestore(buf));
+                do {
+                    result = webserverChannel.write(buf);
+                }
+                while (result != -1 && buf.position() < buf.limit());
+
+                // Don't recycle the dynamically created buffer as it will cause a build up in the buffer qeue// These are left to be cleared up by Java housekeeping.
+            } catch (ClosedChannelException ignored) {
+                try {
+                    // Close the channel or the socket will be left in the CLOSE-WAIT state
+                    webserverChannel.close();
+                } catch (Exception ignore) {
+                }
+            } catch (Exception ex) {
+                showExceptionDetails(ex, "writeRequestToWebserver");
+            }
+        });
+    }
+
+    private class CloudInputProcess implements MessageListener{
+        final private Session session;
+
+        CloudInputProcess(Session session) {
+            this.session = session;
+        }
+
+        void start() {
+            try {
+                Destination dest =  session.createQueue(productId);
+                MessageConsumer cons = session.createConsumer(dest);
+                cons.setMessageListener(this);
+
+            }
+            catch(JMSException ex) {
+                logger.error("JMS Exception in CloudInputProcess.start(): "+ex.getMessage());
+            }
+        }
+
+        @Override
+        public void onMessage(Message message) {
+            try {
+                if (message.getBooleanProperty(HEARTBEAT.value)) {
+                    sendResponseToCloud(message);  // Bounce heartbeats back to the Cloud
+                    resetCloudProxySessionTimeout();;
+                }
+                else
+                    writeRequestToWebserver(message);
+            }
+            catch(Exception ex) {
+                logger.error(ex.getClass().getName()+" in CloudInputProcess.onMessage: "+ex.getMessage());
+            }
+        }
+    }
+    CloudInputProcess cip = null;
     private void startCloudInputProcess(Session  session) {
-        String x = productId;
+        cip = new CloudInputProcess(session);
+        cip.start();;
     }
 
     private Session getSession() throws Exception {

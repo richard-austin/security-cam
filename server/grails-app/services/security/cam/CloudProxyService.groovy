@@ -18,11 +18,11 @@ class CloudProxyService {
     ObjectCommandResponse start() {
         if(cloudProxy == null)
         {
-            cloudProxy = new CloudAMQProxy();
-//                    (String)(grailsApplication.config.cloudProxy.webServerForCloudProxyHost),
-//                    (Integer)(grailsApplication.config.cloudProxy.webServerForCloudProxyPort),
-//                    (String)(grailsApplication.config.cloudProxy.cloudHost),
-//                    (Integer)(grailsApplication.config.cloudProxy.cloudPort))
+            cloudProxy = new CloudAMQProxy(
+                    (String)(grailsApplication.config.cloudProxy.webServerForCloudProxyHost),
+                    (Integer)(grailsApplication.config.cloudProxy.webServerForCloudProxyPort),
+                    (String)(grailsApplication.config.cloudProxy.cloudHost),
+                    (Integer)(grailsApplication.config.cloudProxy.cloudPort))
         }
 
         ObjectCommandResponse response = new ObjectCommandResponse()
