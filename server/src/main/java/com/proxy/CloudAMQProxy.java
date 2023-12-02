@@ -3,6 +3,7 @@ package com.proxy;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import org.apache.activemq.ActiveMQSslConnectionFactory;
+import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,7 @@ import javax.jms.*;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
@@ -21,8 +23,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.proxy.CloudAMQProxy.MessageMetadata.CONNECTION_CLOSED;
 import static com.proxy.CloudAMQProxy.MessageMetadata.HEARTBEAT;
-import static org.apache.cxf.ws.security.SecurityConstants.TOKEN;
+import static com.proxy.CloudAMQProxy.MessageMetadata.TOKEN;
+
 
 public class CloudAMQProxy implements MessageListener {
     public enum MessageMetadata {
@@ -45,7 +49,10 @@ public class CloudAMQProxy implements MessageListener {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     private ExecutorService cloudProxyExecutor;
+    private ExecutorService webserverReadExecutor;
+
     private ExecutorService webserverWriteExecutor;
+
     AdvisoryMonitor am;
     private static final String productIdRegex = "^(?:[A-Z0-9]{4}-){3}[A-Z0-9]{4}$";
     CloudProxyProperties cloudProxyProperties = CloudProxyProperties.getInstance();
@@ -63,6 +70,7 @@ public class CloudAMQProxy implements MessageListener {
             setLogLevel(cloudProxyProperties.getLOG_LEVEL());
 
             cloudProxyExecutor = Executors.newSingleThreadExecutor();
+            webserverReadExecutor = Executors.newCachedThreadPool();
             webserverWriteExecutor = Executors.newSingleThreadExecutor();
             cloudProxyExecutor.execute(() -> {
                 running = true;
@@ -131,12 +139,22 @@ public class CloudAMQProxy implements MessageListener {
 
     }
 
-    private void writeRequestToWebserver(Message message) {
+    void removeSocket(int token) {
+        try {
+            SocketChannel sock = tokenSocketMap.get(token);
+            sock.close();
+            tokenSocketMap.remove(token);
+        } catch (Exception ex) {
+            showExceptionDetails(ex, "removeSocket");
+        }
+    }
+
+    private void writeRequestToWebserver(BytesMessage message) {
         try {
             logger.info("Received message ");
-            int token = message.getIntProperty(TOKEN);
+            int token = message.getIntProperty(TOKEN.value);
             if (tokenSocketMap.containsKey(token)) {
-                if (getConnectionClosedFlag(message) != 0) {
+                if (message.getBooleanProperty(CONNECTION_CLOSED.value)) {
                     tokenSocketMap.get(token).close();
                     removeSocket(token);
                 } else {
@@ -149,7 +167,7 @@ public class CloudAMQProxy implements MessageListener {
                 webserverChannel.connect(new InetSocketAddress(webServerForCloudProxyHost, webServerForCloudProxyPort));
                 webserverChannel.configureBlocking(true);
                 tokenSocketMap.put(token, webserverChannel);
-                logger.debug("writeRequestToWebserver(1) length: " + getDataLengthFullRestore(message));
+                logger.debug("writeRequestToWebserver(1) length: " + message.getBodyLength());
                 writeRequestToWebserver(message, webserverChannel);
                 readResponseFromWebserver(webserverChannel, token);
             }
@@ -158,15 +176,15 @@ public class CloudAMQProxy implements MessageListener {
             restart();
         }
     }
-    private void writeRequestToWebserver(final ByteBuffer buf, final SocketChannel webserverChannel) {
+    private void writeRequestToWebserver(final BytesMessage msg, final SocketChannel webserverChannel) {
         this.webserverWriteExecutor.submit(() -> {
             //  logMessageMetadata(buf, "To webserv");
             try {
-                int length = getDataLength(buf);
-                buf.position(headerLength);
-                buf.limit(headerLength + length);
+                int length = (int)msg.getBodyLength();
+                ByteBuffer buf = ByteBuffer.allocate(length);
+                buf.put(buf.array(), 0, length);
                 int result;
-                logger.debug("writeRequestToWebserver(2) length: " + getDataLengthFullRestore(buf));
+                logger.debug("writeRequestToWebserver(2) length: " + msg.getBodyLength());
                 do {
                     result = webserverChannel.write(buf);
                 }
@@ -184,6 +202,34 @@ public class CloudAMQProxy implements MessageListener {
             }
         });
     }
+
+    private void readResponseFromWebserver(SocketChannel webserverChannel, int token) {
+        webserverReadExecutor.submit(() -> {
+            try {
+                ByteBuffer buf = getBuffer();
+                while (running && webserverChannel.isOpen() && webserverChannel.read(buf) != -1) {
+                    logger.debug("readResponseFromWebserver length: " + buf.position());
+                    final BytesMessage msg = session.createBytesMessage();
+                    msg.writeBytes(buf.array(), 0, buf.position());
+                    msg.setIntProperty(TOKEN.value, token);
+                    sendResponseToCloud(msg);
+                    buf = getBuffer();
+                }
+
+                final BytesMessage msg = session.createBytesMessage();
+                msg.setBooleanProperty(CONNECTION_CLOSED.value, true);
+                msg.setIntProperty(TOKEN.value, token);
+                sendResponseToCloud(msg);
+                webserverChannel.close();
+            } catch (AsynchronousCloseException ignored) {
+                // Don't report AsynchronousCloseException as these come up when the channel has been closed
+                //  by a signal via getConnectionClosedFlag  from Cloud
+            } catch (Exception e) {
+                showExceptionDetails(e, "readResponseFromWebserver");
+            }
+        });
+    }
+
 
     private class CloudInputProcess implements MessageListener{
         final private Session session;
@@ -211,8 +257,10 @@ public class CloudAMQProxy implements MessageListener {
                     sendResponseToCloud(message);  // Bounce heartbeats back to the Cloud
                     resetCloudProxySessionTimeout();;
                 }
+                else if(message instanceof BytesMessage)
+                    writeRequestToWebserver((BytesMessage)message);
                 else
-                    writeRequestToWebserver(message);
+                    logger.error("Unhandled message type in CloudInputProcess.onMessage: "+message.getClass().getName());
             }
             catch(Exception ex) {
                 logger.error(ex.getClass().getName()+" in CloudInputProcess.onMessage: "+ex.getMessage());
@@ -309,6 +357,18 @@ public class CloudAMQProxy implements MessageListener {
         if (running) {
         }
     }
+
+    /**
+     * getBuffer: Get a buffer and place the token at the start.
+     *
+     * @return: The byte buffer with the token in place and length reservation set up.
+     */
+    private ByteBuffer getBuffer() {
+        final int BUFFER_SIZE = 1024;
+
+        return ByteBuffer.allocate(BUFFER_SIZE);
+    }
+
     void showExceptionDetails(Throwable t, String functionName) {
         logger.error(t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
 //        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
