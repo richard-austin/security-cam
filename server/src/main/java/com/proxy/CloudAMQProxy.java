@@ -3,7 +3,6 @@ package com.proxy;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import org.apache.activemq.ActiveMQSslConnectionFactory;
-import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.slf4j.LoggerFactory;
 
@@ -92,9 +91,6 @@ public class CloudAMQProxy implements MessageListener {
         }
     }
     public void stop() {
-    }
-
-    private void sendResponseToCloud(Message msg) {
     }
 
     @Override
@@ -212,14 +208,14 @@ public class CloudAMQProxy implements MessageListener {
                     final BytesMessage msg = session.createBytesMessage();
                     msg.writeBytes(buf.array(), 0, buf.position());
                     msg.setIntProperty(TOKEN.value, token);
-                    sendResponseToCloud(msg);
+                    cip.sendResponseToCloud(msg);
                     buf = getBuffer();
                 }
 
                 final BytesMessage msg = session.createBytesMessage();
                 msg.setBooleanProperty(CONNECTION_CLOSED.value, true);
                 msg.setIntProperty(TOKEN.value, token);
-                sendResponseToCloud(msg);
+                cip.sendResponseToCloud(msg);
                 webserverChannel.close();
             } catch (AsynchronousCloseException ignored) {
                 // Don't report AsynchronousCloseException as these come up when the channel has been closed
@@ -233,6 +229,8 @@ public class CloudAMQProxy implements MessageListener {
 
     private class CloudInputProcess implements MessageListener{
         final private Session session;
+        Destination cloud = null;
+        MessageProducer producer = null;
 
         CloudInputProcess(Session session) {
             this.session = session;
@@ -253,6 +251,11 @@ public class CloudAMQProxy implements MessageListener {
         @Override
         public void onMessage(Message message) {
             try {
+                if(cloud == null) {
+                    cloud = message.getJMSReplyTo();
+                    producer = session.createProducer(cloud);
+                }
+
                 if (message.getBooleanProperty(HEARTBEAT.value)) {
                     sendResponseToCloud(message);  // Bounce heartbeats back to the Cloud
                     resetCloudProxySessionTimeout();;
@@ -264,6 +267,14 @@ public class CloudAMQProxy implements MessageListener {
             }
             catch(Exception ex) {
                 logger.error(ex.getClass().getName()+" in CloudInputProcess.onMessage: "+ex.getMessage());
+            }
+        }
+        void sendResponseToCloud(Message msg) {
+            try {
+                producer.send(msg);
+            }
+            catch(Exception ex) {
+                logger.error(ex.getClass().getName()+" in CloudInputProcess.sendResponseToCloud: "+ex.getMessage());
             }
         }
     }
