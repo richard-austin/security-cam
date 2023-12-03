@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousCloseException;
@@ -35,10 +36,12 @@ public class CloudAMQProxy implements MessageListener {
         CONNECTION_CLOSED("connectionClosed");
 
         final String value;
-        MessageMetadata(String value)  {
+
+        MessageMetadata(String value) {
             this.value = value;
         }
     }
+
     final Map<Integer, SocketChannel> tokenSocketMap = new ConcurrentHashMap<>();
 
     private boolean running = false;
@@ -90,6 +93,7 @@ public class CloudAMQProxy implements MessageListener {
 
         }
     }
+
     public void stop() {
     }
 
@@ -100,24 +104,23 @@ public class CloudAMQProxy implements MessageListener {
 
     private void createConnectionToCloud() {
         try {
-                Session session = getSession();
+            Session session = getSession();
 
-                // Create the destination
-                Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
-    //            am = new AdvisoryMonitor(session, destination);
+            // Create the destination
+            Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
+            //            am = new AdvisoryMonitor(session, destination);
 
-                createCloudProxySessionTimer();   // Start the connection timer, if heartbeats are not received for the
-                // timout period, this will trigger a retry.
-                // If we fail to connect,this time, the timeout will trigger a retry
-                // after the timeout period.
+            createCloudProxySessionTimer();   // Start the connection timer, if heartbeats are not received for the
+            // timout period, this will trigger a retry.
+            // If we fail to connect,this time, the timeout will trigger a retry
+            // after the timeout period.
 
-                if (productKeyAccepted(session, destination)) {
-                    this.session = session;
-                    logger.info("Connected successfully to the Cloud");
-                    startCloudInputProcess(session);
-                    startCloudConnectionCheck();
-                } else
-                    logger.error("Product key was not accepted by the Cloud server");
+            if (productKeyAccepted(session, destination)) {
+                this.session = session;
+                logger.info("Connected successfully to the Cloud");
+                startCloudInputProcess(session);
+            } else
+                logger.error("Product key was not accepted by the Cloud server");
 
         } catch (Exception e) {
             logger.warn("Exception in createConnectionToCloud: " + e.getMessage() + ": Couldn't connect to Cloud");
@@ -131,13 +134,9 @@ public class CloudAMQProxy implements MessageListener {
         }
     }
 
-    private void startCloudConnectionCheck() {
-
-    }
-
     void removeSocket(int token) {
-        try {
-            SocketChannel sock = tokenSocketMap.get(token);
+        try (SocketChannel sock = tokenSocketMap.get(token)){
+           // SocketChannel sock = tokenSocketMap.get(token);
             sock.close();
             tokenSocketMap.remove(token);
         } catch (Exception ex) {
@@ -172,11 +171,12 @@ public class CloudAMQProxy implements MessageListener {
             restart();
         }
     }
+
     private void writeRequestToWebserver(final BytesMessage msg, final SocketChannel webserverChannel) {
         this.webserverWriteExecutor.submit(() -> {
             //  logMessageMetadata(buf, "To webserv");
             try {
-                int length = (int)msg.getBodyLength();
+                int length = (int) msg.getBodyLength();
                 ByteBuffer buf = ByteBuffer.allocate(length);
                 buf.put(buf.array(), 0, length);
                 int result;
@@ -227,7 +227,7 @@ public class CloudAMQProxy implements MessageListener {
     }
 
 
-    private class CloudInputProcess implements MessageListener{
+    private class CloudInputProcess implements MessageListener {
         final private Session session;
         Destination cloud = null;
         MessageProducer producer = null;
@@ -238,50 +238,50 @@ public class CloudAMQProxy implements MessageListener {
 
         void start() {
             try {
-                Destination dest =  session.createQueue(productId);
+                Destination dest = session.createQueue(productId);
                 MessageConsumer cons = session.createConsumer(dest);
                 cons.setMessageListener(this);
 
-            }
-            catch(JMSException ex) {
-                logger.error("JMS Exception in CloudInputProcess.start(): "+ex.getMessage());
+            } catch (JMSException ex) {
+                logger.error("JMS Exception in CloudInputProcess.start(): " + ex.getMessage());
             }
         }
 
         @Override
         public void onMessage(Message message) {
             try {
-                if(cloud == null) {
+                if (cloud == null) {
                     cloud = message.getJMSReplyTo();
                     producer = session.createProducer(cloud);
                 }
 
                 if (message.getBooleanProperty(HEARTBEAT.value)) {
+                    logger.info("Received heartbeat");
                     sendResponseToCloud(message);  // Bounce heartbeats back to the Cloud
-                    resetCloudProxySessionTimeout();;
-                }
-                else if(message instanceof BytesMessage)
-                    writeRequestToWebserver((BytesMessage)message);
+                    resetCloudProxySessionTimeout();
+                  } else if (message instanceof BytesMessage)
+                    writeRequestToWebserver((BytesMessage) message);
                 else
-                    logger.error("Unhandled message type in CloudInputProcess.onMessage: "+message.getClass().getName());
-            }
-            catch(Exception ex) {
-                logger.error(ex.getClass().getName()+" in CloudInputProcess.onMessage: "+ex.getMessage());
+                    logger.error("Unhandled message type in CloudInputProcess.onMessage: " + message.getClass().getName());
+            } catch (Exception ex) {
+                logger.error(ex.getClass().getName() + " in CloudInputProcess.onMessage: " + ex.getMessage());
             }
         }
+
         void sendResponseToCloud(Message msg) {
             try {
                 producer.send(msg);
-            }
-            catch(Exception ex) {
-                logger.error(ex.getClass().getName()+" in CloudInputProcess.sendResponseToCloud: "+ex.getMessage());
+            } catch (Exception ex) {
+                logger.error(ex.getClass().getName() + " in CloudInputProcess.sendResponseToCloud: " + ex.getMessage());
             }
         }
     }
+
     CloudInputProcess cip = null;
-    private void startCloudInputProcess(Session  session) {
+
+    private void startCloudInputProcess(Session session) {
         cip = new CloudInputProcess(session);
-        cip.start();;
+        cip.start();
     }
 
     private Session getSession() throws Exception {
@@ -331,7 +331,7 @@ public class CloudAMQProxy implements MessageListener {
                 }
             }
         } catch (Exception ex) {
-            logger.error(ex.getClass().getName()+" in productKeyAccepted: "+ex.getMessage());
+            logger.error(ex.getClass().getName() + " in productKeyAccepted: " + ex.getMessage());
         }
         return retVal;
     }
@@ -364,9 +364,45 @@ public class CloudAMQProxy implements MessageListener {
 
         createCloudProxySessionTimer();
     }
+
+    /**
+     * cleanUpForRestart: Some sort of problem occurred with the Cloud connection, ensure we restart cleanly
+     */
     void restart() {
         if (running) {
+            try {
+                setLogLevel(cloudProxyProperties.getLOG_LEVEL());
+                logger.info("Restarting CloudProxy");
+//                sendResponseToCloudExecutor.shutdownNow();
+//                startCloudInputProcessExecutor.shutdownNow();
+//                cloudConnectionCheckExecutor.shutdownNow();
+                webserverWriteExecutor.shutdownNow();
+
+//                sendResponseToCloudExecutor = Executors.newSingleThreadExecutor();
+//                startCloudInputProcessExecutor = Executors.newSingleThreadExecutor();
+//                cloudConnectionCheckExecutor = Executors.newSingleThreadScheduledExecutor();
+                webserverWriteExecutor = Executors.newSingleThreadExecutor();
+
+
+                // Ensure all sockets in the token/socket map are closed
+                tokenSocketMap.forEach((token, socket) -> {
+                    try {
+                        socket.close();
+                    } catch (IOException ignore) {
+                    }
+                });
+                // Clear the token/socket map
+                tokenSocketMap.clear();
+                if(session != null) {
+                    session.close();
+                    session = null;
+                }
+                createConnectionToCloud();
+            } catch (Exception ex) {
+                logger.error(ex.getClass().getName() + " in restart: " + ex.getMessage());
+            }
         }
+        /**/
     }
 
     /**
