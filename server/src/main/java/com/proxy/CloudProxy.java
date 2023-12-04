@@ -35,7 +35,6 @@ public class CloudProxy implements SslContextProvider {
     private final int closedFlagLength = Byte.BYTES;
     private final int headerLength = tokenLength + lengthLength + closedFlagLength;
     public static final int BUFFER_SIZE = 1024;
-    private final long cloudProxySessionTimeout = 50 * 1000; // Restart CloudProxy after 50 seconds without a heartbeat
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     final Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
     SSLSocket cloudChannel;

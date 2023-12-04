@@ -47,7 +47,7 @@ public class CloudAMQProxy implements MessageListener {
     private boolean running = false;
     private final String webServerForCloudProxyHost;
     private final int webServerForCloudProxyPort;
-    private final long cloudProxySessionTimeout = 50 * 1000; // Restart CloudProxy after 50 seconds without a heartbeat
+    private final long cloudProxySessionTimeout = 20 * 1000; // Restart CloudProxy after 50 seconds without a heartbeat
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     private ExecutorService cloudProxyExecutor;
@@ -253,6 +253,7 @@ public class CloudAMQProxy implements MessageListener {
                 if (cloud == null) {
                     cloud = message.getJMSReplyTo();
                     producer = session.createProducer(cloud);
+                    producer.setTimeToLive(1000);
                 }
 
                 if (message.getBooleanProperty(HEARTBEAT.value)) {
