@@ -34,7 +34,7 @@ public class CloudProxy implements SslContextProvider {
     private final int lengthLength = Integer.BYTES;
     private final int closedFlagLength = Byte.BYTES;
     private final int headerLength = tokenLength + lengthLength + closedFlagLength;
-    public static final int BUFFER_SIZE = 1024;
+    public static final int BUFFER_SIZE = 16384;
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     final Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
     SSLSocket cloudChannel;

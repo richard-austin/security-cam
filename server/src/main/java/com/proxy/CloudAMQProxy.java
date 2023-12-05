@@ -415,7 +415,7 @@ public class CloudAMQProxy implements MessageListener {
      * @return: The byte buffer with the token in place and length reservation set up.
      */
     private ByteBuffer getBuffer() {
-        final int BUFFER_SIZE = 1024;
+        final int BUFFER_SIZE = 16384;
 
         return ByteBuffer.allocate(BUFFER_SIZE);
     }
