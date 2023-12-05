@@ -178,7 +178,7 @@ public class CloudAMQProxy implements MessageListener {
             try {
                 int length = (int) msg.getBodyLength();
                 ByteBuffer buf = ByteBuffer.allocate(length);
-                buf.put(buf.array(), 0, length);
+                msg.readBytes(buf.array());
                 int result;
                 logger.debug("writeRequestToWebserver(2) length: " + msg.getBodyLength());
                 do {
@@ -208,6 +208,7 @@ public class CloudAMQProxy implements MessageListener {
                     final BytesMessage msg = session.createBytesMessage();
                     msg.writeBytes(buf.array(), 0, buf.position());
                     msg.setIntProperty(TOKEN.value, token);
+                    msg.setJMSCorrelationID("cloudProxy");
                     cip.sendResponseToCloud(msg);
                     buf = getBuffer();
                 }
@@ -215,6 +216,7 @@ public class CloudAMQProxy implements MessageListener {
                 final BytesMessage msg = session.createBytesMessage();
                 msg.setBooleanProperty(CONNECTION_CLOSED.value, true);
                 msg.setIntProperty(TOKEN.value, token);
+                msg.setJMSCorrelationID("cloudProxy");
                 cip.sendResponseToCloud(msg);
                 webserverChannel.close();
             } catch (AsynchronousCloseException ignored) {
@@ -286,7 +288,7 @@ public class CloudAMQProxy implements MessageListener {
     }
 
     private Session getSession() throws Exception {
-        ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory("failover://ssl://localhost:61617?socket.verifyHostName=false");
+        ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(cloudProxyProperties.getCLOUD_PROXY_ACTIVE_MQ_URL());
         connectionFactory.setKeyStore(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PATH());
         connectionFactory.setKeyStorePassword(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PASSWORD());
         connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
@@ -398,7 +400,8 @@ public class CloudAMQProxy implements MessageListener {
                     session.close();
                     session = null;
                 }
-                createConnectionToCloud();
+                // Restart the start process
+                new Thread(this::createConnectionToCloud).start();
             } catch (Exception ex) {
                 logger.error(ex.getClass().getName() + " in restart: " + ex.getMessage());
             }
