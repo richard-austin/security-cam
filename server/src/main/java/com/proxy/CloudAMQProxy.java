@@ -18,14 +18,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.proxy.CloudAMQProxy.MessageMetadata.CONNECTION_CLOSED;
-import static com.proxy.CloudAMQProxy.MessageMetadata.HEARTBEAT;
-import static com.proxy.CloudAMQProxy.MessageMetadata.TOKEN;
+import static com.proxy.CloudAMQProxy.MessageMetadata.*;
 
 
 public class CloudAMQProxy implements MessageListener {
@@ -33,8 +33,8 @@ public class CloudAMQProxy implements MessageListener {
         HEARTBEAT("heartbeat"),
         REQUEST_RESPONSE("requestResponse"),
         TOKEN("token"),
-        CONNECTION_CLOSED("connectionClosed");
-
+        CONNECTION_CLOSED("connectionClosed"),
+        CLOUD_PROXY_CORRELATION_ID("cloudProxy");
         final String value;
 
         MessageMetadata(String value) {
@@ -45,6 +45,8 @@ public class CloudAMQProxy implements MessageListener {
     final Map<Integer, SocketChannel> tokenSocketMap = new ConcurrentHashMap<>();
 
     private boolean running = false;
+    final private static Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
+    public static final int BUFFER_SIZE = 16384;
     private final String webServerForCloudProxyHost;
     private final int webServerForCloudProxyPort;
     private final long cloudProxySessionTimeout = 20 * 1000; // Restart CloudProxy after 50 seconds without a heartbeat
@@ -135,10 +137,8 @@ public class CloudAMQProxy implements MessageListener {
     }
 
     void removeSocket(int token) {
-        try (SocketChannel sock = tokenSocketMap.get(token)){
-           // SocketChannel sock = tokenSocketMap.get(token);
-            sock.close();
-            tokenSocketMap.remove(token);
+        try (var ignore = tokenSocketMap.remove(token)){
+            logger.debug("Removing and closing socket for token " + token);
         } catch (Exception ex) {
             showExceptionDetails(ex, "removeSocket");
         }
@@ -146,7 +146,7 @@ public class CloudAMQProxy implements MessageListener {
 
     private void writeRequestToWebserver(BytesMessage message) {
         try {
-            logger.info("Received message ");
+            logger.debug("Received message ");
             int token = message.getIntProperty(TOKEN.value);
             if (tokenSocketMap.containsKey(token)) {
                 if (message.getBooleanProperty(CONNECTION_CLOSED.value)) {
@@ -177,14 +177,18 @@ public class CloudAMQProxy implements MessageListener {
             //  logMessageMetadata(buf, "To webserv");
             try {
                 int length = (int) msg.getBodyLength();
-                ByteBuffer buf = ByteBuffer.allocate(length);
+                ByteBuffer buf = length > BUFFER_SIZE ? ByteBuffer.allocate(length) : getBuffer();
                 msg.readBytes(buf.array());
+                buf.limit(length);
                 int result;
                 logger.debug("writeRequestToWebserver(2) length: " + msg.getBodyLength());
                 do {
                     result = webserverChannel.write(buf);
                 }
                 while (result != -1 && buf.position() < buf.limit());
+
+                if(length <= BUFFER_SIZE)
+                    recycle(buf);
 
                 // Don't recycle the dynamically created buffer as it will cause a build up in the buffer qeue// These are left to be cleared up by Java housekeeping.
             } catch (ClosedChannelException ignored) {
@@ -208,15 +212,16 @@ public class CloudAMQProxy implements MessageListener {
                     final BytesMessage msg = session.createBytesMessage();
                     msg.writeBytes(buf.array(), 0, buf.position());
                     msg.setIntProperty(TOKEN.value, token);
-                    msg.setJMSCorrelationID("cloudProxy");
+                    msg.setJMSCorrelationID(CLOUD_PROXY_CORRELATION_ID.value);
                     cip.sendResponseToCloud(msg);
+                    recycle(buf);
                     buf = getBuffer();
                 }
-
+                recycle(buf);
                 final BytesMessage msg = session.createBytesMessage();
                 msg.setBooleanProperty(CONNECTION_CLOSED.value, true);
                 msg.setIntProperty(TOKEN.value, token);
-                msg.setJMSCorrelationID("cloudProxy");
+                msg.setJMSCorrelationID(CLOUD_PROXY_CORRELATION_ID.value);
                 cip.sendResponseToCloud(msg);
                 webserverChannel.close();
             } catch (AsynchronousCloseException ignored) {
@@ -259,7 +264,7 @@ public class CloudAMQProxy implements MessageListener {
                 }
 
                 if (message.getBooleanProperty(HEARTBEAT.value)) {
-                    logger.info("Received heartbeat");
+                    logger.debug("Received heartbeat");
                     sendResponseToCloud(message);  // Bounce heartbeats back to the Cloud
                     resetCloudProxySessionTimeout();
                   } else if (message instanceof BytesMessage)
@@ -376,16 +381,8 @@ public class CloudAMQProxy implements MessageListener {
             try {
                 setLogLevel(cloudProxyProperties.getLOG_LEVEL());
                 logger.info("Restarting CloudProxy");
-//                sendResponseToCloudExecutor.shutdownNow();
-//                startCloudInputProcessExecutor.shutdownNow();
-//                cloudConnectionCheckExecutor.shutdownNow();
                 webserverWriteExecutor.shutdownNow();
-
-//                sendResponseToCloudExecutor = Executors.newSingleThreadExecutor();
-//                startCloudInputProcessExecutor = Executors.newSingleThreadExecutor();
-//                cloudConnectionCheckExecutor = Executors.newSingleThreadScheduledExecutor();
                 webserverWriteExecutor = Executors.newSingleThreadExecutor();
-
 
                 // Ensure all sockets in the token/socket map are closed
                 tokenSocketMap.forEach((token, socket) -> {
@@ -410,16 +407,20 @@ public class CloudAMQProxy implements MessageListener {
     }
 
     /**
-     * getBuffer: Get a buffer and place the token at the start.
+     * getBuffer: Get a new ByteBuffer of BUFFER_SIZE bytes length.
      *
-     * @return: The byte buffer with the token in place and length reservation set up.
+     * @return: The buffer
      */
-    private ByteBuffer getBuffer() {
-        final int BUFFER_SIZE = 16384;
-
-        return ByteBuffer.allocate(BUFFER_SIZE);
+    public static ByteBuffer getBuffer() {
+        ByteBuffer buf = Objects.requireNonNullElseGet(bufferQueue.poll(), () -> ByteBuffer.allocate(BUFFER_SIZE));
+        buf.clear();
+        return buf;
     }
 
+    public static synchronized void recycle(ByteBuffer buf) {
+        buf.clear();
+        bufferQueue.add(buf);
+    }
     void showExceptionDetails(Throwable t, String functionName) {
         logger.error(t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
 //        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
