@@ -16,7 +16,7 @@ public class CloudSessionTimerTask extends TimerTask {
 
     @Override
     public void run() {
-        // If timer times out, then we've lost connection so try restarting the CloudProxy
+        // If timer times out, then we've lost connection so try restarting CloudAMAProxy
         thisCP.restart();
     }
 }

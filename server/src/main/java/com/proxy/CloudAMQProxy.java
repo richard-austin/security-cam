@@ -49,7 +49,7 @@ public class CloudAMQProxy implements MessageListener {
     public static final int BUFFER_SIZE = 16384;
     private final String webServerForCloudProxyHost;
     private final int webServerForCloudProxyPort;
-    private final long cloudProxySessionTimeout = 20 * 1000; // Restart CloudProxy after 50 seconds without a heartbeat
+    private final long cloudProxySessionTimeout = 20 * 1000; // Restart CloudAMQProxy after 20 seconds without a heartbeat
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     private ExecutorService cloudProxyExecutor;
@@ -380,7 +380,7 @@ public class CloudAMQProxy implements MessageListener {
         if (running) {
             try {
                 setLogLevel(cloudProxyProperties.getLOG_LEVEL());
-                logger.info("Restarting CloudProxy");
+                logger.info("Restarting CloudAMQProxy");
                 webserverWriteExecutor.shutdownNow();
                 webserverWriteExecutor = Executors.newSingleThreadExecutor();
 

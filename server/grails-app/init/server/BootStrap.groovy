@@ -39,7 +39,7 @@ class BootStrap {
 
         sc_processesService.startProcesses()
 
-        // Start CloudProxy if enabled in the config or if there is no local web account other than guest on the NVR
+        // Start CloudAMQProxy if enabled in the config or if there is no local web account other than guest on the NVR
         if(grailsApplication.config.cloudProxy.enabled || User.all.find{it.username != 'guest' && !it.cloudAccount} == null)
             cloudProxyService.start()
 
