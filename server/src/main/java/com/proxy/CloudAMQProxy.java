@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 import static com.proxy.CloudAMQProxy.MessageMetadata.*;
 
 
-public class CloudAMQProxy implements MessageListener {
+public class CloudAMQProxy {
     public enum MessageMetadata {
         HEARTBEAT("heartbeat"),
         REQUEST_RESPONSE("requestResponse"),
@@ -97,12 +97,19 @@ public class CloudAMQProxy implements MessageListener {
     }
 
     public void stop() {
+        if(running) {
+            running = false;
+            stopCloudInputProcess();
+            synchronized (LOCK) {
+                LOCK.notify();
+            }
+        }
     }
 
-    @Override
-    public void onMessage(Message message) {
-
+    public boolean isRunning() {
+        return running;
     }
+
 
     private void createConnectionToCloud() {
         try {
@@ -112,15 +119,15 @@ public class CloudAMQProxy implements MessageListener {
             Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
             //            am = new AdvisoryMonitor(session, destination);
 
-            createCloudProxySessionTimer();   // Start the connection timer, if heartbeats are not received for the
-            // timout period, this will trigger a retry.
-            // If we fail to connect,this time, the timeout will trigger a retry
-            // after the timeout period.
+            createCloudProxySessionTimer();     // Start the connection timer, if heartbeats are not received for the
+                                                // timout period, this will trigger a retry.
+                                                // If we fail to connect,this time, the timeout will trigger a retry
+                                                // after the timeout period.
 
             if (productKeyAccepted(session, destination)) {
                 this.session = session;
                 logger.info("Connected successfully to the Cloud");
-                startCloudInputProcess(session);
+                startCloudInputProcess();
             } else
                 logger.error("Product key was not accepted by the Cloud server");
 
@@ -243,14 +250,27 @@ public class CloudAMQProxy implements MessageListener {
             this.session = session;
         }
 
+        MessageConsumer cons = null;
         void start() {
             try {
+
                 Destination dest = session.createQueue(productId);
-                MessageConsumer cons = session.createConsumer(dest);
+                cons = session.createConsumer(dest);
                 cons.setMessageListener(this);
 
             } catch (JMSException ex) {
                 logger.error("JMS Exception in CloudInputProcess.start(): " + ex.getMessage());
+            }
+        }
+
+        void stop() {
+            try {
+                cons.close();
+                cloud = null;
+                producer = null;
+            }
+            catch (Exception ex) {
+                logger.error(ex.getClass().getName()+" in CloudInputProcess,stop: "+ex.getMessage());
             }
         }
 
@@ -272,14 +292,17 @@ public class CloudAMQProxy implements MessageListener {
                 else
                     logger.error("Unhandled message type in CloudInputProcess.onMessage: " + message.getClass().getName());
             } catch (Exception ex) {
+                cloud =null;  producer = null;
                 logger.error(ex.getClass().getName() + " in CloudInputProcess.onMessage: " + ex.getMessage());
             }
         }
 
         void sendResponseToCloud(Message msg) {
             try {
-                producer.send(msg);
+                if(producer != null)
+                    producer.send(msg);
             } catch (Exception ex) {
+                cloud =null;  producer = null;
                 logger.error(ex.getClass().getName() + " in CloudInputProcess.sendResponseToCloud: " + ex.getMessage());
             }
         }
@@ -287,11 +310,20 @@ public class CloudAMQProxy implements MessageListener {
 
     CloudInputProcess cip = null;
 
-    private void startCloudInputProcess(Session session) {
+    private void startCloudInputProcess() {
         cip = new CloudInputProcess(session);
         cip.start();
     }
 
+    private void stopCloudInputProcess() {
+        try {
+            cip.stop();
+            session.close();
+        }
+        catch(Exception ex) {
+            logger.error(ex.getClass().getName()+" in stopCloudInputProcess: "+ex.getMessage());
+        }
+    }
     private Session getSession() throws Exception {
         ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(cloudProxyProperties.getCLOUD_PROXY_ACTIVE_MQ_URL());
         connectionFactory.setKeyStore(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PATH());
