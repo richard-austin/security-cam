@@ -49,15 +49,11 @@ public class CloudAMQProxy {
     public static final int BUFFER_SIZE = 16384;
     private final String webServerForCloudProxyHost;
     private final int webServerForCloudProxyPort;
-    private final long cloudProxySessionTimeout = 20 * 1000; // Restart CloudAMQProxy after 20 seconds without a heartbeat
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger("CLOUDPROXY");
     private ExecutorService cloudProxyExecutor;
     private ExecutorService webserverReadExecutor;
-
     private ExecutorService webserverWriteExecutor;
-
-    AdvisoryMonitor am;
     private static final String productIdRegex = "^(?:[A-Z0-9]{4}-){3}[A-Z0-9]{4}$";
     CloudProxyProperties cloudProxyProperties = CloudProxyProperties.getInstance();
     final Object LOCK = new Object();
@@ -117,8 +113,6 @@ public class CloudAMQProxy {
 
             // Create the destination
             Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
-            //            am = new AdvisoryMonitor(session, destination);
-
             createCloudProxySessionTimer();     // Start the connection timer, if heartbeats are not received for the
                                                 // timout period, this will trigger a retry.
                                                 // If we fail to connect,this time, the timeout will trigger a retry
@@ -181,7 +175,6 @@ public class CloudAMQProxy {
 
     private void writeRequestToWebserver(final BytesMessage msg, final SocketChannel webserverChannel) {
         this.webserverWriteExecutor.submit(() -> {
-            //  logMessageMetadata(buf, "To webserv");
             try {
                 int length = (int) msg.getBodyLength();
                 ByteBuffer buf = length > BUFFER_SIZE ? ByteBuffer.allocate(length) : getBuffer();
@@ -394,6 +387,8 @@ public class CloudAMQProxy {
             cloudProxySessionTimer.cancel();
         CloudSessionTimerTask cstt = new CloudSessionTimerTask(this);
         cloudProxySessionTimer = new Timer("cloudProxySessionTimer");
+        // Restart CloudAMQProxy after 20 seconds without a heartbeat
+        long cloudProxySessionTimeout = 20 * 1000;
         cloudProxySessionTimer.schedule(cstt, cloudProxySessionTimeout);
     }
 
