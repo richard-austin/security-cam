@@ -138,6 +138,8 @@ environments:
       mqKeyStorePath: ../xtrn-scripts-and-config/client.ks
       mqTrustStorePassword: password
       mqKeyStorePassword: password
+      mqUser: user
+      mqPassword: password
       productKeyPath: /etc/security-cam/prodKey
       cloudActiveMQUrl: failover://ssl://192.168.1.82:61617?socket.verifyHostName=false
       activeMQInitQueue: INIT
@@ -202,6 +204,8 @@ environments:
       mqKeyStorePath: /etc/security-cam/client.ks
       mqTrustStorePassword: password
       mqKeyStorePassword: password
+      mqUser: user
+      mqPassword: password
       productKeyPath: /etc/security-cam/prodKey
       cloudActiveMQUrl: failover://ssl://192.168.1.82:61617?socket.verifyHostName=false
       activeMQInitQueue: INIT

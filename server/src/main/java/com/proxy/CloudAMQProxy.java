@@ -324,7 +324,7 @@ public class CloudAMQProxy {
         connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
         connectionFactory.setTrustStorePassword(cloudProxyProperties.getMQ_TRUSTSTORE_PASSWORD());
         // Create a Connection
-        Connection connection = connectionFactory.createConnection();
+        Connection connection = connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
         connection.start();
 
         // Create a Session
