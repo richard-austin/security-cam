@@ -247,7 +247,7 @@ public class CloudAMQProxy {
         void start() {
             try {
 
-                Destination dest = session.createQueue(productId);
+                Destination dest = session.createTopic(productId);
                 cons = session.createConsumer(dest);
                 cons.setMessageListener(this);
 
@@ -273,7 +273,9 @@ public class CloudAMQProxy {
                 if (cloud == null) {
                     cloud = message.getJMSReplyTo();
                     producer = session.createProducer(cloud);
-                    producer.setTimeToLive(1000);
+//                    producer.setDisableMessageID(true);
+//                    producer.setDisableMessageTimestamp(true);
+              //      producer.setTimeToLive(1000);
                 }
 
                 if (message.getBooleanProperty(HEARTBEAT.value)) {
