@@ -93,7 +93,7 @@ public class CloudAMQProxy {
     }
 
     public void stop() {
-        if(running) {
+        if (running) {
             running = false;
             stopCloudInputProcess();
             synchronized (LOCK) {
@@ -114,9 +114,9 @@ public class CloudAMQProxy {
             // Create the destination
             Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
             createCloudProxySessionTimer();     // Start the connection timer, if heartbeats are not received for the
-                                                // timout period, this will trigger a retry.
-                                                // If we fail to connect,this time, the timeout will trigger a retry
-                                                // after the timeout period.
+            // timout period, this will trigger a retry.
+            // If we fail to connect,this time, the timeout will trigger a retry
+            // after the timeout period.
 
             if (productKeyAccepted(session, destination)) {
                 this.session = session;
@@ -138,7 +138,11 @@ public class CloudAMQProxy {
     }
 
     void removeSocket(int token) {
-        try (var ignore = tokenSocketMap.remove(token)){
+        try (var channel = tokenSocketMap.remove(token)) {
+            if (channel != null) {
+                channel.close();
+                channel.socket().close();
+            }
             logger.debug("Removing and closing socket for token " + token);
         } catch (Exception ex) {
             showExceptionDetails(ex, "removeSocket");
@@ -150,15 +154,9 @@ public class CloudAMQProxy {
             logger.debug("Received message ");
             int token = message.getIntProperty(TOKEN.value);
             if (tokenSocketMap.containsKey(token)) {
-                if (message.getBooleanProperty(CONNECTION_CLOSED.value)) {
-                    tokenSocketMap.get(token).close();
-                    removeSocket(token);
-                } else {
-                    SocketChannel webserverChannel = tokenSocketMap.get(token);
-                    writeRequestToWebserver(message, webserverChannel);
-                }
-            } else  // Make a new connection to the webserver
-            {
+                SocketChannel webserverChannel = tokenSocketMap.get(token);
+                writeRequestToWebserver(message, webserverChannel);
+            } else { // Make a new connection to the webserver
                 final SocketChannel webserverChannel = SocketChannel.open();
                 webserverChannel.connect(new InetSocketAddress(webServerForCloudProxyHost, webServerForCloudProxyPort));
                 webserverChannel.configureBlocking(true);
@@ -187,7 +185,7 @@ public class CloudAMQProxy {
                 }
                 while (result != -1 && buf.position() < buf.limit());
 
-                if(length <= BUFFER_SIZE)
+                if (length <= BUFFER_SIZE)
                     recycle(buf);
 
                 // Don't recycle the dynamically created buffer as it will cause a build up in the buffer qeue// These are left to be cleared up by Java housekeeping.
@@ -218,11 +216,6 @@ public class CloudAMQProxy {
                     buf = getBuffer();
                 }
                 recycle(buf);
-                final BytesMessage msg = session.createBytesMessage();
-                msg.setBooleanProperty(CONNECTION_CLOSED.value, true);
-                msg.setIntProperty(TOKEN.value, token);
-                msg.setJMSCorrelationID(CLOUD_PROXY_CORRELATION_ID.value);
-                cip.sendResponseToCloud(msg);
                 webserverChannel.close();
             } catch (AsynchronousCloseException ignored) {
                 // Don't report AsynchronousCloseException as these come up when the channel has been closed
@@ -232,7 +225,6 @@ public class CloudAMQProxy {
             }
         });
     }
-
 
     private class CloudInputProcess implements MessageListener {
         final private Session session;
@@ -244,6 +236,7 @@ public class CloudAMQProxy {
         }
 
         MessageConsumer cons = null;
+
         void start() {
             try {
 
@@ -261,9 +254,8 @@ public class CloudAMQProxy {
                 cons.close();
                 cloud = null;
                 producer = null;
-            }
-            catch (Exception ex) {
-                logger.error(ex.getClass().getName()+" in CloudInputProcess,stop: "+ex.getMessage());
+            } catch (Exception ex) {
+                logger.error(ex.getClass().getName() + " in CloudInputProcess,stop: " + ex.getMessage());
             }
         }
 
@@ -275,29 +267,33 @@ public class CloudAMQProxy {
                     producer = session.createProducer(cloud);
 //                    producer.setDisableMessageID(true);
 //                    producer.setDisableMessageTimestamp(true);
-              //      producer.setTimeToLive(1000);
+                    //      producer.setTimeToLive(1000);
                 }
 
                 if (message.getBooleanProperty(HEARTBEAT.value)) {
                     logger.debug("Received heartbeat");
                     sendResponseToCloud(message);  // Bounce heartbeats back to the Cloud
                     resetCloudProxySessionTimeout();
-                  } else if (message instanceof BytesMessage)
+                } else if (message.getBooleanProperty(CONNECTION_CLOSED.value))
+                    removeSocket(message.getIntProperty(TOKEN.value));
+                else if (message instanceof BytesMessage)
                     writeRequestToWebserver((BytesMessage) message);
                 else
                     logger.error("Unhandled message type in CloudInputProcess.onMessage: " + message.getClass().getName());
             } catch (Exception ex) {
-                cloud =null;  producer = null;
+                cloud = null;
+                producer = null;
                 logger.error(ex.getClass().getName() + " in CloudInputProcess.onMessage: " + ex.getMessage());
             }
         }
 
         void sendResponseToCloud(Message msg) {
             try {
-                if(producer != null)
+                if (producer != null)
                     producer.send(msg);
             } catch (Exception ex) {
-                cloud =null;  producer = null;
+                cloud = null;
+                producer = null;
                 logger.error(ex.getClass().getName() + " in CloudInputProcess.sendResponseToCloud: " + ex.getMessage());
             }
         }
@@ -314,13 +310,17 @@ public class CloudAMQProxy {
         try {
             cip.stop();
             session.close();
-        }
-        catch(Exception ex) {
-            logger.error(ex.getClass().getName()+" in stopCloudInputProcess: "+ex.getMessage());
+        } catch (Exception ex) {
+            logger.error(ex.getClass().getName() + " in stopCloudInputProcess: " + ex.getMessage());
         }
     }
+
     private Session getSession() throws Exception {
         ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(cloudProxyProperties.getCLOUD_PROXY_ACTIVE_MQ_URL());
+        connectionFactory.setUseAsyncSend(true);
+        connectionFactory.setOptimizeAcknowledge(true);
+        // connectionFactory.setAlwaysSessionAsync(false);
+
         connectionFactory.setKeyStore(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PATH());
         connectionFactory.setKeyStorePassword(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PASSWORD());
         connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
@@ -422,7 +422,7 @@ public class CloudAMQProxy {
                 });
                 // Clear the token/socket map
                 tokenSocketMap.clear();
-                if(session != null) {
+                if (session != null) {
                     session.close();
                     session = null;
                 }
@@ -450,6 +450,7 @@ public class CloudAMQProxy {
         buf.clear();
         bufferQueue.add(buf);
     }
+
     void showExceptionDetails(Throwable t, String functionName) {
         logger.error(t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
 //        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
