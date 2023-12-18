@@ -15,7 +15,7 @@
         </mat-card-title>
 
         <mat-card-content>
-          <table mat-table [dataSource]="cameras | mapToKeyValue" multiTemplateDataRows class="mat-elevation-z8">
+          <table mat-table [dataSource]="cams | keyvalue" multiTemplateDataRows class="mat-elevation-z8">
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Camera</th>
               <td mat-cell *matCellDef="let cam">{{cam.value.name}}</td>
@@ -37,7 +37,7 @@
               <td mat-cell *matCellDef="let cam" [attr.colspan]="cameraColumns.length">
                 <div class="element-detail mat-elevation-z10"
                      [@detailExpand]="cam.value == expandedElement ? 'expanded' : 'collapsed'">
-                  <table mat-table [dataSource]="cam.value.streams | mapToKeyValue"
+                  <table mat-table [dataSource]="cam.value.streams | keyvalue"
                          class="streams-info mat-elevation-z10">
                     <ng-container matColumnDef="select">
                       <th mat-header-cell *matHeaderCellDef>Select Stream To Display</th>
@@ -76,7 +76,7 @@
 </div>
 <app-reporting></app-reporting>
 <div class="flex-container-vid">
-  <ng-container *ngFor="let cam of cameras | keyvalue">
+  <ng-container *ngFor="let cam of cams | keyvalue">
     <app-video [isfmp4]="true"></app-video>
   </ng-container>
 </div>

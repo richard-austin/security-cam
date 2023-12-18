@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera, CameraStream, Stream} from '../cameras/Camera';
+import {Camera, Stream} from '../cameras/Camera';
 import {MatCheckboxChange} from '@angular/material/checkbox';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {VideoComponent} from '../video/video.component';
@@ -47,7 +47,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService) {
   }
 
-  cameras: Map<string, Camera> = new Map<string, Camera>();
+  cams: Map<string, Camera> = new Map<string, Camera>();
   showStreamSelector: boolean = false;
   toggleStreamSelector() {
       this.showStreamSelector = !this.showStreamSelector;
@@ -61,13 +61,16 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
       video.stop();
     });
     let index: number = 0;
-    if (this.cams.length > 0) {
-      this.cams.forEach((cs) => {
-        let video: VideoComponent | undefined = this.videos?.get(index++);
-        if (video !== undefined) {
-          video.setSource(cs);
-          video.visible = true;
-        }
+    if (this.cams.size > 0) {
+      this.cams.forEach((cam) => {
+        cam.streams.forEach((stream, k) => {
+          let video: VideoComponent | undefined = this.videos?.get(index);
+          if (video !== undefined && stream.defaultOnMultiDisplay) {
+            video.setSource(cam, stream);
+            video.visible = true;
+            ++index;
+          }
+        });
       });
     } else {
       this.showInvalidInput();
@@ -92,33 +95,14 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   setUpCameraDetails(): void {
     this.cameraSvc.loadCameras().subscribe(cameras => {
-        this.cameras = cameras;
-        this.showSelected();
+        this.cams = cameras;
+//        this.showSelected();
         timer(100).subscribe(() => this.setupVideo());
       },
       reason => this.reporting.errorMessage = reason);
   }
 
-  cams: CameraStream[] = [];
-
-  /**
-   * showSelected: Display the currently selected streams..
-   */
-  showSelected(): void {
-    this.cams = [];
-    this.cameras.forEach((c: Camera) => {
-      c.streams.forEach((stream) => {
-        if (stream.selected) {
-          let cs: CameraStream = new CameraStream();
-          cs.camera = c;
-          cs.stream = stream;
-          this.cams.push(cs);
-        }
-      });
-    });
-    this.setupVideo();
-  }
-  toggle(el: { key: string, value: Camera }) {
+   toggle(el: { key: string, value: Camera }) {
     this.expandedElement = this.expandedElement === el.value ? null : el.value;
   }
 
@@ -147,20 +131,16 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
     // Update the affected video
     timer(10).subscribe(() => {
       let index: number = 0;
-      this.cameras.forEach((cam) => {
+      this.cams.forEach((cam) => {
         cam.streams.forEach((stream) => {
           if (camera.address === cam.address && stream.selected) {
-            let cs : CameraStream = new CameraStream();
-            cs.camera = cam;
-            cs.stream = stream;
-            let video: VideoComponent | undefined = this.videos?.get(index);
+            let video: VideoComponent | undefined = this.videos?.get(index++);
             if (video !== undefined) {
-              video.setSource(cs);
+              video.setSource(cam, stream);
               video.visible = true;
             }
           }
         });
-        ++index;
       });
     });
   }

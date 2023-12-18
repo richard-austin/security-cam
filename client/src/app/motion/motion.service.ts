@@ -3,7 +3,7 @@ import {Observable, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
-import {Camera, Stream, CameraStream} from "../cameras/Camera";
+import {Camera, Stream} from "../cameras/Camera";
 import {LocalMotionEvents, MotionEvents} from "../cameras/camera.service";
 
 declare let moment: any;
@@ -27,14 +27,15 @@ export class MotionService {
   /**
    * getMotionEvents: Get the list of .m3u8 manifest files of the recordings for this cameraStream. Convert these
    *                  to an array of manifest file name, epoch time and formatted date/time
-   * @param camStream: The CameraStream for which to get the motion events.
+   * @param cam: The camera
+   * @param stream: The stream on cam
    */
-  getMotionEvents(camStream: CameraStream): Observable<LocalMotionEvents> {
+  getMotionEvents(cam: Camera, stream: Stream): Observable<LocalMotionEvents> {
     let epochStartDelim: string = '-';
     let epochEndDelim: string = '_';
     let retVal = new LocalMotionEvents();
 
-    let name: { cam: Camera, stream: Stream } = {cam: camStream.camera, stream: camStream.stream};
+    let name: { cam: Camera, stream: Stream } = {cam: cam, stream: stream};
     return this.http.post<MotionEvents>(this._baseUrl.getLink("motion", "getMotionEvents"), JSON.stringify(name), this.httpJSONOptions).pipe(
       map((value: MotionEvents) => {
         value.events.forEach((event: string) => {

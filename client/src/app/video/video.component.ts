@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {CameraStream} from '../cameras/Camera';
+import {Camera, Stream} from '../cameras/Camera';
 import {Client} from "@stomp/stompjs";
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
@@ -17,7 +17,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isfmp4: boolean = false;
-  camstream!: CameraStream;
+  cam!: Camera;
+  stream!: Stream;
   video!: HTMLVideoElement;
 
   hls: any = null;
@@ -41,20 +42,22 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * setSource: Set up to play the given manifest file and display the camera details
-   * @param camStream
+   * @param cam
+   * @param stream
    * @param manifest
    */
-  setSource(camStream: CameraStream, manifest: string = ''): void {
+  setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
     this.stop();
-    this.camstream = camStream;
+    this.cam = cam;
+    this.stream = stream;
     this.recording = manifest !== '';
-    this.recordingUri = camStream.stream.recording.uri;
+    this.recordingUri = stream.recording.uri;
 
     if (this.recordingUri[this.recordingUri.length - 1] !== '/') {
       this.recordingUri += '/';
     }
 
-    if(camStream.camera.backchannelAudioSupported) {
+    if(cam.backchannelAudioSupported) {
       // Call getUserMedia to make the browser ask the user for permission to access the microphones so that
       //  enumerateDevices can get the microphone list.
       navigator.mediaDevices.getUserMedia({
@@ -89,13 +92,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private startVideo(keepAudioStream: boolean = false): void {
     if (!this.isfmp4) {
-      if (this.camstream !== undefined) {
+      if (this.cam !== undefined) {
         if (Hls.isSupported()) {
           this.hls = new Hls();
-          this.hls.loadSource(this.recording ? this.recordingUri : this.camstream.stream.uri);
+          this.hls.loadSource(this.recording ? this.recordingUri : this.stream.uri);
           this.hls.attachMedia(this.video);
         } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
-          this.video.src = this.camstream.stream.uri;
+          this.video.src = this.stream.uri;
         }
       }
     } else {
@@ -271,20 +274,20 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     let getUrl = window.location;
     let baseUrl = getUrl.protocol + '//' + getUrl.host + '/' + getUrl.pathname.split('/')[1];
 
-    let url = this.camstream.stream.uri.startsWith('http:') || this.camstream.stream.uri.startsWith('https:') || this.camstream.stream.uri.startsWith('ws:')
+    let url = this.stream.uri.startsWith('http:') || this.stream.uri.startsWith('https:') || this.stream.uri.startsWith('ws:')
       ?  // Absolute url
-      this.camstream.stream.uri
+      this.stream.uri
         .replace('https', 'wss') // Change https to wss
         .replace('http', 'ws')  // or change http to ws
       :  // Relative uri
       baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
         .replace('https', 'wss') // Change https to wss
         .replace('http', 'ws')  // or change http to ws
-      + this.camstream.stream.uri;
+      + this.stream.uri;
     let counter = 0;
     this.streamTestInterval = interval(1000).subscribe(() => {
       if(++counter >= 4) {  // If counter gets to 4, the stream messages have stopped, so restart the video
-        console.log("Stream for "+this.camstream.camera.name+" has stalled, attempting restart in 1 second");
+        console.log("Stream for "+this.cam.name+" has stalled, attempting restart in 1 second");
         this.stop();  // Close the existing video set up
         let timerSubscription = timer(1000).subscribe(() => {
           timerSubscription.unsubscribe();
@@ -327,7 +330,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         // Time the response and add this to the audio off delay time, this is a bodge to mitigate cutting the audio
         //  off before outgoing voice message was complete.
         let intervalSubscription: Subscription = interval(1).subscribe(() => ++this.timeForStartAudioOutResponse)
-        this.utilsService.startAudioOut(this.camstream.stream).subscribe(() => {
+        this.utilsService.startAudioOut(this.stream).subscribe(() => {
           intervalSubscription.unsubscribe();
         }, reason => {
           this.reporting.errorMessage = reason

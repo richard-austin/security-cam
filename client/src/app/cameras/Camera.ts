@@ -111,9 +111,3 @@ export class Camera
     retriggerWindow: number = 30;
 
 }
-
-export class CameraStream
-{
-    camera: Camera = new Camera();
-    stream: Stream = new Stream();
-}
