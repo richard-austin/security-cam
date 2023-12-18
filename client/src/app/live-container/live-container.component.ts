@@ -34,13 +34,8 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.setupVideo();
               });
             }
-
           });
-          for (const name in cam.streams) {
-            // @ts-ignore
-            const stream: Stream = cam.streams[name];
-          }
-        });
+         });
     })
   }
 
