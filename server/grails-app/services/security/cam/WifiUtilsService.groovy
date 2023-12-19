@@ -5,6 +5,7 @@ import grails.converters.JSON
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
+import org.apache.activemq.util.URISupport
 import org.apache.commons.lang.StringUtils
 import security.cam.commands.SetUpWifiCommand
 import security.cam.commands.SetWifiStatusCommand
@@ -280,7 +281,14 @@ class WifiUtilsService {
             // Find the IP address for the Ethernet interface
             String ipAddrShowOutput = utilsService.executeLinuxCommand(command)
             def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
-            Integer port = (Integer) (isCloud ?grailsApplication.config.cloudProxy.cloudPort :
+
+            final String activeMQURL = grailsApplication.config.cloudProxy.cloudActiveMQUrl
+            String strUri = activeMQURL.startsWith("failover://") ? URISupport.stripPrefix(activeMQURL, "failover://") : activeMQurl
+            URI uri = new URI(strUri)
+
+            final int activeMQPort = uri.port
+
+            Integer port = (Integer) (isCloud ? activeMQPort:
                     grailsApplication.config.nvrWebServer.port)
             command = [
                     "/bin/sh",

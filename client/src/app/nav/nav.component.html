@@ -73,7 +73,11 @@
     <div>
       <button mat-button [matMenuTriggerFor]="$any(menuGeneral)">General</button>
       <mat-menu #menuGeneral="matMenu">
-        <button mat-menu-item (click)="configSetup();menuClosed()">Cameras Configuration</button>
+        <button mat-menu-item (click)="configSetup();menuClosed()"
+                matTooltip="Discover and configure the cameras for live view, recording, audio back channel and various other features."
+                matTooltipClass="tooltip">
+        Cameras Configuration
+        </button>
         <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="changePassword();menuClosed()">Change Password</button>

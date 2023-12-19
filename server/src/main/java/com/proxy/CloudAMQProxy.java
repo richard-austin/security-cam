@@ -58,6 +58,7 @@ public class CloudAMQProxy {
     CloudProxyProperties cloudProxyProperties = CloudProxyProperties.getInstance();
     final Object LOCK = new Object();
     private Session session = null;
+    private Connection connection = null;
     private String productId = "";
 
     public CloudAMQProxy(String webServerForCloudProxyHost, int webServerForCloudProxyPort) {
@@ -94,10 +95,15 @@ public class CloudAMQProxy {
 
     public void stop() {
         if (running) {
-            running = false;
-            stopCloudInputProcess();
-            synchronized (LOCK) {
-                LOCK.notify();
+            try {
+                running = false;
+                 stopCloudInputProcess();
+                synchronized (LOCK) {
+                    LOCK.notify();
+                }
+            }
+            catch(Exception ex) {
+                logger.error(ex.getClass().getName()+" in CloudAMQProxy.stop: "+ex.getMessage());
             }
         }
     }
@@ -109,8 +115,10 @@ public class CloudAMQProxy {
 
     private void createConnectionToCloud() {
         try {
-            Session session = getSession();
-
+            connection = getConnection();
+            connection.start();
+            // Create a Session
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             // Create the destination
             Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
             createCloudProxySessionTimer();     // Start the connection timer, if heartbeats are not received for the
@@ -310,12 +318,13 @@ public class CloudAMQProxy {
         try {
             cip.stop();
             session.close();
+            connection.close();
         } catch (Exception ex) {
             logger.error(ex.getClass().getName() + " in stopCloudInputProcess: " + ex.getMessage());
         }
     }
 
-    private Session getSession() throws Exception {
+    private Connection getConnection() throws Exception {
         ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(cloudProxyProperties.getCLOUD_PROXY_ACTIVE_MQ_URL());
         connectionFactory.setUseAsyncSend(true);
         connectionFactory.setOptimizeAcknowledge(true);
@@ -326,11 +335,7 @@ public class CloudAMQProxy {
         connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
         connectionFactory.setTrustStorePassword(cloudProxyProperties.getMQ_TRUSTSTORE_PASSWORD());
         // Create a Connection
-        Connection connection = connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
-        connection.start();
-
-        // Create a Session
-        return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        return connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
     }
 
     /**
