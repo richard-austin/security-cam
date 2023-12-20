@@ -114,7 +114,7 @@ environments:
     grails:
       plugin:
         springsecurity:
-          active: false  # Set to false for direct development access, or true to access via Cloud server
+          active: true  # Set to false for direct development access, or true to access via Cloud server
       cors:
         enabled: true
 
@@ -125,7 +125,7 @@ environments:
     camerasHomeDirectory: /var/security-cam
     recordingsHomeDirectory: /var/security-cam
     myipFileLocation: /var/security-cam/myip
-    logLevel: TRACE
+    logLevel: DEBUG
 
     motion:
       configDir: /var/security-cam/motion/conf.d

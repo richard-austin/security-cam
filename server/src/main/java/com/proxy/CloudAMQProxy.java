@@ -80,11 +80,15 @@ public class CloudAMQProxy {
                     session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
                     // Create the destination
                     Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
-                    startCloudProxySessionTimer();     // Start the connection timer, if heartbeats are not received for the
                     loginToCloud(destination);
 
                 } catch (Exception ex) {
-                    showExceptionDetails(ex, "start");
+                    showExceptionDetails(ex, "CloudAMQProxy.start");
+                    running = true;
+                    stop();
+                }
+                finally {
+                    resetCloudProxySessionTimeout();     // Start the connection timer, if heartbeats are not received from the Cloud
                 }
             });
 
@@ -102,10 +106,10 @@ public class CloudAMQProxy {
                     cip.stop();
                 if (session != null)
                     session.close();
-                if (connection != null)
+                if (connection != null) {
+                    connection.stop();
                     connection.close();
-                running = false;
-
+                }
                 tokenSocketMap.forEach((token, socket) -> {
                     try {
                         socket.close();
@@ -117,6 +121,9 @@ public class CloudAMQProxy {
 
             } catch (Exception ex) {
                 logger.error(ex.getClass().getName() + " in CloudAMQProxy.stop: " + ex.getMessage());
+            }
+            finally {
+                running = false;
             }
         }
     }
@@ -272,9 +279,11 @@ public class CloudAMQProxy {
 
         void stop() {
             try {
-                cons.close();
+                if(cons != null)
+                    cons.close();
                 cloud = null;
-                producer.close();
+                if(producer != null)
+                    producer.close();
                 producer = null;
             } catch (Exception ex) {
                 logger.error(ex.getClass().getName() + " in CloudInputProcess,stop: " + ex.getMessage());

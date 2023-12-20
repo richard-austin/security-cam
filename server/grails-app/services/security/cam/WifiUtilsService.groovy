@@ -283,7 +283,7 @@ class WifiUtilsService {
             def ipAddress = StringUtils.substringBetween(ipAddrShowOutput, "inet ", "/")
 
             final String activeMQURL = grailsApplication.config.cloudProxy.cloudActiveMQUrl
-            String strUri = activeMQURL.startsWith("failover://") ? URISupport.stripPrefix(activeMQURL, "failover://") : activeMQurl
+            String strUri = activeMQURL.startsWith("failover://") ? URISupport.stripPrefix(activeMQURL, "failover://") : activeMQURL
             URI uri = new URI(strUri)
 
             final int activeMQPort = uri.port
