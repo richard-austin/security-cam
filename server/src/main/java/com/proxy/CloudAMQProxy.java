@@ -2,8 +2,10 @@ package com.proxy;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.apache.activemq.command.ActiveMQTextMessage;
+import org.apache.activemq.transport.TransportListener;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
@@ -113,8 +115,7 @@ public class CloudAMQProxy {
                 closeAndClearSockets();
             } catch (Exception ex) {
                 logger.error(ex.getClass().getName() + " in CloudAMQProxy.stop: " + ex.getMessage());
-            }
-            finally {
+            } finally {
                 running = false;
             }
         }
@@ -161,10 +162,10 @@ public class CloudAMQProxy {
                 logger.info("Connected successfully to the Cloud");
                 cip = new CloudInputProcess(session);
                 cip.start();
-
-            } else
+            } else {
                 logger.error("Product key was not accepted by the Cloud server");
-
+                resetCloudProxySessionTimeout();
+            }
         } catch (Exception e) {
             logger.warn("Exception in createConnectionToCloud: " + e.getMessage() + ": Couldn't connect to Cloud");
             restart();
@@ -185,7 +186,7 @@ public class CloudAMQProxy {
 
     private void writeRequestToWebserver(BytesMessage message) {
         try {
-            logger.debug("Received message ");
+            logger.trace("Received message ");
             int token = message.getIntProperty(TOKEN.value);
             if (tokenSocketMap.containsKey(token)) {
                 SocketChannel webserverChannel = tokenSocketMap.get(token);
@@ -285,10 +286,10 @@ public class CloudAMQProxy {
 
         void stop() {
             try {
-                if(cons != null)
+                if (cons != null)
                     cons.close();
                 cloud = null;
-                if(producer != null)
+                if (producer != null)
                     producer.close();
                 producer = null;
             } catch (Exception ex) {
@@ -346,7 +347,30 @@ public class CloudAMQProxy {
         connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
         connectionFactory.setTrustStorePassword(cloudProxyProperties.getMQ_TRUSTSTORE_PASSWORD());
         // Create a Connection
-        return connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
+        ActiveMQConnection connection = (ActiveMQConnection)connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
+        TransportListener tl = new TransportListener() {
+            @Override
+            public void onCommand(Object command) {
+                //   logger.info("Command");
+            }
+
+            @Override
+            public void onException(IOException error) {
+                logger.info(error.getClass().getName() + " received in getConnection transport listener: " + error.getMessage());
+            }
+
+            @Override
+            public void transportInterupted() {
+                logger.info("Transport interrupted");
+            }
+
+            @Override
+            public void transportResumed() {
+                logger.info("Transport resumed");
+            }
+        };
+        connection.addTransportListener(tl);
+        return connection;
     }
 
     /**
@@ -409,6 +433,7 @@ public class CloudAMQProxy {
         long cloudProxySessionTimeout = 20 * 1000;
         cloudProxySessionTimer.schedule(cstt, cloudProxySessionTimeout);
     }
+
     private void stopCloudProxySessionTimer() {
         if (cloudProxySessionTimer != null)
             cloudProxySessionTimer.cancel();
