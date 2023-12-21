@@ -110,15 +110,7 @@ public class CloudAMQProxy {
                     connection.stop();
                     connection.close();
                 }
-                tokenSocketMap.forEach((token, socket) -> {
-                    try {
-                        socket.close();
-                    } catch (IOException ignore) {
-                    }
-                });
-                // Clear the token/socket map
-                tokenSocketMap.clear();
-
+                closeAndClearSockets();
             } catch (Exception ex) {
                 logger.error(ex.getClass().getName() + " in CloudAMQProxy.stop: " + ex.getMessage());
             }
@@ -128,16 +120,30 @@ public class CloudAMQProxy {
         }
     }
 
+    void closeAndClearSockets() {
+        tokenSocketMap.forEach((token, socket) -> {
+            try {
+                socket.close();
+            } catch (IOException ignore) {
+            }
+        });
+        // Clear the token/socket map
+        tokenSocketMap.clear();
+    }
+
     /**
      * cleanUpForRestart: Some sort of problem occurred with the Cloud connection, ensure we restart cleanly
      */
     void restart() {
         try {
-            stop();
+            cip.stop();
+            closeAndClearSockets();
             logger.info("Restarting CloudAMQProxy");
             // Ensure all sockets in the token/socket map are closed
             Thread.sleep(2000); // Short wait before restart
-            start();
+            // Create the destination
+            Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
+            loginToCloud(destination);
         } catch (Exception ex) {
             logger.error(ex.getClass().getName() + " in restart: " + ex.getMessage());
         }
@@ -189,7 +195,7 @@ public class CloudAMQProxy {
                 webserverChannel.connect(new InetSocketAddress(webServerForCloudProxyHost, webServerForCloudProxyPort));
                 webserverChannel.configureBlocking(true);
                 tokenSocketMap.put(token, webserverChannel);
-                logger.debug("writeRequestToWebserver(1) length: " + message.getBodyLength());
+                logger.trace("writeRequestToWebserver(1) length: " + message.getBodyLength());
                 writeRequestToWebserver(message, webserverChannel);
                 readResponseFromWebserver(webserverChannel, token);
             }
@@ -207,7 +213,7 @@ public class CloudAMQProxy {
                 msg.readBytes(buf.array());
                 buf.limit(length);
                 int result;
-                logger.debug("writeRequestToWebserver(2) length: " + msg.getBodyLength());
+                logger.trace("writeRequestToWebserver(2) length: " + msg.getBodyLength());
                 do {
                     result = webserverChannel.write(buf);
                 }
@@ -234,7 +240,7 @@ public class CloudAMQProxy {
             try {
                 ByteBuffer buf = getBuffer();
                 while (isRunning() && webserverChannel.isOpen() && webserverChannel.read(buf) != -1) {
-                    logger.debug("readResponseFromWebserver length: " + buf.position());
+                    logger.trace("readResponseFromWebserver length: " + buf.position());
                     final BytesMessage msg = session.createBytesMessage();
                     msg.writeBytes(buf.array(), 0, buf.position());
                     msg.setIntProperty(TOKEN.value, token);
