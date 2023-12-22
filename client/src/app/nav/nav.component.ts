@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService, cameraType} from '../cameras/camera.service';
-import {Camera, CameraStream} from '../cameras/Camera';
+import {Camera, Stream} from '../cameras/Camera';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {HttpErrorResponse} from '@angular/common/http';
 import {Subscription} from 'rxjs';
@@ -22,8 +22,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef<HTMLDivElement>;
 
-  cameraStreams: CameraStream[] = []; // All camera streams
-  cameras: Camera[] = [];
+//  cameras: Map<string, Camera> = new Map<string, Camera>();
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
   timerHandle!: Subscription;
@@ -42,17 +41,17 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
   }
 
-  setVideoStream(camStream: CameraStream): void {
+  setVideoStream(cam: Camera, stream: Stream): void {
     let suuid = 'suuid=';
-    let uri = camStream.stream.uri;
+    let uri = stream.uri;
     let index = uri.indexOf(suuid);
     let streamName = uri.substring(index + suuid.length);
     window.location.href = '#/live/' + streamName;
   }
 
-  showRecording(camStream: CameraStream): void {
+  showRecording(cam: Camera, stream: Stream): void {
     let suuid = 'suuid=';
-    let uri = camStream.stream.recording.recording_src_url;
+    let uri = stream.recording.recording_src_url;
     let index = uri.indexOf(suuid);
     let streamName = uri.substring(index + suuid.length);
     window.location.href = '#/recording/' + streamName;
@@ -219,10 +218,11 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.client.activate();
    }
 
-  async ngOnInit(): Promise<void> {
-    this.cameraStreams = this.cameraSvc.getCameraStreams();
-    this.cameras = this.cameraSvc.getCameras();
+   get cameras(): Map<string, Camera> {
+    return this.cameraSvc.getCameras();
+   }
 
+  async ngOnInit(): Promise<void> {
     // Get the initial core temperature
     this.getTemperature();
 
@@ -256,11 +256,6 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Gets the core temperature every minute (Raspberry pi only), and keeps the session alive
     this.pingHandle = this.userIdle.ping$.subscribe(() => this.getTemperature());
-
-    this.cameraSvc.getConfigUpdates().subscribe(() => {
-      this.cameraStreams = this.cameraSvc.getCameraStreams();
-      this.cameras = this.cameraSvc.getCameras();
-    });
 
     try {
       this.isGuest = (await this.utilsService.isGuest()).guestAccount;

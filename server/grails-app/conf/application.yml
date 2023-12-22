@@ -114,7 +114,7 @@ environments:
     grails:
       plugin:
         springsecurity:
-          active: false  # Set to false for direct development access, or true to access via Cloud server
+          active: true  # Set to false for direct development access, or true to access via Cloud server
       cors:
         enabled: true
 
@@ -125,7 +125,7 @@ environments:
     camerasHomeDirectory: /var/security-cam
     recordingsHomeDirectory: /var/security-cam
     myipFileLocation: /var/security-cam/myip
-    logLevel: TRACE
+    logLevel: DEBUG
 
     motion:
       configDir: /var/security-cam/motion/conf.d
@@ -134,16 +134,18 @@ environments:
 
     cloudProxy:
       enabled: true
-      trustStorePath: ../xtrn-scripts-and-config/cacert.jks
-      keyStorePath: ../xtrn-scripts-and-config/client.jks
+      mqTrustStorePath: ../xtrn-scripts-and-config/client.ts
+      mqKeyStorePath: ../xtrn-scripts-and-config/client.ks
+      mqTrustStorePassword: CIdERVERiMPLetORThrONVAce
+      mqKeyStorePassword: ExPEThINdAvAmpROteRCLEyfI
+      mqUser: cloud
+      mqPassword: inelESOLsiONgeOuShEFatIns
       productKeyPath: /etc/security-cam/prodKey
-      keyStorePassword: B0331e
-      trustStorePassword: B0331e
-      cloudHost: 192.168.1.82
-      cloudPort: 8081
+      cloudActiveMQUrl: failover://ssl://192.168.1.82:61617?socket.verifyHostName=false
+      activeMQInitQueue: INIT
       webServerForCloudProxyHost: localhost
-      webServerForCloudProxyPort: 8088
-      logLevel: ERROR
+      webServerForCloudProxyPort: 8080
+      logLevel: DEBUG
 
     nvrWebServer:
       port: 4200 # Used to detect whether connected through Ethernet (for Wi-Fi set up)
@@ -198,16 +200,18 @@ environments:
 
     cloudProxy:
       enabled: false
-      trustStorePath: /etc/security-cam/cacert.jks
-      keyStorePath: /etc/security-cam/client.jks
+      mqTrustStorePath: /etc/security-cam/client.ts
+      mqKeyStorePath: /etc/security-cam/client.ks
+      mqTrustStorePassword: CIdERVERiMPLetORThrONVAce
+      mqKeyStorePassword: ExPEThINdAvAmpROteRCLEyfI
+      mqUser: cloud
+      mqPassword: inelESOLsiONgeOuShEFatIns
       productKeyPath: /etc/security-cam/prodKey
-      keyStorePassword: B0331e
-      trustStorePassword: B0331e
-      cloudHost: 192.168.1.82
-      cloudPort: 8081
+      cloudActiveMQUrl: failover://ssl://192.168.1.82:61617?socket.verifyHostName=false
+      activeMQInitQueue: INIT
       webServerForCloudProxyHost: localhost
       webServerForCloudProxyPort: 8088
-      logLevel: INFO
+      logLevel: DEBUG
 
     nvrWebServer:
       port: 443 # Used to detect whether connected through Ethernet (for Wi-Fi set up)

@@ -44,8 +44,8 @@ chmod 640 /etc/tomcat9/tomcat-users.xml
 chown root:tomcat /etc/tomcat9/tomcat-users.xml
 chmod 640 /etc/tomcat9/server.xml
 chown root:tomcat /etc/tomcat9/server.xml
-chown root:security-cam /etc/security-cam/cacert.jks /etc/security-cam/client.jks
-chmod 440 /etc/security-cam/cacert.jks /etc/security-cam/client.jks
+chown root:security-cam /etc/security-cam/client.ts /etc/security-cam/client.ks
+chmod 440 /etc/security-cam/client.ts /etc/security-cam/client.ks
 chown root:root /etc/security-cam/wifi-setup-service/*.py
 chown tomcat:tomcat -R /etc/fmp4-ws-media-server
 

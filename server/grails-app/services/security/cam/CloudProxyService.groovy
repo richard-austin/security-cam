@@ -1,6 +1,6 @@
 package security.cam
 
-import com.proxy.CloudProxy
+import com.proxy.CloudAMQProxy
 import security.cam.interfaceobjects.CloudProxyRestartTask
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
@@ -12,16 +12,14 @@ class CloudProxyService {
     LogService logService
     GrailsApplication grailsApplication
 
-    CloudProxy cloudProxy = null
+    CloudAMQProxy cloudProxy = null
 
     ObjectCommandResponse start() {
         if(cloudProxy == null)
         {
-            cloudProxy = new CloudProxy(
+            cloudProxy = new CloudAMQProxy(
                     (String)(grailsApplication.config.cloudProxy.webServerForCloudProxyHost),
-                    (Integer)(grailsApplication.config.cloudProxy.webServerForCloudProxyPort),
-                    (String)(grailsApplication.config.cloudProxy.cloudHost),
-                    (Integer)(grailsApplication.config.cloudProxy.cloudPort))
+                    (Integer)(grailsApplication.config.cloudProxy.webServerForCloudProxyPort))
         }
 
         ObjectCommandResponse response = new ObjectCommandResponse()
@@ -31,7 +29,7 @@ class CloudProxyService {
         catch(Exception ex)
         {
             response.status= PassFail.FAIL
-            response.error = "Exception in CloudProxy.start: "+ex.getClass().getName()+": "+ex.getMessage()
+            response.error = "Exception in CloudAMQProxy.start: "+ex.getClass().getName()+": "+ex.getMessage()
             logService.cam.error(response.error)
         }
         return response
@@ -45,14 +43,14 @@ class CloudProxyService {
         catch(Exception ex)
         {
             response.status= PassFail.FAIL
-            response.error = "Exception in CloudProxy.stop: "+ex.getClass().getName()+": "+ex.getMessage()
+            response.error = "Exception in CloudAMQProxy.stop: "+ex.getClass().getName()+": "+ex.getMessage()
             logService.cam.error(response.error)
         }
         return response
     }
 
     /**
-     * restart: Set up an asynchronous restart of the CloudProxy. This is used when switching between Wi-Fi and Ethernet
+     * restart: Set up an asynchronous restart of the CloudAMQProxy. This is used when switching between Wi-Fi and Ethernet
      *          when setting up or changing Wi-Fi configuration.
      * @return
      */
@@ -67,7 +65,7 @@ class CloudProxyService {
         catch(Exception ex)
         {
             response.status= PassFail.FAIL
-            response.error = "Exception in CloudProxy.restart: "+ex.getClass().getName()+": "+ex.getMessage()
+            response.error = "Exception in CloudAMQProxy.restart: "+ex.getClass().getName()+": "+ex.getMessage()
             logService.cam.error(response.error)
         }
 
@@ -82,7 +80,7 @@ class CloudProxyService {
         catch(Exception ex)
         {
             response.status= PassFail.FAIL
-            response.error = "Exception in CloudProxy.status: "+ex.getClass().getName()+": "+ex.getMessage()
+            response.error = "Exception in CloudAMQProxy.status: "+ex.getClass().getName()+": "+ex.getMessage()
             logService.cam.error(response.error)
         }
         return response

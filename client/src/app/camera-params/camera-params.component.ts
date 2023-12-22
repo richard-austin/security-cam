@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {SetCameraParams, UtilsService} from '../shared/utils.service';
 import {CameraService, cameraType} from '../cameras/camera.service';
-import {CameraParams, CameraStream} from '../cameras/Camera';
+import {Camera, CameraParams} from '../cameras/Camera';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
@@ -22,7 +22,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   model!: AbstractControl;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  cam!: CameraStream;
+  cam!: Camera;
   initialised: boolean;
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private utils: UtilsService) {
@@ -33,8 +33,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
       let cams = cameraSvc.getCameras()
         cams.forEach((cam) => {
           if (cam.address == camera) {
-            this.cam = new CameraStream();
-            this.cam.camera = cam;
+            this.cam = cam;
             this.camType() === cameraType.sv3c ?
               this.camControlFormGroup = new FormGroup({
                 irselector: new FormControl('', [Validators.required]),
@@ -85,8 +84,8 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   private getCameraParams() {
     this.reporting.dismiss();
     this.downloading = true;
-    if (this.cam && this.cam.camera.address !== undefined && this.cam.camera.cameraParamSpecs.uri !== undefined) {
-      this.utils.cameraParams(this.cam.camera.address, this.cam.camera.cameraParamSpecs.uri, this.cam.camera.cameraParamSpecs.params).subscribe(
+    if (this.cam && this.cam.address !== undefined && this.cam.cameraParamSpecs.uri !== undefined) {
+      this.utils.cameraParams(this.cam.address, this.cam.cameraParamSpecs.uri, this.cam.cameraParamSpecs.params).subscribe(
         result => {
           this.downloading = false;
           this.cameraParams = result;
@@ -127,16 +126,16 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.reporting.dismiss();
     this.downloading = true;
     let params: SetCameraParams = this.camType() === this.cameraTypes.sv3c ?
-      new SetCameraParams(this.cam.camera.cameraParamSpecs.camType,
-        this.cam.camera.address,
-        this.cam.camera.cameraParamSpecs.uri,
+      new SetCameraParams(this.cam.cameraParamSpecs.camType,
+        this.cam.address,
+        this.cam.cameraParamSpecs.uri,
         this.irselector.value,
         this.cameraName.value,
         this._reboot)
       :
-      new SetCameraParams(this.cam.camera.cameraParamSpecs.camType,
-        this.cam.camera.address,
-        this.cam.camera.cameraParamSpecs.uri,
+      new SetCameraParams(this.cam.cameraParamSpecs.camType,
+        this.cam.address,
+        this.cam.cameraParamSpecs.uri,
         '',
         this.cameraName.value,
         this._reboot,
@@ -179,7 +178,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   camType(): cameraType {
-    return this.cam.camera.cameraParamSpecs.camType;
+    return this.cam.cameraParamSpecs.camType;
   }
 
   anyChanged() {

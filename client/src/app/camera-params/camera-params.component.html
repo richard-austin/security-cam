@@ -1,7 +1,7 @@
 <div class="camera-params-container">
   <mat-card class="mat-elevation-z8">
     <mat-card-title>View/Set Parameters</mat-card-title>
-    <mat-card-subtitle>{{cam?.camera?.name}}</mat-card-subtitle>
+    <mat-card-subtitle>{{cam?.name}}</mat-card-subtitle>
     <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
       <mat-spinner [diameter]="25"></mat-spinner>
       <span>Please wait..</span>

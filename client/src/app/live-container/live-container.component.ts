@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
-import {Camera, CameraStream} from '../cameras/Camera';
+import {Camera, Stream} from '../cameras/Camera';
 import {Subscription, timer} from 'rxjs';
 import {VideoComponent} from '../video/video.component';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
@@ -18,25 +18,25 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   @ViewChild(VideoComponent) video!: VideoComponent;
 
   timerHandle!: Subscription;
-  cs!: CameraStream;
+  camera!: Camera;
+  stream!: Stream;
 
   constructor(private route: ActivatedRoute, public cameraSvc: CameraService, private utilsService: UtilsService) {
     // Use route.paramMap to get the stream name correctly if we switch directly between live streams
     this.route.paramMap.subscribe((paramMap) => {
       let streamName: string = paramMap.get('streamName') as string;
-      // The timer is used to allow the (await ed) call to loadAndUpdateCameraStreams to complete if switching directly
-      //  from the config-setup component having run discovery and (quite legitimately) not saved changes. Without this,
-      //  getCameraStreams would pick up the data from the discovery scan rather than the proper data from cameras.json
-      let timerSubscription = timer(50).subscribe(() => {
-        cameraSvc.getCameraStreams().forEach((cam) => {
-          if (cam.stream.media_server_input_uri.endsWith(streamName)) {
-            this.cs = cam;
-            this.setupVideo();
-          }
-        });
-        timerSubscription.unsubscribe();
-      });
-    });
+        cameraSvc.getCameras().forEach((cam) => {
+          cam.streams.forEach((stream, k) => {
+            if (stream.media_server_input_uri.endsWith(streamName)) {
+              this.camera = cam;
+              this.stream = stream;
+              timer(100).subscribe( () => {
+                this.setupVideo();
+              });
+            }
+          });
+         });
+    })
   }
 
   setupVideo() {
@@ -44,9 +44,9 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
     this.video.visible = false;
     this.timerHandle?.unsubscribe();
-    if (this.cs !== undefined) {
+    if (this.camera !== undefined && this.stream !== undefined) {
       if (this.video !== undefined) {
-        this.video.setSource(this.cs);
+        this.video.setSource(this.camera, this.stream);
         this.video.visible = true;
       }
     } else
@@ -55,11 +55,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
 
   hasPTZControls() {
-    return this.cs?.camera?.ptzControls;
-  }
-
-  camera(): Camera | null {
-    return this.cs?.camera;
+    return this.camera?.ptzControls;
   }
 
   /**
