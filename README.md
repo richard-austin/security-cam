@@ -263,9 +263,34 @@ to the NVR, otherwise it is not required.
 ## Initial Setup
 ### Use with the Cloud Service
 #### If you don't want to use a Cloud Service for access, ignore this section and see "Setup for Direct Access (Browser to NVR)"
-The NVR will have the Cloud Proxy enabled by default on initial setup, and provided that the correct Cloud Server address/port
-was entered in application.yml, you will be able to set up a cloud account from your cloud browser session, using the product
-key which was shown near the end of the NVR installation text. Please see the README.md for the Cloud Service for details on setting up a cloud account.
+The NVR will have the Cloud Proxy enabled by default on initial setup, and provided that the correct Cloud Server parameters are 
+present in application.yml, you will be able to set up a cloud account from your cloud browser session, using the product
+key which was shown near the end of the NVR installation text. 
+### Cloudproxy parameters in application.yml
+#### These are under the cloudProxy section :-
+
+| *Parameter*                | Description                                                                                                                        |
+|----------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| enabled                    | CloudProxy will run if true (and CloudProxy status is enabled on the NVR General menu)                                             |
+| mqTrustStorePath **        | Path to the trust store which contains the ActiveMQ servers certificate                                                            |
+| mqKeyStorePath **          | Path the the ActiveMQ client key store                                                                                             |
+| mqTrustStorePassword *     | Password for the trust store                                                                                                       |
+| mqKeyStorePassword *       | Password for the keystore                                                                                                          |
+| mqUser *                   | ActiveMQ user name                                                                                                                 |
+| mqPassword *               | ActiveMQ password                                                                                                                  |
+| productKeyPath             | Path to the file containing the encrypted NVR Product key                                                                          |
+| cloudActiveMQUrl           | Url to the ActiveMQ service that the NVRs and the Cloud server connect to. This should begin with failover://ssl:                  |
+| activeMQInitQueue          | The name of the queue in ActiveMQ through which connections are initiated. This must be the same on all NVRs and the Cloud server. |
+| webServerForCloudProxyHost | The host name for the NVRs cloud web server (normally localhost)                                                                   |
+| webServerForCloudProxyPort | The port for the NVRs web server (Normally 8088) This service is set up on nginx to provide special access for Cloud connections.  | 
+| logLevel                   | The log level for cloudproxy.log (normally located at /var/log/security-cam)                                                       |
+
+&ast; You may want to change these from their defaults. The ActiveMQ user name and password must obviously be changed 
+in the ActiveMQ and Cloud server settings as well as in this config. 
+
+&ast;&ast; You may want to create your own keys and certs for the Cloud and NVRs <a href="https://activemq.apache.org/how-do-i-use-ssl">see here</a>
+
+Please see the README.md for the Cloud Service for details on setting up a cloud account and using the Cloud service.
 ### Setup for Direct Access (Browser to NVR)
 #### Set up user account
 To log into the NVR when accessing it directly, 
