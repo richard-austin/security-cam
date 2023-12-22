@@ -550,7 +550,7 @@ email address, giving the new public IP address.
     To use this the NVR must have an Ethernet connection, and the browser must be connected to the NVR through the Ethernet IP address. 
 * **Set CloudProxy Status**
 
-**Note, An experimental Cloud Service is being developed (see <a href="https://github.com/richard-austin/cloud-server">here</a>).**
+**Note, An experimental Cloud Service has been developed (see <a href="https://github.com/richard-austin/cloud-server">here</a>). This works in conjunction with <a href="https://github.com/richard-austin/activemq-for-cloud-service">ActiveMQ</a>**
 
   Check the Checkbox to enable the Cloud Proxy to connect to the Cloud Service, or uncheck it to disable Cloud Service connection.
   The Cloud Proxy is used to provide a connection to the Cloud Service from the NVR.
@@ -558,7 +558,7 @@ email address, giving the new public IP address.
   of the NVR will be available via the Cloud Service. The Camera Admin page functionality is not available via the Cloud Service.
   Cloud Proxy Status defaults to "on" before the local NVR account is set up.
 
-  *The NVR must have the correct cloudHost/cloudPort set up in application.yml if the Cloud Service is used.*
+  *The NVR must have the correct cloudActiveMQUrl set up in application.yml if the Cloud Service is used.*
 * **Admin Functions**
   
   The initial setup functions used to set credentials for a direct access account.
