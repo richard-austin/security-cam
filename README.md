@@ -9,6 +9,13 @@ https://github.com/richard-austin/cloud-server.
 It requires network cameras providing RTSP streams with the video encoded as H264 or H265. Audio is supported. 
 The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on the browser using Media Source Extensions (MSE).
 
+![config editor buttons](README.images/ptz.png)
+*PTZ camera as viewed with Google Chrome*
+
+
+![config editor buttons](README.images/multi-cam.png)
+*Multi camera view on Google Chrome (edited for privacy)*
+
 #### NVR features
 * Secure authenticated web access.
 * Live, low latency (approx 1 second or less) video and audio.
