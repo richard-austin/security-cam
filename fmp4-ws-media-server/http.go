@@ -236,7 +236,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 		} else {
 			data = <-ch
 			if !started {
-				if data.isKeyFrame() {
+				if stream.audioOnly || data.isKeyFrame() {
 					started = true
 				} else {
 					continue
@@ -334,7 +334,7 @@ func ws(ws *websocket.Conn) {
 		} else {
 			data = <-ch
 			if !started {
-				if data.isKeyFrame() {
+				if stream.audioOnly || data.isKeyFrame() {
 					started = true
 				} else {
 					continue

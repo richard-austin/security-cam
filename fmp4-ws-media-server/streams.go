@@ -15,6 +15,7 @@ type Stream struct {
 	codecs      string
 	gopCache    GopCache
 	PcktStreams map[string]*PacketStream // One packetStream for each client connected through the suuid
+	audioOnly   bool
 }
 type StreamMap map[string]*Stream
 type Streams struct {
@@ -235,13 +236,18 @@ func (s *Streams) getCodecsFromMoov(suuid string) (err error, codecs string) {
 			// Save the codec data in hex string format as required by mse
 			codecs = fmt.Sprintf("hvc1.%d.4.L%d.B0", val[9]&0x1f, val[21]&0x1f)
 		} else {
-			log.Errorln("No video codec found for", suuid)
-			err = fmt.Errorf("no video codec found for %s", suuid)
+			log.Warnln("No video codec found for", suuid)
+			//err = fmt.Errorf("no video codec found for %s", suuid)
 		}
 	}
-
+	audioOnly := false
 	// Find audio codec data (if present)
-	val = s.StreamMap[suuid].moov.pckt[trakLen:]
+	if codecs == "" {
+		audioOnly = true
+		val = s.StreamMap[suuid].moov.pckt
+	} else {
+		val = s.StreamMap[suuid].moov.pckt[trakLen:]
+	}
 	names2 := []string{"trak", "mdia", "minf", "stbl", "stsd", "mp4a", "esds"}
 
 	for _, n := range names2 {
@@ -258,11 +264,16 @@ func (s *Streams) getCodecsFromMoov(suuid string) (err error, codecs string) {
 		// Audio stream present
 		aacCodec := val[25:27]
 		aacCodec[1] &= 0x0f // Mask off the high nybble
-		codecs += fmt.Sprintf(", mp4a.%2x.%x", aacCodec[0], aacCodec[1])
+		if codecs != "" {
+			codecs += ", "
+		}
+		codecs += fmt.Sprintf("mp4a.%2x.%x", aacCodec[0], aacCodec[1])
 	}
 
 	stream := s.StreamMap[suuid]
 	stream.codecs = codecs
+	stream.audioOnly = audioOnly
+	stream.gopCache.GopCacheUsed = !audioOnly
 	s.StreamMap[suuid] = stream
 	return
 }

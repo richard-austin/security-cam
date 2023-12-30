@@ -284,6 +284,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         .replace('https', 'wss') // Change https to wss
         .replace('http', 'ws')  // or change http to ws
       + this.stream.uri;
+   url += 'a';
+
     let counter = 0;
     this.streamTestInterval = interval(1000).subscribe(() => {
       if(++counter >= 4) {  // If counter gets to 4, the stream messages have stopped, so restart the video
@@ -469,7 +471,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
     this.video.autoplay = true;
-    this.video.muted = true;
+    this.video.muted = false;
     this.video.controls = true;
     // @ts-ignore
     this.selectedAudioInput = null;
