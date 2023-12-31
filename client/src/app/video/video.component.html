@@ -3,7 +3,7 @@
   <div class="row">
     <mat-card class="mx-auto hide-background mat-elevation-z0">
       <mat-card-title class="mat-elevation-z8">
-        {{cam != undefined ? (cam?.name + " (" + stream?.descr + ")") : ""}}
+        {{feeder?.cam != undefined ? (feeder?.cam?.name + " (" + feeder?.stream?.descr + ")") : ""}}
       </mat-card-title>
     </mat-card>
   </div>
@@ -12,18 +12,18 @@
     </video>
     <div *ngIf="isfmp4" class="latency-limit-selector">
       <div>
-        <label *ngIf="cam != undefined ? cam?.backchannelAudioSupported : false" [matTooltip]="audioButtonTooltip()" matTooltipClass="tooltip">
+        <label *ngIf="feeder?.cam != undefined ? feeder?.cam?.backchannelAudioSupported : false" [matTooltip]="audioButtonTooltip()" matTooltipClass="tooltip">
           <mat-icon [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioToggle) || utilsService.isGuestAccount}" (click)="toggleAudioOut()">{{audioToggle ? 'mic' : 'mic_off'}}</mat-icon>
         </label>
-        <select *ngIf="cam != undefined ? cam?.backchannelAudioSupported : false" [disabled]="utilsService.speakActive" [matTooltip]="audioInputSelectorTooltip()" matTooltipClass="tooltip"
+        <select *ngIf="feeder?.cam != undefined ? feeder?.cam?.backchannelAudioSupported : false" [disabled]="utilsService.speakActive" [matTooltip]="audioInputSelectorTooltip()" matTooltipClass="tooltip"
                 [(ngModel)]="selectedDeviceId" (change)="setAudioInput()">
           <option *ngFor="let device of mediaDevices | audioInput" [value]="device.deviceId">{{device.label}}</option>
         </select>
         <label>
           <mat-icon>timer</mat-icon>
         </label>
-        <select matTooltip="Set upper latency chasing limit" matTooltipClass="tooltip"
-                style="width: 90px;" #latencyLimitSelect [(ngModel)]="buffering_sec" (change)="setlatencyLim()">
+        <select *ngIf="feeder" matTooltip="Set upper latency chasing limit" matTooltipClass="tooltip"
+                style="width: 90px;" #latencyLimitSelect [(ngModel)]="feeder.buffering_sec" (change)="feeder.setlatencyLim()">
           <option value="0.4">0.4</option>
           <option value="0.6">0.6</option>
           <option value="0.8"> 0.8</option>
