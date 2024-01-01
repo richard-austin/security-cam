@@ -4,7 +4,7 @@ import {Client} from "@stomp/stompjs";
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
 import {interval, Subscription, timer} from "rxjs";
-import { MediaFeeder } from './MediaFeeder';
+import {MediaFeeder} from './MediaFeeder';
 
 declare let Hls: any;
 
@@ -16,14 +16,16 @@ declare let Hls: any;
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
+  @ViewChild('audio') audioEl!: ElementRef<HTMLAudioElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isfmp4: boolean = false;
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
+  audio!: HTMLAudioElement;
 
   visible: boolean = false;
- // manifest: string = '';
+  // manifest: string = '';
   // @ts-ignore
   recorder: MediaRecorder;
   mediaDevices!: MediaDeviceInfo[];
@@ -33,10 +35,15 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 //  private isFullscreenNow: boolean = false;
   private client!: Client;
   private timeForStartAudioOutResponse: number = 0;
-  feeder!: MediaFeeder;
+  videoFeeder!: MediaFeeder;
+  audioFeeder!: MediaFeeder;
+  multi: boolean = false;
+  buffering_sec: number = 1.2;
+
 
   constructor(public utilsService: UtilsService) {
-    this.feeder = new MediaFeeder()
+    this.videoFeeder = new MediaFeeder(this.buffering_sec)
+    this.audioFeeder = new MediaFeeder(this.buffering_sec, true);
   }
 
   /**
@@ -46,9 +53,15 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param manifest
    */
   setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
+    if (this.audioToggle) {// Ensure two way audio is off when switching streams
+      this.stopAudioOut();
+    }
+    this.stop();
     this.stream = stream;
-    this.feeder.setSource(cam, stream, manifest)
-    if(cam.backchannelAudioSupported) {
+    this.videoFeeder.setSource(cam, stream, manifest)
+    if(this.isfmp4 && this.stream.audio)
+      this.audioFeeder.setSource(cam, stream);
+    if (cam.backchannelAudioSupported) {
       // Call getUserMedia to make the browser ask the user for permission to access the microphones so that
       //  enumerateDevices can get the microphone list.
       navigator.mediaDevices.getUserMedia({
@@ -66,13 +79,14 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  multi: boolean = false;
   stop(): void {
-    this.feeder.stop();
+    this.videoFeeder.stop();
+    if(this.isfmp4)
+      this.audioFeeder.stop();
   }
 
   toggleAudioOut() {
-    if(!this.utilsService.isGuestAccount && (!this.utilsService.speakActive || this.audioToggle)) {
+    if (!this.utilsService.isGuestAccount && (!this.utilsService.speakActive || this.audioToggle)) {
       this.audioToggle = !this.audioToggle;
       if (this.audioToggle) {
         this.timeForStartAudioOutResponse = 0;
@@ -86,8 +100,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           this.stopAudioOut();
         });
         this.startAudioOutput();
-      }
-      else {
+      } else {
         this.beginStopAudioOut();
       }
     }
@@ -106,11 +119,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.video.muted = true;
     let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host + '/audio';
 
-    this.client  = new Client({
+    this.client = new Client({
       brokerURL: serverUrl,
-      onConnect: () => {},
+      onConnect: () => {
+      },
       reconnectDelay: 1000,
-      debug: () => {}
+      debug: () => {
+      }
     });
 
     if (navigator.mediaDevices) {
@@ -138,7 +153,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           blob.arrayBuffer().then((buff) => {
             let data = new Uint8Array(buff);
 
-            if(data.length > 0) {
+            if (data.length > 0) {
               // and send that blob to the server...
               this.client.publish({
                 destination: '/app/audio',
@@ -175,29 +190,35 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   beginStopAudioOut() {
     // 1.6 second plus timeForStartAudioOutResponse delay on stopping to allow for the latency in the audio and prevent
     //  the end of the speech getting get cut off
-    let timerSubscription = timer(1600+this.timeForStartAudioOutResponse).subscribe(() => {
+    let timerSubscription = timer(1600 + this.timeForStartAudioOutResponse).subscribe(() => {
       this.stopAudioOut();
       timerSubscription.unsubscribe();
     });
   }
 
-  stopAudioOut() : void {
+  stopAudioOut(): void {
     this.video.muted = false;
     this.recorder?.stop();
     this.utilsService.stopAudioOut().subscribe(() => {
-      this.client?.deactivate({force: false}).then(() => {});
+      this.client?.deactivate({force: false}).then(() => {
+      });
     }, reason => {
       this.reporting.errorMessage = reason;
     });
     this.audioToggle = false;
   }
 
-  audioButtonTooltip() : string {
+  toggleMuteAudio() {
+    if(this.audioFeeder)
+      this.audioFeeder.mute(!this.audioFeeder.isMuted);
+  }
+
+  audioButtonTooltip(): string {
     let speakActive = this.utilsService.speakActive;
     let retVal: string = "";
-    if(this.utilsService.isGuestAccount)
+    if (this.utilsService.isGuestAccount)
       retVal = "Not available to guest"
-    else if(speakActive)
+    else if (speakActive)
       retVal = this.audioToggle ? "Stop audio to camera" : "Audio to camera is in use in another session. Cannot start audio to camera at this time";
     else if (!speakActive) {
       retVal = "Start audio to camera"
@@ -207,7 +228,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   audioInputSelectorTooltip() {
     let retVal = "Set audio input device";
-    if(this.utilsService.speakActive)
+    if (this.utilsService.speakActive)
       retVal = "Audio to camera is in use, cannot select audio input at this time";
     return retVal;
   }
@@ -216,21 +237,27 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.feeder.init(this.isfmp4, this.videoEl.nativeElement, this);
     this.video = this.videoEl.nativeElement;
+    this.audio = this.audioEl.nativeElement;
+    this.videoFeeder.init(this.isfmp4, this.video);
+    if(this.isfmp4)
+      this.audioFeeder.init(this.isfmp4, this.audio);
+
     // @ts-ignore
     this.selectedAudioInput = null;
   }
 
   ngOnDestroy(): void {
-    this.feeder.stop();
+    this.videoFeeder.stop();
+    if(this.isfmp4 && this.stream !== null && this.stream !== undefined && this.stream.audio)
+      this.audioFeeder.stop();
     if (this.audioToggle) {
       // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
       //  ffmpeg to the backchannel device. The problem does not occur when done like this
-      let timerSubscription: Subscription =  timer(20).subscribe( () => {
+      let timerSubscription: Subscription = timer(20).subscribe(() => {
         this.stopAudioOut();
         timerSubscription.unsubscribe();
       });
-     }
+    }
   }
 }

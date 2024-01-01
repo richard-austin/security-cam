@@ -18,31 +18,33 @@ export class MediaFeeder {
   stream_started = false; // is the source_buffer updateend callback active or not
   started: boolean = false;
   mimeType: string = 'video/mp4';
-  vc!: VideoComponent;
 
   // create media source instance
   ms!: MediaSource;
   cc: number = 0;
   source_buffer!: SourceBuffer; // source_buffer instance
   verbose: boolean = false;
-  buffering_sec: number = 1.2; // Default value, changeable from live video pages.
-  buffering_sec_seek: number = this.buffering_sec * 0.9;
+  buffering_sec!: number
+  buffering_sec_seek!: number;
   // ..seek the stream if it's this much away or
   // from the last available timestamp
-  buffering_sec_seek_distance: number = this.buffering_sec * 0.5;
+  buffering_sec_seek_distance!: number;
+  latency_chasing: boolean = false;
 
+  isAudio: boolean;
   // .. jump to this distance from the last avail. timestamp
 
-  constructor() {
+  constructor(buffering_sec: number, isAudio: boolean = false) {
+    this.setlatencyLim(buffering_sec);
+    this.isAudio = isAudio
   }
 
-  init(isMp4: boolean, media: HTMLMediaElement, vc: VideoComponent) {
+  init(isMp4: boolean, media: HTMLMediaElement) {
     this.isfmp4 = isMp4;
     this.media = media;
-    this.vc = vc;
     this.media.autoplay = true;
     this.media.muted = false;
-    this.media.controls = true;
+    this.media.controls = false;
   }
 
   /**
@@ -71,7 +73,7 @@ export class MediaFeeder {
    * startVideo: Start the video (assumes appropriate uri and camera is set up).
    * @private
    */
-  public startVideo(keepAudioStream: boolean = false): void {
+  public startVideo(): void {
     if (!this.isfmp4) {
       if (this.cam !== undefined) {
         if (Hls.isSupported()) {
@@ -83,9 +85,6 @@ export class MediaFeeder {
         }
       }
     } else {
-      if(this.vc !== null && !keepAudioStream && this.vc.audioToggle)
-        this.vc.stopAudioOut();
-
       this.ms = new MediaSource();
       this.ms.addEventListener('sourceopen', this.opened, false);
 
@@ -112,7 +111,7 @@ export class MediaFeeder {
         .replace('https', 'wss') // Change https to wss
         .replace('http', 'ws')  // or change http to ws
       + this.stream.uri;
-    url += 'a';
+    url += this.isAudio ? 'a' : '';
 
     let counter = 0;
     this.streamTestInterval = interval(1000).subscribe(() => {
@@ -121,7 +120,7 @@ export class MediaFeeder {
         this.stop();  // Close the existing video set up
         let timerSubscription = timer(1000).subscribe(() => {
           timerSubscription.unsubscribe();
-          this.startVideo(true);  // Start it again after 1-second delay
+          this.startVideo();  // Start it again after 1-second delay
         });
       }
     });
@@ -196,6 +195,12 @@ export class MediaFeeder {
       if ((this.media.duration >= this.buffering_sec) &&
         ((latest - this.media.currentTime) > this.buffering_sec_seek)) {
         console.log('seek from ', this.media.currentTime, ' to ', latest);
+        // Flag to show latency chasing is occurring
+        this.latency_chasing = true;
+        let timerSubscription = timer(500).subscribe(() => {
+          this.latency_chasing = false;
+          timerSubscription.unsubscribe();
+        });
         let df = (this.media.duration - this.media.currentTime); // this much away from the last available frame
         if ((df > this.buffering_sec_seek)) {
           this.media.currentTime = this.media.duration - this.buffering_sec_seek_distance;
@@ -242,13 +247,41 @@ export class MediaFeeder {
     }
   };
 
-  setlatencyLim() {
-    this.buffering_sec = Number(this.buffering_sec);
+  setlatencyLim(buffering_sec: number | object) {
+    this.buffering_sec = Number(buffering_sec);
     // Update these accordingly
     this.buffering_sec_seek = this.buffering_sec * 0.9;
     this.buffering_sec_seek_distance = this.buffering_sec * 0.5;
   }
 
+  get isLatencyChasing(): boolean {
+    return this.latency_chasing;
+  }
+  mute(muted: boolean = true) {
+    if(this.media !== null && this.media !== undefined)
+      this.media.muted = muted;
+  }
+
+  get isMuted() {
+    return this.media !== null && this.media !== undefined && this.media.muted;
+  }
+
+  get hasCam(): boolean {
+    return this.cam !== null && this.cam !== undefined;
+  }
+  get hasStream(): boolean {
+    return this.stream !== null && this.stream !== undefined;
+  }
+  get backchannelAudioSupported(): boolean {
+    return this.hasCam && this.cam.backchannelAudioSupported
+  }
+  get camName(): string {
+    return this.hasCam ? this.cam.name : 'NO CAMERA!!';
+  }
+
+  get streamDescr() : string {
+    return this.hasStream ? this.stream.descr : "NO STREAM!!"
+  }
   Utf8ArrayToStr(array: Uint8Array): string {
     let out, i, len, c;
     let char2, char3;
