@@ -1,7 +1,6 @@
 import Hls from "hls.js";
 import {Camera, Stream} from "../cameras/Camera";
 import {interval, Subscription, timer} from "rxjs";
-import {VideoComponent} from "./video.component";
 
 export class MediaFeeder {
   isfmp4!: boolean;
@@ -39,12 +38,12 @@ export class MediaFeeder {
     this.isAudio = isAudio
   }
 
-  init(isMp4: boolean, media: HTMLMediaElement) {
-    this.isfmp4 = isMp4;
+  init(isfmp4: boolean, media: HTMLMediaElement) {
+    this.isfmp4 = isfmp4;
     this.media = media;
     this.media.autoplay = true;
     this.media.muted = false;
-    this.media.controls = false;
+    this.media.controls = isfmp4;
   }
 
   /**

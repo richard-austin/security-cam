@@ -6,8 +6,6 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {interval, Subscription, timer} from "rxjs";
 import {MediaFeeder} from './MediaFeeder';
 
-declare let Hls: any;
-
 @Component({
   selector: 'app-video',
   templateUrl: './video.component.html',
