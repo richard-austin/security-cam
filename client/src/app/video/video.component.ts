@@ -128,7 +128,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   startAudioOutput(): boolean {
     let retVal = true;
-    this.video.muted = true;
+    if(this.isfmp4)
+      this.audio.muted = true;
     let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host + '/audio';
 
     this.client = new Client({
@@ -209,7 +210,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   stopAudioOut(): void {
-    this.video.muted = false;
+    if(this.isfmp4)
+      this.audio.muted = false;
     this.recorder?.stop();
     this.utilsService.stopAudioOut().subscribe(() => {
       this.client?.deactivate({force: false}).then(() => {
@@ -223,6 +225,11 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleMuteAudio() {
     if(this.audioFeeder)
       this.audioFeeder.mute(!this.audioFeeder.isMuted);
+  }
+
+  mute(mute: boolean = true): void {
+    if(this.audioFeeder)
+      this.audioFeeder.mute(mute);
   }
 
   audioButtonTooltip(): string {
