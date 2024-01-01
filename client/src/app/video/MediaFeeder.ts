@@ -43,7 +43,7 @@ export class MediaFeeder {
     this.media = media;
     this.media.autoplay = true;
     this.media.muted = false;
-    this.media.controls = isfmp4;
+    this.media.controls = !isfmp4;
   }
 
   /**
