@@ -84,6 +84,20 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     if(this.isfmp4)
       this.audioFeeder.stop();
   }
+  setFullScreen() {
+    if(this.video) {
+      if(this.video.requestFullscreen)
+        this.video.requestFullscreen();
+      // @ts-ignore
+      else if(this.video.webkitRequestFullscreen)
+        // @ts-ignore
+        this.video.webkitRequestFullscreen();
+      // @ts-ignore
+      else if(this.video.msRequestFullScreen)
+        // @ts-ignore
+        this.video.msRequestFullScreen();
+    }
+  }
 
   toggleAudioOut() {
     if (!this.utilsService.isGuestAccount && (!this.utilsService.speakActive || this.audioToggle)) {
@@ -238,7 +252,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.audio = this.audioEl.nativeElement;
+    if(this.isfmp4)
+      this.audio = this.audioEl.nativeElement;
     this.videoFeeder.init(this.isfmp4, this.video);
     if(this.isfmp4)
       this.audioFeeder.init(this.isfmp4, this.audio);

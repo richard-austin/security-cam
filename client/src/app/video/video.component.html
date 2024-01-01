@@ -45,6 +45,9 @@
           <option value="1.8">1.8</option>
           <option value="2">2.0</option>
         </select>
+        <label matTooltip="Set full screen" matTooltipClass="tooltip">
+          <mat-icon (click)="setFullScreen()">fullscreen</mat-icon>
+        </label>
       </div>
       <audio #audio style="width: 0; height: 0"> <!-- Invisible audio element -->
       </audio>
