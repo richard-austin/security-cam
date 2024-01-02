@@ -141,7 +141,7 @@ environments:
       mqUser: cloud
       mqPassword: inelESOLsiONgeOuShEFatIns
       productKeyPath: /etc/security-cam/prodKey
-      cloudActiveMQUrl: failover://ssl://192.168.1.82:61617?socket.verifyHostName=false
+      cloudActiveMQUrl: failover://ssl://192.168.1.8361617?socket.verifyHostName=false
       activeMQInitQueue: INIT
       webServerForCloudProxyHost: localhost
       webServerForCloudProxyPort: 8080
@@ -207,7 +207,7 @@ environments:
       mqUser: cloud
       mqPassword: inelESOLsiONgeOuShEFatIns
       productKeyPath: /etc/security-cam/prodKey
-      cloudActiveMQUrl: failover://ssl://192.168.1.82:61617?socket.verifyHostName=false
+      cloudActiveMQUrl: failover://ssl://192.168.1.83:61617?socket.verifyHostName=false
       activeMQInitQueue: INIT
       webServerForCloudProxyHost: localhost
       webServerForCloudProxyPort: 8088
