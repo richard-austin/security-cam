@@ -4,8 +4,7 @@ import {Client} from "@stomp/stompjs";
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
 import {interval, Subscription, timer} from "rxjs";
-
-declare let Hls: any;
+import {MediaFeeder} from './MediaFeeder';
 
 @Component({
   selector: 'app-video',
@@ -15,17 +14,16 @@ declare let Hls: any;
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
+  @ViewChild('audio') audioEl!: ElementRef<HTMLAudioElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isfmp4: boolean = false;
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
+  audio!: HTMLAudioElement;
 
-  hls: any = null;
   visible: boolean = false;
-  recording: boolean = false;
-  recordingUri: string = '';
-  manifest: string = '';
+  // manifest: string = '';
   // @ts-ignore
   recorder: MediaRecorder;
   mediaDevices!: MediaDeviceInfo[];
@@ -35,9 +33,15 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 //  private isFullscreenNow: boolean = false;
   private client!: Client;
   private timeForStartAudioOutResponse: number = 0;
+  videoFeeder!: MediaFeeder;
+  audioFeeder!: MediaFeeder;
+  multi: boolean = false;
+  buffering_sec: number = 1.2;
 
 
   constructor(public utilsService: UtilsService) {
+    this.videoFeeder = new MediaFeeder(this.buffering_sec)
+    this.audioFeeder = new MediaFeeder(this.buffering_sec, true);
   }
 
   /**
@@ -47,17 +51,15 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param manifest
    */
   setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
-    this.stop();
-    this.cam = cam;
-    this.stream = stream;
-    this.recording = manifest !== '';
-    this.recordingUri = stream.recording.uri;
-
-    if (this.recordingUri[this.recordingUri.length - 1] !== '/') {
-      this.recordingUri += '/';
+    if (this.audioToggle) {// Ensure two way audio is off when switching streams
+      this.stopAudioOut();
     }
-
-    if(cam.backchannelAudioSupported) {
+    this.stop();
+    this.stream = stream;
+    this.videoFeeder.setSource(cam, stream, manifest)
+    if(this.isfmp4 && this.stream.audio)
+      this.audioFeeder.setSource(cam, stream);
+    if (cam.backchannelAudioSupported) {
       // Call getUserMedia to make the browser ask the user for permission to access the microphones so that
       //  enumerateDevices can get the microphone list.
       navigator.mediaDevices.getUserMedia({
@@ -73,257 +75,30 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       })
     }
-
-    this.recordingUri += manifest;
-    this.manifest = manifest;   // Save the manifest file name so it can be returned by getManifest
-    this.startVideo();
   }
-
-  /**
-   * Get the currently selected recording manifest file
-   */
-  getManifest(): string {
-    return this.manifest;
-  }
-
-  /**
-   * startVideo: Start the video (assumes appropriate uri and camera is set up).
-   * @private
-   */
-  private startVideo(keepAudioStream: boolean = false): void {
-    if (!this.isfmp4) {
-      if (this.cam !== undefined) {
-        if (Hls.isSupported()) {
-          this.hls = new Hls();
-          this.hls.loadSource(this.recording ? this.recordingUri : this.stream.uri);
-          this.hls.attachMedia(this.video);
-        } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
-          this.video.src = this.stream.uri;
-        }
-      }
-    } else {
-      // If an audio output session is running, stop it if we switch video views.
-      if(!keepAudioStream && this.audioToggle)
-        this.stopAudioOut();
-
-      this.ms = new MediaSource();
-      this.ms.addEventListener('sourceopen', this.opened, false);
-
-      // set MediaSource as source of video
-      this.video.src = window.URL.createObjectURL(this.ms);
-    }
-  }
-
-  verbose: boolean = false;
-  multi: boolean = false;
-  buffering_sec: number = 1.2; // Default value, changeable from live video pages.
-  buffering_sec_seek: number = this.buffering_sec * 0.9;
-  // ..seek the stream if it's this much away or
-  // from the last available timestamp
-  buffering_sec_seek_distance: number = this.buffering_sec * 0.5;
-  // .. jump to this distance from the last avail. timestamp
-  started: boolean = false;
-
-  mimeType: string = 'video/mp4';
-
-  stream_started = false; // is the source_buffer updateend callback active or not
-
-  // create media source instance
-  ms!: MediaSource;
-
-  // queue for incoming media packets
-  queue: BufferSource[] = [];
-  ws!: WebSocket; // websocket
-  seeked = false; // have seeked manually once ..
-  cc: number = 0;
-
-  source_buffer!: SourceBuffer; // source_buffer instance
-
-  setlatencyLim() {
-    this.buffering_sec = Number(this.buffering_sec);
-    // Update these accordingly
-    this.buffering_sec_seek = this.buffering_sec * 0.9;
-    this.buffering_sec_seek_distance = this.buffering_sec * 0.5;
-  }
-
-  Utf8ArrayToStr(array: Uint8Array): string {
-    let out, i, len, c;
-    let char2, char3;
-    out = '';
-    len = array.length;
-    i = 0;
-    while (i < len) {
-      c = array[i++];
-      switch (c >> 4) {
-        case 7:
-          out += String.fromCharCode(c);
-          break;
-        case 13:
-          char2 = array[i++];
-          out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
-          break;
-        case 14:
-          char2 = array[i++];
-          char3 = array[i++];
-          out += String.fromCharCode(((c & 0x0F) << 12) |
-            ((char2 & 0x3F) << 6) |
-            ((char3 & 0x3F) << 0));
-          break;
-      }
-    }
-    return out;
-  }
-
-
-  // Callbacks:
-  // - putPacket : called when websocket receives data
-  // - loadPacket : called when source_buffer is ready for more data
-  // Both operate on a common fifo
-  putPacket(arr: Uint8Array) {
-    // receives ArrayBuffer.  Called when websocket gets more data
-    // first packet ever to arrive: write directly to source_buffer
-    // source_buffer ready to accept: write directly to source_buffer
-    // otherwise insert it to queue
-
-    let data = new Uint8Array(arr);
-    if (data[0] === 9 && !this.started) {
-      this.started = true;
-      let codecs;  // https://wiki.whatwg.org/wiki/Video_type_parameters
-      let decoded_arr = data.slice(1);
-      if (window.TextDecoder) {
-        codecs = new TextDecoder('utf-8').decode(decoded_arr);
-      } else {
-        codecs = this.Utf8ArrayToStr(decoded_arr);
-      }
-      if (this.verbose) {
-        console.log('first packet with codec data: ' + codecs);
-      }
-
-      // if your stream has audio, remember to include it in these definitions.. otherwise your mse goes sour
-      let codecPars = this.mimeType + ';codecs="' + codecs + '"';
-      if (!(window.MediaSource && window.MediaSource.isTypeSupported(codecPars))) {
-        console.log(codecPars + 'Not supported');
-      }
-      this.ms.duration = this.buffering_sec;
-      this.source_buffer = this.ms.addSourceBuffer(codecPars);
-
-      // https://developer.mozilla.org/en-US/docs/Web/API/source_buffer/mode
-      //     let myMode = source_buffer.mode;
-      this.source_buffer.mode = 'sequence';
-      // source_buffer.mode = 'segments';  // TODO: should we use this instead?
-
-      this.source_buffer.addEventListener('updateend', this.loadPacket);
-    } else if (this.started) {
-      // keep the latency to minimum
-      let latest = this.video.duration;
-      if ((this.video.duration >= this.buffering_sec) &&
-        ((latest - this.video.currentTime) > this.buffering_sec_seek)) {
-        console.log('seek from ', this.video.currentTime, ' to ', latest);
-        let df = (this.video.duration - this.video.currentTime); // this much away from the last available frame
-        if ((df > this.buffering_sec_seek)) {
-          this.video.currentTime = this.video.duration - this.buffering_sec_seek_distance;
-        }
-      }
-
-      data = arr;
-      if (!this.stream_started && this.video.error == null) {
-            this.source_buffer.appendBuffer(data);
-        this.stream_started = true;
-        this.cc += 1;
-        return;
-      }
-      else if( this.video.error != null)
-        console.log(this.video.error.message)
-
-        this.queue.push(data); // add to the end
-      if (this.verbose) {
-        console.log('queue push:', this.queue.length);
-      }
-    }
-  }
-
-  loadPacket = () => { // called when source_buffer is ready for more
-    if (!this.source_buffer.updating) { // really, really ready
-      if (this.queue.length > 0) {
-
-        let inp = this.queue.shift(); // pop from the beginning
-        if (this.verbose) {
-          console.log('this.queue pop:', this.queue.length);
-        }
-
-        let memview = new Uint8Array(inp as Uint8Array);
-
-        if (this.verbose) {
-          console.log(' ==> writing buffer with', memview[0], memview[1], memview[2], memview[3]);
-        }
-
-          this.source_buffer.appendBuffer(inp as BufferSource);
-        this.cc += 1;
-      } else { // the this.queue runs empty, so the next packet is fed directly
-        this.stream_started = false;
-      }
-    } else { // so it was not?
-    }
-  };
-
-  streamTestInterval!: Subscription;
-
-  opened = () => { // MediaSource object is ready to go
-    console.log('Called opened');
-    // https://developer.mozilla.org/en-US/docs/Web/API/MediaSource/duration
-    let getUrl = window.location;
-    let baseUrl = getUrl.protocol + '//' + getUrl.host + '/' + getUrl.pathname.split('/')[1];
-
-    let url = this.stream.uri.startsWith('http:') || this.stream.uri.startsWith('https:') || this.stream.uri.startsWith('ws:')
-      ?  // Absolute url
-      this.stream.uri
-        .replace('https', 'wss') // Change https to wss
-        .replace('http', 'ws')  // or change http to ws
-      :  // Relative uri
-      baseUrl.substring(0, baseUrl.length - 1) // Remove trailing /
-        .replace('https', 'wss') // Change https to wss
-        .replace('http', 'ws')  // or change http to ws
-      + this.stream.uri;
-    let counter = 0;
-    this.streamTestInterval = interval(1000).subscribe(() => {
-      if(++counter >= 4) {  // If counter gets to 4, the stream messages have stopped, so restart the video
-        console.log("Stream for "+this.cam.name+" has stalled, attempting restart in 1 second");
-        this.stop();  // Close the existing video set up
-        let timerSubscription = timer(1000).subscribe(() => {
-          timerSubscription.unsubscribe();
-          this.startVideo(true);  // Start it again after 1-second delay
-        });
-      }
-    });
-    this.ws = new WebSocket(url);
-    this.ws.binaryType = 'arraybuffer';
-    this.ws.onmessage = (event: MessageEvent) => {
-      this.putPacket(event.data);
-      counter = 0;
-    };
-  };
 
   stop(): void {
-    this.streamTestInterval?.unsubscribe();  // Stop the stream test interval, or it will be restarted after
-                                            // we exit the video component
-    if (!this.isfmp4 && this.hls !== null) {
-      this.video.pause();
-      this.hls.stopLoad();
-      this.hls.detachMedia();
-      this.hls.destroy();
-      this.hls = null;
-    } else if (this.isfmp4) {
-      if (this.ws !== undefined) {
-        this.ws.close();
-        this.ws.onmessage = null;
-      }
-      this.started = false;
-      this.video.pause();
+    this.videoFeeder.stop();
+    if(this.isfmp4)
+      this.audioFeeder.stop();
+  }
+  setFullScreen() {
+    if(this.video) {
+      if(this.video.requestFullscreen)
+        this.video.requestFullscreen();
+      // @ts-ignore
+      else if(this.video.webkitRequestFullscreen)
+        // @ts-ignore
+        this.video.webkitRequestFullscreen();
+      // @ts-ignore
+      else if(this.video.msRequestFullScreen)
+        // @ts-ignore
+        this.video.msRequestFullScreen();
     }
   }
 
   toggleAudioOut() {
-    if(!this.utilsService.isGuestAccount && (!this.utilsService.speakActive || this.audioToggle)) {
+    if (!this.utilsService.isGuestAccount && (!this.utilsService.speakActive || this.audioToggle)) {
       this.audioToggle = !this.audioToggle;
       if (this.audioToggle) {
         this.timeForStartAudioOutResponse = 0;
@@ -337,8 +112,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           this.stopAudioOut();
         });
         this.startAudioOutput();
-      }
-      else {
+      } else {
         this.beginStopAudioOut();
       }
     }
@@ -354,14 +128,17 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   startAudioOutput(): boolean {
     let retVal = true;
-    this.video.muted = true;
+    if(this.isfmp4)
+      this.audio.muted = true;
     let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host + '/audio';
 
-    this.client  = new Client({
+    this.client = new Client({
       brokerURL: serverUrl,
-      onConnect: () => {},
+      onConnect: () => {
+      },
       reconnectDelay: 1000,
-      debug: () => {}
+      debug: () => {
+      }
     });
 
     if (navigator.mediaDevices) {
@@ -389,7 +166,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
           blob.arrayBuffer().then((buff) => {
             let data = new Uint8Array(buff);
 
-            if(data.length > 0) {
+            if (data.length > 0) {
               // and send that blob to the server...
               this.client.publish({
                 destination: '/app/audio',
@@ -426,29 +203,41 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   beginStopAudioOut() {
     // 1.6 second plus timeForStartAudioOutResponse delay on stopping to allow for the latency in the audio and prevent
     //  the end of the speech getting get cut off
-    let timerSubscription = timer(1600+this.timeForStartAudioOutResponse).subscribe(() => {
+    let timerSubscription = timer(1600 + this.timeForStartAudioOutResponse).subscribe(() => {
       this.stopAudioOut();
       timerSubscription.unsubscribe();
     });
   }
 
-  private stopAudioOut() : void {
-    this.video.muted = false;
+  stopAudioOut(): void {
+    if(this.isfmp4)
+      this.audio.muted = false;
     this.recorder?.stop();
     this.utilsService.stopAudioOut().subscribe(() => {
-      this.client?.deactivate({force: false}).then(() => {});
+      this.client?.deactivate({force: false}).then(() => {
+      });
     }, reason => {
       this.reporting.errorMessage = reason;
     });
     this.audioToggle = false;
   }
 
-  audioButtonTooltip() : string {
+  toggleMuteAudio() {
+    if(this.audioFeeder)
+      this.audioFeeder.mute(!this.audioFeeder.isMuted);
+  }
+
+  mute(mute: boolean = true): void {
+    if(this.audioFeeder)
+      this.audioFeeder.mute(mute);
+  }
+
+  audioButtonTooltip(): string {
     let speakActive = this.utilsService.speakActive;
     let retVal: string = "";
-    if(this.utilsService.isGuestAccount)
+    if (this.utilsService.isGuestAccount)
       retVal = "Not available to guest"
-    else if(speakActive)
+    else if (speakActive)
       retVal = this.audioToggle ? "Stop audio to camera" : "Audio to camera is in use in another session. Cannot start audio to camera at this time";
     else if (!speakActive) {
       retVal = "Start audio to camera"
@@ -458,7 +247,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   audioInputSelectorTooltip() {
     let retVal = "Set audio input device";
-    if(this.utilsService.speakActive)
+    if (this.utilsService.speakActive)
       retVal = "Audio to camera is in use, cannot select audio input at this time";
     return retVal;
   }
@@ -468,22 +257,27 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.video.autoplay = true;
-    this.video.muted = true;
-    this.video.controls = true;
+    if(this.isfmp4)
+      this.audio = this.audioEl.nativeElement;
+    this.videoFeeder.init(this.isfmp4, this.video);
+    if(this.isfmp4)
+      this.audioFeeder.init(this.isfmp4, this.audio);
+
     // @ts-ignore
     this.selectedAudioInput = null;
   }
 
   ngOnDestroy(): void {
-    this.stop();
+    this.videoFeeder.stop();
+    if(this.isfmp4 && this.stream !== null && this.stream !== undefined && this.stream.audio)
+      this.audioFeeder.stop();
     if (this.audioToggle) {
       // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
       //  ffmpeg to the backchannel device. The problem does not occur when done like this
-      let timerSubscription: Subscription =  timer(20).subscribe( () => {
+      let timerSubscription: Subscription = timer(20).subscribe(() => {
         this.stopAudioOut();
         timerSubscription.unsubscribe();
       });
-     }
+    }
   }
 }

@@ -65,6 +65,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cams.forEach((cam) => {
         cam.streams.forEach((stream, k) => {
           let video: VideoComponent | undefined = this.videos?.get(index);
+          video?.mute();
           if (video !== undefined && stream.defaultOnMultiDisplay) {
             video.setSource(cam, stream);
             video.visible = true;
