@@ -30,18 +30,15 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   audioToggle: boolean = false;
   selectedDeviceId!: string;
   selectedAudioInput!: MediaDeviceInfo;
-//  private isFullscreenNow: boolean = false;
   private client!: Client;
   private timeForStartAudioOutResponse: number = 0;
   videoFeeder!: MediaFeeder;
-  audioFeeder!: MediaFeeder;
   multi: boolean = false;
   buffering_sec: number = 1.2;
 
 
   constructor(public utilsService: UtilsService) {
     this.videoFeeder = new MediaFeeder(this.buffering_sec)
-    this.audioFeeder = new MediaFeeder(this.buffering_sec, true);
   }
 
   /**
@@ -57,8 +54,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.stop();
     this.stream = stream;
     this.videoFeeder.setSource(cam, stream, manifest)
-    if(this.isfmp4 && this.stream.audio)
-      this.audioFeeder.setSource(cam, stream);
     if (cam.backchannelAudioSupported) {
       // Call getUserMedia to make the browser ask the user for permission to access the microphones so that
       //  enumerateDevices can get the microphone list.
@@ -79,8 +74,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   stop(): void {
     this.videoFeeder.stop();
-    if(this.isfmp4)
-      this.audioFeeder.stop();
   }
   setFullScreen() {
     if(this.video) {
@@ -223,13 +216,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleMuteAudio() {
-    if(this.audioFeeder)
-      this.audioFeeder.mute(!this.audioFeeder.isMuted);
+    if(this.videoFeeder)
+      this.videoFeeder.mute(!this.videoFeeder.isMuted);
   }
 
   mute(mute: boolean = true): void {
-    if(this.audioFeeder)
-      this.audioFeeder.mute(mute);
+    if(this.videoFeeder)
+      this.videoFeeder.mute(mute);
   }
 
   audioButtonTooltip(): string {
@@ -260,8 +253,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     if(this.isfmp4)
       this.audio = this.audioEl.nativeElement;
     this.videoFeeder.init(this.isfmp4, this.video);
-    if(this.isfmp4)
-      this.audioFeeder.init(this.isfmp4, this.audio);
 
     // @ts-ignore
     this.selectedAudioInput = null;
@@ -269,8 +260,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.videoFeeder.stop();
-    if(this.isfmp4 && this.stream !== null && this.stream !== undefined && this.stream.audio)
-      this.audioFeeder.stop();
     if (this.audioToggle) {
       // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
       //  ffmpeg to the backchannel device. The problem does not occur when done like this
