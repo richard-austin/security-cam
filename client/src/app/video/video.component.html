@@ -17,17 +17,17 @@
                matTooltipClass="tooltip">
           <mat-icon (click)="toggleMuteAudio()">{{ videoFeeder.isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
         </label>
-        <label *ngIf="videoFeeder.backchannelAudioSupported" [matTooltip]="audioButtonTooltip()"
+        <label *ngIf="videoFeeder.backchannelAudioSupported" [matTooltip]="audioBackchannel.audioButtonTooltip()"
                matTooltipClass="tooltip">
           <mat-icon
-            [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioToggle) || utilsService.isGuestAccount}"
-            (click)="toggleAudioOut()">{{ audioToggle ? 'mic' : 'mic_off' }}
+            [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioBackchannel.audioToggle) || utilsService.isGuestAccount}"
+            (click)="audioBackchannel.toggleAudioOut(stream)">{{ audioBackchannel.audioToggle ? 'mic' : 'mic_off' }}
           </mat-icon>
         </label>
         <select *ngIf="videoFeeder.backchannelAudioSupported" [disabled]="utilsService.speakActive"
-                [matTooltip]="audioInputSelectorTooltip()" matTooltipClass="tooltip"
-                [(ngModel)]="selectedDeviceId" (change)="setAudioInput()">
-          <option *ngFor="let device of mediaDevices | audioInput" [value]="device.deviceId">{{ device.label }}</option>
+                [matTooltip]="audioBackchannel.audioInputSelectorTooltip()" matTooltipClass="tooltip"
+                [(ngModel)]="audioBackchannel.selectedDeviceId" (change)="audioBackchannel.setAudioInput()">
+          <option *ngFor="let device of audioBackchannel.mediaDevices | audioInput" [value]="device.deviceId">{{ device.label }}</option>
         </select>
         <label [ngClass]="{'latency-chasing': videoFeeder.isLatencyChasing}">
           <mat-icon>timer</mat-icon>
@@ -49,8 +49,6 @@
           <mat-icon (click)="setFullScreen()">fullscreen</mat-icon>
         </label>
       </div>
-      <audio #audio style="width: 0; height: 0"> <!-- Invisible audio element -->
-      </audio>
     </div>
   </div>
 </div>
