@@ -49,8 +49,9 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   cams: Map<string, Camera> = new Map<string, Camera>();
   showStreamSelector: boolean = false;
+
   toggleStreamSelector() {
-      this.showStreamSelector = !this.showStreamSelector;
+    this.showStreamSelector = !this.showStreamSelector;
   }
 
   setupVideo() {
@@ -65,8 +66,8 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cams.forEach((cam) => {
         cam.streams.forEach((stream, k) => {
           let video: VideoComponent | undefined = this.videos?.get(index);
-          video?.mute();
           if (video !== undefined && stream.defaultOnMultiDisplay) {
+            video.mute();
             video.setSource(cam, stream);
             video.visible = true;
             ++index;
@@ -103,7 +104,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
       reason => this.reporting.errorMessage = reason);
   }
 
-   toggle(el: { key: string, value: Camera }) {
+  toggle(el: { key: string, value: Camera }) {
     this.expandedElement = this.expandedElement === el.value ? null : el.value;
   }
 
@@ -115,7 +116,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param stream: The stream on which the selection is being made
    */
   updateCameras($event: MatCheckboxChange, camera: Camera, stream: Stream) {
-    if(stream.selected) {
+    if (stream.selected) {
       // If clicking on an already checked check box, ensure it remains checked and exit without updating the vids.
       $event.source.checked = true;
       return;

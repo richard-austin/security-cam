@@ -12,29 +12,29 @@
     </video>
     <div *ngIf="isfmp4" class="latency-limit-selector">
       <div>
-        <label [ngClass]="{'latency-chasing': audioFeeder.isLatencyChasing}" *ngIf="stream?.audio"
-               matTooltip="Please increase upper latency limit if this flashes red"
+        <label *ngIf="stream?.audio"
+               [matTooltip]="'Click to ' + (videoFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
                matTooltipClass="tooltip">
-          <mat-icon (click)="toggleMuteAudio()">{{ audioFeeder.isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
+          <mat-icon (click)="toggleMuteAudio()">{{ videoFeeder.isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
         </label>
-        <label *ngIf="videoFeeder.backchannelAudioSupported" [matTooltip]="audioButtonTooltip()"
+        <label *ngIf="videoFeeder.backchannelAudioSupported" [matTooltip]="audioBackchannel.audioButtonTooltip()"
                matTooltipClass="tooltip">
           <mat-icon
-            [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioToggle) || utilsService.isGuestAccount}"
-            (click)="toggleAudioOut()">{{ audioToggle ? 'mic' : 'mic_off' }}
+            [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioBackchannel.audioToggle) || utilsService.isGuestAccount}"
+            (click)="audioBackchannel.toggleAudioOut(stream)">{{ audioBackchannel.audioToggle ? 'mic' : 'mic_off' }}
           </mat-icon>
         </label>
         <select *ngIf="videoFeeder.backchannelAudioSupported" [disabled]="utilsService.speakActive"
-                [matTooltip]="audioInputSelectorTooltip()" matTooltipClass="tooltip"
-                [(ngModel)]="selectedDeviceId" (change)="setAudioInput()">
-          <option *ngFor="let device of mediaDevices | audioInput" [value]="device.deviceId">{{ device.label }}</option>
+                [matTooltip]="audioBackchannel.audioInputSelectorTooltip()" matTooltipClass="tooltip"
+                [(ngModel)]="audioBackchannel.selectedDeviceId" (change)="audioBackchannel.setAudioInput()">
+          <option *ngFor="let device of audioBackchannel.mediaDevices | audioInput" [value]="device.deviceId">{{ device.label }}</option>
         </select>
         <label [ngClass]="{'latency-chasing': videoFeeder.isLatencyChasing}">
           <mat-icon>timer</mat-icon>
         </label>
         <select *ngIf="videoFeeder" matTooltip="Set upper latency chasing limit. Please increase upper latency limit if this flashes red" matTooltipClass="tooltip"
                 style="width: 90px;" #latencyLimitSelect [(ngModel)]="buffering_sec"
-                (change)="videoFeeder.setlatencyLim(buffering_sec);audioFeeder.setlatencyLim(buffering_sec)">
+                (change)="videoFeeder.setlatencyLim(buffering_sec)">
           <option value="0.4">0.4</option>
           <option value="0.6">0.6</option>
           <option value="0.8"> 0.8</option>
@@ -49,8 +49,6 @@
           <mat-icon (click)="setFullScreen()">fullscreen</mat-icon>
         </label>
       </div>
-      <audio #audio style="width: 0; height: 0"> <!-- Invisible audio element -->
-      </audio>
     </div>
   </div>
 </div>

@@ -20,11 +20,11 @@ func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
 					time.Sleep(time.Second)
 					var audio string
 					if !stream.Audio {
-						audio = ""
+						audio = "-an"
 					} else if stream.AudioEncoding != "AAC" {
-						audio = fmt.Sprintf(" -vn -c:a aac -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_size 10 -f mp4 %sa", stream.MediaServerInputUri)
+						audio = "-c:a aac"
 					} else {
-						audio = fmt.Sprintf(" -vn -c:a aac -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_size 10 -f mp4  %sa", stream.MediaServerInputUri) //Don't use copy when source is AAC, it caused errors in the MSE media element
+						audio = "-c:a aac" //Don't use copy when source is AAC, it caused errors in the MSE media element
 					}
 
 					// Currently the development machine has ffmpeg version 5.1.2-3, while live has version 4.4.2-0.
@@ -40,7 +40,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
 						uri = uri[:idx] + url.QueryEscape(creds.CamerasAdminUserName) + ":" + url.QueryEscape(creds.CamerasAdminPassword) + "@" + uri[idx:]
 					}
 
-					cmdStr := fmt.Sprintf("/usr/local/bin/ffmpeg -loglevel warning -hide_banner %s-fflags nobuffer -rtsp_transport %s -i  %s -c:v copy -an -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_size 10 -f mp4 %s%s", stimeout, rtspTransport, uri, stream.MediaServerInputUri, audio)
+					cmdStr := fmt.Sprintf("/usr/local/bin/ffmpeg -loglevel warning -hide_banner %s-fflags nobuffer -rtsp_transport %s -i  %s -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_size 10 -f mp4 %s", stimeout, rtspTransport, uri, audio, stream.MediaServerInputUri)
 					cmdStr += " 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log"
 					cmd := exec.Command("bash", "-c", cmdStr)
 					stdout, err := cmd.Output()
