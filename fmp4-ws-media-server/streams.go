@@ -236,7 +236,7 @@ func (s *Streams) getCodecsFromMoov(suuid string) (err error, codecs string) {
 			codecs = fmt.Sprintf("hvc1.%d.4.L%d.B0", val[9]&0x1f, val[21]&0x1f)
 		} else {
 			log.Warnln("No video codec found for", suuid)
-			//err = fmt.Errorf("no video codec found for %s", suuid)
+			err = fmt.Errorf("no video codec found for %s", suuid)
 		}
 	}
 
