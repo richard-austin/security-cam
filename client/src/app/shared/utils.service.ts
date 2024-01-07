@@ -2,10 +2,11 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "./BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
-import {catchError,tap} from "rxjs/operators";
+import {catchError, tap} from "rxjs/operators";
 import {Stream, CameraParams} from "../cameras/Camera";
 import {environment} from "../../environments/environment";
 import {cameraType} from '../cameras/camera.service';
+import {IMessage, StompHeaders} from "@stomp/stompjs";
 
 
 export class Temperature {
@@ -48,7 +49,10 @@ export class LogoffMessage extends Message {
 
 export class GuestStatus {
   guestAccount: boolean = true;
-   constructor(guestAccount: boolean){this.guestAccount = guestAccount;}
+
+  constructor(guestAccount: boolean) {
+    this.guestAccount = guestAccount;
+  }
 }
 
 export class GuestAccountStatus {
@@ -56,7 +60,7 @@ export class GuestAccountStatus {
 }
 
 export class SetCameraParams {
-  constructor(cameraTypes: cameraType, address: string, uri: string, infraredstat: string, cameraName: string, reboot: boolean=false, wdr?: string, lamp_mode?: string) {
+  constructor(cameraTypes: cameraType, address: string, uri: string, infraredstat: string, cameraName: string, reboot: boolean = false, wdr?: string, lamp_mode?: string) {
     this.cameraType = cameraTypes;
     this.address = address;
     this.uri = uri;
@@ -66,6 +70,7 @@ export class SetCameraParams {
     this.lamp_mode = lamp_mode;
     this.reboot = reboot;
   }
+
   cameraType: cameraType;
   address: string;
   uri: string;
@@ -85,7 +90,7 @@ export class UtilsService {
       'Content-Type': 'application/json',
       'Authorization': 'my-auth-token'
     })
-   };
+  };
 
   readonly httpTextOptions = {
     headers: new HttpHeaders({
@@ -97,6 +102,9 @@ export class UtilsService {
   private _messaging: Subject<any> = new Subject<any>();
   private _isGuestAccount: boolean = true;
   speakActive: boolean = true;
+  private _activeMQTransportActive: boolean = false;
+  private _cloudProxyRunning: boolean = false;
+
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     // Initialise the speakActive state
     this.audioInUse().subscribe();
@@ -115,12 +123,14 @@ export class UtilsService {
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }
+
   getOpenSourceInfo(): Observable<string> {
     return this.http.post(this._baseUrl.getLink("utils", "getOpenSourceInfo"), '', {responseType: 'text'}).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }
+
   setIp(): Observable<MyIp> {
     return this.http.post<MyIp>(this._baseUrl.getLink("utils", "setIP"), '', this.httpJSONOptions).pipe(
       tap(),
@@ -188,8 +198,8 @@ export class UtilsService {
    * isGuest: check if logged in as guest.
    *          This is called from the nav component ngOnInit
    */
-  async isGuest() : Promise<GuestStatus> {
-    let retVal : GuestStatus = environment.production ? await this.http.post<GuestStatus>(this._baseUrl.getLink("user", "isGuest"), '', this.httpJSONOptions).toPromise() : new GuestStatus(false)
+  async isGuest(): Promise<GuestStatus> {
+    let retVal: GuestStatus = environment.production ? await this.http.post<GuestStatus>(this._baseUrl.getLink("user", "isGuest"), '', this.httpJSONOptions).toPromise() : new GuestStatus(false)
     this.isGuestAccount = retVal.guestAccount;
     return retVal;
   }
@@ -198,19 +208,18 @@ export class UtilsService {
    * isGuestAccount: Set true if guest account, else false.
    * @param value
    */
-  set isGuestAccount(value: boolean)
-  {
+  set isGuestAccount(value: boolean) {
     this._isGuestAccount = value;
   }
 
   /**
    * isGuestAccount: Returns true if logged in as guest. The value is set by a preceding call to isGuest from the nav component.
    */
-  get isGuestAccount()
-  {
+  get isGuestAccount() {
     return this._isGuestAccount;
   }
-  async guestAccountEnabled() : Promise<GuestAccountStatus> {
+
+  async guestAccountEnabled(): Promise<GuestAccountStatus> {
     return await this.http.post<GuestAccountStatus>(this._baseUrl.getLink("user", "guestAccountEnabled"), '', this.httpJSONOptions).toPromise()
   }
 
@@ -235,8 +244,10 @@ export class UtilsService {
   }
 
   audioInUse() {
-    return this.http.post<{audioInUse: boolean }>(this._baseUrl.getLink("utils", "audioInUse"), "", this.httpJSONOptions).pipe(
-      tap((result)=> {
+    return this.http.post<{
+      audioInUse: boolean
+    }>(this._baseUrl.getLink("utils", "audioInUse"), "", this.httpJSONOptions).pipe(
+      tap((result) => {
         this.speakActive = result.audioInUse;
       }),
       catchError((err: HttpErrorResponse) => throwError(err)));
@@ -247,12 +258,37 @@ export class UtilsService {
    *          re-enables it when that usage has finished.
    * @param message
    */
-  talkOff(message: any) {
+  talkOff(message: IMessage) {
     if (message.body) {
       let msgObj = JSON.parse(message.body);
       if (msgObj.message === 'talkOff') {
         this.speakActive = msgObj.instruction == "on";
       }
     }
+  }
+
+  setTransportStatus(message: IMessage) {
+    let strMsg: string;
+    if (message.isBinaryBody)
+      strMsg = new TextDecoder().decode(message.binaryBody);
+    else
+      strMsg = message.body;
+    let status: { transportActive: boolean } = JSON.parse(strMsg)
+    this._activeMQTransportActive = status.transportActive;
+  }
+
+  get activeMQTransportActive(): boolean {
+    return this._activeMQTransportActive
+  }
+
+  set activeMQTransportActive(value: boolean) {
+    this._activeMQTransportActive = value;
+  }
+  get cloudProxyRunning() : boolean {
+    return this._cloudProxyRunning;
+  }
+
+  set cloudProxyRunning(value: boolean) {
+    this._cloudProxyRunning = value;
   }
 }

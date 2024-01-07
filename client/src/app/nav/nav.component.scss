@@ -76,3 +76,31 @@ div.general {
 .navbar-toggler {
   order: 10;
 }
+
+div.no-transport-warning {
+  margin-top: 1rem;
+  width: 100%;
+  > div {
+    border-radius: 2.0rem;
+    margin: auto;
+    width: fit-content;
+    padding: 1rem;
+    background-color: black;
+    > mat-card-title {
+      animation: pulsing 1300ms infinite;
+      background-color: transparent
+    }
+  }
+  @keyframes pulsing {
+    0% {
+      color: red;
+    }
+    50% {
+      color: #ef8484;
+    }
+    100% {
+      color: red;
+    }
+  }
+
+}

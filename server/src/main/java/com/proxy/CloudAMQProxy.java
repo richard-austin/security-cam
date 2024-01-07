@@ -6,7 +6,9 @@ import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.activemq.transport.TransportListener;
+import org.grails.web.json.JSONObject;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import javax.jms.*;
 import java.io.File;
@@ -47,6 +49,8 @@ public class CloudAMQProxy {
     final Map<Integer, SocketChannel> tokenSocketMap = new ConcurrentHashMap<>();
 
     private boolean running = false;
+    private boolean transportActive = true;
+
     final private static Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
     public static final int BUFFER_SIZE = 16384;
     private final String webServerForCloudProxyHost;
@@ -56,45 +60,48 @@ public class CloudAMQProxy {
     private ExecutorService cloudProxyExecutor;
     private ExecutorService webserverReadExecutor;
     private ExecutorService webserverWriteExecutor;
+    private final ExecutorService startActiveMQClientExecutor = Executors.newSingleThreadExecutor();
     private static final String productIdRegex = "^(?:[A-Z0-9]{4}-){3}[A-Z0-9]{4}$";
     CloudProxyProperties cloudProxyProperties = CloudProxyProperties.getInstance();
     private Session session = null;
-    private Connection connection = null;
+    private ActiveMQConnection connection = null;
     private String productId = "";
+    SimpMessagingTemplate brokerMessagingTemplate;
 
-    public CloudAMQProxy(String webServerForCloudProxyHost, int webServerForCloudProxyPort) {
+    public CloudAMQProxy(String webServerForCloudProxyHost, int webServerForCloudProxyPort, SimpMessagingTemplate brokerMessagingTemplate) {
         this.webServerForCloudProxyHost = webServerForCloudProxyHost;
         this.webServerForCloudProxyPort = webServerForCloudProxyPort;
+        this.brokerMessagingTemplate = brokerMessagingTemplate;
         setLogLevel(cloudProxyProperties.getLOG_LEVEL());
     }
 
     public void start() {
-        if (!isRunning()) {
-            cloudProxyExecutor = Executors.newSingleThreadExecutor();
-            webserverReadExecutor = Executors.newCachedThreadPool();
-            webserverWriteExecutor = Executors.newSingleThreadExecutor();
-            cloudProxyExecutor.execute(() -> {
-                running = true;
-                try {
-                    connection = getConnection();
-                    connection.start();
-                    // Create a Session
-                    session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                    // Create the destination
-                    Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
-                    loginToCloud(destination);
-
-                } catch (Exception ex) {
-                    showExceptionDetails(ex, "CloudAMQProxy.start");
+        startActiveMQClientExecutor.submit(() -> {
+            if (!isRunning()) {
+                cloudProxyExecutor = Executors.newSingleThreadExecutor();
+                webserverReadExecutor = Executors.newCachedThreadPool();
+                webserverWriteExecutor = Executors.newSingleThreadExecutor();
+                cloudProxyExecutor.execute(() -> {
                     running = true;
-                    stop();
-                }
-                finally {
-                    resetCloudProxySessionTimeout();     // Start the connection timer, if heartbeats are not received from the Cloud
-                }
-            });
+                    try {
+                        connection = getConnection();
+                        connection.start();
+                        // Create a Session
+                        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                        // Create the destination (INIT queue for sending product ID for login)
+                        Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
+                        loginToCloud(destination);
 
-        }
+                    } catch (Exception ex) {
+                        showExceptionDetails(ex, "CloudAMQProxy.start");
+                        running = true;
+                        stop();
+                    } finally {
+                        resetCloudProxySessionTimeout();     // Start the connection timer, if heartbeats are not received from the Cloud
+                    }
+                });
+            }
+        });
     }
 
     public void stop() {
@@ -109,8 +116,9 @@ public class CloudAMQProxy {
                 if (session != null)
                     session.close();
                 if (connection != null) {
-                    connection.stop();
                     connection.close();
+                    connection.stop();
+
                 }
                 closeAndClearSockets();
             } catch (Exception ex) {
@@ -119,6 +127,10 @@ public class CloudAMQProxy {
                 running = false;
             }
         }
+    }
+
+    public boolean isTransportActive() {
+        return connection != null &&  !connection.isClosed() && connection.isStarted() && transportActive;
     }
 
     void closeAndClearSockets() {
@@ -336,7 +348,7 @@ public class CloudAMQProxy {
 
     CloudInputProcess cip = null;
 
-    private Connection getConnection() throws Exception {
+    private ActiveMQConnection getConnection() throws Exception {
         ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(cloudProxyProperties.getCLOUD_PROXY_ACTIVE_MQ_URL());
         connectionFactory.setUseAsyncSend(true);
         connectionFactory.setOptimizeAcknowledge(true);
@@ -361,11 +373,24 @@ public class CloudAMQProxy {
 
             @Override
             public void transportInterupted() {
+                final String transportActiveMsg = new JSONObject()
+                        .put("transportActive", false)
+                        .toString();
+                // Disable audio out on clients except the initiator
+                brokerMessagingTemplate.convertAndSend("/topic/transportStatus", transportActiveMsg);
+                transportActive = false;
                 logger.info("Transport interrupted");
             }
 
             @Override
             public void transportResumed() {
+                final String transportActiveMsg = new JSONObject()
+                        .put("transportActive", true)
+                        .toString();
+                // Disable audio out on clients except the initiator
+                brokerMessagingTemplate.convertAndSend("/topic/transportStatus", transportActiveMsg);
+
+                transportActive = true;
                 logger.info("Transport resumed");
             }
         };

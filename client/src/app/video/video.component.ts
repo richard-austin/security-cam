@@ -13,7 +13,6 @@ import {AudioBackchannel} from './AudioBackchannel';
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
-  @ViewChild('audio') audioEl!: ElementRef<HTMLAudioElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isfmp4: boolean = false;
   cam!: Camera;

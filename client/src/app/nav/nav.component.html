@@ -134,5 +134,10 @@
     <button mat-flat-button color="default" (click)="logOff(false)">Cancel</button>
   </mat-card-content>
 </mat-card>
+<div *ngIf="utilsService.cloudProxyRunning && !utilsService.activeMQTransportActive" class="no-transport-warning">
+  <div>
+    <mat-card-title>Not Connected To Transport</mat-card-title>
+  </div>
+</div>
 <router-outlet></router-outlet>
 <app-reporting></app-reporting>
