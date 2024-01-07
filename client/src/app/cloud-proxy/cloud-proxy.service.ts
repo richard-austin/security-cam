@@ -4,6 +4,11 @@ import {BaseUrl} from '../shared/BaseUrl/BaseUrl';
 import {catchError} from 'rxjs/operators';
 import {Observable, throwError} from 'rxjs';
 
+export class IsMQConnected {
+  transportActive: boolean = false;
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,5 +36,10 @@ export class CloudProxyService {
   stop(): Observable<void> {
     return this.http.post<void>(this._baseUrl.getLink('cloudProxy', 'stop'), '', this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
+  }
+  isTransportActive():Observable<IsMQConnected> {
+    return this.http.post<IsMQConnected>(this._baseUrl.getLink("cloudProxy", "isTransportActive"), '', this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err))
+    );
   }
 }

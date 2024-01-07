@@ -10,7 +10,8 @@ import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-moda
 import {MatDialogRef} from '@angular/material/dialog/dialog-ref';
 import {UserIdleConfig} from '../angular-user-idle/angular-user-idle.config';
 import {UserIdleService} from '../angular-user-idle/angular-user-idle.service';
-import {Client, StompSubscription} from "@stomp/stompjs";
+import {Client, IMessage, StompSubscription} from "@stomp/stompjs";
+import {CloudProxyService, IsMQConnected} from "../cloud-proxy/cloud-proxy.service";
 
 @Component({
   selector: 'app-nav',
@@ -19,7 +20,7 @@ import {Client, StompSubscription} from "@stomp/stompjs";
 })
 export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
+  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef<HTMLDivElement>;
 
 //  cameras: Map<string, Camera> = new Map<string, Camera>();
@@ -37,8 +38,22 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   cameraTypes: typeof cameraType = cameraType;
   logoffSubscription!: StompSubscription;
   talkOffSubscription!: StompSubscription;
+  transportWarningSubscription!: StompSubscription;
 
-  constructor(private cameraSvc: CameraService, private utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog) {
+  constructor(private cameraSvc: CameraService, public utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog, private cpService: CloudProxyService) {
+    this.cpService.getStatus().subscribe((status: boolean) => {
+        this.utilsService.cloudProxyRunning = status;
+      },
+      reason => {
+        this.reporting.errorMessage = reason;
+      });
+
+    this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
+        this.utilsService.activeMQTransportActive = status.transportActive;
+      },
+      reason => {
+        this.reporting.errorMessage = reason;
+      });
   }
 
   setVideoStream(cam: Camera, stream: Stream): void {
@@ -151,6 +166,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   wifiSettings() {
     window.location.href = '#/wifisettings';
   }
+
   getActiveIPAddresses() {
     window.location.href = '#/getactiveipaddresses';
   }
@@ -194,15 +210,15 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
    *                                is disabled.
    */
   initializeWebSocketConnection() {
-    let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host +'/stomp';
+    let serverUrl: string = (window.location.protocol == 'http:' ? 'ws://' : 'wss://') + window.location.host + '/stomp';
 
     this.client = new Client({
       brokerURL: serverUrl,
       reconnectDelay: 2000,
       heartbeatOutgoing: 120000,
       heartbeatIncoming: 120000,
-      onConnect: ()=> {
-        this.logoffSubscription = this.client.subscribe('/topic/logoff', (message: any) => {
+      onConnect: () => {
+        this.logoffSubscription = this.client.subscribe('/topic/logoff', (message: IMessage) => {
           if (message.body) {
             let msgObj = JSON.parse(message.body);
             if (msgObj.message === 'logoff' && this.isGuest) {
@@ -211,16 +227,18 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           }
         });
-        this.talkOffSubscription = this.client.subscribe('/topic/talkoff', (message: any) => this.utilsService.talkOff(message));
+        this.talkOffSubscription = this.client.subscribe('/topic/talkoff', (message: IMessage) => this.utilsService.talkOff(message));
+        this.transportWarningSubscription = this.client.subscribe('/topic/transportStatus', (message: IMessage) => this.utilsService.setTransportStatus(message));
       },
-      debug: () => {}
+      debug: () => {
+      }
     });
     this.client.activate();
-   }
+  }
 
-   get cameras(): Map<string, Camera> {
+  get cameras(): Map<string, Camera> {
     return this.cameraSvc.getCameras();
-   }
+  }
 
   async ngOnInit(): Promise<void> {
     // Get the initial core temperature
@@ -276,7 +294,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     // If the camera service got any errors while getting the camera setup, then we report it here.
-    this.cameraSvc.errorEmitter.subscribe((error: HttpErrorResponse) => this.errorReporting.errorMessage = error);
+    this.cameraSvc.errorEmitter.subscribe((error: HttpErrorResponse) => this.reporting.errorMessage = error);
   }
 
   ngOnDestroy(): void {
@@ -285,6 +303,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.messageSubscription.unsubscribe();
     this.logoffSubscription.unsubscribe();
     this.talkOffSubscription.unsubscribe();
-    this.client.deactivate({force: false}).then(()=> {});
+    this.client.deactivate({force: false}).then(() => {
+    });
   }
 }
