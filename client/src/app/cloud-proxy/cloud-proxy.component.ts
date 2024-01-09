@@ -3,7 +3,6 @@ import {MatCheckboxChange} from '@angular/material/checkbox';
 import {CloudProxyService, IsMQConnected} from './cloud-proxy.service';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {UtilsService} from '../shared/utils.service';
-import {Subscription, timer} from "rxjs";
 
 @Component({
   selector: 'app-cloud-proxy',
