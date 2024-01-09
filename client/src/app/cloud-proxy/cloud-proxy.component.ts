@@ -3,7 +3,6 @@ import {MatCheckboxChange} from '@angular/material/checkbox';
 import {CloudProxyService, IsMQConnected} from './cloud-proxy.service';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {UtilsService} from '../shared/utils.service';
-import {Subscription, timer} from "rxjs";
 
 @Component({
   selector: 'app-cloud-proxy',
@@ -41,10 +40,11 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
   start(): void {
     this.cbEnabled = false;
     this.cpService.start().subscribe(() => {
-        this.cps = this.utils.cloudProxyRunning = true;
+
         this.cbEnabled = true;
         this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
           this.utils.activeMQTransportActive = status.transportActive;
+          this.cps = this.utils.cloudProxyRunning = true;
         });
       },
       (reason) => {

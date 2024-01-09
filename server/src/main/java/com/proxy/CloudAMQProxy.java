@@ -116,11 +116,12 @@ public class CloudAMQProxy {
                 if (session != null)
                     session.close();
                 if (connection != null) {
-                    connection.close();
-                    connection.stop();
-
+                    if (connection.isStarted())
+                        connection.stop();
+                    if (!connection.isClosed())
+                        connection.close();
+                    closeAndClearSockets();
                 }
-                closeAndClearSockets();
             } catch (Exception ex) {
                 logger.error(ex.getClass().getName() + " in CloudAMQProxy.stop: " + ex.getMessage());
             } finally {
@@ -130,7 +131,7 @@ public class CloudAMQProxy {
     }
 
     public boolean isTransportActive() {
-        return connection != null &&  !connection.isClosed() && connection.isStarted() && transportActive;
+        return connection != null && !connection.isClosed() && connection.isStarted() && transportActive;
     }
 
     void closeAndClearSockets() {
@@ -359,7 +360,7 @@ public class CloudAMQProxy {
         connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
         connectionFactory.setTrustStorePassword(cloudProxyProperties.getMQ_TRUSTSTORE_PASSWORD());
         // Create a Connection
-        ActiveMQConnection connection = (ActiveMQConnection)connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
+        ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
         TransportListener tl = new TransportListener() {
             @Override
             public void onCommand(Object command) {
