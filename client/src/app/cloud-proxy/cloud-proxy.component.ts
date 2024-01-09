@@ -40,11 +40,11 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
   start(): void {
     this.cbEnabled = false;
     this.cpService.start().subscribe(() => {
-        this.utils.activeMQTransportActive = true; // Prevent warning flashing up before isTransportActive returns
-        this.cps = this.utils.cloudProxyRunning = true;
+
         this.cbEnabled = true;
         this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
           this.utils.activeMQTransportActive = status.transportActive;
+          this.cps = this.utils.cloudProxyRunning = true;
         });
       },
       (reason) => {
