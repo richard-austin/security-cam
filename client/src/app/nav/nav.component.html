@@ -130,8 +130,8 @@
     Logout from Security Cam, Are you sure?
   </mat-card-subtitle>
   <mat-card-content>
-    <button mat-flat-button color="warning" (click)="logOff(true)">Confirm</button>
-    <button mat-flat-button color="default" (click)="logOff(false)">Cancel</button>
+    <button mat-flat-button color="warn" (click)="logOff(true)">Confirm</button>
+    <button mat-flat-button color="primary" (click)="logOff(false)">Cancel</button>
   </mat-card-content>
 </mat-card>
 <div *ngIf="utilsService.cloudProxyRunning && !utilsService.activeMQTransportActive" class="no-transport-warning">
