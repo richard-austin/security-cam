@@ -170,17 +170,37 @@ public class CloudAMQProxy {
 
     private void loginToCloud(Destination destination) {
         try {
+            final String logingInMsg = new JSONObject()
+                    .put("message", "Logging in to the Cloud")
+                    .put("status", "working")
+                    .toString();
+            brokerMessagingTemplate.convertAndSend("/topic/nvrloginstatus", logingInMsg);
             // Authentication on the Cloud is the encrypted product key being successfully decrypted to a valid product key format
             if (productKeyAccepted(session, destination)) {
                 logger.info("Connected successfully to the Cloud");
                 cip = new CloudInputProcess(session);
                 cip.start();
+                final String loggedInMsg = new JSONObject()
+                        .put("message", "Connected to the Cloud successfully")
+                        .put("status", "success")
+                        .toString();
+                brokerMessagingTemplate.convertAndSend("/topic/nvrloginstatus", loggedInMsg);
             } else {
                 logger.error("Product key was not accepted by the Cloud server");
                 resetCloudProxySessionTimeout();
+                final String failedLoginMsg = new JSONObject()
+                        .put("message", "Product key was not accepted by the Cloud server")
+                        .put("status", "fail")
+                        .toString();
+                brokerMessagingTemplate.convertAndSend("/topic/nvrloginstatus", failedLoginMsg);
             }
         } catch (Exception e) {
             logger.warn("Exception in createConnectionToCloud: " + e.getMessage() + ": Couldn't connect to Cloud");
+            final String failedLoginMsg = new JSONObject()
+                    .put("message", "An error occurred, re-trying")
+                    .put("status", "fail")
+                    .toString();
+            brokerMessagingTemplate.convertAndSend("/topic/nvrloginstatus", failedLoginMsg);
             restart();
         }
     }
@@ -350,17 +370,7 @@ public class CloudAMQProxy {
     CloudInputProcess cip = null;
 
     private ActiveMQConnection getConnection() throws Exception {
-        ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(cloudProxyProperties.getCLOUD_PROXY_ACTIVE_MQ_URL());
-        connectionFactory.setUseAsyncSend(true);
-        connectionFactory.setOptimizeAcknowledge(true);
-        // connectionFactory.setAlwaysSessionAsync(false);
-
-        connectionFactory.setKeyStore(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PATH());
-        connectionFactory.setKeyStorePassword(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PASSWORD());
-        connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
-        connectionFactory.setTrustStorePassword(cloudProxyProperties.getMQ_TRUSTSTORE_PASSWORD());
-        // Create a Connection
-        ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
+        ActiveMQConnection connection = getActiveMQConnection();
         TransportListener tl = new TransportListener() {
             @Override
             public void onCommand(Object command) {
@@ -397,6 +407,20 @@ public class CloudAMQProxy {
         };
         connection.addTransportListener(tl);
         return connection;
+    }
+
+    private ActiveMQConnection getActiveMQConnection() throws Exception {
+        ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(cloudProxyProperties.getCLOUD_PROXY_ACTIVE_MQ_URL());
+        connectionFactory.setUseAsyncSend(true);
+        connectionFactory.setOptimizeAcknowledge(true);
+        // connectionFactory.setAlwaysSessionAsync(false);
+
+        connectionFactory.setKeyStore(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PATH());
+        connectionFactory.setKeyStorePassword(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PASSWORD());
+        connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
+        connectionFactory.setTrustStorePassword(cloudProxyProperties.getMQ_TRUSTSTORE_PASSWORD());
+        // Create a Connection
+        return (ActiveMQConnection) connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
     }
 
     /**
