@@ -113,13 +113,13 @@ public class CloudAMQProxy {
                 webserverWriteExecutor.shutdownNow();
                 if (cip != null)
                     cip.stop();
-                if (session != null)
-                    session.close();
                 if (connection != null) {
                     if (connection.isStarted())
                         connection.stop();
                     if (!connection.isClosed())
                         connection.close();
+                    if (session != null)
+                        session.close();
                     closeAndClearSockets();
                 }
             } catch (Exception ex) {
