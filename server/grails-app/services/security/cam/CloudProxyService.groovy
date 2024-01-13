@@ -12,7 +12,7 @@ import security.cam.interfaceobjects.ObjectCommandResponse
 class CloudProxyService {
     LogService logService
     GrailsApplication grailsApplication
-    SimpMessagingTemplate brokerMessagingTemplate;
+    SimpMessagingTemplate brokerMessagingTemplate
 
     CloudAMQProxy cloudProxy = null
 
