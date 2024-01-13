@@ -26,7 +26,7 @@ class CloudProxyService {
 
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
-            cloudProxy.start()
+            cloudProxy.userStart()
         }
         catch (Exception ex) {
             response.status = PassFail.FAIL
@@ -39,7 +39,7 @@ class CloudProxyService {
     ObjectCommandResponse stop() {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
-            cloudProxy.stop()
+            cloudProxy.userStop()
         }
         catch (Exception ex) {
             response.status = PassFail.FAIL

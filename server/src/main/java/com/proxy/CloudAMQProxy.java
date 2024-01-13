@@ -67,6 +67,7 @@ public class CloudAMQProxy {
     private ActiveMQConnection connection = null;
     private String productId = "";
     SimpMessagingTemplate brokerMessagingTemplate;
+    private boolean userSelectedRunning = false;
 
     public CloudAMQProxy(String webServerForCloudProxyHost, int webServerForCloudProxyPort, SimpMessagingTemplate brokerMessagingTemplate) {
         this.webServerForCloudProxyHost = webServerForCloudProxyHost;
@@ -75,39 +76,53 @@ public class CloudAMQProxy {
         setLogLevel(cloudProxyProperties.getLOG_LEVEL());
     }
 
-    public void start() {
-        startActiveMQClientExecutor.submit(() -> {
-            if (!isRunning()) {
-                cloudProxyExecutor = Executors.newSingleThreadExecutor();
-                webserverReadExecutor = Executors.newCachedThreadPool();
-                webserverWriteExecutor = Executors.newSingleThreadExecutor();
-                cloudProxyExecutor.execute(() -> {
-                    running = true;
-                    try {
-                        connection = getConnection();
-                        connection.start();
-                        // Create a Session
-                        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                        // Create the destination (INIT queue for sending product ID for login)
-                        Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
-                        loginToCloud(destination);
-
-                    } catch (Exception ex) {
-                        showExceptionDetails(ex, "CloudAMQProxy.start");
-                        running = true;
-                        stop();
-                    } finally {
-                        resetCloudProxySessionTimeout();     // Start the connection timer, if heartbeats are not received from the Cloud
-                    }
-                });
-            }
-        });
+    public void userStart() {
+        userSelectedRunning = true;
+        start();
     }
 
-    public void stop() {
+    private void start() {
+        if (userSelectedRunning) {
+            startActiveMQClientExecutor.submit(() -> {
+                if (!isRunning()) {
+                    cloudProxyExecutor = Executors.newSingleThreadExecutor();
+                    webserverReadExecutor = Executors.newCachedThreadPool();
+                    webserverWriteExecutor = Executors.newSingleThreadExecutor();
+                    cloudProxyExecutor.execute(() -> {
+                        running = true;
+                        try {
+                            connection = getConnection();
+                            connection.start();
+                            // Create a Session
+                            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                            // Create the destination (INIT queue for sending product ID for login)
+                            Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
+                            // Signal that the connection is active
+                            brokerMessagingTemplate.convertAndSend("/topic/transportStatus", transportActiveMsg);
+                            transportActive = true;
+                            loginToCloud(destination);
+                        } catch (Exception ex) {
+                            showExceptionDetails(ex, "CloudAMQProxy.start");
+                            stop();
+                        } finally {
+                            resetCloudProxySessionTimeout();     // Start the connection timer, if heartbeats are not received from the Cloud
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    public void userStop() {
+        userSelectedRunning = false;
+        stop();
+    }
+
+    private void stop() {
         if (isRunning()) {
             try {
                 stopCloudProxySessionTimer();
+                running = false;
                 cloudProxyExecutor.shutdownNow();
                 webserverReadExecutor.shutdown();
                 webserverWriteExecutor.shutdownNow();
@@ -124,8 +139,6 @@ public class CloudAMQProxy {
                 }
             } catch (Exception ex) {
                 logger.error(ex.getClass().getName() + " in CloudAMQProxy.stop: " + ex.getMessage());
-            } finally {
-                running = false;
             }
         }
     }
@@ -148,16 +161,14 @@ public class CloudAMQProxy {
     /**
      * cleanUpForRestart: Some sort of problem occurred with the Cloud connection, ensure we restart cleanly
      */
-    void restart() {
+    public void restart() {
         try {
-            cip.stop();
-            closeAndClearSockets();
-            logger.info("Restarting CloudAMQProxy");
-            // Ensure all sockets in the token/socket map are closed
-            Thread.sleep(2000); // Short wait before restart
+            stop();
+            if (userSelectedRunning) {
+                Thread.sleep(2000); // Short wait before restart
+                start();
+            }
             // Create the destination
-            Destination destination = session.createQueue(cloudProxyProperties.getACTIVE_MQ_INIT_QUEUE());
-            loginToCloud(destination);
         } catch (Exception ex) {
             logger.error(ex.getClass().getName() + " in restart: " + ex.getMessage());
         }
@@ -368,9 +379,19 @@ public class CloudAMQProxy {
     }
 
     CloudInputProcess cip = null;
+    final String transportActiveMsg = new JSONObject()
+            .put("transportActive", true)
+            .toString();
+    final String transportInactiveMsg = new JSONObject()
+            .put("transportActive", false)
+            .toString();
 
     private ActiveMQConnection getConnection() throws Exception {
         ActiveMQConnection connection = getActiveMQConnection();
+        final String transportActiveMsg = new JSONObject()
+                .put("transportActive", false)
+                .toString();
+
         TransportListener tl = new TransportListener() {
             @Override
             public void onCommand(Object command) {
@@ -379,26 +400,29 @@ public class CloudAMQProxy {
 
             @Override
             public void onException(IOException error) {
+                // This does get called when not using failover.
                 logger.info(error.getClass().getName() + " received in getConnection transport listener: " + error.getMessage());
+
+                // Use the exception handler for what I hoped the transportInterupted handler would do!
+                brokerMessagingTemplate.convertAndSend("/topic/transportStatus", transportInactiveMsg);
+                transportActive = false;
             }
 
             @Override
             public void transportInterupted() {
-                final String transportActiveMsg = new JSONObject()
-                        .put("transportActive", false)
-                        .toString();
-                // Disable audio out on clients except the initiator
-                brokerMessagingTemplate.convertAndSend("/topic/transportStatus", transportActiveMsg);
+                // This is never called when not using failover
+
+                // Signal that the connection is down
+                brokerMessagingTemplate.convertAndSend("/topic/transportStatus", transportInactiveMsg);
                 transportActive = false;
                 logger.info("Transport interrupted");
             }
 
             @Override
             public void transportResumed() {
-                final String transportActiveMsg = new JSONObject()
-                        .put("transportActive", true)
-                        .toString();
-                // Disable audio out on clients except the initiator
+                // This is never called when not using failover
+
+                // Signal that the connection is active
                 brokerMessagingTemplate.convertAndSend("/topic/transportStatus", transportActiveMsg);
 
                 transportActive = true;
@@ -485,8 +509,9 @@ public class CloudAMQProxy {
     }
 
     private void stopCloudProxySessionTimer() {
-        if (cloudProxySessionTimer != null)
+        if (cloudProxySessionTimer != null) {
             cloudProxySessionTimer.cancel();
+        }
     }
 
     public void resetCloudProxySessionTimeout() {
