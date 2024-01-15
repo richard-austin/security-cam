@@ -56,7 +56,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   setFullScreen() {
     if (this.video) {
       if (this.video.requestFullscreen)
-        this.video.requestFullscreen().then(r => {
+        this.video.requestFullscreen().then(() => {
         });
       // @ts-ignore
       else if (this.video.webkitRequestFullscreen)
