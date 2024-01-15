@@ -8,8 +8,9 @@
     </mat-card>
   </div>
   <div>
-    <video #video [ngClass]="{'multi': multi}" class="video" style="visibility: visible">
-    </video>
+    <div #videoContainer [ngClass]="{'multi': multi}" class="video" (wheel)="mouseWheelZoom.mouseWheel($event)">
+      <video #video></video>
+    </div>
     <div *ngIf="isfmp4" class="latency-limit-selector">
       <div>
         <label *ngIf="stream?.audio"

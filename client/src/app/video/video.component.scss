@@ -1,15 +1,19 @@
-video.video {
-  @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px) {
-    width: 700px;
+div.video {
+  video {
+    @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px) {
+      width: 700px;
+    }
+    @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
+      width: 900px;
+    }
   }
-  @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
-    width: 900px;
-  }
+
   border: 0.25rem solid darkblue;
   border-right-color: #3939f3;
   border-bottom-color: #3939f3;
   margin-left: 1.5rem;
   margin-right: 1.5rem;
+  overflow: hidden;
 }
 
 // Smaller video size in multi display
@@ -110,3 +114,4 @@ div.latency-limit-selector {
     animation:  flash 2000ms steps(3, start) forwards;
   }
 }
+

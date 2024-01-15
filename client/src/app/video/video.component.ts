@@ -5,6 +5,7 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {Subscription, timer} from "rxjs";
 import {MediaFeeder} from './MediaFeeder';
 import {AudioBackchannel} from './AudioBackchannel';
+import {MouseWheelZoom} from "./MouseWheelZoom";
 
 @Component({
   selector: 'app-video',
@@ -13,6 +14,7 @@ import {AudioBackchannel} from './AudioBackchannel';
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
+  @ViewChild('videoContainer')vcEL!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isfmp4: boolean = false;
   cam!: Camera;
@@ -24,7 +26,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   multi: boolean = false;
   buffering_sec: number = 1.2;
   audioBackchannel!: AudioBackchannel
-
+  mouseWheelZoom!: MouseWheelZoom;
 
   constructor(public utilsService: UtilsService) {
     this.videoFeeder = new MediaFeeder(this.buffering_sec)
@@ -84,6 +86,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.video = this.videoEl.nativeElement;
     this.videoFeeder.init(this.isfmp4, this.video);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
+    this.mouseWheelZoom = new MouseWheelZoom(this.video, this.vcEL.nativeElement);
   }
 
   ngOnDestroy(): void {
