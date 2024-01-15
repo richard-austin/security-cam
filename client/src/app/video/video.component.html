@@ -13,12 +13,14 @@
     </div>
     <div *ngIf="isfmp4" class="latency-limit-selector">
       <div>
-        <label *ngIf="stream?.audio"
+        <label *ngIf="stream?.audio" class="video-buttons"
                [matTooltip]="'Click to ' + (videoFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
                matTooltipClass="tooltip">
           <mat-icon (click)="toggleMuteAudio()">{{ videoFeeder.isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
         </label>
-        <label *ngIf="videoFeeder.backchannelAudioSupported" [matTooltip]="audioBackchannel.audioButtonTooltip()"
+        <label *ngIf="videoFeeder.backchannelAudioSupported"
+               class="video-buttons"
+               [matTooltip]="audioBackchannel.audioButtonTooltip()"
                matTooltipClass="tooltip">
           <mat-icon
             [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioBackchannel.audioToggle) || utilsService.isGuestAccount}"
@@ -46,7 +48,9 @@
           <option value="1.8">1.8</option>
           <option value="2">2.0</option>
         </select>
-        <label matTooltip="Set full screen" matTooltipClass="tooltip">
+        <label class="video-buttons"
+               matTooltip="Set full screen"
+               matTooltipClass="tooltip">
           <mat-icon (click)="setFullScreen()">fullscreen</mat-icon>
         </label>
       </div>

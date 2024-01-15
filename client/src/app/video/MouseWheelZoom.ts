@@ -45,7 +45,7 @@ export class MouseWheelZoom {
       this.video.style.transform = "scale("+this.scale+")";
       this.prevScale = this.scale;
     }
-
+    $event.preventDefault();
     //
     // console.log("x = "+this.transformOriginX+" y = "+this.transformOriginY);
     //
