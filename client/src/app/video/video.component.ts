@@ -76,6 +76,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         // @ts-ignore
         this.video.msRequestFullScreen();
     }
+    this.mouseWheelZoom.reset();
   }
 
   toggleMuteAudio() {
