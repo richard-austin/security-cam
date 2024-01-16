@@ -8,10 +8,10 @@
     </mat-card>
   </div>
   <div>
-    <div #videoContainer [ngClass]="{'multi': multi}" class="video" (wheel)="mouseWheelZoom.mouseWheel($event)">
+    <div #videoContainer [ngClass]="{'multi': multi}" class="video" (wheel)="mouseWheelZoom.mouseWheel($event)" (mousedown)="resetZoom($event)">
       <video #video></video>
     </div>
-    <div *ngIf="isfmp4" class="latency-limit-selector">
+    <div *ngIf="isFmp4" class="latency-limit-selector">
       <div>
         <label *ngIf="stream?.audio" class="video-buttons"
                [matTooltip]="'Click to ' + (videoFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"

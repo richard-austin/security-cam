@@ -7,8 +7,6 @@ div.video {
       width: 900px;
     }
     cursor: zoom-in;
-    transition-duration: 950ms;
-    transition-property: transform;
   }
 
   border: 0.25rem solid darkblue;
@@ -20,8 +18,10 @@ div.video {
 }
 
 // Smaller video size in multi display
-video.multi {
-  max-width: 700px;
+div.multi {
+  > video {
+    max-width: 700px;
+  }
 }
 
 .mx-auto {
