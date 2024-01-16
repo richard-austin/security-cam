@@ -97,7 +97,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.videoFeeder.init(this.isFmp4, this.video);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.mouseWheelZoom = new MouseWheelZoom(this.video, this.vcEL.nativeElement);
-   // this.cd.detectChanges();
+    this.video.addEventListener('fullscreenchange', () => {
+      this.mouseWheelZoom.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
+    });
   }
 
   ngOnDestroy(): void {
