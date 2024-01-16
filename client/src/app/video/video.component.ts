@@ -1,4 +1,12 @@
-import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {Camera, Stream} from '../cameras/Camera';
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
@@ -14,9 +22,9 @@ import {MouseWheelZoom} from "./MouseWheelZoom";
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
-  @ViewChild('videoContainer')vcEL!: ElementRef<HTMLDivElement>;
+  @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @Input() isfmp4: boolean = false;
+  @Input() isFmp4: boolean = false;
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
@@ -39,11 +47,12 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param manifest
    */
   setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
+    if (this.mouseWheelZoom !== undefined)
+      this.mouseWheelZoom.reset();
     this.audioBackchannel.stopAudioOut(); // Ensure two way audio is off when switching streams
     this.stop();
     this.stream = stream;
     this.videoFeeder.setSource(cam, stream, manifest)
-
     if (cam.backchannelAudioSupported) {
       this.audioBackchannel.getMediaDevices();
     }
@@ -67,6 +76,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         // @ts-ignore
         this.video.msRequestFullScreen();
     }
+    this.mouseWheelZoom.reset();
   }
 
   toggleMuteAudio() {
@@ -84,9 +94,12 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.videoFeeder.init(this.isfmp4, this.video);
+    this.videoFeeder.init(this.isFmp4, this.video);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.mouseWheelZoom = new MouseWheelZoom(this.video, this.vcEL.nativeElement);
+    this.video.addEventListener('fullscreenchange', () => {
+      this.mouseWheelZoom.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
+    });
   }
 
   ngOnDestroy(): void {
@@ -97,5 +110,12 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.audioBackchannel.stopAudioOut();
       timerSubscription.unsubscribe();
     });
+  }
+
+  resetZoom($event: MouseEvent) {
+    if($event.button === 1) {
+      this.mouseWheelZoom.reset(true);
+      $event.preventDefault();
+    }
   }
 }

@@ -6,6 +6,7 @@ div.video {
     @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
       width: 900px;
     }
+    cursor: zoom-in;
   }
 
   border: 0.25rem solid darkblue;
@@ -17,8 +18,10 @@ div.video {
 }
 
 // Smaller video size in multi display
-video.multi {
-  max-width: 700px;
+div.multi {
+  > video {
+    max-width: 700px;
+  }
 }
 
 .mx-auto {
@@ -75,12 +78,28 @@ div.latency-limit-selector {
   }
 }
 
+.video-buttons {
+  cursor: pointer;
+  :hover {
+    transform: scale(1.3);
+    transition-duration: 350ms;
+    transition-property: transform;
+  }
+  :not(:hover) {
+    transform: scale(1);
+    transition-duration: 350ms;
+    transition-property: transform;
+  }
+}
+
 .audio-out-disabled {
   color: gray !important;
+  cursor: pointer;
 }
 
 .audio-out-inactive {
   color: white !important;
+  cursor: pointer;
 }
 
 .audio-out-active {
