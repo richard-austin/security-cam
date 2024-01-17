@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {VideoComponent} from '../video/video.component';
 import {Camera, Stream} from '../cameras/Camera';
 import {CameraService, DateSlot, LocalMotionEvent, LocalMotionEvents} from '../cameras/camera.service';
@@ -54,13 +54,13 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   _maxDate!: Date;
   initialised: boolean;
 
-  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService, private utilsService: UtilsService) {
+  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService, private utilsService: UtilsService, private cd: ChangeDetectorRef) {
     // route.url.subscribe((u:UrlSegment[]) => {
     // });
     this.initialised = false;
     this.route.paramMap.subscribe((paramMap) => {
       let streamName: string = paramMap.get('streamName') as string;
-      cameraSvc.getCameras().forEach((cam) => {
+      this.cameraSvc.getCameras().forEach((cam) => {
         cam.streams.forEach((stream, k) => {
           if (stream.media_server_input_uri.endsWith(streamName)) {
             this.cam = cam;
@@ -351,7 +351,9 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   ngAfterViewInit(): void {
     this.isGuest = this.utilsService.isGuestAccount;
     this.initialised = true;
-    this.setupRecording();  }
+    this.setupRecording();
+    this.cd.detectChanges();
+  }
 
   ngOnDestroy(): void {
   }

@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {fromEvent, merge, Subscription} from 'rxjs';
 
 @Component({
@@ -13,7 +13,7 @@ export class CreateUserAccountContainerComponent implements OnInit, AfterViewIni
   height!: number;
   iframeEventsHandle!: Subscription;
 
-  constructor() { }
+  constructor(private cd: ChangeDetectorRef) { }
 
 
   ngOnInit(): void {
@@ -32,6 +32,7 @@ export class CreateUserAccountContainerComponent implements OnInit, AfterViewIni
         fromEvent(this.cuaframe.contentWindow as Window, 'keydown')).subscribe(() => {
         window.dispatchEvent(new Event('mousemove'));
       });
+    this.cd.detectChanges();
   }
   ngOnDestroy(): void {
     this.iframeEventsHandle.unsubscribe();

@@ -7,8 +7,8 @@
       </mat-card-title>
     </mat-card>
   </div>
-  <div>
-    <div #videoContainer [ngClass]="{'multi': multi}" class="video" (wheel)="mouseWheelZoom.mouseWheel($event)" (mousedown)="resetZoom($event)">
+  <div class="video-and-controls">
+    <div #videoContainer [ngClass]="{'video': !multi, 'multi': multi}" (wheel)="mouseWheelZoom.mouseWheel($event)" (mousedown)="resetZoom($event)">
       <video #video></video>
     </div>
     <div *ngIf="isFmp4" class="latency-limit-selector">

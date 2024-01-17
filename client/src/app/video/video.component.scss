@@ -1,3 +1,13 @@
+@mixin border-characteristics {
+  width: fit-content;
+  border: 0.25rem solid darkblue;
+  border-right-color: #3939f3;
+  border-bottom-color: #3939f3;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  overflow: hidden;
+}
+
 div.video {
   video {
     @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px) {
@@ -8,20 +18,21 @@ div.video {
     }
     cursor: zoom-in;
   }
+  @include border-characteristics;
+}
 
-  border: 0.25rem solid darkblue;
-  border-right-color: #3939f3;
-  border-bottom-color: #3939f3;
-  margin-left: 1.5rem;
-  margin-right: 1.5rem;
-  overflow: hidden;
+.video-and-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 // Smaller video size in multi display
 div.multi {
   > video {
-    max-width: 700px;
+    width: 700px;
   }
+  @include border-characteristics;
 }
 
 .mx-auto {
@@ -41,7 +52,7 @@ div.multi {
 div.latency-limit-selector {
   display: flex;
   justify-content: center;
-
+  white-space: nowrap;
   > div {
     height: 25px;
     background-color: #646363;
