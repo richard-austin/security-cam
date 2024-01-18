@@ -7,7 +7,8 @@ export class MouseWheelZoom {
   readonly div: HTMLDivElement;
   scale: number = this.minScale;
   prevScale: number = this.minScale;
-  touchStartDist!: number;
+  touchStartDist!: number;  // Distance aprt of fingers at the touchStart
+  readonly fiddleFactor: number = 5;  // Multiplier to get the best pinch zoom response
 
   constructor(video: HTMLVideoElement, div: HTMLDivElement) {
     this.video = video;
@@ -56,37 +57,34 @@ export class MouseWheelZoom {
 
   touchStartHandler(ev: TouchEvent) {
     if (ev.touches.length == 2) {
+      const rect = this.div.getBoundingClientRect();
       if (this.scale === this.minScale) {
-        this.transformOriginX = (ev.touches[0].clientX + ev.touches[1].clientX) / 2;
-        this.transformOriginY = (ev.touches[0].clientY + ev.touches[1].clientY) / 2;
+        this.transformOriginX = (ev.touches[0].clientX + ev.touches[1].clientX) / 2 -rect.left;
+        this.transformOriginY = (ev.touches[0].clientY + ev.touches[1].clientY) / 2 - rect.top;
       }
-      this.touchStartDist = Math.sqrt((ev.touches[0].clientX - ev.touches[1].clientX) ** 2 + (ev.touches[0].clientY - ev.touches[1].clientY) ** 2);
+      this.touchStartDist = Math.sqrt((ev.touches[0].clientX - ev.touches[1].clientX) ** 2 +
+        (ev.touches[0].clientY - ev.touches[1].clientY) ** 2);
     }
-    console.log("TouchStart: " + ev.touches.length);
-    for (let i = 0; i < ev.touches.length; i++) {
-      let touch: Touch = ev.touches[i];
-      console.log("Touch: " + (i + 1) + " clientX: " + touch.clientX + " clientY: " + touch.clientY)
-    }
+    console.log("transformOriginX: "+this.transformOriginX+" transformOriginY: "+this.transformOriginY);
   }
 
   touchMoveHandler(ev: TouchEvent) {
     if (ev.touches.length == 2) {
-      let dist: number = Math.sqrt((ev.touches[0].clientX - ev.touches[1].clientX) ** 2 + (ev.touches[0].clientY - ev.touches[1].clientY) ** 2);
-      let distChange: number = dist - this.touchStartDist;
+      const rect = this.div.getBoundingClientRect();
 
-      const delta = distChange / 7800;
-
+      let dist: number = Math.sqrt((ev.touches[0].clientX - ev.touches[1].clientX) ** 2 +
+        (ev.touches[0].clientY - ev.touches[1].clientY) ** 2);
+      let distChange: number = dist - this.touchStartDist ;
+      this.touchStartDist = dist;
       // Calculate new scale value, keeping it withing the limits minScale - maxScale
-      if (delta > 0 && this.scale < this.maxScale) {
-        this.scale += delta;
-        this.scale = this.scale > this.maxScale ? this.maxScale : this.scale;
-      } else if (delta < 0 && this.scale > this.minScale) {
-        this.scale += delta;
-        this.scale = this.scale < this.minScale ? this.minScale : this.scale;
-      }
-      console.log("TouchMove: " + ev.touches.length);
-      console.log("deltaY: "+delta);
-      this.zoom(0);
+      this.scale = this.prevScale + distChange / rect.width * this.fiddleFactor;
+      if(this.scale > this.maxScale)
+        this.scale = this.maxScale;
+      else if(this.scale < this.minScale)
+        this.scale = this.minScale;
+
+      console.log("scale: "+this.scale);
+      this.zoom(100);
     }
     ev.preventDefault();
   }
@@ -101,11 +99,12 @@ export class MouseWheelZoom {
   }
 
   touchEndHandler(ev: TouchEvent) {
-    console.log("TouchEnd: " + ev.touches.length);
-    for (let i = 0; i < ev.touches.length; i++) {
-      let touch: Touch = ev.touches[i];
-      console.log("Touch: " + (i + 1) + " clientX: " + touch.clientX + " clientY: " + touch.clientY)
-    }
+    this.prevScale = this.scale;
+    // console.log("TouchEnd: " + ev.touches.length);
+    // for (let i = 0; i < ev.touches.length; i++) {
+    //   let touch: Touch = ev.touches[i];
+    //   console.log("Touch: " + (i + 1) + " clientX: " + touch.clientX + " clientY: " + touch.clientY)
+    // }
     ev.preventDefault()
   }
 }
