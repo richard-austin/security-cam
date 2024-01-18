@@ -1,7 +1,7 @@
 export class MouseWheelZoom {
   transformOriginX: number = 0;
   transformOriginY: number = 0;
-  readonly maxScale: number = 4;
+  readonly maxScale: number = 6;
   readonly minScale: number = 1;
   readonly video: HTMLVideoElement;
   readonly div: HTMLDivElement;
@@ -21,7 +21,7 @@ export class MouseWheelZoom {
 
     // Get the bounding rectangle of target
     const rect = this.div.getBoundingClientRect();
-    const deltaY = -$event.deltaY / 1000;
+    const deltaY = -$event.deltaY / 400;
 
     // Keep same transform origin while we are zoomed in to prevent the video jumping if you move the cursor and mouse wheel
     if (this.scale == this.minScale) {
