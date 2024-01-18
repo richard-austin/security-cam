@@ -7,8 +7,9 @@ export class MouseWheelZoom {
   readonly div: HTMLDivElement;
   scale: number = this.minScale;
   prevScale: number = this.minScale;
+  touchStartDist!: number;
 
-  constructor(video: HTMLVideoElement, div:HTMLDivElement) {
+  constructor(video: HTMLVideoElement, div: HTMLDivElement) {
     this.video = video;
     this.div = div;
   }
@@ -38,22 +39,73 @@ export class MouseWheelZoom {
       this.scale = this.scale < this.minScale ? this.minScale : this.scale;
     }
 
-    if(this.scale !== this.prevScale) {
-      this.video.style.transformOrigin = this.transformOriginX+"px "+this.transformOriginY+"px";
-      this.video.style.transitionProperty = "transform";
-      this.video.style.transitionDuration = "550ms";
-      this.video.style.transform = "scale("+this.scale+")";
-      this.prevScale = this.scale;
-    }
+    this.zoom();
 
     $event.preventDefault();
-    // console.log("x = "+this.transformOriginX+" y = "+this.transformOriginY);
-    // console.log("Scale = "+this.scale);
+    // log("x = "+this.transformOriginX+" y = "+this.transformOriginY);
+    // log("Scale = "+this.scale);
   }
+
   reset(slow: boolean = false): void {
     this.scale = this.prevScale = this.minScale;
     this.video.style.transitionProperty = "transform";
     this.video.style.transitionDuration = slow ? "200ms" : "0ms";
-    this.video.style.transform = "scale("+this.minScale+")";
+    this.video.style.transform = "scale(" + this.minScale + ")";
+  }
+
+
+  touchStartHandler(ev: TouchEvent) {
+    if (ev.touches.length == 2) {
+      if (this.scale === this.minScale) {
+        this.transformOriginX = (ev.touches[0].clientX + ev.touches[1].clientX) / 2;
+        this.transformOriginY = (ev.touches[0].clientY + ev.touches[1].clientY) / 2;
+      }
+      this.touchStartDist = Math.sqrt((ev.touches[0].clientX - ev.touches[1].clientX) ** 2 + (ev.touches[0].clientY - ev.touches[1].clientY) ** 2);
+    }
+    console.log("TouchStart: " + ev.touches.length);
+    for (let i = 0; i < ev.touches.length; i++) {
+      let touch: Touch = ev.touches[i];
+      console.log("Touch: " + (i + 1) + " clientX: " + touch.clientX + " clientY: " + touch.clientY)
+    }
+  }
+
+  touchMoveHandler(ev: TouchEvent) {
+    if (ev.touches.length == 2) {
+      let dist: number = Math.sqrt((ev.touches[0].clientX - ev.touches[1].clientX) ** 2 + (ev.touches[0].clientY - ev.touches[1].clientY) ** 2);
+      let distChange: number = dist - this.touchStartDist;
+
+      const delta = distChange / 7800;
+
+      // Calculate new scale value, keeping it withing the limits minScale - maxScale
+      if (delta > 0 && this.scale < this.maxScale) {
+        this.scale += delta;
+        this.scale = this.scale > this.maxScale ? this.maxScale : this.scale;
+      } else if (delta < 0 && this.scale > this.minScale) {
+        this.scale += delta;
+        this.scale = this.scale < this.minScale ? this.minScale : this.scale;
+      }
+      console.log("TouchMove: " + ev.touches.length);
+      console.log("deltaY: "+delta);
+      this.zoom(0);
+    }
+    ev.preventDefault();
+  }
+  private zoom(transitionDuration: number=550): void {
+    if (this.scale !== this.prevScale) {
+      this.video.style.transformOrigin = this.transformOriginX + "px " + this.transformOriginY + "px";
+      this.video.style.transitionProperty = "transform";
+      this.video.style.transitionDuration = transitionDuration+"ms";
+      this.video.style.transform = "scale(" + this.scale + ")";
+      this.prevScale = this.scale;
+    }
+  }
+
+  touchEndHandler(ev: TouchEvent) {
+    console.log("TouchEnd: " + ev.touches.length);
+    for (let i = 0; i < ev.touches.length; i++) {
+      let touch: Touch = ev.touches[i];
+      console.log("Touch: " + (i + 1) + " clientX: " + touch.clientX + " clientY: " + touch.clientY)
+    }
+    ev.preventDefault()
   }
 }
