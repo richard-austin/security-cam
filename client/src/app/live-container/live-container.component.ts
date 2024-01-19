@@ -1,7 +1,7 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, Stream} from '../cameras/Camera';
-import {Subscription, timer} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {VideoComponent} from '../video/video.component';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import {HttpErrorResponse} from '@angular/common/http';
