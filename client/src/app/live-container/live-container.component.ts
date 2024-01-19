@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, Stream} from '../cameras/Camera';
 import {Subscription, timer} from 'rxjs';
@@ -21,7 +21,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   camera!: Camera;
   stream!: Stream;
 
-  constructor(private route: ActivatedRoute, public cameraSvc: CameraService, private utilsService: UtilsService) {
+  constructor(private route: ActivatedRoute, public cameraSvc: CameraService, private utilsService: UtilsService, private cd: ChangeDetectorRef) {
     // Use route.paramMap to get the stream name correctly if we switch directly between live streams
     this.route.paramMap.subscribe((paramMap) => {
       let streamName: string = paramMap.get('streamName') as string;
@@ -30,9 +30,6 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
             if (stream.media_server_input_uri.endsWith(streamName)) {
               this.camera = cam;
               this.stream = stream;
-              timer(100).subscribe( () => {
-                this.setupVideo();
-              });
             }
           });
          });
@@ -78,6 +75,8 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit(): void {
+      this.setupVideo();
+      this.cd.detectChanges();
   }
 
 
