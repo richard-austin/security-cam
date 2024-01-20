@@ -55,17 +55,19 @@ export class MouseWheelZoom {
 
   private zoom(transitionDuration: number = 550): void {
     if (this.scale !== this.prevScale) {
-      this.video.style.transformOrigin = (this.transformOriginX) + "px " + (this.transformOriginY) + "px";
+      this.video.style.transformOrigin = (this.transformOriginX-this.xDist/this.scale) + "px " + (this.transformOriginY-this.yDist/this.scale) + "px";
       this.video.style.transitionProperty = "transform";
       this.video.style.transitionDuration = transitionDuration + "ms";
       this.video.style.transform = "scale(" + this.scale + ")";
+      this.video.style.transform = "translate(" + this.xDist + "px, " + this.yDist + "px) scale(" + this.scale + ")";
       this.prevScale = this.scale;
     }
   }
 
-  private translate(xShift: number, yShift: number) {
-//    this.video.style.transform = "translate(" + xShift + "px, " + yShift + "px) scale(" + this.scale + ")";
-    console.log(xShift + " : " + yShift);
+  private translate() {
+    this.video.style.transformOrigin = (this.transformOriginX-this.xDist/this.scale) + "px " + (this.transformOriginY-this.yDist/this.scale) + "px";
+    this.video.style.transform = "translate(" + this.xDist + "px, " + this.yDist + "px) scale(" + this.scale + ")";
+    console.log(this.xDist + " : " + this.yDist);
   }
 
   reset(slow: boolean = false): void {
@@ -76,9 +78,11 @@ export class MouseWheelZoom {
     this.xDist = this.yDist = 0;
   }
 
-  tapTimer: Subscription | null = null;
-
+  private tapTimer: Subscription | null = null;
+  private currentTouches: number = 0;
   touchStartHandler(ev: TouchEvent) {
+    console.log("touchStartHandler: touches="+ev.touches.length);
+    this.currentTouches = ev.touches.length;
     const rect = this.div.getBoundingClientRect();
     if (ev.touches.length == 2) {
       if (this.scale === this.minScale) {
@@ -104,8 +108,9 @@ export class MouseWheelZoom {
   }
 
   touchMoveHandler(ev: TouchEvent) {
+    console.log("touchMoveHandler: touches="+ev.touches.length);
     const rect: DOMRect = this.div.getBoundingClientRect();
-    if (ev.touches.length == 2) {
+    if (ev.touches.length == 2 && this.currentTouches === ev.touches.length) {
       const dist: number = this.pythagoras(ev);
       const distChange: number = dist - this.touchStartDist;
       this.touchStartDist = dist;
@@ -115,7 +120,7 @@ export class MouseWheelZoom {
       this.scale = Math.max(this.minScale, this.scale);
 //      console.log("scale: "+this.scale);
       this.zoom(100);
-    } else if (ev.touches.length === 1) {
+    } else if (ev.touches.length === 1 && this.currentTouches === ev.touches.length) {
       const newX: number = ev.touches[0].clientX;
       const newY: number = ev.touches[0].clientY;
       const deltaX: number = newX - this.translateOriginX;
@@ -123,12 +128,14 @@ export class MouseWheelZoom {
       this.xDist += deltaX;
       this.yDist += deltaY;
       this.translateOriginX = newX; this.translateOriginY = newY;
-      this.translate(this.xDist, this.yDist);
+      this.translate();
     }
     ev.preventDefault();
   }
 
   touchEndHandler(ev: TouchEvent) {
+    console.log("touchEndHandler: touches="+ev.touches.length);
+    this.currentTouches = ev.touches.length == 0 ? 0 : this.currentTouches;
     this.prevScale = this.scale;
     ev.preventDefault()
   }
