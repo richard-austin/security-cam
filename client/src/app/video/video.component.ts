@@ -117,5 +117,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.mouseWheelZoom.reset(true);
       $event.preventDefault();
     }
+    else if ($event.button === 0)
+      this.mouseWheelZoom.mouseDown($event);
   }
 }

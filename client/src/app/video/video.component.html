@@ -10,6 +10,9 @@
   <div class="video-and-controls">
     <div #videoContainer [ngClass]="{'video': !multi, 'multi': multi}" (wheel)="mouseWheelZoom.mouseWheel($event)"
          (mousedown)="resetZoom($event)"
+         (mousemove)="mouseWheelZoom.mouseMove($event)"
+         (mouseup)="mouseWheelZoom.mouseUp($event)"
+         (mouseout)="mouseWheelZoom.mouseUp($event)"
          (touchstart)="mouseWheelZoom.touchStartHandler($event)"
          (touchmove)="mouseWheelZoom.touchMoveHandler(($event))"
          (touchend)="mouseWheelZoom.touchEndHandler($event)">

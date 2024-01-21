@@ -36,6 +36,9 @@ export class MouseWheelZoom {
       this.transformOriginX = ($event.clientX - rect.left);
       this.transformOriginY = ($event.clientY - rect.top);
     }
+    else {
+      this.xDist = this.yDist = 0;  // Reset any xy pan if continuing zoom
+    }
 
     // Calculate new scale value, keeping it withing the limits minScale - maxScale
     if (deltaY > 0 && this.scale < this.maxScale) {
@@ -46,28 +49,77 @@ export class MouseWheelZoom {
       this.scale = Math.max(this.scale, this.minScale);
     }
 
-    this.zoom();
+    this.transform(this.xDist, this.yDist);
 
     $event.preventDefault();
     // log("x = "+this.transformOriginX+" y = "+this.transformOriginY);
     // log("Scale = "+this.scale);
   }
 
+  bMouseDown: boolean = false;
+  bDragging: boolean = false;
+  mouseDown(ev: MouseEvent) {
+    this.bMouseDown = true;
+    this.translateOriginX = ev.clientX;
+    this.translateOriginY = ev.clientY;
+
+    console.log("mouseDown: clientX = "+ev.clientX+" clientY = "+ev.clientY);
+  }
+  mouseMove(ev: MouseEvent) {
+    if(this.bMouseDown) {
+      this.bDragging = true;
+      const newX: number = ev.clientX;
+      const newY: number = ev.clientY;
+      this.transform(newX, newY);
+      console.log("mouseMove: clientX = "+ev.clientX+" clientY = "+ev.clientY);
+    }
+  }
+
+  mouseUp(ev: MouseEvent) {
+    if(this.bDragging)
+      this.prevScale = this.scale;
+    this.bMouseDown = this.bDragging = false;
+    console.log("mouseMove: clientX = "+ev.clientX+" clientY = "+ev.clientY);
+  }
+
   private zoom(transitionDuration: number = 550): void {
     if (this.scale !== this.prevScale) {
-      this.video.style.transformOrigin = (this.transformOriginX-this.xDist/this.scale) + "px " + (this.transformOriginY-this.yDist/this.scale) + "px";
+      this.video.style.transformOrigin = (this.transformOriginX) + "px " + (this.transformOriginY) + "px";
       this.video.style.transitionProperty = "transform";
       this.video.style.transitionDuration = transitionDuration + "ms";
-      this.video.style.transform = "scale(" + this.scale + ")";
       this.video.style.transform = "translate(" + this.xDist + "px, " + this.yDist + "px) scale(" + this.scale + ")";
+ //     this.video.style.transform = "scale(" + this.scale + ") translate(" + this.xDist + "px, " + this.yDist + "px";
       this.prevScale = this.scale;
     }
   }
 
-  private translate() {
-    this.video.style.transformOrigin = (this.transformOriginX-this.xDist/this.scale) + "px " + (this.transformOriginY-this.yDist/this.scale) + "px";
+  private transform(newX: number, newY: number) {
+    const deltaX: number = newX - this.translateOriginX;
+    const deltaY: number = newY - this.translateOriginY
+    this.xDist += deltaX;
+    this.yDist += deltaY;
+    this.translateOriginX = newX; this.translateOriginY = newY;
+    this.video.style.transitionProperty = "transform";
+    this.video.style.transitionDuration = 550 + "ms";
+    this.video.style.transformOrigin = (this.transformOriginX) + "px " + (this.transformOriginY) + "px";
+    this.fixWithinViewPort();
     this.video.style.transform = "translate(" + this.xDist + "px, " + this.yDist + "px) scale(" + this.scale + ")";
-    console.log(this.xDist + " : " + this.yDist);
+//    console.log(this.xDist + " : " + this.yDist);
+  }
+
+  private fixWithinViewPort() {
+    const rect: DOMRect =  this.div.getBoundingClientRect();
+    const width = rect.width-this.div.clientLeft;
+    const height = rect.height-this.div.clientTop;
+    if(this.xDist + this.transformOriginX * (1-this.scale) > 0)
+      this.xDist = -this.transformOriginX * (1-this.scale)
+    else if(this.xDist + this.transformOriginX + (width -this.transformOriginX) * this.scale <width)
+      this.xDist = -(width -this.transformOriginX) * this.scale -this.transformOriginX + width;
+
+    if(this.yDist + this.transformOriginY * (1-this.scale) > 0)
+      this.yDist = -this.transformOriginY * (1-this.scale);
+    else if(this.yDist + this.transformOriginY + (height -this.transformOriginY) * this.scale <height)
+      this.yDist = -(height -this.transformOriginY) * this.scale -this.transformOriginY + height;
   }
 
   reset(slow: boolean = false): void {
@@ -123,14 +175,10 @@ export class MouseWheelZoom {
     } else if (ev.touches.length === 1 && this.currentTouches === ev.touches.length) {
       const newX: number = ev.touches[0].clientX;
       const newY: number = ev.touches[0].clientY;
-      const deltaX: number = newX - this.translateOriginX;
-      const deltaY: number = newY - this.translateOriginY
-      this.xDist += deltaX;
-      this.yDist += deltaY;
-      this.translateOriginX = newX; this.translateOriginY = newY;
-      this.translate();
+      this.transform(newX, newY);
     }
-    ev.preventDefault();
+    if(this.scale !== this.minScale)
+      ev.preventDefault();  // Allow touchMove default action if no zoom to allow scrolling of multicam page on smartphone
   }
 
   touchEndHandler(ev: TouchEvent) {
