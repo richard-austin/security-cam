@@ -1,6 +1,6 @@
 import {Subscription, timer} from "rxjs";
 
-export class MouseWheelZoom {
+export class VideoTransformations {
   private originX: number = 0;
   private originY: number = 0;
   private newOriginX: number = 0;
