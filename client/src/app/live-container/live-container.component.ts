@@ -1,7 +1,7 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, Stream} from '../cameras/Camera';
-import {Subscription} from 'rxjs';
+import {Subscription, timer} from 'rxjs';
 import {VideoComponent} from '../video/video.component';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import {HttpErrorResponse} from '@angular/common/http';
@@ -30,6 +30,10 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
             if (stream.media_server_input_uri.endsWith(streamName)) {
               this.camera = cam;
               this.stream = stream;
+              const subscription = timer(100).subscribe( () => {
+                this.setupVideo();
+                subscription.unsubscribe();
+              });
             }
           });
          });
@@ -75,7 +79,6 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit(): void {
-      this.setupVideo();
       this.cd.detectChanges();
   }
 
