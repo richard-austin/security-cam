@@ -35,58 +35,28 @@ export class MouseWheelZoom {
    * @param ev The wheel event
    */
   public mouseWheel(ev: WheelEvent) {
-    // Get the bounding rectangle of target
-    const rect = this.div.getBoundingClientRect();
-    const deltaWheel = -ev.deltaY / 400;
-    const prevScale = this.scale;
-    const x1 = ev.clientX - rect.left;
-    const y1 = ev.clientY - rect.top;
-    if (this.scale == this.minScale) {
-      this.originX = this.newOriginX = x1;
-      this.originY = this.newOriginY = y1;
-      this.deltaX = this.deltaY = this.prevDeltaX = this.prevDeltaY = this.prevPanX = this.prevPanY = 0;
-    }
-    if (deltaWheel > 0 && this.scale < this.maxScale) {
-      this.scale += deltaWheel;
-      this.scale = Math.min(this.scale, this.maxScale);
-    } else if (deltaWheel < 0 && this.scale > this.minScale) {
-      this.scale += deltaWheel;
-      this.scale = Math.max(this.scale, this.minScale);
-    }
-
-    if (this.scale > this.minScale) {
-      if (x1 !== this.newOriginX || y1 !== this.newOriginY) {
-        this.prevSc = prevScale;
-        this.newOriginX = x1;
-        this.prevDeltaX = this.deltaX;
-        this.newOriginY = y1;
-        this.prevDeltaY = this.deltaY;
-        // Reset pan continuation variables when scaling as the pan net sum is now contained in prevDeltaX and prevDeltaY
-        this.prevPanX = this.prevPanY = 0;
-      }
-      this.deltaX = this.delta(this.prevDeltaX, this.newOriginX, this.originX);
-      this.deltaY = this.delta(this.prevDeltaY, this.newOriginY, this.originY);
-    }
-    console.log("originX = "+this.originX+" newOriginX = "+this.newOriginX+" originY = "+this.originY+" newOriginY = "+this.newOriginY+" scale = "+this.scale+" prevSc = "+this.prevSc+" deltaX = "+this.deltaX+" deltaY = "+this.deltaY)
-    this.transform();
-
-    ev.preventDefault();
-    // log("x = "+this.transformOriginX+" y = "+this.transformOriginY);
-    // log("Scale = "+this.scale);
+    this.zoom(ev);
   }
 
   bMouseDown: boolean = false;
   bDragging: boolean = false;
+
   mouseDown(ev: MouseEvent) {
     this.bMouseDown = true;
-    // Start panning from where last pan left off, or zero when no previous pan)
-    this.panXStart = ev.clientX-this.prevPanX;
-    this.panYStart = ev.clientY-this.prevPanY;
+    // Start panning from where last pan left off, or zero when no previous pan
+    this.panXStart = ev.clientX - this.prevPanX;
+    this.panYStart = ev.clientY - this.prevPanY;
     console.log("mouseDown: clientX = " + ev.clientX + " clientY = " + ev.clientY);
   }
 
   mouseMove(ev: MouseEvent) {
     if (this.bMouseDown) {
+      this.pan(ev);
+    }
+  }
+
+  private pan(ev: Event) {
+    if (ev instanceof MouseEvent) {
       this.bDragging = true;
       // Continue panning from where last pan finished
       this.panX = ev.clientX - this.panXStart;
@@ -94,31 +64,67 @@ export class MouseWheelZoom {
       // Save where we are now for next time
       this.prevPanX = this.panX;
       this.prevPanY = this.panY;
-      this.deltaX = this.panX+this.delta(this.prevDeltaX, this.newOriginX, this.originX);
-      this.deltaY = this.panY+this.delta(this.prevDeltaY, this.newOriginY, this.originY);
+      this.deltaX = this.panX + this.delta(this.prevDeltaX, this.newOriginX, this.originX);
+      this.deltaY = this.panY + this.delta(this.prevDeltaY, this.newOriginY, this.originY);
       this.transform(true);
       console.log("mouseMove: clientX = " + ev.clientX + " clientY = " + ev.clientY);
     }
   }
 
-  delta(prevDelta: number, newOrigin:number, origin: number) : number {
-    return (prevDelta*this.scale-(newOrigin - origin) * (this.scale - this.prevSc))/this.prevSc;
+  private zoom(ev: Event) {
+    if (ev instanceof WheelEvent) {
+      // Get the bounding rectangle of target
+      const rect = this.div.getBoundingClientRect();
+      const deltaWheel = -ev.deltaY / 400;
+      const prevScale = this.scale;
+      const x1 = ev.clientX - rect.left;
+      const y1 = ev.clientY - rect.top;
+      if (this.scale == this.minScale) {
+        this.originX = this.newOriginX = x1;
+        this.originY = this.newOriginY = y1;
+        this.deltaX = this.deltaY = this.prevDeltaX = this.prevDeltaY = this.prevPanX = this.prevPanY = 0;
+      }
+      if (deltaWheel > 0 && this.scale < this.maxScale) {
+        this.scale += deltaWheel;
+        this.scale = Math.min(this.scale, this.maxScale);
+      } else if (deltaWheel < 0 && this.scale > this.minScale) {
+        this.scale += deltaWheel;
+        this.scale = Math.max(this.scale, this.minScale);
+      }
+
+      if (this.scale > this.minScale) {
+        if (x1 !== this.newOriginX || y1 !== this.newOriginY) {
+          this.prevSc = prevScale;
+          this.newOriginX = x1;
+          this.prevDeltaX = this.deltaX;
+          this.newOriginY = y1;
+          this.prevDeltaY = this.deltaY;
+          // Reset pan continuation variables when scaling as the pan net sum is now contained in prevDeltaX and prevDeltaY
+          this.prevPanX = this.prevPanY = 0;
+        }
+        this.deltaX = this.delta(this.prevDeltaX, this.newOriginX, this.originX);
+        this.deltaY = this.delta(this.prevDeltaY, this.newOriginY, this.originY);
+      }
+      console.log("originX = " + this.originX + " newOriginX = " + this.newOriginX + " originY = " + this.originY + " newOriginY = " + this.newOriginY + " scale = " + this.scale + " prevSc = " + this.prevSc + " deltaX = " + this.deltaX + " deltaY = " + this.deltaY)
+      this.transform();
+
+      ev.preventDefault();
+      // log("x = "+this.transformOriginX+" y = "+this.transformOriginY);
+      // log("Scale = "+this.scale);
+    }
   }
+
+  private delta(prevDelta: number, newOrigin: number, origin: number): number {
+    return (prevDelta * this.scale - (newOrigin - origin) * (this.scale - this.prevSc)) / this.prevSc;
+  }
+
   mouseUp(ev: MouseEvent) {
     this.bMouseDown = false;
-    if(this.bDragging) {
+    if (this.bDragging) {
       this.bDragging = false;
     }
 
     console.log("mouseMove: clientX = " + ev.clientX + " clientY = " + ev.clientY);
-  }
-
-  private zoom(transitionDuration: number = 550): void {
-      this.video.style.transformOrigin = (this.originX) + "px " + (this.originY) + "px";
-      this.video.style.transitionProperty = "transform";
-      this.video.style.transitionDuration = transitionDuration + "ms";
-      this.video.style.transform = "translate(" + this.deltaX + "px, " + this.deltaY + "px) scale(" + this.scale + ")";
-      //     this.video.style.transform = "scale(" + this.scale + ") translate(" + this.xDist + "px, " + this.yDist + "px";
   }
 
   private transform(fast: boolean = false) {
@@ -190,14 +196,12 @@ export class MouseWheelZoom {
       const distChange: number = dist - this.touchStartDist;
       this.touchStartDist = dist;
       // Calculate new scale value, keeping it withing the limits minScale - maxScale
-   //   this.scale = this.prevScale + distChange / rect.width * this.fiddleFactor;
+      //   this.scale = this.prevScale + distChange / rect.width * this.fiddleFactor;
       this.scale = Math.min(this.scale, this.maxScale);
       this.scale = Math.max(this.minScale, this.scale);
 //      console.log("scale: "+this.scale);
-      this.zoom(100);
+      this.transform(false);
     } else if (ev.touches.length === 1 && this.currentTouches === ev.touches.length) {
-      const newX: number = ev.touches[0].clientX;
-      const newY: number = ev.touches[0].clientY;
       this.transform();
     }
     if (this.scale !== this.minScale)
