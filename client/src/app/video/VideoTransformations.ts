@@ -89,7 +89,7 @@ export class VideoTransformations {
     return (prevDelta * this.scale - (newOrigin - origin) * (this.scale - this.prevSc)) / this.prevSc;
   }
 
-  mouseUp(ev: MouseEvent) {
+  mouseUp(ignore: MouseEvent) {
     this.bMouseDown = false;
     if (this.bDragging) {
       this.bDragging = false;
