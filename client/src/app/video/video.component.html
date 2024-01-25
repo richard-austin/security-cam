@@ -8,7 +8,14 @@
     </mat-card>
   </div>
   <div class="video-and-controls">
-    <div #videoContainer [ngClass]="{'video': !multi, 'multi': multi}" (wheel)="mouseWheelZoom.mouseWheel($event)" (mousedown)="resetZoom($event)">
+    <div #videoContainer [ngClass]="{'video': !multi, 'multi': multi}" (wheel)="mouseWheelZoom.mouseWheel($event)"
+         (mousedown)="resetZoom($event)"
+         (mousemove)="mouseWheelZoom.mouseMove($event)"
+         (mouseup)="mouseWheelZoom.mouseUp($event)"
+         (mouseout)="mouseWheelZoom.mouseUp($event)"
+         (touchstart)="mouseWheelZoom.touchStartHandler($event)"
+         (touchmove)="mouseWheelZoom.touchMoveHandler(($event))"
+         (touchend)="mouseWheelZoom.touchEndHandler($event)">
       <video #video></video>
     </div>
     <div *ngIf="isFmp4" class="latency-limit-selector">
@@ -30,12 +37,16 @@
         <select *ngIf="videoFeeder.backchannelAudioSupported" [disabled]="utilsService.speakActive"
                 [matTooltip]="audioBackchannel.audioInputSelectorTooltip()" matTooltipClass="tooltip"
                 [(ngModel)]="audioBackchannel.selectedDeviceId" (change)="audioBackchannel.setAudioInput()">
-          <option *ngFor="let device of audioBackchannel.mediaDevices | audioInput" [value]="device.deviceId">{{ device.label }}</option>
+          <option *ngFor="let device of audioBackchannel.mediaDevices | audioInput"
+                  [value]="device.deviceId">{{ device.label }}
+          </option>
         </select>
         <label [ngClass]="{'latency-chasing': videoFeeder.isLatencyChasing}">
           <mat-icon>timer</mat-icon>
         </label>
-        <select *ngIf="videoFeeder" matTooltip="Set upper latency chasing limit. Please increase upper latency limit if this flashes red" matTooltipClass="tooltip"
+        <select *ngIf="videoFeeder"
+                matTooltip="Set upper latency chasing limit. Please increase upper latency limit if this flashes red"
+                matTooltipClass="tooltip"
                 style="width: 90px;" #latencyLimitSelect [(ngModel)]="buffering_sec"
                 (change)="videoFeeder.setlatencyLim(buffering_sec)">
           <option value="0.4">0.4</option>

@@ -16,6 +16,9 @@ div.video {
     @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
       width: 900px;
     }
+    @media handheld and (min-device-width: 1500px), screen and (min-width: 1500px) {
+      width: 1200px;
+    }
     cursor: zoom-in;
   }
   @include border-characteristics;
