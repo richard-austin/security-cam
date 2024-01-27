@@ -44,6 +44,7 @@ export class VideoTransformations {
       this.panStart = new Point(ev);
     }
   }
+
   mouseUp() {
     this.bMouseDown = false;
     if (this.bDragging) {
@@ -64,8 +65,7 @@ export class VideoTransformations {
       this.offset.minus(this.deltaOffset(sc0, this.scale, new Point(ev, rect)));
       this.fixWithinViewPort();  // Ensure video borders don't end up inside the viewport borders
       this.transform();
-    }
-    else if(ev instanceof TouchEvent) {
+    } else if (ev instanceof TouchEvent) {
       const dist: number = this.hypotenuse(ev);
       const distChange: number = dist - this.touchStartDist;
       this.touchStartDist = dist;
@@ -103,10 +103,12 @@ export class VideoTransformations {
     const lowerLimit = new Point(width, height).times(1 - this.scale);
     this.offset.fixLowerLimit(lowerLimit);
   }
+
   private setScaleWithinLimits() {
     this.scale = Math.min(this.scale, this.maxScale);
     this.scale = Math.max(this.scale, this.minScale);
   }
+
   reset(slow: boolean = false): void {
     this.scale = this.minScale;
     this.offset.x = this.offset.y = 0;
@@ -141,6 +143,7 @@ export class VideoTransformations {
       }
     }
   }
+
   touchMoveHandler(ev: TouchEvent) {
     // console.log("touchMoveHandler: touches=" + ev.touches.length);
     if (ev.touches.length == 2 && this.currentTouches === ev.touches.length) {
@@ -157,14 +160,20 @@ export class VideoTransformations {
       ev.preventDefault();  // Allow touchMove default action if no zoom to allow scrolling of multicam page on smartphone
   }
 
-   touchEndHandler(ev: TouchEvent) {
+  touchEndHandler(ev: TouchEvent) {
     this.currentTouches = ev.touches.length == 0 ? 0 : this.currentTouches;
     ev.preventDefault()
   }
+
+  /**
+   * hypotenuse: Returns the distance between two coordinates on the display.
+   *             Used in pinch zoom operations.
+   * @param ev
+   */
   hypotenuse(ev: TouchEvent): number {
     if (ev.touches.length === 2)
-      return Math.sqrt((ev.touches[0].clientX - ev.touches[1].clientX) ** 2 +
-        (ev.touches[0].clientY - ev.touches[1].clientY) ** 2);
+      return new Point(ev.touches[0].clientX, ev.touches[0].clientY)
+        .hypotenuse(new Point(ev.touches[1].clientX, ev.touches[1].clientY));
     else
       return 0;
   }

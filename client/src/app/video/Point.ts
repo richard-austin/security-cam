@@ -73,8 +73,8 @@ export class Point {
   }
 
   squared(): Point{
-    this.x *= this.x;
-    this.y *= this.y;
+    this.x **= 2;
+    this.y **= 2;
     return this;
   }
 
