@@ -44,7 +44,7 @@ export class VideoTransformations {
       this.panStart = new Point(ev);
     }
   }
-  mouseUp(ignore: MouseEvent) {
+  mouseUp() {
     this.bMouseDown = false;
     if (this.bDragging) {
       this.bDragging = false;
@@ -69,7 +69,6 @@ export class VideoTransformations {
       const dist: number = this.hypotenuse(ev);
       const distChange: number = dist - this.touchStartDist;
       this.touchStartDist = dist;
-      const prevScale = this.scale;
       const x1 = Math.abs(ev.touches[0].clientX + ev.touches[1].clientX) / 2;
       const y1 = Math.abs(ev.touches[0].clientY + ev.touches[1].clientY) / 2;
 
@@ -122,7 +121,6 @@ export class VideoTransformations {
   touchStartHandler(ev: TouchEvent) {
 //    console.log("touchStartHandler: touches=" + ev.touches.length);
     this.currentTouches = ev.touches.length;
-    const rect = this.div.getBoundingClientRect();
     if (ev.touches.length == 2) {
       if (this.scale === this.minScale) {
         this.reset();
@@ -145,7 +143,6 @@ export class VideoTransformations {
   }
   touchMoveHandler(ev: TouchEvent) {
     // console.log("touchMoveHandler: touches=" + ev.touches.length);
-    const rect: DOMRect = this.div.getBoundingClientRect();
     if (ev.touches.length == 2 && this.currentTouches === ev.touches.length) {
       this.zoom(ev);
     } else if (ev.touches.length === 1 && this.currentTouches === ev.touches.length) {
