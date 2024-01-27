@@ -1,31 +1,23 @@
 import {Subscription, timer} from "rxjs";
+import {Point} from "./Point";
 
 export class VideoTransformations {
-  private originX: number = 0;
-  private originY: number = 0;
-  private newOriginX: number = 0;
-  private newOriginY: number = 0;
   private readonly maxScale: number = 6;
   private readonly minScale: number = 1;
   private readonly video: HTMLVideoElement;
   private readonly div: HTMLDivElement;
   private scale: number = this.minScale;
-  private panX: number = 0;
-  private panY: number = 0;
-  private panXStart: number = 0;
-  private panYStart: number = 0;
-  private prevPanX: number = 0;
-  private prevPanY: number = 0;
 
   private touchStartDist!: number;  // Distance aprt of fingers at the touchStart
   readonly fiddleFactor: number = 5;  // Multiplier to get the best pinch zoom response
-  private deltaX: number = 0;
-  private deltaY: number = 0;
-  private prevDeltaX: number = 0;
-  private prevDeltaY: number = 0;
-  private prevSc: number = this.minScale;
+  private readonly offset: Point;
+  private panStart!: Point;
+
+  bMouseDown: boolean = false;
+  bDragging: boolean = false;
 
   constructor(video: HTMLVideoElement, div: HTMLDivElement) {
+    this.offset = new Point();
     this.video = video;
     this.div = div;
   }
@@ -38,93 +30,88 @@ export class VideoTransformations {
     this.zoom(ev);
   }
 
-  bMouseDown: boolean = false;
-  bDragging: boolean = false;
-
   mouseDown(ev: MouseEvent) {
     this.bMouseDown = true;
-    // Start panning from where last pan left off, or zero when no previous pan
-    this.panXStart = ev.clientX - this.prevPanX;
-    this.panYStart = ev.clientY - this.prevPanY;
- //   console.log("mouseDown: clientX = " + ev.clientX + " clientY = " + ev.clientY);
+    this.panStart = new Point(ev);
   }
 
   mouseMove(ev: MouseEvent) {
     if (this.bMouseDown) {
-      this.pan(ev);
+      const panDelta = new Point(ev).minus(this.panStart);
+      this.offset.plus(panDelta);
+      this.fixWithinViewPort();
+      this.transform(true);
+      this.panStart = new Point(ev);
     }
   }
 
-  private pan(ev: Event) {
-    if (ev instanceof MouseEvent) {
-      this.bDragging = true;
-      // Continue panning from where last pan finished
-      this.panX = ev.clientX - this.panXStart;
-      this.panY = ev.clientY - this.panYStart;
-      this.doPan();
-//      console.log("mouseMove: clientX = " + ev.clientX + " clientY = " + ev.clientY);
-    }
-  }
-
-  private zoom(ev: Event) {
-    if (ev instanceof WheelEvent) {
-      // Get the bounding rectangle of target
-      const rect = this.div.getBoundingClientRect();
-      const deltaWheel = -ev.deltaY / 400;
-      const prevScale = this.scale;
-      const x1 = ev.clientX - rect.left;
-      const y1 = ev.clientY - rect.top;
-      if (this.scale == this.minScale) {
-        this.resetForMinScale(x1, y1);
-      }
-      this.scale += deltaWheel;
-      this.doScale(x1, y1, prevScale, false);
-      ev.preventDefault();
-      // log("x = "+this.transformOriginX+" y = "+this.transformOriginY);
-      // log("Scale = "+this.scale);
-    }
-  }
-
-  private delta(prevDelta: number, newOrigin: number, origin: number): number {
-    return (prevDelta * this.scale - (newOrigin - origin) * (this.scale - this.prevSc)) / this.prevSc;
-  }
-
-  mouseUp(ignore: MouseEvent) {
+  mouseUp() {
     this.bMouseDown = false;
     if (this.bDragging) {
       this.bDragging = false;
     }
-//    console.log("mouseMove: clientX = " + ev.clientX + " clientY = " + ev.clientY);
+  }
+
+  private zoom(ev: Event) {
+    const rect = this.div.getBoundingClientRect();
+    const sc0 = this.scale;  // Save initial scale
+    if (ev instanceof WheelEvent) {
+      // Get the bounding rectangle of target
+      const deltaWheel = -ev.deltaY * this.scale / 400;
+      this.scale += deltaWheel;  // Adjust the scale
+      // Ensure scale limits
+      this.setScaleWithinLimits();
+      // Adjust the offset to keep the focus point at the same screen position
+      this.offset.minus(this.deltaOffset(sc0, this.scale, new Point(ev, rect)));
+      this.fixWithinViewPort();  // Ensure video borders don't end up inside the viewport borders
+      this.transform();
+    } else if (ev instanceof TouchEvent) {
+      const dist: number = this.hypotenuse(ev);
+      const distChange: number = dist - this.touchStartDist;
+      this.touchStartDist = dist;
+      const x1 = Math.abs(ev.touches[0].clientX + ev.touches[1].clientX) / 2;
+      const y1 = Math.abs(ev.touches[0].clientY + ev.touches[1].clientY) / 2;
+
+      this.scale += distChange / rect.width * this.fiddleFactor;
+      // Ensure scale limits
+      this.setScaleWithinLimits();
+      this.offset.minus(this.deltaOffset(sc0, this.scale, new Point(x1, y1).minus(new Point(rect.left, rect.top))));
+      this.fixWithinViewPort();  // Ensure video borders don't end up inside the viewport borders
+      this.transform(true);
+    }
+    ev.preventDefault();
+  }
+
+  deltaOffset(sc0: number, sc1: number, mousePos: Point): Point {
+    const origTotalLength: Point = new Point(this.offset).times(-1).plus(mousePos);
+    const newTotalLength: Point = new Point(origTotalLength).times(sc1 / sc0);
+    return new Point(newTotalLength).minus(origTotalLength);
   }
 
   private transform(fast: boolean = false) {
     this.video.style.transitionProperty = "transform";
     this.video.style.transitionDuration = (fast ? 0 : 550) + "ms";
-    this.video.style.transformOrigin = (this.originX) + "px " + (this.originY) + "px";
-    this.fixWithinViewPort();
-    this.video.style.transform = "translate(" + this.deltaX + "px, " + this.deltaY + "px) scale(" + this.scale + ")";
-//    console.log(this.xDist + " : " + this.yDist);
+    this.video.style.transformOrigin = 0 + " " + 0;
+    this.video.style.transform = "translate(" + this.offset.x + "px, " + this.offset.y + "px) scale(" + this.scale + ")";
   }
 
   private fixWithinViewPort() {
     const rect: DOMRect = this.div.getBoundingClientRect();
     const width = rect.width - this.div.clientLeft;
     const height = rect.height - this.div.clientTop;
-    if (this.deltaX + this.originX * (1 - this.scale) > 0)
-      this.deltaX = -this.originX * (1 - this.scale)
-    else if (this.deltaX + this.originX + (width - this.originX) * this.scale < width)
-      this.deltaX = -(width - this.originX) * this.scale - this.originX + width;
+    this.offset.fixUpperLimit(new Point());
+    const lowerLimit = new Point(width, height).times(1 - this.scale);
+    this.offset.fixLowerLimit(lowerLimit);
+  }
 
-    if (this.deltaY + this.originY * (1 - this.scale) > 0)
-      this.deltaY = -this.originY * (1 - this.scale);
-    else if (this.deltaY + this.originY + (height - this.originY) * this.scale < height)
-      this.deltaY = -(height - this.originY) * this.scale - this.originY + height;
+  private setScaleWithinLimits() {
+    this.scale = Math.min(this.scale, this.maxScale);
+    this.scale = Math.max(this.scale, this.minScale);
   }
 
   reset(slow: boolean = false): void {
-    this.scale = this.prevSc = this.minScale;
-    this.originX = this.newOriginX = this.originY = this.newOriginY = this.deltaX = this.deltaY =
-      this.panXStart = this.panYStart = this.prevPanX = this.prevPanY = 0;
+    this.scale = this.minScale;
+    this.offset.x = this.offset.y = 0;
     this.video.style.transitionProperty = "transform";
     this.video.style.transitionDuration = slow ? "200ms" : "0ms";
     this.video.style.transform = "scale(" + this.minScale + ")";
@@ -136,18 +123,14 @@ export class VideoTransformations {
   touchStartHandler(ev: TouchEvent) {
 //    console.log("touchStartHandler: touches=" + ev.touches.length);
     this.currentTouches = ev.touches.length;
-    const rect = this.div.getBoundingClientRect();
     if (ev.touches.length == 2) {
       if (this.scale === this.minScale) {
-        this.originX = this.newOriginX = (ev.touches[0].clientX + ev.touches[1].clientX) / 2 - rect.left;
-        this.originY = this.newOriginY = (ev.touches[0].clientY + ev.touches[1].clientY) / 2 - rect.top;
+        this.reset();
       }
-      this.touchStartDist = this.pythagoras(ev);
+      this.touchStartDist = this.hypotenuse(ev);
     } else if (ev.touches.length === 1) { // Handle double tap to reset zoom, or single to shift the zoomed image.
+      this.panStart = new Point(ev.touches[0].clientX, ev.touches[0].clientY);
       if (this.tapTimer == null) {  // 1 tap
-        this.panXStart = ev.touches[0].clientX - this.prevPanX;
-        this.panYStart = ev.touches[0].clientY - this.prevPanY;
-
         this.tapTimer = timer(300).subscribe(() => {
           // @ts-ignore
           this.tapTimer.unsubscribe();
@@ -159,84 +142,39 @@ export class VideoTransformations {
         this.reset(true);
       }
     }
-//    console.log("transformOriginX: "+this.transformOriginX+" transformOriginY: "+this.transformOriginY);
   }
 
   touchMoveHandler(ev: TouchEvent) {
     // console.log("touchMoveHandler: touches=" + ev.touches.length);
-    const rect: DOMRect = this.div.getBoundingClientRect();
     if (ev.touches.length == 2 && this.currentTouches === ev.touches.length) {
-      const dist: number = this.pythagoras(ev);
-      const distChange: number = dist - this.touchStartDist;
-      this.touchStartDist = dist;
-      const prevScale = this.scale;
-      const x1 = Math.abs(ev.touches[0].clientX + ev.touches[1].clientX) / 2 - rect.left;
-      const y1 = Math.abs(ev.touches[0].clientY + ev.touches[1].clientY) / 2 - rect.top;
-
-      if (this.scale === this.minScale) {
-        this.resetForMinScale(x1, y1);
-      }
-      this.scale = prevScale + distChange / rect.width * this.fiddleFactor;
-      this.doScale(x1, y1, prevScale, true);
-      ev.preventDefault();
+      this.zoom(ev);
     } else if (ev.touches.length === 1 && this.currentTouches === ev.touches.length) {
-      // Continue panning from where last pan finished
-      this.panX = ev.touches[0].clientX - this.panXStart;
-      this.panY = ev.touches[0].clientY - this.panYStart;
-      this.doPan();
-//      console.log("mouseMove: clientX = " + ev.touches[0].clientX + " clientY = " + ev.touches[0].clientY);
+      const panNow = new Point(new Point(ev.touches[0].clientX, ev.touches[0].clientY));
+      const panDelta = new Point(panNow).minus(this.panStart);
+      this.offset.plus(panDelta);
+      this.panStart = panNow;
+      this.fixWithinViewPort();
+      this.transform(true);
     }
-    if (this.scale !== this.minScale)
+    if (this.scale !== this.minScale && ev.cancelable)
       ev.preventDefault();  // Allow touchMove default action if no zoom to allow scrolling of multicam page on smartphone
   }
 
-  private resetForMinScale(x1: number, y1: number) {
-    this.originX = this.newOriginX = x1;
-    this.originY = this.newOriginY = y1;
-    this.deltaX = this.deltaY = this.prevDeltaX = this.prevDeltaY = this.prevPanX = this.prevPanY = 0;
-  }
-
-  private doScale(x1: number, y1: any, prevScale: number, fast: boolean) {
-    this.scale = Math.min(this.scale, this.maxScale);
-    this.scale = Math.max(this.scale, this.minScale);
-
-    if (this.scale > this.minScale) {
-      if (x1 !== this.newOriginX || y1 !== this.newOriginY) {
-        this.prevSc = prevScale;
-        this.newOriginX = x1;
-        this.prevDeltaX = this.deltaX;
-        this.newOriginY = y1;
-        this.prevDeltaY = this.deltaY;
-        // Reset pan continuation variables when scaling as the pan net sum is now contained in prevDeltaX and prevDeltaY
-        this.prevPanX = this.prevPanY = 0;
-      }
-      this.deltaX = this.delta(this.prevDeltaX, this.newOriginX, this.originX);
-      this.deltaY = this.delta(this.prevDeltaY, this.newOriginY, this.originY);
-    }
-//    console.log("originX = " + this.originX + " newOriginX = " + this.newOriginX + " originY = " + this.originY + " newOriginY = " + this.newOriginY + " scale = " + this.scale + " prevSc = " + this.prevSc + " deltaX = " + this.deltaX + " deltaY = " + this.deltaY)
-    this.transform(fast);
-  }
-
-  private doPan() {
-    // Save where we are now for next time
-    this.prevPanX = this.panX;
-    this.prevPanY = this.panY;
-    this.deltaX = this.panX + this.delta(this.prevDeltaX, this.newOriginX, this.originX);
-    this.deltaY = this.panY + this.delta(this.prevDeltaY, this.newOriginY, this.originY);
-    this.transform(true);
-  }
-
   touchEndHandler(ev: TouchEvent) {
-//    console.log("touchEndHandler: touches=" + ev.touches.length);
     this.currentTouches = ev.touches.length == 0 ? 0 : this.currentTouches;
-//    this.prevScale = this.scale;
-    ev.preventDefault()
+    if(ev.cancelable)
+      ev.preventDefault()
   }
 
-  pythagoras(ev: TouchEvent): number {
+  /**
+   * hypotenuse: Returns the distance between two coordinates on the display.
+   *             Used in pinch zoom operations.
+   * @param ev
+   */
+  hypotenuse(ev: TouchEvent): number {
     if (ev.touches.length === 2)
-      return Math.sqrt((ev.touches[0].clientX - ev.touches[1].clientX) ** 2 +
-        (ev.touches[0].clientY - ev.touches[1].clientY) ** 2);
+      return new Point(ev.touches[0].clientX, ev.touches[0].clientY)
+        .hypotenuse(new Point(ev.touches[1].clientX, ev.touches[1].clientY));
     else
       return 0;
   }
