@@ -156,13 +156,14 @@ export class VideoTransformations {
       this.fixWithinViewPort();
       this.transform(true);
     }
-    if (this.scale !== this.minScale)
+    if (this.scale !== this.minScale && ev.cancelable)
       ev.preventDefault();  // Allow touchMove default action if no zoom to allow scrolling of multicam page on smartphone
   }
 
   touchEndHandler(ev: TouchEvent) {
     this.currentTouches = ev.touches.length == 0 ? 0 : this.currentTouches;
-    ev.preventDefault()
+    if(ev.cancelable)
+      ev.preventDefault()
   }
 
   /**
