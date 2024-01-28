@@ -21,6 +21,7 @@ div.video {
     }
     cursor: zoom-in;
   }
+
   @include border-characteristics;
 }
 
@@ -35,6 +36,8 @@ div.multi {
   > video {
     width: 700px;
   }
+
+  cursor: zoom-in;
   @include border-characteristics;
 }
 
@@ -56,6 +59,7 @@ div.latency-limit-selector {
   display: flex;
   justify-content: center;
   white-space: nowrap;
+
   > div {
     height: 25px;
     background-color: #646363;
@@ -69,19 +73,23 @@ div.latency-limit-selector {
     display: block;
     position: relative;
     top: -5px;
+
     > label {
       > mat-icon {
         padding-left: 0.2rem;
       }
-     }
+    }
+
     > label {
       margin-right: 5px;
       position: relative;
       top: 1px;
+
       > mat-icon {
         color: white;
       }
     }
+
     > select {
       color: white;
       background-color: #2d2d2d;
@@ -94,15 +102,28 @@ div.latency-limit-selector {
 
 .video-buttons {
   cursor: pointer;
-  :hover {
-    transform: scale(1.3);
-    transition-duration: 350ms;
-    transition-property: transform;
+  @media only screen and (max-width: 768px){
+    :active {
+      scale: 1.3;
+      transition: scale 350ms linear
+    }
+    :not(:active) {
+      scale: 1;
+      transition-property: transform;
+      transition: scale 350ms linear;
+    }
   }
-  :not(:hover) {
-    transform: scale(1);
-    transition-duration: 350ms;
-    transition-property: transform;
+  @media only screen and (min-width: 768px) {
+    :hover {
+      scale: 1.3;
+      transition: scale 350ms
+    }
+
+    :not(:hover) {
+      scale: 1;
+      transition-property: transform;
+      transition: scale 350ms linear;
+    }
   }
 }
 
@@ -119,6 +140,7 @@ div.latency-limit-selector {
 .audio-out-active {
   animation: pulsing 1300ms infinite;
 }
+
 @keyframes pulsing {
   0% {
     color: #800;
@@ -142,9 +164,10 @@ div.latency-limit-selector {
     color: #650303;
   }
 }
+
 .latency-chasing {
   > mat-icon {
-    animation:  flash 2000ms steps(3, start) forwards;
+    animation: flash 2000ms steps(3, start) forwards;
   }
 }
 
