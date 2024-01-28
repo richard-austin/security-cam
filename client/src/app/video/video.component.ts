@@ -34,7 +34,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   multi: boolean = false;
   buffering_sec: number = 1.2;
   audioBackchannel!: AudioBackchannel
-  mouseWheelZoom!: VideoTransformations;
+  vt!: VideoTransformations;
 
   constructor(public utilsService: UtilsService) {
     this.videoFeeder = new MediaFeeder(this.buffering_sec)
@@ -47,8 +47,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param manifest
    */
   setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
-    if (this.mouseWheelZoom !== undefined)
-      this.mouseWheelZoom.reset();
+    if (this.vt !== undefined)
+      this.vt.reset();
     this.audioBackchannel.stopAudioOut(); // Ensure two way audio is off when switching streams
     this.stop();
     this.stream = stream;
@@ -76,7 +76,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         // @ts-ignore
         this.video.msRequestFullScreen();
     }
-    this.mouseWheelZoom.reset();
+    this.vt.reset();
   }
 
   toggleMuteAudio() {
@@ -96,9 +96,11 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.video = this.videoEl.nativeElement;
     this.videoFeeder.init(this.isFmp4, this.video);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
-    this.mouseWheelZoom = new VideoTransformations(this.video, this.vcEL.nativeElement);
+    this.video.addEventListener("play",()=> {
+      this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
+    });
     this.video.addEventListener('fullscreenchange', () => {
-      this.mouseWheelZoom.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
+      this.vt.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
     });
   }
 
@@ -114,10 +116,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   resetZoom($event: MouseEvent) {
     if($event.button === 1) {
-      this.mouseWheelZoom.reset(true);
+      this.vt.reset(true);
       $event.preventDefault();
     }
     else if ($event.button === 0)
-      this.mouseWheelZoom.mouseDown($event);
+      this.vt.mouseDown($event);
   }
 }

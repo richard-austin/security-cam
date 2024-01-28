@@ -8,14 +8,14 @@
     </mat-card>
   </div>
   <div class="video-and-controls">
-    <div #videoContainer [ngClass]="{'video': !multi, 'multi': multi}" (wheel)="mouseWheelZoom.mouseWheel($event)"
+    <div #videoContainer [ngClass]="{'video': !multi, 'multi': multi}" (wheel)="vt.mouseWheel($event)"
          (mousedown)="resetZoom($event)"
-         (mousemove)="mouseWheelZoom.mouseMove($event)"
-         (mouseup)="mouseWheelZoom.mouseUp()"
-         (mouseout)="mouseWheelZoom.mouseUp()"
-         (touchstart)="mouseWheelZoom.touchStartHandler($event)"
-         (touchmove)="mouseWheelZoom.touchMoveHandler(($event))"
-         (touchend)="mouseWheelZoom.touchEndHandler($event)">
+         (mousemove)="vt.mouseMove($event)"
+         (mouseup)="vt.mouseUp()"
+         (mouseout)="vt.mouseUp()"
+         (touchstart)="vt.touchStartHandler($event)"
+         (touchmove)="vt.touchMoveHandler(($event))"
+         (touchend)="vt.touchEndHandler($event)">
       <video #video></video>
     </div>
     <div *ngIf="isFmp4" class="latency-limit-selector">

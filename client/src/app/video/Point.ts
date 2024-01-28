@@ -1,3 +1,5 @@
+import {ContainerDimensions} from "./ContainerDimensions";
+
 /**
  * Point: A class representing a point in the video frame. It provides some arithmetic operations on points
  */
@@ -5,7 +7,7 @@ export class Point {
   x: number;
   y: number;
 
-  constructor(x?: number | Point | Event, y?: number | DOMRect) {
+  constructor(x?: number | Point | Event, y?: number | ContainerDimensions) {
     if(typeof(x) === "number" && typeof (y) === "number") {
       this.x = x;
       this.y = y;
@@ -17,7 +19,7 @@ export class Point {
     else if (x instanceof MouseEvent || x instanceof WheelEvent) {
       this.x = x.clientX;
       this.y = x.clientY;
-      if(y instanceof DOMRect) {
+      if(y instanceof ContainerDimensions) {
         this.x -= y.left;
         this.y -= y.top;
       }

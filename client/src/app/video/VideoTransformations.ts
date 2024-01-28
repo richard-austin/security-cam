@@ -1,11 +1,13 @@
 import {Subscription, timer} from "rxjs";
 import {Point} from "./Point";
+import {ContainerDimensions} from "./ContainerDimensions";
 
 export class VideoTransformations {
   private readonly maxScale: number = 6;
   private readonly minScale: number = 1;
   private readonly video: HTMLVideoElement;
   private readonly div: HTMLDivElement;
+  private readonly cd: ContainerDimensions;
   private scale: number = this.minScale;
 
   private touchStartDist!: number;  // Distance aprt of fingers at the touchStart
@@ -20,6 +22,7 @@ export class VideoTransformations {
     this.offset = new Point();
     this.video = video;
     this.div = div;
+    this.cd = new ContainerDimensions(div);
   }
 
   /**
@@ -53,7 +56,6 @@ export class VideoTransformations {
   }
 
   private zoom(ev: Event) {
-    const rect = this.div.getBoundingClientRect();
     const sc0 = this.scale;  // Save initial scale
     if (ev instanceof WheelEvent) {
       // Get the bounding rectangle of target
@@ -62,7 +64,7 @@ export class VideoTransformations {
       // Ensure scale limits
       this.setScaleWithinLimits();
       // Adjust the offset to keep the focus point at the same screen position
-      this.offset.minus(this.deltaOffset(sc0, this.scale, new Point(ev, rect)));
+      this.offset.minus(this.deltaOffset(sc0, this.scale, new Point(ev, this.cd)));
       this.fixWithinViewPort();  // Ensure video borders don't end up inside the viewport borders
       this.transform();
     } else if (ev instanceof TouchEvent) {
@@ -72,10 +74,10 @@ export class VideoTransformations {
       const x1 = Math.abs(ev.touches[0].clientX + ev.touches[1].clientX) / 2;
       const y1 = Math.abs(ev.touches[0].clientY + ev.touches[1].clientY) / 2;
 
-      this.scale += distChange / rect.width * this.fiddleFactor;
+      this.scale += distChange / this.cd.width * this.fiddleFactor;
       // Ensure scale limits
       this.setScaleWithinLimits();
-      this.offset.minus(this.deltaOffset(sc0, this.scale, new Point(x1, y1).minus(new Point(rect.left, rect.top))));
+      this.offset.minus(this.deltaOffset(sc0, this.scale, new Point(x1, y1).minus(new Point(this.cd.left, this.cd.top))));
       this.fixWithinViewPort();  // Ensure video borders don't end up inside the viewport borders
       this.transform(true);
     }
@@ -96,9 +98,8 @@ export class VideoTransformations {
   }
 
   private fixWithinViewPort() {
-    const rect: DOMRect = this.div.getBoundingClientRect();
-    const width = rect.width - this.div.clientLeft;
-    const height = rect.height - this.div.clientTop;
+    const width = this.cd.width - this.div.clientLeft;
+    const height = this.cd.height - this.div.clientTop;
     this.offset.fixUpperLimit(new Point());
     const lowerLimit = new Point(width, height).times(1 - this.scale);
     this.offset.fixLowerLimit(lowerLimit);
