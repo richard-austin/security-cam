@@ -96,12 +96,16 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.video = this.videoEl.nativeElement;
     this.videoFeeder.init(this.isFmp4, this.video);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
-    this.video.addEventListener("play",()=> {
-      this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
-    });
+    this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
     this.video.addEventListener('fullscreenchange', () => {
       this.vt.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
     });
+
+    window.screen.orientation.onchange =(ev: Event) => {
+      this.vt.reset(true);
+      // Set up VideoTransformations again to take account of viewport dimension changes
+      this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
+    };
   }
 
   ngOnDestroy(): void {
@@ -115,11 +119,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   resetZoom($event: MouseEvent) {
-    if($event.button === 1) {
+    if ($event.button === 1) {
       this.vt.reset(true);
       $event.preventDefault();
-    }
-    else if ($event.button === 0)
+    } else if ($event.button === 0)
       this.vt.mouseDown($event);
   }
 }

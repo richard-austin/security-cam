@@ -7,7 +7,7 @@ export class VideoTransformations {
   private readonly minScale: number = 1;
   private readonly video: HTMLVideoElement;
   private readonly div: HTMLDivElement;
-  private readonly cd: ContainerDimensions;
+  private cd!: ContainerDimensions;
   private scale: number = this.minScale;
 
   private touchStartDist!: number;  // Distance aprt of fingers at the touchStart
@@ -22,7 +22,6 @@ export class VideoTransformations {
     this.offset = new Point();
     this.video = video;
     this.div = div;
-    this.cd = new ContainerDimensions(div);
   }
 
   /**
@@ -57,6 +56,9 @@ export class VideoTransformations {
 
   private zoom(ev: Event) {
     const sc0 = this.scale;  // Save initial scale
+    if(this.scale === this.minScale)
+      this.cd = new ContainerDimensions(this.div);
+
     if (ev instanceof WheelEvent) {
       // Get the bounding rectangle of target
       const deltaWheel = -ev.deltaY * this.scale / 400;
@@ -116,6 +118,7 @@ export class VideoTransformations {
     this.video.style.transitionProperty = "transform";
     this.video.style.transitionDuration = slow ? "200ms" : "0ms";
     this.video.style.transform = "scale(" + this.minScale + ")";
+    this.cd = new ContainerDimensions(this.div);
   }
 
   private tapTimer: Subscription | null = null;
