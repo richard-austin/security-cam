@@ -10,6 +10,8 @@
 
 div.video {
   video {
+    max-width: 100%;
+    max-height: 100%;
     @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px) {
       width: 700px;
     }
