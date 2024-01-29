@@ -16,7 +16,7 @@ export class ContainerDimensions {
     const paddingBottom: number = style.paddingBottom !== "" ? parseInt(style.paddingBottom) : 0;
     this.top = rect.top+borderTop+paddingTop;
     this.left = rect.left+borderLeft+paddingLeft;
-    this.width = rect.width-borderLeft-borderRight-paddingRight;
-    this.height = rect.height-borderTop-borderBottom-paddingBottom;
+    this.width = rect.width-borderLeft-borderRight-paddingRight-paddingLeft;
+    this.height = rect.height-borderTop-borderBottom-paddingBottom-paddingTop;
   }
 }
