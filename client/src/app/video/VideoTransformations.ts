@@ -30,6 +30,8 @@ export class VideoTransformations {
    */
   public mouseWheel(ev: WheelEvent) {
     this.zoom(ev);
+    if(ev.cancelable)
+      ev.preventDefault();
   }
 
   mouseDown(ev: MouseEvent) {
@@ -38,7 +40,7 @@ export class VideoTransformations {
   }
 
   mouseMove(ev: MouseEvent) {
-    if (this.bMouseDown) {
+    if (this.bMouseDown && this.scale !== this.minScale) {
       const panDelta = new Point(ev).minus(this.panStart);
       this.offset.plus(panDelta);
       this.fixWithinViewPort();
@@ -83,7 +85,6 @@ export class VideoTransformations {
       this.fixWithinViewPort();  // Ensure video borders don't end up inside the viewport borders
       this.transform(true);
     }
-    ev.preventDefault();
   }
 
   deltaOffset(sc0: number, sc1: number, mousePos: Point): Point {
@@ -152,7 +153,9 @@ export class VideoTransformations {
     // console.log("touchMoveHandler: touches=" + ev.touches.length);
     if (ev.touches.length == 2 && this.currentTouches === ev.touches.length) {
       this.zoom(ev);
-    } else if (ev.touches.length === 1 && this.currentTouches === ev.touches.length) {
+      if(ev.cancelable)
+        ev.preventDefault();
+    } else if (ev.touches.length === 1 && this.currentTouches === ev.touches.length && this.scale !== this.minScale) {
       const panNow = new Point(new Point(ev.touches[0].clientX, ev.touches[0].clientY));
       const panDelta = new Point(panNow).minus(this.panStart);
       this.offset.plus(panDelta);

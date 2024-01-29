@@ -102,9 +102,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     window.screen.orientation.onchange =(ev: Event) => {
-      this.vt.reset(true);
       // Set up VideoTransformations again to take account of viewport dimension changes
       this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
+      this.vt.reset(true);
     };
   }
 
@@ -116,9 +116,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.audioBackchannel.stopAudioOut();
       timerSubscription.unsubscribe();
     });
+    window.screen.orientation.onchange = null;
   }
 
-  resetZoom($event: MouseEvent) {
+  reset($event: MouseEvent) {
     if ($event.button === 1) {
       this.vt.reset(true);
       $event.preventDefault();
