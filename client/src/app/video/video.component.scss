@@ -9,12 +9,10 @@
 }
 
 div.video {
+  width: fit-content;
   video {
-    max-width: 100%;
-    max-height: 100%;
-    @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px) {
-      width: 700px;
-    }
+    max-width: 92dvw;
+    max-height: 98dvh;
     @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
       width: 900px;
     }
@@ -36,11 +34,12 @@ div.video {
 // Smaller video size in multi display
 div.multi {
   > video {
-    max-width: 100%;
-    max-height: 100%;
-    width: 700px;
+    max-width: 92dvw;
+    max-height: 98dvh;
+    @media handheld and (min-device-width: 800px), screen and (min-width: 800px) {
+      width: 700px;
+    }
   }
-
   cursor: zoom-in;
   @include border-characteristics;
 }
