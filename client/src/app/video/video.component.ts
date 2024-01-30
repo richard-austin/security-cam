@@ -23,6 +23,7 @@ import {VideoTransformations} from "./VideoTransformations";
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
+  @ViewChild('top_of_page') topOfPage!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isFmp4: boolean = false;
   cam!: Camera;
@@ -101,18 +102,29 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.vt.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
     });
 
-    window.screen.orientation.onchange =(ev: Event) => {
+    window.screen.orientation.onchange = (ev: Event) => {
       // Set up VideoTransformations again to take account of viewport dimension changes
       this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
-      this.vt.reset(true);
-    };
+      if (ev.currentTarget instanceof ScreenOrientation) {
+        let target: ScreenOrientation = ev.currentTarget;
+        if (!this.multi) {
+          if (target.type === "landscape-primary" || target.type === "landscape-secondary")
+            this.vcEL.nativeElement.scrollIntoView();
+          else if ((target.type === 'portrait-primary' || target.type === 'portrait-secondary'))
+            this.topOfPage.nativeElement.scrollIntoView();
+        }
+        this.vt.reset(true);
+      }
+    }
   }
 
   ngOnDestroy(): void {
     this.videoFeeder.stop();
     // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
     //  ffmpeg to the backchannel device. The problem does not occur when done like this
-    let timerSubscription: Subscription = timer(20).subscribe(() => {
+    let timerSubscription
+      :
+      Subscription = timer(20).subscribe(() => {
       this.audioBackchannel.stopAudioOut();
       timerSubscription.unsubscribe();
     });
