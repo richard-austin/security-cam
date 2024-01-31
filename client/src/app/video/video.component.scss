@@ -1,28 +1,32 @@
-@mixin border-characteristics {
+@mixin common-characteristics {
   width: fit-content;
-  border: 0.25rem solid darkblue;
-  border-right-color: #3939f3;
-  border-bottom-color: #3939f3;
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  @media handheld and (min-device-width: 900px), handheld and (orientation: landscape), screen and (min-width: 900px) {
+    border: 0.25rem solid darkblue;
+    border-right-color: #3939f3;
+    border-bottom-color: #3939f3;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
   overflow: hidden;
+  cursor: zoom-in;
 }
 
 div.video {
-  width: fit-content;
   video {
-    max-width: 92dvw;
-    max-height: 98dvh;
-    @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
+    max-width: 100dvw;
+    max-height: 100dvh;
+    @media handheld and (min-device-width: 800px), screen and (min-width: 800px) and (min-height: 400px){
+      width: 700px;
+    }
+    @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) and (min-height: 700px) {
       width: 900px;
     }
-    @media handheld and (min-device-width: 1500px), screen and (min-width: 1500px) {
+    @media handheld and (min-device-width: 1500px), screen and (min-width: 1500px) and (min-height: 900px) {
       width: 1200px;
     }
-    cursor: zoom-in;
   }
 
-  @include border-characteristics;
+  @include common-characteristics;
 }
 
 .video-and-controls {
@@ -34,14 +38,13 @@ div.video {
 // Smaller video size in multi display
 div.multi {
   > video {
-    max-width: 92dvw;
-    max-height: 98dvh;
-    @media handheld and (min-device-width: 800px), screen and (min-width: 800px) {
+    max-width: 100dvw;
+    max-height: 100dvh;
+    @media handheld and (min-device-width: 800px), screen and (min-width: 800px) and (min-height: 400px){
       width: 700px;
     }
   }
-  cursor: zoom-in;
-  @include border-characteristics;
+  @include common-characteristics;
 }
 
 .mx-auto {
