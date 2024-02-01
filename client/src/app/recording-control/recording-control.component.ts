@@ -353,8 +353,12 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.initialised = true;
     this.setupRecording();
     this.cd.detectChanges();
+    const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+    if(isFirefox)
+      this.video.video.controls = false;  // Turn off controls in Firefox as they prevent some touch events from working
   }
 
   ngOnDestroy(): void {
+    this.video.video.controls = true; // Enable controls again
   }
 }

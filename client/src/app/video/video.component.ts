@@ -101,19 +101,30 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.video.addEventListener('fullscreenchange', () => {
       this.vt.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
     });
-
     window.screen.orientation.onchange = (ev: Event) => {
       // Set up VideoTransformations again to take account of viewport dimension changes
       this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
       if (ev.currentTarget instanceof ScreenOrientation) {
         let target: ScreenOrientation = ev.currentTarget;
         if (!this.multi) {
-          if (target.type === "landscape-primary" || target.type === "landscape-secondary")
-            this.vcEL.nativeElement.scrollIntoView();
-          else if ((target.type === 'portrait-primary' || target.type === 'portrait-secondary'))
-            this.topOfPage.nativeElement.scrollIntoView();
+          /** Ensure that if the browser has switched to full screen on orienting to landscape,
+           *  that we switch out of it (to allow pan/zoom to still work) and scroll video to top of page.
+           **/
+            // Timer to ensure full screen mode is detectable with document.fullscreenElement !== null
+          let sub = timer(60).subscribe(() => {
+              sub.unsubscribe();
+              if ((target.type === 'landscape-secondary' || target.type === 'landscape-primary') && document.fullscreenElement !== null) {
+                document.exitFullscreen().then();
+                console.log("Exited full screen");
+              }
+              // Timer to ensure it's fully out of full screen before using scrollIntoView
+              sub = timer(30).subscribe(() => {
+                sub.unsubscribe();
+                this.video.scrollIntoView();
+              });
+            });
+          this.vt.reset(true);
         }
-        this.vt.reset(true);
       }
     }
   }
