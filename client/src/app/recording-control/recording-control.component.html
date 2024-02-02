@@ -1,103 +1,106 @@
 <div [ngClass]="{'no-display': !visible}" class="flex-container">
-  <mat-card class="events-select mat-elevation-z8 hide-background">
-    <mat-card-title>Select a Motion Event</mat-card-title>
-    <mat-card-content>
-      <div>
-        <mat-form-field appearance="fill">
-          <mat-label>Choose a date</mat-label>
-          <input matInput readonly [matDatepickerFilter]="dateFilter" [min]="minDate" [max]="maxDate" [value]="selectedDate" (dateChange)="setDateSlot($event)" [matDatepicker]="picker">
-          <mat-hint></mat-hint>
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker [startAt]="_selectedDate"></mat-datepicker>
-        </mat-form-field>
-      </div>
-      <div>
-        <mat-form-field appearance="fill">
-          <mat-label>Motion Events</mat-label>
-          <mat-select #selector (selectionChange)="showMotionEvent($event)"
-                      matTooltip="Select a recording by date and time"
-                      matTooltipClass="tooltip">
-            <mat-option *ngFor="let event of motionEvents" [value]="event">
-              {{event.dateTime}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
-        <div *ngSwitchCase="false"
-             matTooltip="{{isGuest ? 'Disabled for guest' : 'Delete the currently selected recording'}}"
-             matTooltipClass="tooltip">
-          <button (click)="confirmDelete=true" [disabled]="isGuest" color="warning" mat-flat-button
-                  matTooltip="Delete the currently displayed recording" matTooltipClass="tooltip">
-            Delete This Recording
-          </button>
-        </div>
-        <div *ngSwitchCase="true">
-          Delete {{selector.value.dateTime}},
-          <div>are you sure?</div>
-          <button (click)="confirmDelete=false;deleteRecording()" color="danger" mat-flat-button
-                  matTooltip="Delete the currently selected recording"
-                  matTooltipClass="tooltip">Confirm
-          </button>
-          <button (click)="confirmDelete=false" color="default" mat-flat-button
-                  matTooltip="Do not delete the recording"
-                  matTooltipClass="tooltip">
-            Cancel
-          </button>
-        </div>
-      </div>
-      <div *ngIf="!confirmDelete && !downloading" class="download-button">
-        <button (click)="downloadRecording()" color="light" mat-flat-button
-                matTooltip="Download this recording to your PC or phone"
-                matTooltipClass="tooltip">
-          Download Recording
-        </button>
-      </div>
-    </mat-card-content>
-    <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
-      <mat-spinner [diameter]="25"></mat-spinner>
-      <span>Please wait..</span>
-    </mat-card-content>
-  </mat-card>
   <div class="recording-container">
-    <app-video></app-video>
-    <div class="buttons-flex-container">
-      <mat-card class="recording-buttons hide-background mat-elevation-z8">
-        <mat-button-toggle-group aria-label="Playback control" name="playbackControl"
-                                 [(ngModel)]="selectedPlaybackMode">
-          <button mat-button (click)="returnToStart()"
-                  matTooltip="Go back to the start of the recording" matTooltipClass="tooltip">
-            <mat-icon>fast_rewind</mat-icon>
+    <mat-card class="events-select mat-elevation-z8 hide-background">
+      <mat-card-title>Select a Motion Event</mat-card-title>
+      <mat-card-content>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Choose a date</mat-label>
+            <input matInput readonly [matDatepickerFilter]="dateFilter" [min]="minDate" [max]="maxDate"
+                   [value]="selectedDate" (dateChange)="setDateSlot($event)" [matDatepicker]="picker">
+            <mat-hint></mat-hint>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker [startAt]="_selectedDate"></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Motion Events</mat-label>
+            <mat-select #selector (selectionChange)="showMotionEvent($event)"
+                        matTooltip="Select a recording by date and time"
+                        matTooltipClass="tooltip">
+              <mat-option *ngFor="let event of motionEvents" [value]="event">
+                {{ event.dateTime }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
+          <div *ngSwitchCase="false"
+               matTooltip="{{isGuest ? 'Disabled for guest' : 'Delete the currently selected recording'}}"
+               matTooltipClass="tooltip">
+            <button (click)="confirmDelete=true" [disabled]="isGuest" color="warning" mat-flat-button
+                    matTooltip="Delete the currently displayed recording" matTooltipClass="tooltip">
+              Delete This Recording
+            </button>
+          </div>
+          <div *ngSwitchCase="true">
+            Delete {{ selector.value.dateTime }},
+            <div>are you sure?</div>
+            <button (click)="confirmDelete=false;deleteRecording()" color="danger" mat-flat-button
+                    matTooltip="Delete the currently selected recording"
+                    matTooltipClass="tooltip">Confirm
+            </button>
+            <button (click)="confirmDelete=false" color="default" mat-flat-button
+                    matTooltip="Do not delete the recording"
+                    matTooltipClass="tooltip">
+              Cancel
+            </button>
+          </div>
+        </div>
+        <div *ngIf="!confirmDelete && !downloading" class="download-button">
+          <button (click)="downloadRecording()" color="light" mat-flat-button
+                  matTooltip="Download this recording to your PC or phone"
+                  matTooltipClass="tooltip">
+            Download Recording
           </button>
-          <button mat-button (click)="stepBack()" matTooltip="Step backward 10 seconds" matTooltipClass="tooltip">
-            <mat-icon>replay_10</mat-icon>
-          </button>
-          <button mat-button (click)="stepForward()" matTooltip="Step forward 10 seconds" matTooltipClass="tooltip">
-            <mat-icon>forward_10</mat-icon>
-          </button>
+        </div>
+      </mat-card-content>
+      <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
+        <mat-spinner [diameter]="25"></mat-spinner>
+        <span>Please wait..</span>
+      </mat-card-content>
+    </mat-card>
+    <div>
+      <app-video></app-video>
+      <div class="buttons-flex-container">
+        <mat-card class="recording-buttons hide-background mat-elevation-z8">
+          <mat-button-toggle-group aria-label="Playback control" name="playbackControl"
+                                   [(ngModel)]="selectedPlaybackMode">
+            <button mat-button (click)="returnToStart()"
+                    matTooltip="Go back to the start of the recording" matTooltipClass="tooltip">
+              <mat-icon>fast_rewind</mat-icon>
+            </button>
+            <button mat-button (click)="stepBack()" matTooltip="Step backward 10 seconds" matTooltipClass="tooltip">
+              <mat-icon>replay_10</mat-icon>
+            </button>
+            <button mat-button (click)="stepForward()" matTooltip="Step forward 10 seconds" matTooltipClass="tooltip">
+              <mat-icon>forward_10</mat-icon>
+            </button>
 
-          <mat-button-toggle (click)="paused ? start() : pause()" [matTooltip]="paused ? 'Play' : 'Pause'"
-                             matTooltipClass="tooltip"
-                             value="startPause">
-            <mat-icon *ngIf="!paused">pause</mat-icon>
-            <mat-icon *ngIf="paused">play_arrow</mat-icon>
-          </mat-button-toggle>
-          <mat-button-toggle (click)="fastForward()" matTooltip="Fast forward" matTooltipClass="tooltip"
-                             value="fastForward">
-            <mat-icon>fast_forward</mat-icon>
-          </mat-button-toggle>
-          <mat-button-toggle (click)="fasterForward()" matTooltip="Faster forward" matTooltipClass="tooltip"
-                             value="fasterForward">
-            <mat-icon class="faster-forward">fast_forward</mat-icon>
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-      </mat-card>
+            <mat-button-toggle (click)="paused ? start() : pause()" [matTooltip]="paused ? 'Play' : 'Pause'"
+                               matTooltipClass="tooltip"
+                               value="startPause">
+              <mat-icon *ngIf="!paused">pause</mat-icon>
+              <mat-icon *ngIf="paused">play_arrow</mat-icon>
+            </mat-button-toggle>
+            <mat-button-toggle (click)="fastForward()" matTooltip="Fast forward" matTooltipClass="tooltip"
+                               value="fastForward">
+              <mat-icon>fast_forward</mat-icon>
+            </mat-button-toggle>
+            <mat-button-toggle (click)="fasterForward()" matTooltip="Faster forward" matTooltipClass="tooltip"
+                               value="fasterForward">
+              <mat-icon class="faster-forward">fast_forward</mat-icon>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </mat-card>
+      </div>
     </div>
   </div>
 </div>
 <br>
-<div [ngClass]="{'no-display': !noVideo}" class="alert-warning">No Video Clips Available For {{cam?.name}}
-  ({{stream?.descr}})
+<div [ngClass]="{'no-display': !noVideo}" class="alert-warning">No Video Clips Available For {{ cam?.name }}
+  ({{ stream?.descr }})
 </div>
 <app-reporting></app-reporting>
 

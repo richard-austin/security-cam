@@ -113,17 +113,20 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
             // Timer to ensure full screen mode is detectable with document.fullscreenElement !== null
           let sub = timer(60).subscribe(() => {
               sub.unsubscribe();
-              if ((target.type === 'landscape-secondary' || target.type === 'landscape-primary') && document.fullscreenElement !== null) {
+              if ((target.type === 'landscape-secondary' || target.type === 'landscape-primary') && document.fullscreenElement !== null)
                 document.exitFullscreen().then();
-                console.log("Exited full screen");
-              }
-              // Timer to ensure it's fully out of full screen before using scrollIntoView
+              this.vt.reset();
+              // Timer to ensure it's fully out of full screen before using scrollTo
               sub = timer(30).subscribe(() => {
                 sub.unsubscribe();
-                this.video.scrollIntoView();
+                if (target.type.toString().includes('portrait'))
+                  document.body.scrollTop = document.documentElement.scrollTop = 0;  // Scroll to top of page
+                else
+                  // Scroll to fit video in screen
+                  window.scrollTo({left: 0, top: this.video.getBoundingClientRect().y + window.scrollY});
               });
             });
-          this.vt.reset(true);
+
         }
       }
     }

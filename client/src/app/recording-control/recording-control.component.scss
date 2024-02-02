@@ -26,7 +26,8 @@ mat-icon.faster-forward {
 
 mat-card.recording-buttons {
   padding: 0.4rem;
-  > mat-button-toggle-group > button{
+
+  > mat-button-toggle-group > button {
     min-width: 0;
     border-right: .2px solid #646363;
     border-radius: 0;
@@ -39,25 +40,33 @@ div.no-display {
   display: none;
 }
 
-div.delete-button-set
-{
-    > div
-    {
-        button{
-          margin-top: 0.4rem;
-          margin-right: 0.4rem;
-        }
+div.delete-button-set {
+  > div {
+    button {
+      margin-top: 0.4rem;
+      margin-right: 0.4rem;
     }
+  }
 }
 
-div.download-button
-{
-  >button{
+div.download-button {
+  > button {
     width: 167.38px;
   }
+
   margin-top: 0.4rem;
 }
 
 div.recording-container {
-  margin-left: 1rem;
+  > mat-card {
+    margin-left: 0.5rem;
+    margin-right: 1rem;
+  }
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  > div {
+    margin-right: auto;
+    margin-left: auto;
+  }
 }
