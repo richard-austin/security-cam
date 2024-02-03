@@ -171,6 +171,15 @@ div.latency-limit-selector {
   }
 }
 
+span.vid-time {
+  font-size: medium;
+  color: #c7cef3;
+}
+span.duration-time {
+  font-size: medium;
+  color: #858585;
+}
+
 .latency-chasing {
   > mat-icon {
     animation: flash 2000ms steps(3, start) forwards;

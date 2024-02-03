@@ -3,7 +3,7 @@
   <div class="row">
     <mat-card class="mx-auto hide-background mat-elevation-z0">
       <mat-card-title class="mat-elevation-z8">
-        {{ videoFeeder.camName + " (" + videoFeeder.streamDescr + ")" }}
+        {{ videoFeeder.camName + " (" + videoFeeder.streamDescr + ") "}}<span class="vid-time">{{currentTime}}</span><span *ngIf="!isFmp4" class="duration-time"> - {{totalTime}}</span>
       </mat-card-title>
     </mat-card>
   </div>
