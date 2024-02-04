@@ -106,33 +106,6 @@ div.latency-limit-selector {
   }
 }
 
-.video-buttons {
-  cursor: pointer;
-  @media only screen and (max-width: 768px){
-    :active {
-      scale: 1.3;
-      transition: scale 350ms linear
-    }
-    :not(:active) {
-      scale: 1;
-      transition-property: transform;
-      transition: scale 350ms linear;
-    }
-  }
-  @media only screen and (min-width: 768px) {
-    :hover {
-      scale: 1.3;
-      transition: scale 350ms
-    }
-
-    :not(:hover) {
-      scale: 1;
-      transition-property: transform;
-      transition: scale 350ms linear;
-    }
-  }
-}
-
 .audio-out-disabled {
   color: gray !important;
   cursor: pointer;

@@ -1,4 +1,4 @@
-@use '~@angular/material' as mat;
+@use '@angular/material' as mat;
 @include mat.core;
 
 // Basic colours used in theme
@@ -183,6 +183,32 @@ mat-card.hide-background {
 
   > button {
     margin-left: 0.5rem;
+  }
+}
+label.video-buttons {
+  cursor: pointer;
+  @media only screen and (max-width: 768px){
+    :active {
+      scale: 1.3;
+      transition: scale 350ms linear
+    }
+    :not(:active) {
+      scale: 1;
+      transition-property: transform;
+      transition: scale 350ms linear;
+    }
+  }
+  @media only screen and (min-width: 768px) {
+    :hover {
+      scale: 1.3;
+      transition: scale 350ms
+    }
+
+    :not(:hover) {
+      scale: 1;
+      transition-property: transform;
+      transition: scale 350ms linear;
+    }
   }
 }
 

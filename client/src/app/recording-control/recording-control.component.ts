@@ -170,6 +170,15 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       this.showInvalidInput(false);
     }
   }
+  hasAudio (): boolean {
+    const video: any = this.video?.video;
+    if(video) {
+      return video.mozHasAudio ||
+        Boolean(video.webkitAudioDecodedByteCount) ||
+        Boolean(video.audioTracks && video.audioTracks.length);
+    }
+    return false;
+  }
 
   /**
    * showInvalidInput: Called after checking for a valid recording for this component.
@@ -360,5 +369,17 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
   ngOnDestroy(): void {
     this.video.video.controls = true; // Enable controls again
+  }
+
+  toggleMuteAudio() {
+    if(this.video !== undefined && this.video !== null)
+      this.video.videoFeeder.mute(!this.video.videoFeeder.isMuted);
+  }
+
+  isMuted() : boolean {
+    let retVal = false;
+    if(this.video !== undefined && this.video !== null)
+      retVal = this.video.videoFeeder.isMuted;
+    return retVal;
   }
 }
