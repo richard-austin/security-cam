@@ -36,6 +36,14 @@ mat-card.recording-buttons {
   }
 }
 
+div.additional-buttons {
+  margin-top: 0.3rem;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 div.no-display {
   display: none;
 }

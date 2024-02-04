@@ -103,9 +103,11 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.video.addEventListener('fullscreenchange', () => {
       this.vt.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
     });
-    this.video.ontimeupdate = (ev:Event) => {
-      this.currentTime = new Date( this.video.currentTime * 1000).toISOString().substring(11, 19);
-      this.totalTime = new Date( this.video.duration * 1000).toISOString().substring(11, 19);
+    this.video.ontimeupdate = () => {
+      if (this.video.currentTime !== null && !isNaN(this.video.currentTime))
+        this.currentTime = new Date(this.video.currentTime * 1000).toISOString().substring(11, 19);
+      if (this.video.duration !== null && !isNaN(this.video.duration))
+        this.totalTime = new Date(this.video.duration * 1000).toISOString().substring(11, 19);
     };
     window.screen.orientation.onchange = (ev: Event) => {
       // Set up VideoTransformations again to take account of viewport dimension changes
