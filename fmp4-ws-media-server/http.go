@@ -109,7 +109,6 @@ func serveHTTP() {
 		streams.addStream(suuid)
 		defer streams.removeStream(suuid)
 
-		// TODO: Need to find the most efficient way to get a clean buffer
 		data := make([]byte, 33000)
 		queue := make(chan Packet, 1)
 
@@ -186,7 +185,6 @@ func serveHTTP() {
 		log.Errorln(err)
 	}
 }
-
 func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	defer func() { r.Close = true }()
 	suuid := r.FormValue("suuid")
@@ -204,37 +202,42 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 		log.Errorf("Error getting ftyp: %s", err.Error())
 		return
 	}
-	bytes, err := w.Write(data.pckt)
+	nBytes, err := w.Write(data.pckt)
 	if err != nil {
 		log.Errorf("Error writing ftyp: %s", err.Error())
 		return
 	}
-	log.Tracef("Sent ftyp through http to %s:- %d bytes", suuid, bytes)
+	log.Tracef("Sent ftyp through http to %s:- %d nBytes", suuid, nBytes)
 
 	err, data = streams.getMoov(suuid)
 	if err != nil {
 		log.Errorf("Error getting moov: %s", err.Error())
 		return
 	}
-	bytes, err = w.Write(data.pckt)
+	nBytes, err = w.Write(data.pckt)
 	if err != nil {
 		log.Errorf("Error writing moov: %s", err.Error())
 		return
 	}
-	log.Tracef("Sent moov through http to %s:- %d bytes", suuid, bytes)
+	log.Tracef("Sent moov through http to %s:- %d nBytes", suuid, nBytes)
 
 	started := false
 	stream := streams.StreamMap[suuid]
-	gopCache := stream.gopCache.GetCurrent()
-	gopCacheUsed := stream.gopCache.GopCacheUsed
+	bb := stream.bucketBrigade.GetCurrent()
+	bbUsed := stream.bucketBrigade.bbUsed
+	defer bb.destroy()
 	for {
 		var data Packet
 
-		if gopCacheUsed {
-			data = gopCache.Get(ch)
+		if bbUsed {
+			fmt.Printf("Before Get\n")
+			data = bb.Get()
+			fmt.Printf("After Get\n")
+			//_ = <-ch // Dump the channel contents
 			started = true
 		} else {
 			data = <-ch
+			//			fmt.Printf("BB: %d ---- Nm: %d equal: %t\n", len(data.pckt), len(dast.pckt), bytes.Equal(dast.pckt, data.pckt))
 			if !started {
 				if data.isKeyFrame() {
 					started = true
@@ -243,13 +246,15 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
+		fmt.Printf("Before Write\n")
 		bytes, err := w.Write(data.pckt)
+		fmt.Printf("Writing %d bytes\n", len(data.pckt))
 		if err != nil {
 			// Warning only as it could be because the client disconnected
 			log.Warnf("writing to client for %s:= %s", suuid, err.Error())
 			break
 		}
-		log.Tracef("Data sent to http client for %s:- %d bytes", suuid, bytes)
+		log.Tracef("Data sent to http client for %s:- %d nBytes", suuid, bytes)
 	}
 }
 

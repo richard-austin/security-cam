@@ -10,11 +10,12 @@ import (
 )
 
 type Stream struct {
-	ftyp        Packet
-	moov        Packet
-	codecs      string
-	gopCache    GopCache
-	PcktStreams map[string]*PacketStream // One packetStream for each client connected through the suuid
+	ftyp          Packet
+	moov          Packet
+	codecs        string
+	gopCache      GopCache
+	bucketBrigade BucketBrigade
+	PcktStreams   map[string]*PacketStream // One packetStream for each client connected through the suuid
 }
 type StreamMap map[string]*Stream
 type Streams struct {
@@ -32,7 +33,7 @@ func NewStreams() *Streams {
 func (s *Streams) addStream(suuid string) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache)}
+	s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache), bucketBrigade: NewBucketBrigade(true)}
 }
 
 func (s *Streams) removeStream(suuid string) {
@@ -72,7 +73,11 @@ func (s *Streams) put(suuid string, pckt Packet) error {
 	var retVal error = nil
 	stream, ok := s.StreamMap[suuid]
 	if ok {
-		err := stream.gopCache.Input(pckt)
+		//err := stream.gopCache.Input(pckt)
+		//if err != nil {
+		//	_ = fmt.Errorf(err.Error())
+		//}
+		err := stream.bucketBrigade.Input(pckt)
 		if err != nil {
 			_ = fmt.Errorf(err.Error())
 		}
@@ -89,7 +94,7 @@ func (s *Streams) put(suuid string, pckt Packet) error {
 		}
 
 	} else {
-		retVal = fmt.Errorf("No stream with name %s was found", suuid)
+		retVal = fmt.Errorf("no stream with name %s was found", suuid)
 	}
 	return retVal
 }
@@ -141,17 +146,6 @@ func (s *Streams) getCodecs(suuid string) (err error, pckt Packet) {
 	defer s.mutex.Unlock()
 	pckt.pckt = append([]byte{0x09}, []byte(s.StreamMap[suuid].codecs)...)
 	err = nil
-	return
-}
-
-func (s *Streams) getGOPCache(suuid string) (err error, gopCache *GopCacheCopy) {
-	gopCache = nil
-	stream, ok := s.StreamMap[suuid]
-	if !ok {
-		err = fmt.Errorf("no stream for %s in getGOPCache", suuid)
-		return
-	}
-	gopCache = stream.gopCache.GetCurrent()
 	return
 }
 

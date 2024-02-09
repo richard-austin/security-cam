@@ -32,6 +32,7 @@ func (g *GopCache) Input(p Packet) (err error) {
 	defer g.mutex.Unlock()
 	if (p.isMoof() || g.inputIndex == 0) && p.isKeyFrame() {
 		g.inputIndex = 0
+		fmt.Printf("Keyframe\n")
 	}
 	if g.inputIndex < g.cacheLength {
 		g.Cache[g.inputIndex] = p
@@ -62,7 +63,6 @@ func newGopCacheCopy(cache *GopCache) (copy *GopCacheCopy) {
 func (c GopCacheCopy) Get(live chan Packet) (packet Packet) {
 	select {
 	case packet = <-c.pktChan:
-
 	default:
 		packet = <-live
 	}
