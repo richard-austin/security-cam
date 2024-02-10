@@ -190,13 +190,6 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	suuid := r.FormValue("suuid")
 
 	log.Infof("Request %s", suuid)
-	cuuid, ch := streams.addClient(suuid)
-	if ch == nil {
-		return
-	}
-	log.Infof("number of cuuid's = %d", len(streams.StreamMap[suuid].PcktStreams))
-	defer streams.deleteClient(suuid, cuuid)
-
 	err, data := streams.getFtyp(suuid)
 	if err != nil {
 		log.Errorf("Error getting ftyp: %s", err.Error())
@@ -221,34 +214,14 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Tracef("Sent moov through http to %s:- %d nBytes", suuid, nBytes)
 
-	started := false
 	stream := streams.StreamMap[suuid]
 	bb := stream.bucketBrigade.GetCurrent()
-	bbUsed := stream.bucketBrigade.bbUsed
+
 	defer bb.destroy()
 	for {
 		var data Packet
-
-		if bbUsed {
-			fmt.Printf("Before Get\n")
-			data = bb.Get()
-			fmt.Printf("After Get\n")
-			//_ = <-ch // Dump the channel contents
-			started = true
-		} else {
-			data = <-ch
-			//			fmt.Printf("BB: %d ---- Nm: %d equal: %t\n", len(data.pckt), len(dast.pckt), bytes.Equal(dast.pckt, data.pckt))
-			if !started {
-				if data.isKeyFrame() {
-					started = true
-				} else {
-					continue
-				}
-			}
-		}
-		fmt.Printf("Before Write\n")
+		data = bb.Get()
 		bytes, err := w.Write(data.pckt)
-		fmt.Printf("Writing %d bytes\n", len(data.pckt))
 		if err != nil {
 			// Warning only as it could be because the client disconnected
 			log.Warnf("writing to client for %s:= %s", suuid, err.Error())

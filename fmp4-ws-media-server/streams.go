@@ -73,11 +73,11 @@ func (s *Streams) put(suuid string, pckt Packet) error {
 	var retVal error = nil
 	stream, ok := s.StreamMap[suuid]
 	if ok {
-		//err := stream.gopCache.Input(pckt)
-		//if err != nil {
-		//	_ = fmt.Errorf(err.Error())
-		//}
-		err := stream.bucketBrigade.Input(pckt)
+		err := stream.gopCache.Input(pckt)
+		if err != nil {
+			_ = fmt.Errorf(err.Error())
+		}
+		err = stream.bucketBrigade.Input(pckt)
 		if err != nil {
 			_ = fmt.Errorf(err.Error())
 		}
@@ -282,16 +282,16 @@ func NewPacket(pckt []byte) Packet {
 }
 
 func (p Packet) isKeyFrame() (retVal bool) {
-	// [moof [mfhd] [traf [tfhd] [tfdt] [trun]]]
+	// [moof [mfhd] [traf [tfhd] [tfdt] [moof]]]
 	retVal = false
-	trun := getSubBox(p, "trun")
-	if trun == nil {
-		log.Warnf("trun was nil in isKeyFrame")
+	moof := getSubBox(p, "moof")
+	if moof == nil {
+		log.Warnf("moof was nil in isKeyFrame")
 		return
 	}
-	flags := trun[10:14]
+	flags := moof[3:5]
 
-	retVal = flags[1]&4 == 4
+	retVal = flags[0]&8 == 8
 	return
 }
 
