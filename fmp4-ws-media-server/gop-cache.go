@@ -46,22 +46,22 @@ func (g *GopCache) GetFeeder() (gopCacheCopy *GopCacheFeeder) {
 	if !g.GopCacheUsed {
 		return
 	}
-	g.mutex.Lock()
-	defer g.mutex.Unlock()
-	gopCacheCopy = newGopCacheCopy(g)
+	gopCacheCopy = newFeeder(g)
 	return
 }
-func newGopCacheCopy(cache *GopCache) (feeder *GopCacheFeeder) {
-	feeder = &GopCacheFeeder{pktChan: make(chan Packet, cache.cacheLength)}
-	for _, pkt := range cache.Cache[:cache.inputIndex] {
+func newFeeder(g *GopCache) (feeder *GopCacheFeeder) {
+	feeder = &GopCacheFeeder{pktChan: make(chan Packet, g.cacheLength)}
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	for _, pkt := range g.Cache[:g.inputIndex] {
 		feeder.pktChan <- pkt
 	}
 	return
 }
 
-func (c GopCacheFeeder) Get(live chan Packet) (packet Packet) {
+func (gcf GopCacheFeeder) Get(live chan Packet) (packet Packet) {
 	select {
-	case packet = <-c.pktChan:
+	case packet = <-gcf.pktChan:
 	default:
 		packet = <-live
 	}
