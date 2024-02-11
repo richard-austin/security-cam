@@ -13,7 +13,7 @@ type GopCache struct {
 	Cache        []Packet
 }
 
-type GopCacheFeeder struct {
+type GopCacheSnapshot struct {
 	pktChan chan Packet
 }
 
@@ -42,15 +42,15 @@ func (g *GopCache) Input(p Packet) (err error) {
 	return
 }
 
-func (g *GopCache) GetFeeder() (gopCacheCopy *GopCacheFeeder) {
+func (g *GopCache) GetSnapshot() (snapshot *GopCacheSnapshot) {
 	if !g.GopCacheUsed {
 		return
 	}
-	gopCacheCopy = newFeeder(g)
+	snapshot = newFeeder(g)
 	return
 }
-func newFeeder(g *GopCache) (feeder *GopCacheFeeder) {
-	feeder = &GopCacheFeeder{pktChan: make(chan Packet, g.cacheLength)}
+func newFeeder(g *GopCache) (feeder *GopCacheSnapshot) {
+	feeder = &GopCacheSnapshot{pktChan: make(chan Packet, g.cacheLength)}
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
 	for _, pkt := range g.Cache[:g.inputIndex] {
@@ -59,9 +59,9 @@ func newFeeder(g *GopCache) (feeder *GopCacheFeeder) {
 	return
 }
 
-func (gcf GopCacheFeeder) Get(live chan Packet) (packet Packet) {
+func (s GopCacheSnapshot) Get(live chan Packet) (packet Packet) {
 	select {
-	case packet = <-gcf.pktChan:
+	case packet = <-s.pktChan:
 	default:
 		packet = <-live
 	}

@@ -189,7 +189,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	defer func() { r.Close = true }()
 	suuid := r.FormValue("suuid")
 
-	log.Infof("Request %s", suuid)
+	log.Infof("http Request %s", suuid)
 	err, data := streams.getFtyp(suuid)
 	if err != nil {
 		log.Errorf("Error getting ftyp: %s", err.Error())
@@ -216,8 +216,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 
 	stream := streams.StreamMap[suuid]
 	bb := stream.bucketBrigade.GetFeeder()
-
-	defer bb.destroy()
+	defer stream.bucketBrigade.DestroyFeeder(bb)
 	for {
 		var data Packet
 		data = bb.Get()
@@ -240,7 +239,7 @@ func ws(ws *websocket.Conn) {
 	}()
 	suuid := ws.Request().FormValue("suuid")
 
-	log.Infof("Request %s", suuid)
+	log.Infof("ws Request %s", suuid)
 	err := ws.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	if err != nil {
 		log.Errorf("Error in SetWriteDeadline %s", err.Error())
@@ -301,7 +300,7 @@ func ws(ws *websocket.Conn) {
 	}()
 
 	stream := streams.StreamMap[suuid]
-	gopCache := stream.gopCache.GetFeeder()
+	gopCache := stream.gopCache.GetSnapshot()
 	gopCacheUsed := stream.gopCache.GopCacheUsed
 	// Main loop to send moof and mdat atoms
 	started := false

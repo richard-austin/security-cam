@@ -9,6 +9,7 @@ import (
 //	/** to the point at which action was detected
 type BucketBrigade struct {
 	bbUsed      bool
+	feeders     []*BucketBrigadeFeeder
 	cacheLength int
 	mutex       sync.Mutex
 	inputIndex  int
@@ -17,18 +18,18 @@ type BucketBrigade struct {
 	gopCache    GopCache
 }
 
-// BucketBrigadeFeeder // Combines a (delayed input) GopCacheFeeder with the delayed feed from a bucket brigade instance
+// BucketBrigadeFeeder // Combines a (delayed input) GopCacheSnapshot with the delayed feed from a bucket brigade instance
 type BucketBrigadeFeeder struct {
-	mutex        *sync.Mutex
-	lastBBIdx    int
-	gopCacheCopy *GopCacheFeeder
-	pktFeed      chan Packet
+	lastBBIdx        int
+	gopCacheSnapshot *GopCacheSnapshot
+	pktFeed          chan Packet
 }
 
 func NewBucketBrigade(used bool) (bucketBrigade BucketBrigade) {
 	const cacheLength int = 200
 	bucketBrigade = BucketBrigade{
 		Cache:       make([]Packet, cacheLength),
+		feeders:     make([]*BucketBrigadeFeeder, 0),
 		started:     false,
 		inputIndex:  0,
 		cacheLength: cacheLength,
@@ -39,13 +40,13 @@ func NewBucketBrigade(used bool) (bucketBrigade BucketBrigade) {
 
 func (bb *BucketBrigade) newFeeder() (bbFeeder *BucketBrigadeFeeder) {
 	bbFeeder = &BucketBrigadeFeeder{
-		mutex:        &bb.mutex,
-		lastBBIdx:    0,
-		gopCacheCopy: bb.gopCache.GetFeeder(),
-		pktFeed:      make(chan Packet, 1),
+		lastBBIdx:        0,
+		gopCacheSnapshot: bb.gopCache.GetSnapshot(),
+		pktFeed:          make(chan Packet, 1),
 	}
-
-	bbfMarshallPoint.bbf = append(bbfMarshallPoint.bbf, bbFeeder)
+	bb.mutex.Lock()
+	defer bb.mutex.Unlock()
+	bb.feeders = append(bb.feeders, bbFeeder)
 	return
 }
 
@@ -61,8 +62,8 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 	if bb.started {
 		opIdx := (bb.inputIndex + 1) % bb.cacheLength
 		err = bb.gopCache.Input(bb.Cache[opIdx])
-		for _, cb := range bbfMarshallPoint.bbf {
-			cb.pktFeed <- bb.Cache[opIdx]
+		for _, f := range bb.feeders {
+			f.pktFeed <- bb.Cache[opIdx]
 		}
 	}
 	if bb.inputIndex < bb.cacheLength-1 {
@@ -78,24 +79,23 @@ func (bb *BucketBrigade) GetFeeder() (bbFeeder *BucketBrigadeFeeder) {
 	if !bb.bbUsed {
 		return
 	}
-	bb.mutex.Lock()
-	defer bb.mutex.Unlock()
 	bbFeeder = bb.newFeeder()
 	return
 }
 
-func (bbf *BucketBrigadeFeeder) destroy() {
-	bbf.mutex.Lock()
-	defer bbf.mutex.Unlock()
-	for i := 0; i < len(bbfMarshallPoint.bbf); i++ {
-		if bbf == bbfMarshallPoint.bbf[i] {
-			bbfMarshallPoint.bbf = append(bbfMarshallPoint.bbf[:i], bbfMarshallPoint.bbf[i+1:]...)
+func (bb *BucketBrigade) DestroyFeeder(bbf *BucketBrigadeFeeder) {
+	bb.mutex.Lock()
+	defer bb.mutex.Unlock()
+	i := 0
+	for ; i < len(bb.feeders); i++ {
+		if bbf == bb.feeders[i] {
 			break
 		}
 	}
+	bb.feeders = append(bb.feeders[:i], bb.feeders[i+1:]...)
 }
 
 func (bbf *BucketBrigadeFeeder) Get() (packet Packet) {
-	packet = bbf.gopCacheCopy.Get(bbf.pktFeed)
+	packet = bbf.gopCacheSnapshot.Get(bbf.pktFeed)
 	return
 }
