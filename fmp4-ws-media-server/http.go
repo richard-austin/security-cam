@@ -215,7 +215,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	log.Tracef("Sent moov through http to %s:- %d nBytes", suuid, nBytes)
 
 	stream := streams.StreamMap[suuid]
-	bb := stream.bucketBrigade.GetCurrent()
+	bb := stream.bucketBrigade.GetFeeder()
 
 	defer bb.destroy()
 	for {
@@ -301,7 +301,7 @@ func ws(ws *websocket.Conn) {
 	}()
 
 	stream := streams.StreamMap[suuid]
-	gopCache := stream.gopCache.GetCurrent()
+	gopCache := stream.gopCache.GetFeeder()
 	gopCacheUsed := stream.gopCache.GopCacheUsed
 	// Main loop to send moof and mdat atoms
 	started := false

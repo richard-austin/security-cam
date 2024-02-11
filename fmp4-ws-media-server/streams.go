@@ -263,7 +263,7 @@ func (s *Streams) getCodecsFromMoov(suuid string) (err error, codecs string) {
 
 type PacketStream struct {
 	ps chan Packet
-	//	gopCacheCopy *GopCacheCopy
+	//	gopCacheCopy *GopCacheFeeder
 }
 
 func NewPacketStream() (packetStream PacketStream) {

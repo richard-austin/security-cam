@@ -17,11 +17,11 @@ type BucketBrigade struct {
 	gopCache    GopCache
 }
 
-// BucketBrigadeFeeder // Combines a (delayed input) GopCacheCopy with the delayed feed from a bucket brigade instance
+// BucketBrigadeFeeder // Combines a (delayed input) GopCacheFeeder with the delayed feed from a bucket brigade instance
 type BucketBrigadeFeeder struct {
-	mutex        sync.Mutex
+	mutex        *sync.Mutex
 	lastBBIdx    int
-	gopCacheCopy *GopCacheCopy
+	gopCacheCopy *GopCacheFeeder
 	pktFeed      chan Packet
 }
 
@@ -37,10 +37,11 @@ func NewBucketBrigade(used bool) (bucketBrigade BucketBrigade) {
 	return
 }
 
-func newBucketBrigadeFeeder(bucketBrigade *BucketBrigade) (bbFeeder *BucketBrigadeFeeder) {
+func (bb *BucketBrigade) newFeeder() (bbFeeder *BucketBrigadeFeeder) {
 	bbFeeder = &BucketBrigadeFeeder{
+		mutex:        &bb.mutex,
 		lastBBIdx:    0,
-		gopCacheCopy: bucketBrigade.gopCache.GetCurrent(),
+		gopCacheCopy: bb.gopCache.GetFeeder(),
 		pktFeed:      make(chan Packet, 1),
 	}
 
@@ -73,28 +74,28 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 	return
 }
 
-func (bb *BucketBrigade) GetCurrent() (bbFeeder *BucketBrigadeFeeder) {
+func (bb *BucketBrigade) GetFeeder() (bbFeeder *BucketBrigadeFeeder) {
 	if !bb.bbUsed {
 		return
 	}
 	bb.mutex.Lock()
 	defer bb.mutex.Unlock()
-	bbFeeder = newBucketBrigadeFeeder(bb)
+	bbFeeder = bb.newFeeder()
 	return
 }
 
-func (bb *BucketBrigadeFeeder) destroy() {
-	bb.mutex.Lock()
-	defer bb.mutex.Unlock()
+func (bbf *BucketBrigadeFeeder) destroy() {
+	bbf.mutex.Lock()
+	defer bbf.mutex.Unlock()
 	for i := 0; i < len(bbfMarshallPoint.bbf); i++ {
-		if bb == bbfMarshallPoint.bbf[i] {
+		if bbf == bbfMarshallPoint.bbf[i] {
 			bbfMarshallPoint.bbf = append(bbfMarshallPoint.bbf[:i], bbfMarshallPoint.bbf[i+1:]...)
 			break
 		}
 	}
 }
 
-func (bb *BucketBrigadeFeeder) Get() (packet Packet) {
-	packet = bb.gopCacheCopy.Get(bb.pktFeed)
+func (bbf *BucketBrigadeFeeder) Get() (packet Packet) {
+	packet = bbf.gopCacheCopy.Get(bbf.pktFeed)
 	return
 }
