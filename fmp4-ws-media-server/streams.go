@@ -10,11 +10,12 @@ import (
 )
 
 type Stream struct {
-	ftyp        Packet
-	moov        Packet
-	codecs      string
-	gopCache    GopCache
-	PcktStreams map[string]*PacketStream // One packetStream for each client connected through the suuid
+	ftyp          Packet
+	moov          Packet
+	codecs        string
+	gopCache      GopCache
+	bucketBrigade BucketBrigade
+	PcktStreams   map[string]*PacketStream // One packetStream for each client connected through the suuid
 }
 type StreamMap map[string]*Stream
 type Streams struct {
@@ -32,7 +33,7 @@ func NewStreams() *Streams {
 func (s *Streams) addStream(suuid string) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache)}
+	s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache), bucketBrigade: NewBucketBrigade(true)}
 }
 
 func (s *Streams) removeStream(suuid string) {
@@ -76,6 +77,10 @@ func (s *Streams) put(suuid string, pckt Packet) error {
 		if err != nil {
 			_ = fmt.Errorf(err.Error())
 		}
+		err = stream.bucketBrigade.Input(pckt)
+		if err != nil {
+			_ = fmt.Errorf(err.Error())
+		}
 		for _, packetStream := range stream.PcktStreams {
 			length := len(packetStream.ps)
 			log.Tracef("%s channel length = %d", suuid, length)
@@ -89,7 +94,7 @@ func (s *Streams) put(suuid string, pckt Packet) error {
 		}
 
 	} else {
-		retVal = fmt.Errorf("No stream with name %s was found", suuid)
+		retVal = fmt.Errorf("no stream with name %s was found", suuid)
 	}
 	return retVal
 }
@@ -141,17 +146,6 @@ func (s *Streams) getCodecs(suuid string) (err error, pckt Packet) {
 	defer s.mutex.Unlock()
 	pckt.pckt = append([]byte{0x09}, []byte(s.StreamMap[suuid].codecs)...)
 	err = nil
-	return
-}
-
-func (s *Streams) getGOPCache(suuid string) (err error, gopCache *GopCacheCopy) {
-	gopCache = nil
-	stream, ok := s.StreamMap[suuid]
-	if !ok {
-		err = fmt.Errorf("no stream for %s in getGOPCache", suuid)
-		return
-	}
-	gopCache = stream.gopCache.GetCurrent()
 	return
 }
 
@@ -269,7 +263,7 @@ func (s *Streams) getCodecsFromMoov(suuid string) (err error, codecs string) {
 
 type PacketStream struct {
 	ps chan Packet
-	//	gopCacheCopy *GopCacheCopy
+	//	gopCacheSnapshot *GopCacheSnapshot
 }
 
 func NewPacketStream() (packetStream PacketStream) {
@@ -288,16 +282,16 @@ func NewPacket(pckt []byte) Packet {
 }
 
 func (p Packet) isKeyFrame() (retVal bool) {
-	// [moof [mfhd] [traf [tfhd] [tfdt] [trun]]]
+	// [moof [mfhd] [traf [tfhd] [tfdt] [moof]]]
 	retVal = false
-	trun := getSubBox(p, "trun")
-	if trun == nil {
-		log.Warnf("trun was nil in isKeyFrame")
+	moof := getSubBox(p, "moof")
+	if moof == nil {
+		log.Warnf("moof was nil in isKeyFrame")
 		return
 	}
-	flags := trun[10:14]
+	flags := moof[3:5]
 
-	retVal = flags[1]&4 == 4
+	retVal = flags[0]&8 == 8
 	return
 }
 

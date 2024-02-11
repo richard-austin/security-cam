@@ -23,7 +23,6 @@ import {VideoTransformations} from "./VideoTransformations";
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
-  @ViewChild('top_of_page') topOfPage!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isFmp4: boolean = false;
   cam!: Camera;
@@ -134,9 +133,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.videoFeeder.stop();
     // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
     //  ffmpeg to the backchannel device. The problem does not occur when done like this
-    let timerSubscription
-      :
-      Subscription = timer(20).subscribe(() => {
+    let timerSubscription: Subscription = timer(20).subscribe(() => {
       this.audioBackchannel.stopAudioOut();
       timerSubscription.unsubscribe();
     });
@@ -150,6 +147,4 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if ($event.button === 0)
       this.vt.mouseDown($event);
   }
-
-  protected readonly Math = Math;
 }
