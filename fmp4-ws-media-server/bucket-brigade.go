@@ -1,6 +1,7 @@
 package main
 
 import (
+	log "github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -42,7 +43,7 @@ func (bb *BucketBrigade) newFeeder() (bbFeeder *BucketBrigadeFeeder) {
 	bbFeeder = &BucketBrigadeFeeder{
 		lastBBIdx:        0,
 		gopCacheSnapshot: bb.gopCache.GetSnapshot(),
-		pktFeed:          make(chan Packet, 1),
+		pktFeed:          make(chan Packet, 300),
 	}
 	bb.mutex.Lock()
 	defer bb.mutex.Unlock()
@@ -63,7 +64,11 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 		opIdx := (bb.inputIndex + 1) % bb.cacheLength
 		err = bb.gopCache.Input(bb.Cache[opIdx])
 		for _, f := range bb.feeders {
-			f.pktFeed <- bb.Cache[opIdx]
+			select {
+			case f.pktFeed <- bb.Cache[opIdx]:
+			default:
+				log.Errorf("Missed packet in bucket brigade Input: %d items in pktFeed channel\n", len(f.pktFeed))
+			}
 		}
 	}
 	if bb.inputIndex < bb.cacheLength-1 {
@@ -91,6 +96,10 @@ func (bb *BucketBrigade) DestroyFeeder(bbf *BucketBrigadeFeeder) {
 		if bbf == bb.feeders[i] {
 			break
 		}
+	}
+	// Ensure the channel is emptied to prevent Input from blocking
+	for len(bb.feeders[i].pktFeed) > 0 {
+		_ = <-bb.feeders[i].pktFeed
 	}
 	bb.feeders = append(bb.feeders[:i], bb.feeders[i+1:]...)
 }
