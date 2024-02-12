@@ -43,6 +43,7 @@ type StreamC struct {
 	NetcamUri           string `json:"netcam_uri"`
 	MediaServerInputUri string `json:"media_server_input_uri"`
 	URI                 string `json:"uri"`
+	PreambleFrames      int    `json:"preambleFrames"`
 }
 
 type CameraParamSpecs struct {

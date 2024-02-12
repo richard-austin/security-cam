@@ -37,7 +37,7 @@
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Camera discovery active, Please wait..</span>
   </mat-card-content>
-  <mat-card-content *ngIf="!downloading  && !updating && !discovering">
+  <mat-card-content style="width: calc(100dvw - 30px); height: calc(100dvh - 140px);  overflow: scroll" *ngIf="!downloading  && !updating && !discovering">
     <table mat-table
            [dataSource]="cameras | keyvalue" multiTemplateDataRows
            class="mat-elevation-z8">
@@ -142,7 +142,7 @@
           <mat-checkbox [formControl]="getCamControl(i, 'ftp')"
                         [disabled]="getFTPDisabledState(cam.value)"
                         matTooltip="{{motionSet(cam.value) ? 'To use FTP upload from the camera, you must not have motion selected on any stream.' :
-                        'If checked, make event recordings sent by FTP from '+ cam.key + ' available in the recordings selection.'}}"
+                        'If checked, images sent by FTP from '+ cam.key + ' on motion being detected will trigger the NVR to make a recording on the HD stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP to ./'+cam.key+ 'on port 2121 of the NVR. See Camera Recordings Service section of the README.md'}}"
                         matTooltipClass="tooltip"
                         (change)="updateCamField(i, 'ftp')">
           </mat-checkbox>
@@ -427,6 +427,22 @@
                         *ngFor="let camStream of cam.value.streams | keyvalue | excludeOwnStream:stream.key"
                         [value]="cam.key+'.'+camStream.key">
                         {{camStream.key}}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="preambleFrames">
+                <th mat-header-cell *matHeaderCellDef>Preamble Frames.</th>
+                <td mat-cell *matCellDef="let stream; let streamIndex = index">
+                  <mat-form-field appearance="legacy" [style.width.px]="50">
+                    <mat-select [formControl]="getStreamControl(camIndex, streamIndex, 'preambleFrames')"
+                                (selectionChange)="updateStreamField(camIndex, streamIndex, 'preambleFrames')"
+                                [disabled]="getPreambleFramesDisabledState(cam.value, stream.value)"
+                                matTooltip="The number of frames to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value divided by thje camera frame rate (seconds)."
+                                matTooltipClass="tooltip">
+                      <mat-option *ngFor="let preamble of cameraSvc.preambleFrameValues" [value]="preamble">
+                        {{preamble}}
                       </mat-option>
                     </mat-select>
                   </mat-form-field>

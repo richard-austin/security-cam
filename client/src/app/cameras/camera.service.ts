@@ -108,6 +108,9 @@ export class CameraService {
     {name: "100", value: 100}
   ];
 
+  private _preambleFrameValues: number[] = [
+    0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300
+  ]
   get cameraParamSpecs() {
     return this._cameraParamSpecs;
   };
@@ -119,7 +122,9 @@ export class CameraService {
   get ftpRetriggerWindows() {
     return this._ftpRetriggerWindows;
   }
-
+  get preambleFrameValues() {
+    return this._preambleFrameValues;
+  }
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     this.loadCameras().subscribe((cams) => {
       this.cameras = cams;

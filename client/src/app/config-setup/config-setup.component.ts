@@ -95,7 +95,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
-  streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'threshold', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
+  streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'threshold', 'trigger_recording_on', 'preambleFrames', 'mask_file', 'video_width', 'video_height'];
   streamFooterColumns = ['buttons']
 //  camSetupFormGroup!: FormGroup;
   camControls!: FormArray;
@@ -128,6 +128,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     if (ovhc.value == '')
       ptzc.setValue(false);  // Ensure PTZ is set to "off" if onvifHost has the (valid) value empty
     return ovhc.value == '' || !ovhc.valid;
+  }
+  getPreambleFramesDisabledState(cam: Camera, stream: Stream): boolean {
+    return !stream?.motion?.enabled && !cam?.ftp;
   }
 
   updateCam(index: number, field: string, value: any) {
@@ -236,6 +239,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
             value: stream.motion.trigger_recording_on,
             disabled: !stream.motion.enabled
           }, [Validators.nullValidator]),
+          preambleFrames: new FormControl({
+            value: stream.preambleFrames,
+            disabled: this.getPreambleFramesDisabledState(camera, stream),
+          }, [Validators.min(0), Validators.max(300)]),
           mask_file: new FormControl({
             value: stream.motion.mask_file,
             disabled: !stream.motion.enabled

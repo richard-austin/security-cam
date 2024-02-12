@@ -26,15 +26,15 @@ type BucketBrigadeFeeder struct {
 	pktFeed          chan Packet
 }
 
-func NewBucketBrigade(used bool) (bucketBrigade BucketBrigade) {
-	const cacheLength int = 200
+func NewBucketBrigade(preambleFrames int) (bucketBrigade BucketBrigade) {
+	cacheLength := preambleFrames + 1
 	bucketBrigade = BucketBrigade{
 		Cache:       make([]Packet, cacheLength),
 		feeders:     make([]*BucketBrigadeFeeder, 0),
 		started:     false,
 		inputIndex:  0,
 		cacheLength: cacheLength,
-		bbUsed:      used,
+		bbUsed:      true,
 		gopCache:    NewGopCache(true)}
 	return
 }
