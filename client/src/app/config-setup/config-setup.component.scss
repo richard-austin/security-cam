@@ -213,6 +213,7 @@ mat-icon.sort-button-icon {
 .no-camera-credentials {
   animation: pulsing 1300ms infinite;
 }
+
 @keyframes pulsing {
   0% {
     color: #800;
@@ -223,4 +224,32 @@ mat-icon.sort-button-icon {
   100% {
     color: #800;
   }
+}
+mat-card-content.scrollable-content {
+  width: calc(100dvw - 30px);
+  height: calc(100dvh - 140px);
+  overflow: auto;
+}
+::-webkit-scrollbar {
+  width: 15px;
+  height: 15px;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #626262;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #8f8f8f;
+}
+
+::-webkit-scrollbar-corner {
+  background-color: inherit;
 }

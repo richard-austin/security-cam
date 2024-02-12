@@ -37,7 +37,7 @@
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Camera discovery active, Please wait..</span>
   </mat-card-content>
-  <mat-card-content style="width: calc(100dvw - 30px); height: calc(100dvh - 140px);  overflow: scroll" *ngIf="!downloading  && !updating && !discovering">
+  <mat-card-content class="scrollable-content" *ngIf="!downloading  && !updating && !discovering">
     <table mat-table
            [dataSource]="cameras | keyvalue" multiTemplateDataRows
            class="mat-elevation-z8">
