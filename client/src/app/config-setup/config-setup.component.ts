@@ -1,4 +1,13 @@
-import {AfterViewInit, Component, ElementRef, isDevMode, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  isDevMode,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -115,7 +124,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   savedDataHash: string = "";
   haveCameraCredentials: boolean = false;
 
-  constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
+  constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
   }
 
   getCamControl(index: number, fieldName: string): FormControl {
@@ -468,6 +477,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.cameras = retVal;
     this.setUpTableFormControls();
+    this.cd.detectChanges();  // Fixes bug where the doorbell would come up with the wrong stream selected for motion after onvif discovery
   }
 
   toggle(el: { key: string, value: Camera }) {
