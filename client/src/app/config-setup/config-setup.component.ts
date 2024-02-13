@@ -87,6 +87,7 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
 export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
   @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
+  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement>
   downloading: boolean = true;
   updating: boolean = false;
   discovering: boolean = false;
@@ -815,6 +816,15 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     cam.backchannelAudioSupported = !cam.backchannelAudioSupported;
   }
 
+  getScrollableContentStyle():string {
+    const scrollableContent = this.scrollableContent?.nativeElement;
+
+    if(scrollableContent !== undefined ) {
+      const boundingRect = scrollableContent.getBoundingClientRect()
+      return 'width: 100%; height: calc(100dvh - ${boundingRect.top+20}px); overflow: auto;'
+    }
+    else return ""
+  }
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the checkboxes
     this.cameraSvc.loadCameras().subscribe(cameras => {

@@ -225,11 +225,7 @@ mat-icon.sort-button-icon {
     color: #800;
   }
 }
-mat-card-content.scrollable-content {
-  width: calc(100dvw - 30px);
-  height: calc(100dvh - 140px);
-  overflow: auto;
-}
+
 ::-webkit-scrollbar {
   width: 15px;
   height: 15px;
@@ -245,7 +241,6 @@ mat-card-content.scrollable-content {
   border-radius: 10px;
 }
 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #8f8f8f;
 }
