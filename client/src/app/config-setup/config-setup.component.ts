@@ -821,10 +821,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if(scrollableContent !== undefined ) {
       const boundingRect = scrollableContent.getBoundingClientRect()
-      return 'width: 100%; height: calc(100dvh - ${boundingRect.top+20}px); overflow: auto;'
+      return `width: 100%; height: calc(100dvh - ${boundingRect.top+20}px); overflow: auto;`
     }
     else return ""
   }
+
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the checkboxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
