@@ -9,7 +9,7 @@
       matTooltipClass="tooltip">
       <button class="change-password-button"
               mat-icon-button
-              [attr.disabled]="isGuest"
+              [disabled]="isGuest"
               (click)="togglePasswordDialogue()">
         <mat-icon [ngClass]="{'no-camera-credentials': !haveCameraCredentials}">security</mat-icon>
       </button>
@@ -48,14 +48,14 @@
             class="sort-buttons"
             *matCellDef="let cam">
           <span>
-            <button [attr.disabled]="lastElement(cam) || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
+            <button [disabled]="lastElement(cam) || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
                     mat-icon-button (click)="moveDown(cam)"
                     [matTooltip]="lastElement(cam) ? '' : 'Click to move '+cam.value.name+' down 1 step'"
                     matTooltipClass="tooltip"
                     class="sort-button-icon">
               <mat-icon class="sort-button-icon">arrow_downward</mat-icon>
             </button>
-            <button [attr.disabled]="cam.key=='camera1' || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
+            <button [disabled]="cam.key=='camera1' || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
                     mat-icon-button (click)="moveUp(cam)"
                     [matTooltip]="cam.key=='camera1' ? '' : 'Click to move '+cam.value.name+' up 1 step'"
                     matTooltipClass="tooltip"
@@ -88,7 +88,7 @@
         <th mat-header-cell *matHeaderCellDef>Delete</th>
         <td mat-cell *matCellDef="let cam">
           <button mat-icon-button matTooltip="Delete {{cam.key}}" matTooltipClass="tooltip"
-                  [attr.disabled]="cameras.size <= 1 || confirmSave || confirmNew"
+                  [disabled]="cameras.size <= 1 || confirmSave || confirmNew"
                   (click)="deleteCamera(cam.key)">
             <mat-icon>delete</mat-icon>
           </button>
@@ -141,7 +141,7 @@
         <th mat-header-cell *matHeaderCellDef>FTP From Camera.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
           <mat-checkbox [formControl]="getCamControl(i, 'ftp')"
-                        [attr.disabled]="getFTPDisabledState(cam.value)"
+                        [disabled]="getFTPDisabledState(cam.value)"
                         matTooltip="{{motionSet(cam.value) ? 'To use FTP upload from the camera, you must not have motion selected on any stream.' :
                         'If checked, images sent by FTP from '+ cam.key + ' on motion being detected will trigger the NVR to make a recording on the HD stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP to ./'+cam.key+ 'on port 2121 of the NVR. See Camera Recordings Service section of the README.md'}}"
                         matTooltipClass="tooltip"
@@ -156,7 +156,7 @@
           <mat-form-field appearance="legacy" [style.width.px]="50">
             <mat-select [formControl]="getCamControl(i, 'retriggerWindow')"
                         (selectionChange)="updateCamField(i, 'retriggerWindow')"
-                        [attr.disabled]="!cam.value.ftp"
+                        [disabled]="!cam.value.ftp"
                         matTooltip="Select the maximum time in seconds that can elapse between FTP uploads from the camere for the recording to be extended further by this selected time. The absence of another FTP within this window will result in the recording being completed."
                         matTooltipClass="tooltip">
               <mat-option *ngFor="let win of cameraSvc.ftpRetriggerWindows" [value]="win.value">
@@ -243,7 +243,7 @@
         <th mat-header-cell *matHeaderCellDef>PTZ Controls.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
           <mat-checkbox [formControl]="getCamControl(i, 'ptzControls')"
-                        [attr.disabled]="setPTZControlsCheckboxDisabledState(i)"
+                        [disabled]="setPTZControlsCheckboxDisabledState(i)"
                         matTooltip="The Pan Tilt and Zoom controls for {{cam.key}} will be present on the live stream view if checked."
                         matTooltipClass="tooltip"
                         (change)="updateCamField(i, 'ptzControls')">
@@ -283,7 +283,7 @@
                 <th mat-header-cell *matHeaderCellDef>Delete</th>
                 <td mat-cell *matCellDef="let stream" [width]="50">
                   <button mat-icon-button matTooltip="Delete this stream" matTooltipClass="tooltip"
-                          [attr.disabled]="(cam.value.streams.size <= 1) || confirmSave || confirmNew"
+                          [disabled]="(cam.value.streams.size <= 1) || confirmSave || confirmNew"
                           (click)="deleteStream(cam.key, stream.key)">
                     <mat-icon>delete</mat-icon>
                   </button>
@@ -314,7 +314,7 @@
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
                   <mat-checkbox [color]="'primary'" [checked]="stream.value.audio"
                                 (change)="setAudioInEnabledStatus($event, stream.value)"
-                                [attr.disabled]="stream.value.audio_encoding == 'None'"
+                                [disabled]="stream.value.audio_encoding == 'None'"
                                 matTooltip="If checked, audio will be enabled on {{stream.key}} for {{cam.key}}."
                                 matTooltipClass="tooltip">
                   </mat-checkbox>

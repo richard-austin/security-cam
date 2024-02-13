@@ -842,9 +842,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cameraSvc.loadCameras().subscribe(cameras => {
         this.cameras = cameras;
 
-        this.savedDataHash = objectHash(this.cameras);
         this.downloading = false;
         this.FixUpCamerasData()
+        this.savedDataHash = objectHash(this.cameras);
       },
       () => {
         this.createNew();
