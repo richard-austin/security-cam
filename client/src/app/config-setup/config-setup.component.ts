@@ -652,6 +652,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updating = false;
         // Update the saved data hash
         this.savedDataHash = objectHash(this.cameras);
+        this.cd.detectChanges();
       },
       reason => {
         this.reporting.errorMessage = reason
@@ -676,8 +677,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.discovering = true;
     this.cameraSvc.discover().subscribe((cams: Map<string, Camera>) => {
         this.cameras = cams;
-        this.FixUpCamerasData();
         this.discovering = false;
+        this.FixUpCamerasData();
       },
       reason => {
         this.reporting.errorMessage = reason;
@@ -840,9 +841,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     // Set up the available streams/cameras for selection by the checkboxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
         this.cameras = cameras;
-        this.FixUpCamerasData()
+
         this.savedDataHash = objectHash(this.cameras);
         this.downloading = false;
+        this.FixUpCamerasData()
       },
       () => {
         this.createNew();

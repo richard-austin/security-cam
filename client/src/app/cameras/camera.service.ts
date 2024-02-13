@@ -6,6 +6,7 @@ import {catchError, map, tap} from "rxjs/operators";
 import {AudioEncoding, Camera, CameraParamSpec, Stream} from "./Camera";
 import {CameraAdminCredentials} from "../credentials-for-camera-access/credentials-for-camera-access.component";
 import {NativeDateAdapter} from '@angular/material/core';
+import {KeyValue} from "@angular/common";
 
 
 /**
@@ -158,6 +159,19 @@ export class CameraService {
     return cameras;
   }
 
+  /**
+   * compareFn: Compare function for use with the keyvalue pipe. This compares string with numbers (such as stream9, stream10)
+   *            and sorts the numeric parts numerically rather than alphabetically. This was added to fix a bug which
+   *            occurred when there are 10 or more streams in total (like with 5 cameras, each having two streams).
+   * @param kv1 key1 camera1/stream1
+   * @param kv2 key2, camera2/stream2
+   */
+  compareFn(kv1: KeyValue<string, any>, kv2: KeyValue<string, any>): number {
+    return kv1.key.localeCompare(kv2.key, undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    });
+  }
   /**
    * loadCameras: Get camera set up details from the server
    * @private

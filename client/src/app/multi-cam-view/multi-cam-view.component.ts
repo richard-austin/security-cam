@@ -44,7 +44,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   cameraColumns = ['name', 'expand'];
   streamColumns = ['select'];
 
-  constructor(private cameraSvc: CameraService, private utilsService: UtilsService) {
+  constructor(public cameraSvc: CameraService, private utilsService: UtilsService) {
   }
 
   cams: Map<string, Camera> = new Map<string, Camera>();
