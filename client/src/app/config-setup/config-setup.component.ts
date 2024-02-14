@@ -16,7 +16,7 @@ import {
   AbstractControl,
   FormArray,
   FormControl,
-  FormGroup, NgControl,
+  FormGroup,
   ValidationErrors,
   ValidatorFn,
   Validators
