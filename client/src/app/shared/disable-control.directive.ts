@@ -6,15 +6,17 @@ import {timer} from "rxjs";
   selector: '[disableControl]'
 })
 export class DisableControlDirective {
-  @Input() set disableControl( condition : boolean ) {
+  @Input() set disableControl(condition: boolean) {
     const action = condition ? 'disable' : 'enable';
-    const sub = timer(0).subscribe(()=> {
-    // @ts-ignore
-    this.ngControl.control[action]();
-    sub.unsubscribe();
+    // Deferred execution of the control action otherwise it on sets thew initial form state,
+    //  and doesn't work for dynamic updates.
+    const sub = timer(0).subscribe(() => {
+      // @ts-ignore
+      this.ngControl.control[action]();
+      sub.unsubscribe();
     })
   }
 
-  constructor( private ngControl : NgControl) {
+  constructor(private ngControl: NgControl) {
   }
 }
