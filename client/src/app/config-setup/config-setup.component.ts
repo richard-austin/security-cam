@@ -16,7 +16,7 @@ import {
   AbstractControl,
   FormArray,
   FormControl,
-  FormGroup,
+  FormGroup, NgControl,
   ValidationErrors,
   ValidatorFn,
   Validators
@@ -144,7 +144,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateCam(index: number, field: string, value: any) {
-    console.log(index, field, value);
     Array.from(this.cameras.values()).forEach((cam: Camera, i) => {
       if (i === index) { // @ts-ignore
         cam[field] = value;
@@ -273,7 +272,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         }, [Validators.maxLength(55)]),
         ftp: new FormControl({
           value: camera.ftp,
-          disabled: this.getFTPDisabledState(camera),
+          disabled: false,
         }, [validateTrueOrFalse({ftp: true})]),
         retriggerWindow: new FormControl({
             value: camera?.retriggerWindow != undefined ? camera.retriggerWindow : 30,
@@ -832,7 +831,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if(scrollableContent !== undefined ) {
       const boundingRect = scrollableContent.getBoundingClientRect()
-      return `width: 100%; height: calc(100dvh - ${boundingRect.top+20}px); overflow: auto;`
+      return `width: 100%; height: calc(100dvh - ${boundingRect.top+17}px); overflow: auto;`
     }
     else return ""
   }
