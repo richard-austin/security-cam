@@ -1,4 +1,13 @@
-import {AfterViewInit, Component, ElementRef, isDevMode, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  isDevMode,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -87,6 +96,7 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
 export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
   @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
+  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement>
   downloading: boolean = true;
   updating: boolean = false;
   discovering: boolean = false;
@@ -95,7 +105,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
-  streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'threshold', 'trigger_recording_on', 'mask_file', 'video_width', 'video_height'];
+  streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'threshold', 'trigger_recording_on', 'preambleFrames', 'mask_file', 'video_width', 'video_height'];
   streamFooterColumns = ['buttons']
 //  camSetupFormGroup!: FormGroup;
   camControls!: FormArray;
@@ -114,7 +124,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   savedDataHash: string = "";
   haveCameraCredentials: boolean = false;
 
-  constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer) {
+  constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
   }
 
   getCamControl(index: number, fieldName: string): FormControl {
@@ -128,6 +138,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     if (ovhc.value == '')
       ptzc.setValue(false);  // Ensure PTZ is set to "off" if onvifHost has the (valid) value empty
     return ovhc.value == '' || !ovhc.valid;
+  }
+  getPreambleFramesDisabledState(cam: Camera, stream: Stream): boolean {
+    return !stream?.motion?.enabled && !cam?.ftp;
   }
 
   updateCam(index: number, field: string, value: any) {
@@ -236,6 +249,10 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
             value: stream.motion.trigger_recording_on,
             disabled: !stream.motion.enabled
           }, [Validators.nullValidator]),
+          preambleFrames: new FormControl({
+            value: stream.preambleFrames,
+            disabled: this.getPreambleFramesDisabledState(camera, stream),
+          }, [Validators.min(0), Validators.max(300)]),
           mask_file: new FormControl({
             value: stream.motion.mask_file,
             disabled: !stream.motion.enabled
@@ -460,6 +477,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.cameras = retVal;
     this.setUpTableFormControls();
+    this.cd.detectChanges();  // Fixes bug where the doorbell would come up with the wrong stream selected for motion after onvif discovery
   }
 
   toggle(el: { key: string, value: Camera }) {
@@ -634,6 +652,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updating = false;
         // Update the saved data hash
         this.savedDataHash = objectHash(this.cameras);
+        this.cd.detectChanges();
       },
       reason => {
         this.reporting.errorMessage = reason
@@ -658,8 +677,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.discovering = true;
     this.cameraSvc.discover().subscribe((cams: Map<string, Camera>) => {
         this.cameras = cams;
-        this.FixUpCamerasData();
         this.discovering = false;
+        this.FixUpCamerasData();
       },
       reason => {
         this.reporting.errorMessage = reason;
@@ -808,13 +827,24 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     cam.backchannelAudioSupported = !cam.backchannelAudioSupported;
   }
 
+  getScrollableContentStyle():string {
+    const scrollableContent = this.scrollableContent?.nativeElement;
+
+    if(scrollableContent !== undefined ) {
+      const boundingRect = scrollableContent.getBoundingClientRect()
+      return `width: 100%; height: calc(100dvh - ${boundingRect.top+20}px); overflow: auto;`
+    }
+    else return ""
+  }
+
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the checkboxes
     this.cameraSvc.loadCameras().subscribe(cameras => {
         this.cameras = cameras;
+
+        this.downloading = false;
         this.FixUpCamerasData()
         this.savedDataHash = objectHash(this.cameras);
-        this.downloading = false;
       },
       () => {
         this.createNew();

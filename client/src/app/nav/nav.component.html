@@ -18,8 +18,8 @@
         Select Camera
       </button>
       <mat-menu #menuSelectCamera="matMenu">
-        <ng-container *ngFor="let camKV of cameras | keyvalue">
-          <ng-container *ngFor="let streamKV of camKV.value.streams | keyvalue">
+        <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
+          <ng-container *ngFor="let streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn">
             <button mat-menu-item (click)="setVideoStream(camKV.value, streamKV.value);menuClosed()">
               {{camKV.value.name + " (" + streamKV.value.descr + ")"}}
             </button>
@@ -32,8 +32,8 @@
     <div>
       <button mat-button [matMenuTriggerFor]="$any(menuSelectRecording)">Select Recording</button>
       <mat-menu #menuSelectRecording="matMenu">
-        <ng-container *ngFor="let camKV of cameras | keyvalue">
-          <ng-container *ngFor="let streamKV of camKV.value.streams | keyvalue">
+        <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
+          <ng-container *ngFor="let streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn">
             <button mat-menu-item (click)="showRecording(camKV.value, streamKV.value);menuClosed()" *ngIf="streamKV.value.recording.enabled">
               {{camKV.value.name + " (" + streamKV.value.descr + ")"}}
             </button>
@@ -49,7 +49,7 @@
         <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraAdmin)">Camera Admin</button>
       </mat-menu>
       <mat-menu #menuCameraSettings="matMenu">
-        <ng-container *ngFor="let camKV of cameras | keyvalue">
+        <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
           <button *ngIf="camKV.value.address!=''&&camKV.value.cameraParamSpecs.camType !== cameraTypes.none" mat-menu-item
                   (click)="cameraControl(camKV.value);menuClosed()">
             {{camKV.value.name}}
@@ -57,7 +57,7 @@
         </ng-container>
       </mat-menu>
       <mat-menu #menuCameraAdmin="matMenu">
-        <ng-container *ngFor="let camKV of cameras | keyvalue">
+        <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
           <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
             <button *ngIf="camKV.value.address!=''" mat-menu-item
                     [disabled]="isGuest"

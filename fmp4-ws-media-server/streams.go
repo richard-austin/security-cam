@@ -33,7 +33,11 @@ func NewStreams() *Streams {
 func (s *Streams) addStream(suuid string) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache), bucketBrigade: NewBucketBrigade(true)}
+	streamC, err := getStreamC(suuid)
+	if err != nil {
+		log.Errorf("could not get a camera stream for suuid %s\n", suuid)
+	}
+	s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache), bucketBrigade: NewBucketBrigade(streamC.PreambleFrames)}
 }
 
 func (s *Streams) removeStream(suuid string) {
@@ -138,6 +142,21 @@ func (s *Streams) putMoov(suuid string, pckt Packet) (retVal error) {
 			retVal = fmt.Errorf("Stream %s not found", suuid)
 		}
 	}
+	return
+}
+
+/** getStreamC: Get camera stream for the http stream suuid
+ */
+func getStreamC(suuid string) (streamC StreamC, err error) {
+	err = nil
+	for _, camera := range cameras.Cameras {
+		stream, ok := camera.Streams[suuid]
+		if ok {
+			streamC = stream
+			return
+		}
+	}
+	err = fmt.Errorf("no stream found for suuid %s", suuid)
 	return
 }
 

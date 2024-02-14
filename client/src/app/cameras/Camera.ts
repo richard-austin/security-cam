@@ -71,6 +71,7 @@ export class Stream {
   video_height: number = 0;
   recording: Recording = new Recording();
   rec_num: number = 0;  // Used to give a rec number for the recording URI with motion triggered recordings
+  preambleFrames: number = 100;
 }
 export class CameraParamSpec {
   constructor(camType: cameraType, params: string, uri: string, name: string) {

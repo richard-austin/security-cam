@@ -102,7 +102,6 @@ func serveHTTP() {
 			log.Errorf("Cannot add %s, there is already an existing stream with that id", suuid)
 			return
 		}
-
 		log.Infof("Input connected for %s", suuid)
 		readCloser := req.Body
 
