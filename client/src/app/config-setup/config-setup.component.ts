@@ -830,7 +830,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     const scrollableContent = this.scrollableContent?.nativeElement;
     // Calculated scrollbar height, don't use or we Expression changed after it was checked. ====>
     //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
-    const scrollbarHeight = 15; //Should be the same as height in ::-webkit-scrollbar
+    const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
     const extraBit = 1;  // To make browser window vertical scrollbar disappear
     if(scrollableContent !== undefined ) {
       const boundingRect = scrollableContent.getBoundingClientRect()
