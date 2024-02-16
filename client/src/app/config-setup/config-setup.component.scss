@@ -254,7 +254,8 @@ mat-icon.sort-button-icon {
 mat-card-content.scrollable-content {
   width: 100%;
   overflow: auto;
-
+  //scrollbar-color: #545454 #C2D2E4;  // Firefox only, overrides webkit settings so not using it
+  //scrollbar-width: auto;            // Firefox only, overrides webkit settings so not using it
   &::-webkit-scrollbar {
     width: 20px;
     height: 20px;
