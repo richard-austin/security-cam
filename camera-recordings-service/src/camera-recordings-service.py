@@ -50,18 +50,29 @@ def execute_os_command(command: str) -> [int, str]:
     return {exitcode, message}
 
 
-def get_ffmpeg_cmd(camera: any):
-    if camera is not None and camera["ftp"]:
-        first_stream = next(iter(camera['streams']))
-    location = camera['streams'][first_stream]['recording']['location']
-    audio = camera["streams"][first_stream]["audio"]
-    recording_src_url = camera['streams'][first_stream]['recording']['recording_src_url']
-    epoch_time = int(time.time())
-    ffmpeg_cmd: str = (
-        f"/usr/local/bin/ffmpeg -i {recording_src_url} -t 01:00:00 {'-c:a copy' if audio else '-an'}"
-        f" -c:v copy -level 3.0 -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type"
-        f" fmp4 -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
-        f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")
+def get_ffmpeg_cmd(camera: any, stream: str = ""):  # stream is irrelevant if ftp triggered recording enabled on camera
+    ffmpeg_cmd: str = ""
+    selected_stream: str = ""
+    if camera is not None:
+        if camera["ftp"]:
+            selected_stream = next(iter(camera['streams']))  # Get the first stream for ftp triggered recordings
+        else:
+            if stream.find("stream") == 0:  # Check the stream name starts with "stream"
+                selected_stream = stream
+        if selected_stream != "":
+            location = camera['streams'][selected_stream]['recording']['location']
+            audio = camera["streams"][selected_stream]["audio"]
+            recording_src_url = camera['streams'][selected_stream]['recording']['recording_src_url']
+            epoch_time = int(time.time())
+            ffmpeg_cmd: str = (
+                f"/usr/local/bin/ffmpeg -i {recording_src_url} -t 01:00:00 {'-c:a copy' if audio else '-an'}"
+                f" -c:v copy -level 3.0 -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type"
+                f" fmp4 -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
+                f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")
+        else:
+            logger.error("No stream specified for recording")
+    else:
+        logger.error("No camera specified for recording")
     return ffmpeg_cmd
 
 
@@ -115,7 +126,7 @@ class FTPAndVideoFileProcessor(FTPHandler):
 
     def trigger_recording_from_ftp_file(self, path: str):
         cams_file = open("/var/security-cam/cameras.json")
-        location: str = ""
+
         try:
             cams = json.load(cams_file)
             camera_name: str = path.replace(self.ftpPath, '', 1)
@@ -129,25 +140,25 @@ class FTPAndVideoFileProcessor(FTPHandler):
                     logger.warning(f"No camera type for file {path}")
 
             if path.endswith('.jpg'):  # Only dealing with jpg files
-                if self.processDict.__contains__(location):
-                    self.processDict[location].reset()
+                if self.processDict.__contains__(camera_name):
+                    self.processDict[camera_name].reset()
                 else:
                     ffmpeg_cmd = get_ffmpeg_cmd(camera)
                     subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
                     timer: ResettableTimer = ResettableTimer(camera['retriggerWindow'],
-                                                             lambda: self.finish_recording(subproc, location))
+                                                             lambda: self.finish_recording(subproc, camera_name))
                     timer.start()
-                    self.processDict[location] = timer
+                    self.processDict[camera_name] = timer
                     logger.info(
-                        f"Started recording for {location}, retriggerWindow = {camera['retriggerWindow']}")
+                        f"Started recording for {camera_name}, retriggerWindow = {camera['retriggerWindow']}")
 
                 os.remove(path)
 
                 # Remove old directories and any remaining files created by camera FTP transfers
                 execute_os_command(f"find {self.ftpPath} -mtime +2 -delete")
                 # Remove recording files more than 3 weeks old
-                if location != "":
-                    execute_os_command(f"find {self.recordingsPath}/{location} -mtime +21 -delete")
+                if camera_name != "":
+                    execute_os_command(f"find {self.recordingsPath}/{camera_name} -mtime +21 -delete")
 
         except TypeError as t:
             logger.error(f"Exception TypeError was raised {t!r}")
@@ -166,36 +177,56 @@ class HttpHandler(BaseHTTPRequestHandler):
         try:
             cams_file = open("/var/security-cam/cameras.json")
             cams = json.load(cams_file)
+            stream: str = ""
+
+            def get_triggered_stream(cam: any):
+                for s in cam['streams']:
+                    s_obj = cam['streams'][s]
+                    tro = s_obj['motion']['trigger_recording_on']
+                    if tro.find('stream') != -1:
+                        dot_idx = tro.index('.')
+                        return tro[dot_idx + 1:]  # Remove the camera name from the string, just leaving the stream name
+
+            def finish_recording(cn: str):
+                if self.recording_procs.__contains__(cn):
+                    sp = self.recording_procs[cn]
+                    sp.send_signal(signal.SIGINT)
+                    sp.wait()
+                    self.recording_procs.pop(cn)
 
             cmd = self.parse_POST()
             match cmd['command']:
                 case 'start_recording':
                     camera_name = cmd['camera_name']
-                    logger.info(f"Starting recording for {camera_name}")
                     camera = cams[camera_name]
-                    cam_type: CameraType = camera['cameraParamSpecs']['camType']
-                    ffmpeg_cmd = get_ffmpeg_cmd(camera)
-                    # Check there is not already an entry for this camera before starting recording
-                    if not self.recording_procs.__contains__(camera_name):
-                        subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
-                        self.recording_procs[camera_name] = subproc
-                        self.returnResponse(200, f"Recording started for {camera_name}")
-                    else:
-                        self.returnResponse(400, f"Recording already underway for {camera_name}")
+                    stream = get_triggered_stream(camera)
+                    if stream != "":
+                        # cam_type: CameraType = camera['cameraParamSpecs']['camType']
+                        ffmpeg_cmd = get_ffmpeg_cmd(camera, stream)
+                        logger.info(f"Starting recording for {camera_name}")
+                        # Check there is not already an entry for this camera before starting recording
+                        if not self.recording_procs.__contains__(camera_name):
+                            subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
+                            self.recording_procs[camera_name] = subproc
+                            # Limit the max recording time to 15 minutes
+                            timer: ResettableTimer = ResettableTimer(900, lambda: finish_recording(camera_name))
+                            timer.start()
 
+                            self.returnResponse(200, f"Recording started for {camera_name}")
+                        else:
+                            self.returnResponse(400, f"Recording already underway for {camera_name}")
                 case 'end_recording':
                     camera_name = cmd['camera_name']
-                    # Check there is a recording process for this camera
-                    if self.recording_procs.__contains__(camera_name):
-                        logger.info("Stopping recording")
-                        subproc = self.recording_procs[camera_name]
-                        subproc.send_signal(signal.SIGINT)
-                        subproc.wait()
-                        logger.info(f"Recording ended for {camera_name}")
-                        self.recording_procs.pop(camera_name)
-                    else:
-                        self.returnResponse(400, f"No recording process exists for {camera_name}")
-
+                    camera = cams[camera_name]
+                    stream = get_triggered_stream(camera)
+                    if stream != "":
+                        # Check there is a recording process for this camera
+                        if self.recording_procs.__contains__(camera_name):
+                            logger.info("Stopping recording")
+                            finish_recording(camera_name)
+                            logger.info(f"Recording ended for {camera_name}")
+                        else:
+                            self.returnResponse(400, f"No recording process exists for {camera_name}")
 
         except Exception as ex:
             self.returnResponse(500, ex.__str__())
