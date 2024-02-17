@@ -139,7 +139,7 @@ class FTPAndVideoFileProcessor(FTPHandler):
                 case _:
                     logger.warning(f"No camera type for file {path}")
 
-            if path.endswith('.jpg'):  # Only dealing with jpg files
+            if path.endswith('.jpg') or path.endswith('jpeg'):  # Only dealing with jpg files
                 if self.processDict.__contains__(camera_name):
                     self.processDict[camera_name].reset()
                 else:
