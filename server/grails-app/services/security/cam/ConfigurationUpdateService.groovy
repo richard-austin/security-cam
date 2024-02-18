@@ -104,7 +104,7 @@ class ConfigurationUpdateService {
 # This name is the key for the data of the camera on which a recording will be triggered.
 #  Normally only the lower definition stream would be connected to motion to keep CPU utilisation
 #  low, and this information enables motion to trigger a recording on the HD stream using the
-#  with an http call via curl to the camer recording service
+#  with an http call via curl to the camera recording service
 camera_name ${it.key}
 
 # Threshold for number of changed pixels that triggers motion.

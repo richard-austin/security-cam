@@ -43,6 +43,9 @@ class CameraType(Enum):
     zxtechMCW5B10X = 2
 
 
+secCamVarPath: str = "/var/security-cam"
+
+
 def execute_os_command(command: str) -> [int, str]:
     stream = os.popen(command)
     message: str = stream.read()
@@ -77,8 +80,7 @@ def get_ffmpeg_cmd(camera: any, stream: str = ""):  # stream is irrelevant if ft
 
 
 class FTPAndVideoFileProcessor(FTPHandler):
-    recordingsPath: str = "/var/security-cam"
-    ftpPath: str = f"{recordingsPath}/ftp"
+    ftpPath: str = f"{secCamVarPath}/ftp"
 
     processDict: dict = dict()
 
@@ -140,7 +142,8 @@ class FTPAndVideoFileProcessor(FTPHandler):
                     logger.warning(f"No camera type for file {path}")
 
             if path.endswith('.jpg') or path.endswith('jpeg'):  # Only dealing with jpg files
-                if self.processDict.__contains__(camera_name):
+                if self.processDict.__contains__(
+                        camera_name):  # If recording is already underway for this camera, reset the timer
                     self.processDict[camera_name].reset()
                 else:
                     ffmpeg_cmd = get_ffmpeg_cmd(camera)
@@ -157,8 +160,10 @@ class FTPAndVideoFileProcessor(FTPHandler):
                 # Remove old directories and any remaining files created by camera FTP transfers
                 execute_os_command(f"find {self.ftpPath} -mtime +2 -delete")
                 # Remove recording files more than 3 weeks old
-                if camera_name != "":
-                    execute_os_command(f"find {self.recordingsPath}/{camera_name} -mtime +21 -delete")
+                stream = next(iter(camera['streams']))  # Get the first stream for ftp triggered recordings
+                location = camera['streams'][stream]['recording']['location']
+                if location != "":
+                    execute_os_command(f"find {secCamVarPath}/{location} -mtime +21 -type f -delete")
 
         except TypeError as t:
             logger.error(f"Exception TypeError was raised {t!r}")
@@ -215,6 +220,11 @@ class HttpHandler(BaseHTTPRequestHandler):
                             self.returnResponse(200, f"Recording started for {camera_name}")
                         else:
                             self.returnResponse(400, f"Recording already underway for {camera_name}")
+
+                        location = camera['streams'][stream]['recording']['location']
+                        if location != "":
+                            execute_os_command(f"find {secCamVarPath}/{location} -mtime +21 -type f -delete")
+
                 case 'end_recording':
                     camera_name = cmd['camera_name']
                     camera = cams[camera_name]

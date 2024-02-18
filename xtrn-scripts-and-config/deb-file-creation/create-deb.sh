@@ -40,16 +40,10 @@ mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/recording-pids
 mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/motion/conf.d
 
 mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/ftp
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec1
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec2
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec3
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec4
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec5
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec6
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec7
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec8
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec9
-mkdir security-cam_"${VERSION}"_arm64/var/security-cam/rec10
+
+# Create recording file location for up top 50 streams
+for ((i = 1 ; i < 51 ; i++ )); do mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/rec"$i"; done
+
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/camera-recordings-service
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/fmp4-ws-media-service
