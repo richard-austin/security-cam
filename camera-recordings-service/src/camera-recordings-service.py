@@ -53,19 +53,13 @@ def execute_os_command(command: str) -> [int, str]:
     return {exitcode, message}
 
 
-def get_ffmpeg_cmd(camera: any, stream: str = ""):  # stream is irrelevant if ftp triggered recording enabled on camera
+def get_ffmpeg_cmd(camera: any, stream: str):  
     ffmpeg_cmd: str = ""
-    selected_stream: str = ""
     if camera is not None:
-        if camera["ftp"]:
-            selected_stream = next(iter(camera['streams']))  # Get the first stream for ftp triggered recordings
-        else:
-            if stream.find("stream") == 0:  # Check the stream name starts with "stream"
-                selected_stream = stream
-        if selected_stream != "":
-            location = camera['streams'][selected_stream]['recording']['location']
-            audio = camera["streams"][selected_stream]["audio"]
-            recording_src_url = camera['streams'][selected_stream]['recording']['recording_src_url']
+        if stream != "":
+            location = camera['streams'][stream]['recording']['location']
+            audio = camera["streams"][stream]["audio"]
+            recording_src_url = camera['streams'][stream]['recording']['recording_src_url']
             epoch_time = int(time.time())
             ffmpeg_cmd: str = (
                 f"/usr/local/bin/ffmpeg -i {recording_src_url} -t 01:00:00 {'-c:a copy' if audio else '-an'}"
@@ -146,7 +140,13 @@ class FTPAndVideoFileProcessor(FTPHandler):
                         camera_name):  # If recording is already underway for this camera, reset the timer
                     self.processDict[camera_name].reset()
                 else:
-                    ffmpeg_cmd = get_ffmpeg_cmd(camera)
+                    stream_id = ""
+                    for s in camera['streams']:
+                        if camera['streams'][s]['recording']['enabled']:
+                            stream_id = s
+                            break
+
+                    ffmpeg_cmd = get_ffmpeg_cmd(camera, stream_id)
                     subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
                     timer: ResettableTimer = ResettableTimer(camera['retriggerWindow'],
                                                              lambda: self.finish_recording(subproc, camera_name))

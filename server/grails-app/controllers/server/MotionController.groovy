@@ -69,7 +69,7 @@ class Camera {
     String name=''
     String address=''
     CameraParamSpecs cameraParamSpecs = null
-    boolean ftp = false
+    String ftp = "none"
     String snapshotUri=''
     boolean ptzControls = false
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()

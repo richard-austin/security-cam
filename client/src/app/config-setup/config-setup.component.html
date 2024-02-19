@@ -38,7 +38,8 @@
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Camera discovery active, Please wait..</span>
   </mat-card-content>
-  <mat-card-content #scrollable_content class="scrollable-content" [style]="getScrollableContentStyle()" *ngIf="!downloading  && !updating && !discovering">
+  <mat-card-content #scrollable_content class="scrollable-content" [style]="getScrollableContentStyle()"
+                    *ngIf="!downloading  && !updating && !discovering">
     <table mat-table
            [dataSource]="cameras | keyvalue: cameraSvc.compareFn" multiTemplateDataRows
            class="mat-elevation-z8">
@@ -74,7 +75,7 @@
             *matCellDef="let cam" (mousedown)="getSnapshot(cam)"
             matTooltip="The logical id of the camera (sequential numbering).{{cam.value.snapshotUri != '' ? ' Click to show a snapshot from this camera.' : ''}}"
             matTooltipClass="tooltip">
-          {{cam.key}}
+          {{ cam.key }}
           <div *ngIf="snapShotKey==cam.key && cam.value.snapshotUri !== ''">
             <mat-spinner [diameter]="25" *ngIf="snapshotLoading"></mat-spinner>
             <div class="snapshot mat-elevation-z8">
@@ -131,7 +132,7 @@
                         matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'Not Listed' to disable this feature, or if the camera type is not listed."
                         matTooltipClass="tooltip">
               <mat-option *ngFor="let spec of cameraSvc.cameraParamSpecs" [value]="spec">
-                {{spec.name}}
+                {{ spec.name }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -140,13 +141,18 @@
       <ng-container matColumnDef="ftp">
         <th mat-header-cell *matHeaderCellDef>FTP From Camera.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-checkbox [formControl]="getCamControl(i, 'ftp')"
+          <mat-form-field appearance="legacy" [style.width.px]="85">
+            <mat-select [formControl]="getCamControl(i, 'ftp')"
+                        (selectionChange)="updateCamField(i, 'ftp')"
                         [disableControl]="getFTPDisabledState(cam.value)"
-                        matTooltip="{{motionSet(cam.value) ? 'To use FTP upload from the camera, you must not have motion selected on any stream.' :
-                        'If checked, images sent by FTP from '+ cam.key + ' on motion being detected will trigger the NVR to make a recording on the HD stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP to ./'+cam.key+ 'on port 2121 of the NVR. See Camera Recordings Service section of the README.md'}}"
-                        matTooltipClass="tooltip"
-                        (change)="updateCamField(i, 'ftp')">
-          </mat-checkbox>
+                        matTooltip="{{motionSet(cam.value) ? 'To use FTP upload from the camera, you must not have motion selected on any stream.' : 'If a stream is selected, images sent by FTP from '+ cam.key + ' on motion being detected will trigger the NVR to make a recording on the selected stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP a .jpg (jpeg) image to ./'+cam.key+ ' on port 2121 of the NVR. See Camera Recordings Service section of the README.md'}}"
+                        matTooltipClass="tooltip">
+              <mat-option [value]="'none'">none</mat-option>
+              <mat-option *ngFor="let stream of cam.value.streams | keyvalue: cameraSvc.compareFn" [value]="stream.key">
+                {{ stream.key }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
           <mat-error *ngIf="getCamControl(i, 'ftp').invalid">Set the FTP status</mat-error>
         </td>
       </ng-container>
@@ -156,11 +162,11 @@
           <mat-form-field appearance="legacy" [style.width.px]="50">
             <mat-select [formControl]="getCamControl(i, 'retriggerWindow')"
                         (selectionChange)="updateCamField(i, 'retriggerWindow')"
-                        [disableControl]="!cam.value.ftp"
+                        [disableControl]="cam.value.ftp == 'none'"
                         matTooltip="Select the maximum time in seconds that can elapse between FTP uploads from the camere for the recording to be extended further by this selected time. The absence of another FTP within this window will result in the recording being completed."
                         matTooltipClass="tooltip">
               <mat-option *ngFor="let win of cameraSvc.ftpRetriggerWindows" [value]="win.value">
-                {{win.name}}
+                {{ win.name }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -234,7 +240,7 @@
                     [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
                     [matTooltip]="cam.value.backchannelAudioSupported ? 'Two way audio enabled for this device (please ensure the device supports 2 way audio)' : 'Two way audio is not enabled for this device'"
                     matTooltipClass="tooltip">
-            {{cam.value.backchannelAudioSupported ? "check_circle" : "cancel"}}
+            {{ cam.value.backchannelAudioSupported ? "check_circle" : "cancel" }}
           </mat-icon>
         </td>
       </ng-container>
@@ -271,13 +277,15 @@
         <td mat-cell *matCellDef="let cam; let camIndex=dataIndex" [attr.colspan]="cameraColumns.length">
           <div class="element-detail mat-elevation-z10"
                [@detailExpand]="cam.value == expandedElement ? 'expanded' : 'collapsed'">
-            <table mat-table [dataSource]="cam.value.streams | keyvalue: cameraSvc.compareFn" class="streams-info mat-elevation-z10">
+            <table mat-table [dataSource]="cam.value.streams | keyvalue: cameraSvc.compareFn"
+                   class="streams-info mat-elevation-z10">
               <ng-container matColumnDef="stream_id">
                 <th mat-header-cell *matHeaderCellDef>Stream ID</th>
                 <td mat-cell *matCellDef="let stream" [width]="60"
                     matTooltip="The logical id of the stream (sequential numbering)"
                     matTooltipClass="tooltip">
-                  {{stream.key}}</td>
+                  {{ stream.key }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="delete">
                 <th mat-header-cell *matHeaderCellDef>Delete</th>
@@ -332,7 +340,7 @@
                                 matTooltip="Set the audio encoding (G711 or AAC) for {{stream.key}}. If you are unsure, select 'Not Listed'"
                                 matTooltipClass="tooltip">
                       <mat-option *ngFor="let enc of cameraSvc.audioEncodings" [value]="enc.value">
-                        {{enc.name}}
+                        {{ enc.name }}
                       </mat-option>
                     </mat-select>
                     <mat-error *ngIf="getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('required')">
@@ -371,7 +379,7 @@
                                 (change)="setDefaultOnMultiDisplayStatus($event, stream.value,  cam.value)"
                                 matTooltip="If checked, {{stream.key}} will be the default stream for {{cam.key}} on the multi camera display."
                                 matTooltipClass="tooltip">
-                    {{'Default On Multi Display'}}
+                    {{ 'Default On Multi Display' }}
                   </mat-checkbox>
                 </td>
               </ng-container>
@@ -382,17 +390,17 @@
                                 [style.width.px]="95"
                                 [disabled]="ftpSet(cam.value)"
                                 (change)="setMotionStatus($event, stream.value,  cam.value)"
-                                matTooltip="{{ftpSet(cam.value) ? 'To use internal motion sensing, you must uncheck FTP on the camera line' :
+                                matTooltip="{{ftpSet(cam.value) ? 'To use motion sensing with the motion service, you must select \'none\'as the FTP From Camera setting on the camera row.' :
                                 'If checked, motion detection and its consequent recording will be enabled on ' + stream.key + '. Only one stream from a camera can have motion detection enabled. Where a camera has more than one stream, the lower resolution stream is best used for motion detection to keep CPU usage down.'}}"
                                 matTooltipClass="tooltip">
-                    {{'Motion'}}
+                    {{ 'Motion' }}
                   </mat-checkbox>
                 </td>
               </ng-container>
               <ng-container matColumnDef="threshold">
                 <th mat-header-cell *matHeaderCellDef>Motion Threshold</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index" [style.width.px]="100">
-                  <mat-form-field appearance="legacy"  [style.width.px]="95">
+                  <mat-form-field appearance="legacy" [style.width.px]="95">
                     <input matInput type="number" autocomplete="off" maxlength="10"
                            [formControl]="getStreamControl(camIndex, streamIndex, 'threshold')"
                            [disableControl]="!stream.value.motion.enabled"
@@ -427,7 +435,7 @@
                       <mat-option
                         *ngFor="let camStream of cam.value.streams | keyvalue: cameraSvc.compareFn | excludeOwnStream:stream.key"
                         [value]="cam.key+'.'+camStream.key">
-                        {{camStream.key}}
+                        {{ camStream.key }}
                       </mat-option>
                     </mat-select>
                   </mat-form-field>
@@ -443,7 +451,7 @@
                                 matTooltip="The number of frames to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value divided by thje camera frame rate (seconds)."
                                 matTooltipClass="tooltip">
                       <mat-option *ngFor="let preamble of cameraSvc.preambleFrameValues" [value]="preamble">
-                        {{preamble}}
+                        {{ preamble }}
                       </mat-option>
                     </mat-select>
                   </mat-form-field>
@@ -580,7 +588,8 @@
             </button>
             <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
                   matTooltipClass="tooltip">
-            <button [disabled]="!dataHasChanged() || anyInvalid() || confirmNew || confirmNewLookup || isGuest" mat-icon-button
+            <button [disabled]="!dataHasChanged() || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
+                    mat-icon-button
                     (click)="confirmSave=true"
                     *ngIf="!confirmSave && !confirmNewLookup">
               <mat-icon>save</mat-icon>

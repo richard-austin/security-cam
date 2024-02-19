@@ -103,7 +103,7 @@ export class Camera
     cameraParamSpecs!: CameraParamSpec;
     snapshotUri: string="";
     ptzControls: boolean = false;
-    ftp: boolean = false;
+    ftp: string = "none";
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
     backchannelAudioSupported: boolean = false
