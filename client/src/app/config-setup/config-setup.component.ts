@@ -380,7 +380,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         stream.recording.enabled = false
         stream.rec_num = recNo++;
       });
-      let streamKeyNum: number = 1;
       // Process the streams
       camera.streams.forEach((stream, streamKey) => {
         if (stream.audio_encoding === "")

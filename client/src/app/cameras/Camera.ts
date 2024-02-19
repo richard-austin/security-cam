@@ -103,7 +103,7 @@ export class Camera
     cameraParamSpecs!: CameraParamSpec;
     snapshotUri: string="";
     ptzControls: boolean = false;
-    ftp: string = "none";
+    ftp: string | boolean = "none";  // | boolean is only used for a test which can detect ftp's boolean value in earlier versions
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
     backchannelAudioSupported: boolean = false
