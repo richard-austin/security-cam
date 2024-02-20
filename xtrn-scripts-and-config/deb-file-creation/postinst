@@ -66,8 +66,6 @@ chown tomcat:security-cam /var/lib/tomcat
 
 # Make the following scripts executable
 chmod +x /etc/security-cam/install-cert.sh
-chmod +x /etc/security-cam/start_hd_recording.sh || true
-chmod +x /etc/security-cam/end_hd_recording.sh || true
 chmod +x /etc/security-cam/processmotionrecordings.sh || true
 chmod +x /etc/security-cam/productKeyGen.sh || true
 

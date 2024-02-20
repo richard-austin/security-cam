@@ -49,7 +49,7 @@ class Stream {
     Integer audio_sample_rate = 0
     String media_server_input_uri=''
     Motion motion=new Motion()
-    Integer preambleFrames = 100;
+    Integer preambleFrames = 100
     Integer video_width=0
     Integer video_height=0
     Recording recording=new Recording()
@@ -69,7 +69,7 @@ class Camera {
     String name=''
     String address=''
     CameraParamSpecs cameraParamSpecs = null
-    boolean ftp = false
+    String ftp = "none"
     String snapshotUri=''
     boolean ptzControls = false
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()

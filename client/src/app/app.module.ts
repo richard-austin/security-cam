@@ -38,7 +38,7 @@ import {MatTableModule} from "@angular/material/table";
 import {MatSortModule} from "@angular/material/sort";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import { ExcludeOwnStreamPipe } from './config-setup/exclude-own-stream.pipe';
-import { DisableControlDirective } from './config-setup/disable-control.directive';
+import { DisableControlDirective } from './shared/disable-control.directive';
 import { CredentialsForCameraAccessComponent } from './credentials-for-camera-access/credentials-for-camera-access.component';
 import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
@@ -113,6 +113,7 @@ import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/ad
     MatMenuModule,
     MatProgressSpinnerModule,
     FormsModule,
+    ReactiveFormsModule,
     // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
     // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
     // and `ping` is 6q0 (1 minutes).

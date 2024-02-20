@@ -144,7 +144,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateCam(index: number, field: string, value: any) {
-    console.log(index, field, value);
     Array.from(this.cameras.values()).forEach((cam: Camera, i) => {
       if (i === index) { // @ts-ignore
         cam[field] = value;
@@ -252,7 +251,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           preambleFrames: new FormControl({
             value: stream.preambleFrames,
             disabled: this.getPreambleFramesDisabledState(camera, stream),
-          }, [Validators.min(0), Validators.max(300)]),
+          }, [Validators.min(0), Validators.max(400)]),
           mask_file: new FormControl({
             value: stream.motion.mask_file,
             disabled: !stream.motion.enabled
@@ -272,10 +271,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           disabled: false
         }, [Validators.maxLength(55)]),
         ftp: new FormControl({
-          value: camera.ftp,
-          disabled: this.getFTPDisabledState(camera),
-        }, [validateTrueOrFalse({ftp: true})]),
-        retriggerWindow: new FormControl({
+            value: camera?.ftp != undefined ? camera.ftp : 'none',
+            disabled: false,
+          }, [Validators.pattern(/^none|stream[1-9]+$/)]
+        ),
+         retriggerWindow: new FormControl({
             value: camera?.retriggerWindow != undefined ? camera.retriggerWindow : 30,
             disabled: false,
           }, [Validators.pattern(/^10$|20|30|40|50|60|70|80|90|100/)]
@@ -380,9 +380,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         stream.recording.enabled = false
         stream.rec_num = recNo++;
       });
-      let streamKeyNum: number = 1;
       // Process the streams
-      camera.streams.forEach((stream) => {
+      camera.streams.forEach((stream, streamKey) => {
         if (stream.audio_encoding === "")
           stream.audio_encoding = "None";
 
@@ -392,7 +391,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
 
-          if (camera.ftp && streamKeyNum++ == 1) {
+          if (camera.ftp !== 'none' && camera.ftp === streamKey) {
             stream.recording.enabled = true
             stream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = 'http://localhost:8084/recording/rec' + streamNum + '/';
@@ -424,7 +423,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           stream.uri = "/ws/stream?suuid=stream" + streamNum;
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
-          if (camera.ftp && streamKeyNum++ === 1) {
+          if (camera.ftp !== 'none' && camera.ftp === streamKey) {
             stream.recording.enabled = true
             stream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = '/recording/rec' + streamNum + '/';
@@ -604,15 +603,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         retVal = true;
     })
 
-    if (retVal)
-      return retVal;
-
-    for (let streamFormArrayKey in this.streamControls) {
-      this.streamControls[streamFormArrayKey].controls.forEach((streamControlFormGroup: AbstractControl) => {
-        if (streamControlFormGroup.invalid)
-          retVal = true;
-      })
-    }
+    if (!retVal)
+      for (let streamFormArrayKey in this.streamControls) {
+        this.streamControls[streamFormArrayKey].controls.forEach((streamControlFormGroup: AbstractControl) => {
+          if (streamControlFormGroup.invalid)
+            retVal = true;
+        });
+      }
 
     return retVal;
   }
@@ -757,7 +754,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ftpSet(cam: Camera): boolean {
-    return cam.ftp;
+    return cam.ftp !== 'none' && typeof cam.ftp !== 'boolean';
   }
 
   motionSet(cam: Camera): boolean {
@@ -829,10 +826,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getScrollableContentStyle():string {
     const scrollableContent = this.scrollableContent?.nativeElement;
+    // Calculated scrollbar height, don't use or we Expression changed after it was checked error will occur
+    //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
+    const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
+    const extraBit = 1;  // To make browser window vertical scrollbar disappear
 
     if(scrollableContent !== undefined ) {
       const boundingRect = scrollableContent.getBoundingClientRect()
-      return `width: 100%; height: calc(100dvh - ${boundingRect.top+20}px); overflow: auto;`
+      return `height: calc(100dvh - ${boundingRect.top+scrollbarHeight+extraBit}px);`
     }
     else return ""
   }
