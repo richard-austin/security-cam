@@ -1,12 +1,9 @@
 <h2 style="text-align: center">Security Cam</h2>
-<h2 style="text-align: center">CCTV on Raspberry Pi 4 Via Web Browser</h2>
+<h2 id="h2" style="text-align: center">CCTV on Raspberry Pi 4 Via Web Browser</h2>
 
 ### Introduction
 This is a Network Video Recorder accessed through a web browser, designed to run on a Raspberry pi.
-Access can be either direct or through a Cloud service. There is no live implementation
-of the Cloud Service, but the source code is freely available at
-https://github.com/richard-austin/cloud-server.
-It requires network cameras providing RTSP streams with the video encoded as H264 or H265. Audio is supported. 
+It requires network cameras providing RTSP streams with the video encoded as H264 or H265. Audio (G711 or AAC) is supported. 
 The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on the browser using Media Source Extensions (MSE).
 
 ![ptz camera](README.images/ptz.png)
@@ -28,8 +25,7 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * PTZ for cameras supporting this feature through Onvif.
 * Quick reboot or setup of key camera parameters for SV3C type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
-  This feature requires access through port 446 as well as the usual https port 443. *This is not available when connecting
-  via the Cloud Service.*
+  This feature requires access through port 446 as well as the usual https port 443.
 * Configuration editor supporting Onvif discovery of cameras and their capabilities. Cam also find capabilities of specific cameras.
 * email notification if public IP address changes (for when port forwarding is used).
 * Initial unauthenticated set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
@@ -37,7 +33,6 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * Get Local Wi-Fi source details.
 * Set up Wi-Fi connection.
 * NVR includes NTP server for cameras to sync time without the need for them to connect to the internet.
-* Enable/Disable client connection to Cloud server.
 * Complete project deployment using a single deb file
 #### Limitations
 * Requires network cameras which provide H264 or 265 video, and optionally audio via RTSP (G711/AAC). *No video transcoding
@@ -54,9 +49,6 @@ Secure authenticated access is through ports 443 and 446 via nginx.
 These ports, plus port 80,  are set up for port forwarding on the router when direct access
 from outside the LAN is required.
 
-When the NVR is accessed through the Cloud service, port forwarding is not required
-as all communication is through a client connection that the NVR makes to the
-Cloud service. Camera web admin pages are not accessible through the Cloud Service.
 ### Tomcat Web Server
 Tomcat 9 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
 to these through port 8080.
@@ -216,11 +208,6 @@ Using other versions may cause build issues in some cases.
 git clone git@github.com:richard-austin/security-cam.git
 cd security-cam
 ```
-### If accessing through the Cloud Server.
-* *Skip this if only using direct NVR access from the browser* 
-  * In application.yml, ensure that environments -> production -> cloudProxy -> cloudHost
-    is set to the correct IP for your Cloud server (cloudPort will normally be 8081)
-
 ### Build for deployment to Raspberry pi
 The Raspberry pi should be running Ubuntu 23.10 (Mantic Minotaur) OS.
 ```
@@ -268,36 +255,6 @@ to the NVR, otherwise it is not required.
     sudo systemctl restart nginx
     ```
 ## Initial Setup
-### Use with the Cloud Service
-#### If you don't want to use a Cloud Service for access, ignore this section and see "Setup for Direct Access (Browser to NVR)"
-The NVR will have the Cloud Proxy enabled by default on initial setup, and provided that the correct Cloud Server parameters are 
-present in application.yml, you will be able to set up a cloud account from your cloud browser session, using the product
-key which was shown near the end of the NVR installation text. 
-### Cloudproxy parameters in application.yml
-#### These are under the cloudProxy section :-
-
-| *Parameter*                | Description                                                                                                                        |
-|----------------------------|------------------------------------------------------------------------------------------------------------------------------------|
-| enabled                    | CloudProxy will run if true (and CloudProxy status is enabled on the NVR General menu)                                             |
-| mqTrustStorePath **        | Path to the trust store which contains the ActiveMQ servers certificate                                                            |
-| mqKeyStorePath **          | Path the the ActiveMQ client key store                                                                                             |
-| mqTrustStorePassword *     | Password for the trust store                                                                                                       |
-| mqKeyStorePassword *       | Password for the keystore                                                                                                          |
-| mqUser *                   | ActiveMQ user name                                                                                                                 |
-| mqPassword *               | ActiveMQ password                                                                                                                  |
-| productKeyPath             | Path to the file containing the encrypted NVR Product key                                                                          |
-| cloudActiveMQUrl           | Url to the ActiveMQ service that the NVRs and the Cloud server connect to. This should begin with failover://ssl:                  |
-| activeMQInitQueue          | The name of the queue in ActiveMQ through which connections are initiated. This must be the same on all NVRs and the Cloud server. |
-| webServerForCloudProxyHost | The host name for the NVRs cloud web server (normally localhost)                                                                   |
-| webServerForCloudProxyPort | The port for the NVRs web server (Normally 8088) This service is set up on nginx to provide special access for Cloud connections.  | 
-| logLevel                   | The log level for cloudproxy.log (normally located at /var/log/security-cam)                                                       |
-
-&ast; You may want to change these from their defaults. The ActiveMQ user name and password must obviously be changed 
-in the ActiveMQ and Cloud server settings as well as in this config. 
-
-&ast;&ast; You may want to create your own keys and certs for the Cloud and NVRs <a href="https://activemq.apache.org/how-do-i-use-ssl">see here</a>
-
-Please see the README.md for the Cloud Service for details on setting up a cloud account and using the Cloud service.
 ### Setup for Direct Access (Browser to NVR)
 #### Set up user account
 To log into the NVR when accessing it directly, 
@@ -559,14 +516,7 @@ email address, giving the new public IP address.
 * **Set CloudProxy Status**
 
 **Note, An experimental Cloud Service has been developed (see <a href="https://github.com/richard-austin/cloud-server">here</a>). This works in conjunction with <a href="https://github.com/richard-austin/activemq-for-cloud-service">ActiveMQ</a>**
-
-  Check the Checkbox to enable the Cloud Proxy to connect to the Cloud Service, or uncheck it to disable Cloud Service connection.
-  The Cloud Proxy is used to provide a connection to the Cloud Service from the NVR.
-  This is a client connection and so doesn't require port forwarding to be set up. Most functions 
-  of the NVR will be available via the Cloud Service. The Camera Admin page functionality is not available via the Cloud Service.
-  Cloud Proxy Status defaults to "on" before the local NVR account is set up.
-
-  *The NVR must have the correct cloudActiveMQUrl set up in application.yml if the Cloud Service is used.*
+For information on accessing the NVR through the Cloud Service, see README_CLOUD.md
 * **Admin Functions**
   
   The initial setup functions used to set credentials for a direct access account.
