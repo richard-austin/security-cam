@@ -171,7 +171,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     }
   }
   hasAudio (): boolean {
-    return this.stream?.audio;
+    return this.stream?.audio && !this.stream.motion?.enabled;
   }
 
   /**
