@@ -4,7 +4,7 @@ import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
 import {AudioEncoding, Camera, CameraParamSpec, Stream} from "./Camera";
-import {CameraAdminCredentials} from "../credentials-for-camera-access/credentials-for-camera-access.component";
+import {CameraAdminCredentials} from "../config-setup/credentials-for-camera-access/credentials-for-camera-access.component";
 import {NativeDateAdapter} from '@angular/material/core';
 import {KeyValue} from "@angular/common";
 

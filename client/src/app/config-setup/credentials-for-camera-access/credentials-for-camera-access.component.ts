@@ -1,7 +1,8 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {CameraService} from "../cameras/camera.service";
-import {ReportingComponent} from "../reporting/reporting.component";
+import { Camera } from 'src/app/cameras/Camera';
+import {CameraService} from "../../cameras/camera.service";
+import {ReportingComponent} from "../../reporting/reporting.component";
 
 export class CameraAdminCredentials
 {
@@ -18,6 +19,7 @@ export class CredentialsForCameraAccessComponent implements OnInit {
 
   @Output() hideDialogue: EventEmitter<void> = new EventEmitter<void>();
   @Input() reporting!: ReportingComponent
+  @Input() camera!: Camera;
 
   constructor(private camSvc:CameraService) { }
 

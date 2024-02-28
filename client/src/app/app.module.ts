@@ -39,7 +39,7 @@ import {MatSortModule} from "@angular/material/sort";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import { ExcludeOwnStreamPipe } from './config-setup/exclude-own-stream.pipe';
 import { DisableControlDirective } from './shared/disable-control.directive';
-import { CredentialsForCameraAccessComponent } from './credentials-for-camera-access/credentials-for-camera-access.component';
+import { CredentialsForCameraAccessComponent } from './config-setup/credentials-for-camera-access/credentials-for-camera-access.component';
 import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-account.component';

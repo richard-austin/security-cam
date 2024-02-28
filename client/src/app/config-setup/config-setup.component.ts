@@ -28,6 +28,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {KeyValue} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
+import {Encryption} from "./encryption";
 
 declare let objectHash: (obj: Object) => string;
 
@@ -101,7 +102,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['sorting', 'camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'useRtspAuth', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['sorting', 'camera_id', 'creds', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'useRtspAuth', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -117,7 +118,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   snapshotLoading: boolean = false;
   snapshot: SafeResourceUrl | String = '';
   snapShotKey: string = '';
-  showPasswordDialogue: boolean = false;
+  showPasswordDialogue: string = "";
   showAddCameraDialogue: boolean = false;
   isGuest: boolean = true;
   gettingCameraDetails: boolean = false;
@@ -580,7 +581,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  addCamera() {
+  async addCamera() {
+    const encrypt = new Encryption();
+    const result = await encrypt.encrypt("username:pa55w0rd")
+    const x = result;
+    return;
     let newCamera: Camera = new Camera();
     let newStream: Stream = new Stream();
     newStream.defaultOnMultiDisplay = true; // Set the first stream defined for the camera to be
@@ -789,15 +794,15 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  togglePasswordDialogue() {
-    this.showPasswordDialogue = !this.showPasswordDialogue;
+  togglePasswordDialogue(camId: string) {
+    this.showPasswordDialogue = this.showPasswordDialogue !== camId ? camId : "";
     this.showAddCameraDialogue = false;
     this.checkIfCameraCredentialsPresent();
   }
 
   toggleAddCameraOnvifUriDialogue() {
     this.showAddCameraDialogue = !this.showAddCameraDialogue;
-    this.showPasswordDialogue = false;
+    this.showPasswordDialogue = "";
   }
 
   startFindCameraDetails(onvifUrl: string) {

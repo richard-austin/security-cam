@@ -3,28 +3,7 @@
     can be found in the LICENSE file at http://angular.io/license -->
 
 <mat-card>
-  <mat-card-title>Cameras Configuration
-    <span
-      [matTooltip]="!haveCameraCredentials ? 'Camera credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'"
-      matTooltipClass="tooltip">
-      <button class="change-password-button"
-              mat-icon-button
-              [disabled]="isGuest"
-              (click)="togglePasswordDialogue()">
-        <mat-icon [ngClass]="{'no-camera-credentials': !haveCameraCredentials}">security</mat-icon>
-      </button>
-    </span>
-    <div class="password-dialogue">
-      <div class="mat-elevation-z15" [@detailExpand]="showPasswordDialogue ? 'expanded' : 'collapsed'">
-        <div>
-        </div>
-        <app-credentials-for-camera-access
-          (hideDialogue)="togglePasswordDialogue()"
-          [reporting]="errorReporting">
-        </app-credentials-for-camera-access>
-      </div>
-    </div>
-  </mat-card-title>
+  <mat-card-title>Cameras Configuration</mat-card-title>
   <app-reporting #errorReporting></app-reporting>
   <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
     <mat-spinner [diameter]="25"></mat-spinner>
@@ -84,6 +63,38 @@
           </div>
         </td>
       </ng-container>
+
+
+      <ng-container matColumnDef="creds">
+        <th mat-header-cell *matHeaderCellDef>Cam. Credentials</th>
+        <td class="snapshot"
+            [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''"
+            mat-cell
+            *matCellDef="let cam">
+        <span
+          [matTooltip]="!haveCameraCredentials ? 'Camera credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'"
+          matTooltipClass="tooltip">
+          <button class="change-password-button"
+                  mat-icon-button
+                  [disabled]="isGuest"
+                  (click)="togglePasswordDialogue(cam.key)">
+            <mat-icon [ngClass]="{'no-camera-credentials': !haveCameraCredentials}">security</mat-icon>
+          </button>
+          <div class="password-dialogue">
+            <div class="mat-elevation-z15" [@detailExpand]="showPasswordDialogue ? 'expanded' : 'collapsed'">
+              <div>
+              </div>
+              <app-credentials-for-camera-access
+                [camera]="cam.value"
+                (hideDialogue)="togglePasswordDialogue('')"
+                [reporting]="errorReporting">
+              </app-credentials-for-camera-access>
+            </div>
+          </div>
+        </span>
+        </td>
+      </ng-container>
+
 
       <ng-container matColumnDef="delete">
         <th mat-header-cell *matHeaderCellDef>Delete</th>
