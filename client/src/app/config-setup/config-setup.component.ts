@@ -28,7 +28,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {KeyValue} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
-import {Encryption} from "./encryption";
+import {Encryption} from "./credentials-for-camera-access/encryption";
 
 declare let objectHash: (obj: Object) => string;
 
@@ -118,12 +118,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   snapshotLoading: boolean = false;
   snapshot: SafeResourceUrl | String = '';
   snapShotKey: string = '';
-  showPasswordDialogue: string = "";
+  camForCredentialsEntry: string = "";
   showAddCameraDialogue: boolean = false;
   isGuest: boolean = true;
   gettingCameraDetails: boolean = false;
   savedDataHash: string = "";
-  haveCameraCredentials: boolean = false;
 
   constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
   }
@@ -582,10 +581,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async addCamera() {
-    const encrypt = new Encryption();
-    const result = await encrypt.encrypt("username:pa55w0rd")
-    const x = result;
-    return;
     let newCamera: Camera = new Camera();
     let newStream: Stream = new Stream();
     newStream.defaultOnMultiDisplay = true; // Set the first stream defined for the camera to be
@@ -785,24 +780,18 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     return window.btoa(binary);
   }
 
-  private checkIfCameraCredentialsPresent() {
-    this.cameraSvc.haveCameraCredentials().subscribe(result => {
-        this.haveCameraCredentials = result == "true";
-      },
-      () => {
-        this.reporting.errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
-      });
+  private cameraHasCredentials(cam: Camera) {
+    return cam.cred !== "";
   }
 
   togglePasswordDialogue(camId: string) {
-    this.showPasswordDialogue = this.showPasswordDialogue !== camId ? camId : "";
+    this.camForCredentialsEntry = this.camForCredentialsEntry !== camId ? camId : "";
     this.showAddCameraDialogue = false;
-    this.checkIfCameraCredentialsPresent();
   }
 
   toggleAddCameraOnvifUriDialogue() {
     this.showAddCameraDialogue = !this.showAddCameraDialogue;
-    this.showPasswordDialogue = "";
+    this.camForCredentialsEntry = "";
   }
 
   startFindCameraDetails(onvifUrl: string) {
@@ -857,7 +846,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
         this.downloading = false;
       })
-    this.checkIfCameraCredentialsPresent();
     this.isGuest = this.utils.isGuestAccount;
   }
 

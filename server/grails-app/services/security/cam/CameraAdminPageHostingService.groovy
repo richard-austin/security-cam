@@ -1,6 +1,6 @@
 package security.cam
 
-import com.proxy.CamWebadminHostProxy
+import security.cam.interfaceobjects.CamWebadminHostProxy
 import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import org.apache.http.config.SocketConfig

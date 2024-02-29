@@ -5,12 +5,11 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.google.gson.internal.LinkedTreeMap
-import com.proxy.ICamServiceInterface
+
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import org.apache.commons.io.IOUtils
 import org.grails.web.json.JSONObject
-import security.cam.commands.SetAccessCredentialsCommand
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.commands.UploadMaskFileCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -19,7 +18,7 @@ import server.Camera
 import server.Stream
 
 @Transactional
-class CamService implements ICamServiceInterface{
+class CamService {
     GrailsApplication grailsApplication
     LogService logService
     ConfigurationUpdateService configurationUpdateService
@@ -137,68 +136,6 @@ class CamService implements ICamServiceInterface{
         return result
     }
 
-    /**
-     * setCameraAccessCredentials: Set the access credentials used for administrative operations (and snapshot access)
-     *                             on the cameras. Note that ths does not change credentials on any camera, just those
-     *                             used on this software to access them. Ideally all cameras should use the same user
-     *                             name and password.
-     * @param cmd: Command object containing the username and password
-     * @return: ObjectCommandResponse with success/error state.
-     */
-    def setCameraAccessCredentials(SetAccessCredentialsCommand cmd) {
-        ObjectCommandResponse response = new ObjectCommandResponse()
-
-        try {
-            String json = """{
-    \"camerasAdminUserName\": \"${cmd.camerasAdminUserName}\",
-    \"camerasAdminPassword\": \"${cmd.camerasAdminPassword}\"
-}
-"""
-            // Stop media server etc
-            ObjectCommandResponse stopResult = sc_processesService.stopProcesses()
-            String fileName = "${grailsApplication.config.camerasHomeDirectory}/cameraCredentials.json"
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
-            writer.write(json)
-            writer.close()
-            // Restart media server etc to pic]=k up new credentials
-            ObjectCommandResponse startResult = sc_processesService.startProcesses()
-
-            if(stopResult.status == PassFail.FAIL)
-                response = stopResult
-            else if (startResult.status == PassFail.FAIL)
-                response = startResult
-        }
-        catch (Exception ex) {
-            logService.cam.error "setCameraAccessCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
-            response.status = PassFail.FAIL
-            response.error = ex.getMessage()
-        }
-
-        return response
-    }
-
-    def getCameraCredentials()
-    {
-        ObjectCommandResponse response = new ObjectCommandResponse()
-        try {
-            FileInputStream fis
-
-            fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/cameraCredentials.json")
-
-            String data = IOUtils.toString(fis, "UTF-8")
-            Gson gson2 = new Gson()
-            Object obj = gson2.fromJson(data, Object.class)
-            response.responseObject = obj
-        }
-        catch(Exception ex)
-        {
-            logService.cam.error "getCameraCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
-            response.status = PassFail.FAIL
-            response.error = ex.getMessage()
-        }
-        return response
-    }
-
     Integer getCameraType(String cameraHost) {
         Integer camType = null
         ObjectCommandResponse getCamerasResult = (ObjectCommandResponse)getCameras()
@@ -213,21 +150,18 @@ class CamService implements ICamServiceInterface{
         return camType
     }
 
-    /**
-     * cameraAdminUserName
-     * @return: The admin user name for the cameras
-     */
-    String cameraAdminUserName()
-    {
-        return getCameraCredentials().responseObject?.camerasAdminUserName
+    Camera getCamera(String cameraHost) {
+        Camera retVal = null
+        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse)getCameras()
+        if(getCamerasResult.status == PassFail.PASS) {
+            JSONObject jo = (JSONObject)getCamerasResult.getResponseObject()
+            jo.forEach((k, cam) -> {
+                Camera camera = (Camera)cam
+                if(Objects.equals(camera.getAddress(), cameraHost))
+                    retVal = camera
+            })
+        }
+        return retVal
     }
 
-    /**
-     * cameraAdminPassword
-     * @return: The admin password for the cameras
-     */
-    String cameraAdminPassword()
-    {
-        return getCameraCredentials().responseObject?.camerasAdminPassword
-    }
 }

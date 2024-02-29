@@ -184,12 +184,6 @@ export class CameraService {
       ),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
-
-  haveCameraCredentials(): Observable<string> {
-    return this.http.post(this._baseUrl.getLink("cam", "haveCameraCredentials"), '', {responseType: 'text'}).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err)));
-  }
-
   updateCameras(camerasJON: string):
     Observable<Map<string, Camera>> {
     let cameras = {camerasJSON: camerasJON};
@@ -238,12 +232,6 @@ export class CameraService {
     const formData: FormData = new FormData();
     formData.append('url', url);
     return this.http.post<Array<any>>(this._baseUrl.getLink("onvif", "getSnapshot"), formData, this.httpUploadOptions).pipe(
-      tap(),
-      catchError((err: HttpErrorResponse) => throwError(err)));
-  }
-
-  setCameraAdminCredentials(creds: CameraAdminCredentials): Observable<any> {
-    return this.http.post<any>(this._baseUrl.getLink("cam", "setAccessCredentials"), creds, this.httpUploadOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

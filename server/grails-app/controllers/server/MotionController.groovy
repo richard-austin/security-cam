@@ -1,5 +1,6 @@
 package server
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.internal.LinkedHashTreeMap
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -11,6 +12,7 @@ import security.cam.commands.GetMotionEventsCommand
 import security.cam.MotionService
 import security.cam.ValidationErrorService
 import security.cam.enums.PassFail
+import security.cam.interfaceobjects.Asymmetric
 import security.cam.interfaceobjects.ObjectCommandResponse
 
 import java.nio.file.Files
@@ -65,6 +67,12 @@ class CameraParamSpecs {
     String name
 }
 
+class CameraAdminCredentials
+{
+    String userName = ""
+    String password = ""
+}
+
 class Camera {
     String name=''
     String address=''
@@ -78,6 +86,13 @@ class Camera {
     String rtspTransport = "tcp"
     boolean useRtspAuth = false
     int retriggerWindow = 30
+    String cred = ""
+    CameraAdminCredentials getCredentials() {
+        Asymmetric crypto = new Asymmetric()
+        String jsonCreds = crypto.decrypt(cred)
+        ObjectMapper mapper = new ObjectMapper()
+        return mapper.readValue(jsonCreds, CameraAdminCredentials.class)
+    }
 }
 
 class MotionController {

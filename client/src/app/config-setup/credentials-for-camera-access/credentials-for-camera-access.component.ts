@@ -3,11 +3,12 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import { Camera } from 'src/app/cameras/Camera';
 import {CameraService} from "../../cameras/camera.service";
 import {ReportingComponent} from "../../reporting/reporting.component";
+import {Encryption} from "./encryption";
 
 export class CameraAdminCredentials
 {
-  camerasAdminUserName: string='';
-  camerasAdminPassword: string='';
+  userName: string='';
+  password: string='';
 }
 
 @Component({
@@ -23,33 +24,24 @@ export class CredentialsForCameraAccessComponent implements OnInit {
 
   constructor(private camSvc:CameraService) { }
 
-  camerasUsername: string = '';
-  camerasPassword: string = '';
+  username: string = '';
+  password: string = '';
   setPasswordForm!: FormGroup;
-  updating: boolean = false;
-
-
-  hidePasswordDialogue() {
+   hidePasswordDialogue() {
     this.hideDialogue.emit();
   }
 
-  updateCredentials() {
-    this.camerasUsername = this.getFormControl('camerasUsername').value;
-    this.camerasPassword = this.getFormControl('camerasPassword').value;
+  async updateCredentials() {
+    this.username = this.getFormControl('camerasUsername').value;
+    this.password = this.getFormControl('camerasPassword').value;
 
     let creds: CameraAdminCredentials = new CameraAdminCredentials();
-    creds.camerasAdminPassword = this.camerasPassword;
-    creds.camerasAdminUserName = this.camerasUsername;
-    this.updating = true;
-    this.camSvc.setCameraAdminCredentials(creds).subscribe(() =>{
-        this.hidePasswordDialogue();
-        this.reporting.successMessage="Camera Access Credentials Updated";
-        this.updating = false;
-    },
-      (reason) => {
-        this.reporting.errorMessage = reason;
-        this.updating = false;
-      })
+    creds.password = this.password;
+    creds.userName = this.username;
+    const jsonCreds = JSON.stringify(creds);
+    const crypto: Encryption = new Encryption();
+    this.camera.cred = await crypto.encrypt(jsonCreds);
+    this.hidePasswordDialogue();
   }
 
   getFormControl(fcName: string): FormControl {
@@ -63,8 +55,8 @@ export class CredentialsForCameraAccessComponent implements OnInit {
 
   ngOnInit(): void {
     this.setPasswordForm = new FormGroup({
-      camerasUsername: new FormControl(this.camerasUsername, [Validators.required, Validators.maxLength(20), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
-      camerasPassword: new FormControl(this.camerasPassword, [Validators.required, Validators.maxLength(25), Validators.pattern("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")])
+      camerasUsername: new FormControl(this.username, [Validators.required, Validators.maxLength(20), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
+      camerasPassword: new FormControl(this.password, [Validators.required, Validators.maxLength(25), Validators.pattern("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")])
     }, {updateOn: "change"});
 
     // Ensure camera form controls highlight immediately if invalid

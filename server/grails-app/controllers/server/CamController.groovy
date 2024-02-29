@@ -79,33 +79,6 @@ class CamController {
     }
 
     /**
-     * setAccessCredentials: Set the access credentials used for administrative operations (and snapshot access)
-     *                       on the cameras. Note that ths does not change credentials on any camera, just those
-     *                       used on this software to access them. Ideally all cameras should use the same user
-     *                       name and password.
-     * @param cmd: Command object containing the username and password
-     * @return: Success/error state.
-     */
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
-    def setAccessCredentials(SetAccessCredentialsCommand cmd)
-    {
-        if(cmd.hasErrors())
-        {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "setAccessCredentials")
-            render(status: 400, text: (errorsMap as JSON))
-        }
-        else
-        {
-            ObjectCommandResponse response = camService.setCameraAccessCredentials(cmd)
-
-            if(response.status != PassFail.PASS)
-                render (status: 500, text: response.error)
-            else
-                render (status: 200, text:'')
-        }
-    }
-
-    /**
      * getAccessToken: Get an access token for a camera web admin page via the camera admin page hosting server.
      * @param cmd: Command object containing the camera host address and port.
      * @return The access token to use as the accessToken parameter in the initial get request to the hosting server,

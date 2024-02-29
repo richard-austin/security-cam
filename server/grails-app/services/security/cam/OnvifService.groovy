@@ -314,15 +314,25 @@ class OnvifService {
 
     def getSnapshot(String url) {
         ObjectCommandResponse resp = getSnapshotWithAuth(url, "")
+        try {
+            if (resp.errno == 401) {
+                Authentication auth = new Authentication(logService)
+                var uri = new URI(url)
+                var host = uri.host
+                var cam = camService.getCamera(host)
+                var creds = cam.getCredentials()
+                String username = creds.userName
+                String password = creds.password
 
-        if(resp.errno == 401) {
-            Authentication auth = new Authentication(logService)
-            String username = camService.cameraAdminUserName()
-            String password = camService.cameraAdminPassword()
-
-            var ah = auth.getAuthResponse(username, password, "GET", url, resp.response as String, new BasicHttpContext())
-            String authString = ah.value
-            resp = getSnapshotWithAuth(url, authString)
+                var ah = auth.getAuthResponse(username, password, "GET", url, resp.response as String, new BasicHttpContext())
+                String authString = ah.value
+                resp = getSnapshotWithAuth(url, authString)
+            }
+        }
+        catch(Exception ex) {
+            resp.status = PassFail.FAIL
+            resp.error = "${ex.getClass().getName()} in  getSnapshot: ${ex.getMessage()}"
+            logService.cam.error(resp.error)
         }
 
         return resp

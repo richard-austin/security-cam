@@ -1,4 +1,4 @@
-package com.proxy;
+package security.cam.interfaceobjects;
 
 import java.nio.channels.SocketChannel;
 import java.util.*;

@@ -1,7 +1,12 @@
-package com.proxy;
+package security.cam.interfaceobjects;
 
+import com.proxy.IGetAccessTokenCommand;
+import com.proxy.ILogService;
+import com.proxy.IResetTimerCommand;
 import common.HeaderProcessing;
-//import org.jetbrains.annotations.NotNull;
+import security.cam.CamService;
+import server.Camera;
+import server.CameraAdminCredentials;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -23,11 +28,11 @@ public class CamWebadminHostProxy extends HeaderProcessing {
     final int zxtechMCW5B10X = 2;
 
     ILogService logService;
-    ICamServiceInterface camService;
+    CamService camService;
     final Map<String, AccessDetails> accessDetailsMap;
     final ExecutorService processRequestThread = Executors.newCachedThreadPool();
 
-    public CamWebadminHostProxy(ILogService logService, ICamServiceInterface camService) {
+    public CamWebadminHostProxy(ILogService logService, CamService camService) {
         super(logService);
         accessDetailsMap = new HashMap<>();
         this.logService = logService;
@@ -65,7 +70,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
             try {
                 ByteBuffer reply = getBuffer(false);
                 final Object lock = new Object();
-
                 // Create a connection to the real server.
                 // If we cannot connect to the server, send an error to the
                 // client, disconnect, and continue waiting for connections.
@@ -86,9 +90,10 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             logService.getCam().trace("handleClientRequest: Ready to read client request");
                             while (client.read(request) != -1) {
                                 request.flip();
+                                AccessDetails ad = null;
                                 if (++pass == 1) {
                                     accessDetails.set(getAccessDetails(request));
-                                    AccessDetails ad = accessDetails.get();
+                                    ad = accessDetails.get();
                                     if (ad != null) {
                                         ad.addClient(client);  // Add to the list for forced close on exit from hosting
                                         Integer ct = camService.getCameraType(ad.cameraHost);
@@ -110,8 +115,11 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                     if (++serverPass == 1) {
                                         // Camera types sv3c and zxtech use basic auth, only apply to these
                                         if (camType.get() == sv3c || camType.get() == zxtechMCW5B10X) {
-                                            final String username = camService.cameraAdminUserName();
-                                            final String password = camService.cameraAdminPassword();
+                                            assert ad != null;
+                                            Camera cam = camService.getCamera(ad.cameraHost);
+                                            CameraAdminCredentials creds = cam.getCredentials();
+                                            final String username = creds.getUserName();
+                                            final String password = creds.getPassword();
                                             String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
                                             if (addHeader(request, updatedReq, "Authorization", "Basic " + encodedCredentials)) {
                                                 request = updatedReq.get();
