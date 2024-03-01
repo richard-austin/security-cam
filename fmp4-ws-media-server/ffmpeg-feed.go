@@ -51,7 +51,7 @@ func getCredentials(cam Camera) (err error, credentials Credentials) {
 	}
 	return
 }
-func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
+func ffmpegFeed(config *Config, cameras *Cameras) {
 	go cleanLogs()
 	path, _ := filepath.Split(config.LogPath)
 	for _, camera := range cameras.Cameras {
