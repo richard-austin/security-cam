@@ -77,7 +77,7 @@ public class Asymmetric {
         try {
             byte[] bytes = java.util.Base64.getDecoder().decode(base64);
             AsymmetricCryptography ac = new AsymmetricCryptography();
-            PrivateKey privateKey = ac.getPrivate("/home/richard/cloud-server/xtrn-files-and-config/privateKey");
+            PrivateKey privateKey = ac.getPrivate("/etc/security-cam/id_rsa");
             Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
             OAEPParameterSpec oaepParameterSpecJCE = new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
             cipher.init(Cipher.DECRYPT_MODE, privateKey, oaepParameterSpecJCE);

@@ -2,7 +2,7 @@ import {interval, Subscription, timer} from "rxjs";
 import {Client} from "@stomp/stompjs";
 import {UtilsService} from "../shared/utils.service";
 import {ReportingComponent} from "../reporting/reporting.component";
-import {Stream} from "../cameras/Camera";
+import {Camera, Stream} from "../cameras/Camera";
 
 export class AudioBackchannel {
   utilsService: UtilsService;
@@ -23,7 +23,7 @@ export class AudioBackchannel {
     this.video = video;
   }
 
-  toggleAudioOut(stream: Stream) {
+  toggleAudioOut(cam: Camera, stream: Stream) {
     if (!this.utilsService.isGuestAccount && (!this.utilsService.speakActive || this.audioToggle)) {
       this.audioToggle = !this.audioToggle;
       if (this.audioToggle) {
@@ -31,7 +31,7 @@ export class AudioBackchannel {
         // Time the response and add this to the audio off delay time, this is a bodge to mitigate cutting the audio
         //  off before outgoing voice message was complete.
         let intervalSubscription: Subscription = interval(1).subscribe(() => ++this.timeForStartAudioOutResponse)
-        this.utilsService.startAudioOut(stream).subscribe(() => {
+        this.utilsService.startAudioOut(cam, stream.netcam_uri).subscribe(() => {
           intervalSubscription.unsubscribe();
         }, reason => {
           this.reporting.errorMessage = reason
@@ -103,8 +103,8 @@ export class AudioBackchannel {
         };
 
         this.recorder.onstop = () => {
-          this.recorder.ondataavailable = undefined;
-          this.recorder.onstop = undefined;
+          this.recorder.ondataavailable = null;
+          this.recorder.onstop = null;
         }
 
         this.client.onConnect = () => this.recorder.start(100);

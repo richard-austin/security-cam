@@ -117,7 +117,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                         if (camType.get() == sv3c || camType.get() == zxtechMCW5B10X) {
                                             assert ad != null;
                                             Camera cam = camService.getCamera(ad.cameraHost);
-                                            CameraAdminCredentials creds = cam.getCredentials();
+                                            CameraAdminCredentials creds = cam.credentials();
                                             final String username = creds.getUserName();
                                             final String password = creds.getPassword();
                                             String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());

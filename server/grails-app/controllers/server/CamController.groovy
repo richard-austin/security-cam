@@ -10,7 +10,6 @@ import security.cam.ValidationErrorService
 import security.cam.commands.CloseClientsCommand
 import security.cam.commands.GetAccessTokenCommand
 import security.cam.commands.ResetTimerCommand
-import security.cam.commands.SetAccessCredentialsCommand
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.commands.UploadMaskFileCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -130,11 +129,11 @@ class CamController {
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
-    def haveCameraCredentials() {
+    def haveOnvifCredentials() {
         try {
             String pw, un
-            pw = camService.cameraAdminPassword()
-            un = camService.cameraAdminUserName()
+            pw = camService.onvifPassword()
+            un = camService.onvifUserName()
 
             if (un == null || pw == null)
                 render(status: 200, text: "false")

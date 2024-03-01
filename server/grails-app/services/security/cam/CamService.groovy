@@ -10,6 +10,7 @@ import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import org.apache.commons.io.IOUtils
 import org.grails.web.json.JSONObject
+import security.cam.commands.SetOnvifCredentialsCommand
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.commands.UploadMaskFileCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -95,7 +96,7 @@ class CamService {
             result = configurationUpdateService.generateConfigs()
             ObjectCommandResponse startResult = sc_processesService.startProcesses()
 
-            if(result.status !== PassFail.PASS)
+            if (result.status !== PassFail.PASS)
                 throw new Exception(result.error)
 
             Gson gson2 = new Gson()
@@ -103,7 +104,7 @@ class CamService {
 
             removeUnusedMaskFiles(obj, grailsApplication)
 
-            if(stopResult.status != PassFail.PASS)
+            if (stopResult.status != PassFail.PASS)
                 result = stopResult
             else if (startResult.status != PassFail.PASS)
                 result = startResult
@@ -136,14 +137,63 @@ class CamService {
         return result
     }
 
+    /**
+     * setOnvifCredentials: Set the access credentials required by some cameras to return onvif query results
+     * @param cmd : Command object containing the username and password
+     * @return: ObjectCommandResponse with success/error state.
+     */
+    def setOnvifCredentials(SetOnvifCredentialsCommand cmd) {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+
+        try {
+            String json = """{
+    \"onvifUserName\": \"${cmd.onvifUserName}\",
+    \"onvifPassword\": \"${cmd.onvifPassword}\"
+}
+"""
+            String fileName = "${grailsApplication.config.camerasHomeDirectory}/.json"
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
+            writer.write(json)
+
+            writer.close()
+        }
+        catch (Exception ex) {
+            logService.cam.error "setCameraAccessCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            response.status = PassFail.FAIL
+            response.error = ex.getMessage()
+        }
+
+        return response
+    }
+
+    def getOnvifCredentials() {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            FileInputStream fis
+
+            fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/onvifCredentials.json")
+
+            String data = IOUtils.toString(fis, "UTF-8")
+            Gson gson2 = new Gson()
+            Object obj = gson2.fromJson(data, Object.class)
+            response.responseObject = obj
+        }
+        catch (Exception ex) {
+            logService.cam.error "getCameraCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            response.status = PassFail.FAIL
+            response.error = ex.getMessage()
+        }
+        return response
+    }
+
     Integer getCameraType(String cameraHost) {
         Integer camType = null
-        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse)getCameras()
-        if(getCamerasResult.status == PassFail.PASS) {
-            JSONObject jo = (JSONObject)getCamerasResult.getResponseObject()
+        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
+        if (getCamerasResult.status == PassFail.PASS) {
+            JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
             jo.forEach((k, cam) -> {
-                Camera camera = (Camera)cam
-                if(Objects.equals(camera.getAddress(), cameraHost))
+                Camera camera = (Camera) cam
+                if (Objects.equals(camera.getAddress(), cameraHost))
                     camType = camera.cameraParamSpecs.camType
             })
         }
@@ -152,16 +202,21 @@ class CamService {
 
     Camera getCamera(String cameraHost) {
         Camera retVal = null
-        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse)getCameras()
-        if(getCamerasResult.status == PassFail.PASS) {
-            JSONObject jo = (JSONObject)getCamerasResult.getResponseObject()
+        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
+        if (getCamerasResult.status == PassFail.PASS) {
+            JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
             jo.forEach((k, cam) -> {
-                Camera camera = (Camera)cam
-                if(Objects.equals(camera.getAddress(), cameraHost))
+                Camera camera = (Camera) cam
+                if (Objects.equals(camera.getAddress(), cameraHost))
                     retVal = camera
             })
         }
         return retVal
     }
 
+    def String onvifPassword() {}
+
+    def onvifUserName() {
+
+    }
 }

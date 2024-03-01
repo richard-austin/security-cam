@@ -87,11 +87,14 @@ class Camera {
     boolean useRtspAuth = false
     int retriggerWindow = 30
     String cred = ""
-    CameraAdminCredentials getCredentials() {
+    CameraAdminCredentials credentials() {
         Asymmetric crypto = new Asymmetric()
         String jsonCreds = crypto.decrypt(cred)
         ObjectMapper mapper = new ObjectMapper()
-        return mapper.readValue(jsonCreds, CameraAdminCredentials.class)
+        if (jsonCreds.length() > 0)
+            return mapper.readValue(jsonCreds, CameraAdminCredentials.class)
+        else
+            return new CameraAdminCredentials()
     }
 }
 

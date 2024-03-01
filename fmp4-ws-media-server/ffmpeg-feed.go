@@ -22,8 +22,19 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
+/*
+ * getCredentials: Get the camera credentials from the encrypted string cred in the camera data.
+ * Private key generated like this: -
+ *	openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -pkeyopt rsa_keygen_pubexp:65537 | openssl pkcs8 -topk8 -nocrypt -outform der > /etc/security-cam/id_rsa
+ *
+ * And the public key is created from that with: -
+ *	openssl pkey -pubout -inform der -outform der -in /etc/security-cam/id_rsa -out rsa-2048-public-key.spki
+ *
+ * And the base64 format used in the encryption.ts on the client is created with: -
+ * cat rsa-2048-public-key.spki | base64
+ */
 func getCredentials(cam Camera) (err error, credentials Credentials) {
-	bytes, err := os.ReadFile("/home/richard/cloud-server/xtrn-files-and-config/privateKey")
+	bytes, err := os.ReadFile(config.PrivateKeyPath)
 	if err != nil {
 		log.Errorf("Error in getCredentials reading private key (%s)", err.Error())
 		return

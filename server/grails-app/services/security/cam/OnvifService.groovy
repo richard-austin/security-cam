@@ -2,7 +2,6 @@ package security.cam
 
 import com.google.gson.internal.LinkedTreeMap
 import common.Authentication
-import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
@@ -320,11 +319,8 @@ class OnvifService {
                 var uri = new URI(url)
                 var host = uri.host
                 var cam = camService.getCamera(host)
-                var creds = cam.getCredentials()
-                String username = creds.userName
-                String password = creds.password
-
-                var ah = auth.getAuthResponse(username, password, "GET", url, resp.response as String, new BasicHttpContext())
+                var creds = cam.credentials()
+                var ah = auth.getAuthResponse(creds.userName, creds.password, "GET", url, resp.response as String, new BasicHttpContext())
                 String authString = ah.value
                 resp = getSnapshotWithAuth(url, authString)
             }

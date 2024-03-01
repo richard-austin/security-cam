@@ -3,6 +3,7 @@ package security.cam
 import grails.core.GrailsApplication
 import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.RestfulResponse
+import server.Camera
 
 class CameraParams {
     public def storage = [:]
@@ -38,9 +39,9 @@ class RestfulInterfaceService {
         String url = buildURL(address, uri, isPOST ? null : params)
 
         try {
-            String username = camService.cameraAdminUserName()
-            String password = camService.cameraAdminPassword()
-            String userPass = "${username}:${password}"
+            Camera cam = camService.getCamera(address)
+            def creds = cam.credentials()
+            String userPass = "${creds.userName}:${creds.password}"
             String basicAuth = "Basic " + userPass.bytes.encodeBase64().toString()
             URL u = new URL(url)
             conn = (HttpURLConnection) u.openConnection(Proxy.NO_PROXY)
