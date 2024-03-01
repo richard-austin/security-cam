@@ -1,15 +1,56 @@
 package main
 
 import (
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 )
 
+type Credentials struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+func getCredentials(cam Camera) (err error, credentials Credentials) {
+	bytes, err := os.ReadFile("/home/richard/cloud-server/xtrn-files-and-config/privateKey")
+	if err != nil {
+		log.Errorf("Error in getCredentials reading private key (%s)", err.Error())
+		return
+	}
+	str := base64.StdEncoding.EncodeToString(bytes)
+	privateKeyBlock, _ := pem.Decode([]byte("-----BEGIN PRIVATE KEY-----\n" + str + "\n-----END PRIVATE KEY-----"))
+	get, err := x509.ParsePKCS8PrivateKey(privateKeyBlock.Bytes)
+	if err != nil {
+		log.Errorf("Error in getCredentials parsing private key (%s)", err.Error())
+		return
+	}
+	pk := get.(*rsa.PrivateKey) // Cast to type that rsa.DecryptOAEP can use
+	encrypted, _ := base64.StdEncoding.DecodeString(cam.Cred)
+	if len(encrypted) > 0 {
+		decryptedData, err := rsa.DecryptOAEP(sha256.New(), nil, pk, encrypted, nil)
+		if err != nil {
+			log.Errorf("Decrypt data error in getCredentials: %s", err.Error())
+			panic(err)
+		}
+		err = json.Unmarshal(decryptedData, &credentials)
+		if err != nil {
+			log.Errorf("Error unmarshalling JSON in getCredentials: %s", err.Error())
+			panic(err)
+		}
+	}
+	return
+}
 func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
 	go cleanLogs()
 	path, _ := filepath.Split(config.LogPath)
@@ -32,8 +73,9 @@ func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
 					rtspTransport := camera.RtspTransport
 
 					if camera.UseRtspAuth { // Use credentials if required
+						_, creds := getCredentials(camera)
 						idx := len("rtsp://")
-						uri = uri[:idx] + url.QueryEscape(creds.CamerasAdminUserName) + ":" + url.QueryEscape(creds.CamerasAdminPassword) + "@" + uri[idx:]
+						uri = uri[:idx] + url.QueryEscape(creds.UserName) + ":" + url.QueryEscape(creds.Password) + "@" + uri[idx:]
 					}
 					// Using ffmpeg version 4.4.4 (built on a Raspberry pi and deployed by the .deb file) as versions 5+ don't
 					//  work with RTSP streams with no time stamps when producing fragmented mp4 with audio. All my cameras
