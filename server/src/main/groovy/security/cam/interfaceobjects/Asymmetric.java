@@ -2,8 +2,6 @@ package security.cam.interfaceobjects;// Java program to create a
 // asymmetric key
 
 
-import grails.converters.JSON;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;

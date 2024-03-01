@@ -214,7 +214,7 @@ class CamService {
         return retVal
     }
 
-    def String onvifPassword() {}
+    String onvifPassword() {}
 
     def onvifUserName() {
 

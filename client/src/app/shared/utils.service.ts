@@ -3,10 +3,10 @@ import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {BaseUrl} from "./BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
-import {Stream, CameraParams, Camera} from "../cameras/Camera";
+import {CameraParams, Camera} from "../cameras/Camera";
 import {environment} from "../../environments/environment";
 import {cameraType} from '../cameras/camera.service';
-import {IMessage, StompHeaders} from "@stomp/stompjs";
+import {IMessage} from "@stomp/stompjs";
 
 
 export class Temperature {
