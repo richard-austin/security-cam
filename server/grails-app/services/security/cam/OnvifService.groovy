@@ -390,8 +390,18 @@ class OnvifService {
 
     private synchronized OnvifDevice getDevice(String onvifBaseAddress) {
         try {
-            if (!deviceMap.containsKey(onvifBaseAddress))
-                deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, "admin", "R@nc1dTapsB0ttom"))
+            if (!deviceMap.containsKey(onvifBaseAddress)) {
+                def user = ""
+                def password = ""
+                def response = camService.getOnvifCredentials()
+
+                if(response.status == PassFail.PASS)
+                {
+                    user = response.responseObject?.onvifUserName
+                    password = response.responseObject?.onvifPassword
+                }
+                deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, user, password))
+            }
         }
         catch (Exception ex) {
             logService.cam.error("${ex.getClass().getName()} in getDevice ${ex.getMessage()}")

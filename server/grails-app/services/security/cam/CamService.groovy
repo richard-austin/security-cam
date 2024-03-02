@@ -151,7 +151,7 @@ class CamService {
     \"onvifPassword\": \"${cmd.onvifPassword}\"
 }
 """
-            String fileName = "${grailsApplication.config.camerasHomeDirectory}/.json"
+            String fileName = "${grailsApplication.config.camerasHomeDirectory}/onvifCredentials.json"
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
             writer.write(json)
 
@@ -163,26 +163,6 @@ class CamService {
             response.error = ex.getMessage()
         }
 
-        return response
-    }
-
-    def getOnvifCredentials() {
-        ObjectCommandResponse response = new ObjectCommandResponse()
-        try {
-            FileInputStream fis
-
-            fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/onvifCredentials.json")
-
-            String data = IOUtils.toString(fis, "UTF-8")
-            Gson gson2 = new Gson()
-            Object obj = gson2.fromJson(data, Object.class)
-            response.responseObject = obj
-        }
-        catch (Exception ex) {
-            logService.cam.error "getCameraCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
-            response.status = PassFail.FAIL
-            response.error = ex.getMessage()
-        }
         return response
     }
 
@@ -214,9 +194,50 @@ class CamService {
         return retVal
     }
 
-    String onvifPassword() {}
+    /**
+     * getOnvifCredentials: Get the user name and password to authenticate on the cameras Onvif services.
+     * These are set up with the setOnvifCredentials call
+     *
+     * @return The user name
+     */
+    def getOnvifCredentials() {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            FileInputStream fis
 
-    def onvifUserName() {
+            fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/onvifCredentials.json")
 
+            String data = IOUtils.toString(fis, "UTF-8")
+            Gson gson2 = new Gson()
+            Object obj = gson2.fromJson(data, Object.class)
+            response.responseObject = obj
+        }
+        catch (Exception ex) {
+            logService.cam.error "getOnvifCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            response.status = PassFail.FAIL
+            response.error = ex.getMessage()
+        }
+        return response
+    }
+
+    def haveOnvifCredentials() {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            String pw = null, un = null
+            response = getOnvifCredentials()
+            if (response.status == PassFail.PASS) {
+                un = response.responseObject?.onvifUserName
+                pw = response.responseObject?.onvifPassword
+            }
+            response.responseObject = un != null && pw != null
+         }
+        catch (Exception ex) {
+            String msg = "${ex.getClass().getName()} in haveCameraCredentials: ${ex.getMessage()}"
+            response.responseObject = false
+            response.status = PassFail.FAIL
+            response.error = msg
+            logService.getCam().error(msg)
+        }
+        return response
     }
 }

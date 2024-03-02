@@ -10,6 +10,7 @@ import security.cam.ValidationErrorService
 import security.cam.commands.CloseClientsCommand
 import security.cam.commands.GetAccessTokenCommand
 import security.cam.commands.ResetTimerCommand
+import security.cam.commands.SetOnvifCredentialsCommand
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.commands.UploadMaskFileCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -30,8 +31,8 @@ class CamController {
     def getCameras() {
         ObjectCommandResponse cameras = camService.getCameras()
 
-        if(cameras.status != PassFail.PASS)
-            render (status: 500, text: cameras.error)
+        if (cameras.status != PassFail.PASS)
+            render(status: 500, text: cameras.error)
         else {
             logService.cam.info("getCameras: success")
             render cameras.responseObject as JSON
@@ -39,20 +40,17 @@ class CamController {
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
-    def updateCameras(UpdateCamerasCommand cmd)
-    {
+    def updateCameras(UpdateCamerasCommand cmd) {
         ObjectCommandResponse result
 
-        if(cmd.hasErrors())
-        {
+        if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'updateCameras')
             logService.cam.error "updateCameras: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
-        }
-        else {
+        } else {
             result = camService.updateCameras(cmd)
-            if(result.status != PassFail.PASS)
-                render (status: 500, text: result.error)
+            if (result.status != PassFail.PASS)
+                render(status: 500, text: result.error)
             render result.responseObject as JSON
         }
     }
@@ -67,83 +65,92 @@ class CamController {
             //cmd.errors.each { println it }
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "uploadMaskFile")
             render(status: 400, text: (errorsMap as JSON))
-        }
-        else {
+        } else {
             result = camService.uploadMaskFile(cmd)
-            if(result.status == PassFail.PASS)
-                render (status: 200, text: [])
+            if (result.status == PassFail.PASS)
+                render(status: 200, text: [])
             else
-                render (status: 500, text: result.error)
+                render(status: 500, text: result.error)
+        }
+    }
+
+    /**
+     * setAccessCredentials: Set the access credentials used for administrative operations (and snapshot access)
+     *                       on the cameras. Note that ths does not change credentials on any camera, just those
+     *                       used on this software to access them. Ideally all cameras should use the same user
+     *                       name and password.
+     * @param cmd : Command object containing the username and password
+     * @return: Success/error state.
+     */
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    def setAccessCredentials(SetOnvifCredentialsCommand cmd) {
+        if (cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "setAccessCredentials")
+            render(status: 400, text: (errorsMap as JSON))
+        } else {
+            ObjectCommandResponse response = camService.setOnvifCredentials(cmd)
+
+            if (response.status != PassFail.PASS)
+                render(status: 500, text: response.error)
+            else
+                render(status: 200, text: '')
         }
     }
 
     /**
      * getAccessToken: Get an access token for a camera web admin page via the camera admin page hosting server.
-     * @param cmd: Command object containing the camera host address and port.
+     * @param cmd : Command object containing the camera host address and port.
      * @return The access token to use as the accessToken parameter in the initial get request to the hosting server,
      *          or error code.
      */
     @Secured(['ROLE_CLIENT'])
     def getAccessToken(GetAccessTokenCommand cmd) {
-        if(cmd.hasErrors()) {
+        if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "getAccessToken")
             render(status: 400, text: (errorsMap as JSON))
-        }
-        else {
+        } else {
             ObjectCommandResponse response = cameraAdminPageHostingService.getAccessToken(cmd)
-            if(response.status != PassFail.PASS)
-                render (status: 500, text: response.error)
+            if (response.status != PassFail.PASS)
+                render(status: 500, text: response.error)
             else
-                render (status: 200, text: response.responseObject)
+                render(status: 200, text: response.responseObject)
         }
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def resetTimer(ResetTimerCommand cmd) {
-        if(cmd.hasErrors()) {
+        if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "resetTimer")
             render(status: 400, text: (errorsMap as JSON))
-        }
-        else {
+        } else {
             ObjectCommandResponse response = cameraAdminPageHostingService.resetTimer(cmd)
-            if(response.status != PassFail.PASS)
-                render (status: 500, text: response.error)
+            if (response.status != PassFail.PASS)
+                render(status: 500, text: response.error)
             else
-                render (status: 200, text: (response.responseObject as JSON))
+                render(status: 200, text: (response.responseObject as JSON))
         }
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def closeClients(CloseClientsCommand cmd) {
-        if(cmd.hasErrors()) {
+        if (cmd.hasErrors()) {
             def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "closeClients")
             render(status: 400, text: (errorsMap as JSON))
-        }
-        else {
+        } else {
             ObjectCommandResponse response = cameraAdminPageHostingService.closeClients(cmd)
-            if(response.status != PassFail.PASS)
-                render (status: 500, text: response.error)
+            if (response.status != PassFail.PASS)
+                render(status: 500, text: response.error)
             else
-                render (status: 200, text: (response.responseObject as JSON))
+                render(status: 200, text: (response.responseObject as JSON))
         }
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def haveOnvifCredentials() {
-        try {
-            String pw, un
-            pw = camService.onvifPassword()
-            un = camService.onvifUserName()
-
-            if (un == null || pw == null)
-                render(status: 200, text: "false")
-            else
-                render(status: 200, text: "true")
-        }
-        catch(Exception ex) {
-            String msg = "${ex.getClass().getName()} in haveCameraCredentials: ${ex.getMessage()}"
-            logService.getCam().error(msg)
-            render (status: 500, text: msg)
-        }
+        ObjectCommandResponse response = camService.haveOnvifCredentials()
+        if (response.status == PassFail.PASS)
+            render(status: 200, text: (response.responseObject ? 'true' : 'false'))
+        else
+            render(status: 500, text: response.error)
     }
 }
