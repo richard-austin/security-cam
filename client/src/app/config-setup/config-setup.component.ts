@@ -28,7 +28,6 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {KeyValue} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
-import {Encryption} from "./credentials-for-camera-access/encryption";
 
 declare let objectHash: (obj: Object) => string;
 
@@ -123,7 +122,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   isGuest: boolean = true;
   gettingCameraDetails: boolean = false;
   savedDataHash: string = "";
-
+  haveOnvifCredentials: boolean = false;
+  showOnvifCredentialsForm: boolean = false;
   constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
   }
 
@@ -784,14 +784,30 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     return cam.cred !== "";
   }
 
+  private checkIfOnvifCredentialsPresent() {
+    this.cameraSvc.haveOnvifCredentials().subscribe(result => {
+        this.haveOnvifCredentials = result == "true";
+      },
+      () => {
+        this.reporting.errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
+      });
+  }
+
   togglePasswordDialogue(camId: string) {
     this.camForCredentialsEntry = this.camForCredentialsEntry !== camId ? camId : "";
+    this.showAddCameraDialogue = this.showOnvifCredentialsForm = false;
+  }
+
+  toggleOnvifPasswordDialogue() {
+    this.camForCredentialsEntry = "";
     this.showAddCameraDialogue = false;
+    this.showOnvifCredentialsForm = !this.showOnvifCredentialsForm;
   }
 
   toggleAddCameraOnvifUriDialogue() {
     this.showAddCameraDialogue = !this.showAddCameraDialogue;
     this.camForCredentialsEntry = "";
+    this.showOnvifCredentialsForm = false;
   }
 
   startFindCameraDetails(onvifUrl: string) {
@@ -846,6 +862,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
         this.downloading = false;
       })
+    this.checkIfOnvifCredentialsPresent();
     this.isGuest = this.utils.isGuestAccount;
   }
 

@@ -1,54 +1,73 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import { Camera } from 'src/app/cameras/Camera';
-import {CameraService} from "../../cameras/camera.service";
+import {Camera} from 'src/app/cameras/Camera';
+import {CameraService, OnvifCredentials} from "../../cameras/camera.service";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {Encryption} from "./encryption";
 
-export class CameraAdminCredentials
-{
-  userName: string='';
-  password: string='';
+export class CameraAdminCredentials {
+  userName: string = '';
+  password: string = '';
 }
+
 @Component({
   selector: 'app-credentials-for-camera-access',
   templateUrl: './credentials-for-camera-access.component.html',
   styleUrls: ['./credentials-for-camera-access.component.scss']
 })
-export class CredentialsForCameraAccessComponent implements OnInit {
+export class CredentialsForCameraAccessComponent implements OnInit, AfterViewInit {
 
   @Output() hideDialogue: EventEmitter<void> = new EventEmitter<void>();
   @Input() reporting!: ReportingComponent
-  @Input() camera!: Camera;
+  @Input() camera!: Camera | undefined | null;
 
-  constructor(private camSvc:CameraService) { }
+  constructor(private camSvc: CameraService) {
+  }
+
+  ngAfterViewInit(): void {
+    if (this.camera === null || this.camera === undefined) {
+      this.usernameTooltip = "Enter the user name for Onvif authentication. This is used on overall Onvif discovery";
+      this.passwordTooltip = "Enter the password for Onvif authentication.";
+    }
+  }
 
   username: string = '';
   password: string = '';
   setPasswordForm!: FormGroup;
-   hidePasswordDialogue() {
+  usernameTooltip: string = "Enter the user name for administrative access to the cameras. Note this is to give this application access to the cameras not to set it on the cameras.";
+  passwordTooltip: string = "Enter the password for administrative access to the cameras. Note this is to give this application access to the cameras not to set it on the cameras.";
+  hidePasswordDialogue() {
     this.hideDialogue.emit();
   }
 
   async updateCredentials() {
     this.username = this.getFormControl('cameraUserName').value;
     this.password = this.getFormControl('cameraPassword').value;
-
-    let creds: CameraAdminCredentials = new CameraAdminCredentials();
-    creds.password = this.password;
-    creds.userName = this.username;
-    const jsonCreds = JSON.stringify(creds);
-    const crypto: Encryption = new Encryption();
-    this.camera.cred = await crypto.encrypt(jsonCreds);
-    this.hidePasswordDialogue();
+    if (this.camera !== null && this.camera !== undefined) {
+      let creds: CameraAdminCredentials = new CameraAdminCredentials();
+      creds.password = this.password;
+      creds.userName = this.username;
+      const jsonCreds = JSON.stringify(creds);
+      const crypto: Encryption = new Encryption();
+      this.camera.cred = await crypto.encrypt(jsonCreds);
+      this.hidePasswordDialogue();
+    } else {
+      const creds: OnvifCredentials = new OnvifCredentials();
+      creds.userName = this.username;
+      creds.password = this.password;
+      this.camSvc.setOnvifCredentials(creds).subscribe(() => {
+      }, reason => {
+        this.reporting.errorMessage = reason;
+      });
+      this.hidePasswordDialogue();
+    }
   }
 
   getFormControl(fcName: string): FormControl {
     return this.setPasswordForm.get(fcName) as FormControl;
   }
 
-  anyInvalid(): boolean
-  {
+  anyInvalid(): boolean {
     return this.setPasswordForm.invalid;
   }
 

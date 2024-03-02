@@ -3,7 +3,28 @@
     can be found in the LICENSE file at http://angular.io/license -->
 
 <mat-card>
-  <mat-card-title>Cameras Configuration</mat-card-title>
+  <mat-card-title>Cameras Configuration
+    <span
+      [matTooltip]="!haveOnvifCredentials ? 'Onvif credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used For Onvif authentication. This is used for overall Onvif discovery.'"
+      matTooltipClass="tooltip">
+      <button class="change-password-button"
+              mat-icon-button
+              [disabled]="isGuest"
+              (click)="toggleOnvifPasswordDialogue()">
+        <mat-icon [ngClass]="{'no-credentials': !haveOnvifCredentials}">security</mat-icon>
+      </button>
+    </span>
+    <div class="password-dialogue">
+      <div class="mat-elevation-z15" [@detailExpand]="showOnvifCredentialsForm ? 'expanded' : 'collapsed'">
+        <div>
+        </div>
+        <app-credentials-for-camera-access
+          (hideDialogue)="toggleOnvifPasswordDialogue()"
+          [reporting]="errorReporting">
+        </app-credentials-for-camera-access>
+      </div>
+    </div>
+  </mat-card-title>
   <app-reporting #errorReporting></app-reporting>
   <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
     <mat-spinner [diameter]="25"></mat-spinner>
@@ -78,7 +99,7 @@
                   mat-icon-button
                   [disabled]="isGuest"
                   (click)="togglePasswordDialogue(cam.key)">
-            <mat-icon [ngClass]="{'no-camera-credentials': cam.value.cred == ''}">security</mat-icon>
+            <mat-icon [ngClass]="{'no-credentials': cam.value.cred == ''}">security</mat-icon>
           </button>
           <div class="password-dialogue">
             <div class="mat-elevation-z15" [@detailExpand]="camForCredentialsEntry==cam.key ? 'expanded' : 'collapsed'">

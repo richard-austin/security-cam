@@ -191,8 +191,8 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  haveCameraCredentials(): Observable<string> {
-    return this.http.post(this._baseUrl.getLink("cam", "haveCameraCredentials"), '', {responseType: 'text'}).pipe(
+  haveOnvifCredentials(): Observable<string> {
+    return this.http.post(this._baseUrl.getLink("cam", "haveOnvifCredentials"), '', {responseType: 'text'}).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
@@ -249,7 +249,8 @@ export class CameraService {
   }
 
   setOnvifCredentials(creds: OnvifCredentials): Observable<any> {
-    return this.http.post<any>(this._baseUrl.getLink("cam", "setOnvifCredentials"), creds, this.httpUploadOptions).pipe(
+    const msg = {onvifUserName: creds.userName, onvifPassword: creds.password};
+    return this.http.post<any>(this._baseUrl.getLink("cam", "setOnvifCredentials"), JSON.stringify(msg), this.httpJSONOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
