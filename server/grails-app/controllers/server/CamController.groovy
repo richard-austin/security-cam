@@ -75,17 +75,14 @@ class CamController {
     }
 
     /**
-     * setAccessCredentials: Set the access credentials used for administrative operations (and snapshot access)
-     *                       on the cameras. Note that ths does not change credentials on any camera, just those
-     *                       used on this software to access them. Ideally all cameras should use the same user
-     *                       name and password.
+     * setOnvifCredentials: Set the access credentials used for Onvif operations on the cameras
      * @param cmd : Command object containing the username and password
      * @return: Success/error state.
      */
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
-    def setAccessCredentials(SetOnvifCredentialsCommand cmd) {
+    def setOnvifCredentials(SetOnvifCredentialsCommand cmd) {
         if (cmd.hasErrors()) {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "setAccessCredentials")
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, "setOnvifCredentials")
             render(status: 400, text: (errorsMap as JSON))
         } else {
             ObjectCommandResponse response = camService.setOnvifCredentials(cmd)

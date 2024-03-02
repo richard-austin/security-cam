@@ -10,7 +10,6 @@ export class CameraAdminCredentials
   userName: string='';
   password: string='';
 }
-
 @Component({
   selector: 'app-credentials-for-camera-access',
   templateUrl: './credentials-for-camera-access.component.html',
@@ -32,8 +31,8 @@ export class CredentialsForCameraAccessComponent implements OnInit {
   }
 
   async updateCredentials() {
-    this.username = this.getFormControl('camerasUsername').value;
-    this.password = this.getFormControl('camerasPassword').value;
+    this.username = this.getFormControl('cameraUserName').value;
+    this.password = this.getFormControl('cameraPassword').value;
 
     let creds: CameraAdminCredentials = new CameraAdminCredentials();
     creds.password = this.password;
@@ -55,8 +54,8 @@ export class CredentialsForCameraAccessComponent implements OnInit {
 
   ngOnInit(): void {
     this.setPasswordForm = new FormGroup({
-      camerasUsername: new FormControl(this.username, [Validators.required, Validators.maxLength(20), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
-      camerasPassword: new FormControl(this.password, [Validators.required, Validators.maxLength(25), Validators.pattern("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")])
+      cameraUserName: new FormControl(this.username, [Validators.required, Validators.maxLength(20), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
+      cameraPassword: new FormControl(this.password, [Validators.required, Validators.maxLength(25), Validators.pattern("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")])
     }, {updateOn: "change"});
 
     // Ensure camera form controls highlight immediately if invalid

@@ -70,7 +70,7 @@ class SC_PTZData {
 @Transactional
 class OnvifService {
     LogService logService
-  //  GrailsApplication grailsApplication
+    //  GrailsApplication grailsApplication
     CamService camService
     Sc_processesService sc_processesService
     private ExecutorService deviceUpdateExecutor = Executors.newSingleThreadExecutor()
@@ -81,17 +81,27 @@ class OnvifService {
     def populateDeviceMap() {
         deviceMap.clear()
         def getCamerasResult = camService.getCameras()
-        if(getCamerasResult.status == PassFail.PASS) {
+        if (getCamerasResult.status == PassFail.PASS) {
             // Populate the Onvif device map
             def cameras = getCamerasResult.getResponseObject()
             cameras.forEach((k, cam) -> {
                 getDevice(cam.onvifHost as String)
             })
-        }
-        else
-            throw new Exception("Error in populateDeviceMap: "+getCamerasResult.error)
+        } else
+            throw new Exception("Error in populateDeviceMap: " + getCamerasResult.error)
     }
 
+    private def getOnvifCredentials() {
+        def user = ""
+        def password = ""
+        def response = camService.getOnvifCredentials()
+
+        if (response.status == PassFail.PASS) {
+            user = response.responseObject?.onvifUserName
+            password = response.responseObject?.onvifPassword
+        }
+        return [user, password]
+    }
     /**
      * getMediaProfiles: Get the details of Onvif compliant cameras which are online on the LAN.
      * @return: LinkedHashMap<String, Camera> containing discovered cameras with all fields populated which can be.
@@ -103,16 +113,20 @@ class OnvifService {
             sc_processesService.stopProcesses()
             Collection<URL> urls = new CopyOnWriteArrayList<>()
 
-            if(onvifUrl == null) {  // Discover cameras on LAN with multicast probe
+            if (onvifUrl == null) {  // Discover cameras on LAN with multicast probe
                 logService.cam.info "Camera discovery..."
                 urls = OnvifDiscovery.discoverOnvifURLs()
-            }
-            else  // Get the details for the camera with the given Onvif URL
+            } else { // Get the details for the camera with the given Onvif URL
                 urls.add(new URL(onvifUrl))
+                deviceMap.clear()
+            }
+            def user, password
+            (user, password) = getOnvifCredentials()
 
             for (URL u : urls) {
                 logService.cam.info(u.toString())
-                OnvifCredentials c = new OnvifCredentials(u.host.toString() + ':' + u.port.toString(), 'admin', 'R@nc1dTapsB0ttom', 'MediaProfile000')
+
+                OnvifCredentials c = new OnvifCredentials(u.host.toString() + ':' + u.port.toString(), user, password, 'MediaProfile000')
                 creds.add(c)
             }
 
@@ -138,7 +152,7 @@ class OnvifService {
                     try {
                         logService.cam.info "Creating onvif device for ${credentials.getHost()} ..."
                         device = getDevice(credentials.getHost())
-                        if(device == null)
+                        if (device == null)
                             throw new Exception("No camera found at ${onvifUrl == null ? credentials.host : onvifUrl}")
                         Media media = device.getMedia()
                         List<Profile> profiles = media.getProfiles()
@@ -160,15 +174,14 @@ class OnvifService {
                             AudioEncoderConfiguration aec = profile.getAudioEncoderConfiguration()
                             int bitRate = aec.getBitrate()
                             // bitRate should be in Kbps, though it is in bps from SV3C type cameras.
-                            if(bitRate < 200)
+                            if (bitRate < 200)
                                 bitRate *= 1000
                             stream.audio_bitrate = bitRate
                             String encoding = aec.getEncoding().value()
-                            if(isSupportedAudioOutputFmt(encoding)) {
+                            if (isSupportedAudioOutputFmt(encoding)) {
                                 stream.audio_encoding = encoding
                                 stream.audio = true
-                            }
-                            else {
+                            } else {
                                 stream.audio_encoding = "None"
                                 stream.audio = false
                             }
@@ -183,7 +196,7 @@ class OnvifService {
                         if (!snapshotUri.isEmpty()) {
                             // If port 80 is specified for an http url, this will cause digest auth to fail,
                             //  so remove it as it's implied by the http:// protocol heading
-                            if(snapshotUri.startsWith("http://"))
+                            if (snapshotUri.startsWith("http://"))
                                 snapshotUri = snapshotUri.replace(":80/", "/")
 
                             cam.snapshotUri = snapshotUri
@@ -205,6 +218,7 @@ class OnvifService {
             logService.cam.error("${ex.getClass().getName()} in getMediaProfiles: ${ex.getMessage()}")
             result.status = PassFail.FAIL
             result.error = "Error processing Onvif responses " + ex.getMessage()
+            deviceMap.clear()  // Ensure credentials will be set up again
         }
         finally {
             sc_processesService.startProcesses()
@@ -228,7 +242,7 @@ class OnvifService {
         String[] urlParts = url.split('//')
         int indexOfColon = urlParts[1].indexOf(':')
         int indexOfForwardSlash = urlParts[1].indexOf('/')
-        if(indexOfForwardSlash == -1)
+        if (indexOfForwardSlash == -1)
             indexOfForwardSlash = urlParts[1].length()
         if (indexOfColon == -1 || indexOfForwardSlash < indexOfColon)
             return urlParts[1].substring(0, indexOfForwardSlash)
@@ -239,7 +253,7 @@ class OnvifService {
     /**
      * getPortFromHost: Get the rtsp p[ort number for host string of the form, <host or ip>:<port>
      *                  If port is not present, return the default rtsp port 554
-     * @param host: Host (format <host or ip>:<port> or <host or ip>
+     * @param host : Host (format <host or ip>:<port> or <host or ip>
      * @return The rtsp port number
      * @throws Exception
      */
@@ -247,14 +261,14 @@ class OnvifService {
             throws Exception {
         String port = 554
         String[] hostParts = host.split(':')
-        if(hostParts.length == 2)
+        if (hostParts.length == 2)
             port = hostParts[1]
         return Integer.parseInt(port)
-      }
+    }
 
     private static String getHostFromHostPort(String hostPort) throws Exception {
         String[] hostParts = hostPort.split(':')
-        if(hostParts.length > 0)
+        if (hostParts.length > 0)
             return hostParts[0]
         else
             throw new Exception("Host incorrect in getHostFromHostPort")
@@ -262,13 +276,13 @@ class OnvifService {
 
     /**
      * getBaseUrl: Get the protocol/address/port part of the url with no uri
-     * @param url: The rtsp url
+     * @param url : The rtsp url
      * @return: The base url
      */
     private static String getBaseUrl(String url) {
         String[] urlParts = url.split('//')
         String[] urlBreakDown = urlParts[1].split("/")
-        return urlParts[0]+"//"+urlBreakDown[0]
+        return urlParts[0] + "//" + urlBreakDown[0]
     }
     /**
      * setDefaults: Set default values for video_height and width, motion enabled (on the lowest res stream) and
@@ -302,9 +316,11 @@ class OnvifService {
                 X509Certificate[] getAcceptedIssuers() {
                     return null
                 }
+
                 void checkClientTrusted(
                         X509Certificate[] certs, String authType) {
                 }
+
                 void checkServerTrusted(
                         X509Certificate[] certs, String authType) {
                 }
@@ -325,7 +341,7 @@ class OnvifService {
                 resp = getSnapshotWithAuth(url, authString)
             }
         }
-        catch(Exception ex) {
+        catch (Exception ex) {
             resp.status = PassFail.FAIL
             resp.error = "${ex.getClass().getName()} in  getSnapshot: ${ex.getMessage()}"
             logService.cam.error(resp.error)
@@ -350,7 +366,7 @@ class OnvifService {
             }
         }
 
-        HttpsURLConnection.setDefaultHostnameVerifier (allHostsValid)
+        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
 
         HttpURLConnection uc = null
         try {
@@ -391,15 +407,8 @@ class OnvifService {
     private synchronized OnvifDevice getDevice(String onvifBaseAddress) {
         try {
             if (!deviceMap.containsKey(onvifBaseAddress)) {
-                def user = ""
-                def password = ""
-                def response = camService.getOnvifCredentials()
-
-                if(response.status == PassFail.PASS)
-                {
-                    user = response.responseObject?.onvifUserName
-                    password = response.responseObject?.onvifPassword
-                }
+                def user, password
+                (user, password) = getOnvifCredentials()
                 deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, user, password))
             }
         }
