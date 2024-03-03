@@ -735,7 +735,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
       this.snapShotKey = '';
     else if (cam.value.snapshotUri !== '') {
       this.snapShotKey = cam.key;
-      this.cameraSvc.getSnapshot(cam.value.snapshotUri).subscribe(result => {
+      this.cameraSvc.getSnapshot(cam.value).subscribe(result => {
           this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(result));
           this.snapshotLoading = false;
         },

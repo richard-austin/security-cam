@@ -1,5 +1,6 @@
 package security.cam
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.internal.LinkedTreeMap
 import common.Authentication
 import grails.gorm.transactions.Transactional
@@ -31,8 +32,10 @@ import org.onvif.ver20.ptz.wsdl.PTZ
 import org.utils.OnvifCredentials
 import org.utils.TestDevice
 import security.cam.enums.PassFail
+import security.cam.interfaceobjects.Asymmetric
 import security.cam.interfaceobjects.ObjectCommandResponse
 import server.Camera
+import server.CameraAdminCredentials
 import server.Stream
 
 import javax.net.ssl.HostnameVerifier
@@ -138,6 +141,8 @@ class OnvifService {
                     Camera cam = new Camera()
                     cam.onvifHost = credentials.host
                     cam.streams = new LinkedTreeMap<String, Stream>()
+                    Asymmetric asym = new Asymmetric()
+                    cam.cred = asym.encrypt("{\"userName\": \"${credentials.user}\", \"password\": \"${credentials.password}\"}")
                     RtspClient rtspClient =
                             new RtspClient(
                                     getHostFromHostPort(credentials.getHost()),
@@ -251,7 +256,7 @@ class OnvifService {
     }
 
     /**
-     * getPortFromHost: Get the rtsp p[ort number for host string of the form, <host or ip>:<port>
+     * getPortFromHost: Get the rtsp port number for host string of the form, <host or ip>:<port>
      *                  If port is not present, return the default rtsp port 554
      * @param host : Host (format <host or ip>:<port> or <host or ip>
      * @return The rtsp port number
@@ -327,15 +332,18 @@ class OnvifService {
             }
     }
 
-    def getSnapshot(String url) {
+    def getSnapshot(String url, String cred) {
         ObjectCommandResponse resp = getSnapshotWithAuth(url, "")
         try {
             if (resp.errno == 401) {
                 Authentication auth = new Authentication(logService)
-                var uri = new URI(url)
-                var host = uri.host
-                var cam = camService.getCamera(host)
-                var creds = cam.credentials()
+                Asymmetric asym = new Asymmetric()
+                var jsonCreds = asym.decrypt(cred)
+                CameraAdminCredentials creds = new CameraAdminCredentials()
+                ObjectMapper mapper = new ObjectMapper()
+                if (jsonCreds.length() > 0)
+                    creds = mapper.readValue(jsonCreds, CameraAdminCredentials.class)
+
                 var ah = auth.getAuthResponse(creds.userName, creds.password, "GET", url, resp.response as String, new BasicHttpContext())
                 String authString = ah.value
                 resp = getSnapshotWithAuth(url, authString)

@@ -1,6 +1,4 @@
-package security.cam.interfaceobjects;// Java program to create a
-// asymmetric key
-
+package security.cam.interfaceobjects;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.OAEPParameterSpec;
@@ -9,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.MGF1ParameterSpec;
 
-// Class to create an asymmetric key
 public class Asymmetric {
 
     private static final String RSA
@@ -33,41 +30,22 @@ public class Asymmetric {
                 .generateKeyPair();
     }
 
-    // Encryption function which converts
-    // the plainText into a cipherText
-    // using private Key.
-    public static byte[] do_RSAEncryption(
-            String plainText,
-            PrivateKey privateKey)
-            throws Exception
-    {
-        Cipher cipher
-                = Cipher.getInstance(RSA);
-
-        cipher.init(
-                Cipher.ENCRYPT_MODE, privateKey);
-
-        return cipher.doFinal(
-                plainText.getBytes());
-    }
-    // De
-    // cryption function which converts
-    // the ciphertext back to the
-    // original plaintext.
-    public static String do_RSADecryption(
-            byte[] cipherText,
-            PublicKey publicKey)
-            throws Exception
-    {
-        Cipher cipher
-                = Cipher.getInstance(RSA);
-
-        cipher.init(Cipher.DECRYPT_MODE,
-                publicKey);
-        byte[] result
-                = cipher.doFinal(cipherText);
-
-        return new String(result);
+    public String encrypt(String plainText) {
+        String retVal = "";
+        try {
+            byte[] bytes = plainText.getBytes();
+            AsymmetricCryptography ac = new AsymmetricCryptography();
+            PublicKey publicKey = ac.getPublic("/etc/security-cam/id_rsa.pub");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+            OAEPParameterSpec oaepParameterSpecJCE = new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey, oaepParameterSpecJCE);
+            byte[] result = cipher.doFinal(bytes, 0, bytes.length);
+            byte[] b64 = java.util.Base64.getEncoder().encode(result);
+            retVal = new String(b64, StandardCharsets.UTF_8);
+        }
+        catch (Exception ignore) {
+        }
+        return retVal;
     }
 
     public String decrypt(String base64) {

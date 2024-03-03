@@ -4,6 +4,7 @@ import grails.validation.Validateable
 
 class GetSnapshotCommand implements Validateable{
     String url
+    String cred
     static constraints = {
         url(blank: false,
             nullable: false,
@@ -13,5 +14,6 @@ class GetSnapshotCommand implements Validateable{
 //                    return "Invalid url ${url}"
                 return
             })
+        cred(nullable: false)
     }
 }

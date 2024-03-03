@@ -240,9 +240,10 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getSnapshot(url: string): Observable<Array<any>> {
+  getSnapshot(cam: Camera): Observable<Array<any>> {
     const formData: FormData = new FormData();
-    formData.append('url', url);
+    formData.append('url', cam.snapshotUri);
+    formData.append('cred', cam.cred)
     return this.http.post<Array<any>>(this._baseUrl.getLink("onvif", "getSnapshot"), formData, this.httpUploadOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
