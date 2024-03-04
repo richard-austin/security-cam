@@ -3,6 +3,7 @@ package security.cam
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.internal.LinkedTreeMap
 import common.Authentication
+import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
@@ -44,6 +45,7 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
+import javax.xml.ws.WebServiceException
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.concurrent.CopyOnWriteArrayList
@@ -68,6 +70,11 @@ class SC_PTZData {
     Profile profile
     PTZSpaces spaces
     Map<eMoveDirections, XYZValues> xyzMap
+}
+
+class DiscoveryResult {
+    Map<String, Camera> cams
+    Map<String, String> failed
 }
 
 @Transactional
@@ -134,6 +141,7 @@ class OnvifService {
             }
 
             Map<String, Camera> cams = new LinkedTreeMap<String, Camera>()
+            final Map<String, String> failed = new HashMap<String, String>()
             int camNum = 0
             creds.forEach({ credentials ->
                 if (credentials != null) {
@@ -154,13 +162,22 @@ class OnvifService {
                     rtspClient.start()
                     rtspClient.await()
 
+
                     try {
                         logService.cam.info "Creating onvif device for ${credentials.getHost()} ..."
                         device = getDevice(credentials.getHost())
                         if (device == null)
                             throw new Exception("No camera found at ${onvifUrl == null ? credentials.host : onvifUrl}")
                         Media media = device.getMedia()
-                        List<Profile> profiles = media.getProfiles()
+                        List<Profile> profiles
+                        try {
+                            profiles = media.getProfiles()
+                        }
+                        catch(WebServiceException ex) {
+                            // Add this one to the list of
+                            failed.put(credentials.getHost(), "Failed to get media profile: ${ex.getMessage()}")
+                            return
+                        }
 
                         int streamNum = 0
 
@@ -217,7 +234,7 @@ class OnvifService {
                     cams.put('camera' + ++camNum, cam)
                 }
             })
-            result.responseObject = cams
+            result.responseObject = new DiscoveryResult(cams: cams, failed: failed)
         }
         catch (Exception ex) {
             logService.cam.error("${ex.getClass().getName()} in getMediaProfiles: ${ex.getMessage()}")

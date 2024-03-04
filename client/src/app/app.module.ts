@@ -59,6 +59,7 @@ import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active
 import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
 import { AudioInputPipe } from './video/audio-input.pipe';
 import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/add-as-onvif-device.component';
+import { SafeHtmlPipe } from './config-setup/safe-html.pipe';
 
 @NgModule({
   declarations: [
@@ -93,7 +94,8 @@ import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/ad
     WifiSettingsComponent,
     CreateUserAccountContainerComponent,
     AudioInputPipe,
-    AddAsOnvifDeviceComponent
+    AddAsOnvifDeviceComponent,
+    SafeHtmlPipe
   ],
   imports: [
     BrowserModule,

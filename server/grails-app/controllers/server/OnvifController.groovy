@@ -18,9 +18,9 @@ class OnvifController {
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def discover() {
         ObjectCommandResponse resp = onvifService.getMediaProfiles()
-
-        if(resp.status == PassFail.PASS)
+        if(resp.status == PassFail.PASS) {
             render resp.responseObject as JSON
+        }
         else
             render (status: 500, text: resp.error)
     }

@@ -147,7 +147,7 @@ export class CameraService {
   }
 
   private static convertCamsObjectToMap(cams: Object): Map<string, Camera> {
-    let cameras: Map<string, Camera> = new Map<string, Camera>();
+    const cameras: Map<string, Camera> = new Map<string, Camera>();
 
     for (let key in cams) {
       // @ts-ignore
@@ -165,6 +165,15 @@ export class CameraService {
     return cameras;
   }
 
+  private static convertFailureReasonsToMap(failed: Object): Map<string, string> {
+    const failures: Map<string, string> = new Map<string, string>();
+    for(let address in failed) {
+      // @ts-ignore
+      const failure = failed[address]
+      failures.set(address, failure)
+    }
+    return failures;
+  }
   /**
    * compareFn: Compare function for use with the keyvalue pipe. This compares string with numbers (such as stream9, stream10)
    *            and sorts the numeric parts numerically rather than alphabetically. This was added to fix a bug which
@@ -212,10 +221,10 @@ export class CameraService {
     );
   }
 
-  discover(): Observable<Map<string, Camera>> {
+  discover(): Observable<{cams: Map<string, Camera>, failed: Map<string, string>}> {
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discover"), '', this.httpJSONOptions).pipe(
-      map(cams => {
-        return CameraService.convertCamsObjectToMap(cams);
+      map(result => {
+        return {cams: CameraService.convertCamsObjectToMap(result.cams), failed: CameraService.convertFailureReasonsToMap(result.failed)};
       })
     );
   }

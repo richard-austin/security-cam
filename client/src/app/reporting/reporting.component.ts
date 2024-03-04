@@ -13,7 +13,9 @@ export class ReportingComponent implements OnInit {
   isHtml: boolean = false;
   validationErrors!:string[];
   showMessageInError:boolean = true;
+  htmlWarning: string | undefined;
   @Input() embedded: boolean = false;
+
 
   constructor() {
   }
@@ -44,6 +46,10 @@ export class ReportingComponent implements OnInit {
     this.warning = warning;
   }
 
+  set htmlWarningMessage(warning: string) {
+    this.clearMessage();
+    this.htmlWarning = warning;
+  }
   dismiss() {
     this.clearMessage();
   }
@@ -52,6 +58,7 @@ export class ReportingComponent implements OnInit {
     this.error = undefined;
     this.success = undefined;
     this.warning = undefined;
+    this.htmlWarning = undefined;
   }
 
   ngOnInit(): void {

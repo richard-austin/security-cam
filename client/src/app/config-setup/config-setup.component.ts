@@ -6,7 +6,8 @@ import {
   isDevMode,
   OnDestroy,
   OnInit,
-  ViewChild
+  ViewChild,
+  ViewEncapsulation
 } from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
@@ -672,10 +673,27 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
   startOnvifSearch() {
     this.discovering = true;
-    this.cameraSvc.discover().subscribe((cams: Map<string, Camera>) => {
-        this.cameras = cams;
+    this.cameraSvc.discover().subscribe((result: {cams: Map<string, Camera>, failed: Map<string, string>}) => {
+        this.cameras = result.cams;
         this.discovering = false;
         this.FixUpCamerasData();
+        if(result.failed.size > 0) {
+          let failures = "<span style=\"font-size: 20px !important;\">Some cameras did not respond correctly. Check the Onvif credentials: -</span>";
+          for(let [address, message] of result.failed) {
+            failures += "<br><br><span style=\"font-style: italic\">" + address + "</span> :" + message;
+          }
+          failures += "<br><br>Try adding " + (result.failed.size == 1 ? "this camera" : "these cameras")+ " with the correct credentials in single camera discovery (using the <span style=\" width: 500px;\n" +
+            "  position: relative;\n" +
+            " top: 3px;\n" +
+            "  height: 25px;\n" +
+            "  line-height: 25px;\n" +
+            "  border-radius: 50%;\n" +
+            "  font-size: 25px;\n" +
+            "  color: #000;\n" +
+            "  text-align: center;\n" +
+            "  background: #fff\n\">&nbsp;+&nbsp;</span> button)";
+          this.reporting.htmlWarningMessage = failures;
+        }
       },
       reason => {
         this.reporting.errorMessage = reason;
