@@ -1,0 +1,43 @@
+div.onvif-failures-container
+{
+
+  margin-top: 1rem;
+  font-size: 2rem;
+  display: inline-flex;
+  width: 100%;
+  >mat-card
+  {
+    background-color: #dc9900;
+    color: black;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    > mat-card-subtitle {
+      > mat-icon {
+        position: relative;
+        top: 3px;
+      }
+      color: black;
+    }
+    >mat-card-content
+    {
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+.mat-column-onvifUrl {
+  width: 320px;
+}
+
+.mat-column-error {
+  width: 400px;
+}
+
+.mat-column-onvifUser {
+  width:150px;
+}
+
+.mat-column-onvifPassword {
+  width:150px;
+}

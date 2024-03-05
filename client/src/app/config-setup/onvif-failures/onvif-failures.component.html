@@ -1,0 +1,53 @@
+<div class="onvif-failures-container">
+  <mat-card>
+    <mat-card-title>Onvif Communication Failure</mat-card-title>
+    <mat-card-subtitle>Communication failed for {{failures.size == 1 ? 'this camera' : 'these cameras'}}. This is usually because {{failures.size == 1 ? 'it has' : 'they have'}} different credentials from
+      the global credentials used.<br>
+      Please enter the correct credentials, and click the <mat-icon>add_circle</mat-icon> button to try again{{failures.size > 1 ? ' for each of these cameras.': '.'}}
+    </mat-card-subtitle>
+    <mat-card-content class="global-colours">
+      <ng-container>
+        <table *ngIf="failures.size > 0" mat-table [dataSource]="failures | keyvalue"
+               class="mat-elevation-z8">
+          <!-- Onvif URL column -->
+          <ng-container matColumnDef="onvifUrl">
+            <th mat-header-cell *matHeaderCellDef> Onvif URL.</th>
+            <td mat-cell *matCellDef="let failure"> {{failure.key}} </td>
+          </ng-container>
+
+          <!-- Error message column -->
+          <ng-container matColumnDef="error">
+            <th mat-header-cell *matHeaderCellDef> Error Reason</th>
+            <td mat-cell *matCellDef="let failure">{{failure.value}} </td>
+          </ng-container>
+
+          <!-- User name entry column -->
+          <ng-container matColumnDef="onvifUser">
+            <th mat-header-cell *matHeaderCellDef> Onvif User Name</th>
+            <td mat-cell *matCellDef="let failure"> </td>
+          </ng-container>
+
+          <!-- Password entry column -->
+          <ng-container matColumnDef="onvifPassword">
+            <th mat-header-cell *matHeaderCellDef> Onvif Password</th>
+            <td mat-cell *matCellDef="let failure"> </td>
+          </ng-container>
+
+          <!-- Discover button column -->
+          <ng-container matColumnDef="discover">
+            <th mat-header-cell *matHeaderCellDef>Start Discovery</th>
+            <td mat-cell *matCellDef="let failure">
+              <button mat-icon-button>
+                <mat-icon>add_circle</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr class="table-row" mat-row *matRowDef="let failure; columns: displayedColumns" ></tr>
+
+        </table>
+
+      </ng-container>
+    </mat-card-content>
+  </mat-card>
+</div>

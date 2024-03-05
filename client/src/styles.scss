@@ -37,7 +37,7 @@ $theme: mat.define-dark-theme((color: (primary: $sec-cam-primary, secondary: $se
 
 $mat-theme-background: map-get($theme, background);
 $background-colour: mat.get-color-from-palette($mat-theme-background, background);
-
+$color: mat.get-contrast-color-from-palette($sec-cam-primary, 900);
 @include mat.all-component-themes($theme);
 
 body {
@@ -50,6 +50,10 @@ html, body {
   height: 100%;
 }
 
+.global-colours {
+  background-color: $background-colour;
+  color: $color
+}
 
 @mixin alert {
  // position: relative;
@@ -136,6 +140,10 @@ html, body {
   color: $secondary-button-colour;
 }
 
+.mat-light {
+  background-color: $light-button-bkgnd;
+  color: $light-button-colour;
+}
 .mat-light {
   background-color: $light-button-bkgnd;
   color: $light-button-colour;

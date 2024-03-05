@@ -60,6 +60,7 @@ import { CreateUserAccountContainerComponent } from './create-user-account-conta
 import { AudioInputPipe } from './video/audio-input.pipe';
 import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/add-as-onvif-device.component';
 import { SafeHtmlPipe } from './config-setup/safe-html.pipe';
+import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-failures.component';
 
 @NgModule({
   declarations: [
@@ -95,7 +96,8 @@ import { SafeHtmlPipe } from './config-setup/safe-html.pipe';
     CreateUserAccountContainerComponent,
     AudioInputPipe,
     AddAsOnvifDeviceComponent,
-    SafeHtmlPipe
+    SafeHtmlPipe,
+    OnvifFailuresComponent
   ],
   imports: [
     BrowserModule,

@@ -136,7 +136,7 @@ class OnvifService {
             for (URL u : urls) {
                 logService.cam.info(u.toString())
 
-                OnvifCredentials c = new OnvifCredentials(u.host.toString() + ':' + u.port.toString(), user, password, 'MediaProfile000')
+                OnvifCredentials c = new OnvifCredentials(u.protocol + "://" + u.host.toString() + ':' + u.port.toString() + u.path, user, password, 'MediaProfile000')
                 creds.add(c)
             }
 
@@ -175,7 +175,7 @@ class OnvifService {
                         }
                         catch(WebServiceException ex) {
                             // Add this one to the list of
-                            failed.put(credentials.getHost(), "Failed to get media profile: ${ex.getMessage()}")
+                            failed.put(credentials.getOnvifUrl(), "Failed to get media profile: ${ex.getMessage()}")
                             return
                         }
 
