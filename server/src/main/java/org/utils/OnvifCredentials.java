@@ -2,13 +2,12 @@ package org.utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.LinkedHashMap;
 
 public class OnvifCredentials {
-  private String onvifUrl;
-  private String user; // admin
-  private String password; // secret
-  private String profile; // "MediaProfile000"  If empty, will use first profile.
+  private final String onvifUrl;
+  private final String user; // admin
+  private final String password; // secret
+  private final String profile; // "MediaProfile000"  If empty, will use first profile.
 
   public OnvifCredentials(String onvifUrl, String user, String password, String profile) {
     this.onvifUrl = onvifUrl;
@@ -23,7 +22,7 @@ public class OnvifCredentials {
 
   public String getHost() throws MalformedURLException {
     final URL url = new URL(this.onvifUrl);
-    return url.getHost()+ ":" + url.getPort();
+    return url.getHost() + ":" + url.getPort();
   }
 
   public String getUser() {
