@@ -1,7 +1,7 @@
 <div class="onvif-failures-container">
   <mat-card>
-    <mat-card-title>Onvif Communication Failure</mat-card-title>
-    <mat-card-subtitle>Communication failed for {{failures.size == 1 ? 'this camera' : 'these cameras'}}. This is usually because {{failures.size == 1 ? 'it has' : 'they have'}} different credentials from
+    <mat-card-title>Couldn't Get Some Camera Profiles</mat-card-title>
+    <mat-card-subtitle>Profile discovery failed for {{failures.size == 1 ? 'this camera' : 'these cameras'}}. This is usually because {{failures.size == 1 ? 'it has' : 'they have'}} different credentials from
       the global credentials used.<br>
       Please enter the correct credentials, and click the <mat-icon>add_circle</mat-icon> button to try again{{failures.size > 1 ? ' for each of these cameras.': '.'}}
     </mat-card-subtitle>
