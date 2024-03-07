@@ -1,12 +1,12 @@
 export class Encryption {
   async encrypt(strToEncrypt: string) {
     const publicKeyB64 = `
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnQvG/Rdc8IVkr1ys6/xOwm8V6os50IWh
-+q+BHEc2ZN43twtqITLk/kk09KUDdpxwSd44i2YjC7NW4sWTO+mF8Cbecu+FX7Fd6BdvP8bOHuq0
-Z9xisfPcjeYFQ1QpDj0xM/of7q9tAeDH5GiQOV+Y8mV5l/bzeqfUEolAI+usudhUUmB0vZQ7JE83
-gG9Nb661FRNvRZHP3MCalgWu4IBgqemPtE17KeV+JN5yLH7cl/reSoQSzkfkrzmWoTpJhfAm9GfG
-Wg0619xsqy8KcE+LH+faY3B9CioVd9vdUVOz/dsKkA7Z5s1uagMSqG3fimfFSjvpA0b5ctlJToYv
-ueVCnQIDAQAB`;
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnMpUfwvCtT1lQUchQJL1pN1AYXCYjEtO
+aOdEK662ch7thOvMiiysLDA3I66sLfCgzfCSUROIafY12m4ROSPLobicmHz9e5eravGrMlJZW2lv
+vgj1lvS/4cBUYSr6OHi+PAbzH6r7xxPosMHNNzeJKWnl2ane01xkmqDqF9F79mSuVuQrNSNwQ3ej
+JLWnLb/USm4zsNTB8QLZPKL7KIviC3h+oOFenrzWjMY8emcSz/BBVcGGyxVL+vCKrC91CYGMStoS
+TBACb7aC3drsDik9XpoX5ZZaePAzJO13KKEjl7yOFjSenRuwQ3aWsdEeCQI1nPA+52zq7GT38Mpp
+KT5t7QIDAQAB`;
     //Convert the public key in base 64 (DER encoded) to array buffer
     const publicKeyAB = this.str2ab(atob(publicKeyB64.replace('/\s/g', '')));
 

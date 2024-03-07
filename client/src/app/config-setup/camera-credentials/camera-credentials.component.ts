@@ -24,13 +24,6 @@ export class CameraCredentialsComponent implements OnInit, AfterViewInit {
   constructor(private camSvc: CameraService) {
   }
 
-  ngAfterViewInit(): void {
-    if (this.camera === null || this.camera === undefined) {
-      this.usernameTooltip = "Enter the user name for Onvif authentication. This is used on overall Onvif discovery";
-      this.passwordTooltip = "Enter the password for Onvif authentication.";
-    }
-  }
-
   username: string = '';
   password: string = '';
   setPasswordForm!: FormGroup;
@@ -80,4 +73,11 @@ export class CameraCredentialsComponent implements OnInit, AfterViewInit {
     // Ensure camera form controls highlight immediately if invalid
     this.setPasswordForm.markAllAsTouched();
   }
+  ngAfterViewInit(): void {
+    if (this.camera === null || this.camera === undefined) {
+      this.usernameTooltip = "Enter the user name for Onvif authentication. This is used on overall Onvif discovery";
+      this.passwordTooltip = "Enter the password for Onvif authentication.";
+    }
+  }
+
 }
