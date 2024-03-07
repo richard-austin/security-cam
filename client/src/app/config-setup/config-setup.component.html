@@ -25,7 +25,7 @@
       </div>
     </div>
   </mat-card-title>
-  <app-onvif-failures *ngIf="failed" [failures]="failed"></app-onvif-failures>
+  <app-onvif-failures *ngIf="failed.size > 0" [failures]="failed" [cameras]="cameras" (fixUpCamerasData)="FixUpCamerasData()"></app-onvif-failures>
   <app-reporting #errorReporting></app-reporting>
   <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
     <mat-spinner [diameter]="25"></mat-spinner>

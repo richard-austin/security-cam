@@ -229,14 +229,18 @@ export class CameraService {
     );
   }
 
-  discoverCameraDetails(onvifUrl: string): Observable<Camera> {
+  discoverCameraDetails(onvifUrl: string, onvifUserName: string = "", onvifPassword: string = ""): Observable<{cam: Camera, failed: Map<string, string>}> {
     const formData: FormData = new FormData();
     formData.append('onvifUrl', onvifUrl)
+    formData.append("onvifUserName", onvifUserName);
+    formData.append("onvifPassword", onvifPassword);
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discoverCameraDetails"), formData, this.httpUploadOptions).pipe(
-      map(cams => {
-        let map: Map<string, Camera> = CameraService.convertCamsObjectToMap(cams);
+      map(result => {
+        let map: Map<string, Camera> = CameraService.convertCamsObjectToMap(result.cams);
         if (map.size == 1)
-          return map.entries().next().value[1];
+          return {cam: map.entries().next().value[1],  failed: CameraService.convertFailureReasonsToMap(result.failed)};
+        else
+          return {cam: result.cam, failed: CameraService.convertFailureReasonsToMap(result.failed)}
       })
     );
   }

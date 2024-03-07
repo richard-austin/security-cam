@@ -5,43 +5,45 @@ import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {eMoveDirections} from "./ptzcontrols/ptzbutton/ptzbutton.component";
 import {BaseUrl} from '../shared/BaseUrl/BaseUrl';
 import {ePresetOperations} from "./ptzcontrols/preset-button/preset-button.component";
+import { Camera } from '../cameras/Camera';
 
-export class PTZMove {
-  constructor(moveDirection: eMoveDirections, onvifBaseAddress: string) {
+class PtzOperations {
+  onvifBaseAddress: string;
+  creds: string;
+  constructor(cam: Camera) {
+    this.onvifBaseAddress = cam.onvifHost
+    this.creds = cam.cred
+  }
+}
+export class PTZMove extends PtzOperations {
+  constructor(moveDirection: eMoveDirections, cam:Camera) {
+    super(cam);
     this.moveDirection = moveDirection;
-    this.onvifBaseAddress = onvifBaseAddress;
   }
 
   moveDirection: eMoveDirections;
-  onvifBaseAddress: string;
 }
 
-export class PTZStop {
-  constructor(onvifBaseAddress: string) {
-    this.onvifBaseAddress = onvifBaseAddress;
+export class PTZStop extends PtzOperations{
+  constructor(cam: Camera) {
+    super(cam);
   }
-
-  onvifBaseAddress: string;
 }
 
-export class PTZPresetCommand {
-  constructor(operation: ePresetOperations, onvifBaseAddress: string, preset: string) {
+export class PTZPresetCommand extends PtzOperations{
+  constructor(operation: ePresetOperations, cam: Camera, preset: string) {
+    super(cam);
     this.operation = operation;
-    this.onvifBaseAddress = onvifBaseAddress;
     this.preset = preset;
   }
-
   operation: ePresetOperations;
-  onvifBaseAddress: string;
   preset: string;
 }
 
-export class PTZPresetsInfoCommand {
-  constructor(onvifBaseAddress: string) {
-    this.onvifBaseAddress = onvifBaseAddress;
+export class PTZPresetsInfoCommand extends PtzOperations{
+  constructor(cam: Camera) {
+    super(cam);
   }
-
-  onvifBaseAddress: string;
 }
 
 export class Preset {

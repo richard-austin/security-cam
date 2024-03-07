@@ -1,4 +1,9 @@
-import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {CameraService} from "../../cameras/camera.service";
+import {Camera} from "../../cameras/Camera";
+import {ReportingComponent} from "../../reporting/reporting.component";
+import {BehaviorSubject} from "rxjs";
+import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-onvif-failures',
@@ -7,13 +12,92 @@ import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 })
 export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   @Input() failures!: Map<string, string>;
-  displayedColumns: string[] = ['onvifUrl', 'error', 'onvifUser', 'onvifPassword', 'discover'];
-  constructor() { }
+  @Input() cameras!: Map<string, Camera>;
+  @Input() reporting!:ReportingComponent;
+  @Output() fixUpCamerasData: EventEmitter<void> = new EventEmitter<void>();
+
+  list$!: BehaviorSubject<[string, string][]>;
+  failControls!:FormArray;
+  onvifUserName: string = "";
+  onvifPassword: string = "";
+  gettingCameraDetails: boolean = false;
+
+  readonly displayedColumns: string[] = ['onvifUrl', 'error', 'onvifUser', 'onvifPassword', 'discover'];
+  constructor(private cameraSvc: CameraService) { }
+
+  discover(onvifUrl: string, onvifUserName: string, onvifPassword: string) {
+    this.gettingCameraDetails = true;
+    this.cameraSvc.discoverCameraDetails(onvifUrl, onvifUserName, onvifPassword).subscribe((result: { cam: Camera, failed: Map<string, string> }) => {
+        if (result.failed.size == 1) {
+          const fKey: string = result.failed.keys().next().value;
+          if (this.failures === undefined)
+            this.failures = result.failed;
+          else if (!this.failures.has(fKey)) {
+            const fVal: string = result.failed.values().next().value;
+            this.failures.set(fKey, fVal);
+          }
+        }
+        if(result.cam !== undefined) {
+          this.cameras.set('camera' + (this.cameras.size + 1), result.cam);
+          this.fixUpCamerasData.emit();
+          this.failures.delete(onvifUrl);
+          // if(this.failures.size == 0)
+          //     this.failures = undefined;
+        }
+        this.gettingCameraDetails = false;
+      },
+      reason => {
+        this.reporting.errorMessage = reason;
+        this.fixUpCamerasData.emit();
+      });
+  }
+
+  setupTableFormControls() {
+    this.list$ = new BehaviorSubject<[string, string][]>(Array.from(this.failures));
+    const toFailureGroups = this.list$.value.map(camera => {
+      return new FormGroup(
+        {
+          onvifUserName: new FormControl({
+            value: this.onvifUserName,
+            disabled: this.gettingCameraDetails
+          }, [Validators.maxLength(20), Validators.minLength(0), Validators.pattern(/^[a-zA-Z0-9](_(?!([._]))|\.(?!([_.]))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/)]),
+          onvifPassword: new FormControl({
+            value: this.onvifPassword,
+            disabled: this.gettingCameraDetails
+          }, [Validators.maxLength(25), Validators.minLength(0), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/)])
+        });
+    });
+
+    this.failControls = new FormArray(toFailureGroups);
+
+    // Ensure camera form controls highlight immediately if invalid
+    for (let i = 0; i < this.failControls.length; ++i) {
+      this.failControls.at(i).markAllAsTouched();
+    }
+  }
+
+  getControl(index: number, fieldName: string): FormControl {
+      return this.failControls?.at(index).get(fieldName) as FormControl;
+  }
+
+ private  update(index: number, field: string, value: any) {
+    Array.from(this.cameras.values()).forEach((cam: Camera, i) => {
+      if (i === index) { // @ts-ignore
+        cam[field] = value;
+      }
+    });
+  }
+
+  updateField(index: number, field: string) {
+    const control = this.getControl(index, field);
+    if (control) {
+      this.update(index, field, control.value);
+    }
+  }
 
   ngAfterViewInit(): void {
-      let x = this.failures;
-    }
-
+    this.setupTableFormControls();
+  }
   ngOnInit(): void {
   }
 

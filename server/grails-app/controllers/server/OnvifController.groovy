@@ -33,7 +33,7 @@ class OnvifController {
             render(status: 400, text: errorsMap as JSON)
         }
         else {
-            ObjectCommandResponse resp = onvifService.getMediaProfiles(cmd.onvifUrl)
+            ObjectCommandResponse resp = onvifService.getMediaProfiles(cmd)
 
             if (resp.status == PassFail.PASS)
                 render resp.responseObject as JSON

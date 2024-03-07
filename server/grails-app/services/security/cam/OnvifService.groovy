@@ -3,7 +3,6 @@ package security.cam
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.internal.LinkedTreeMap
 import common.Authentication
-import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
@@ -14,7 +13,7 @@ import org.onvif.ver10.schema.PTZSpaces
 import org.onvif.ver10.schema.Space1DDescription
 import org.onvif.ver10.schema.Space2DDescription
 import security.cam.audiobackchannel.RtspClient
-
+import security.cam.commands.DiscoverCameraDetailsCommand
 import security.cam.commands.MoveCommand
 import security.cam.commands.MoveCommand.eMoveDirections
 import security.cam.commands.PTZPresetsInfoCommand
@@ -94,8 +93,17 @@ class OnvifService {
         if (getCamerasResult.status == PassFail.PASS) {
             // Populate the Onvif device map
             def cameras = getCamerasResult.getResponseObject()
+            Asymmetric asym = new Asymmetric()
             cameras.forEach((k, cam) -> {
-                getDevice(cam.onvifHost as String)
+                String jsonCreds = asym.decrypt(cam.cred as String)
+                ObjectMapper mapper = new ObjectMapper()
+                def (user, password) = [null, null]
+                if (jsonCreds.length() > 0) {
+                    CameraAdminCredentials cac = mapper.readValue(jsonCreds, CameraAdminCredentials.class)
+                    user = cac.userName
+                    password = cac.password
+                }
+                getDevice(cam.onvifHost as String, user, password)
             })
         } else
             throw new Exception("Error in populateDeviceMap: " + getCamerasResult.error)
@@ -116,22 +124,25 @@ class OnvifService {
      * getMediaProfiles: Get the details of Onvif compliant cameras which are online on the LAN.
      * @return: LinkedHashMap<String, Camera> containing discovered cameras with all fields populated which can be.
      */
-    def getMediaProfiles(String onvifUrl = null) {
+    def getMediaProfiles(DiscoverCameraDetailsCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             List<OnvifCredentials> creds = []
             sc_processesService.stopProcesses()
             Collection<URL> urls = new CopyOnWriteArrayList<>()
 
-            if (onvifUrl == null) {  // Discover cameras on LAN with multicast probe
+            if (cmd?.onvifUrl == null) {  // Discover cameras on LAN with multicast probe
                 logService.cam.info "Camera discovery..."
                 urls = OnvifDiscovery.discoverOnvifURLs()
             } else { // Get the details for the camera with the given Onvif URL
-                urls.add(new URL(onvifUrl))
+                urls.add(new URL(cmd?.onvifUrl))
                 deviceMap.clear()
             }
             def user, password
-            (user, password) = getOnvifCredentials()
+            if (cmd?.onvifUserName != null && cmd.onvifUserName != "")
+                (user, password) = [cmd.onvifUserName, cmd.onvifPassword]
+            else
+                (user, password) = getOnvifCredentials()
 
             for (URL u : urls) {
                 logService.cam.info(u.toString())
@@ -165,15 +176,16 @@ class OnvifService {
 
                     try {
                         logService.cam.info "Creating onvif device for ${credentials.getHost()} ..."
-                        device = getDevice(credentials.getHost())
+                        device = getDevice(credentials.getHost(), user, password)
                         if (device == null)
-                            throw new Exception("No camera found at ${onvifUrl == null ? credentials.host : onvifUrl}")
-                        Media media = device.getMedia()
+                            throw new Exception("No camera found at ${cmd?.onvifUrl == null ? credentials.host : cmd.onvifUrl}")
+
                         List<Profile> profiles
                         try {
+                            Media media = device.getMedia()
                             profiles = media.getProfiles()
                         }
-                        catch(WebServiceException ex) {
+                        catch (WebServiceException ex) {
                             // Add this one to the list of
                             failed.put(credentials.getOnvifUrl(), "Failed to get media profile: ${ex.getMessage()}")
                             return
@@ -243,6 +255,12 @@ class OnvifService {
             deviceMap.clear()  // Ensure credentials will be set up again
         }
         finally {
+            // If this was for a specific camera, remove from the device map as the credentials may differ from the global creds
+            if (cmd?.onvifUrl != null) {
+                def url = new URL(cmd.onvifUrl)
+                def onvifHost = url.host+":"+url.port
+                deviceMap.remove(onvifHost)
+            }
             sc_processesService.startProcesses()
         }
         return result
@@ -429,11 +447,14 @@ class OnvifService {
 
     private final static Map<String, OnvifDevice> deviceMap = new HashMap<>()
 
-    private synchronized OnvifDevice getDevice(String onvifBaseAddress) {
+    private synchronized OnvifDevice getDevice(String onvifBaseAddress, String onvifUserName = "", String onvifPassword = "") {
         try {
             if (!deviceMap.containsKey(onvifBaseAddress)) {
                 def user, password
-                (user, password) = getOnvifCredentials()
+                if(onvifUserName.length()> 0 && onvifPassword.length() > 0)
+                    (user, password) = [onvifUserName, onvifPassword]
+                else
+                    (user, password) = getOnvifCredentials()
                 deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, user, password))
             }
         }
@@ -458,10 +479,8 @@ class OnvifService {
 
     ObjectCommandResponse move(MoveCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
-
         try {
-
-            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress, cmd.user, cmd.password)
 
             Profile profile = ptzDataMap.get(cmd.onvifBaseAddress).getProfile()
 
@@ -497,9 +516,8 @@ class OnvifService {
 
     ObjectCommandResponse stop(StopCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
-
         try {
-            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress, cmd.user, cmd.password)
 
             Profile profile = ptzDataMap.get(cmd.onvifBaseAddress).getProfile()
 
@@ -521,9 +539,8 @@ class OnvifService {
 
     ObjectCommandResponse preset(PTZPresetsCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
-
         try {
-            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress, cmd.user, cmd.password)
 
             Profile profile = ptzDataMap.get(cmd.onvifBaseAddress).getProfile()
 
@@ -560,9 +577,8 @@ class OnvifService {
 
     ObjectCommandResponse ptzPresetsInfo(PTZPresetsInfoCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
-
         try {
-            OnvifDevice device = getDevice(cmd.onvifBaseAddress)
+            OnvifDevice device = getDevice(cmd.onvifBaseAddress, cmd.user, cmd.password)
             Media media = device.getMedia()
 
             Profile profile = media.getProfiles().get(0)

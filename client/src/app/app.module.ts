@@ -59,7 +59,7 @@ import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active
 import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
 import { AudioInputPipe } from './video/audio-input.pipe';
 import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/add-as-onvif-device.component';
-import { SafeHtmlPipe } from './config-setup/safe-html.pipe';
+import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-failures.component';
 
 @NgModule({

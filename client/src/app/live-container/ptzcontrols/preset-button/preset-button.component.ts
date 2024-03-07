@@ -12,7 +12,7 @@ export enum ePresetOperations {moveTo, saveTo, clearFrom}
   styleUrls: ['./preset-button.component.scss']
 })
 export class PresetButtonComponent implements OnInit {
-  @Input() camera!: Camera | null;
+  @Input() camera!: Camera;
   @Input() reporting!: ReportingComponent;
   @Input() presetInfo!: Preset;
   @Input() presetNumber!: string;
@@ -23,7 +23,7 @@ export class PresetButtonComponent implements OnInit {
   constructor(private ptz: PTZService) { }
 
   preset() {
-    let ptz: PTZPresetCommand = new PTZPresetCommand(this.operation, this.camera?.onvifHost as string, this.presetInfo.token)
+    let ptz: PTZPresetCommand = new PTZPresetCommand(this.operation, this.camera, this.presetInfo.token)
     this.ptz.preset(ptz).subscribe(() => {
       },
       reason => {
