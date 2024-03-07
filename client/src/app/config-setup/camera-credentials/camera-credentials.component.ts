@@ -11,11 +11,11 @@ export class CameraAdminCredentials {
 }
 
 @Component({
-  selector: 'app-credentials-for-camera-access',
-  templateUrl: './credentials-for-camera-access.component.html',
-  styleUrls: ['./credentials-for-camera-access.component.scss']
+  selector: 'app-camera-credentials',
+  templateUrl: './camera-credentials.component.html',
+  styleUrls: ['./camera-credentials.component.scss']
 })
-export class CredentialsForCameraAccessComponent implements OnInit, AfterViewInit {
+export class CameraCredentialsComponent implements OnInit, AfterViewInit {
 
   @Output() hideDialogue: EventEmitter<void> = new EventEmitter<void>();
   @Input() reporting!: ReportingComponent

@@ -18,15 +18,15 @@
       <div class="mat-elevation-z15" [@detailExpand]="showOnvifCredentialsForm ? 'expanded' : 'collapsed'">
         <div>
         </div>
-        <app-credentials-for-camera-access
+        <app-camera-credentials
           (hideDialogue)="toggleOnvifPasswordDialogue()"
-          [reporting]="errorReporting">
-        </app-credentials-for-camera-access>
+          [reporting]="reporting">
+        </app-camera-credentials>
       </div>
     </div>
   </mat-card-title>
-  <app-onvif-failures *ngIf="failed.size > 0" [failures]="failed" [cameras]="cameras" (fixUpCamerasData)="FixUpCamerasData()"></app-onvif-failures>
   <app-reporting #errorReporting></app-reporting>
+  <app-onvif-failures *ngIf="failed.size > 0" [reporting]="reporting" [failures]="failed" [cameras]="cameras" (fixUpCamerasData)="FixUpCamerasData()"></app-onvif-failures>
   <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Loading, Please wait..</span>
@@ -106,11 +106,11 @@
             <div class="mat-elevation-z15" [@detailExpand]="camForCredentialsEntry==cam.key ? 'expanded' : 'collapsed'">
               <div>
               </div>
-              <app-credentials-for-camera-access
+              <app-camera-credentials
                 [camera]="cam.value"
                 (hideDialogue)="togglePasswordDialogue('')"
-                [reporting]="errorReporting">
-              </app-credentials-for-camera-access>
+                [reporting]="reporting">
+              </app-camera-credentials>
             </div>
           </div>
         </span>
@@ -600,7 +600,7 @@
                 </div>
                 <app-add-as-onvif-device
                   (hideDialogue)="toggleAddCameraOnvifUriDialogue()"
-                  [reporting]="errorReporting"
+                  [reporting]="reporting"
                   (startFindCameraDetails)="startFindCameraDetails($event)"
                   [cameras]="cameras"
                 >

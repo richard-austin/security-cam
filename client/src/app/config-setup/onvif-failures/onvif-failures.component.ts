@@ -13,21 +13,28 @@ import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   @Input() failures!: Map<string, string>;
   @Input() cameras!: Map<string, Camera>;
-  @Input() reporting!:ReportingComponent;
+  @Input() reporting!: ReportingComponent;
   @Output() fixUpCamerasData: EventEmitter<void> = new EventEmitter<void>();
 
   list$!: BehaviorSubject<[string, string][]>;
-  failControls!:FormArray;
+  failControls!: FormArray;
   onvifUserName: string = "";
   onvifPassword: string = "";
   gettingCameraDetails: boolean = false;
+  onvifUrl!: string;
 
   readonly displayedColumns: string[] = ['onvifUrl', 'error', 'onvifUser', 'onvifPassword', 'discover'];
-  constructor(private cameraSvc: CameraService) { }
+
+  constructor(private cameraSvc: CameraService) {
+  }
 
   discover(onvifUrl: string, onvifUserName: string, onvifPassword: string) {
     this.gettingCameraDetails = true;
-    this.cameraSvc.discoverCameraDetails(onvifUrl, onvifUserName, onvifPassword).subscribe((result: { cam: Camera, failed: Map<string, string> }) => {
+    this.onvifUrl = onvifUrl
+    this.cameraSvc.discoverCameraDetails(onvifUrl, onvifUserName, onvifPassword).subscribe((result: {
+        cam: Camera,
+        failed: Map<string, string>
+      }) => {
         if (result.failed.size == 1) {
           const fKey: string = result.failed.keys().next().value;
           if (this.failures === undefined)
@@ -37,18 +44,24 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
             this.failures.set(fKey, fVal);
           }
         }
-        if(result.cam !== undefined) {
+        if (result.cam !== undefined) {
           this.cameras.set('camera' + (this.cameras.size + 1), result.cam);
           this.fixUpCamerasData.emit();
           this.failures.delete(onvifUrl);
           // if(this.failures.size == 0)
           //     this.failures = undefined;
+        } else {
+          let msg = "Couldn't get camera details: - ";
+          if (result.failed !== undefined && result.failed.size > 0)
+            msg += result.failed.entries().next().value
+          this.reporting.warning = msg;
         }
         this.gettingCameraDetails = false;
+        this.fixUpCamerasData.emit();
       },
       reason => {
+        this.gettingCameraDetails = false;
         this.reporting.errorMessage = reason;
-        this.fixUpCamerasData.emit();
       });
   }
 
@@ -77,10 +90,13 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   }
 
   getControl(index: number, fieldName: string): FormControl {
-      return this.failControls?.at(index).get(fieldName) as FormControl;
+    return this.failControls?.at(index).get(fieldName) as FormControl;
+  }
+  anyInvalid(i: number) : boolean {
+    return this.failControls?.at(i).invalid;
   }
 
- private  update(index: number, field: string, value: any) {
+  private update(index: number, field: string, value: any) {
     Array.from(this.cameras.values()).forEach((cam: Camera, i) => {
       if (i === index) { // @ts-ignore
         cam[field] = value;
@@ -98,8 +114,7 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.setupTableFormControls();
   }
+
   ngOnInit(): void {
   }
-
-  protected readonly Symbol = Symbol;
 }
