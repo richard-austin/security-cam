@@ -76,6 +76,7 @@ export class CameraService {
   private cameras: Map<string, Camera> = new Map();
 
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
+ private _publicKey!: Uint8Array;
 
   public readonly _cameraParamSpecs: CameraParamSpec[] =
     [new CameraParamSpec(
@@ -132,11 +133,15 @@ export class CameraService {
   get preambleFrameValues() {
     return this._preambleFrameValues;
   }
+
+  get publicKey() : Uint8Array {
+    return this._publicKey;
+  }
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     this.loadCameras().subscribe((cams) => {
       this.cameras = cams;
-
-    })
+    });
+    this.getPublicKey();
   }
 
   /**
@@ -262,6 +267,16 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
+  getPublicKey():void {
+    if(this._publicKey === undefined) {
+      this.http.post<Uint8Array>(this._baseUrl.getLink("cam", "getPublicKey"), "", this.httpUploadOptions).pipe(
+        tap((pk) => {
+          this._publicKey = new Uint8Array(pk);
+        }),
+        catchError((err: HttpErrorResponse) => throwError(err)))
+        .subscribe();
+    }
+  }
   setOnvifCredentials(creds: OnvifCredentials): Observable<any> {
     const msg = {onvifUserName: creds.userName, onvifPassword: creds.password};
     return this.http.post<any>(this._baseUrl.getLink("cam", "setOnvifCredentials"), JSON.stringify(msg), this.httpJSONOptions).pipe(

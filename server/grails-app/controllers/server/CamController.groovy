@@ -74,6 +74,15 @@ class CamController {
         }
     }
 
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    def getPublicKey() {
+        ObjectCommandResponse response = camService.getPublicKey()
+        if(response.status == PassFail.PASS)
+            render response.responseObject
+        else
+            render(status: 500, text: response.error)
+    }
+
     /**
      * setOnvifCredentials: Set the access credentials used for Onvif operations on the cameras
      * @param cmd : Command object containing the username and password

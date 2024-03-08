@@ -41,7 +41,7 @@ export class CameraCredentialsComponent implements OnInit, AfterViewInit {
       creds.password = this.password;
       creds.userName = this.username;
       const jsonCreds = JSON.stringify(creds);
-      const crypto: Encryption = new Encryption();
+      const crypto: Encryption = new Encryption(this.camSvc.publicKey);
       this.camera.cred = await crypto.encrypt(jsonCreds);
       this.hidePasswordDialogue();
     } else {

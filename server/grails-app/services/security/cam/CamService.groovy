@@ -137,6 +137,22 @@ class CamService {
         return result
     }
 
+    def getPublicKey() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            File file = new File("/etc/security-cam/id_rsa.pub")
+
+            byte[] bytes = file.readBytes()
+            result.responseObject = bytes
+        }
+        catch(Exception ex) {
+            logService.cam.error "getPublicKey() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
     /**
      * setOnvifCredentials: Set the access credentials required by some cameras to return onvif query results
      * @param cmd : Command object containing the username and password
