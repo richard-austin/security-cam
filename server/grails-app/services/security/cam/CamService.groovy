@@ -197,16 +197,21 @@ class CamService {
     }
 
     Camera getCamera(String cameraHost) {
+
         Camera retVal = null
-        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
-        if (getCamerasResult.status == PassFail.PASS) {
-            JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
-            jo.forEach((k, cam) -> {
-                Camera camera = (Camera) cam
-                if (Objects.equals(camera.getAddress(), cameraHost))
-                    retVal = camera
-            })
-        }
+            if(!cameraHost.contains("localhost")) {
+                ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
+                if (getCamerasResult.status == PassFail.PASS) {
+                    JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
+                    jo.forEach((k, cam) -> {
+                        Camera camera = (Camera) cam
+                        if (Objects.equals(camera.getAddress(), cameraHost))
+                            retVal = camera
+                    })
+                }
+                if (retVal == null)
+                    logService.cam.error("getCamera: Could not find a camera with the address ${cameraHost}")
+            }
         return retVal
     }
 

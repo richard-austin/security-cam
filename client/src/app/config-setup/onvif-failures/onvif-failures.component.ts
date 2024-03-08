@@ -57,7 +57,6 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
           this.reporting.warning = msg;
         }
         this.gettingCameraDetails = false;
-        this.fixUpCamerasData.emit();
       },
       reason => {
         this.gettingCameraDetails = false;
@@ -96,20 +95,20 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
     return this.failControls?.at(i).invalid;
   }
 
-  private update(index: number, field: string, value: any) {
-    Array.from(this.cameras.values()).forEach((cam: Camera, i) => {
-      if (i === index) { // @ts-ignore
-        cam[field] = value;
-      }
-    });
-  }
-
-  updateField(index: number, field: string) {
-    const control = this.getControl(index, field);
-    if (control) {
-      this.update(index, field, control.value);
-    }
-  }
+  // private update(index: number, field: string, value: any) {
+  //   Array.from(this.failures.values()).forEach((cam: Camera, i) => {
+  //     if (i === index) { // @ts-ignore
+  //       cam[field] = value;
+  //     }
+  //   });
+  // }
+  //
+  // updateField(index: number, field: string) {
+  //   const control = this.getControl(index, field);
+  //   if (control) {
+  //     this.update(index, field, control.value);
+  //   }
+  // }
 
   ngAfterViewInit(): void {
     this.setupTableFormControls();
