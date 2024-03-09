@@ -19,7 +19,6 @@
         <div>
         </div>
         <app-camera-credentials
-          *ngIf="reporting?.warning != null"
           (hideDialogue)="toggleOnvifPasswordDialogue()"
           (haveOnvifCredentials)="checkIfOnvifCredentialsPresent()"
           [reporting]="reporting">
