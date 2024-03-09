@@ -14,6 +14,6 @@ class GetSnapshotCommand implements Validateable{
 //                    return "Invalid url ${url}"
                 return
             })
-        cred(nullable: false)
+        cred(nullable: true)
     }
 }

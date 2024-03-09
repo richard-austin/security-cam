@@ -233,6 +233,9 @@ class CamService {
             Object obj = gson2.fromJson(data, Object.class)
             response.responseObject = obj
         }
+        catch(FileNotFoundException ignore) {
+            response.responseObject = [onvifUserName: "", onvifPassword: ""]
+        }
         catch (Exception ex) {
             logService.cam.error "getOnvifCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
             response.status = PassFail.FAIL
@@ -244,13 +247,13 @@ class CamService {
     def haveOnvifCredentials() {
         ObjectCommandResponse response = new ObjectCommandResponse()
         try {
-            String pw = null, un = null
+            String pw = "", un = ""
             response = getOnvifCredentials()
             if (response.status == PassFail.PASS) {
                 un = response.responseObject?.onvifUserName
                 pw = response.responseObject?.onvifPassword
             }
-            response.responseObject = un != null && pw != null
+            response.responseObject = !un.isEmpty() && !pw.isEmpty()
          }
         catch (Exception ex) {
             String msg = "${ex.getClass().getName()} in haveCameraCredentials: ${ex.getMessage()}"

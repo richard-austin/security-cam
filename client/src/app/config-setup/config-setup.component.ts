@@ -789,7 +789,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     return cam.cred !== "";
   }
 
-  private checkIfOnvifCredentialsPresent() {
+  checkIfOnvifCredentialsPresent() {
     this.cameraSvc.haveOnvifCredentials().subscribe(result => {
         this.haveOnvifCredentials = result == "true";
       },

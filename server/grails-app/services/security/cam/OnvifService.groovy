@@ -130,13 +130,12 @@ class OnvifService {
             List<OnvifCredentials> creds = []
             sc_processesService.stopProcesses()
             Collection<URL> urls = new CopyOnWriteArrayList<>()
-
+            deviceMap.clear()
             if (cmd?.onvifUrl == null) {  // Discover cameras on LAN with multicast probe
                 logService.cam.info "Camera discovery..."
                 urls = OnvifDiscovery.discoverOnvifURLs()
             } else { // Get the details for the camera with the given Onvif URL
                 urls.add(new URL(cmd?.onvifUrl))
-                deviceMap.clear()
             }
             def user, password
             if (cmd?.onvifUserName != null && cmd.onvifUserName != "")
@@ -161,7 +160,10 @@ class OnvifService {
                     cam.onvifHost = credentials.host
                     cam.streams = new LinkedTreeMap<String, Stream>()
                     Asymmetric asym = new Asymmetric()
-                    cam.cred = asym.encrypt("{\"userName\": \"${credentials.user}\", \"password\": \"${credentials.password}\"}")
+                    if(!credentials.nullOrEmpty())
+                        cam.cred = asym.encrypt("{\"userName\": \"${credentials.user}\", \"password\": \"${credentials.password}\"}")
+                    else
+                        cam.cred = ""
                     RtspClient rtspClient =
                             new RtspClient(
                                     getHostFromHostPort(credentials.getHost()),
@@ -448,6 +450,10 @@ class OnvifService {
     private final static Map<String, OnvifDevice> deviceMap = new HashMap<>()
 
     private synchronized OnvifDevice getDevice(String onvifBaseAddress, String onvifUserName = "", String onvifPassword = "") {
+        if(onvifUserName == null)
+            onvifUserName = ""
+        if(onvifPassword == null)
+            onvifPassword = ""
         try {
             if (!deviceMap.containsKey(onvifBaseAddress)) {
                 def user, password
@@ -455,6 +461,7 @@ class OnvifService {
                     (user, password) = [onvifUserName, onvifPassword]
                 else
                     (user, password) = getOnvifCredentials()
+
                 deviceMap.put(onvifBaseAddress, new OnvifDevice(onvifBaseAddress, user, password))
             }
         }

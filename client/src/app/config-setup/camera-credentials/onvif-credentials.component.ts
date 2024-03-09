@@ -5,19 +5,15 @@ import {CameraService, OnvifCredentials} from "../../cameras/camera.service";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {Encryption} from "./encryption";
 
-export class CameraAdminCredentials {
-  userName: string = '';
-  password: string = '';
-}
-
 @Component({
   selector: 'app-camera-credentials',
-  templateUrl: './camera-credentials.component.html',
-  styleUrls: ['./camera-credentials.component.scss']
+  templateUrl: './onvif-credentials.component.html',
+  styleUrls: ['./onvif-credentials.component.scss']
 })
-export class CameraCredentialsComponent implements OnInit, AfterViewInit {
+export class OnvifCredentialsComponent implements OnInit, AfterViewInit {
 
   @Output() hideDialogue: EventEmitter<void> = new EventEmitter<void>();
+  @Output() haveOnvifCredentials: EventEmitter<void> = new EventEmitter<void>();
   @Input() reporting!: ReportingComponent
   @Input() camera!: Camera | undefined | null;
 
@@ -37,7 +33,7 @@ export class CameraCredentialsComponent implements OnInit, AfterViewInit {
     this.username = this.getFormControl('cameraUserName').value;
     this.password = this.getFormControl('cameraPassword').value;
     if (this.camera !== null && this.camera !== undefined) {
-      let creds: CameraAdminCredentials = new CameraAdminCredentials();
+      let creds: OnvifCredentials = new OnvifCredentials();
       creds.password = this.password;
       creds.userName = this.username;
       const jsonCreds = JSON.stringify(creds);
@@ -49,6 +45,7 @@ export class CameraCredentialsComponent implements OnInit, AfterViewInit {
       creds.userName = this.username;
       creds.password = this.password;
       this.camSvc.setOnvifCredentials(creds).subscribe(() => {
+        this.haveOnvifCredentials.emit();
       }, reason => {
         this.reporting.errorMessage = reason;
       });
@@ -79,5 +76,4 @@ export class CameraCredentialsComponent implements OnInit, AfterViewInit {
       this.passwordTooltip = "Enter the password for Onvif authentication.";
     }
   }
-
 }

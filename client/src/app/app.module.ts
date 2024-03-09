@@ -39,7 +39,7 @@ import {MatSortModule} from "@angular/material/sort";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import { ExcludeOwnStreamPipe } from './config-setup/exclude-own-stream.pipe';
 import { DisableControlDirective } from './shared/disable-control.directive';
-import { CameraCredentialsComponent } from './config-setup/camera-credentials/camera-credentials.component';
+import { OnvifCredentialsComponent } from './config-setup/camera-credentials/onvif-credentials.component';
 import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-account.component';
@@ -81,7 +81,7 @@ import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-fail
     ConfigSetupComponent,
     ExcludeOwnStreamPipe,
     DisableControlDirective,
-    CameraCredentialsComponent,
+    OnvifCredentialsComponent,
     CloudProxyComponent,
     ChangeEmailComponent,
     ChangeEmailComponent,

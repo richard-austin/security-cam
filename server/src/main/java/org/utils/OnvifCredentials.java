@@ -16,6 +16,10 @@ public class OnvifCredentials {
     this.profile = profile;
   }
 
+  public boolean nullOrEmpty() {
+    return user == null || user.isEmpty() || password == null || password.isEmpty();
+  }
+
   public String getOnvifUrl() {
     return onvifUrl;
   }

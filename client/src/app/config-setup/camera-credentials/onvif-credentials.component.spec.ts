@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CameraCredentialsComponent } from './camera-credentials.component';
+import { OnvifCredentialsComponent } from './onvif-credentials.component';
 
 describe('CredentialsForCameraAccessComponent', () => {
-  let component: CameraCredentialsComponent;
-  let fixture: ComponentFixture<CameraCredentialsComponent>;
+  let component: OnvifCredentialsComponent;
+  let fixture: ComponentFixture<OnvifCredentialsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CameraCredentialsComponent ]
+      declarations: [ OnvifCredentialsComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CameraCredentialsComponent);
+    fixture = TestBed.createComponent(OnvifCredentialsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
