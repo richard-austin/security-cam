@@ -126,7 +126,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   showOnvifCredentialsForm: boolean = false;
   failed: Map<string, string> = new Map<string, string>();
 
-  constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
+  constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
   }
 
   getCamControl(index: number, fieldName: string): FormControl {

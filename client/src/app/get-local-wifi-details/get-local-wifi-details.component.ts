@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {timer} from 'rxjs';
 import { Subscription } from 'rxjs';
@@ -6,6 +6,7 @@ import { OnDestroy } from '@angular/core';
 import {WifiDetails} from '../shared/wifi-details';
 import {WifiUtilsService} from '../shared/wifi-utils.service';
 import { AfterViewInit } from '@angular/core';
+import {UtilsService} from "../shared/utils.service";
 
 @Component({
   selector: 'app-get-local-wifi-details',
@@ -14,13 +15,14 @@ import { AfterViewInit } from '@angular/core';
 })
 export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement>
 
   wifiDetails!: WifiDetails[];
   displayedColumns: string[] = ["InUse", "Ssid", "Rate", "Signal", "Channel", "Security", "Mode", "Bssid"];
   subscription!: Subscription;
   private wifiEnabled: boolean = true;
 
-  constructor(private wifiUtilsService: WifiUtilsService) {
+  constructor(private wifiUtilsService: WifiUtilsService, public utils: UtilsService) {
   }
 
   getLocalWifiDetails(): void {

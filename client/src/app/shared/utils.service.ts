@@ -230,6 +230,18 @@ export class UtilsService {
   getMessages(): Observable<Message> {
     return this._messaging.asObservable();
   }
+  getScrollableContentStyle(scrollableContent: HTMLElement | null | undefined): string {
+    // Calculated scrollbar height, don't use or we Expression changed after it was checked error will occur
+    //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
+    const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
+    const extraBit = 1;  // To make browser window vertical scrollbar disappear
+
+    if (scrollableContent !== null && scrollableContent !== undefined) {
+      const boundingRect = scrollableContent.getBoundingClientRect()
+      return `max-height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
+    } else return ""
+  }
+
 
   startAudioOut(cam: Camera, netcam_uri: string) {
     return this.http.post<void>(this._baseUrl.getLink("utils", "startAudioOut"), JSON.stringify({cam: cam, netcam_uri: netcam_uri}), this.httpJSONOptions).pipe(

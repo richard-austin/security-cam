@@ -220,3 +220,65 @@ label.video-buttons {
   }
 }
 
+@mixin scrollbar-button {
+  &:hover {
+    background-color: #848484;
+  }
+
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+}
+
+mat-card-content.scrollable-content {
+  width: 100%;
+  overflow: auto;
+
+  &::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px lightgray;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    box-shadow: inset 0 0 5px lightgray;
+    background: #545454;
+
+    &:hover {
+      background: #848484;
+    }
+
+    border-radius: 10px;
+  }
+
+  //scrollbar-color: #545454 #C2D2E4;  // Firefox only, overrides webkit settings so not using it
+  //scrollbar-width: auto;            // Firefox only, overrides webkit settings so not using it
+  &::-webkit-scrollbar {
+    width: 20px;
+    height: 20px;
+  }
+  &::-webkit-scrollbar-button:single-button:vertical:increment {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="100 -900 960 960" width="24" fill="white"> <g><path d="M480-200 240-440l56-56 184 183 184-183 56 56-240 240Zm0-240L240-680l56-56 184 183 184-183 56 56-240 240Z"/></g></svg>');
+    @include scrollbar-button
+  }
+
+  &::-webkit-scrollbar-button:single-button:vertical:decrement {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="100 -900 960 960" width="24" fill="white"> <g><path d="m296-224-56-56 240-240 240 240-56 56-184-183-184 183Zm0-240-56-56 240-240 240 240-56 56-184-183-184 183Z"/></g></svg>');
+    @include scrollbar-button
+  }
+
+  &::-webkit-scrollbar-button:single-button:horizontal:decrement {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="100 -900 960 960" width="24" fill="white"> <g><path d="M440-240 200-480l240-240 56 56-183 184 183 184-56 56Zm264 0L464-480l240-240 56 56-183 184 183 184-56 56Z"/></g></svg>');
+    @include scrollbar-button
+  }
+
+  &::-webkit-scrollbar-button:single-button:horizontal:increment {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="100 -900 960 960" width="24" fill="white"> <g><path d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z"/></g></svg>');
+    @include scrollbar-button
+  }
+
+  &::-webkit-scrollbar-corner {
+    background-color: inherit;
+  }
+}
+
+
