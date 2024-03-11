@@ -230,7 +230,8 @@ export class UtilsService {
   getMessages(): Observable<Message> {
     return this._messaging.asObservable();
   }
-  getScrollableContentStyle(scrollableContent: HTMLElement | null | undefined): string {
+
+  getScrollableContentStyle(scrollableContent: HTMLElement | null | undefined, setMaxHeight: boolean = false): string {
     // Calculated scrollbar height, don't use or we Expression changed after it was checked error will occur
     //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
     const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
@@ -238,13 +239,17 @@ export class UtilsService {
 
     if (scrollableContent !== null && scrollableContent !== undefined) {
       const boundingRect = scrollableContent.getBoundingClientRect()
-      return `max-height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
-    } else return ""
+      return (setMaxHeight ? 'max-' : '') + `height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
+    }
+    else return ""
   }
 
 
   startAudioOut(cam: Camera, netcam_uri: string) {
-    return this.http.post<void>(this._baseUrl.getLink("utils", "startAudioOut"), JSON.stringify({cam: cam, netcam_uri: netcam_uri}), this.httpJSONOptions).pipe(
+    return this.http.post<void>(this._baseUrl.getLink("utils", "startAudioOut"), JSON.stringify({
+      cam: cam,
+      netcam_uri: netcam_uri
+    }), this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }
@@ -296,7 +301,7 @@ export class UtilsService {
   set activeMQTransportActive(value: boolean) {
     this._activeMQTransportActive = value;
   }
-  get cloudProxyRunning() : boolean {
+  get cloudProxyRunning(): boolean {
     return this._cloudProxyRunning;
   }
 

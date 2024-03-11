@@ -1,7 +1,7 @@
 <div class="wifi-details">
   <mat-card>
     <mat-card-title>Local Wifi Information</mat-card-title>
-    <mat-card-content #scrollable_content class="scrollable-content" [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement)">
+    <mat-card-content #scrollable_content class="scrollable-content" [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement, true)">
       <app-reporting [embedded]="true"></app-reporting>
       <table mat-table [dataSource]="wifiDetails" class="mat-elevation-z8">
         <!-- In Use Column -->
