@@ -324,9 +324,19 @@ If camera configuration has not yet been done, the Cameras Configuration Editor 
 be empty apart from a single unpopulated camera entry.
 
 ![config editor](README.images/config-editor.png)
-*Cameras Configuration Editor buttons*
+*Cameras Configuration Editor*
 
 #### Config page button functions
+<img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> **At top of page to the left of the 
+page title.**
+
+Set the global Onvif credentials used during single and all camera Onvif discovery. Cameras successfully discovered
+will have their credentials set to those entered here. Cameraswhose credentials were different from these, will
+be listed above the table*
+allowing the correct credentials to be entered against them before
+retrying discovery on them individually.
+
+&ast; See *Cameras Configuration Editor Showing A Camera Whose Onvif Credentials Differ From The Global Onvif Credentials* below. 
 
 | Button                                                                                                                                   | Function                                                                                                                                                                                                                                                                                                                                                                                    |
 |------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -343,7 +353,7 @@ be empty apart from a single unpopulated camera entry.
 | <img src="README.images/caret-right-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>  &ast;                      | Show the cameras streams                                                                                                                                                                                                                                                                                                                                                                    |
 | <img src="README.images/caret-bottom-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> &ast;                      | Hide the cameras streams                                                                                                                                                                                                                                                                                                                                                                    |
 | camera(<i>n</i>)                                                                                                                         | Camera ID. Click on this to show a snapshot from the camera. Note that this will require that the camera credentials are set up correctly (<img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button)                                                                                                                                |
-| <img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                | Set or change the user name and password used to access features on the cameras. Note that this currently requires all the cameras on the network to have the same credentials.                                                                                                                                                                                                             |
+| <img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                | Enter or change credentials for this camera. These credentials will be used on view snapshot (on config setup), on camera settings and admin page hosting (SV3C and ZXTech cameras only) and in RTSP authentication (when selected).                                                                                                                                                        |
 
 &ast; Button style toggles with context
 
@@ -374,6 +384,7 @@ not recommended unless Onvif is not supported on the device.
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
 | Sorting             | Up and down arrows move camera position in the list, and correspondingly on the menus.                                                                                                                                                                                                                                                                                         | N/A                    |
 | Camera ID           | Map key of the camera. Clicking on this displays a snapshot from that camera.                                                                                                                                                                                                                                                                                                  | N/A                    |
+| Cam Credentials     | Enter or change the credentials used for this camera. This is set to the global onvif credentials if this camera was successfully discovered with Onvif, but can be changed with this function if required.                                                                                                                                                                    | 
 | Delete              | Delete this camera and its streams from the configuration (trash button).                                                                                                                                                                                                                                                                                                      | N/A                    |
 | Name                | The name of the camera as it will appear on the menus.                                                                                                                                                                                                                                                                                                                         | No                     |
 | Camera Type         | Select SV3C, ZTech MCW5B10X or Not Listed. The named options enable some admin functions under Camera Settings -> Quick camera Setup                                                                                                                                                                                                                                           | No                     |
@@ -405,6 +416,15 @@ not recommended unless Onvif is not supported on the device.
 | Video Width              | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                                                                                                                                                                                                                                    | Yes                    |
 | Video Height             | For Motion Service, the height of the video stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                                                                                                                                                                                                                                  | Yes                    |
 
+![config editor](README.images/config-editor2.png)
+*Cameras Configuration Editor Showing A Camera Whose Onvif Credentials Differ From The Global Onvif Credentials*
+
+## One or More Cameras Failing Onvif Authentication During Discovery
+### Cameras in this category will be listed in the orange bordered box shown in the above screenshot.
+Enter the correct Onvif user name and password for the camera listed in the orange bordered box and click the <img src="README.images/add-circle-solid-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
+button beside the password to run single camera discovery using these credentials. If successful, the camera will be removed from this list and added 
+tol the cameras list below, where parameter entry can be completed. Once all parameters are set, the new configuration must be saved 
+(<img src="README.images/floppy-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button) to take effect.
 ## Using the NVR
 
 ### The Menus 
