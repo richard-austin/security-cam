@@ -27,7 +27,7 @@
     "@stomp/stompjs": "^7.0.0",
     "engine.io": "^6.5.4",
     "file-saver": "^2.0.5",
-    "hls.js": "^1.0.7",
+    "hls.js": "<=1.4.12",
     "moment": "^2.29.1",
     "object-hash": "^3.0.0",
     "rx": "^4.1.0",
