@@ -42,8 +42,10 @@ older machines, the GPU may not support H265 (HEVC) decoding. There are special 
 with software decoding (see <a href="https://thorium.rocks/">Thorium</a> and <a href="https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding">Special Chromium Build</a>)
   * For Chromium based browsers running on Ubuntu 23.04 with VAAPI installed and a suitable Intel GPU, you may need to use the parameters --enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoDecoder,VaapiVideoEncoder in the command line to enable hevc decoding.
 This will also enable hardware decoding generally.
-### Run Time Platform for NVR
-The current build configuration (as created with ./gradlew buildDebFile) is for Raspberry pi V4 running headless (server) version of Ubuntu 23.10 (Mantic Minotaur).
+### Run Time Platform and Installation
+The current build configuration is for Raspberry pi V4 or V5 running headless (server) version of Ubuntu 23.10 (Mantic Minotaur).
+Installation of the complete system can be done with a .deb file which you can obtain from the latest release in the Releases section or you can build yourself by following the details under the Development section below.
+
 ### Security
 The NVR is designed to run on a LAN which is protected from unauthorised
 external access. From within the LAN, access to administrative functions is possible without authentication.
