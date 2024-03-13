@@ -42,6 +42,11 @@ older machines, the GPU may not support H265 (HEVC) decoding. There are special 
 with software decoding (see <a href="https://thorium.rocks/">Thorium</a> and <a href="https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding">Special Chromium Build</a>)
   * For Chromium based browsers running on Ubuntu 23.04 with VAAPI installed and a suitable Intel GPU, you may need to use the parameters --enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoDecoder,VaapiVideoEncoder in the command line to enable hevc decoding.
 This will also enable hardware decoding generally.
+* https web admin hosting and rstps (secure rtsp streaming from cameras) are not currently supported.
+* This has been tested with SV3C and ZXTech cameras and Reolink Wi-Fi doorbell.
+There might be compatibility issues with some other camera types.
+* 2 way audio (Onvif profile T) supported on the Reolink Wi-fi doorbell using firmware version v3.0.0.1996_23053101.
+The firmware from Reolink main downloads site does not fully support this functionality. 
 ### Run Time Platform and Installation
 The current build configuration is for Raspberry pi V4 or V5 running headless (server) version of Ubuntu 23.10 (Mantic Minotaur).
 Installation of the complete system can be done with a .deb file which you can obtain from the latest release in the Releases section or you can build yourself by following the details under the Development section below.
@@ -455,8 +460,11 @@ icon and a selector just below it. The selection option is the maximum
 > If two-way audio is enabled, a <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
 > button and a device selector will also be below the video. Select the required audio input
 > device and click the <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button to
-> speak. While audio output is active, the button changes to <img src="README.images/microphone-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
-> , click it again to turn audio output off.
+> speak. While audio output is active, the button changes to <img src="README.images/microphone-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>,
+> click it again to turn audio output off.
+> 
+> You can zoom in on the video by using the mouse wheel on a PC, or pinch zoom on a mobile. Mouse down and drag will pan the zoomed video while
+> touch and move does the same on mobile. This is distinct from PTZ operations which can be done on suitable cameras.
 
 ##### Multi Camera View
 The last option on the Select Camera menu is Multi Camera View. This shows one stream
@@ -467,6 +475,8 @@ The camera streams can be switched by clicking the
 button at the top left of the page and changing the selection.
 > Each video on multi camera view will have the latency chasing setter below it. Any
 > cameras with two-way audio enabled will also have the <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button and device selector.
+> 
+> Mouse wheel zoom and mouse down drag pan functions, and their mobile counterparts can be done on each of the videos.
 #### Select Recording
 This menu allows selection of recordings made on camera streams.
 The names
