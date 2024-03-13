@@ -1,16 +1,68 @@
 package main
 
 import (
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 )
 
-func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
+type Credentials struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+/*
+ * getCredentials: Get the camera credentials from the encrypted string cred in the camera data.
+ * Private key generated like this: -
+ *	openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -pkeyopt rsa_keygen_pubexp:65537 | openssl pkcs8 -topk8 -nocrypt -outform der > /etc/security-cam/id_rsa
+ *
+ * And the public key is created from that with: -
+ *	openssl pkey -pubout -inform der -outform der -in /etc/security-cam/id_rsa -out rsa-2048-public-key.spki
+ *
+ * And the base64 format used in the encryption.ts on the client is created with: -
+ * cat rsa-2048-public-key.spki | base64
+ */
+func getCredentials(cam Camera) (err error, credentials Credentials) {
+	bytes, err := os.ReadFile(config.PrivateKeyPath)
+	if err != nil {
+		log.Errorf("Error in getCredentials reading private key (%s)", err.Error())
+		return
+	}
+	str := base64.StdEncoding.EncodeToString(bytes)
+	privateKeyBlock, _ := pem.Decode([]byte("-----BEGIN PRIVATE KEY-----\n" + str + "\n-----END PRIVATE KEY-----"))
+	get, err := x509.ParsePKCS8PrivateKey(privateKeyBlock.Bytes)
+	if err != nil {
+		log.Errorf("Error in getCredentials parsing private key (%s)", err.Error())
+		return
+	}
+	pk := get.(*rsa.PrivateKey) // Cast to type that rsa.DecryptOAEP can use
+	encrypted, _ := base64.StdEncoding.DecodeString(cam.Cred)
+	if len(encrypted) > 0 {
+		decryptedData, err := rsa.DecryptOAEP(sha256.New(), nil, pk, encrypted, nil)
+		if err != nil {
+			log.Errorf("Decrypt data error in getCredentials: %s", err.Error())
+			panic(err)
+		}
+		err = json.Unmarshal(decryptedData, &credentials)
+		if err != nil {
+			log.Errorf("Error unmarshalling JSON in getCredentials: %s", err.Error())
+			panic(err)
+		}
+	}
+	return
+}
+func ffmpegFeed(config *Config, cameras *Cameras) {
 	go cleanLogs()
 	path, _ := filepath.Split(config.LogPath)
 	for _, camera := range cameras.Cameras {
@@ -32,8 +84,9 @@ func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
 					rtspTransport := camera.RtspTransport
 
 					if camera.UseRtspAuth { // Use credentials if required
+						_, creds := getCredentials(camera)
 						idx := len("rtsp://")
-						uri = uri[:idx] + url.QueryEscape(creds.CamerasAdminUserName) + ":" + url.QueryEscape(creds.CamerasAdminPassword) + "@" + uri[idx:]
+						uri = uri[:idx] + url.QueryEscape(creds.UserName) + ":" + url.QueryEscape(creds.Password) + "@" + uri[idx:]
 					}
 					// Using ffmpeg version 4.4.4 (built on a Raspberry pi and deployed by the .deb file) as versions 5+ don't
 					//  work with RTSP streams with no time stamps when producing fragmented mp4 with audio. All my cameras

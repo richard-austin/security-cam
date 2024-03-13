@@ -15,7 +15,7 @@ export class PTZButtonComponent implements OnInit {
   @Input() matIcon!: string;
   @Input() ptzBtnMatTooltip: string = "";
   @Input() moveDirection!: eMoveDirections;
-  @Input() camera!: Camera | null;
+  @Input() camera!: Camera;
   @Input() reporting!: ReportingComponent;
   @Input() scale: number = 2;
   isGuest: boolean = true;
@@ -24,7 +24,7 @@ export class PTZButtonComponent implements OnInit {
   }
 
   move() {
-    let ptz: PTZMove = new PTZMove(this.moveDirection, this.camera?.onvifHost as string);
+    let ptz: PTZMove = new PTZMove(this.moveDirection, this.camera);
     this.ptz.move(ptz).subscribe(() => {
       },
       reason => {
@@ -33,7 +33,7 @@ export class PTZButtonComponent implements OnInit {
   }
 
   stop() {
-    let ptz: PTZStop = new PTZStop(this.camera?.onvifHost as string)
+    let ptz: PTZStop = new PTZStop(this.camera)
     this.ptz.stop(ptz).subscribe(() => {
       },
       reason => {

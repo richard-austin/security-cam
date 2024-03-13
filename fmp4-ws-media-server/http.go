@@ -60,7 +60,7 @@ func ReadBox(readCloser io.ReadCloser, data []byte, queue chan Packet) (numOfByt
 	return
 }
 
-func serveHTTP() {
+func serveHTTP(cameras *Cameras) {
 	router := gin.Default()
 	gin.SetMode(gin.DebugMode)
 	router.LoadHTMLFiles("web/index.gohtml")

@@ -171,13 +171,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     }
   }
   hasAudio (): boolean {
-    const video: any = this.video?.video;
-    if(video) {
-      return video.mozHasAudio ||
-        Boolean(video.webkitAudioDecodedByteCount) ||
-        Boolean(video.audioTracks && video.audioTracks.length);
-    }
-    return false;
+    return this.stream?.audio && !this.stream.motion?.enabled;
   }
 
   /**

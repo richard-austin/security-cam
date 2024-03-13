@@ -281,6 +281,10 @@ export class MediaFeeder {
   get streamDescr() : string {
     return this.hasStream ? this.stream.descr : "NO STREAM!!"
   }
+
+  get camera() : Camera {
+    return this.cam;
+  }
   Utf8ArrayToStr(array: Uint8Array): string {
     let out, i, len, c;
     let char2, char3;

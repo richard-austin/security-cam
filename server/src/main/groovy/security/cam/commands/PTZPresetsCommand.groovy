@@ -3,7 +3,7 @@ package security.cam.commands
 import grails.validation.Validateable
 import security.cam.UtilsService
 
-class PTZPresetsCommand implements Validateable{
+class PTZPresetsCommand extends PtzCommands{
     static final enum ePresetOperations {moveTo, saveTo, clearFrom}
     ePresetOperations operation
     String onvifBaseAddress

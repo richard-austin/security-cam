@@ -5,9 +5,11 @@ import server.Camera
 import server.Stream
 
 class StartAudioOutCommand implements Validateable{
-    Stream stream
+    Camera cam
+    String netcam_uri
 
     static constraints = {
-        stream(nullable: false, blank: false)
+        cam(nullable: false, blank: false)
+        netcam_uri(nullable: false, blank: false)
     }
 }

@@ -5,12 +5,12 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.google.gson.internal.LinkedTreeMap
-import com.proxy.ICamServiceInterface
+
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import org.apache.commons.io.IOUtils
 import org.grails.web.json.JSONObject
-import security.cam.commands.SetAccessCredentialsCommand
+import security.cam.commands.SetOnvifCredentialsCommand
 import security.cam.commands.UpdateCamerasCommand
 import security.cam.commands.UploadMaskFileCommand
 import security.cam.interfaceobjects.ObjectCommandResponse
@@ -19,7 +19,7 @@ import server.Camera
 import server.Stream
 
 @Transactional
-class CamService implements ICamServiceInterface{
+class CamService {
     GrailsApplication grailsApplication
     LogService logService
     ConfigurationUpdateService configurationUpdateService
@@ -96,7 +96,7 @@ class CamService implements ICamServiceInterface{
             result = configurationUpdateService.generateConfigs()
             ObjectCommandResponse startResult = sc_processesService.startProcesses()
 
-            if(result.status !== PassFail.PASS)
+            if (result.status !== PassFail.PASS)
                 throw new Exception(result.error)
 
             Gson gson2 = new Gson()
@@ -104,7 +104,7 @@ class CamService implements ICamServiceInterface{
 
             removeUnusedMaskFiles(obj, grailsApplication)
 
-            if(stopResult.status != PassFail.PASS)
+            if (stopResult.status != PassFail.PASS)
                 result = stopResult
             else if (startResult.status != PassFail.PASS)
                 result = startResult
@@ -137,36 +137,41 @@ class CamService implements ICamServiceInterface{
         return result
     }
 
+    def getPublicKey() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            File file = new File("/etc/security-cam/id_rsa.pub")
+
+            byte[] bytes = file.readBytes()
+            result.responseObject = bytes
+        }
+        catch(Exception ex) {
+            logService.cam.error "getPublicKey() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
     /**
-     * setCameraAccessCredentials: Set the access credentials used for administrative operations (and snapshot access)
-     *                             on the cameras. Note that ths does not change credentials on any camera, just those
-     *                             used on this software to access them. Ideally all cameras should use the same user
-     *                             name and password.
-     * @param cmd: Command object containing the username and password
+     * setOnvifCredentials: Set the access credentials required by some cameras to return onvif query results
+     * @param cmd : Command object containing the username and password
      * @return: ObjectCommandResponse with success/error state.
      */
-    def setCameraAccessCredentials(SetAccessCredentialsCommand cmd) {
+    def setOnvifCredentials(SetOnvifCredentialsCommand cmd) {
         ObjectCommandResponse response = new ObjectCommandResponse()
 
         try {
             String json = """{
-    \"camerasAdminUserName\": \"${cmd.camerasAdminUserName}\",
-    \"camerasAdminPassword\": \"${cmd.camerasAdminPassword}\"
+    \"onvifUserName\": \"${cmd.onvifUserName}\",
+    \"onvifPassword\": \"${cmd.onvifPassword}\"
 }
 """
-            // Stop media server etc
-            ObjectCommandResponse stopResult = sc_processesService.stopProcesses()
-            String fileName = "${grailsApplication.config.camerasHomeDirectory}/cameraCredentials.json"
+            String fileName = "${grailsApplication.config.camerasHomeDirectory}/onvifCredentials.json"
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
             writer.write(json)
-            writer.close()
-            // Restart media server etc to pic]=k up new credentials
-            ObjectCommandResponse startResult = sc_processesService.startProcesses()
 
-            if(stopResult.status == PassFail.FAIL)
-                response = stopResult
-            else if (startResult.status == PassFail.FAIL)
-                response = startResult
+            writer.close()
         }
         catch (Exception ex) {
             logService.cam.error "setCameraAccessCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
@@ -177,57 +182,86 @@ class CamService implements ICamServiceInterface{
         return response
     }
 
-    def getCameraCredentials()
-    {
-        ObjectCommandResponse response = new ObjectCommandResponse()
-        try {
-            FileInputStream fis
-
-            fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/cameraCredentials.json")
-
-            String data = IOUtils.toString(fis, "UTF-8")
-            Gson gson2 = new Gson()
-            Object obj = gson2.fromJson(data, Object.class)
-            response.responseObject = obj
-        }
-        catch(Exception ex)
-        {
-            logService.cam.error "getCameraCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
-            response.status = PassFail.FAIL
-            response.error = ex.getMessage()
-        }
-        return response
-    }
-
     Integer getCameraType(String cameraHost) {
         Integer camType = null
-        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse)getCameras()
-        if(getCamerasResult.status == PassFail.PASS) {
-            JSONObject jo = (JSONObject)getCamerasResult.getResponseObject()
+        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
+        if (getCamerasResult.status == PassFail.PASS) {
+            JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
             jo.forEach((k, cam) -> {
-                Camera camera = (Camera)cam
-                if(Objects.equals(camera.getAddress(), cameraHost))
+                Camera camera = (Camera) cam
+                if (Objects.equals(camera.getAddress(), cameraHost))
                     camType = camera.cameraParamSpecs.camType
             })
         }
         return camType
     }
 
-    /**
-     * cameraAdminUserName
-     * @return: The admin user name for the cameras
-     */
-    String cameraAdminUserName()
-    {
-        return getCameraCredentials().responseObject?.camerasAdminUserName
+    Camera getCamera(String cameraHost) {
+
+        Camera retVal = null
+            if(!cameraHost.contains("localhost")) {
+                ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
+                if (getCamerasResult.status == PassFail.PASS) {
+                    JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
+                    jo.forEach((k, cam) -> {
+                        Camera camera = (Camera) cam
+                        if (Objects.equals(camera.getAddress(), cameraHost))
+                            retVal = camera
+                    })
+                }
+                if (retVal == null)
+                    logService.cam.error("getCamera: Could not find a camera with the address ${cameraHost}")
+            }
+        return retVal
     }
 
     /**
-     * cameraAdminPassword
-     * @return: The admin password for the cameras
+     * getOnvifCredentials: Get the user name and password to authenticate on the cameras Onvif services.
+     * These are set up with the setOnvifCredentials call
+     *
+     * @return The user name
      */
-    String cameraAdminPassword()
-    {
-        return getCameraCredentials().responseObject?.camerasAdminPassword
+    def getOnvifCredentials() {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            FileInputStream fis
+
+            fis = new FileInputStream("${grailsApplication.config.camerasHomeDirectory}/onvifCredentials.json")
+
+            String data = IOUtils.toString(fis, "UTF-8")
+            Gson gson2 = new Gson()
+            Object obj = gson2.fromJson(data, Object.class)
+            response.responseObject = obj
+        }
+        catch(FileNotFoundException ignore) {
+            response.responseObject = [onvifUserName: "", onvifPassword: ""]
+        }
+        catch (Exception ex) {
+            logService.cam.error "getOnvifCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            response.status = PassFail.FAIL
+            response.error = ex.getMessage()
+        }
+        return response
+    }
+
+    def haveOnvifCredentials() {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            String pw = "", un = ""
+            response = getOnvifCredentials()
+            if (response.status == PassFail.PASS) {
+                un = response.responseObject?.onvifUserName
+                pw = response.responseObject?.onvifPassword
+            }
+            response.responseObject = !un.isEmpty() && !pw.isEmpty()
+         }
+        catch (Exception ex) {
+            String msg = "${ex.getClass().getName()} in haveCameraCredentials: ${ex.getMessage()}"
+            response.responseObject = false
+            response.status = PassFail.FAIL
+            response.error = msg
+            logService.getCam().error(msg)
+        }
+        return response
     }
 }

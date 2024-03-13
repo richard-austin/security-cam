@@ -110,5 +110,5 @@ export class Camera
     rtspTransport: string = "tcp";
     useRtspAuth: boolean = false;
     retriggerWindow: number = 30;
-
+    cred: string = "";
 }

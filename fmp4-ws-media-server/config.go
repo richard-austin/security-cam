@@ -7,13 +7,13 @@ import (
 )
 
 type Config struct {
-	LogPath               string  `json:"log_path"`
-	LogLevelStr           string  `json:"log_level"`
-	CamerasJsonPath       string  `json:"cameras_json_path"`
-	CameraCredentialsPath string  `json:"camera_credentials_path"`
-	ServerPort            int     `json:"server_port"`
-	DefaultLatencyLimit   float32 `json:"default_latency_limit"`
-	GopCache              bool    `json:"gop_cache"`
+	LogPath             string  `json:"log_path"`
+	LogLevelStr         string  `json:"log_level"`
+	CamerasJsonPath     string  `json:"cameras_json_path"`
+	PrivateKeyPath      string  `json:"private_key_path"`
+	ServerPort          int     `json:"server_port"`
+	DefaultLatencyLimit float32 `json:"default_latency_limit"`
+	GopCache            bool    `json:"gop_cache"`
 }
 
 func (c *Config) LogLevel() (err error, level log.Level) {
@@ -62,15 +62,11 @@ type Camera struct {
 	BackChannelAudioSupported bool               `json:"backChannelAudioSupported"`
 	RtspTransport             string             `json:"rtspTransport"`
 	UseRtspAuth               bool               `json:"useRtspAuth"`
+	Cred                      string             `json:"cred"`
 }
 
 type Cameras struct {
 	Cameras map[string]Camera `json:"{}"`
-}
-
-type CameraCredentials struct {
-	CamerasAdminUserName string `json:"camerasAdminUserName"`
-	CamerasAdminPassword string `json:"camerasAdminPassword"`
 }
 
 func (c *Cameras) Suuids() (suuids map[string]string) {
@@ -83,10 +79,9 @@ func (c *Cameras) Suuids() (suuids map[string]string) {
 	return
 }
 
-func loadConfig() (config *Config, cameras *Cameras, credentials *CameraCredentials) {
+func loadConfig() (config *Config, cameras *Cameras) {
 	var cams Cameras
 	var conf Config
-	var creds CameraCredentials
 
 	cameras = &cams
 	// Read config.json from the executables directory
@@ -103,15 +98,6 @@ func loadConfig() (config *Config, cameras *Cameras, credentials *CameraCredenti
 	if err != nil {
 		log.Errorln(err)
 	}
-	data, err = os.ReadFile(conf.CameraCredentialsPath)
-	if err != nil {
-		log.Errorln(err)
-	}
-	err = json.Unmarshal(data, &creds)
-	if err != nil {
-		log.Errorln(err)
-	}
-
 	data, err = os.ReadFile(conf.CamerasJsonPath)
 	if err != nil {
 		log.Errorln(err)
@@ -122,6 +108,5 @@ func loadConfig() (config *Config, cameras *Cameras, credentials *CameraCredenti
 	}
 
 	config = &conf
-	credentials = &creds
 	return
 }

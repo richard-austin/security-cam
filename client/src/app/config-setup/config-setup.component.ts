@@ -6,7 +6,7 @@ import {
   isDevMode,
   OnDestroy,
   OnInit,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
@@ -101,7 +101,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['sorting', 'camera_id', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'useRtspAuth', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['sorting', 'camera_id', 'creds', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'useRtspAuth', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -117,14 +117,16 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   snapshotLoading: boolean = false;
   snapshot: SafeResourceUrl | String = '';
   snapShotKey: string = '';
-  showPasswordDialogue: boolean = false;
+  camForCredentialsEntry: string = "";
   showAddCameraDialogue: boolean = false;
   isGuest: boolean = true;
   gettingCameraDetails: boolean = false;
   savedDataHash: string = "";
-  haveCameraCredentials: boolean = false;
+  haveOnvifCredentials: boolean = false;
+  showOnvifCredentialsForm: boolean = false;
+  failed: Map<string, string> = new Map<string, string>();
 
-  constructor(public cameraSvc: CameraService, private utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
+  constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
   }
 
   getCamControl(index: number, fieldName: string): FormControl {
@@ -139,6 +141,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
       ptzc.setValue(false);  // Ensure PTZ is set to "off" if onvifHost has the (valid) value empty
     return ovhc.value == '' || !ovhc.valid;
   }
+
   getPreambleFramesDisabledState(cam: Camera, stream: Stream): boolean {
     return !stream?.motion?.enabled && !cam?.ftp;
   }
@@ -275,7 +278,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
             disabled: false,
           }, [Validators.pattern(/^none|stream[1-9]+$/)]
         ),
-         retriggerWindow: new FormControl({
+        retriggerWindow: new FormControl({
             value: camera?.retriggerWindow != undefined ? camera.retriggerWindow : 30,
             disabled: false,
           }, [Validators.pattern(/^10$|20|30|40|50|60|70|80|90|100/)]
@@ -580,7 +583,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  addCamera() {
+  async addCamera() {
     let newCamera: Camera = new Camera();
     let newStream: Stream = new Stream();
     newStream.defaultOnMultiDisplay = true; // Set the first stream defined for the camera to be
@@ -672,10 +675,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
   startOnvifSearch() {
     this.discovering = true;
-    this.cameraSvc.discover().subscribe((cams: Map<string, Camera>) => {
-        this.cameras = cams;
+    this.failed = new Map<string, string>();
+    this.cameraSvc.discover().subscribe((result: { cams: Map<string, Camera>, failed: Map<string, string> }) => {
+        this.cameras = result.cams;
         this.discovering = false;
         this.FixUpCamerasData();
+        this.failed = result.failed;
       },
       reason => {
         this.reporting.errorMessage = reason;
@@ -735,7 +740,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
       this.snapShotKey = '';
     else if (cam.value.snapshotUri !== '') {
       this.snapShotKey = cam.key;
-      this.cameraSvc.getSnapshot(cam.value.snapshotUri).subscribe(result => {
+      this.cameraSvc.getSnapshot(cam.value).subscribe(result => {
           this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(result));
           this.snapshotLoading = false;
         },
@@ -743,7 +748,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
           if (reason.status === 401) {
             this.reporting.warningMessage =
               `Access to camera snapshot at ${cam.value.snapshotUri} is unauthorised. Please ensure the correct credentials for
-              all cameras are set. (Click on the shield icon to the right of this page title).`;
+              ${cam.key} is set. (Click on the shield icon on this camera row).`;
           } else {
             this.reporting.errorMessage = reason;
           }
@@ -780,31 +785,52 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     return window.btoa(binary);
   }
 
-  private checkIfCameraCredentialsPresent() {
-    this.cameraSvc.haveCameraCredentials().subscribe(result => {
-        this.haveCameraCredentials = result == "true";
+  private cameraHasCredentials(cam: Camera) {
+    return cam.cred !== "";
+  }
+
+  checkIfOnvifCredentialsPresent() {
+    this.cameraSvc.haveOnvifCredentials().subscribe(result => {
+        this.haveOnvifCredentials = result == "true";
       },
       () => {
         this.reporting.errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
       });
   }
 
-  togglePasswordDialogue() {
-    this.showPasswordDialogue = !this.showPasswordDialogue;
+  togglePasswordDialogue(camId: string) {
+    this.camForCredentialsEntry = this.camForCredentialsEntry !== camId ? camId : "";
+    this.showAddCameraDialogue = this.showOnvifCredentialsForm = false;
+  }
+
+  toggleOnvifPasswordDialogue() {
+    this.camForCredentialsEntry = "";
     this.showAddCameraDialogue = false;
-    this.checkIfCameraCredentialsPresent();
+    this.showOnvifCredentialsForm = !this.showOnvifCredentialsForm;
   }
 
   toggleAddCameraOnvifUriDialogue() {
     this.showAddCameraDialogue = !this.showAddCameraDialogue;
-    this.showPasswordDialogue = false;
+    this.camForCredentialsEntry = "";
+    this.showOnvifCredentialsForm = false;
   }
 
   startFindCameraDetails(onvifUrl: string) {
     this.gettingCameraDetails = true;
-    this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe((cam: Camera) => {
-        this.cameras.set('camera' + (this.cameras.size + 1), cam);
-        this.FixUpCamerasData();
+    this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe((result: { cam: Camera, failed: Map<string, string> }) => {
+        if (result.failed.size == 1) {
+          const fKey: string = result.failed.keys().next().value;
+          if (this.failed === undefined)
+            this.failed = result.failed;
+          else if (!this.failed.has(fKey)) {
+            const fVal: string = result.failed.values().next().value;
+            this.failed.set(fKey, fVal);
+          }
+        }
+        if(result.cam !== undefined) {
+          this.cameras.set('camera' + (this.cameras.size + 1), result.cam);
+          this.FixUpCamerasData();
+        }
         this.gettingCameraDetails = false;
       },
       reason => {
@@ -824,18 +850,17 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     cam.backchannelAudioSupported = !cam.backchannelAudioSupported;
   }
 
-  getScrollableContentStyle():string {
+  getScrollableContentStyle(): string {
     const scrollableContent = this.scrollableContent?.nativeElement;
     // Calculated scrollbar height, don't use or we Expression changed after it was checked error will occur
     //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
     const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
     const extraBit = 1;  // To make browser window vertical scrollbar disappear
 
-    if(scrollableContent !== undefined ) {
+    if (scrollableContent !== undefined) {
       const boundingRect = scrollableContent.getBoundingClientRect()
-      return `height: calc(100dvh - ${boundingRect.top+scrollbarHeight+extraBit}px);`
-    }
-    else return ""
+      return `height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
+    } else return ""
   }
 
   ngOnInit(): void {
@@ -852,7 +877,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
         this.downloading = false;
       })
-    this.checkIfCameraCredentialsPresent();
+    this.checkIfOnvifCredentialsPresent();
     this.isGuest = this.utils.isGuestAccount;
   }
 

@@ -3,9 +3,8 @@ package security.cam.commands
 import grails.validation.Validateable
 import security.cam.UtilsService
 
-class MoveCommand implements Validateable{
+class MoveCommand extends PtzCommands{
     static final enum eMoveDirections {tiltUp, tiltDown, panLeft, panRight, zoomIn, zoomOut}
-
     eMoveDirections moveDirection
     String onvifBaseAddress
 

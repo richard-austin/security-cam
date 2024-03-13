@@ -31,7 +31,7 @@
                matTooltipClass="tooltip">
           <mat-icon
             [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioBackchannel.audioToggle) || utilsService.isGuestAccount}"
-            (click)="audioBackchannel.toggleAudioOut(stream)">{{ audioBackchannel.audioToggle ? 'mic' : 'mic_off' }}
+            (click)="audioBackchannel.toggleAudioOut(videoFeeder.camera, stream)">{{ audioBackchannel.audioToggle ? 'mic' : 'mic_off' }}
           </mat-icon>
         </label>
         <select *ngIf="videoFeeder.backchannelAudioSupported" [disabled]="utilsService.speakActive"

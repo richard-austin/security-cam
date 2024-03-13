@@ -5,27 +5,30 @@
 <mat-card>
   <mat-card-title>Cameras Configuration
     <span
-      [matTooltip]="!haveCameraCredentials ? 'Camera credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'"
+      [matTooltip]="!haveOnvifCredentials ? 'Onvif credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used For Onvif authentication. This is used for overall Onvif discovery.'"
       matTooltipClass="tooltip">
       <button class="change-password-button"
               mat-icon-button
               [disabled]="isGuest"
-              (click)="togglePasswordDialogue()">
-        <mat-icon [ngClass]="{'no-camera-credentials': !haveCameraCredentials}">security</mat-icon>
+              (click)="toggleOnvifPasswordDialogue()">
+        <mat-icon [ngClass]="{'no-credentials': !haveOnvifCredentials}">security</mat-icon>
       </button>
     </span>
     <div class="password-dialogue">
-      <div class="mat-elevation-z15" [@detailExpand]="showPasswordDialogue ? 'expanded' : 'collapsed'">
+      <div class="mat-elevation-z15" [@detailExpand]="showOnvifCredentialsForm ? 'expanded' : 'collapsed'">
         <div>
         </div>
-        <app-credentials-for-camera-access
-          (hideDialogue)="togglePasswordDialogue()"
-          [reporting]="errorReporting">
-        </app-credentials-for-camera-access>
+        <app-camera-credentials
+          (hideDialogue)="toggleOnvifPasswordDialogue()"
+          (haveOnvifCredentials)="checkIfOnvifCredentialsPresent()"
+          [reporting]="reporting">
+        </app-camera-credentials>
       </div>
     </div>
   </mat-card-title>
   <app-reporting #errorReporting></app-reporting>
+  <app-onvif-failures *ngIf="failed.size > 0" [reporting]="reporting" [failures]="failed" [cameras]="cameras"
+                      (fixUpCamerasData)="FixUpCamerasData()"></app-onvif-failures>
   <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Loading, Please wait..</span>
@@ -38,7 +41,8 @@
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Camera discovery active, Please wait..</span>
   </mat-card-content>
-  <mat-card-content #scrollable_content class="scrollable-content" [style]="getScrollableContentStyle()"
+  <mat-card-content #scrollable_content class="scrollable-content"
+                    [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement)"
                     *ngIf="!downloading  && !updating && !discovering">
     <table mat-table
            [dataSource]="cameras | keyvalue: cameraSvc.compareFn" multiTemplateDataRows
@@ -84,6 +88,38 @@
           </div>
         </td>
       </ng-container>
+
+
+      <ng-container matColumnDef="creds">
+        <th mat-header-cell *matHeaderCellDef>Cam. Credentials</th>
+        <td class="snapshot"
+            [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''"
+            mat-cell
+            *matCellDef="let cam">
+        <span
+          [matTooltip]="cam.value.cred == '' ? 'Camera credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'"
+          matTooltipClass="tooltip">
+          <button class="change-password-button"
+                  mat-icon-button
+                  [disabled]="isGuest"
+                  (click)="togglePasswordDialogue(cam.key)">
+            <mat-icon [ngClass]="{'no-credentials': cam.value.cred == ''}">security</mat-icon>
+          </button>
+          <div class="password-dialogue">
+            <div class="mat-elevation-z15" [@detailExpand]="camForCredentialsEntry==cam.key ? 'expanded' : 'collapsed'">
+              <div>
+              </div>
+              <app-camera-credentials
+                [camera]="cam.value"
+                (hideDialogue)="togglePasswordDialogue('')"
+                [reporting]="reporting">
+              </app-camera-credentials>
+            </div>
+          </div>
+        </span>
+        </td>
+      </ng-container>
+
 
       <ng-container matColumnDef="delete">
         <th mat-header-cell *matHeaderCellDef>Delete</th>
@@ -567,10 +603,9 @@
                 </div>
                 <app-add-as-onvif-device
                   (hideDialogue)="toggleAddCameraOnvifUriDialogue()"
-                  [reporting]="errorReporting"
+                  [reporting]="reporting"
                   (startFindCameraDetails)="startFindCameraDetails($event)"
-                  [cameras]="cameras"
-                >
+                  [cameras]="cameras">
                 </app-add-as-onvif-device>
               </div>
             </div>

@@ -41,13 +41,13 @@ class ConfigurationUpdateService {
             FileUtils.cleanDirectory(new File(motionConfigDir))
 
             response = camService.getCameras()
-            if(response.status == PassFail.PASS) {
+            if (response.status == PassFail.PASS) {
 
                 Map<String, Camera> jsonObj = response.responseObject as Map<String, Camera>
 
                 logService.cam.info "Calling UpdateMotionConfig"
                 UpdateMotionConfig(jsonObj)
-              }
+            }
         }
         catch (Exception ex) {
             logService.cam.error "Exception in generateConfigs: " + ex.getMessage()
@@ -76,20 +76,18 @@ class ConfigurationUpdateService {
             cam.streams.each { streamIt ->
                 Stream stream = streamIt.value
                 // TODO: Use paths from config instead of the hard coded paths used here
-                if(stream.recording.location != "") {
+                if (stream.recording.location != "") {
                     File f = new File(Paths.get(motionRecordingDir, stream.recording.location).toString())
                     f.mkdir()
                 }
                 if (stream.motion.enabled) {
-                    String netcam_url =  stream.netcam_uri
-                    if(cam.cameraParamSpecs.camType == 0) {
-                        ObjectCommandResponse response = camService.getCameraCredentials()
-                        if(response.status == PassFail.PASS) {
-                            def encoded_username = URLEncoder.encode(response.responseObject.camerasAdminUserName as String, StandardCharsets.UTF_8.toString())
-                            def encoded_password = URLEncoder.encode(response.responseObject.camerasAdminPassword as String, StandardCharsets.UTF_8.toString())
-                            def idx = "rtsp://".length()
-                            netcam_url = stream.netcam_uri.substring(0, idx)+encoded_username+":"+encoded_password+"@"+stream.netcam_uri.substring(idx)
-                        }
+                    String netcam_url = stream.netcam_uri
+                    if (cam.cameraParamSpecs.camType == 0) {
+                        def creds = cam.credentials()
+                        def encoded_username = URLEncoder.encode(creds.userName as String, StandardCharsets.UTF_8.toString())
+                        def encoded_password = URLEncoder.encode(creds.password as String, StandardCharsets.UTF_8.toString())
+                        def idx = "rtsp://".length()
+                        netcam_url = stream.netcam_uri.substring(0, idx) + encoded_username + ":" + encoded_password + "@" + stream.netcam_uri.substring(idx)
                     }
                     String motionConf =
                             """
@@ -111,7 +109,7 @@ camera_name ${it.key}
 threshold ${stream.motion.threshold}
 
 # Mask to exclude public areas
-${stream.motion.mask_file != '' ? "mask_file ${Paths.get(motionMaskFileDir,stream.motion.mask_file).toString()}" : "; mask_file"} 
+${stream.motion.mask_file != '' ? "mask_file ${Paths.get(motionMaskFileDir, stream.motion.mask_file).toString()}" : "; mask_file"} 
 
 # Numeric identifier for the camera.
 camera_id ${++camId}

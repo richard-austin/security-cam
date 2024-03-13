@@ -18,9 +18,9 @@ class OnvifController {
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     def discover() {
         ObjectCommandResponse resp = onvifService.getMediaProfiles()
-
-        if(resp.status == PassFail.PASS)
+        if(resp.status == PassFail.PASS) {
             render resp.responseObject as JSON
+        }
         else
             render (status: 500, text: resp.error)
     }
@@ -33,7 +33,7 @@ class OnvifController {
             render(status: 400, text: errorsMap as JSON)
         }
         else {
-            ObjectCommandResponse resp = onvifService.getMediaProfiles(cmd.onvifUrl)
+            ObjectCommandResponse resp = onvifService.getMediaProfiles(cmd)
 
             if (resp.status == PassFail.PASS)
                 render resp.responseObject as JSON
@@ -52,7 +52,7 @@ class OnvifController {
             render(status: 400, text: errorsMap as JSON)
         }
         else {
-            def result = onvifService.getSnapshot(cmd.url)
+            def result = onvifService.getSnapshot(cmd.url, cmd.cred)
             if (result.status == PassFail.PASS)
                 render result.responseObject
             else if(result.errno == 401)

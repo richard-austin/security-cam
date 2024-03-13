@@ -1,12 +1,9 @@
 <h2 style="text-align: center">Security Cam</h2>
-<h2 style="text-align: center">CCTV on Raspberry Pi 4 Via Web Browser</h2>
+<h2 id="h2" style="text-align: center">CCTV on Raspberry Pi 4 Via Web Browser</h2>
 
 ### Introduction
 This is a Network Video Recorder accessed through a web browser, designed to run on a Raspberry pi.
-Access can be either direct or through a Cloud service. There is no live implementation
-of the Cloud Service, but the source code is freely available at
-https://github.com/richard-austin/cloud-server.
-It requires network cameras providing RTSP streams with the video encoded as H264 or H265. Audio is supported. 
+It requires network cameras providing RTSP streams with the video encoded as H264 or H265. Audio (G711 or AAC) is supported. 
 The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on the browser using Media Source Extensions (MSE).
 
 ![ptz camera](README.images/ptz.png)
@@ -28,8 +25,7 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * PTZ for cameras supporting this feature through Onvif.
 * Quick reboot or setup of key camera parameters for SV3C type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
-  This feature requires access through port 446 as well as the usual https port 443. *This is not available when connecting
-  via the Cloud Service.*
+  This feature requires access through port 446 as well as the usual https port 443.
 * Configuration editor supporting Onvif discovery of cameras and their capabilities. Cam also find capabilities of specific cameras.
 * email notification if public IP address changes (for when port forwarding is used).
 * Initial unauthenticated set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
@@ -37,7 +33,6 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * Get Local Wi-Fi source details.
 * Set up Wi-Fi connection.
 * NVR includes NTP server for cameras to sync time without the need for them to connect to the internet.
-* Enable/Disable client connection to Cloud server.
 * Complete project deployment using a single deb file
 #### Limitations
 * Requires network cameras which provide H264 or 265 video, and optionally audio via RTSP (G711/AAC). *No video transcoding
@@ -45,8 +40,17 @@ is done on the raspberry pi to keep CPU utilisation low*
 * The browser used must be able to display the video format used. Most browsers will support H264, but on some
 older machines, the GPU may not support H265 (HEVC) decoding. There are special chromium forks which can render H265
 with software decoding (see <a href="https://thorium.rocks/">Thorium</a> and <a href="https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding">Special Chromium Build</a>)
-### Run Time Platform for NVR
-The current build configuration (as created with ./gradlew buildDebFile) is for Raspberry pi V4 running headless (server) version of Ubuntu 23.10 (Mantic Minotaur).
+  * For Chromium based browsers running on Ubuntu 23.04 with VAAPI installed and a suitable Intel GPU, you may need to use the parameters --enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoDecoder,VaapiVideoEncoder in the command line to enable hevc decoding.
+This will also enable hardware decoding generally.
+* https web admin hosting and rstps (secure rtsp streaming from cameras) are not currently supported.
+* This has been tested with SV3C and ZXTech cameras and Reolink Wi-Fi doorbell.
+There might be compatibility issues with some other camera types.
+* 2 way audio (Onvif profile T) supported on the Reolink Wi-fi doorbell using firmware version v3.0.0.1996_23053101.
+The firmware from Reolink main downloads site does not fully support this functionality. 
+### Run Time Platform and Installation
+The current build configuration is for Raspberry pi V4 or V5 running headless (server) version of Ubuntu 23.10 (Mantic Minotaur).
+Installation of the complete system can be done with a .deb file which you can obtain from the latest release in the Releases section or you can build yourself by following the details under the Development section below.
+
 ### Security
 The NVR is designed to run on a LAN which is protected from unauthorised
 external access. From within the LAN, access to administrative functions is possible without authentication.
@@ -54,9 +58,6 @@ Secure authenticated access is through ports 443 and 446 via nginx.
 These ports, plus port 80,  are set up for port forwarding on the router when direct access
 from outside the LAN is required.
 
-When the NVR is accessed through the Cloud service, port forwarding is not required
-as all communication is through a client connection that the NVR makes to the
-Cloud service. Camera web admin pages are not accessible through the Cloud Service.
 ### Tomcat Web Server
 Tomcat 9 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
 to these through port 8080.
@@ -144,10 +145,10 @@ make: *** [ffbuild/common.mak:81: libavformat/adtsenc.o] Error 1
 </pre>
 
 To fix this, copy xtrn-scripts-and-config/ffmpeg-v4.4.4/mathopts.patch to
-your ffmpeg-4.4.4 build directory and (from theffmpeg-4.4.4 build directory) run
+your ffmpeg-4.4.4 build directory and (from the ffmpeg-4.4.4 build directory) run
 
 ```text
-patch -u -b  ./libavcodec/x86/mathops.h ffmpeg4.patch 
+patch -u -b  ./libavcodec/x86/mathops.h mathopts.patch 
 ```
 Run 
 ```text
@@ -177,7 +178,7 @@ Access is through a single port (443), giving them a common origin from the brow
 An additional port (446) provides access to the proxy host for the camera admin web pages.
 
 #### What nginx is used for on the NVR
-* TLS encryption of traffic.
+* TLS encryption of all traffic.
 * Translation from Tomcat port 8080 to HTTPS port 443.
 * HTTP redirect from port 80.
 * Webserver, live and recorded streams made available through a single port (443) at their designated URLs.
@@ -216,11 +217,6 @@ Using other versions may cause build issues in some cases.
 git clone git@github.com:richard-austin/security-cam.git
 cd security-cam
 ```
-### If accessing through the Cloud Server.
-* *Skip this if only using direct NVR access from the browser* 
-  * In application.yml, ensure that environments -> production -> cloudProxy -> cloudHost
-    is set to the correct IP for your Cloud server (cloudPort will normally be 8081)
-
 ### Build for deployment to Raspberry pi
 The Raspberry pi should be running Ubuntu 23.10 (Mantic Minotaur) OS.
 ```
@@ -268,36 +264,6 @@ to the NVR, otherwise it is not required.
     sudo systemctl restart nginx
     ```
 ## Initial Setup
-### Use with the Cloud Service
-#### If you don't want to use a Cloud Service for access, ignore this section and see "Setup for Direct Access (Browser to NVR)"
-The NVR will have the Cloud Proxy enabled by default on initial setup, and provided that the correct Cloud Server parameters are 
-present in application.yml, you will be able to set up a cloud account from your cloud browser session, using the product
-key which was shown near the end of the NVR installation text. 
-### Cloudproxy parameters in application.yml
-#### These are under the cloudProxy section :-
-
-| *Parameter*                | Description                                                                                                                        |
-|----------------------------|------------------------------------------------------------------------------------------------------------------------------------|
-| enabled                    | CloudProxy will run if true (and CloudProxy status is enabled on the NVR General menu)                                             |
-| mqTrustStorePath **        | Path to the trust store which contains the ActiveMQ servers certificate                                                            |
-| mqKeyStorePath **          | Path the the ActiveMQ client key store                                                                                             |
-| mqTrustStorePassword *     | Password for the trust store                                                                                                       |
-| mqKeyStorePassword *       | Password for the keystore                                                                                                          |
-| mqUser *                   | ActiveMQ user name                                                                                                                 |
-| mqPassword *               | ActiveMQ password                                                                                                                  |
-| productKeyPath             | Path to the file containing the encrypted NVR Product key                                                                          |
-| cloudActiveMQUrl           | Url to the ActiveMQ service that the NVRs and the Cloud server connect to. This should begin with failover://ssl:                  |
-| activeMQInitQueue          | The name of the queue in ActiveMQ through which connections are initiated. This must be the same on all NVRs and the Cloud server. |
-| webServerForCloudProxyHost | The host name for the NVRs cloud web server (normally localhost)                                                                   |
-| webServerForCloudProxyPort | The port for the NVRs web server (Normally 8088) This service is set up on nginx to provide special access for Cloud connections.  | 
-| logLevel                   | The log level for cloudproxy.log (normally located at /var/log/security-cam)                                                       |
-
-&ast; You may want to change these from their defaults. The ActiveMQ user name and password must obviously be changed 
-in the ActiveMQ and Cloud server settings as well as in this config. 
-
-&ast;&ast; You may want to create your own keys and certs for the Cloud and NVRs <a href="https://activemq.apache.org/how-do-i-use-ssl">see here</a>
-
-Please see the README.md for the Cloud Service for details on setting up a cloud account and using the Cloud service.
 ### Setup for Direct Access (Browser to NVR)
 #### Set up user account
 To log into the NVR when accessing it directly, 
@@ -367,16 +333,26 @@ If camera configuration has not yet been done, the Cameras Configuration Editor 
 be empty apart from a single unpopulated camera entry.
 
 ![config editor](README.images/config-editor.png)
-*Cameras Configuration Editor buttons*
+*Cameras Configuration Editor*
 
 #### Config page button functions
+<img src="README.images/security-svgrepo-com.svg" title="Image of camera configuration page" width="20"/></img> **At top of page to the left of the 
+page title.**
+
+Set the global Onvif credentials used during single and all camera Onvif discovery. Cameras successfully discovered
+will have their credentials set to those entered here. Cameras whose credentials were different from these, will
+be listed above the table*
+allowing the correct credentials to be entered against them before
+retrying discovery on them individually.
+
+&ast; See *Cameras Configuration Editor Showing A Camera Whose Onvif Credentials Differ From The Global Onvif Credentials* below. 
 
 | Button                                                                                                                                   | Function                                                                                                                                                                                                                                                                                                                                                                                    |
 |------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | <img src="README.images/simple-trash-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"/></img> (on&nbsp;camera&nbsp;row) | Delete the corresponding camera and its streams. Disabled when there is only one camera                                                                                                                                                                                                                                                                                                     |
 | <img src="README.images/simple-trash-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> (on&nbsp;stream&nbsp;row)  | Delete the corresponding stream. Disabled when the stream is the only one on the camera.                                                                                                                                                                                                                                                                                                    |
 | <img src="README.images/add-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                     | Add a new stream. The new stream will be unpopulated and all fields will need manual entry/setup.                                                                                                                                                                                                                                                                                           |
-| <img src="README.images/arrow-sm-down-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                           | Move the corresponding camera down one place in the list. The cameras will be listed on the selection menus in the same order as they appear on this list.                                                                                                                                                                                                                                  |
+| <img src="README.images/arrow-sm-down-svgrepo-com.svg" title="Down arrow" width="20"/></img>                                             | Move the corresponding camera down one place in the list. The cameras will be listed on the selection menus in the same order as they appear on this list.                                                                                                                                                                                                                                  |
 | <img src="README.images/arrow-sm-up-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                             | Move the corresponding camera up one place in the list. The cameras will be listed on the selection menus in the same order as they appear on this list.                                                                                                                                                                                                                                    |                                                                                                                                                                  |
 | <img src="README.images/add-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                     | Add a new camera. This will add a camera with one stream, with all fields unpopulated. All fields will need to be populated manually.                                                                                                                                                                                                                                                       |
 | <img src="README.images/add-circle-solid-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                        | Add a new camera. You enter the Onvif URL for the required camera, and the camera details will be returned with camera specific data populated. Intended for when General Onvif Discovery has not picked up the camera or a new camera is added to an existing setup. This is the preferred way to add a single camera. You will need to enter the camera name and stream ID's as a minimum |
@@ -386,7 +362,7 @@ be empty apart from a single unpopulated camera entry.
 | <img src="README.images/caret-right-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>  &ast;                      | Show the cameras streams                                                                                                                                                                                                                                                                                                                                                                    |
 | <img src="README.images/caret-bottom-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> &ast;                      | Hide the cameras streams                                                                                                                                                                                                                                                                                                                                                                    |
 | camera(<i>n</i>)                                                                                                                         | Camera ID. Click on this to show a snapshot from the camera. Note that this will require that the camera credentials are set up correctly (<img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button)                                                                                                                                |
-| <img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                | Set or change the user name and password used to access features on the cameras. Note that this currently requires all the cameras on the network to have the same credentials.                                                                                                                                                                                                             |
+| <img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                | Enter or change credentials for this camera. These credentials will be used on view snapshot (on config setup), on camera settings and admin page hosting (SV3C and ZXTech cameras only) and in RTSP authentication (when selected).                                                                                                                                                        |
 
 &ast; Button style toggles with context
 
@@ -413,22 +389,23 @@ Cameras can also be added manually by clicking on the <img src="README.images/ad
 not recommended unless Onvif is not supported on the device.
 
 #### Camera Configuration Parameters
-| Parameter/Control   | Function                                                                                                                                                                                                                                                                                                                                                                       | Set by Onvif Discovery |
-|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
-| Sorting             | Up and down arrows move camera position in the list, and correspondingly on the menus.                                                                                                                                                                                                                                                                                         | N/A                    |
-| Camera ID           | Map key of the camera. Clicking on this displays a snapshot from that camera.                                                                                                                                                                                                                                                                                                  | N/A                    |
-| Delete              | Delete this camera and its streams from the configuration (trash button).                                                                                                                                                                                                                                                                                                      | N/A                    |
-| Name                | The name of the camera as it will appear on the menus.                                                                                                                                                                                                                                                                                                                         | No                     |
-| Camera Type         | Select SV3C, ZTech MCW5B10X or Not Listed. The named options enable some admin functions under Camera Settings -> Quick camera Setup                                                                                                                                                                                                                                           | No                     |
-| FTP From camera     | If a stream is selected, recording will be triggered when the camera sends a .jpg (jpeg) to ./<i>camera_map_key</i>  on the NVR IP address on port 2121. This is not available if Motion Sensing is set on any of the camera streams. If 'none' is selected, ftp uploads will not be processed.                                                                                | No                     |
-| Retrigger Window    | For FTP triggered recordings only. The time window in seconds during which the recording can be extended (by retrigger window seconds) by further FTP uploads from the camera.                                                                                                                                                                                                 | No                     |
-| Address             | Camera IP address                                                                                                                                                                                                                                                                                                                                                              | Yes                    |
-| Snapshot URI        | The cameras snapshot URL.                                                                                                                                                                                                                                                                                                                                                      | Yes                    |
-| RTSP Authentication | If checked, authentication will be used on the RTSP connection to the camera. The credentials will be those entered for the camera set on the Cameras Config page.                                                                                                                                                                                                             | No                     |
-| RTSP Transport      | Determine whether to use TCP or UDP for the RTSP video/audio stream. If in doubt, use TCP.                                                                                                                                                                                                                                                                                     | No                     |
-| Audio Backchannel   | Enable use of the cameras Audio backchannel for two way audio (if camera supports Onvif Profile T backchannel). (<img src="README.images/xmark-circle-svgrepo-com.svg" width="20" style="position: relative; top: 5px"> inactive, <img src="README.images/tick-circle-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> active. Click to toggle).</img> | Yes                    |
-| PTZ Controls        | Enable PTZ controls on the live stream view. This requires that the camera supports Onvif PTZ control.                                                                                                                                                                                                                                                                         | No                     |
-| Onvif Base Address  | IP address and port of the cameras Onvif SOAP web service.                                                                                                                                                                                                                                                                                                                     | Yes                    |
+| Parameter/Control   | Function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Set by Onvif Discovery |
+|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| Sorting             | Up and down arrows move camera position in the list, and correspondingly on the menus.                                                                                                                                                                                                                                                                                                                                                                                                                                                       | N/A                    |
+| Camera ID           | Map key of the camera. Clicking on this displays a snapshot from that camera.                                                                                                                                                                                                                                                                                                                                                                                                                                                                | N/A                    |
+| Cam Credentials     | Enter or change the credentials used for this camera. This is set to the global onvif credentials if this camera was successfully discovered with Onvif, but can be changed with this function if required. <br/><br/> NOTE: You must save save the configuration (using the <img src="README.images/floppy-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button) to make the credentials stick.<br/><br/>Before saving, you can click on the camera ID to check the (usually authenticated) snapshot is working. | N/A                    |
+| Delete              | Delete this camera and its streams from the configuration (trash button).                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | N/A                    |
+| Name                | The name of the camera as it will appear on the menus.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | No                     |
+| Camera Type         | Select SV3C, ZTech MCW5B10X or Not Listed. The named options enable some admin functions under Camera Settings -> Quick camera Setup                                                                                                                                                                                                                                                                                                                                                                                                         | No                     |
+| FTP From camera     | If a stream is selected, recording will be triggered when the camera sends a .jpg (jpeg) to ./<i>camera_map_key</i>  on the NVR IP address on port 2121. This is not available if Motion Sensing is set on any of the camera streams. If 'none' is selected, ftp uploads will not be processed.                                                                                                                                                                                                                                              | No                     |
+| Retrigger Window    | For FTP triggered recordings only. The time window in seconds during which the recording can be extended (by retrigger window seconds) by further FTP uploads from the camera.                                                                                                                                                                                                                                                                                                                                                               | No                     |
+| Address             | Camera IP address                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Yes                    |
+| Snapshot URI        | The cameras snapshot URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Yes                    |
+| RTSP Authentication | If checked, authentication will be used on the RTSP connection to the camera. The credentials will be those entered for the camera set on the Cameras Config page.                                                                                                                                                                                                                                                                                                                                                                           | No                     |
+| RTSP Transport      | Determine whether to use TCP or UDP for the RTSP video/audio stream. If in doubt, use TCP.                                                                                                                                                                                                                                                                                                                                                                                                                                                   | No                     |
+| Audio Backchannel   | Enable use of the cameras Audio backchannel for two way audio (if camera supports Onvif Profile T backchannel). (<img src="README.images/xmark-circle-svgrepo-com.svg" width="20" style="position: relative; top: 5px"> inactive, <img src="README.images/tick-circle-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> active. Click to toggle).</img>                                                                                                                                                               | Yes                    |
+| PTZ Controls        | Enable PTZ controls on the live stream view. This requires that the camera supports Onvif PTZ control.                                                                                                                                                                                                                                                                                                                                                                                                                                       | No                     |
+| Onvif Base Address  | IP address and port of the cameras Onvif SOAP web service.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Yes                    |
 
 #### Stream Parameters
 | Parameter/Control        | Function                                                                                                                                                                                                                                                                                                                                                                                                                       | Set by Onvif Discovery |
@@ -448,6 +425,15 @@ not recommended unless Onvif is not supported on the device.
 | Video Width              | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                                                                                                                                                                                                                                    | Yes                    |
 | Video Height             | For Motion Service, the height of the video stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                                                                                                                                                                                                                                  | Yes                    |
 
+![config editor](README.images/config-editor2.png "Camera configuration page following Onvif discovery, showing a camera whose credentials are different from the global Onvif credentials")
+*Cameras Configuration Editor Showing A Camera Whose Onvif Credentials Differ From The Global Onvif Credentials*
+
+## One or More Cameras Failing Onvif Authentication During Discovery
+### Cameras in this category will be listed in the orange bordered box shown in the above screenshot.
+Enter the correct Onvif user name and password for the camera listed in the orange bordered box and click the <img src="README.images/add-circle-solid-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
+button beside the password to run single camera discovery using these credentials. If successful, the camera will be removed from this list and added 
+tol the cameras list below, where parameter entry can be completed. Once all parameters are set, the new configuration must be saved 
+(<img src="README.images/floppy-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button) to take effect.
 ## Using the NVR
 
 ### The Menus 
@@ -474,8 +460,11 @@ icon and a selector just below it. The selection option is the maximum
 > If two-way audio is enabled, a <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
 > button and a device selector will also be below the video. Select the required audio input
 > device and click the <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button to
-> speak. While audio output is active, the button changes to <img src="README.images/microphone-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
-> , click it again to turn audio output off.
+> speak. While audio output is active, the button changes to <img src="README.images/microphone-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>,
+> click it again to turn audio output off.
+> 
+> You can zoom in on the video by using the mouse wheel on a PC, or pinch zoom on a mobile. Mouse down and drag will pan the zoomed video while
+> touch and move does the same on mobile. This is distinct from PTZ operations which can be done on suitable cameras.
 
 ##### Multi Camera View
 The last option on the Select Camera menu is Multi Camera View. This shows one stream
@@ -486,6 +475,8 @@ The camera streams can be switched by clicking the
 button at the top left of the page and changing the selection.
 > Each video on multi camera view will have the latency chasing setter below it. Any
 > cameras with two-way audio enabled will also have the <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button and device selector.
+> 
+> Mouse wheel zoom and mouse down drag pan functions, and their mobile counterparts can be done on each of the videos.
 #### Select Recording
 This menu allows selection of recordings made on camera streams.
 The names
@@ -559,14 +550,7 @@ email address, giving the new public IP address.
 * **Set CloudProxy Status**
 
 **Note, An experimental Cloud Service has been developed (see <a href="https://github.com/richard-austin/cloud-server">here</a>). This works in conjunction with <a href="https://github.com/richard-austin/activemq-for-cloud-service">ActiveMQ</a>**
-
-  Check the Checkbox to enable the Cloud Proxy to connect to the Cloud Service, or uncheck it to disable Cloud Service connection.
-  The Cloud Proxy is used to provide a connection to the Cloud Service from the NVR.
-  This is a client connection and so doesn't require port forwarding to be set up. Most functions 
-  of the NVR will be available via the Cloud Service. The Camera Admin page functionality is not available via the Cloud Service.
-  Cloud Proxy Status defaults to "on" before the local NVR account is set up.
-
-  *The NVR must have the correct cloudActiveMQUrl set up in application.yml if the Cloud Service is used.*
+For information on accessing the NVR through the Cloud Service, see README_CLOUD.md
 * **Admin Functions**
   
   The initial setup functions used to set credentials for a direct access account.
