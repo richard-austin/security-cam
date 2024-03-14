@@ -38,8 +38,13 @@ nginx provides access to this service with common origin (port 443) to the Web B
 The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi. To change to a different architecture, edit the build task in fmp4-ws-media-server/build.gradle
 
 ### ffmpeg
-ffmpeg version 4.4.4 precompiled for ARM64 is deployed with this system as version 5 and above have issues with
-a lack of timestamps from the RTSP cameras. If you want to run this on a platform other than ARM64, you
+ffmpeg is used for re-muxing, audio transcoding and camera connectivity.
+
+ffmpeg version 4.4.4 is used in the NVR as versions 5 and above will not correctly mux the rtsp to fmp4 when audio is present.
+The problem is due to a lack of timestamps in one or both of the streams.
+See [FFMPEG.md](FFMPEG.md) for details of this.
+
+ffmpeg version 4.4.4 precompiled for ARM64 is deployed with this system. If you want to run this on a platform other than ARM64, you
 will need to compile ffmpeg 4.4.4 for that platform (see [FFMPEG.md](FFMPEG.md)).
 ### Wi-Fi Setup Service
 Runs as a root Linux service. It is a web application written in Python,
@@ -83,9 +88,3 @@ to the internet.
 ###### If you want to isolate cameras from their manufacturers cloud service, you can either block their IP addresses from internet access on your router, or set the camera to a fixed IP and set the default gateway to the cameras own IP address. This will leave access to the LAN, but not external addresses.
 ###### For the NTP time control to work, you must then set the cameras NTP server address to the NVR IP address.
 
-### ffmpeg
-ffmpeg is used for re-muxing, audio transcoding and camera connectivity. 
-
-ffmpeg version 4 is used in the NVR as versions 5 and above will not correctly mux the rtsp to fmp4 when audio is present.
-The problem is due to a lack of timestamps in one or both of the streams.
-See [FFMPEG.md](FFMPEG.md) for details of this.
