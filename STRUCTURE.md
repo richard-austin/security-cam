@@ -77,4 +77,8 @@ to the internet.
 ###### For the NTP time control to work, you must then set the cameras NTP server address to the NVR IP address.
 
 ### ffmpeg
-ffmpeg is used for re-muxing, audio transcoding and camera connectivity. See FFMPEG.md for details of this.
+ffmpeg is used for re-muxing, audio transcoding and camera connectivity. 
+
+ffmpeg version 4 is used in the NVR as versions 5 and above will not correctly mux the rtsp to fmp4 when audio is present.
+The problem is due to a lack of timestamps in one or both of the streams.
+See FFMPEG.md for details of this.
