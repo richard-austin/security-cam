@@ -27,8 +27,6 @@
     </div>
   </mat-card-title>
   <app-reporting #errorReporting></app-reporting>
-  <app-onvif-failures *ngIf="failed.size > 0" [reporting]="reporting" [failures]="failed" [cameras]="cameras"
-                      (fixUpCamerasData)="FixUpCamerasData()"></app-onvif-failures>
   <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
     <mat-spinner [diameter]="25"></mat-spinner>
     <span>Loading, Please wait..</span>
@@ -44,6 +42,10 @@
   <mat-card-content #scrollable_content class="scrollable-content"
                     [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement)"
                     *ngIf="!downloading  && !updating && !discovering">
+    <app-onvif-failures *ngIf="failed.size > 0" [reporting]="reporting" [failures]="failed" [cameras]="cameras"
+                        (fixUpCamerasData)="FixUpCamerasData()">
+
+    </app-onvif-failures>
     <table mat-table
            [dataSource]="cameras | keyvalue: cameraSvc.compareFn" multiTemplateDataRows
            class="mat-elevation-z8">
