@@ -44,7 +44,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   cameraColumns = ['name', 'expand'];
   streamColumns = ['select'];
 
-  constructor(private cameraSvc: CameraService, private utilsService: UtilsService) {
+  constructor(public cameraSvc: CameraService, private utilsService: UtilsService) {
   }
 
   cams: Map<string, Camera> = new Map<string, Camera>();
@@ -111,9 +111,9 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * updateCameras Respond to check box clicks to select/unselect streams. This also ensures
    *               that only one stream (HD or Low Res) can be selected at one time
-   * @param $event: MatCheckbox change event including selected attribute
-   * @param camera: The current camera the stream is on
-   * @param stream: The stream on which the selection is being made
+   * @param $event MatCheckbox change event including selected attribute
+   * @param camera The current camera the stream is on
+   * @param stream The stream on which the selection is being made
    */
   updateCameras($event: MatCheckboxChange, camera: Camera, stream: Stream) {
     if (stream.selected) {

@@ -40,7 +40,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   talkOffSubscription!: StompSubscription;
   transportWarningSubscription!: StompSubscription;
 
-  constructor(private cameraSvc: CameraService, public utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog, private cpService: CloudProxyService) {
+  constructor(public cameraSvc: CameraService, public utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog, private cpService: CloudProxyService) {
     this.cpService.getStatus().subscribe((status: boolean) => {
         this.utilsService.cloudProxyRunning = status;
       },

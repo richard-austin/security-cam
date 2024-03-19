@@ -18,6 +18,8 @@ import security.cam.commands.SetupSMTPAccountCommand
 import security.cam.commands.StartAudioOutCommand
 import security.cam.enums.PassFail
 import security.cam.interfaceobjects.ObjectCommandResponse
+import server.CameraAdminCredentials
+
 import java.nio.charset.StandardCharsets
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -381,14 +383,9 @@ class UtilsService {
                 // Disable audio out on clients except the initiator
                 brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
 
-                final URI netcam_uri = new URI(cmd.stream.netcam_uri)
-                ObjectCommandResponse resp = camService.getCameraCredentials()
-                String user = "", pass = ""
-                if (resp.status == PassFail.PASS) {
-                    user = resp.responseObject.camerasAdminUserName
-                    pass = resp.responseObject.camerasAdminPassword
-                }
-                client = new RtspClient(netcam_uri.getHost(), netcam_uri.getPort(), user, pass, logService)
+                final URI netcam_uri = new URI(cmd.netcam_uri)
+                CameraAdminCredentials creds  = cmd.cam.credentials()
+                client = new RtspClient(netcam_uri.getHost(), netcam_uri.getPort(), creds.userName, creds.password, logService)
                 client.start()
                 result = client.await()
             }

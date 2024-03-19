@@ -4,8 +4,8 @@ import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
 import {AudioEncoding, Camera, CameraParamSpec, Stream} from "./Camera";
-import {CameraAdminCredentials} from "../credentials-for-camera-access/credentials-for-camera-access.component";
 import {NativeDateAdapter} from '@angular/material/core';
+import {KeyValue} from "@angular/common";
 
 
 /**
@@ -47,6 +47,13 @@ export class CustomDateAdapter extends NativeDateAdapter {
   }
 }
 
+export class OnvifCredentials
+{
+  userName: string='';
+  password: string='';
+}
+
+
 export enum cameraType {none, sv3c, zxtechMCW5B10X}
 
 @Injectable({
@@ -69,6 +76,7 @@ export class CameraService {
   private cameras: Map<string, Camera> = new Map();
 
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
+ private _publicKey!: Uint8Array;
 
   public readonly _cameraParamSpecs: CameraParamSpec[] =
     [new CameraParamSpec(
@@ -108,6 +116,9 @@ export class CameraService {
     {name: "100", value: 100}
   ];
 
+  private _preambleFrameValues: number[] = [
+    0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400
+  ]
   get cameraParamSpecs() {
     return this._cameraParamSpecs;
   };
@@ -119,12 +130,18 @@ export class CameraService {
   get ftpRetriggerWindows() {
     return this._ftpRetriggerWindows;
   }
+  get preambleFrameValues() {
+    return this._preambleFrameValues;
+  }
 
+  get publicKey() : Uint8Array {
+    return this._publicKey;
+  }
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     this.loadCameras().subscribe((cams) => {
       this.cameras = cams;
-
-    })
+    });
+    this.getPublicKey();
   }
 
   /**
@@ -135,7 +152,7 @@ export class CameraService {
   }
 
   private static convertCamsObjectToMap(cams: Object): Map<string, Camera> {
-    let cameras: Map<string, Camera> = new Map<string, Camera>();
+    const cameras: Map<string, Camera> = new Map<string, Camera>();
 
     for (let key in cams) {
       // @ts-ignore
@@ -153,6 +170,28 @@ export class CameraService {
     return cameras;
   }
 
+  private static convertFailureReasonsToMap(failed: Object): Map<string, string> {
+    const failures: Map<string, string> = new Map<string, string>();
+    for(let address in failed) {
+      // @ts-ignore
+      const failure = failed[address]
+      failures.set(address, failure)
+    }
+    return failures;
+  }
+  /**
+   * compareFn: Compare function for use with the keyvalue pipe. This compares string with numbers (such as stream9, stream10)
+   *            and sorts the numeric parts numerically rather than alphabetically. This was added to fix a bug which
+   *            occurred when there are 10 or more streams in total (like with 5 cameras, each having two streams).
+   * @param kv1 key1 camera1/stream1
+   * @param kv2 key2, camera2/stream2
+   */
+  compareFn(kv1: KeyValue<string, any>, kv2: KeyValue<string, any>): number {
+    return kv1.key.localeCompare(kv2.key, undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    });
+  }
   /**
    * loadCameras: Get camera set up details from the server
    * @private
@@ -166,8 +205,8 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  haveCameraCredentials(): Observable<string> {
-    return this.http.post(this._baseUrl.getLink("cam", "haveCameraCredentials"), '', {responseType: 'text'}).pipe(
+  haveOnvifCredentials(): Observable<string> {
+    return this.http.post(this._baseUrl.getLink("cam", "haveOnvifCredentials"), '', {responseType: 'text'}).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
@@ -187,22 +226,26 @@ export class CameraService {
     );
   }
 
-  discover(): Observable<Map<string, Camera>> {
+  discover(): Observable<{cams: Map<string, Camera>, failed: Map<string, string>}> {
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discover"), '', this.httpJSONOptions).pipe(
-      map(cams => {
-        return CameraService.convertCamsObjectToMap(cams);
+      map(result => {
+        return {cams: CameraService.convertCamsObjectToMap(result.cams), failed: CameraService.convertFailureReasonsToMap(result.failed)};
       })
     );
   }
 
-  discoverCameraDetails(onvifUrl: string): Observable<Camera> {
+  discoverCameraDetails(onvifUrl: string, onvifUserName: string = "", onvifPassword: string = ""): Observable<{cam: Camera, failed: Map<string, string>}> {
     const formData: FormData = new FormData();
     formData.append('onvifUrl', onvifUrl)
+    formData.append("onvifUserName", onvifUserName);
+    formData.append("onvifPassword", onvifPassword);
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discoverCameraDetails"), formData, this.httpUploadOptions).pipe(
-      map(cams => {
-        let map: Map<string, Camera> = CameraService.convertCamsObjectToMap(cams);
+      map(result => {
+        let map: Map<string, Camera> = CameraService.convertCamsObjectToMap(result.cams);
         if (map.size == 1)
-          return map.entries().next().value[1];
+          return {cam: map.entries().next().value[1],  failed: CameraService.convertFailureReasonsToMap(result.failed)};
+        else
+          return {cam: result.cam, failed: CameraService.convertFailureReasonsToMap(result.failed)}
       })
     );
   }
@@ -215,16 +258,28 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getSnapshot(url: string): Observable<Array<any>> {
+  getSnapshot(cam: Camera): Observable<Array<any>> {
     const formData: FormData = new FormData();
-    formData.append('url', url);
+    formData.append('url', cam.snapshotUri);
+    formData.append('cred', cam.cred)
     return this.http.post<Array<any>>(this._baseUrl.getLink("onvif", "getSnapshot"), formData, this.httpUploadOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  setCameraAdminCredentials(creds: CameraAdminCredentials): Observable<any> {
-    return this.http.post<any>(this._baseUrl.getLink("cam", "setAccessCredentials"), creds, this.httpUploadOptions).pipe(
+  getPublicKey():void {
+    if(this._publicKey === undefined) {
+      this.http.post<Uint8Array>(this._baseUrl.getLink("cam", "getPublicKey"), "", this.httpUploadOptions).pipe(
+        tap((pk) => {
+          this._publicKey = new Uint8Array(pk);
+        }),
+        catchError((err: HttpErrorResponse) => throwError(err)))
+        .subscribe();
+    }
+  }
+  setOnvifCredentials(creds: OnvifCredentials): Observable<any> {
+    const msg = {onvifUserName: creds.userName, onvifPassword: creds.password};
+    return this.http.post<any>(this._baseUrl.getLink("cam", "setOnvifCredentials"), JSON.stringify(msg), this.httpJSONOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

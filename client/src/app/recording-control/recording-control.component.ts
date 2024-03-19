@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {VideoComponent} from '../video/video.component';
 import {Camera, Stream} from '../cameras/Camera';
 import {CameraService, DateSlot, LocalMotionEvent, LocalMotionEvents} from '../cameras/camera.service';
@@ -54,13 +54,13 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   _maxDate!: Date;
   initialised: boolean;
 
-  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService, private utilsService: UtilsService) {
+  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService, private utilsService: UtilsService, private cd: ChangeDetectorRef) {
     // route.url.subscribe((u:UrlSegment[]) => {
     // });
     this.initialised = false;
     this.route.paramMap.subscribe((paramMap) => {
       let streamName: string = paramMap.get('streamName') as string;
-      cameraSvc.getCameras().forEach((cam) => {
+      this.cameraSvc.getCameras().forEach((cam) => {
         cam.streams.forEach((stream, k) => {
           if (stream.media_server_input_uri.endsWith(streamName)) {
             this.cam = cam;
@@ -169,6 +169,9 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     } else {
       this.showInvalidInput(false);
     }
+  }
+  hasAudio (): boolean {
+    return this.stream?.audio && !this.stream.motion?.enabled;
   }
 
   /**
@@ -351,8 +354,26 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   ngAfterViewInit(): void {
     this.isGuest = this.utilsService.isGuestAccount;
     this.initialised = true;
-    this.setupRecording();  }
+    this.setupRecording();
+    this.cd.detectChanges();
+    this.video.video.controls = false;  // Turn off controls to prevent full screen on reorientation to landscape
+                                        // Also in some browsers (Firefox on Android), having the controls enabled
+                                        // prevents pan and pinch zoom from working.
+  }
 
   ngOnDestroy(): void {
+    this.video.video.controls = true; // Enable controls again
+  }
+
+  toggleMuteAudio() {
+    if(this.video !== undefined && this.video !== null)
+      this.video.videoFeeder.mute(!this.video.videoFeeder.isMuted);
+  }
+
+  isMuted() : boolean {
+    let retVal = false;
+    if(this.video !== undefined && this.video !== null)
+      retVal = this.video.videoFeeder.isMuted;
+    return retVal;
   }
 }

@@ -71,6 +71,7 @@ export class Stream {
   video_height: number = 0;
   recording: Recording = new Recording();
   rec_num: number = 0;  // Used to give a rec number for the recording URI with motion triggered recordings
+  preambleFrames: number = 100;
 }
 export class CameraParamSpec {
   constructor(camType: cameraType, params: string, uri: string, name: string) {
@@ -102,12 +103,12 @@ export class Camera
     cameraParamSpecs!: CameraParamSpec;
     snapshotUri: string="";
     ptzControls: boolean = false;
-    ftp: boolean = false;
+    ftp: string | boolean = "none";  // | boolean is only used for a test which can detect ftp's boolean value in earlier versions
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
     backchannelAudioSupported: boolean = false
     rtspTransport: string = "tcp";
     useRtspAuth: boolean = false;
     retriggerWindow: number = 30;
-
+    cred: string = "";
 }

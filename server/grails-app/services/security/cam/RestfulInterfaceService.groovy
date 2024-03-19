@@ -3,6 +3,7 @@ package security.cam
 import grails.core.GrailsApplication
 import security.cam.enums.RestfulResponseStatusEnum
 import security.cam.interfaceobjects.RestfulResponse
+import server.Camera
 
 class CameraParams {
     public def storage = [:]
@@ -38,14 +39,17 @@ class RestfulInterfaceService {
         String url = buildURL(address, uri, isPOST ? null : params)
 
         try {
-            String username = camService.cameraAdminUserName()
-            String password = camService.cameraAdminPassword()
-            String userPass = "${username}:${password}"
-            String basicAuth = "Basic " + userPass.bytes.encodeBase64().toString()
+            Camera cam = camService.getCamera(address)
             URL u = new URL(url)
             conn = (HttpURLConnection) u.openConnection(Proxy.NO_PROXY)
             conn.setRequestMethod(isPOST ? "POST" : "GET")
-            conn.setRequestProperty("Authorization", basicAuth)
+            if (cam != null) {
+                // For requests to cameras only, this will be null for requests to the wifi utils service
+                def creds = cam.credentials()
+                String userPass = "${creds.userName}:${creds.password}"
+                String basicAuth = "Basic " + userPass.bytes.encodeBase64().toString()
+                conn.setRequestProperty("Authorization", basicAuth)
+            }
             conn.setRequestProperty("Content-Type", "application/json; utf-8")
             conn.setRequestProperty("Accept", "application/json")
             conn.setRequestProperty("Accept-Charset", "UTF-8")
@@ -53,8 +57,7 @@ class RestfulInterfaceService {
             conn.setConnectTimeout(timeOut * 1000)
             conn.setReadTimeout(timeOut * 1000)
 
-            if(isPOST)
-            {
+            if (isPOST) {
                 OutputStream os = conn.getOutputStream()
                 byte[] ip = params.getBytes("utf-8")
                 os.write(ip, 0, ip.length)
@@ -83,11 +86,11 @@ class RestfulInterfaceService {
             if (result.responseCode == HttpURLConnection.HTTP_OK) {
                 result.status = RestfulResponseStatusEnum.PASS
                 result.responseObject = createMap(out.toString())
-                if(result.responseObject==null)
-                    result.responseObject=[response:out.toString()]  // Used when setting rather than reading values.
+                if (result.responseObject == null)
+                    result.responseObject = [response: out.toString()]  // Used when setting rather than reading values.
             } else {
                 logService.cam.error("API [${uri}] request failed to [${address}]. Error message: ${out.toString()}")
-                result.status =result.status
+                result.status = result.status
                 result.responseCode = conn.getResponseCode()
                 result.errorMsg = out.toString()
             }
@@ -127,14 +130,14 @@ class RestfulInterfaceService {
         finally {
             if (conn && conn.getErrorStream()) {
                 conn.getErrorStream().close()
+                if (is) {
+                    is.close()
+                }
+                if (inp) {
+                    inp.close()
+                }
+                conn.disconnect()
             }
-            if (is) {
-                is.close()
-            }
-            if (inp) {
-                inp.close()
-            }
-            conn.disconnect()
         }
         return result
     }
@@ -148,8 +151,7 @@ class RestfulInterfaceService {
      */
     private static def createMap(String valueList) {
         CameraParams cp = null
-        if(valueList.contains("\r\n"))
-        {
+        if (valueList.contains("\r\n")) {
             cp = new CameraParams()
             String[] params = valueList.split("\r\n")
             params.each { val ->

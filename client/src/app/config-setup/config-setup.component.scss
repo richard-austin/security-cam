@@ -122,7 +122,7 @@ td, th {
 
 button.change-password-button {
   position: relative;
-  top: -0.4rem;
+  top: 0;
 }
 
 div.password-dialogue {
@@ -210,9 +210,10 @@ mat-icon.sort-button-icon {
   font-size: 18px;
 }
 
-.no-camera-credentials {
+.no-credentials {
   animation: pulsing 1300ms infinite;
 }
+
 @keyframes pulsing {
   0% {
     color: #800;

@@ -1,16 +1,68 @@
 package main
 
 import (
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 )
 
-func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
+type Credentials struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+/*
+ * getCredentials: Get the camera credentials from the encrypted string cred in the camera data.
+ * Private key generated like this: -
+ *	openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -pkeyopt rsa_keygen_pubexp:65537 | openssl pkcs8 -topk8 -nocrypt -outform der > /etc/security-cam/id_rsa
+ *
+ * And the public key is created from that with: -
+ *	openssl pkey -pubout -inform der -outform der -in /etc/security-cam/id_rsa -out rsa-2048-public-key.spki
+ *
+ * And the base64 format used in the encryption.ts on the client is created with: -
+ * cat rsa-2048-public-key.spki | base64
+ */
+func getCredentials(cam Camera) (err error, credentials Credentials) {
+	bytes, err := os.ReadFile(config.PrivateKeyPath)
+	if err != nil {
+		log.Errorf("Error in getCredentials reading private key (%s)", err.Error())
+		return
+	}
+	str := base64.StdEncoding.EncodeToString(bytes)
+	privateKeyBlock, _ := pem.Decode([]byte("-----BEGIN PRIVATE KEY-----\n" + str + "\n-----END PRIVATE KEY-----"))
+	get, err := x509.ParsePKCS8PrivateKey(privateKeyBlock.Bytes)
+	if err != nil {
+		log.Errorf("Error in getCredentials parsing private key (%s)", err.Error())
+		return
+	}
+	pk := get.(*rsa.PrivateKey) // Cast to type that rsa.DecryptOAEP can use
+	encrypted, _ := base64.StdEncoding.DecodeString(cam.Cred)
+	if len(encrypted) > 0 {
+		decryptedData, err := rsa.DecryptOAEP(sha256.New(), nil, pk, encrypted, nil)
+		if err != nil {
+			log.Errorf("Decrypt data error in getCredentials: %s", err.Error())
+			panic(err)
+		}
+		err = json.Unmarshal(decryptedData, &credentials)
+		if err != nil {
+			log.Errorf("Error unmarshalling JSON in getCredentials: %s", err.Error())
+			panic(err)
+		}
+	}
+	return
+}
+func ffmpegFeed(config *Config, cameras *Cameras) {
 	go cleanLogs()
 	path, _ := filepath.Split(config.LogPath)
 	for _, camera := range cameras.Cameras {
@@ -27,19 +79,18 @@ func ffmpegFeed(config *Config, cameras *Cameras, creds *CameraCredentials) {
 						audio = "-c:a aac" //Don't use copy when source is AAC, it caused errors in the MSE media element
 					}
 
-					// Currently the development machine has ffmpeg version 5.1.2-3, while live has version 4.4.2-0.
-					// 5
-					//.1.2-3 does not support the -stimeout parameter for rtsp. Until the versions are in line again
-					// only use -stimer for live and not dev.
 					var stimeout string = "-stimeout 1000000 "
 					uri := stream.NetcamUri
 					rtspTransport := camera.RtspTransport
 
 					if camera.UseRtspAuth { // Use credentials if required
+						_, creds := getCredentials(camera)
 						idx := len("rtsp://")
-						uri = uri[:idx] + url.QueryEscape(creds.CamerasAdminUserName) + ":" + url.QueryEscape(creds.CamerasAdminPassword) + "@" + uri[idx:]
+						uri = uri[:idx] + url.QueryEscape(creds.UserName) + ":" + url.QueryEscape(creds.Password) + "@" + uri[idx:]
 					}
-
+					// Using ffmpeg version 4.4.4 (built on a Raspberry pi and deployed by the .deb file) as versions 5+ don't
+					//  work with RTSP streams with no time stamps when producing fragmented mp4 with audio. All my cameras
+					//  omit to set time stamps so this is my solution for now.
 					cmdStr := fmt.Sprintf("/usr/local/bin/ffmpeg -loglevel warning -hide_banner %s-fflags nobuffer -rtsp_transport %s -i  %s -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_size 10 -f mp4 %s", stimeout, rtspTransport, uri, audio, stream.MediaServerInputUri)
 					cmdStr += " 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log"
 					cmd := exec.Command("bash", "-c", cmdStr)

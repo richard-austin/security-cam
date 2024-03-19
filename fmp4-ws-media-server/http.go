@@ -60,7 +60,7 @@ func ReadBox(readCloser io.ReadCloser, data []byte, queue chan Packet) (numOfByt
 	return
 }
 
-func serveHTTP() {
+func serveHTTP(cameras *Cameras) {
 	router := gin.Default()
 	gin.SetMode(gin.DebugMode)
 	router.LoadHTMLFiles("web/index.gohtml")
@@ -102,14 +102,12 @@ func serveHTTP() {
 			log.Errorf("Cannot add %s, there is already an existing stream with that id", suuid)
 			return
 		}
-
 		log.Infof("Input connected for %s", suuid)
 		readCloser := req.Body
 
 		streams.addStream(suuid)
 		defer streams.removeStream(suuid)
 
-		// TODO: Need to find the most efficient way to get a clean buffer
 		data := make([]byte, 33000)
 		queue := make(chan Packet, 1)
 
@@ -186,70 +184,48 @@ func serveHTTP() {
 		log.Errorln(err)
 	}
 }
-
 func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	defer func() { r.Close = true }()
 	suuid := r.FormValue("suuid")
 
-	log.Infof("Request %s", suuid)
-	cuuid, ch := streams.addClient(suuid)
-	if ch == nil {
-		return
-	}
-	log.Infof("number of cuuid's = %d", len(streams.StreamMap[suuid].PcktStreams))
-	defer streams.deleteClient(suuid, cuuid)
-
+	log.Infof("http Request %s", suuid)
 	err, data := streams.getFtyp(suuid)
 	if err != nil {
 		log.Errorf("Error getting ftyp: %s", err.Error())
 		return
 	}
-	bytes, err := w.Write(data.pckt)
+	nBytes, err := w.Write(data.pckt)
 	if err != nil {
 		log.Errorf("Error writing ftyp: %s", err.Error())
 		return
 	}
-	log.Tracef("Sent ftyp through http to %s:- %d bytes", suuid, bytes)
+	log.Tracef("Sent ftyp through http to %s:- %d nBytes", suuid, nBytes)
 
 	err, data = streams.getMoov(suuid)
 	if err != nil {
 		log.Errorf("Error getting moov: %s", err.Error())
 		return
 	}
-	bytes, err = w.Write(data.pckt)
+	nBytes, err = w.Write(data.pckt)
 	if err != nil {
 		log.Errorf("Error writing moov: %s", err.Error())
 		return
 	}
-	log.Tracef("Sent moov through http to %s:- %d bytes", suuid, bytes)
+	log.Tracef("Sent moov through http to %s:- %d nBytes", suuid, nBytes)
 
-	started := false
 	stream := streams.StreamMap[suuid]
-	gopCache := stream.gopCache.GetCurrent()
-	gopCacheUsed := stream.gopCache.GopCacheUsed
+	bb := stream.bucketBrigade.GetFeeder()
+	defer stream.bucketBrigade.DestroyFeeder(bb)
 	for {
 		var data Packet
-
-		if gopCacheUsed {
-			data = gopCache.Get(ch)
-			started = true
-		} else {
-			data = <-ch
-			if !started {
-				if data.isKeyFrame() {
-					started = true
-				} else {
-					continue
-				}
-			}
-		}
+		data = bb.Get()
 		bytes, err := w.Write(data.pckt)
 		if err != nil {
 			// Warning only as it could be because the client disconnected
 			log.Warnf("writing to client for %s:= %s", suuid, err.Error())
 			break
 		}
-		log.Tracef("Data sent to http client for %s:- %d bytes", suuid, bytes)
+		log.Tracef("Data sent to http client for %s:- %d nBytes", suuid, bytes)
 	}
 }
 
@@ -262,7 +238,7 @@ func ws(ws *websocket.Conn) {
 	}()
 	suuid := ws.Request().FormValue("suuid")
 
-	log.Infof("Request %s", suuid)
+	log.Infof("ws Request %s", suuid)
 	err := ws.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	if err != nil {
 		log.Errorf("Error in SetWriteDeadline %s", err.Error())
@@ -323,7 +299,7 @@ func ws(ws *websocket.Conn) {
 	}()
 
 	stream := streams.StreamMap[suuid]
-	gopCache := stream.gopCache.GetCurrent()
+	gopCache := stream.gopCache.GetSnapshot()
 	gopCacheUsed := stream.gopCache.GopCacheUsed
 	// Main loop to send moof and mdat atoms
 	started := false

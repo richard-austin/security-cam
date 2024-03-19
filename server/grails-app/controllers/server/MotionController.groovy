@@ -1,5 +1,6 @@
 package server
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.internal.LinkedHashTreeMap
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -11,6 +12,7 @@ import security.cam.commands.GetMotionEventsCommand
 import security.cam.MotionService
 import security.cam.ValidationErrorService
 import security.cam.enums.PassFail
+import security.cam.interfaceobjects.Asymmetric
 import security.cam.interfaceobjects.ObjectCommandResponse
 
 import java.nio.file.Files
@@ -49,6 +51,7 @@ class Stream {
     Integer audio_sample_rate = 0
     String media_server_input_uri=''
     Motion motion=new Motion()
+    Integer preambleFrames = 100
     Integer video_width=0
     Integer video_height=0
     Recording recording=new Recording()
@@ -64,11 +67,17 @@ class CameraParamSpecs {
     String name
 }
 
+class CameraAdminCredentials
+{
+    String userName = ""
+    String password = ""
+}
+
 class Camera {
     String name=''
     String address=''
     CameraParamSpecs cameraParamSpecs = null
-    boolean ftp = false
+    String ftp = "none"
     String snapshotUri=''
     boolean ptzControls = false
     Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
@@ -77,6 +86,16 @@ class Camera {
     String rtspTransport = "tcp"
     boolean useRtspAuth = false
     int retriggerWindow = 30
+    String cred = ""
+    CameraAdminCredentials credentials() {
+        Asymmetric crypto = new Asymmetric()
+        String jsonCreds = crypto.decrypt(cred)
+        ObjectMapper mapper = new ObjectMapper()
+        if (jsonCreds.length() > 0)
+            return mapper.readValue(jsonCreds, CameraAdminCredentials.class)
+        else
+            return new CameraAdminCredentials()
+    }
 }
 
 class MotionController {

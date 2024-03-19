@@ -9,15 +9,6 @@ mv /tmp/tomcat-users.xml /etc/tomcat9
 mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
 mv /tmp/cua.war /var/lib/tomcat9/webapps/cua.war
 
-# Make sure there is a cameraCredentials.json file present. If there is one, don't overwrite it with the default.
-if [[ ! -f /var/security-cam/cameraCredentials.json ]]
-then
-  mv /tmp/cameraCredentials.json /var/security-cam
-  chown tomcat:tomcat /var/security-cam/cameraCredentials.json
-else
-  rm /tmp/cameraCredentials.json
-fi
-
 rm -rf /var/lib/tomcat9/webapps/ROOT
 rm -rf /var/lib/tomcat9/webapps/cua
 
@@ -66,8 +57,6 @@ chown tomcat:security-cam /var/lib/tomcat
 
 # Make the following scripts executable
 chmod +x /etc/security-cam/install-cert.sh
-chmod +x /etc/security-cam/start_hd_recording.sh || true
-chmod +x /etc/security-cam/end_hd_recording.sh || true
 chmod +x /etc/security-cam/processmotionrecordings.sh || true
 chmod +x /etc/security-cam/productKeyGen.sh || true
 
@@ -144,6 +133,20 @@ deb-systemd-invoke start chrony
 deb-systemd-invoke enable tomcat9.service
 deb-systemd-invoke start tomcat9.service
 
+
 # Generate the product key if it does not already exist
 cd /etc/security-cam/ || exit
 ./productKeyGen.sh
+
+# Generate the key pair for camera credentials encryption/decryption if they don't already exist
+PRIVATE_KEY=/etc/security-cam/id_rsa
+if [ ! -f "$PRIVATE_KEY" ]; then
+  cd /etc/security-cam/ || exit
+  # Generate private key
+  openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -pkeyopt rsa_keygen_pubexp:65537 | openssl pkcs8 -topk8 -nocrypt -outform der > /etc/security-cam/id_rsa
+  # Generate the public key from the private key
+  openssl pkey -pubout -inform der -outform der -in /etc/security-cam/id_rsa -out /etc/security-cam/id_rsa.pub
+  chown tomcat:security-cam /etc/security-cam/id_rsa
+  chown tomcat:security-cam /etc/security-cam/id_rsa.pub
+fi
+

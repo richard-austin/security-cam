@@ -1,20 +1,50 @@
-video.video {
-  @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px) {
-    width: 700px;
+@mixin common-characteristics {
+  width: fit-content;
+  @media handheld and (min-device-width: 900px), handheld and (orientation: landscape), screen and (min-width: 900px) {
+    border: 0.25rem solid darkblue;
+    border-right-color: #3939f3;
+    border-bottom-color: #3939f3;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
-  @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
-    width: 900px;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+div.video {
+  video {
+    max-width: 100dvw;
+    max-height: 100dvh;
+    @media handheld and (min-device-width: 800px), screen and (min-width: 800px) and (min-height: 400px){
+      width: 700px;
+    }
+    @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) and (min-height: 700px) {
+      width: 900px;
+    }
+    @media handheld and (min-device-width: 1500px), screen and (min-width: 1500px) and (min-height: 900px) {
+      width: 1200px;
+    }
   }
-  border: 0.25rem solid darkblue;
-  border-right-color: #3939f3;
-  border-bottom-color: #3939f3;
-  margin-left: 1.5rem;
-  margin-right: 1.5rem;
+
+  @include common-characteristics;
+}
+
+.video-and-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 // Smaller video size in multi display
-video.multi {
-  max-width: 700px;
+div.multi {
+  > video {
+    max-width: 100dvw;
+    max-height: 100dvh;
+    @media handheld and (min-device-width: 800px), screen and (min-width: 800px) and (min-height: 400px){
+      width: 700px;
+    }
+  }
+  @include common-characteristics;
 }
 
 .mx-auto {
@@ -34,6 +64,7 @@ video.multi {
 div.latency-limit-selector {
   display: flex;
   justify-content: center;
+  white-space: nowrap;
 
   > div {
     height: 25px;
@@ -48,19 +79,23 @@ div.latency-limit-selector {
     display: block;
     position: relative;
     top: -5px;
+
     > label {
       > mat-icon {
         padding-left: 0.2rem;
       }
-     }
+    }
+
     > label {
       margin-right: 5px;
       position: relative;
       top: 1px;
+
       > mat-icon {
         color: white;
       }
     }
+
     > select {
       color: white;
       background-color: #2d2d2d;
@@ -73,15 +108,18 @@ div.latency-limit-selector {
 
 .audio-out-disabled {
   color: gray !important;
+  cursor: pointer;
 }
 
 .audio-out-inactive {
   color: white !important;
+  cursor: pointer;
 }
 
 .audio-out-active {
   animation: pulsing 1300ms infinite;
 }
+
 @keyframes pulsing {
   0% {
     color: #800;
@@ -105,8 +143,19 @@ div.latency-limit-selector {
     color: #650303;
   }
 }
+
+span.vid-time {
+  font-size: medium;
+  color: #c7cef3;
+}
+span.duration-time {
+  font-size: medium;
+  color: #858585;
+}
+
 .latency-chasing {
   > mat-icon {
-    animation:  flash 2000ms steps(3, start) forwards;
+    animation: flash 2000ms steps(3, start) forwards;
   }
 }
+

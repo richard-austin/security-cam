@@ -1,5 +1,5 @@
-<mat-card *ngIf="!embedded &&(error || success || warning)"
-          [ngClass]="{'alert-danger': error, 'alert-success': success, 'alert-warning': warning}"
+<mat-card *ngIf="!embedded &&(error || success || warning || htmlWarning)"
+          [ngClass]="{'alert-danger': error, 'alert-success': success, 'alert-warning': warning || htmlWarning}"
           class="reporting mat-elevation-z8">
   <div *ngIf="success">
     Success: {{success}}
@@ -13,6 +13,7 @@
   <div *ngIf="warning">
     {{warning}}
   </div>
+  <div *ngIf="htmlWarning" [innerHTML]="htmlWarning | safeHtml"></div>
   <div *ngIf="!success && error?.status != 400">
     <div *ngIf="error !== undefined && error?.status !== undefined && error?.status != 0">Error
       status: {{error?.status}}</div>

@@ -175,7 +175,7 @@ class RtspClient {
                 proc.waitFor()
             }
         }
-        ch.close().sync()
+        ch?.close()?.sync()
         workerGroup.shutdownGracefully()
     }
 }

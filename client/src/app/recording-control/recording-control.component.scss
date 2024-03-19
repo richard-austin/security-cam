@@ -11,7 +11,6 @@ div.flex-container {
 div.buttons-flex-container {
   display: flex;
   flex-wrap: nowrap;
-  width: available;
   justify-content: center;
   margin-top: 0.8rem;
 }
@@ -27,7 +26,8 @@ mat-icon.faster-forward {
 
 mat-card.recording-buttons {
   padding: 0.4rem;
-  > mat-button-toggle-group > button{
+
+  > mat-button-toggle-group > button {
     min-width: 0;
     border-right: .2px solid #646363;
     border-radius: 0;
@@ -36,25 +36,45 @@ mat-card.recording-buttons {
   }
 }
 
+div.additional-buttons {
+  margin-top: 0.3rem;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 div.no-display {
   display: none;
 }
 
-div.delete-button-set
-{
-    > div
-    {
-        button{
-          margin-top: 0.4rem;
-          margin-right: 0.4rem;
-        }
+div.delete-button-set {
+  > div {
+    button {
+      margin-top: 0.4rem;
+      margin-right: 0.4rem;
     }
+  }
 }
 
-div.download-button
-{
-  >button{
+div.download-button {
+  > button {
     width: 167.38px;
   }
+
   margin-top: 0.4rem;
+}
+
+div.recording-container {
+  > mat-card {
+    margin-left: 0.5rem;
+    margin-right: 1rem;
+  }
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  > div {
+    margin-right: auto;
+    margin-left: auto;
+  }
 }
