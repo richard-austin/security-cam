@@ -30,9 +30,6 @@ cp ../wifimanagement.service  security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../camera-recordings.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../fmp4-ws-media-server.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 
-mkdir -p security-cam_"${VERSION}"_arm64/usr/local/bin
-cp ../ffmpeg-v4.4.4/ffmpeg security-cam_"${VERSION}"_arm64/usr/local/bin
-
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
 
