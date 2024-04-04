@@ -169,15 +169,8 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                         logService.getCam().trace("handleClientRequest: Ready to read device response");
                         while (server.isOpen() && (server.read(reply)) != -1) {
                             reply.flip();
-                            AtomicReference<ByteBuffer> arNoXFrame = new AtomicReference<>();
                             // Only set the session cookie if it's not already set
                             if (++pass == 1) {
-                                if (camType.get() == none) {
-                                    if (removeHeader(reply, arNoXFrame, "X-Frame-Options"))
-                                        reply = arNoXFrame.get();
-                                    if (removeHeader(reply, arNoXFrame, "X-Xss-Protection"))
-                                        reply = arNoXFrame.get();
-                                }
                                 if (!accessDetails.get().getHasCookie()) {
                                     AtomicReference<ByteBuffer> arReply = new AtomicReference<>();
                                     if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + accessDetails.get().getAccessToken() + "; path=/; HttpOnly"))
