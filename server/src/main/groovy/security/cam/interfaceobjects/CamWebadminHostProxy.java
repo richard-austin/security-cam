@@ -75,6 +75,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                 // client, disconnect, and continue waiting for connections.
                 try {
                     SocketChannel server = SocketChannel.open();
+                    server.socket().setReceiveBufferSize(BUFFER_SIZE);
                     //server.configureBlocking(true);
                     final AtomicReference<AccessDetails> accessDetails = new AtomicReference<>();
                     final AtomicReference<ByteBuffer> updatedReq = new AtomicReference<>();
@@ -101,12 +102,12 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                         server.connect(new InetSocketAddress(ad.cameraHost, ad.cameraPort));
                                     } else
                                         logService.getCam().error("No accessToken found for request");
+                                    AtomicReference<ByteBuffer> newReq = new AtomicReference<>();
+                                    if (modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost)) {
+                                        request = newReq.get();
+                                    }
                                 }
                                 logService.getCam().trace("pass = " + pass);
-                                AtomicReference<ByteBuffer> newReq = new AtomicReference<>();
-                                if (modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost)) {
-                                    request = newReq.get();
-                                }
                                 int bytesWritten = 0;
                                 long serverPass = 0;
 
@@ -168,15 +169,8 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                         logService.getCam().trace("handleClientRequest: Ready to read device response");
                         while (server.isOpen() && (server.read(reply)) != -1) {
                             reply.flip();
-                            AtomicReference<ByteBuffer> arNoXFrame = new AtomicReference<>();
                             // Only set the session cookie if it's not already set
                             if (++pass == 1) {
-                                if (camType.get() == none) {
-                                    if (removeHeader(reply, arNoXFrame, "X-Frame-Options"))
-                                        reply = arNoXFrame.get();
-                                    if (removeHeader(reply, arNoXFrame, "X-Xss-Protection"))
-                                        reply = arNoXFrame.get();
-                                }
                                 if (!accessDetails.get().getHasCookie()) {
                                     AtomicReference<ByteBuffer> arReply = new AtomicReference<>();
                                     if (addHeader(reply, arReply, "Set-cookie", "SESSION-ID=" + accessDetails.get().getAccessToken() + "; path=/; HttpOnly"))
