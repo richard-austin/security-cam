@@ -18,8 +18,8 @@ public class HeaderProcessing {
     final byte[] colonSpace = {':', ' '};
     final private Queue<ByteBuffer> bufferQueue = new ConcurrentLinkedQueue<>();
     final private Queue<ByteBuffer> largerBufferQueue = new ConcurrentLinkedQueue<>();
-    public final int BUFFER_SIZE = 6000;
-    public final int LARGER_BUFFER_SIZE = 7500;  // Extra space for addHeader to slip in headers
+    public final int BUFFER_SIZE = 32768;
+    public final int LARGER_BUFFER_SIZE = 36000;  // Extra space for addHeader to slip in headers
     protected ILogService logService;
 
     protected HeaderProcessing(ILogService logService) {
