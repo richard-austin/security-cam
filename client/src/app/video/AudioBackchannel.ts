@@ -143,9 +143,9 @@ export class AudioBackchannel {
   }
 
   beginStopAudioOut() {
-    // 500 + timeForStartAudioOutResponse seconds delay on stopping to allow for the latency in the audio and prevent
+    // 1000 + timeForStartAudioOutResponse milliseconds delay on stopping to allow for the latency in the audio and prevent
     //  the end of the speech getting cut off
-    let timerSubscription = timer(500+this.timeForStartAudioOutResponse).subscribe(() => {
+    let timerSubscription = timer(1000+this.timeForStartAudioOutResponse).subscribe(() => {
       this.video.muted = false;
       this.stopAudioOut();
       timerSubscription.unsubscribe();
