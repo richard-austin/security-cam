@@ -77,14 +77,14 @@ export class AudioBackchannel {
           alert('vp8/opus mime type is not supported');
           return;
         }
-        const options = {
-          audioBitsPerSecond: 48000,
-          mimeType,
-        }
+        // const options = {
+        //   audioBitsPerSecond: 48000,
+        //   mimeType,
+        // }
 
-        const ff = navigator.userAgent.search("Firefox");
+       // const ff = navigator.userAgent.search("Firefox");
         // @ts-ignore
-        this.recorder = new MediaRecorder(stream, ff == -1 ? options : undefined);
+        this.recorder = new MediaRecorder(stream);
           // fires every one second and passes a BlobEvent
           this.recorder.ondataavailable = (event: any) => {
             // get the Blob from the event
@@ -143,9 +143,9 @@ export class AudioBackchannel {
   }
 
   beginStopAudioOut() {
-    // 1.6 second plus timeForStartAudioOutResponse delay on stopping to allow for the latency in the audio and prevent
-    //  the end of the speech getting get cut off
-    let timerSubscription = timer(1600 + this.timeForStartAudioOutResponse).subscribe(() => {
+    // 500 + timeForStartAudioOutResponse seconds delay on stopping to allow for the latency in the audio and prevent
+    //  the end of the speech getting cut off
+    let timerSubscription = timer(500+this.timeForStartAudioOutResponse).subscribe(() => {
       this.video.muted = false;
       this.stopAudioOut();
       timerSubscription.unsubscribe();
