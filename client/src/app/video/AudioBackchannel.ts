@@ -82,25 +82,26 @@ export class AudioBackchannel {
           mimeType,
         }
 
+        const ff = navigator.userAgent.search("Firefox");
         // @ts-ignore
-        this.recorder = new MediaRecorder(stream, options);
-        // fires every one second and passes a BlobEvent
-        this.recorder.ondataavailable = (event: any) => {
-          // get the Blob from the event
-          const blob: Blob = event.data;
-          blob.arrayBuffer().then((buff) => {
-            let data = new Uint8Array(buff);
+        this.recorder = new MediaRecorder(stream, ff == -1 ? options : undefined);
+          // fires every one second and passes a BlobEvent
+          this.recorder.ondataavailable = (event: any) => {
+            // get the Blob from the event
+            const blob: Blob = event.data;
+            blob.arrayBuffer().then((buff) => {
+              let data = new Uint8Array(buff);
 
-            if (data.length > 0) {
-              // and send that blob to the server...
-              this.client.publish({
-                destination: '/app/audio',
-                binaryBody: data,
-                headers: {"content-type": "application/octet-stream"}
-              });
-            }
-          });
-        };
+              if (data.length > 0) {
+                // and send that blob to the server...
+                this.client.publish({
+                  destination: '/app/audio',
+                  binaryBody: data,
+                  headers: {"content-type": "application/octet-stream"}
+                });
+              }
+            });
+          };
 
         this.recorder.onstop = () => {
           this.recorder.ondataavailable = null;
