@@ -35,6 +35,25 @@ chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent 
 chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
 chown tomcat:tomcat /var/lib/tomcat9/webapps/cua.war
 
+# Create the client keystore for connection to the Cloud server
+MQ_CREDS_FILE=/etc/security-cam/cloud-creds.json
+if ! test -f "$MQ_CREDS_FILE"; then
+  kspassword_client=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 40)
+  keytool -genkey -alias client -dname "cn=NVR USER, ou=Private, o=Private, c=Unknown st=Unknown" -keypass "$kspassword_client" -storepass "$kspassword_client" -keyalg RSA -keystore /etc/security-cam/client.ks
+  chown tomcat:tomcat /etc/security-cam/client.ks
+  chmod 400 /etc/security-cam/client.ks
+  cat > $MQ_CREDS_FILE << EOF
+{
+   "mqClientKSPath": "/etc/security-cam/client.ks",
+   "mqClientKSPW": "${kspassword_client}",
+   "mqUser": "cloud",
+   "mqPw": "inelESOLsiONgeOuShEFatIns"
+}
+EOF
+  chmod 400 $MQ_CREDS_FILE
+  chown tomcat:tomcat $MQ_CREDS_FILE
+fi
+
 chmod 640 /etc/tomcat9/tomcat-users.xml
 chown root:tomcat /etc/tomcat9/tomcat-users.xml
 chmod 640 /etc/tomcat9/server.xml

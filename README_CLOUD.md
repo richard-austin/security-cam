@@ -79,12 +79,6 @@ Cloud service. Camera web admin pages are not accessible through the Cloud Servi
 | *Parameter*                | Description                                                                                                                        |
 |----------------------------|------------------------------------------------------------------------------------------------------------------------------------|
 | enabled                    | CloudProxy will run if true (and CloudProxy status is enabled on the NVR General menu)                                             |
-| mqTrustStorePath **        | Path to the trust store which contains the ActiveMQ servers certificate                                                            |
-| mqKeyStorePath **          | Path the the ActiveMQ client key store                                                                                             |
-| mqTrustStorePassword *     | Password for the trust store                                                                                                       |
-| mqKeyStorePassword *       | Password for the keystore                                                                                                          |
-| mqUser *                   | ActiveMQ user name                                                                                                                 |
-| mqPassword *               | ActiveMQ password                                                                                                                  |
 | productKeyPath             | Path to the file containing the encrypted NVR Product key                                                                          |
 | cloudActiveMQUrl           | Url to the ActiveMQ service that the NVRs and the Cloud server connect to. This should begin with failover://ssl:                  |
 | activeMQInitQueue          | The name of the queue in ActiveMQ through which connections are initiated. This must be the same on all NVRs and the Cloud server. |
