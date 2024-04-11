@@ -196,10 +196,6 @@ environments:
 
     cloudProxy:
       enabled: false
-      mqKeyStorePath: /etc/security-cam/client.ks
-      mqKeyStorePassword: ExPEThINdAvAmpROteRCLEyfI
-      mqUser: cloud
-      mqPassword: inelESOLsiONgeOuShEFatIns
       productKeyPath: /etc/security-cam/prodKey
       cloudActiveMQUrl: ssl://192.168.1.83:61617?socket.verifyHostName=false
       activeMQInitQueue: INIT
