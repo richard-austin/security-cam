@@ -26,13 +26,15 @@ import {MatDividerModule} from '@angular/material/divider';
 import {LayoutModule} from '@angular/cdk/layout';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { SetupSMTPClientComponent } from './setup-smtpclient/setup-smtpclient.component';
+import { ActivemqCredentialsComponent } from './activemq-credentials/activemq-credentials.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         RegisterLocalNvrAccountComponent,
         ReportingComponent,
-        SetupSMTPClientComponent
+        SetupSMTPClientComponent,
+        ActivemqCredentialsComponent
     ],
     imports: [
         CommonModule,

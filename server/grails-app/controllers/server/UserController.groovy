@@ -90,7 +90,7 @@ class UserController {
     /**
      * createOrUpdateAccountLocally: Unsecured to enable account creation without being logged in.
      *                       nginx requires a session to allow access to this url to prevent
-     *                       unauthenticated external access. It is accessed locally tomcats port 8080.
+     *                       unauthenticated external access. It is accessed locally on tomcats port 8080.
      *
      * @param cmd: Contains username, password, email, updateExisting
      */
@@ -111,6 +111,15 @@ class UserController {
         }
         else
             hasLocalAccount()
+    }
+    def checkForActiveMQCreds(CheckNotGuestCommand cmd) {
+        if(cmd.hasErrors()) {  // Just checking user is not guest here
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
+            logService.cam.error "checkForActiveMQCreds: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else
+            hasActiveMQCreds()
     }
 
     @Secured(['ROLE_CLOUD'])
@@ -136,6 +145,18 @@ class UserController {
             render(status: 500, text: result.error)
         } else {
             logService.cam.info("hasLocalAccount: (= ${result.responseObject}) success")
+            render(text: result.responseObject) as JSON
+        }
+    }
+
+    @Secured(['ROLE_CLOUD', 'ROLE_CLIENT'])
+    def hasActiveMQCreds() {
+        ObjectCommandResponse result = userAdminService.hasActiveMQCreds()
+
+        if (result.status != PassFail.PASS) {
+            render(status: 500, text: result.error)
+        } else {
+            logService.cam.info("hasActiveMQCreds: (= ${result.responseObject}) success")
             render(text: result.responseObject) as JSON
         }
     }

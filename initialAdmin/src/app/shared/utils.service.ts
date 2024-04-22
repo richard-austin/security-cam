@@ -86,7 +86,12 @@ export class UtilsService {
   private _loggedIn: boolean = false;
   private _isAdmin: boolean = false;
   private _hasLocalAccount: boolean = false;
+  private _hasActiveMQCreds!: boolean;
   public readonly passwordRegex: RegExp = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/);
+
+  constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
+  }
+
 
   get loggedIn(): boolean {
     return this._loggedIn;
@@ -101,7 +106,8 @@ export class UtilsService {
     return this._hasLocalAccount;
   }
 
-  constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
+  get hasActiveMQCreds(): boolean {
+    return this._hasActiveMQCreds;
   }
 
   createOrUpdateLocalNVRAccount(username: string, password: string, confirmPassword: string, email: string, confirmEmail: string, updateExisting: boolean = false) : Observable<void> {
@@ -119,6 +125,19 @@ export class UtilsService {
     );
   }
 
+  createOrUpdateActiveMQAccount(username: string, password: string, confirmPassword: string, updateExisting: boolean = false) : Observable<void> {
+    let details: { username: string, password: string, confirmPassword: string, updateExisting: boolean} =
+      {
+        username: username,
+        password: password,
+        confirmPassword: confirmPassword,
+        updateExisting: updateExisting
+      };
+    return this.http.post<void>(this._baseUrl.getLink("user", "createOrUpdateActiveMQAccount"), details, this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
+
   checkForAccountLocally() : Observable<boolean> {
     return this.http.post<boolean>(this._baseUrl.getLink("user", "checkForAccountLocally"), "", this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
@@ -127,6 +146,16 @@ export class UtilsService {
 
   setupSMTPClientLocally(smtpData: SMTPData) {
     return this.http.post<boolean>(this._baseUrl.getLink("utils", "setupSMTPClientLocally"), JSON.stringify(smtpData), this.httpJSONOptions);
+  }
+
+  checkForActiveMQCreds(): Observable<boolean> {
+    this._hasActiveMQCreds = false;
+    return this.http.post<boolean>(this._baseUrl.getLink('user', 'checkForActiveMQCreds'), '', this.httpJSONOptions).pipe(
+      tap((result) => {
+        this._hasActiveMQCreds = result;
+      }),
+      catchError((err: HttpErrorResponse) => throwError(err))
+    )
   }
 
   getSMTPClientParamsLocally() : Observable<SMTPData> {

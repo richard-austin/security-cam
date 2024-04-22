@@ -19,7 +19,7 @@ public final class CloudProxyProperties {
     {
     }
 
-    static CloudProxyProperties getInstance()
+    public static CloudProxyProperties getInstance()
     {
         return theInstance;
     }
@@ -44,7 +44,7 @@ public final class CloudProxyProperties {
         Config config = grailsApplication.getConfig();
         try {
             Gson gson = new Gson();
-            json = gson.fromJson(new FileReader(config.toProperties().getProperty("appHomeDirectory")+"/cloud-creds.json"), JsonObject.class);
+            json = gson.fromJson(new FileReader(config.toProperties().getProperty("camerasHomeDirectory")+"/cloud-creds.json"), JsonObject.class);
         }
         catch(Exception ex) {
             throw new Exception("Error when getting Cloud credentials");

@@ -36,7 +36,7 @@ chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
 chown tomcat:tomcat /var/lib/tomcat9/webapps/cua.war
 
 # Create the client keystore for connection to the Cloud server via ActiveMQ
-MQ_CREDS_FILE=/etc/security-cam/cloud-creds.json
+MQ_CREDS_FILE=/var/security-cam/cloud-creds.json
 if ! test -f "$MQ_CREDS_FILE"; then
   kspassword_client=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 40)
   keytool -genkey -alias client -dname "cn=NVR USER, ou=Private, o=Private, c=Unknown st=Unknown" -keypass "$kspassword_client" -storepass "$kspassword_client" -keyalg RSA -keystore /etc/security-cam/client.ks
@@ -46,8 +46,8 @@ if ! test -f "$MQ_CREDS_FILE"; then
 {
    "mqClientKSPath": "/etc/security-cam/client.ks",
    "mqClientKSPW": "${kspassword_client}",
-   "mqUser": "cloud",
-   "mqPw": "dEDncM42caUwkbFk4CDx"
+   "mqUser": "",
+   "mqPw": ""
 }
 EOF
   chmod 400 $MQ_CREDS_FILE

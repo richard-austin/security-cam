@@ -1,5 +1,7 @@
 package security.cam
 
+import com.google.gson.JsonObject
+import com.proxy.CloudProxyProperties
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.grails.web.json.JSONObject
@@ -169,6 +171,20 @@ class UserAdminService {
         }
         catch (Exception ex) {
             logService.cam.error("Exception in hasLocalAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+    ObjectCommandResponse hasActiveMQCreds() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            CloudProxyProperties props = CloudProxyProperties.getInstance()
+            JsonObject creds = props.getCloudCreds()
+            result.responseObject = creds.get("mqUser").getAsString() != ""
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in hasActiveMQCreds: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }

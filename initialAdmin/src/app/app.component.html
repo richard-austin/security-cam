@@ -8,6 +8,9 @@
       <button (click)="setupSMTPClient()" mat-menu-item>
         Set Up SMTP Client
       </button>
+      <button *ngIf="!amqOff" (click)="registerActiveMQAccount()" mat-menu-item>
+        Create or Update ActiveMQ Account for Cloud Connection
+      </button>
     </mat-menu>
   </mat-card-content>
 </mat-card>
