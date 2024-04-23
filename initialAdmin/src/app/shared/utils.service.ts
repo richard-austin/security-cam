@@ -125,7 +125,7 @@ export class UtilsService {
     );
   }
 
-  createOrUpdateActiveMQAccount(username: string, password: string, confirmPassword: string, updateExisting: boolean = false) : Observable<void> {
+  addOrUpdateActiveMQCreds(username: string, password: string, confirmPassword: string, updateExisting: boolean = false) : Observable<void> {
     let details: { username: string, password: string, confirmPassword: string, updateExisting: boolean} =
       {
         username: username,
@@ -133,7 +133,7 @@ export class UtilsService {
         confirmPassword: confirmPassword,
         updateExisting: updateExisting
       };
-    return this.http.post<void>(this._baseUrl.getLink("user", "createOrUpdateActiveMQAccount"), details, this.httpJSONOptions).pipe(
+    return this.http.post<void>(this._baseUrl.getLink("user", "addOrUpdateActiveMQCreds"), details, this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
     );
   }

@@ -74,10 +74,10 @@ export class ActivemqCredentialsComponent implements OnInit{
 
     this.username = this.getFormControl('username').value;
 
-    this.utilsService.createOrUpdateActiveMQAccount(this.username, this.password, this.confirmPassword).subscribe(
+    this.utilsService.addOrUpdateActiveMQCreds(this.username, this.password, this.confirmPassword).subscribe(
       {complete: () => {
           this.utilsService.getHasLocalAccount();
-          this.reporting.successMessage = "Local client account " + (this.updateExisting ? " updated":" created") + " successfully"+ (this.updateExisting?" username now: "+this.username:"");
+          this.reporting.successMessage = "ActiveMQ client credentials " + (this.updateExisting ? " updated":" created") + " successfully"+ (this.updateExisting?" username now: "+this.username:"");
         },
         error: (reason) => {
           this.reporting.errorMessage = reason;

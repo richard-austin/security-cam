@@ -6,6 +6,7 @@ import grails.validation.ValidationErrors
 import security.cam.LogService
 import security.cam.UserAdminService
 import security.cam.ValidationErrorService
+import security.cam.commands.AddOrUpdateActiveMQCredsCmd
 import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CheckNotGuestCommand
 import security.cam.commands.CreateOrUpdateAccountCommand
@@ -120,6 +121,23 @@ class UserController {
         }
         else
             hasActiveMQCreds()
+    }
+
+    def addOrUpdateActiveMQCreds(AddOrUpdateActiveMQCredsCmd cmd) {
+        ObjectCommandResponse result
+        if (cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
+            logService.cam.error "addOrUpdateActiveMQCreds: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        } else {
+            result = userAdminService.addOrUpdateActiveMQCreds(cmd)
+            if (result.status != PassFail.PASS) {
+                render(status: 500, text: result.error)
+            } else {
+                logService.cam.info("addOrUpdateActiveMQCreds: success")
+                render ""
+            }
+        }
     }
 
     @Secured(['ROLE_CLOUD'])
