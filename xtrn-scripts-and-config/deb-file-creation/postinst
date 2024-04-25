@@ -47,7 +47,8 @@ if ! test -f "$MQ_CREDS_FILE"; then
    "mqClientKSPath": "/etc/security-cam/client.ks",
    "mqClientKSPW": "${kspassword_client}",
    "mqUser": "",
-   "mqPw": ""
+   "mqPw": "",
+   "mqHost: "192.168.1.82"
 }
 EOF
   chmod 440 $MQ_CREDS_FILE

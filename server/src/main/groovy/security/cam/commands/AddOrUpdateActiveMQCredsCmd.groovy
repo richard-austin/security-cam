@@ -8,28 +8,48 @@ class AddOrUpdateActiveMQCredsCmd implements Validateable {
     String username
     String password
     String confirmPassword
+    String mqHost
 
     UtilsService utilsService
     UserAdminService userAdminService
 
     static constraints = {
-        username(nullable: false, blank: false,
+        username(nullable: true, blank: true,
                 validator: { username, cmd ->
                     def response = cmd.userAdminService.isGuest()
                     if (response.responseObject.guestAccount)
                         return "Guest not authorised to administer ActiveMQ Credentials"
-
-                    if (!username.matches(cmd.utilsService.usernameRegex))
+                    if (username == null)
+                        username = cmd.username = ""
+                    if (!username.matches(cmd.utilsService.usernameRegex) && username != "")
                         return "Format or length of username is incorrect"
                 })
-        password(nullable: false, blank: false,
+        password(nullable: true, blank: true,
                 validator: { password, cmd ->
-                    if (!password.matches(cmd.utilsService.passwordRegex))
+                    if (password == null)
+                        password = cmd.password = ""
+                    if (!password.matches(cmd.utilsService.passwordRegex) && password != "")
                         return "Password is invalid"
+
+                    if(cmd.username == "" && password != "")
+                        return "Password must be blank if username is blank"
+                    else if (cmd.username != "" && password == "")
+                        return "Password cannot be blank if username is not blank"
                 })
-        confirmPassword(validator: { confirmPassword, cmd ->
-            if (confirmPassword != cmd.password)
-                return "Password and confirm password do not match"
-        })
+        confirmPassword(nullable: true, blank: true,
+                validator: { confirmPassword, cmd ->
+                    if (confirmPassword == null)
+                        confirmPassword = cmd.confirmPassword = ""
+                    if (confirmPassword != cmd.password)
+                        return "Password and confirm password do not match"
+                })
+        mqHost(nullable: false, blank: false,
+                validator: { mqHost, cmd ->
+                    if (!mqHost.matches(CameraParamsCommand.hostNameRegex) &&
+                            !mqHost.matches(CameraParamsCommand.ipV4RegEx) &&
+                            !mqHost.matches(CameraParamsCommand.ipV6RegEx)) {
+                        return "Host name is invalid"
+                    }
+                })
     }
 }

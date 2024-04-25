@@ -139,7 +139,7 @@ class UserAdminService {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             CloudProxyProperties props = CloudProxyProperties.getInstance()
-            props.setCloudCreds(cmd.username, cmd.password)
+            props.setCloudCreds(cmd.username, cmd.password, cmd.mqHost)
         }
         catch(Exception ex) {
             logService.cam.error("Exception in createAccount: " + ex.getCause() + ' ' + ex.getMessage())
@@ -196,7 +196,8 @@ class UserAdminService {
         try {
             CloudProxyProperties props = CloudProxyProperties.getInstance()
             JsonObject creds = props.getCloudCreds()
-            result.responseObject = creds.get("mqUser").getAsString() != ""
+            final String mqHost = creds.get("mqHost")?.getAsString()
+            result.responseObject = "{\"hasActiveMQCreds\": ${creds.get("mqUser").getAsString() != ""}, \"mqHost\": ${mqHost == null ? "\"<none>\"" : "\"$mqHost\""}}"
         }
         catch (Exception ex) {
             logService.cam.error("Exception in hasActiveMQCreds: " + ex.getCause() + ' ' + ex.getMessage())

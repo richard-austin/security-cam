@@ -8,7 +8,7 @@ import {ReportingComponent} from "../reporting/reporting.component";
   templateUrl: './activemq-credentials.component.html',
   styleUrls: ['./activemq-credentials.component.scss']
 })
-export class ActivemqCredentialsComponent implements OnInit{
+export class ActivemqCredentialsComponent implements OnInit {
   public title = ''
   buttonTitle!: string;
   error: boolean = false;
@@ -16,6 +16,7 @@ export class ActivemqCredentialsComponent implements OnInit{
   username: string = '';
   password: string = '';
   confirmPassword: string = '';
+  mqHost: string = "";
   updateExisting: boolean = false;
 
   @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
@@ -43,13 +44,24 @@ export class ActivemqCredentialsComponent implements OnInit{
     return (control: AbstractControl): ValidationErrors | null => {
       this.password = control.value;
       // Update the validation status of the confirmPassword field
-      if (this.confirmPassword !== "") {
+      if (this.cloudCredsForm !== undefined) {
         let cpControl: AbstractControl | null = this.cloudCredsForm.get("confirmPassword");
         cpControl?.updateValueAndValidity();
       }
+      const username = this.cloudCredsForm != undefined ? this.getFormControl('username').value : "";
+      const invalid = !this.utilsService.activeMQPasswordRegex.test(control.value) ||
+        (username == "" && this.password != "");
+      return invalid ? {pattern: {value: control.value}} : null;
+    };
+  }
 
-      const ok = !this.utilsService.passwordRegex.test(control.value);
-      return ok ? {pattern: {value: control.value}} : null;
+  mqHostValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      this.mqHost = control.value;
+      const invalid = !this.utilsService.hostNameRegex.test(control.value) &&
+        !this.utilsService.ipV4RegEx.test(control.value) &&
+        !this.utilsService.ipV6RegEx.test(control.value);
+      return invalid ? {invalidHost: {value: control.value}} : null;
     };
   }
 
@@ -74,22 +86,26 @@ export class ActivemqCredentialsComponent implements OnInit{
 
     this.username = this.getFormControl('username').value;
 
-    this.utilsService.addOrUpdateActiveMQCreds(this.username, this.password, this.confirmPassword).subscribe(
-      {complete: () => {
+    this.utilsService.addOrUpdateActiveMQCreds(this.username, this.password, this.confirmPassword, this.mqHost).subscribe(
+      {
+        complete: () => {
           this.utilsService.getHasLocalAccount();
-          this.reporting.successMessage = "ActiveMQ client credentials " + (this.updateExisting ? " updated":" created") + " successfully"+ (this.updateExisting?" username now: "+this.username:"");
+          this.reporting.successMessage = "ActiveMQ client credentials " + (this.updateExisting ? " updated" : " created") + " successfully" + (this.updateExisting ? " username now: " + this.username : "");
         },
         error: (reason) => {
           this.reporting.errorMessage = reason;
-        }});
+        }
+      });
   }
 
   checkForActiveMQACreds() {
     this.utilsService.checkForActiveMQCreds().subscribe({
-      next: (value: boolean) => {
-        this.updateExisting = value;
-        this.title = value ? "Update ActiveMQ Credentials" : "Enter ActiveMQ Credentials";
-        this.buttonTitle = value ? "Update Creds" : "Confirm Creds";
+      next: (value: { hasActiveMQCreds: boolean, mqHost: string }) => {
+        this.updateExisting = value.hasActiveMQCreds;
+        this.title = value.hasActiveMQCreds ? "Update ActiveMQ Credentials" : "Enter ActiveMQ Credentials";
+        this.buttonTitle = value.hasActiveMQCreds ? "Update Creds" : "Confirm Creds";
+        this.mqHost = value.mqHost;
+        this.getFormControl('mqHost').setValue(this.mqHost);
         this.error = false;
       },
       error: (reason) => {
@@ -103,9 +119,10 @@ export class ActivemqCredentialsComponent implements OnInit{
 
   ngOnInit(): void {
     this.cloudCredsForm = new FormGroup({
-      username: new FormControl(this.username, [Validators.required, Validators.maxLength(20), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
-      password: new FormControl(this.password, [Validators.required, Validators.maxLength(25), this.passwordValidator()]),
-      confirmPassword: new FormControl(this.confirmPassword, [Validators.required, Validators.maxLength(25), this.passwordMatchValidator()]),
+      username: new FormControl(this.username, [Validators.maxLength(20), Validators.pattern("^$|^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
+      password: new FormControl(this.password, [Validators.maxLength(20), this.passwordValidator()]),
+      confirmPassword: new FormControl(this.confirmPassword, [Validators.maxLength(20), this.passwordMatchValidator()]),
+      mqHost: new FormControl(this.mqHost, [Validators.required, Validators.maxLength(39), this.mqHostValidator()]),
     }, {updateOn: "change"});
 
     // Ensure camera form controls highlight immediately if invalid

@@ -126,7 +126,7 @@ class UserController {
     def addOrUpdateActiveMQCreds(AddOrUpdateActiveMQCredsCmd cmd) {
         ObjectCommandResponse result
         if (cmd.hasErrors()) {
-            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'addOrUpdateActiveMQCreds')
             logService.cam.error "addOrUpdateActiveMQCreds: Validation error: " + errorsMap.toString()
             render(status: 400, text: errorsMap as JSON)
         } else {
