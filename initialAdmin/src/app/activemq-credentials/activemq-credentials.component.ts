@@ -48,10 +48,9 @@ export class ActivemqCredentialsComponent implements OnInit {
         let cpControl: AbstractControl | null = this.cloudCredsForm.get("confirmPassword");
         cpControl?.updateValueAndValidity();
       }
-      const username = this.cloudCredsForm != undefined ? this.getFormControl('username').value : "";
-      const invalid = !this.utilsService.activeMQPasswordRegex.test(control.value) ||
-        (username == "" && this.password != "");
-      return invalid ? {pattern: {value: control.value}} : null;
+      let invalid = !this.utilsService.activeMQPasswordRegex.test(control.value);
+      let error: any = {pattern: {value: control.value}};
+      return invalid ? error : null;
     };
   }
 
@@ -73,6 +72,28 @@ export class ActivemqCredentialsComponent implements OnInit {
     };
   }
 
+  formValidator() : {} {
+    const retval: {valid: boolean,
+      fc: FormControl | undefined} = {valid: true, fc: undefined};
+
+    const password = this.getFormControl('password').value;
+    const username = this.getFormControl('username').value;
+
+    if(username === "" && password !== "") {
+      retval.valid = false;
+      retval.fc = this.getFormControl("username");
+      retval.fc.setErrors({emptyWithPassword: {value:"Nonempty Password"}});
+    }
+    else if(username !== "" && password === "") {
+      retval.valid = false;
+      retval.fc = this.getFormControl("password");
+      retval.fc.setErrors({emptyWithUsername: {value:"Nonempty username"}});
+    }
+    else
+      this.register();
+
+    return retval;
+  }
   confirmOnReturn($event: InputEvent) {
     // Ensure password field is up-to-date for the confirmPassword validity check
     this.password = this.getFormControl('password').value;
