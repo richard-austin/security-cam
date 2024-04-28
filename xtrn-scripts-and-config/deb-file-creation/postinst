@@ -48,7 +48,7 @@ if ! test -f "$MQ_CREDS_FILE"; then
    "mqClientKSPW": "${kspassword_client}",
    "mqUser": "",
    "mqPw": "",
-   "mqHost: "192.168.1.82"
+   "mqHost": "192.168.1.82"
 }
 EOF
   chmod 440 $MQ_CREDS_FILE
