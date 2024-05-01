@@ -123,6 +123,7 @@ environments:
       url: jdbc:h2:mem:devDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
 
     camerasHomeDirectory: /var/security-cam
+    appHomeDirectory: /etc/security-cam
     recordingsHomeDirectory: /var/security-cam
     myipFileLocation: /var/security-cam/myip
     logLevel: DEBUG
@@ -134,14 +135,8 @@ environments:
 
     cloudProxy:
       enabled: true
-      mqTrustStorePath: ../xtrn-scripts-and-config/client.ts
-      mqKeyStorePath: ../xtrn-scripts-and-config/client.ks
-      mqTrustStorePassword: CIdERVERiMPLetORThrONVAce
-      mqKeyStorePassword: ExPEThINdAvAmpROteRCLEyfI
-      mqUser: cloud
-      mqPassword: inelESOLsiONgeOuShEFatIns
       productKeyPath: /etc/security-cam/prodKey
-      cloudActiveMQUrl: ssl://192.168.1.82:61617?socket.verifyHostName=false
+      cloudActiveMQUrl: ssl://192.168.1.83:61617?socket.verifyHostName=false
       activeMQInitQueue: INIT
       webServerForCloudProxyHost: localhost
       webServerForCloudProxyPort: 8080
@@ -189,6 +184,7 @@ environments:
         defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
 
     camerasHomeDirectory: /var/security-cam
+    appHomeDirectory: /etc/security-cam
     recordingsHomeDirectory: /var/security-cam
     myipFileLocation: /var/security-cam/myip
     logLevel: DEBUG
@@ -200,14 +196,8 @@ environments:
 
     cloudProxy:
       enabled: false
-      mqTrustStorePath: /etc/security-cam/client.ts
-      mqKeyStorePath: /etc/security-cam/client.ks
-      mqTrustStorePassword: CIdERVERiMPLetORThrONVAce
-      mqKeyStorePassword: ExPEThINdAvAmpROteRCLEyfI
-      mqUser: cloud
-      mqPassword: inelESOLsiONgeOuShEFatIns
       productKeyPath: /etc/security-cam/prodKey
-      cloudActiveMQUrl: ssl://192.168.1.82:61617?socket.verifyHostName=false
+      cloudActiveMQUrl: ssl://192.168.1.83:61617?socket.verifyHostName=false
       activeMQInitQueue: INIT
       webServerForCloudProxyHost: localhost
       webServerForCloudProxyPort: 8088

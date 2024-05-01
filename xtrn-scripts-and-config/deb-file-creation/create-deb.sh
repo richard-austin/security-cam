@@ -8,7 +8,7 @@ rm -r security-cam_*_arm64
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam
 
 cp ../processmotionrecordings.sh \
-  ../client.ks ../client.ts ../productKeyGen/generateProductKey.jar ../productKeyGen/publicKey \
+  ../productKeyGen/generateProductKey.jar ../productKeyGen/publicKey \
   ../productKeyGen/productKeyGen.sh \
  security-cam_"${VERSION}"_arm64/etc/security-cam
 

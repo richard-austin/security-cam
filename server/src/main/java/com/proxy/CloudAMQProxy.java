@@ -3,7 +3,6 @@ package com.proxy;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import org.apache.activemq.ActiveMQConnection;
-import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.activemq.transport.TransportListener;
 import org.grails.web.json.JSONObject;
@@ -30,7 +29,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.proxy.CloudAMQProxy.MessageMetadata.*;
-
 
 public class CloudAMQProxy {
     public enum MessageMetadata {
@@ -434,15 +432,13 @@ public class CloudAMQProxy {
     }
 
     private ActiveMQConnection getActiveMQConnection() throws Exception {
-        ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(cloudProxyProperties.getCLOUD_PROXY_ACTIVE_MQ_URL());
+        ActiveMQSslConnectionFactoryNoTrustStore connectionFactory = new ActiveMQSslConnectionFactoryNoTrustStore(cloudProxyProperties.getCLOUD_PROXY_ACTIVE_MQ_URL());
         connectionFactory.setUseAsyncSend(true);
         connectionFactory.setOptimizeAcknowledge(true);
         // connectionFactory.setAlwaysSessionAsync(false);
 
         connectionFactory.setKeyStore(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PATH());
         connectionFactory.setKeyStorePassword(cloudProxyProperties.getMQ_CLOUD_PROXY_KEYSTORE_PASSWORD());
-        connectionFactory.setTrustStore(cloudProxyProperties.getMQ_TRUSTSTORE_PATH());
-        connectionFactory.setTrustStorePassword(cloudProxyProperties.getMQ_TRUSTSTORE_PASSWORD());
         // Create a Connection
         return (ActiveMQConnection) connectionFactory.createConnection(cloudProxyProperties.getMQ_USER(), cloudProxyProperties.getMQ_PASSWORD());
     }

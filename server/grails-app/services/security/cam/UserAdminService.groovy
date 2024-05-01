@@ -1,9 +1,12 @@
 package security.cam
 
+import com.google.gson.JsonObject
+import com.proxy.CloudProxyProperties
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.grails.web.json.JSONObject
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import security.cam.commands.AddOrUpdateActiveMQCredsCmd
 import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CreateOrUpdateAccountCommand
 import security.cam.commands.ResetPasswordCommand
@@ -132,6 +135,20 @@ class UserAdminService {
         return result
     }
 
+    ObjectCommandResponse addOrUpdateActiveMQCreds(AddOrUpdateActiveMQCredsCmd cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            CloudProxyProperties props = CloudProxyProperties.getInstance()
+            props.setCloudCreds(cmd.username, cmd.password, cmd.mqHost)
+        }
+        catch(Exception ex) {
+            logService.cam.error("Exception in createAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
     /**
      * removeAccount: Remove the local NVR direct web access account
      * @return Success/error status
@@ -169,6 +186,21 @@ class UserAdminService {
         }
         catch (Exception ex) {
             logService.cam.error("Exception in hasLocalAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+    ObjectCommandResponse hasActiveMQCreds() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            CloudProxyProperties props = CloudProxyProperties.getInstance()
+            JsonObject creds = props.getCloudCreds()
+            final String mqHost = creds.get("mqHost")?.getAsString()
+            result.responseObject = "{\"hasActiveMQCreds\": ${creds.get("mqUser").getAsString() != ""}, \"mqHost\": ${mqHost == null ? "\"<none>\"" : "\"$mqHost\""}}"
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in hasActiveMQCreds: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }
@@ -399,4 +431,5 @@ class UserAdminService {
         }
         timerMap.clear()
     }
+
 }

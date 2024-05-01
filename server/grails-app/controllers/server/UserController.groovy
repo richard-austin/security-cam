@@ -6,6 +6,7 @@ import grails.validation.ValidationErrors
 import security.cam.LogService
 import security.cam.UserAdminService
 import security.cam.ValidationErrorService
+import security.cam.commands.AddOrUpdateActiveMQCredsCmd
 import security.cam.commands.ChangeEmailCommand
 import security.cam.commands.CheckNotGuestCommand
 import security.cam.commands.CreateOrUpdateAccountCommand
@@ -90,7 +91,7 @@ class UserController {
     /**
      * createOrUpdateAccountLocally: Unsecured to enable account creation without being logged in.
      *                       nginx requires a session to allow access to this url to prevent
-     *                       unauthenticated external access. It is accessed locally tomcats port 8080.
+     *                       unauthenticated external access. It is accessed locally on tomcats port 8080.
      *
      * @param cmd: Contains username, password, email, updateExisting
      */
@@ -111,6 +112,32 @@ class UserController {
         }
         else
             hasLocalAccount()
+    }
+    def checkForActiveMQCreds(CheckNotGuestCommand cmd) {
+        if(cmd.hasErrors()) {  // Just checking user is not guest here
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'createAccount')
+            logService.cam.error "checkForActiveMQCreds: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        }
+        else
+            hasActiveMQCreds()
+    }
+
+    def addOrUpdateActiveMQCreds(AddOrUpdateActiveMQCredsCmd cmd) {
+        ObjectCommandResponse result
+        if (cmd.hasErrors()) {
+            def errorsMap = validationErrorService.commandErrors(cmd.errors as ValidationErrors, 'addOrUpdateActiveMQCreds')
+            logService.cam.error "addOrUpdateActiveMQCreds: Validation error: " + errorsMap.toString()
+            render(status: 400, text: errorsMap as JSON)
+        } else {
+            result = userAdminService.addOrUpdateActiveMQCreds(cmd)
+            if (result.status != PassFail.PASS) {
+                render(status: 500, text: result.error)
+            } else {
+                logService.cam.info("addOrUpdateActiveMQCreds: success")
+                render ""
+            }
+        }
     }
 
     @Secured(['ROLE_CLOUD'])
@@ -136,6 +163,18 @@ class UserController {
             render(status: 500, text: result.error)
         } else {
             logService.cam.info("hasLocalAccount: (= ${result.responseObject}) success")
+            render(text: result.responseObject) as JSON
+        }
+    }
+
+    @Secured(['ROLE_CLOUD', 'ROLE_CLIENT'])
+    def hasActiveMQCreds() {
+        ObjectCommandResponse result = userAdminService.hasActiveMQCreds()
+
+        if (result.status != PassFail.PASS) {
+            render(status: 500, text: result.error)
+        } else {
+            logService.cam.info("hasActiveMQCreds: (= ${result.responseObject}) success")
             render(text: result.responseObject) as JSON
         }
     }

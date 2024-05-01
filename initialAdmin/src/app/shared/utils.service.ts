@@ -86,7 +86,16 @@ export class UtilsService {
   private _loggedIn: boolean = false;
   private _isAdmin: boolean = false;
   private _hasLocalAccount: boolean = false;
+  private _hasActiveMQCreds!: boolean;
   public readonly passwordRegex: RegExp = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/);
+  public readonly activeMQPasswordRegex: RegExp = new RegExp(/^$|^[A-Za-z0-9]{20}$/);
+  public readonly hostNameRegex =  /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/
+  public readonly ipV4RegEx = /^([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))$/
+  public readonly ipV6RegEx = /^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?$/
+
+  constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
+  }
+
 
   get loggedIn(): boolean {
     return this._loggedIn;
@@ -101,7 +110,8 @@ export class UtilsService {
     return this._hasLocalAccount;
   }
 
-  constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
+  get hasActiveMQCreds(): boolean {
+    return this._hasActiveMQCreds;
   }
 
   createOrUpdateLocalNVRAccount(username: string, password: string, confirmPassword: string, email: string, confirmEmail: string, updateExisting: boolean = false) : Observable<void> {
@@ -119,6 +129,20 @@ export class UtilsService {
     );
   }
 
+  addOrUpdateActiveMQCreds(username: string, password: string, confirmPassword: string, mqHost: string, updateExisting: boolean = false) : Observable<void> {
+    let details: { username: string, password: string, confirmPassword: string, mqHost: string, updateExisting: boolean} =
+      {
+        username: username,
+        password: password,
+        confirmPassword: confirmPassword,
+        mqHost: mqHost,
+        updateExisting: updateExisting
+      };
+    return this.http.post<void>(this._baseUrl.getLink("user", "addOrUpdateActiveMQCreds"), details, this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
+
   checkForAccountLocally() : Observable<boolean> {
     return this.http.post<boolean>(this._baseUrl.getLink("user", "checkForAccountLocally"), "", this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err))
@@ -127,6 +151,16 @@ export class UtilsService {
 
   setupSMTPClientLocally(smtpData: SMTPData) {
     return this.http.post<boolean>(this._baseUrl.getLink("utils", "setupSMTPClientLocally"), JSON.stringify(smtpData), this.httpJSONOptions);
+  }
+
+  checkForActiveMQCreds(): Observable<{hasActiveMQCreds: boolean, mqHost: string}> {
+    this._hasActiveMQCreds = false;
+    return this.http.post<{hasActiveMQCreds: boolean, mqHost: string}>(this._baseUrl.getLink('user', 'checkForActiveMQCreds'), '', this.httpJSONOptions).pipe(
+      tap((result) => {
+        this._hasActiveMQCreds = result.hasActiveMQCreds;
+      }),
+      catchError((err: HttpErrorResponse) => throwError(err))
+    )
   }
 
   getSMTPClientParamsLocally() : Observable<SMTPData> {

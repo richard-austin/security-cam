@@ -7,6 +7,13 @@ import {AfterViewInit, Component} from '@angular/core';
 })
 export class AppComponent implements AfterViewInit{
   title = 'initialAdmin';
+  amqOff: boolean = false;
+
+  constructor() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    this.amqOff = urlParams.get('amqOff') != null;
+  }
 
   registerLocalAccount() {
     window.location.href="#/registerLocalAccount"
@@ -14,6 +21,10 @@ export class AppComponent implements AfterViewInit{
 
   setupSMTPClient () {
     window.location.href = "#/setupSMTPClient"
+  }
+
+  registerActiveMQAccount() {
+    window.location.href = "#/registerActiveMQAccount"
   }
 
   ngAfterViewInit(): void {
