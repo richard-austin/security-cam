@@ -12,7 +12,7 @@ class AddOrUpdateActiveMQCredsCmd implements Validateable {
 
     UtilsService utilsService
     UserAdminService userAdminService
-
+    public final activeMQPasswordRegex = /^$|^[A-Za-z0-9]{20}$/
     static constraints = {
         username(nullable: true, blank: true,
                 validator: { username, cmd ->
@@ -28,7 +28,7 @@ class AddOrUpdateActiveMQCredsCmd implements Validateable {
                 validator: { password, cmd ->
                     if (password == null)
                         password = cmd.password = ""
-                    if (!password.matches(cmd.utilsService.passwordRegex) && password != "")
+                    if (!password.matches(cmd.activeMQPasswordRegex))
                         return "Password is invalid"
 
                     if(cmd.username == "" && password != "")

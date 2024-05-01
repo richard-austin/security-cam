@@ -7,7 +7,7 @@ import {ActivemqCredentialsComponent} from "./activemq-credentials/activemq-cred
 const routes: Routes = [
   {path: 'registerLocalAccount', component: RegisterLocalNvrAccountComponent},
   {path: 'setupSMTPClient', component: SetupSMTPClientComponent},
-  {path: 'registerActiveMQAccount', component: ActivemqCredentialsComponent},
+  {path: 'registerActiveMQAccount', component: ActivemqCredentialsComponent}
 ];
 
 @NgModule({

@@ -12,7 +12,7 @@ export class AppComponent implements AfterViewInit{
   constructor() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    this.amqOff = urlParams.get('amqOff') == 'true';
+    this.amqOff = urlParams.get('amqOff') != null;
   }
 
   registerLocalAccount() {
