@@ -21,13 +21,32 @@ The Cloud Service and <a href="https://github.com/richard-austin/activemq-for-cl
 up
 (with necessary configuration adjustments) on (preferably) a public server to enable the
 use of NVRs through this means.
-### Setting up the NVR for the Cloud Service
-
-* The NVR must have the correct cloudActiveMQUrl set up in application.yml which should contain the domain/IP and port
-  used by ActiveMQ
-  for the Cloud Service. If this needs to be changed, the tomcat service should be restarted to apply the update
-  (***sudo systemctl restart tomcat9.service***)
-* If there is a local account for direct access on the NVR, you should to ensure that
+## Setting up the NVR for the Cloud Service
+### <div id="set-amq-params">Set ActiveMQ username, password and host</div>
+To connect to ActiveMQ, the correct credentials and ActiveMQ host have to be entered. 
+* If a local NVR account has been set up: -
+  * Open the General menu and select **Admin Functions**
+  * Select **Set ActiveMQ Credentials**
+* If there is no local NVR account
+  * From within the same LAN as the NVR, open a browser at ***NVR address:8080/cua***
+  * Select **Set ActiveMQ Credentials**
+* Enter the username (usually cloud) given on initial installation of **activemq-for-cloud-service**
+* Enter the password given on initial installation of **activemq-for-cloud-service** (this will be a 20 character
+  string consisting of upper and lower case letters and numbers).
+* Enter the password again in the **Confirm Password** field
+* Enter the ActiveMQ host (this can be an IP address or hostname).
+* Click the **Update Creds** button, the new settings will be applied.
+#### Changing the ActiveMQ username and password
+* Open the General menu and select "Set ActiveMQ Credentials"
+* The credentials can be changed by the admin user at any time by repeating the above procedure, the current ActiveMQ
+  host will appear as the default in the ActiveMQ Host field.
+* Click the **Update Creds** button, the new settings will be applied.
+#### <div id="amq-host">Changing the ActiveMQ Host</div>
+* Open the General menu and select "Set ActiveMQ Credentials"
+* To change the host without changing the username and password, leave the username and password fields blank
+  and update the ActiveMQ host field only.
+* Click the **Update Creds** button, the new settings will be applied.
+* If there is a local account for direct access on the NVR, you should ensure that
   the link to the Cloud Service is enabled: -
     * **General** menu
         * **Set CloudProxy Status**
@@ -36,11 +55,11 @@ use of NVRs through this means.
       * If the connection is successful, you should see a green dialogue box
   with the message "**Success: Connected to the Cloud successfully**". 
   You should then be able to use the Cloud Service. 
-      * If the connection to ActiveMQ fails, the message <span style="color: darkred; font-weight: bold">Not Connected To
+      * If the connection to ActiveMQ fails, the message <span style="color: red; font-weight: bold">Not Connected To
         Transport</span> will be shown.
-         * This can mean that the ActiveMQ url (in the NVR application.yml file) is not set correctly or that 
-  ActiveMQ is not running.
-      * The error message <span style="color: darkred">Product key was not accepted by the Cloud server</span>
+         * This can mean that the ActiveMQ host, username or password are not set correctly (See Updating the ActiveMQ username and password), 
+           or that ActiveMQ is not running correctly.
+      * The error message <span style="color: red">Product key was not accepted by the Cloud server</span>
         indicates that the NVR connected successfully to ActiveMQ, but it was not authenticated on the Cloud Server. Check that the Cloud Server is running, and it is configured correctly to connect to ActiveMQ.
 
 * If there is no local NVR account, connection to the Cloud Service will be automatically enabled. 
@@ -49,19 +68,18 @@ You can check the cloudproxy.log at /var/log/security-cam
 <div style="margin-left: 2rem">
 
 * If connection was successful, the log should have a line like: -
-<div style="color: green; margin-left: 2rem">2024-02-22 16:44:20.341 INFO  CLOUDPROXY [pool-248-thread-1] - loginToCloud:191 - Connected successfully to the Cloud</div>
-<div style="margin-left: 2rem;margin-top:0.25rem">If this line follows previous errors, it would mean that the connection was successful, provided no further errors follow this message.</div> 
+<div style="color: lightgreen; margin-left: 2rem">2024-02-22 16:44:20.341 INFO  CLOUDPROXY [pool-248-thread-1] - loginToCloud:191 - Connected successfully to the Cloud</div>
    
-* If the NVR failed to connect to ActiveMQ, the log will have the following line. 
+* If the NVR failed to connect to ActiveMQ, the log will have a line similar to: - 
 
-<div style="color: darkred; margin-left: 2rem">2024-02-22 16:42:00.747 ERROR CLOUDPROXY [pool-230-thread-1] - showExceptionDetails:539 - javax.jms.JMSException exception in Clo
+<div style="color: red; margin-left: 2rem">2024-02-22 16:42:00.747 ERROR CLOUDPROXY [pool-230-thread-1] - showExceptionDetails:539 - javax.jms.JMSException exception in Clo
      udAMQProxy.start: Could not connect to broker URL: ssl://192.168.1.82:61617?socket.verifyHostName=false. Reason: java.net.NoRoute
      ToHostException: No route to host</div>
-<div style="margin-left: 2rem; margin-top: 0.25rem">This can mean that the ActiveMQ url (in the NVR application.yml file) is not set correctly or that 
+<div style="margin-left: 2rem; margin-top: 0.25rem">This can mean that the <a href="#amq-host">ActiveMQ host</a> is not set correctly or that 
   ActiveMQ is not running.</div>
 
 * If the log has the following line: -
-<div style="color: darkred; margin-left: 2rem">2024-02-22 16:43:57.623 ERROR CLOUDPROXY [pool-245-thread-1] - loginToCloud:200 - Product key was not accepted by the Cloud server</div>
+<div style="color: red; margin-left: 2rem">2024-02-22 16:43:57.623 ERROR CLOUDPROXY [pool-245-thread-1] - loginToCloud:200 - Product key was not accepted by the Cloud server</div>
 <div style="margin-left: 2rem; margin-top: 0.25rem">This indicates that the NVR connected successfully to ActiveMQ, but it was not authenticated on the Cloud Server. 
 Check that the Cloud Server is running, and it is configured correctly to connect to ActiveMQ.</div>
 </div>
@@ -74,23 +92,17 @@ Cloud service. Camera web admin pages are not accessible through the Cloud Servi
 
 ### Cloudproxy parameters in application.yml
 
-#### These are under the cloudProxy section :-
+#### These are under the cloudProxy section: -
 
-| *Parameter*                | Description                                                                                                                        |
-|----------------------------|------------------------------------------------------------------------------------------------------------------------------------|
-| enabled                    | CloudProxy will run if true (and CloudProxy status is enabled on the NVR General menu)                                             |
-| productKeyPath             | Path to the file containing the encrypted NVR Product key                                                                          |
-| cloudActiveMQUrl           | Url to the ActiveMQ service that the NVRs and the Cloud server connect to. This should begin with failover://ssl:                  |
-| activeMQInitQueue          | The name of the queue in ActiveMQ through which connections are initiated. This must be the same on all NVRs and the Cloud server. |
-| webServerForCloudProxyHost | The host name for the NVRs cloud web server (normally localhost)                                                                   |
-| webServerForCloudProxyPort | The port for the NVRs web server (Normally 8088) This service is set up on nginx to provide special access for Cloud connections.  | 
-| logLevel                   | The log level for cloudproxy.log (normally located at /var/log/security-cam)                                                       |
+| *Parameter*                | Description                                                                                                                                                                                                                                      |
+|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| enabled                    | CloudProxy will run if true (and CloudProxy status is enabled on the NVR General menu, or the NVR has no local user account)                                                                                                                     |
+| productKeyPath             | Path to the file containing the NVR Product key                                                                                                                                                                                                  |
+| cloudActiveMQUrl           | Url to the ActiveMQ service that the NVRs and the Cloud server connect to. This should begin with failover://ssl: The host part will be replaced by the host entered in the **<a href="#set-amq-params">Set ActiveMQ Credentials</a>** dialogue. |
+| activeMQInitQueue          | The name of the queue in ActiveMQ through which connections are initiated. This must be the same on all NVRs and the Cloud server.                                                                                                               |
+| webServerForCloudProxyHost | The host name for the NVRs cloud web server (normally localhost)                                                                                                                                                                                 |
+| webServerForCloudProxyPort | The port for the NVRs web server (Normally 8088) This service is set up on nginx to provide special access for Cloud connections.                                                                                                                | 
+| logLevel                   | The log level for cloudproxy.log (normally located at /var/log/security-cam)                                                                                                                                                                     |
 
-&ast; You may want to change these from their defaults. The ActiveMQ user name and password must obviously be changed
-in the ActiveMQ and Cloud server settings as well as in this config.
-
-&ast;&ast; You may want to create your own keys and certs for the Cloud and
-NVRs <a href="https://activemq.apache.org/how-do-i-use-ssl">see here</a>
-
-Please see the README.md for the Cloud Service for details on setting up a cloud account and using the Cloud service.
+Please see the README.md for the <a href="https://github.com/richard-austin/cloud-server">Cloud Service</a> and <a href="https://github.com/richard-austin/activemq-for-cloud-service">ActiveMQ for Cloud Service</a> for details on setting up a cloud account and using the Cloud service.
 
