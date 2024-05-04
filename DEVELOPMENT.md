@@ -53,18 +53,22 @@ sudo apt install ./<i>deb_file_name</i>.deb
 * Wait for installation to complete.
 * The Tomcat web server will take 1 - 2 minutes to start
   the application.
-* <i>If this is the first installation on the Raspberry pi..</i>
-    * Make a note of the product key (a few lines up).
-      This will be required if you use the Cloud Service to connect
-      to the NVR, otherwise it is not required.
-    * <i>Generate the site certificate..</i>
+  * <i>If this is the first installation on the Raspberry pi..</i>
+      * Make a note of the product key (a few lines up).
       ```
-      cd /etc/security-cam
-      sudo ./install-cert.sh
+        Example: -
+        Product key: U9iO-H45E-1IIU-J743
       ```
-      Fill in the details it requests (don't put in any information you are not happy with being publicly visible, for
-      example you may want to put in a fake email address etc.)
-    * nginx will not have started in the absence of the site certificate, so restart nginx.
-      ```
-      sudo systemctl restart nginx
-      ```
+        This will be required if you use the Cloud Service to connect
+        to the NVR, otherwise it is not required.
+      * <i>Generate the site certificate..</i>
+        ```
+        cd /etc/security-cam
+        sudo ./install-cert.sh
+        ```
+        Fill in the details it requests (don't put in any information you are not happy with being publicly visible, for
+        example you may want to put in a fake email address etc.)
+      * nginx will not have started in the absence of the site certificate, so restart nginx.
+        ```
+        sudo systemctl restart nginx
+        ```
