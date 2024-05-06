@@ -72,8 +72,7 @@ You can check the cloudproxy.log at /var/log/security-cam
    
 * If the NVR failed to connect to ActiveMQ, the log will have a line similar to: - 
 
-<div style="color: red; margin-left: 2rem">2024-02-22 16:42:00.747 ERROR CLOUDPROXY [pool-230-thread-1] - showExceptionDetails:539 - javax.jms.JMSException exception in Clo
-     udAMQProxy.start: Could not connect to broker URL: ssl://192.168.1.82:61617?socket.verifyHostName=false. Reason: java.net.NoRoute
+<div style="color: red; margin-left: 2rem">2024-02-22 16:42:00.747 ERROR CLOUDPROXY [pool-230-thread-1] - showExceptionDetails:539 - javax.jms.JMSException exception in CloudAMQProxy.start: Could not connect to broker URL: ssl://192.168.1.82:61617?socket.verifyHostName=false. Reason: java.net.NoRoute
      ToHostException: No route to host</div>
 <div style="margin-left: 2rem; margin-top: 0.25rem">This can mean that the <a href="#amq-host">ActiveMQ host</a> is not set correctly or that 
   ActiveMQ is not running.</div>
