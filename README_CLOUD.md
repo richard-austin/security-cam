@@ -26,15 +26,17 @@ use of NVRs through this means.
 To connect to ActiveMQ, the correct credentials and ActiveMQ host have to be entered. 
 * If a local NVR account has been set up: -
   * Open the General menu and select **Admin Functions**
+  * Click on the <img src="README.images/hamburger-2-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> icon at the top left of the page.
   * Select **Set ActiveMQ Credentials**
 * If there is no local NVR account
-  * From within the same LAN as the NVR, open a browser at ***NVR address:8080/cua***
-  * Select **Set ActiveMQ Credentials**
+  * From within the same LAN as the NVR, open a browser at ***[NVR IP address]:8080/cua***
+    * Click on the <img src="README.images/hamburger-2-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> icon at the top left of the page.
+    * Select **Set ActiveMQ Credentials**
 * Enter the username (usually cloud) given on initial installation of **activemq-for-cloud-service**
 * Enter the password given on initial installation of **activemq-for-cloud-service** (this will be a 20 character
   string consisting of upper and lower case letters and numbers).
 * Enter the password again in the **Confirm Password** field
-* Enter the ActiveMQ host (this can be an IP address or hostname).
+* Update the ActiveMQ host, if necessary (this can be an IP address or hostname).
 * Click the **Update Creds** button, the new settings will be applied.
 #### Changing the ActiveMQ username and password
 * Open the General menu and select "Set ActiveMQ Credentials"
