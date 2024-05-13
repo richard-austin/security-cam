@@ -1,0 +1,21 @@
+[Unit]
+
+Description=Apache Tomcat Web Application Container
+After=network.target
+[Service]
+Type=forking
+User=tomcat
+Group=tomcat
+Environment="JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-arm64"
+Environment="CATALINA_HOME=/opt/tomcat9"
+Environment="CATALINA_PID=/opt/tomcat9/temp/tomcat.pid"
+Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+ReadWritePaths=/var/log/security-cam/
+ReadWritePaths=/etc/security-cam/
+ReadWritePaths=/var/security-cam/
+ReadWritePaths=/opt/tomcat9/webapps/
+
+ExecStart=/opt/tomcat9/bin/startup.sh
+ExecStop=/opt/tomcat9/bin/shutdown.sh
+[Install]
+WantedBy=multi-user.target

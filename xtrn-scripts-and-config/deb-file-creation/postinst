@@ -3,37 +3,38 @@
 cp /tmp/motion.conf /etc/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/chrony.conf /etc/chrony
-mv /tmp/server.xml /etc/tomcat9/
-mv /tmp/tomcat9 /etc/default/  # Updated tomcat9 default file to enable use of Java 17
-mv /tmp/tomcat-users.xml /etc/tomcat9
-mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
-mv /tmp/cua.war /var/lib/tomcat9/webapps/cua.war
+mv /tmp/server.xml /opt/tomcat9/conf
+#### mv /tmp/tomcat9 /etc/default/  # Updated tomcat9 default file to enable use of Java 17
+mv /tmp/tomcat-users.xml /opt/tomcat9/conf
+mv /tmp/server-7.3.war /opt/tomcat9/webapps/ROOT.war
+mv /tmp/cua.war /opt/tomcat9/webapps/cua.war
 mkdir -p /usr/local/bin
 
 wget -O /usr/local/bin/ffmpeg https://github.com/richard-austin/ffmpeg-4.4.4/releases/download/1.0.0/ffmpeg
 chmod +x /usr/local/bin/ffmpeg
 
-rm -rf /var/lib/tomcat9/webapps/ROOT
-rm -rf /var/lib/tomcat9/webapps/cua
+rm -rf /opt/tomcat9/webapps/ROOT
+rm -rf /opt/tomcat9/webapps/cua
 
 rm -r /tmp/motion.conf
 deb-systemd-invoke stop tomcat9.service  # Stop tomcat before making changes
 deb-systemd-invoke stop motion  # And motion
 sleep 2
 
+useradd tomcat
 useradd sec-cam
 groupadd security-cam
 usermod -a -G video tomcat
 usermod -a -G security-cam tomcat
 usermod -a -G security-cam sec-cam
 usermod -a -G security-cam www-data
-
+q
 chown -R tomcat:security-cam /etc/security-cam
 chown -R tomcat:security-cam /var/security-cam
 
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
-chown tomcat:tomcat /var/lib/tomcat9/webapps/ROOT.war
-chown tomcat:tomcat /var/lib/tomcat9/webapps/cua.war
+chown -R tomcat:tomcat /opt/tomcat9
+
 
 # Create the client keystore for connection to the Cloud server via ActiveMQ
 MQ_CREDS_FILE=/var/security-cam/cloud-creds.json
@@ -55,10 +56,10 @@ EOF
   chown tomcat:root $MQ_CREDS_FILE
 fi
 
-chmod 640 /etc/tomcat9/tomcat-users.xml
-chown root:tomcat /etc/tomcat9/tomcat-users.xml
-chmod 640 /etc/tomcat9/server.xml
-chown root:tomcat /etc/tomcat9/server.xml
+chmod 640 /opt/tomcat9/conf/tomcat-users.xml
+chown root:tomcat /opt/tomcat9/conf/tomcat-users.xml
+chmod 640 /opt/tomcat9/conf/server.xml
+chown root:tomcat /opt/tomcat9/conf/server.xml
 chown root:root /etc/security-cam/wifi-setup-service/*.py
 chown tomcat:tomcat -R /etc/fmp4-ws-media-server
 
@@ -75,8 +76,7 @@ chown sec-cam:security-cam /var/log/motion
 chown tomcat:security-cam /var/log/security-cam
 chown tomcat:security-cam /var/log/camera-recordings-service
 chown tomcat:security-cam /var/log/fmp4-ws-media-service
-chown tomcat:security-cam /var/lib/tomcat
-
+chown tomcat:tomcat /var/log/tomcat9
 # Make the following scripts executable
 chmod +x /etc/security-cam/install-cert.sh
 chmod +x /etc/security-cam/processmotionrecordings.sh || true
@@ -100,28 +100,17 @@ sed -i 's/User=motion/User=tomcat/' /lib/systemd/system/motion.service
 # AddToTomcatUnitFileIfNotPresent: Add ReadWriteFilePaths to the tomcat unit file to enable access to /etc/security-cam
 #                                  and /var/log/security-cam.
 #
-AddToTomcatUnitFileIfNotPresent() {
-  lineToWrite=$1
-  lineToWriteUnder=$2
-  unitFile=$3
-  # Enter lineToWrite after lineToWriteUnder if not already present
-  if ! grep "$lineToWrite" "$unitFile"; then
-    # Add the line after lineToWriteUnder escaping all '/' as the regex is within / delimiters.
-    result=$(awk '/'"${lineToWriteUnder//\//\\/}"'/ { print; print '\""${lineToWrite}"\"'; next }1' "$unitFile")
-    echo "$result" >"$unitFile"
-  fi
-}
-
-# Give tomcat permission to write to some additional directories
-lineToWrite="ReadWritePaths=/var/log/security-cam/"
-lineToWrite2="ReadWritePaths=/etc/security-cam/"
-lineToWrite3="ReadWritePaths=/var/security-cam/"
-lineToWriteUnder="ReadWritePaths=/var/lib/tomcat9/webapps/"
-unitFile="/usr/lib/systemd/system/tomcat9.service"
-
-AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
-AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
-AddToTomcatUnitFileIfNotPresent $lineToWrite3 $lineToWriteUnder $unitFile
+#AddToTomcatUnitFileIfNotPresent() {
+#  lineToWrite=$1
+#  lineToWriteUnder=$2
+#  unitFile=$3
+#  # Enter lineToWrite after lineToWriteUnder if not already present
+#  if ! grep "$lineToWrite" "$unitFile"; then
+#    # Add the line after lineToWriteUnder escaping all '/' as the regex is within / delimiters.
+#    result=$(awk '/'"${lineToWriteUnder//\//\\/}"'/ { print; print '\""${lineToWrite}"\"'; next }1' "$unitFile")
+#    echo "$result" >"$unitFile"
+#  fi
+#}
 
 systemctl daemon-reload  # Register the motion service file change
 
