@@ -23,7 +23,6 @@ apply plugin: "org.grails.grails-gsp"
 
 repositories {
     maven { url "https://repo.grails.org/grails/core" }
-    mavenCentral()
 }
 
 //group 'security.cam.onvif'
@@ -107,11 +106,11 @@ dependencies {
 // https://mvnrepository.com/artifact/javax.sdp/nist-sdp
     implementation 'javax.sdp:nist-sdp:1.0'
 
-    implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:4.0.1'
+    implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.1'
     implementation "org.grails.plugins:gsp"
-    implementation 'javax.mail:mail:1.5.0-b01'
+    implementation 'javax.mail:mail:1.4.7'
 
-    implementation 'commons-io:commons-io:2.16.1'
+    implementation 'commons-io:commons-io:2.8.0'
     compileOnly "io.micronaut:micronaut-inject-groovy"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     console "org.grails:grails-console"
@@ -120,7 +119,7 @@ dependencies {
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.apache.tomcat:tomcat-jdbc"
 
-    runtimeOnly 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+    runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
     runtimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.1'
 
     implementation "com.bertramlabs.plugins:asset-pipeline-grails:3.3.6"
