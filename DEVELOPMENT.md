@@ -2,18 +2,17 @@
 Pre built .deb files for deployment on a Raspberry pi 4 are available in the Releases section.
 The requirements to build the project yourself are detailed below: -
 #### Platform for Development
-* Ubuntu 23.10 (Mantic Minotaur) on PC (Windows WSL2 or direct boot)
+* Ubuntu 24.04 (Noble Numbat) on PC (Windows WSL2 or direct boot)
 
 #### The project is verified to build with the following:-
 * go version go1.20.1
 * Angular CLI: 15.2.0 or greater
 * Node: 18.17.1
-* npm: 9.9.7
 * Package Manager: npm 9.6.7
 * Grails Version: 5.3.2
-* openjdk version "19.0.2" 2023-01-17
+* openjdk version "17.0.10" 2024-01-16
 * Gradle 7.6
-* Python 3.11.4
+* Python 3.11.6
 
 Using other versions may cause build issues in some cases.
 
@@ -23,7 +22,7 @@ git clone git@github.com:richard-austin/security-cam.git
 cd security-cam
 ```
 ### Build for deployment to Raspberry pi
-The Raspberry pi should be running Ubuntu 23.10 (Mantic Minotaur) OS.
+The Raspberry pi should be running Ubuntu 24.04 (Noble Numbat) OS.
 ```
 ./gradlew buildDebFile 
 ```

@@ -1,6 +1,6 @@
 ## NVR System Structure
 ### Run Time Platform and Installation
-The current build configuration is for Raspberry pi V4 or V5 running headless (server) version of Ubuntu 23.10 (Mantic Minotaur).
+The current build configuration is for Raspberry pi V4 or V5 running headless (server) version of Ubuntu 24.04 (Noble Numbat).
 Installation of the complete system can be done with a .deb file which you can obtain from the latest release in the Releases section or you can build yourself by following the details under the Development section below.
 
 ### Security
