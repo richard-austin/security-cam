@@ -76,11 +76,9 @@ page title).**
 
 Set the global Onvif credentials used during single and all camera Onvif discovery. Cameras successfully discovered
 will have their credentials set to those entered here. Cameras whose credentials were different from these, will
-be listed above the table*
+be listed [above the table](#wrong-onvif-creds)
 allowing the correct credentials to be entered against them before
 retrying discovery on them individually.
-
-&ast; See *Cameras Configuration Editor Showing A Camera Whose Onvif Credentials Differ From The Global Onvif Credentials* below.
 ### Onvif
 From https://github.com/fpompermaier/onvif
 
@@ -165,9 +163,8 @@ All these parameters can be set manually, though some are auto-populated by Onvi
 | Video Width              | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                                                                                                                                                                                                                                    | Yes                    |
 | Video Height             | For Motion Service, the height of the video stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                                                                                                                                                                                                                                  | Yes                    |
 
-![config editor](README.images/config-editor2.png "Camera configuration page following Onvif discovery, showing a camera whose credentials are different from the global Onvif credentials")
-*Cameras Configuration Editor Showing A Camera Whose Onvif Credentials Differ From The Global Onvif Credentials*
-
+<a id="wrong-onvif-creds"></a> ![config editor](README.images/config-editor2.png "Camera configuration page following Onvif discovery, showing a camera whose credentials are different from the global Onvif credentials")
+*Camera Configuration Editor Showing A Camera Whose Onvif Credentials Differ From The Global Onvif Credentials*
 ## One or More Cameras Failing Onvif Authentication During Discovery
 ### Cameras in this category will be listed in the orange bordered box shown in the above screenshot.
 Enter the correct Onvif user name and password for the camera listed in the orange bordered box and click the <img src="README.images/add-circle-solid-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
