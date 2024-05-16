@@ -18,3 +18,9 @@ systemctl daemon-reload
 userdel sec-cam || true
 groupdel security-cam || true
 
+#!/bin/bash
+if [ "$1" == purge ] ; then
+  rm -r /var/log/tomcat9
+  rm -r /var/lib/tomcat9
+fi
+

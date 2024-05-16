@@ -37,6 +37,8 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * NVR includes NTP server for cameras to sync time without the need for them to connect to the internet.
 
 #### Limitations
+* The .deb file produced with ./gradlew buildDebFile is set up to install on a Raspberry pi running Ubuntu 24.04 (Noble Numbat). 
+Availability of dependencies may prevent installation on other Ubuntu versions.
 * Requires network cameras which provide H264 or H265 (HEVC) video, and optionally audio via RTSP (G711/AAC). *No video transcoding
 is done on the raspberry pi to keep CPU utilisation low*
 * The browser used must be able to display the video format used. Most browsers will support H264, but on some
@@ -46,11 +48,26 @@ with software decoding (see <a href="https://thorium.rocks/">Thorium</a> and <a 
   ```--enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoDecoder,VaapiVideoEncoder``` 
    in the command line to enable hevc decoding.
 This will also enable hardware decoding generally.
-* https web admin hosting and rstps (secure rtsp streaming from cameras) are not currently supported.
-* This has been tested with SV3C and ZXTech cameras and Reolink Wi-Fi doorbell.
-There might be compatibility issues with some other camera types.
+* Web admin hosting where the camera uses https and rstps (secure rtsp streaming from cameras) are not currently supported.
+* This software has been tested with SV3C and ZXTech cameras and Reolink Wi-Fi doorbell.
+There could possibly be compatibility issues with some other camera types.
 * 2 way audio (Onvif profile T) supported on the Reolink Wi-fi doorbell using firmware version v3.0.0.1996_23053101.
 The firmware from Reolink main downloads site does not fully support this functionality. 
+
+## Installation
+* Set up Ubuntu 24.04 Server (Noble Numbat) on a Raspberry pi 4 or 5
+* ```bash
+    sudo apt update
+    sudo apt upgrade
+    ```
+* Using the deb file in the [release](https://github.com/richard-austin/security-cam/releases/tag/9.0.0) section or one you have build yourself
+(see [DEVELOPMENT.md](DEVELOPMENT.md)) , Copy the deb file to the Raspberry pi.
+* ssh to the Raspberry pi.
+* ```bash
+  # Install with
+  sudo apt install ./security-cam_9.0.0_arm64.deb
+  ```
+* See [SETTING-UP.md](SETTING-UP.md) for how to set up user account, wifi, cameras etc.
 
 ## Documentation 
 You can find further documentation in these files: -
