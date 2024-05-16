@@ -3,18 +3,18 @@
 cp /tmp/motion.conf /etc/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/chrony.conf /etc/chrony
-mv /tmp/server.xml /opt/tomcat9/conf
+mv /tmp/server.xml /var/lib/tomcat9/conf
 #### mv /tmp/tomcat9 /etc/default/  # Updated tomcat9 default file to enable use of Java 17
-mv /tmp/tomcat-users.xml /opt/tomcat9/conf
-mv /tmp/server-7.3.war /opt/tomcat9/webapps/ROOT.war
-mv /tmp/cua.war /opt/tomcat9/webapps/cua.war
+mv /tmp/tomcat-users.xml /var/lib/tomcat9/conf
+mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
+mv /tmp/cua.war /var/lib/tomcat9/webapps/cua.war
 mkdir -p /usr/local/bin
 
 wget -O /usr/local/bin/ffmpeg https://github.com/richard-austin/ffmpeg-4.4.4/releases/download/1.0.0/ffmpeg
 chmod +x /usr/local/bin/ffmpeg
 
-rm -rf /opt/tomcat9/webapps/ROOT
-rm -rf /opt/tomcat9/webapps/cua
+rm -rf /var/lib/tomcat9/webapps/ROOT
+rm -rf /var/lib/tomcat9/webapps/cua
 
 rm -r /tmp/motion.conf
 deb-systemd-invoke stop tomcat9.service  # Stop tomcat before making changes
@@ -33,7 +33,7 @@ chown -R tomcat:security-cam /etc/security-cam
 chown -R tomcat:security-cam /var/security-cam
 
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
-chown -R tomcat:tomcat /opt/tomcat9
+chown -R tomcat:tomcat /var/lib/tomcat9
 
 
 # Create the client keystore for connection to the Cloud server via ActiveMQ
@@ -56,10 +56,10 @@ EOF
   chown tomcat:root $MQ_CREDS_FILE
 fi
 
-chmod 640 /opt/tomcat9/conf/tomcat-users.xml
-chown root:tomcat /opt/tomcat9/conf/tomcat-users.xml
-chmod 640 /opt/tomcat9/conf/server.xml
-chown root:tomcat /opt/tomcat9/conf/server.xml
+chmod 640 /var/lib/tomcat9/conf/tomcat-users.xml
+chown root:tomcat /var/lib/tomcat9/conf/tomcat-users.xml
+chmod 640 /var/lib/tomcat9/conf/server.xml
+chown root:tomcat /var/lib/tomcat9/conf/server.xml
 chown root:root /etc/security-cam/wifi-setup-service/*.py
 chown tomcat:tomcat -R /etc/fmp4-ws-media-server
 
