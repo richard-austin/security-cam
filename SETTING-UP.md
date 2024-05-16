@@ -1,4 +1,4 @@
-## Initial Setup
+## Initial Setup (after installation)
 ### Setup for Direct Access (Browser to NVR)
 #### Set up user account
 To log into the NVR when accessing it directly,

@@ -54,6 +54,21 @@ There could possibly be compatibility issues with some other camera types.
 * 2 way audio (Onvif profile T) supported on the Reolink Wi-fi doorbell using firmware version v3.0.0.1996_23053101.
 The firmware from Reolink main downloads site does not fully support this functionality. 
 
+## Installation
+* Set up Ubuntu 24.04 Server (Noble Numbat) on a Raspberry pi 4 or 5
+* ```bash
+    sudo apt update
+    sudo apt upgrade
+    ```
+* Using the deb file in the [release](https://github.com/richard-austin/security-cam/releases/tag/9.0.0) section or one you have build yourself
+(see [DEVELOPMENT.md](DEVELOPMENT.md)) , Copy the deb file to the Raspberry pi.
+* ssh to the Raspberry pi.
+* ```bash
+  # Install with
+  sudo apt install ./security-cam_9.0.0_arm64.deb
+  ```
+* See [SETTING-UP.md](SETTING-UP.md) for how to set up user account, wifi, cameras etc.
+
 ## Documentation 
 You can find further documentation in these files: -
 * [STRUCTURE.md](STRUCTURE.md)
