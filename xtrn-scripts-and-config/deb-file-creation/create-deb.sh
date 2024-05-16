@@ -48,7 +48,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/var/log/fmp4-ws-media-service
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/tomcat9
-mkdir -p security-cam_"${VERSION}"_arm64/opt/tomcat9
+mkdir -p security-cam_"${VERSION}"_arm64/var/lib/tomcat9
 
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
@@ -56,9 +56,9 @@ mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
 cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9/conf/server.xml ../apache-tomcat-9/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
-tar -xzf ../apache-tomcat-9/apache-tomcat-9.0.89.tar.gz -C security-cam_"${VERSION}"_arm64/opt/tomcat9 --strip-components=1
-rmdir security-cam_"${VERSION}"_arm64/opt/tomcat9/logs
-ln -s /var/log/tomcat9 security-cam_"${VERSION}"_arm64/opt/tomcat9/logs
+tar -xzf ../apache-tomcat-9/apache-tomcat-9.0.89.tar.gz -C security-cam_"${VERSION}"_arm64/var/lib/tomcat9 --strip-components=1
+rmdir security-cam_"${VERSION}"_arm64/var/lib/tomcat9/logs
+ln -s /var/log/tomcat9 security-cam_"${VERSION}"_arm64/var/lib/tomcat9/logs
 cp ../tomcat9 security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-7.3.war security-cam_"${VERSION}"_arm64/tmp
 cp ../../initialAdmin/dist/cua.war  security-cam_"${VERSION}"_arm64/tmp
