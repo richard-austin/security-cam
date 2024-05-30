@@ -197,7 +197,7 @@ class UtilsService {
         <h2>Grails v5.3.2</h2>
         <a href="https://grails.org/" target="_blank">Grails</a>
         <hr>
-        <h2>Java OpenJDK v19.0.2</h2>
+        <h2>Java OpenJDK v17.0.11</h2>
         <a href="https://openjdk.org/" target="_blank">Java OpenJDK</a>
         <hr>
         <h2>ffmpeg v4.4.4</h2>
@@ -218,7 +218,7 @@ class UtilsService {
         <h2>libraspberrypi-bin</h2>
         <a href="https://packages.ubuntu.com/focal-updates/misc/libraspberrypi-bin" target="_blank">libraspberrypi-bin</a>
         <hr>
-        <h2>Chrony v4.3 (NTP Server)</h2>
+        <h2>Chrony v4.5 (NTP Server)</h2>
         <a href="https://chrony-project.org/news.html" target="_blank">Chrony</a>
         <hr>
         <h2>Ubuntu network-manager v1.42.4</h2>
@@ -230,7 +230,7 @@ class UtilsService {
         <h2>moreutils</h2>
         <a href="https://ostechnix.com/moreutils-collection-useful-unix-utilities/" target="_blank">Moreutils</a>
         <hr>
-        <h2>Python3 v 3.11.4</h2>
+        <h2>Python3 v 3.12.3</h2>
         <a href="https://www.python.org/" target="_blank">Python3</a>
         <hr>
     '''
