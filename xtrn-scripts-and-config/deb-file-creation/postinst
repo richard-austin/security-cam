@@ -28,7 +28,7 @@ usermod -a -G video tomcat
 usermod -a -G security-cam tomcat
 usermod -a -G security-cam sec-cam
 usermod -a -G security-cam www-data
-q
+
 chown -R tomcat:security-cam /etc/security-cam
 chown -R tomcat:security-cam /var/security-cam
 
