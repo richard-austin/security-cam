@@ -8,6 +8,9 @@ mv /tmp/server.xml /var/lib/tomcat9/conf
 mv /tmp/tomcat-users.xml /var/lib/tomcat9/conf
 mv /tmp/server-7.3.war /var/lib/tomcat9/webapps/ROOT.war
 mv /tmp/cua.war /var/lib/tomcat9/webapps/cua.war
+# Get the drawdown calculator from the 2.1.0 release area
+wget -O /var/lib/tomcat9/webapps/dc.war https://github.com/richard-austin/drawdown-calculator/releases/download/2.1.0/dc.war
+
 mkdir -p /usr/local/bin
 
 wget -O /usr/local/bin/ffmpeg https://github.com/richard-austin/ffmpeg-4.4.4/releases/download/1.0.0/ffmpeg
