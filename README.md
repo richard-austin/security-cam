@@ -58,8 +58,8 @@ The firmware from Reolink main downloads site does not fully support this functi
 * Set up Ubuntu 24.04 Server (Noble Numbat) on a Raspberry pi 4 or 5
   * NOTE: You can use the Edit Settings feature of the Raspberry pi Imager to set up the hostname, user account locale and enable ssh for the 
   Raspberry pi, but **DO NOT** set up the Wi-Fi with this facility as the NVRs own Wi-Fi set up utility will then not work. The NVR uses
-  nmcli to control the Wi-Fi wheres the Imager will set it up under wpa_supplicant which will make the Wi-Fi device unavailable to nmcli.
-  This means you will need to do the initial setup on the Raspberry pi connect8ed through Ethernet or a direct terminal.
+  nmcli to control the Wi-Fi whereas the Imager will set it up under wpa_supplicant which will make the Wi-Fi device unavailable to nmcli.
+  This means you will need to do the initial setup on the Raspberry pi connected through Ethernet or a direct terminal.
 * ```bash
     sudo apt update
     sudo apt upgrade
