@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$/../.." dumb="true">
       <excludeFolder url="file://$MODULE_DIR$/../../camera-recordings-service/venv" />
       <excludeFolder url="file://$MODULE_DIR$/../../wifi-setup-service/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/../../camera-recording-service/venv" />
     </content>
   </component>
 </module>
