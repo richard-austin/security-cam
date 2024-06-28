@@ -15,7 +15,7 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 3.11 (camera-recordings-service)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 (camera-recording-service)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">

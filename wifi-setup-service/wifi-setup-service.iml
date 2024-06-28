@@ -15,7 +15,7 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 3.11 (wifi-setup-service)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 (wifi-setup-service)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">
