@@ -62,7 +62,7 @@ def get_ffmpeg_cmd(camera: any, stream: str):
             recording_src_url = camera['streams'][stream]['recording']['recording_src_url']
             epoch_time = int(time.time())
             ffmpeg_cmd: str = (
-                f"/usr/local/bin/ffmpeg -i {recording_src_url} -t 01:00:00 {'-c:a copy' if audio else '-an'}"
+                f"/usr/bin/ffmpeg -i {recording_src_url} -t 01:00:00 {'-c:a copy' if audio else '-an'}"
                 f" -c:v copy -level 3.0 -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type"
                 f" fmp4 -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
                 f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")

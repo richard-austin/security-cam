@@ -97,7 +97,7 @@ class RtspClient {
                                     h.getRTPAudioEncoding() == "PCMA" ? "pcm_alaw" : "copy"
                             // Start ffmpeg to transcode and transfer the audio data
                             List<String> command = new ArrayList()
-                            command.add("/usr/local/bin/ffmpeg")
+                            command.add("/usr/bin/ffmpeg")
                             command.add("-loglevel")
                             command.add("info")
                             command.add("-i")
