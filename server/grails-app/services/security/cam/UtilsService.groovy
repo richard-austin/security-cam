@@ -200,7 +200,7 @@ class UtilsService {
         <h2>Java OpenJDK v17.0.11</h2>
         <a href="https://openjdk.org/" target="_blank">Java OpenJDK</a>
         <hr>
-        <h2>ffmpeg v4.4.4</h2>
+        <h2>ffmpeg v6.1.1</h2>
         <a href="https://www.ffmpeg.org/" target="_blank">ffmpeg</a>
         <hr>
         <h2>Onvif for Java</h2>
