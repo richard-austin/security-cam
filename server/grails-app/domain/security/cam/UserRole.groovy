@@ -43,7 +43,7 @@ class UserRole implements Serializable {
 	}
 
 	private static DetachedCriteria criteriaFor(long userId, long roleId) {
-		UserRole.where {
+		where {
 			user == User.load(userId) &&
 			role == Role.load(roleId)
 		}
@@ -57,23 +57,23 @@ class UserRole implements Serializable {
 
 	static boolean remove(User u, Role r) {
 		if (u != null && r != null) {
-			UserRole.where { user == u && role == r }.deleteAll()
+			where { user == u && role == r }.deleteAll()
 		}
 	}
 
 	static int removeAll(User u) {
-		u == null ? 0 : UserRole.where { user == u }.deleteAll() as int
+		u == null ? 0 : where { user == u }.deleteAll() as int
 	}
 
 	static int removeAll(Role r) {
-		r == null ? 0 : UserRole.where { role == r }.deleteAll() as int
+		r == null ? 0 : where { role == r }.deleteAll() as int
 	}
 
 	static constraints = {
 	    user nullable: false
 		role nullable: false, validator: { Role r, UserRole ur ->
 			if (ur.user?.id) {
-				if (UserRole.exists(ur.user.id, r.id)) {
+				if (exists(ur.user.id, r.id)) {
 				    return ['userRole.exists']
 				}
 			}

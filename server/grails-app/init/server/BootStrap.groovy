@@ -1,6 +1,7 @@
 package server
 
 import grails.core.GrailsApplication
+import grails.util.Environment
 import security.cam.CloudProxyService
 import security.cam.RoleService
 import security.cam.Sc_processesService
@@ -43,7 +44,7 @@ class BootStrap {
             cloudProxyService.start()
 
         // In production, user accounts are always set up manually
-        if(false && grails.util.Environment.isDevelopmentMode()) {
+        if(false && Environment.isDevelopmentMode()) {
             User u = new User(username: 'user', password: 'user', cloudAccount: false, enabled: true, passwordExpired: false)
             u = userService.save(u)
             userRoleService.save(u, roleService.findByAuthority('ROLE_CLIENT'))
