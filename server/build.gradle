@@ -207,7 +207,7 @@ bootWar {
     }
 }
 
-task setVersion(type: Exec) {
+tasks.register('setVersion', Exec) {
     group = 'build'
     description = 'Sets the version.txt file with the current version from git describe'
     workingDir "$projectDir"
@@ -215,7 +215,9 @@ task setVersion(type: Exec) {
     args = ['-c', 'mkdir -p grails-app/assets/version && git describe --tags --dirty | tr -d \'\\n\' > grails-app/assets/version/version.txt']
 }
 
-task buildDebFile(type: Exec, dependsOn: [':server:assemble', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar']) {
+tasks.register('buildDebFile', Exec) {
+    group='build'
+    dependsOn([':server:assemble', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar'])
     group = 'build'
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'

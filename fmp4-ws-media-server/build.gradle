@@ -1,15 +1,27 @@
-task build (type: Exec) {
-    group = 'build'
-    description = 'Builds an arm64 executable file for media server'
-    workingDir "$projectDir"
-    executable "sh"
-    args = ['-c', 'env GOOS=linux GOARCH=arm64 go build -o ../xtrn-scripts-and-config/fmp4-ws-media-server/fmp4-ws-media-server_arm64']
+import com.fussionlabs.gradle.tasks.GoTask
+
+plugins {
+    id "com.fussionlabs.gradle.go-plugin" version "$goPluginVersion"
 }
 
-task deploy (type: Copy) {
+//go {
+//    cgoEnabled = true
+//    os = ["linux"]
+//    arch = ["arm64"]
+//    goVersion = "1.20.13"
+//}
+
+tasks.register('buildarm', GoTask) {
+    group='build'
+    workingDir "$projectDir"
+    goTaskEnv=[GOOS:'linux', GOARCH:'arm64']
+    goTaskArgs = ['build',  '-o', '../xtrn-scripts-and-config/fmp4-ws-media-server/fmp4-ws-media-server_arm64']
+}
+
+tasks.register('deploy', Copy) {
     group = 'build'
 
-    dependsOn(build)
+    dependsOn(buildarm)
     delete('../xtrn-scripts-and-config/fmp4-ws-media-server/fmp4-ws-media-server_arm64', '../xtrn-scripts-and-config/fmp4-ws-media-server/config.json')
     from(projectDir)
     into file('../xtrn-scripts-and-config/fmp4-ws-media-server')
