@@ -1,7 +1,6 @@
 package server
 
 import grails.core.GrailsApplication
-import org.hibernate.cfg.Environment
 import security.cam.CloudProxyService
 import security.cam.RoleService
 import security.cam.Sc_processesService
