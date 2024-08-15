@@ -310,7 +310,8 @@ func (p Packet) isKeyFrame() (retVal bool) {
 	}
 	flags := moof[3:5]
 
-	retVal = flags[0]&8 == 8
+	retVal = flags[0] == 0x68 || flags[0] == 0xb4
+	//	log.Infof("flags = 0x%x%c, %t", flags[0], flags[1], retVal)
 	return
 }
 
