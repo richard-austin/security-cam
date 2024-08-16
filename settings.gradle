@@ -1,2 +1,2 @@
-include 'client', 'server', 'fmp4-ws-media-server', 'generateProductKey', 'initialAdmin'
+include 'client', 'server', 'fmp4-ws-media-server', 'camera-recordings-service', 'wifi-setup-service', 'generateProductKey', 'initialAdmin'
 

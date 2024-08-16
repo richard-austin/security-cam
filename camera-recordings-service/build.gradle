@@ -1,0 +1,8 @@
+plugins {
+    id "ru.vyarus.use-python" version "4.0.0"
+}
+
+tasks.register('bootRun', PythonTask) {
+    group = 'application'
+    command = 'camera-recordings-service.py'
+}
