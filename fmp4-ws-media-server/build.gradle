@@ -28,3 +28,8 @@ tasks.register('deploy', Copy) {
     include 'config.json'
 }
 
+tasks.register('bootRun', GoTask) {
+    group='application'
+    workingDir "$projectDir"
+    goTaskArgs = ['run', '.']
+}
