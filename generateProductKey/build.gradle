@@ -17,11 +17,11 @@ jar {
     }
 }
 
-task copyToDeploymentStaging(type: Copy) {
-    from(libsDirectory)
+tasks.register('copyToDeploymentStaging', Copy) {
+    from(base.libsDirectory)
     into file('../xtrn-scripts-and-config/productKeyGen')
 
-    from ('../xtrn-scripts-and-config/productKeyGen/')
+    from('../xtrn-scripts-and-config/productKeyGen/')
     include 'generateProductKey-1.0-SNAPSHOT-uber.jar'
     destinationDir file('../xtrn-scripts-and-config/productKeyGen/')
     rename 'generateProductKey-1.0-SNAPSHOT-uber.jar', 'generateProductKey.jar'

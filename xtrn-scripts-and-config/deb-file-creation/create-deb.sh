@@ -13,8 +13,8 @@ cp ../processmotionrecordings.sh \
  security-cam_"${VERSION}"_arm64/etc/security-cam
 
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service &&
-cp ../../wifi-setup-service/src/*.py security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
-cp ../../wifi-setup-service/src/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
+cp ../../wifi-setup-service/*.py security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
+cp ../../wifi-setup-service/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
 cp ../install-cert.sh security-cam_"${VERSION}"_arm64/etc/security-cam
 
 mkdir -p security-cam_"${VERSION}"_arm64/etc/fmp4-ws-media-server &&
