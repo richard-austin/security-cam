@@ -10,6 +10,6 @@
         <module name="security-cam.server.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="19" />
+    <bytecodeTargetLevel target="21" />
   </component>
 </project>

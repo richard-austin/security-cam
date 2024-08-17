@@ -6,7 +6,7 @@ After=network.target
 Type=forking
 User=tomcat
 Group=tomcat
-Environment="JAVA_HOME=/usr/lib/jvm/java-1.17.0-openjdk-arm64"
+Environment="JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64"
 Environment="CATALINA_HOME=/var/lib/tomcat9"
 Environment="CATALINA_PID=/var/lib/tomcat9/temp/tomcat.pid"
 Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"

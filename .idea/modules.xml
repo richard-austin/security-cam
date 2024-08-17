@@ -3,8 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/security-cam.server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/server/security-cam.server.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/security-cam.server.test.iml" filepath="$PROJECT_DIR$/.idea/modules/server/security-cam.server.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/server.security-cam.server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/server/server.security-cam.server.main.iml" />
     </modules>
   </component>
 </project>
