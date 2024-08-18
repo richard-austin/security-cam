@@ -78,7 +78,8 @@ dependencies {
 
 //    implementation 'org.projectlombok:lombok:1.18.16'
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-    implementation 'org.grails.plugins:spring-security-core:4.0.3'
+// https://mvnrepository.com/artifact/org.grails.plugins/spring-security-core
+    implementation group: 'org.grails.plugins', name: 'spring-security-core', version: '6.1.1'
     implementation 'io.netty:netty-all:4.1.93.Final'
     implementation group: 'org.grails.plugins', name: 'grails-spring-websocket', version: '2.4.1'
     implementation "org.springframework.boot:spring-boot-starter-logging"
@@ -119,7 +120,9 @@ dependencies {
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.apache.tomcat:tomcat-jdbc"
 
-    runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
+// https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api
+    implementation group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: '4.0.2'
+
     runtimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.1'
 
     implementation "com.bertramlabs.plugins:asset-pipeline-grails:3.3.6"
