@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import { UtilsService } from '../shared/utils.service';
@@ -11,7 +11,7 @@ import { UtilsService } from '../shared/utils.service';
 })
 export class ChangePasswordComponent implements OnInit {
 
-  changePasswordForm!: FormGroup;
+  changePasswordForm!: UntypedFormGroup;
   @ViewChild(ReportingComponent) reporting!:ReportingComponent;
 
   constructor(private utilsService: UtilsService) { }
@@ -60,7 +60,7 @@ export class ChangePasswordComponent implements OnInit {
    * @param control
    */
   comparePasswords(control: AbstractControl): { [key: string]: boolean } | null {
-    let fg: FormGroup=control.parent as FormGroup;
+    let fg: UntypedFormGroup=control.parent as UntypedFormGroup;
     let ac: AbstractControl = fg?.controls['newPassword'];
     if (control.value !== undefined && control.value !== ac?.value) {
       return { 'confirmNewPassword': true };
@@ -73,10 +73,10 @@ export class ChangePasswordComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.changePasswordForm = new FormGroup({
-      oldPassword: new FormControl('', [Validators.required]),
-      newPassword: new FormControl('', [Validators.required, Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/)]),
-      confirmNewPassword: new FormControl('', [Validators.required, this.comparePasswords])
+    this.changePasswordForm = new UntypedFormGroup({
+      oldPassword: new UntypedFormControl('', [Validators.required]),
+      newPassword: new UntypedFormControl('', [Validators.required, Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/)]),
+      confirmNewPassword: new UntypedFormControl('', [Validators.required, this.comparePasswords])
     }, {updateOn: "change"});
     this.changePasswordForm.markAllAsTouched();
   }

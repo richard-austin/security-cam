@@ -5,7 +5,7 @@ import {OnDestroy} from '@angular/core';
 import {MatSelect} from '@angular/material/select/select';
 import {timer} from 'rxjs';
 import {HttpErrorResponse} from '@angular/common/http';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {CurrentWifiConnection} from '../shared/current-wifi-connection';
 import {WifiDetails} from '../shared/wifi-details';
 import {WifiUtilsService} from '../shared/wifi-utils.service';
@@ -29,7 +29,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
   connecting: boolean = false;
 
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  enterPasswordForm!: FormGroup;
+  enterPasswordForm!: UntypedFormGroup;
   private password: string | undefined;
   isReady: boolean = false;
 
@@ -153,8 +153,8 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  getFormControl(formGroup: FormGroup, fcName: string): FormControl {
-    return formGroup.get(fcName) as FormControl;
+  getFormControl(formGroup: UntypedFormGroup, fcName: string): UntypedFormControl {
+    return formGroup.get(fcName) as UntypedFormControl;
   }
 
    hasError = (controlName: string, errorName: string): boolean => {
@@ -205,8 +205,8 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
         this.reporting.errorMessage = reason;
       });
 
-    this.enterPasswordForm = new FormGroup({
-      password: new FormControl(this.password, [Validators.required, Validators.minLength(8), Validators.maxLength(35)]),
+    this.enterPasswordForm = new UntypedFormGroup({
+      password: new UntypedFormControl(this.password, [Validators.required, Validators.minLength(8), Validators.maxLength(35)]),
     }, {updateOn: 'change'});
     this.enterPasswordForm.markAllAsTouched();
   }
