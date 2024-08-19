@@ -22,8 +22,8 @@ import {
   Validators
 } from "@angular/forms";
 import {BehaviorSubject} from 'rxjs';
-import {MatCheckboxChange} from "@angular/material/checkbox";
-import {MatSelectChange} from '@angular/material/select';
+import {MatLegacyCheckboxChange as MatCheckboxChange} from "@angular/material/legacy-checkbox";
+import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
 import {HttpErrorResponse} from "@angular/common/http";
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {KeyValue} from '@angular/common';
