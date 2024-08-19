@@ -2,7 +2,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {MatCheckbox, MatCheckboxChange} from '@angular/material/checkbox';
 import {OnDestroy} from '@angular/core';
-import {MatSelect} from '@angular/material/select/select';
+import {MatSelect} from '@angular/material/select';
 import {timer} from 'rxjs';
 import {HttpErrorResponse} from '@angular/common/http';
 import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';

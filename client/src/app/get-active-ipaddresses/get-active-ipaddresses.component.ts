@@ -11,7 +11,7 @@ import {UtilsService} from "../shared/utils.service";
 })
 export class GetActiveIPAddressesComponent implements OnInit {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent
-  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement>
+  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement> | null
 
   ipDetails!: IPDetails[];
   displayedColumns: string[] = ["IP", "Name", "ConnType", "Device"];

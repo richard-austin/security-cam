@@ -7,7 +7,7 @@ import {HttpErrorResponse} from '@angular/common/http';
   styleUrls: ['./reporting.component.scss']
 })
 export class ReportingComponent implements OnInit {
-  error: HttpErrorResponse | undefined;
+  error: HttpErrorResponse | undefined | null;
   success: string | undefined;
   warning: string | undefined;
   isHtml: boolean = false;

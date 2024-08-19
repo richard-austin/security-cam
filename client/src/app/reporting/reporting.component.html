@@ -51,7 +51,7 @@
     <ng-container *ngIf="!success && !warning && error?.status != 400">
       <div>
         <ng-container *ngIf="error && error.status != 0">
-          <div>Error status: {{error?.status}}</div>
+          <div>Error status: {{error.status}}</div>
         </ng-container>
         <br>
         <div *ngIf="isHtml" [innerHTML]="error?.error"></div>

@@ -7,7 +7,7 @@ import {Subscription} from 'rxjs';
 import {IdleTimeoutStatusMessage, Message, messageType, UtilsService} from '../shared/utils.service';
 import {MatDialog} from '@angular/material/dialog';
 import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-modal.component';
-import {MatDialogRef} from '@angular/material/dialog/dialog-ref';
+import {MatDialogRef} from '@angular/material/dialog';
 import {UserIdleConfig} from '../angular-user-idle/angular-user-idle.config';
 import {UserIdleService} from '../angular-user-idle/angular-user-idle.service';
 import {Client, IMessage, StompSubscription} from "@stomp/stompjs";
