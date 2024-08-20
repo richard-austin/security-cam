@@ -1,8 +1,8 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ReportingComponent} from '../reporting/reporting.component';
-import {MatLegacyCheckbox as MatCheckbox, MatLegacyCheckboxChange as MatCheckboxChange} from '@angular/material/legacy-checkbox';
+import {MatCheckbox, MatCheckboxChange} from '@angular/material/checkbox';
 import {OnDestroy} from '@angular/core';
-import {MatLegacySelect as MatSelect} from '@angular/material/legacy-select';
+import {MatSelect} from '@angular/material/select';
 import {timer} from 'rxjs';
 import {HttpErrorResponse} from '@angular/common/http';
 import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';

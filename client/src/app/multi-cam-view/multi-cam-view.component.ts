@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, Stream} from '../cameras/Camera';
-import {MatLegacyCheckboxChange as MatCheckboxChange} from '@angular/material/legacy-checkbox';
+import {MatCheckboxChange} from '@angular/material/checkbox';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {VideoComponent} from '../video/video.component';
 import {HttpErrorResponse} from '@angular/common/http';

@@ -3,7 +3,7 @@ import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from 
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {UtilsService} from '../shared/utils.service';
-import {MatLegacyCheckboxChange as MatCheckboxChange} from '@angular/material/legacy-checkbox';
+import {MatCheckboxChange} from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-set-up-guest-account',

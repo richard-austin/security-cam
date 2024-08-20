@@ -1,5 +1,5 @@
 import {Component, Input, OnInit, QueryList, ViewChildren} from '@angular/core';
-import {MatLegacySlideToggle as MatSlideToggle, MatLegacySlideToggleChange as MatSlideToggleChange} from '@angular/material/legacy-slide-toggle';
+import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {Camera} from 'src/app/cameras/Camera';
 import {ReportingComponent} from 'src/app/reporting/reporting.component';
 import {ePresetOperations} from './preset-button/preset-button.component';

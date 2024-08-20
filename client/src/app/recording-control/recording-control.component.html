@@ -29,7 +29,7 @@
           <div *ngSwitchCase="false"
                matTooltip="{{isGuest ? 'Disabled for guest' : 'Delete the currently selected recording'}}"
                matTooltipClass="tooltip">
-            <button (click)="confirmDelete=true" [disabled]="isGuest" color="warning" mat-flat-button
+            <button (click)="confirmDelete=true" [disabled]="isGuest" color="warn" mat-flat-button
                     matTooltip="Delete the currently displayed recording" matTooltipClass="tooltip">
               Delete This Recording
             </button>
@@ -37,11 +37,11 @@
           <div *ngSwitchCase="true">
             Delete {{ selector.value.dateTime }},
             <div>are you sure?</div>
-            <button (click)="confirmDelete=false;deleteRecording()" color="danger" mat-flat-button
+            <button (click)="confirmDelete=false;deleteRecording()" color="warn" mat-flat-button
                     matTooltip="Delete the currently selected recording"
                     matTooltipClass="tooltip">Confirm
             </button>
-            <button (click)="confirmDelete=false" color="default" mat-flat-button
+            <button (click)="confirmDelete=false" color="primary" mat-flat-button
                     matTooltip="Do not delete the recording"
                     matTooltipClass="tooltip">
               Cancel
@@ -49,7 +49,7 @@
           </div>
         </div>
         <div *ngIf="!confirmDelete && !downloading" class="download-button">
-          <button (click)="downloadRecording()" color="light" mat-flat-button
+          <button (click)="downloadRecording()" color="accent" mat-flat-button
                   matTooltip="Download this recording to your PC or phone"
                   matTooltipClass="tooltip">
             Download Recording
