@@ -4,7 +4,7 @@
       <mat-card-title>Select a Motion Event</mat-card-title>
       <mat-card-content>
         <div>
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Choose a date</mat-label>
             <input matInput readonly [matDatepickerFilter]="dateFilter" [min]="minDate" [max]="maxDate"
                    [value]="selectedDate" (dateChange)="setDateSlot($event)" [matDatepicker]="picker">
@@ -14,7 +14,7 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Motion Events</mat-label>
             <mat-select #selector (selectionChange)="showMotionEvent($event)"
                         matTooltip="Select a recording by date and time"

@@ -4,7 +4,7 @@
     <mat-card-content>
       <form (ngSubmit)="$event.preventDefault(); formSubmitted()" [formGroup]="changeEmailForm">
         <div>
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Password</mat-label>
             <input matInput type="password" formControlName="password"
                    placeholder="Enter password">
@@ -14,7 +14,7 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="fill" class="email-input">
+          <mat-form-field appearance="outline" class="email-input">
             <mat-label>New email address</mat-label>
             <input matInput type="text" formControlName="newEmail" autocomplete="off" maxlength="40"
                    placeholder="New password">
@@ -25,7 +25,7 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="fill" class="email-input">
+          <mat-form-field appearance="outline" class="email-input">
             <mat-label>Confirm new email address</mat-label>
             <input matInput type="text" formControlName="confirmNewEmail" autocomplete="off" maxlength="40"
                    placeholder="Confirm new email address">

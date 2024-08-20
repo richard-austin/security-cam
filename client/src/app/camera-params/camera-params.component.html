@@ -9,7 +9,7 @@
     <mat-card-content [ngStyle]="downloading ? {display: 'none'} : {display: 'block'}">
       <div [formGroup]="camControlFormGroup">
         <div *ngIf="camType() === cameraTypes.sv3c">
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Infra Red Status</mat-label>
             <mat-select formControlName="irselector">
               <mat-option value="auto">
@@ -28,7 +28,7 @@
         </div>
         <div *ngIf="camType() !== cameraTypes.sv3c">
           <div>
-            <mat-form-field appearance="fill">
+            <mat-form-field appearance="outline">
               <mat-label>Night Vision Mode</mat-label>
               <mat-select formControlName="lampStatus">
                 <mat-option value="0">
@@ -46,7 +46,7 @@
             </mat-form-field>
           </div>
           <div>
-            <mat-form-field appearance="fill">
+            <mat-form-field appearance="outline">
               <mat-label>WDR</mat-label>
               <mat-select formControlName="wdrStatus">
                 <mat-option value="off">
@@ -62,7 +62,7 @@
           </div>
         </div>
         <div>
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Camera Name</mat-label>
             <input matInput type="text" formControlName="cameraName"
                    placeholder="Camera Name">
@@ -72,13 +72,13 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Date Format</mat-label>
             <input matInput type="text" formControlName="dateFormat"
                    placeholder="Date Format">
             <mat-hint>Read only value</mat-hint>
           </mat-form-field>
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Start Date</mat-label>
             <input matInput type="text" formControlName="startDate"
                    placeholder="Start Date">
@@ -86,13 +86,13 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Software Version</mat-label>
             <input matInput type="text" formControlName="softVersion"
                    placeholder="Software Version">
             <mat-hint>Read only value</mat-hint>
           </mat-form-field>
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Model</mat-label>
             <input matInput type="text" formControlName="model"
                    placeholder="Model">

@@ -42,7 +42,10 @@ $warn-button-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
 $secondary-button-colour: mat.get-contrast-color-from-palette($sec-cam-accent, 500);
 $default-button-colour: mat.get-contrast-color-from-palette($sec-cam-grey, 500);
 
-$theme: mat.define-dark-theme((color: (primary: $sec-cam-primary, secondary: $sec-cam-secondary, accent: $sec-cam-accent, warn: $sec-cam-warn)));
+$theme: mat.define-dark-theme((
+        color: (primary: $sec-cam-primary, secondary: $sec-cam-secondary, accent: $sec-cam-accent),
+        density: (scale: -2),
+));
 
 $mat-theme-background: map-get($theme, background);
 $background-colour: mat.get-color-from-palette($mat-theme-background, background);
