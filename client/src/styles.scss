@@ -7,8 +7,8 @@
 //  If you don't need the default component typographies but still want the hierarchy styles,
 //  you can delete this line and instead use:
 //    `@include mat.legacy-typography-hierarchy(mat.define-legacy-typography-config());`
-@include mat.all-legacy-component-typographies;
-@include mat.legacy-core();
+@include mat.all-component-typographies;
+@include mat.core();
 
 // Basic colours used in theme
 $sec-cam-primary: mat.define-palette(mat.$light-green-palette);
@@ -47,7 +47,7 @@ $theme: mat.define-dark-theme((color: (primary: $sec-cam-primary, secondary: $se
 $mat-theme-background: map-get($theme, background);
 $background-colour: mat.get-color-from-palette($mat-theme-background, background);
 $color: mat.get-contrast-color-from-palette($sec-cam-primary, 900);
-@include mat.all-legacy-component-themes($theme);
+@include mat.all-component-themes($theme);
 
 body {
   margin: 0;
