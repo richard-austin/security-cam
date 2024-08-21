@@ -4,7 +4,7 @@ import {MatCheckbox, MatCheckboxChange} from '@angular/material/checkbox';
 import {OnDestroy} from '@angular/core';
 import {MatSelect} from '@angular/material/select';
 import {timer} from 'rxjs';
-import {HttpErrorResponse} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {CurrentWifiConnection} from '../shared/current-wifi-connection';
 import {WifiDetails} from '../shared/wifi-details';

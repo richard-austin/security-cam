@@ -4,7 +4,7 @@ import {Camera, Stream} from '../cameras/Camera';
 import {Subscription, timer} from 'rxjs';
 import {VideoComponent} from '../video/video.component';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
-import {HttpErrorResponse} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {ActivatedRoute} from '@angular/router';
 

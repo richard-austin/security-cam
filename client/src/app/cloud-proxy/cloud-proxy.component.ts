@@ -3,7 +3,7 @@ import {CloudProxyService, IsMQConnected} from './cloud-proxy.service';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {UtilsService} from '../shared/utils.service';
 import {Client, IMessage, StompSubscription} from "@stomp/stompjs";
-import {HttpErrorResponse} from "@angular/common/http";
+import { HttpErrorResponse } from "@angular/common/http";
 import {MatCheckboxChange} from "@angular/material/checkbox";
 
 @Component({

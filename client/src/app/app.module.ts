@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CamerasComponent } from './cameras/cameras.component';
-import {HttpClient, HttpClientModule} from "@angular/common/http";
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import {BaseUrl} from "./shared/BaseUrl/BaseUrl";
 import { NavComponent } from './nav/nav.component';
 import { VideoComponent } from './video/video.component';
@@ -62,8 +62,7 @@ import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/ad
 import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-failures.component';
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         CamerasComponent,
         NavComponent,
@@ -99,10 +98,8 @@ import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-fail
         SafeHtmlPipe,
         OnvifFailuresComponent
     ],
-    imports: [
-        BrowserModule,
+    bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
-        HttpClientModule,
         BrowserAnimationsModule,
         MatCardModule,
         ReactiveFormsModule,
@@ -129,15 +126,11 @@ import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-fail
         MatDividerModule,
         MatSlideToggleModule,
         MatDatepickerModule,
-        MatNativeDateModule
-    ],
-    providers: [{
+        MatNativeDateModule], providers: [{
             provide: DateAdapter,
             useClass: CustomDateAdapter,
             deps: [MAT_DATE_LOCALE, Platform]
         },
-        HttpClient, BaseUrl],
-    bootstrap: [AppComponent]
-})
+        HttpClient, BaseUrl, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {
 }

@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {HttpErrorResponse} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-reporting',
