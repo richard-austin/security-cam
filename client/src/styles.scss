@@ -1,4 +1,9 @@
 @use '@angular/material' as mat;
+
+:root {
+  @include mat.form-field-density(-6);
+}
+
 // TODO(v15): As of v15 mat.legacy-core no longer includes default typography styles.
 //  The following line adds:
 //    1. Default typography styles for all components
@@ -11,10 +16,10 @@
 @include mat.core();
 
 // Basic colours used in theme
-$sec-cam-primary: mat.define-palette(mat.$light-green-palette);
+$sec-cam-primary:  mat.define-palette(mat.$light-green-palette);
 $sec-cam-accent: mat.define-palette(mat.$blue-palette);
 $sec-cam-warn: mat.define-palette(mat.$orange-palette);
-
+$sec-cam-skimp: mat.define-palette(mat.$cyan-palette);
 // Colours used for buttons and alter boxes.
 $sec-cam-danger: mat.define-palette(mat.$red-palette);
 $sec-cam-secondary: mat.define-palette(mat.$green-palette, 600);
@@ -30,17 +35,17 @@ $success-colour: mat.get-contrast-color-from-palette($sec-cam-secondary, 400);
 $danger-colour:  mat.get-contrast-color-from-palette($sec-cam-danger, 400);
 $warn-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
 
-$light-button-bkgnd: mat.get-color-from-palette($sec-cam-light, 400);
-$danger-button-bkgnd: mat.get-color-from-palette($sec-cam-danger, A700);
-$warn-button-bkgnd: mat.get-color-from-palette($sec-cam-warn,A400);
-$secondary-button-bkgnd: mat.get-color-from-palette($sec-cam-accent, 900);
-$default-button-bkgnd: mat.get-color-from-palette($sec-cam-grey, 500);
+//$light-button-bkgnd: mat.get-color-from-palette($sec-cam-light, 400);
+//$danger-button-bkgnd: mat.get-color-from-palette($sec-cam-danger, A700);
+//$warn-button-bkgnd: mat.get-color-from-palette($sec-cam-warn,A400);
+//$secondary-button-bkgnd: mat.get-color-from-palette($sec-cam-accent, 900);
+//$default-button-bkgnd: mat.get-color-from-palette($sec-cam-grey, 500);
 
-$light-button-colour: mat.get-contrast-color-from-palette($sec-cam-light, 900);
-$danger-button-colour: mat.get-contrast-color-from-palette($sec-cam-danger, 900);
-$warn-button-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
-$secondary-button-colour: mat.get-contrast-color-from-palette($sec-cam-accent, 500);
-$default-button-colour: mat.get-contrast-color-from-palette($sec-cam-grey, 500);
+//$light-button-colour: mat.get-contrast-color-from-palette($sec-cam-light, 900);
+//$danger-button-colour: mat.get-contrast-color-from-palette($sec-cam-danger, 900);
+//$warn-button-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
+//$secondary-button-colour: mat.get-contrast-color-from-palette($sec-cam-accent, 500);
+//$default-button-colour: mat.get-contrast-color-from-palette($sec-cam-grey, 500);
 
 $theme: mat.define-dark-theme((
         color: (primary: $sec-cam-primary, secondary: $sec-cam-secondary, accent: $sec-cam-accent),
@@ -142,34 +147,34 @@ html, body {
   @include danger;
 }
 
-.mat-danger {
-  background-color: $danger-button-bkgnd;
-  color: $danger-button-colour;
-}
-
-.mat-secondary {
-  background-color: $secondary-button-bkgnd;
-  color: $secondary-button-colour;
-}
-
-.mat-light {
-  background-color: $light-button-bkgnd;
-  color: $light-button-colour;
-}
-.mat-light {
-  background-color: $light-button-bkgnd;
-  color: $light-button-colour;
-}
-
-.mat-warning {
-  background-color: $warn-button-bkgnd;
-  color: $warn-button-colour;
-}
-
-.mat-default {
-  background-color: $default-button-bkgnd;
-  color: $default-button-colour;
-}
+//.mat-danger {
+//  background-color: $danger-button-bkgnd;
+//  color: $danger-button-colour;
+//}
+//
+//.mat-secondary {
+//  background-color: $secondary-button-bkgnd;
+//  color: $secondary-button-colour;
+//}
+//
+//.mat-light {
+//  background-color: $light-button-bkgnd;
+//  color: $light-button-colour;
+//}
+//.mat-light {
+//  background-color: $light-button-bkgnd;
+//  color: $light-button-colour;
+//}
+//
+//.mat-warning {
+//  background-color: $warn-button-bkgnd;
+//  color: $warn-button-colour;
+//}
+//
+//.mat-default {
+//  background-color: $default-button-bkgnd;
+//  color: $default-button-colour;
+//}
 
 mat-card-content.wait-box {
   >mat-spinner {
