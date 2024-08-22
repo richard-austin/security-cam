@@ -1,75 +1,287 @@
 @use '@angular/material' as mat;
+@use 'sass:map';
 
 :root {
   @include mat.form-field-density(-6);
 }
 
-// TODO(v15): As of v15 mat.legacy-core no longer includes default typography styles.
-//  The following line adds:
-//    1. Default typography styles for all components
-//    2. Styles for typography hierarchy classes (e.g. .mat-headline-1)
-//  If you specify typography styles for the components you use elsewhere, you should delete this line.
-//  If you don't need the default component typographies but still want the hierarchy styles,
-//  you can delete this line and instead use:
-//    `@include mat.legacy-typography-hierarchy(mat.define-legacy-typography-config());`
-@include mat.all-component-typographies;
+/**
+* Generated theme by Material Theme Generator
+* https://materialtheme.arcsine.dev
+* Fork at: https://materialtheme.arcsine.dev/?c=YHBhbGV0dGU$YHByaW1hcnk$YF48I2ZmZjkzMyIsIj9lcjwjZmZmZGMyIiwiO2VyPCNmZmY2MjB$LCIlPmBePCM3MmQyNmIiLCI~ZXI8I2Q1ZjJkMyIsIjtlcjwjNTVjMTRlfiwid2Fybj5gXjwjZmY4NTAwIiwiP2VyPCNmZmRhYjMiLCI7ZXI8I2ZmNjgwMH4sIj9UZXh0PCMwMDAwMDAiLCI~PTwjZmFmYWZhIiwiO1RleHQ8I2ZmZmZmZiIsIjs9PCMyYzJjMmN$LCJmb250cz5bYEA8KC00fixgQDwoLTN$LGBAPCgtMn4sYEA8KC0xfixgQDxoZWFkbGluZX4sYEA8dGl0bGV$LGBAPHN1YiktMn4sYEA8c3ViKS0xfixgQDxib2R5LTJ$LGBAPGJvZHktMX4sYEA8YnV0dG9ufixgQDxjYXB0aW9ufixgQDxpbnB1dCIsInNpemU$bnVsbH1dLCJpY29uczxPdXRsaW5lZCIsIj9uZXNzPmZhbHNlLCJ2ZXJzaW9uPjEzfQ==
+*/
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+
+// Fonts
+@import 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined';
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
+
+$fontConfig: (
+        display-4: mat.m2-define-typography-level(112px, 112px, 300, 'Roboto', -0.0134em),
+        display-3: mat.m2-define-typography-level(56px, 56px, 400, 'Roboto', -0.0089em),
+        display-2: mat.m2-define-typography-level(45px, 48px, 400, 'Roboto', 0.0000em),
+        display-1: mat.m2-define-typography-level(34px, 40px, 400, 'Roboto', 0.0074em),
+        headline: mat.m2-define-typography-level(24px, 32px, 400, 'Roboto', 0.0000em),
+        title: mat.m2-define-typography-level(20px, 32px, 500, 'Roboto', 0.0075em),
+        subheading-2: mat.m2-define-typography-level(16px, 28px, 400, 'Roboto', 0.0094em),
+        subheading-1: mat.m2-define-typography-level(15px, 24px, 500, 'Roboto', 0.0067em),
+        body-2: mat.m2-define-typography-level(14px, 24px, 500, 'Roboto', 0.0179em),
+        body-1: mat.m2-define-typography-level(14px, 20px, 400, 'Roboto', 0.0179em),
+        button: mat.m2-define-typography-level(14px, 14px, 500, 'Roboto', 0.0893em),
+        caption: mat.m2-define-typography-level(12px, 20px, 400, 'Roboto', 0.0333em),
+        input: mat.m2-define-typography-level(inherit, 1.125, 400, 'Roboto', 1.5px)
+);
+
+// Foreground Elements
+
+// Light Theme Text
+$dark-text: #000000;
+$dark-primary-text: rgba($dark-text, 0.87);
+$dark-accent-text: rgba($dark-primary-text, 0.54);
+$dark-disabled-text: rgba($dark-primary-text, 0.38);
+$dark-dividers: rgba($dark-primary-text, 0.12);
+$dark-focused: rgba($dark-primary-text, 0.12);
+
+$mat-light-theme-foreground: (
+        base:              black,
+        divider:           $dark-dividers,
+        dividers:          $dark-dividers,
+        disabled:          $dark-disabled-text,
+        disabled-button:   rgba($dark-text, 0.26),
+        disabled-text:     $dark-disabled-text,
+        elevation:         black,
+        secondary-text:    $dark-accent-text,
+        hint-text:         $dark-disabled-text,
+        accent-text:       $dark-accent-text,
+        icon:              $dark-accent-text,
+        icons:             $dark-accent-text,
+        text:              $dark-primary-text,
+        slider-min:        $dark-primary-text,
+        slider-off:        rgba($dark-text, 0.26),
+        slider-off-active: $dark-disabled-text,
+);
+
+// Dark Theme text
+$light-text: #ffffff;
+$light-primary-text: $light-text;
+$light-accent-text: rgba($light-primary-text, 0.7);
+$light-disabled-text: rgba($light-primary-text, 0.5);
+$light-dividers: rgba($light-primary-text, 0.12);
+$light-focused: rgba($light-primary-text, 0.12);
+
+$mat-dark-theme-foreground: (
+        base:              $light-text,
+        divider:           $light-dividers,
+        dividers:          $light-dividers,
+        disabled:          $light-disabled-text,
+        disabled-button:   rgba($light-text, 0.3),
+        disabled-text:     $light-disabled-text,
+        elevation:         black,
+        hint-text:         $light-disabled-text,
+        secondary-text:    $light-accent-text,
+        accent-text:       $light-accent-text,
+        icon:              $light-text,
+        icons:             $light-text,
+        text:              $light-text,
+        slider-min:        $light-text,
+        slider-off:        rgba($light-text, 0.3),
+        slider-off-active: rgba($light-text, 0.3),
+);
+
+// Background config
+// Light bg
+$light-background:    #fafafa;
+$light-bg-darker-5:   darken($light-background, 5%);
+$light-bg-darker-10:  darken($light-background, 10%);
+$light-bg-darker-20:  darken($light-background, 20%);
+$light-bg-darker-30:  darken($light-background, 30%);
+$light-bg-lighter-5:  lighten($light-background, 5%);
+$dark-bg-tooltip:     lighten(#2c2c2c, 20%);
+$dark-bg-alpha-4:     rgba(#2c2c2c, 0.04);
+$dark-bg-alpha-12:    rgba(#2c2c2c, 0.12);
+
+$mat-light-theme-background: (
+        background:               $light-background,
+        status-bar:               $light-bg-darker-20,
+        app-bar:                  $light-bg-darker-5,
+        hover:                    $dark-bg-alpha-4,
+        card:                     $light-bg-lighter-5,
+        dialog:                   $light-bg-lighter-5,
+        tooltip:                  $dark-bg-tooltip,
+        disabled-button:          $dark-bg-alpha-12,
+        raised-button:            $light-bg-lighter-5,
+        focused-button:           $dark-focused,
+        selected-button:          $light-bg-darker-20,
+        selected-disabled-button: $light-bg-darker-30,
+        disabled-button-toggle:   $light-bg-darker-10,
+        unselected-chip:          $light-bg-darker-10,
+        disabled-list-option:     $light-bg-darker-10,
+);
+
+// Dark bg
+$dark-background:     #2c2c2c;
+$dark-bg-lighter-5:   lighten($dark-background, 5%);
+$dark-bg-lighter-10:  lighten($dark-background, 10%);
+$dark-bg-lighter-20:  lighten($dark-background, 20%);
+$dark-bg-lighter-30:  lighten($dark-background, 30%);
+$light-bg-alpha-4:    rgba(#fafafa, 0.04);
+$light-bg-alpha-12:   rgba(#fafafa, 0.12);
+
+// Background palette for dark themes.
+$mat-dark-theme-background: (
+        background:               $dark-background,
+        status-bar:               $dark-bg-lighter-20,
+        app-bar:                  $dark-bg-lighter-5,
+        hover:                    $light-bg-alpha-4,
+        card:                     $dark-bg-lighter-5,
+        dialog:                   $dark-bg-lighter-5,
+        tooltip:                  $dark-bg-lighter-20,
+        disabled-button:          $light-bg-alpha-12,
+        raised-button:            $dark-bg-lighter-5,
+        focused-button:           $light-focused,
+        selected-button:          $dark-bg-lighter-20,
+        selected-disabled-button: $dark-bg-lighter-30,
+        disabled-button-toggle:   $dark-bg-lighter-10,
+        unselected-chip:          $dark-bg-lighter-20,
+        disabled-list-option:     $dark-bg-lighter-10,
+);
+
+// Compute font config
 @include mat.core();
 
-// Basic colours used in theme
-$sec-cam-primary:  mat.m2-define-palette(mat.$m2-light-green-palette);
-$sec-cam-accent: mat.m2-define-palette(mat.$m2-blue-palette);
-$sec-cam-warn: mat.m2-define-palette(mat.$m2-orange-palette);
-$sec-cam-skimp: mat.m2-define-palette(mat.$m2-cyan-palette);
-// Colours used for buttons and alter boxes.
-$sec-cam-danger: mat.m2-define-palette(mat.$m2-red-palette);
-$sec-cam-secondary: mat.m2-define-palette(mat.$m2-green-palette, 600);
-$sec-cam-light: mat.m2-define-palette(mat.$m2-yellow-palette, 400);
-$sec-cam-grey: mat.m2-define-palette(mat.$m2-grey-palette);
-
-// All the following are defined from the sec-cam- group above
-$success-background: mat.m2-get-color-from-palette($sec-cam-secondary, 100);
-$danger-background: mat.m2-get-color-from-palette($sec-cam-danger, 200);
-$warn-background: mat.m2-get-color-from-palette($sec-cam-warn, 100);
-
-$success-colour: mat.m2-get-contrast-color-from-palette($sec-cam-secondary, 400);
-$danger-colour:  mat.m2-get-contrast-color-from-palette($sec-cam-danger, 400);
-$warn-colour: mat.m2-get-contrast-color-from-palette($sec-cam-warn, 400);
-
-//$light-button-bkgnd: mat.get-color-from-palette($sec-cam-light, 400);
-//$danger-button-bkgnd: mat.get-color-from-palette($sec-cam-danger, A700);
-//$warn-button-bkgnd: mat.get-color-from-palette($sec-cam-warn,A400);
-//$secondary-button-bkgnd: mat.get-color-from-palette($sec-cam-accent, 900);
-//$default-button-bkgnd: mat.get-color-from-palette($sec-cam-grey, 500);
-
-//$light-button-colour: mat.get-contrast-color-from-palette($sec-cam-light, 900);
-//$danger-button-colour: mat.get-contrast-color-from-palette($sec-cam-danger, 900);
-//$warn-button-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
-//$secondary-button-colour: mat.get-contrast-color-from-palette($sec-cam-accent, 500);
-//$default-button-colour: mat.get-contrast-color-from-palette($sec-cam-grey, 500);
-
-$theme: mat.m2-define-dark-theme((
-        color: (primary: $sec-cam-primary, secondary: $sec-cam-secondary, accent: $sec-cam-accent),
-        density: (scale: -2),
-));
-
-$mat-theme-background: map-get($theme, background);
-$background-colour: mat.m2-get-color-from-palette($mat-theme-background, background);
-$color: mat.m2-get-contrast-color-from-palette($sec-cam-primary, 900);
-@include mat.all-component-themes($theme);
-
+// Theme Config
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: $background-colour;
+  background-color: $dark-background;
   //  margin: 0;
 }
 html, body {
   height: 100%;
 }
 
-.global-colours {
-  background-color: $background-colour;
-  color: $color
+//body {
+//  --primary-color: #fff933;
+//  --primary-lighter-color: #fffdc2;
+//  --primary-darker-color: #fff620;
+//  --text-primary-color: #{$dark-primary-text};
+//  --text-primary-lighter-color: #{$dark-primary-text};
+//  --text-primary-darker-color: #{$dark-primary-text};
+//}
+$mat-primary: (
+        main: #fff933,
+        lighter: #fffdc2,
+        darker: #fff620,
+        200: #fff933, // For slide toggle,
+        contrast : (
+                main: $dark-primary-text,
+                lighter: $dark-primary-text,
+                darker: $dark-primary-text,
+        )
+);
+$theme-primary: mat.m2-define-palette($mat-primary, main, lighter, darker);
+
+
+//body {
+//  --accent-color: #72d26b;
+//  --accent-lighter-color: #d5f2d3;
+//  --accent-darker-color: #55c14e;
+//  --text-accent-color: #{$dark-primary-text};
+//  --text-accent-lighter-color: #{$dark-primary-text};
+//  --text-accent-darker-color: #{$dark-primary-text};
+//}
+$mat-accent: (
+        main: #72d26b,
+        lighter: #d5f2d3,
+        darker: #55c14e,
+        200: #72d26b, // For slide toggle,
+        contrast : (
+                main: $dark-primary-text,
+                lighter: $dark-primary-text,
+                darker: $dark-primary-text,
+        )
+);
+$theme-accent: mat.m2-define-palette($mat-accent, main, lighter, darker);
+
+
+//body {
+//  --warn-color: #ff8500;
+//  --warn-lighter-color: #ffdab3;
+//  --warn-darker-color: #ff6800;
+//  --text-warn-color: #{$dark-primary-text};
+//  --text-warn-lighter-color: #{$dark-primary-text};
+//  --text-warn-darker-color: #{$dark-primary-text};
+//}
+
+$mat-warn: (
+        main: #ff8500,
+        lighter: #ffdab3,
+        darker: #ff6800,
+        200: #ff8500, // For slide toggle,
+        contrast : (
+                main: $dark-primary-text,
+                lighter: $dark-primary-text,
+                darker: $dark-primary-text,
+        )
+);
+$theme-warn: mat.m2-define-palette($mat-warn, main, lighter, darker);
+;
+
+$theme: mat.m2-define-dark-theme((
+                color: (
+                        primary: $theme-primary,
+                        accent: $theme-accent,
+                        warn: $theme-warn,
+                    //    is-dark: true,
+                        foreground: $mat-dark-theme-foreground,
+                        background: $mat-dark-theme-background,
+                ),
+                typography: (
+                        brand-family: 'Comic Sans',
+                        bold-weight: 900
+                ),
+                density: (
+                        scale: -1
+                )
+        )
+);
+
+// Theme Init
+@include mat.all-component-themes($theme);
+
+$warn-colour: map.get($mat-warn, "contrast.main");
+$success-colour: map.get($mat-accent, "contrast.main");
+$danger-colour: map.get($mat-warn, "contrast.main");
+$warn-background: map.get($mat-warn, "main");
+$success-background: map.get($mat-accent, "main");
+$danger-background: map.get($mat-warn, "darker");
+// Specific component overrides, pieces that are not in line with the general theming
+
+// Handle buttons appropriately, with respect to line-height
+.mat-raised-button, .mat-stroked-button, .mat-flat-button {
+  padding: 0 1.15em;
+  margin: 0 .65em;
+  min-width: 3em;
+  line-height: 36.4px
+}
+
+.mat-standard-chip {
+  padding: .5em .85em;
+  min-height: 2.5em;
+}
+
+.material-icons {
+  font-size: 24px;
+  font-family: 'Material Icons Outlined', 'Material Icons', sans-serif;
+  .mat-badge-content {
+    font-family: 'Roboto', sans-serif;
+  }
+}
+mat-card-title {
+  padding-left: 16px;
+  color: white;
 }
 
 @mixin alert {

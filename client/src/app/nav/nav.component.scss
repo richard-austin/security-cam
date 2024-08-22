@@ -26,6 +26,9 @@ div.general {
   // Home icon (videocam)
   > a {
     color: #2d2d2d;
+    > mat-icon {
+      transform: scale(1.5);
+    }
   }
   > div {
     > div {
@@ -82,6 +85,9 @@ div.general {
 
 .navbar-toggler {
   order: 10;
+  > mat-icon {
+    color: black;
+  }
 }
 
 div.no-transport-warning {
