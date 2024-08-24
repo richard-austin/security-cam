@@ -27,7 +27,7 @@
         <div>
           <mat-form-field appearance="outline" class="email-input">
             <mat-label>Confirm new email address</mat-label>
-            <input matInput type="text" formControlName="confirmNewEmail" autocomplete="off" maxlength="40"
+            <input matInput type="text" formControlName="confirmNewEmail" height="12" autocomplete="off" maxlength="40"
                    placeholder="Confirm new email address">
             <mat-error *ngIf="hasError('confirmNewEmail', 'required')">Confirm new email address is required</mat-error>
             <mat-error *ngIf="hasError('confirmNewEmail', 'confirmNewEmail')">Confirm new email and new email differ

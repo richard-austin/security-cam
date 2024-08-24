@@ -235,7 +235,7 @@ export class UtilsService {
     // Calculated scrollbar height, don't use or we Expression changed after it was checked error will occur
     //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
     const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
-    const extraBit = 1;  // To make browser window vertical scrollbar disappear
+    const extraBit = 13;  // To make browser window vertical scrollbar disappear
 
     if (scrollableContent !== null && scrollableContent !== undefined) {
       const boundingRect = scrollableContent.getBoundingClientRect()

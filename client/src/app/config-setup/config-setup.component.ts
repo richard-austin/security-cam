@@ -850,19 +850,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     cam.backchannelAudioSupported = !cam.backchannelAudioSupported;
   }
 
-  getScrollableContentStyle(): string {
-    const scrollableContent = this.scrollableContent?.nativeElement;
-    // Calculated scrollbar height, don't use or we Expression changed after it was checked error will occur
-    //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
-    const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
-    const extraBit = 1;  // To make browser window vertical scrollbar disappear
-
-    if (scrollableContent !== undefined) {
-      const boundingRect = scrollableContent.getBoundingClientRect()
-      return `height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
-    } else return ""
-  }
-
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the checkboxes
     this.cameraSvc.loadCameras().subscribe(cameras => {

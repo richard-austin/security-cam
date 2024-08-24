@@ -4,11 +4,12 @@ mat-card.confirm-logout {
   padding: 1rem;
   margin-left: auto;
   margin-right: auto;
+
   > mat-card-content {
     margin-top: 0.5rem;
 
     > button:nth-child(2) {
-     float: right;
+      float: right;
     }
   }
 }
@@ -23,13 +24,17 @@ div.general {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   background-color: #e5e1e1;
+  position: relative;
   // Home icon (videocam)
   > a {
+    position: absolute;
     color: #2d2d2d;
     > mat-icon {
-      transform: scale(1.5);
+
+      //    transform: scale(1.5);
     }
   }
+
   > div {
     > div {
       > button {
@@ -41,7 +46,9 @@ div.general {
   // Temperature indicator
   > div:nth-child(2) {
     display: inline-block;
+
     > div {
+      margin-left: 2rem;
       transform: scale(0.75);
       width: fit-content;
       padding: 0.25rem;
@@ -65,8 +72,8 @@ div.general {
       display: inline;
       > div {
         display: inline;
-      }:nth-child(4)
-      {
+      }
+      :nth-child(4) {
         float: right;
       }
     }
@@ -74,7 +81,7 @@ div.general {
 }
 
 .collapse {
-  @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px){
+  @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px) {
     max-height: 0;
     overflow-y: hidden;
     transition: max-height 1s ease-out;
@@ -85,6 +92,7 @@ div.general {
 
 .navbar-toggler {
   order: 10;
+
   > mat-icon {
     color: black;
   }
@@ -93,17 +101,20 @@ div.general {
 div.no-transport-warning {
   margin-top: 1rem;
   width: 100%;
+
   > div {
     border-radius: 2.0rem;
     margin: auto;
     width: fit-content;
     padding: 1rem;
     background-color: black;
+
     > mat-card-title {
       animation: pulsing 1300ms infinite;
       background-color: transparent
     }
   }
+
   @keyframes pulsing {
     0% {
       color: red;

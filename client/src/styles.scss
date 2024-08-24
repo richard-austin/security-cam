@@ -1,9 +1,10 @@
 @use '@angular/material' as mat;
 @use 'sass:map';
 
-:root {
-  @include mat.form-field-density(-6);
-}
+//root {
+//  @include mat.form-field-density(-5);
+//  @include mat.all-component-densities(-5);
+//}
 
 /**
 * Generated theme by Material Theme Generator
@@ -153,6 +154,15 @@ $mat-dark-theme-background: (
 
 // Theme Config
 body {
+  /**
+  Override the Angular Material 15+ sizes which are much too large for my liking
+ */
+  --mat-menu-item-label-text-size: 12px;
+  --mat-select-trigger-text-size: 12px;
+  //--mdc-text-button-container-height: 15px;
+  --mat-menu-item-label-text-line-height: 15px;
+
+
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   background-color: $dark-background;
@@ -234,22 +244,17 @@ $theme: mat.m2-define-dark-theme((
                         primary: $theme-primary,
                         accent: $theme-accent,
                         warn: $theme-warn,
-                    //    is-dark: true,
                         foreground: $mat-dark-theme-foreground,
                         background: $mat-dark-theme-background,
                 ),
-                typography: (
-                        brand-family: 'Comic Sans',
-                        bold-weight: 900
-                ),
-                density: (
-                        scale: -1
-                )
+                typography: mat.m2-define-typography-config(),
+                density: -5
         )
 );
 
 // Theme Init
 @include mat.all-component-themes($theme);
+
 
 $warn-colour: map.get($mat-warn, "contrast.main");
 $success-colour: map.get($mat-accent, "contrast.main");
@@ -257,23 +262,74 @@ $danger-colour: map.get($mat-warn, "contrast.main");
 $warn-background: map.get($mat-warn, "main");
 $success-background: map.get($mat-accent, "main");
 $danger-background: map.get($mat-warn, "darker");
+
+
+/**
+  Override the Angular Material 15+ sizes which are much too large for my liking
+ */
+mat-select {
+  height: 12px !important;
+}
+
+mat-option {
+  font-size: x-small !important;
+//  height: 12px !important;
+}
+
+mat-form-field {
+  font-size: x-small !important;
+  height: 45px !important;
+}
+
+mat-hint {
+  font-size: x-small !important;
+}
+
+mat-label {
+  font-size: x-small !important;
+}
+
+button[mat-button] {
+  font-size: x-small !important;
+}
+
+//button[mat-menu-item] {
+//  font-size: x-small !important;
+//}
+
+mat-menu {
+
+}
+.mat-mdc-menu-item {
+  //font-size: x-small !important;
+  min-height: 30px !important;
+}
+
+.mat-mdc-option {
+  min-height: 30px !important;
+}
+
+//input {
+//  font-size: x-small !important;
+//}
+
 // Specific component overrides, pieces that are not in line with the general theming
 
 // Handle buttons appropriately, with respect to line-height
-.mat-raised-button, .mat-stroked-button, .mat-flat-button {
-  padding: 0 1.15em;
-  margin: 0 .65em;
-  min-width: 3em;
-  line-height: 36.4px
-}
+//.mat-raised-button, .mat-stroked-button, .mat-flat-button {
+//  padding: 0 1.15em;
+//  margin: 0 .65em;
+//  min-width: 3em;
+//  line-height: 36.4px
+//}
 
-.mat-standard-chip {
-  padding: .5em .85em;
-  min-height: 2.5em;
-}
+//.mat-standard-chip {
+//  padding: .5em .85em;
+//  height: 2.5em;
+//}
 
 .material-icons {
-  font-size: 24px;
+  font-size: 20px;
   font-family: 'Material Icons Outlined', 'Material Icons', sans-serif;
   .mat-badge-content {
     font-family: 'Roboto', sans-serif;

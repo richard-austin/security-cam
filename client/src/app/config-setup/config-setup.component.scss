@@ -40,6 +40,8 @@ tr.element-row:not(.expanded-row):active {
 
 td, th {
   padding-left: 1rem !important;
+  padding-right: 0 !important;
+  overflow: visible !important;
 }
 
 .bottom-buttons-bar {
