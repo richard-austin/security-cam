@@ -204,8 +204,13 @@ bootWar.dependsOn(':client:buildClient')
 
 bootWar {
     webInf {
-        from('../client/dist/client')
+        from('../client/dist/client/browser')
         include '**/*'
+        into('classes/public')
+    }
+
+    webInf {
+        file('../client/dist/client/3rdpartylicences.txt')
         into('classes/public')
     }
 }
