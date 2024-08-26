@@ -38,8 +38,15 @@ tr.element-row:not(.expanded-row):active {
   font-size: xx-large;
 }
 
+mat-form-field {
+  margin-top: 5px;
+  margin-bottom: 5px;
+// font-size: small !important;
+  height: 35px !important;
+}
+
 td, th {
-  padding-left: 1rem !important;
+  padding-left: 0.75rem !important;
   padding-right: 0 !important;
   overflow: visible !important;
 }
@@ -73,7 +80,7 @@ td, th {
   > button:first-of-type {
     position: absolute;
     left: -0.5rem;
-    top: -1rem;
+    top: 0;
   }
 
   > input {
@@ -88,7 +95,7 @@ td, th {
     }
 
     right: -0.9rem;
-    top: -0.85rem;
+    top: 0;
 
     &:enabled {
       color: red;
@@ -151,18 +158,20 @@ div.password-dialogue {
   }
 }
 
-.mat-card-content {
-  display: block;
-}
-
 mat-icon.backchannel {
+  position: relative;
+  top: 3px;
   color: #4ccb4c;
   cursor: pointer;
+  font-size: x-large !important;
 }
 
 mat-icon.no-backchannel {
+  position: relative;
+  top: 3px;
   color: #858585;
   cursor: pointer;
+  font-size: x-large !important;
 }
 
 div.add-onvif-url-dialogue {

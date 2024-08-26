@@ -45,24 +45,24 @@ $dark-disabled-text: rgba($dark-primary-text, 0.38);
 $dark-dividers: rgba($dark-primary-text, 0.12);
 $dark-focused: rgba($dark-primary-text, 0.12);
 
-$mat-light-theme-foreground: (
-        base:              black,
-        divider:           $dark-dividers,
-        dividers:          $dark-dividers,
-        disabled:          $dark-disabled-text,
-        disabled-button:   rgba($dark-text, 0.26),
-        disabled-text:     $dark-disabled-text,
-        elevation:         black,
-        secondary-text:    $dark-accent-text,
-        hint-text:         $dark-disabled-text,
-        accent-text:       $dark-accent-text,
-        icon:              $dark-accent-text,
-        icons:             $dark-accent-text,
-        text:              $dark-primary-text,
-        slider-min:        $dark-primary-text,
-        slider-off:        rgba($dark-text, 0.26),
-        slider-off-active: $dark-disabled-text,
-);
+//$mat-light-theme-foreground: (
+//        base:              black,
+//        divider:           $dark-dividers,
+//        dividers:          $dark-dividers,
+//        disabled:          $dark-disabled-text,
+//        disabled-button:   rgba($dark-text, 0.26),
+//        disabled-text:     $dark-disabled-text,
+//        elevation:         black,
+//        secondary-text:    $dark-accent-text,
+//        hint-text:         $dark-disabled-text,
+//        accent-text:       $dark-accent-text,
+//        icon:              $dark-accent-text,
+//        icons:             $dark-accent-text,
+//        text:              $dark-primary-text,
+//        slider-min:        $dark-primary-text,
+//        slider-off:        rgba($dark-text, 0.26),
+//        slider-off-active: $dark-disabled-text,
+//);
 
 // Dark Theme text
 $light-text: #ffffff;
@@ -138,7 +138,7 @@ $mat-dark-theme-background: (
         hover:                    $light-bg-alpha-4,
         card:                     $dark-bg-lighter-5,
         dialog:                   $dark-bg-lighter-5,
-        tooltip:                  $dark-bg-lighter-20,
+      //  tooltip:                  $dark-bg-lighter-20,
         disabled-button:          $light-bg-alpha-12,
         raised-button:            $dark-bg-lighter-5,
         focused-button:           $light-focused,
@@ -159,9 +159,11 @@ body {
  */
   --mat-menu-item-label-text-size: 12px;
   --mat-select-trigger-text-size: 12px;
+  --mdc-plain-tooltip-container-color: e3ba4f;
+  --mdc-plain-tooltip-supporting-text-color: black;
   //--mdc-text-button-container-height: 15px;
   --mat-menu-item-label-text-line-height: 15px;
-
+  //--mdc-plain-tooltip-container-shape: 2rem;
 
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
@@ -170,6 +172,7 @@ body {
 }
 html, body {
   height: 100%;
+
 }
 
 //body {
@@ -273,16 +276,19 @@ mat-select {
 
 mat-option {
   font-size: x-small !important;
-//  height: 12px !important;
+  min-height: 30px !important;
 }
 
 mat-form-field {
+  margin-top: 5px;
+  margin-bottom: 5px;
   font-size: x-small !important;
-  height: 45px !important;
+  height: 50px !important;
 }
 
 mat-hint {
   font-size: x-small !important;
+  color: $light-accent-text;
 }
 
 mat-label {
@@ -290,55 +296,37 @@ mat-label {
 }
 
 button[mat-button] {
-  font-size: x-small !important;
+  font-size: small !important;
 }
 
-//button[mat-menu-item] {
-//  font-size: x-small !important;
-//}
-
-mat-menu {
-
-}
-.mat-mdc-menu-item {
-  //font-size: x-small !important;
+button[mat-menu-item] {
   min-height: 30px !important;
 }
 
-.mat-mdc-option {
-  min-height: 30px !important;
+mat-error {
+  font-size: x-small;
 }
 
-//input {
-//  font-size: x-small !important;
-//}
+// Specific Angular Material component overrides, pieces that are not in line with the general theming
 
-// Specific component overrides, pieces that are not in line with the general theming
-
-// Handle buttons appropriately, with respect to line-height
-//.mat-raised-button, .mat-stroked-button, .mat-flat-button {
-//  padding: 0 1.15em;
-//  margin: 0 .65em;
-//  min-width: 3em;
-//  line-height: 36.4px
-//}
-
-//.mat-standard-chip {
-//  padding: .5em .85em;
-//  height: 2.5em;
-//}
-
-.material-icons {
-  font-size: 20px;
-  font-family: 'Material Icons Outlined', 'Material Icons', sans-serif;
-  .mat-badge-content {
-    font-family: 'Roboto', sans-serif;
-  }
+mat-icon {
+    font-size: 20px !important;
+    font-family: 'Material Icons Outlined', 'Material Icons', sans-serif !important;
+    //.mat-badge-content {
+    //  font-family: 'Roboto', sans-serif;
+    //}
 }
 mat-card-title {
   padding-left: 16px;
   color: white;
 }
+
+mat-card-subtitle {
+  padding-left: 16px;
+}
+/**
+  ########################################################################################################################
+ */
 
 @mixin alert {
  // position: relative;
@@ -460,8 +448,8 @@ mat-card.hide-background {
   background-color: transparent;
 }
 
-.mat-tooltip.tooltip {
-  background-color: #e3ba4f;
+.tooltip {
+  background-color: #e3ba4f !important;
   color: black;
   font-size: 12px;
 }
