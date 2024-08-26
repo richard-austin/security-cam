@@ -101,7 +101,7 @@
         <span
           [matTooltip]="cam.value.cred == '' ? 'Camera credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'"
           matTooltipClass="tooltip">
-          <button class="change-password-button"
+          <button class="change-password-button2"
                   mat-icon-button
                   [disabled]="isGuest"
                   (click)="togglePasswordDialogue(cam.key)">
@@ -253,13 +253,13 @@
       <ng-container matColumnDef="rtspTransport">
         <th mat-header-cell *matHeaderCellDef>RTSP Transport.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-form-field appearance="outline" [style.width.px]="75">
+          <mat-form-field appearance="outline" [style.width.px]="75"
+                          matTooltip="Select the transport protocol to be used between {{cam.key}} and the NVR"
+                          matTooltipClass="tooltip">
             <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
                 enabled state is updated.-->
             <mat-select [formControl]="getCamControl(i, 'rtspTransport')"
-                        (selectionChange)="updateCamField(i, 'rtspTransport'); setUpTableFormControls()"
-                        matTooltip="Select the transport protocol to be used between {{cam.key}} and the NVR"
-                        matTooltipClass="tooltip">
+                        (selectionChange)="updateCamField(i, 'rtspTransport'); setUpTableFormControls()">
               <mat-option value="tcp">
                 TCP
               </mat-option>

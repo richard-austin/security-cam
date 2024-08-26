@@ -159,8 +159,6 @@ body {
  */
   --mat-menu-item-label-text-size: 12px;
   --mat-select-trigger-text-size: 12px;
-  --mdc-plain-tooltip-container-color: e3ba4f;
-  --mdc-plain-tooltip-supporting-text-color: black;
   //--mdc-text-button-container-height: 15px;
   --mat-menu-item-label-text-line-height: 15px;
   //--mdc-plain-tooltip-container-shape: 2rem;
@@ -449,9 +447,10 @@ mat-card.hide-background {
 }
 
 .tooltip {
-  background-color: #e3ba4f !important;
-  color: black;
-  font-size: 12px;
+  --mdc-plain-tooltip-container-color: #e3ba4f;
+  --mdc-plain-tooltip-supporting-text-color: black;
+  --mdc-plain-tooltip-supporting-text-size: 12px;
+  --mdc-plain-tooltip-container-shape: 5px;
 }
 
 .confirm-group {
@@ -504,7 +503,7 @@ label.video-buttons {
 }
 
 mat-card-content.scrollable-content {
-  width: 100%;
+ // width: 100%;
   overflow: auto;
 
   &::-webkit-scrollbar-track {
