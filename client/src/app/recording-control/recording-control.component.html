@@ -26,7 +26,7 @@
           </mat-form-field>
         </div>
         <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
-          <div *ngSwitchCase="false"
+          <div *ngSwitchCase="false" class="delete-button"
                matTooltip="{{isGuest ? 'Disabled for guest' : 'Delete the currently selected recording'}}"
                matTooltipClass="tooltip">
             <button (click)="confirmDelete=true" [disabled]="isGuest" color="warn" mat-flat-button
@@ -52,7 +52,7 @@
           <button (click)="downloadRecording()" color="accent" mat-flat-button
                   matTooltip="Download this recording to your PC or phone"
                   matTooltipClass="tooltip">
-            Download Recording
+            Download&nbsp;Recording
           </button>
         </div>
       </mat-card-content>

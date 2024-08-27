@@ -162,7 +162,7 @@
       <ng-container matColumnDef="cameraParamSpecs">
         <th mat-header-cell *matHeaderCellDef>Camera Type.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-form-field appearance="outline" [style.width.px]="150"
+          <mat-form-field appearance="outline" [style.width.px]="155"
                           matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'Not Listed' to disable this feature, or if the camera type is not listed."
                           matTooltipClass="tooltip">
             <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
@@ -197,7 +197,7 @@
       <ng-container matColumnDef="retrigger-window">
         <th mat-header-cell *matHeaderCellDef>Retrigger Window.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-form-field appearance="outline" [style.width.px]="50"
+          <mat-form-field appearance="outline" [style.width.px]="70"
                           matTooltip="Select the maximum time in seconds that can elapse between FTP uploads from the camere for the recording to be extended further by this selected time. The absence of another FTP within this window will result in the recording being completed."
                           matTooltipClass="tooltip">
             <mat-select [formControl]="getCamControl(i, 'retriggerWindow')"
@@ -372,11 +372,11 @@
               <ng-container matColumnDef="audio_encoding">
                 <th mat-header-cell *matHeaderCellDef>Audio Encoding</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
-                  <mat-form-field appearance="outline" [style.width.px]="90">
+                  <mat-form-field appearance="outline" [style.width.px]="90"
+                                  matTooltip="Set the audio encoding (G711 or AAC) for {{stream.key}}. If you are unsure, select 'Not Listed'"
+                                  matTooltipClass="tooltip">
                     <mat-select [formControl]="getStreamControl(camIndex, streamIndex, 'audio_encoding')"
-                                (selectionChange)="updateAudioEncoding($event, stream.value)"
-                                matTooltip="Set the audio encoding (G711 or AAC) for {{stream.key}}. If you are unsure, select 'Not Listed'"
-                                matTooltipClass="tooltip">
+                                (selectionChange)="updateAudioEncoding($event, stream.value)">
                       <mat-option *ngFor="let enc of cameraSvc.audioEncodings" [value]="enc.value">
                         {{ enc.name }}
                       </mat-option>
@@ -461,12 +461,13 @@
               <ng-container matColumnDef="trigger_recording_on">
                 <th mat-header-cell *matHeaderCellDef>Trigger Recording On</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
-                  <mat-form-field appearance="outline" [style.width.px]="80">
+                  <mat-form-field appearance="outline" [style.width.px]="80"
+                                  matTooltip="Select another stream on the camera to trigger a recording on when motion is detected on {{stream.key}}. Normally you would select the highest resolution stream on the camera."
+                                  matTooltipClass="tooltip">
+
                     <mat-select [formControl]="getStreamControl(camIndex, streamIndex, 'trigger_recording_on')"
                                 (selectionChange)="setRecordingTrigger($event, stream.value)"
-                                [disableControl]="!stream.value.motion.enabled"
-                                matTooltip="Select another stream on the camera to trigger a recording on when motion is detected on {{stream.key}}. Normally you would select the highest resolution stream on the camera."
-                                matTooltipClass="tooltip">
+                                [disableControl]="!stream.value.motion.enabled">
                       <mat-option [value]="''">
                         None
                       </mat-option>
@@ -482,12 +483,13 @@
               <ng-container matColumnDef="preambleFrames">
                 <th mat-header-cell *matHeaderCellDef>Preamble Frames.</th>
                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
-                  <mat-form-field appearance="outline" [style.width.px]="50">
+                  <mat-form-field appearance="outline" [style.width.px]="70"
+                                  matTooltip="The number of frames to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value divided by the camera frame rate (seconds). Note that audio packets are also counted as frames, so a higher value may be required if audio is enabled on the stream."
+                                  matTooltipClass="tooltip">
+
                     <mat-select [formControl]="getStreamControl(camIndex, streamIndex, 'preambleFrames')"
                                 (selectionChange)="updateStreamField(camIndex, streamIndex, 'preambleFrames')"
-                                [disableControl]="getPreambleFramesDisabledState(cam.value, stream.value)"
-                                matTooltip="The number of frames to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value divided by the camera frame rate (seconds). Note that audio packets are also counted as frames, so a higher value may be required if audio is enabled on the stream."
-                                matTooltipClass="tooltip">
+                                [disableControl]="getPreambleFramesDisabledState(cam.value, stream.value)">
                       <mat-option *ngFor="let preamble of cameraSvc.preambleFrameValues" [value]="preamble">
                         {{ preamble }}
                       </mat-option>

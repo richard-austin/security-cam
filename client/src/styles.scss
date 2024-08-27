@@ -45,25 +45,6 @@ $dark-disabled-text: rgba($dark-primary-text, 0.38);
 $dark-dividers: rgba($dark-primary-text, 0.12);
 $dark-focused: rgba($dark-primary-text, 0.12);
 
-//$mat-light-theme-foreground: (
-//        base:              black,
-//        divider:           $dark-dividers,
-//        dividers:          $dark-dividers,
-//        disabled:          $dark-disabled-text,
-//        disabled-button:   rgba($dark-text, 0.26),
-//        disabled-text:     $dark-disabled-text,
-//        elevation:         black,
-//        secondary-text:    $dark-accent-text,
-//        hint-text:         $dark-disabled-text,
-//        accent-text:       $dark-accent-text,
-//        icon:              $dark-accent-text,
-//        icons:             $dark-accent-text,
-//        text:              $dark-primary-text,
-//        slider-min:        $dark-primary-text,
-//        slider-off:        rgba($dark-text, 0.26),
-//        slider-off-active: $dark-disabled-text,
-//);
-
 // Dark Theme text
 $light-text: #ffffff;
 $light-primary-text: $light-text;
@@ -92,35 +73,6 @@ $mat-dark-theme-foreground: (
 );
 
 // Background config
-// Light bg
-$light-background:    #fafafa;
-$light-bg-darker-5:   darken($light-background, 5%);
-$light-bg-darker-10:  darken($light-background, 10%);
-$light-bg-darker-20:  darken($light-background, 20%);
-$light-bg-darker-30:  darken($light-background, 30%);
-$light-bg-lighter-5:  lighten($light-background, 5%);
-$dark-bg-tooltip:     lighten(#2c2c2c, 20%);
-$dark-bg-alpha-4:     rgba(#2c2c2c, 0.04);
-$dark-bg-alpha-12:    rgba(#2c2c2c, 0.12);
-
-$mat-light-theme-background: (
-        background:               $light-background,
-        status-bar:               $light-bg-darker-20,
-        app-bar:                  $light-bg-darker-5,
-        hover:                    $dark-bg-alpha-4,
-        card:                     $light-bg-lighter-5,
-        dialog:                   $light-bg-lighter-5,
-        tooltip:                  $dark-bg-tooltip,
-        disabled-button:          $dark-bg-alpha-12,
-        raised-button:            $light-bg-lighter-5,
-        focused-button:           $dark-focused,
-        selected-button:          $light-bg-darker-20,
-        selected-disabled-button: $light-bg-darker-30,
-        disabled-button-toggle:   $light-bg-darker-10,
-        unselected-chip:          $light-bg-darker-10,
-        disabled-list-option:     $light-bg-darker-10,
-);
-
 // Dark bg
 $dark-background:     #2c2c2c;
 $dark-bg-lighter-5:   lighten($dark-background, 5%);
@@ -162,7 +114,8 @@ body {
   //--mdc-text-button-container-height: 15px;
   --mat-menu-item-label-text-line-height: 15px;
   //--mdc-plain-tooltip-container-shape: 2rem;
-
+  --mat-table-header-headline-size: 12px;
+  --mat-table-header-headline-weight: 400;
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   background-color: $dark-background;
@@ -173,14 +126,6 @@ html, body {
 
 }
 
-//body {
-//  --primary-color: #fff933;
-//  --primary-lighter-color: #fffdc2;
-//  --primary-darker-color: #fff620;
-//  --text-primary-color: #{$dark-primary-text};
-//  --text-primary-lighter-color: #{$dark-primary-text};
-//  --text-primary-darker-color: #{$dark-primary-text};
-//}
 $mat-primary: (
         main: #fff933,
         lighter: #fffdc2,
@@ -194,15 +139,6 @@ $mat-primary: (
 );
 $theme-primary: mat.m2-define-palette($mat-primary, main, lighter, darker);
 
-
-//body {
-//  --accent-color: #72d26b;
-//  --accent-lighter-color: #d5f2d3;
-//  --accent-darker-color: #55c14e;
-//  --text-accent-color: #{$dark-primary-text};
-//  --text-accent-lighter-color: #{$dark-primary-text};
-//  --text-accent-darker-color: #{$dark-primary-text};
-//}
 $mat-accent: (
         main: #72d26b,
         lighter: #d5f2d3,
@@ -215,16 +151,6 @@ $mat-accent: (
         )
 );
 $theme-accent: mat.m2-define-palette($mat-accent, main, lighter, darker);
-
-
-//body {
-//  --warn-color: #ff8500;
-//  --warn-lighter-color: #ffdab3;
-//  --warn-darker-color: #ff6800;
-//  --text-warn-color: #{$dark-primary-text};
-//  --text-warn-lighter-color: #{$dark-primary-text};
-//  --text-warn-darker-color: #{$dark-primary-text};
-//}
 
 $mat-warn: (
         main: #ff8500,
@@ -275,6 +201,7 @@ mat-select {
 mat-option {
   font-size: x-small !important;
   min-height: 30px !important;
+  padding: 0 16px 0 16px !important;
 }
 
 mat-form-field {
@@ -301,6 +228,14 @@ button[mat-menu-item] {
   min-height: 30px !important;
 }
 
+button[mat-raised-button] {
+  font-size: small !important;
+}
+
+button[mat-flat-button] {
+  font-size: 12px;
+}
+
 mat-error {
   font-size: x-small;
 }
@@ -315,13 +250,20 @@ mat-icon {
     //}
 }
 mat-card-title {
-  padding-left: 16px;
+  --mat-card-title-text-size: 24px;
+
+  padding: 0 0 0 16px;
   color: white;
 }
 
-mat-card-subtitle {
-  padding-left: 16px;
+mat-card {
+  padding: 12.5px;
 }
+
+mat-card-subtitle {
+  margin-left: 16px;
+}
+
 /**
   ########################################################################################################################
  */
@@ -400,35 +342,6 @@ mat-card-subtitle {
   @include alert-embedded;
   @include danger;
 }
-
-//.mat-danger {
-//  background-color: $danger-button-bkgnd;
-//  color: $danger-button-colour;
-//}
-//
-//.mat-secondary {
-//  background-color: $secondary-button-bkgnd;
-//  color: $secondary-button-colour;
-//}
-//
-//.mat-light {
-//  background-color: $light-button-bkgnd;
-//  color: $light-button-colour;
-//}
-//.mat-light {
-//  background-color: $light-button-bkgnd;
-//  color: $light-button-colour;
-//}
-//
-//.mat-warning {
-//  background-color: $warn-button-bkgnd;
-//  color: $warn-button-colour;
-//}
-//
-//.mat-default {
-//  background-color: $default-button-bkgnd;
-//  color: $default-button-colour;
-//}
 
 mat-card-content.wait-box {
   >mat-spinner {

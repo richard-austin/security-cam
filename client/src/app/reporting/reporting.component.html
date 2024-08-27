@@ -26,7 +26,7 @@
 </mat-card>
 
 <ng-container *ngIf="embedded && (error || success || warning)">
-  <div
+  <div class="reporting"
     [ngClass]="{'alert-danger-embedded': error, 'alert-success-embedded': success, 'alert-warning-embedded': warning}"
        (click)="dismiss()">
     <ng-container *ngIf="success">

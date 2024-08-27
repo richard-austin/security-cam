@@ -50,6 +50,8 @@ div.no-display {
 
 div.delete-button-set {
   > div {
+    color: white;
+    font-size: 12px;
     button {
       margin-top: 0.4rem;
       margin-right: 0.4rem;
@@ -57,9 +59,18 @@ div.delete-button-set {
   }
 }
 
+div.delete-button {
+  > button {
+    width: 173px;
+  }
+
+  margin-top: 0.4rem;
+}
+
+
 div.download-button {
   > button {
-    width: 167.38px;
+    width: 173px;
   }
 
   margin-top: 0.4rem;
