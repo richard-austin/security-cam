@@ -13,7 +13,9 @@ tr.element-row:not(.expanded-row):hover {
 tr.element-row:not(.expanded-row):active {
   background: grey;
 }
-
+tr[mat-footer-row] {
+  --mat-table-footer-container-height: 55px;
+}
 .element-row td {
   border-bottom-width: 0;
 }

@@ -179,7 +179,7 @@
       <ng-container matColumnDef="ftp">
         <th mat-header-cell *matHeaderCellDef>FTP From Camera.</th>
         <td mat-cell *matCellDef="let cam; let i = dataIndex">
-          <mat-form-field appearance="outline" [style.width.px]="85"
+          <mat-form-field appearance="outline" [style.width.px]="95"
                           matTooltip="{{motionSet(cam.value) ? 'To use FTP upload from the camera, you must not have motion selected on any stream.' : 'If a stream is selected, images sent by FTP from '+ cam.key + ' on motion being detected will trigger the NVR to make a recording on the selected stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP a .jpg (jpeg) image to ./'+cam.key+ ' on port 2121 of the NVR. See Camera Recordings Service section of the README.md'}}"
                           matTooltipClass="tooltip">
             <mat-select [formControl]="getCamControl(i, 'ftp')"

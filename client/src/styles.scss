@@ -109,7 +109,9 @@ body {
   /**
   Override the Angular Material 15+ sizes which are much too large for my liking
  */
-  --mat-menu-item-label-text-size: 12px;
+  --mat-menu-item-label-text-size: 14px;
+  --mat-menu-item-label-text-font: Roboto, "Helvetica Neue", sans-serif;
+  --mat-menu-item-label-text-weight: 400;
   --mat-select-trigger-text-size: 12px;
   //--mdc-text-button-container-height: 15px;
   --mat-menu-item-label-text-line-height: 15px;
@@ -221,11 +223,16 @@ mat-label {
 }
 
 button[mat-button] {
-  font-size: small !important;
+  --mdc-text-button-label-text-size:14px;
+  --mdc-text-button-label-text-tracking: normal;
 }
 
 button[mat-menu-item] {
-  min-height: 30px !important;
+  //min-height: 30px !important;
+  --mdc-text-button-label-text-size: 14px;
+  --mat-menu-item-label-text-weight: 400;
+
+  //--mat-menu-item-label-text-weight: 400;
 }
 
 button[mat-raised-button] {
@@ -261,7 +268,7 @@ mat-card {
 }
 
 mat-card-subtitle {
-  margin-left: 16px;
+  margin-left: 16px !important;
 }
 
 /**

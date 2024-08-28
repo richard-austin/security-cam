@@ -27,12 +27,11 @@ div.general {
   position: relative;
   // Home icon (videocam)
   > a {
-    position: absolute;
+    transform: scale(1.4);
+    top: 10px;
+    height: 40px;
+    width: 40px;
     color: #2d2d2d;
-    > mat-icon {
-
-      //    transform: scale(1.5);
-    }
   }
 
   > div {
@@ -48,7 +47,7 @@ div.general {
     display: inline-block;
 
     > div {
-      margin-left: 2rem;
+      margin-left: -0.125rem;
       transform: scale(0.75);
       width: fit-content;
       padding: 0.25rem;
@@ -62,7 +61,8 @@ div.general {
     @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
       display: none;
     }
-    display: inline;
+   // display: inline;
+    margin-top: 10px;
     float: right;
   }
 
@@ -74,6 +74,7 @@ div.general {
         display: inline;
       }
       :nth-child(4) {
+        margin-top: 10px;
         float: right;
       }
     }

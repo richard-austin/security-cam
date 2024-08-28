@@ -19,12 +19,12 @@
     </div>
     <br>
     <span class="add-camera-confirm-group">
-      <button color="default" mat-flat-button (click)="hideAddCameraDialogue()"
+      <button color="default" mat-raised-button (click)="hideAddCameraDialogue()"
               matTooltip="Close this dialogue and don't look up camera details"
               matTooltipClass="tooltip">
         Cancel
       </button>
-      <button color="warning" mat-flat-button
+      <button color="warn" mat-raised-button
               [disabled]="anyInvalid()"
               (click)="startCapabilitiesDiscovery()"
               matTooltip="Try to find the camera details for the given Onvif URL"
