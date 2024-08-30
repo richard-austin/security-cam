@@ -74,12 +74,12 @@
         </mat-form-field>
       </div>
       <span class="confirm-group">
-      <button color="default" mat-flat-button (click)="hideRegisterForm()"
+      <button color="default" mat-raised-button (click)="hideRegisterForm()"
               matTooltip="{{reporting.success == undefined ? 'Close this dialogue and abandon setting up an account': 'Close this dialogue box'}}"
               matTooltipClass="tooltip">
         {{reporting.success == undefined ? 'Cancel' : 'Exit'}}
       </button>
-      <button color="warning" mat-flat-button
+      <button color="warning" mat-raised-button
               [disabled]="error || anyInvalid() || reporting.success != undefined"
               (click)="register()"
               matTooltip="Register the new account"

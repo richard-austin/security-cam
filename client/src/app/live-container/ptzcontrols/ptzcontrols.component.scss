@@ -66,8 +66,10 @@ div.flex-container {
 }
 
 mat-card-subtitle.smaller-text {
-  font-size: 12px !important;
+  font-size: 11px !important;
+  font-weight: normal;
   color: black !important;
+  line-height: 13px;
   border-radius: 8px;
   background-color: #d9a11a !important;
 }

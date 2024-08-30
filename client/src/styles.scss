@@ -1,5 +1,6 @@
 @use '@angular/material' as mat;
 @use 'sass:map';
+@use 'sass:color';
 
 //root {
 //  @include mat.form-field-density(-5);
@@ -112,12 +113,13 @@ body {
   --mat-menu-item-label-text-size: 14px;
   --mat-menu-item-label-text-font: Roboto, "Helvetica Neue", sans-serif;
   --mat-menu-item-label-text-weight: 400;
-  --mat-select-trigger-text-size: 12px;
+  --mat-select-trigger-text-size: small;
   //--mdc-text-button-container-height: 15px;
   --mat-menu-item-label-text-line-height: 15px;
   //--mdc-plain-tooltip-container-shape: 2rem;
   --mat-table-header-headline-size: 12px;
   --mat-table-header-headline-weight: 400;
+  --mat-table-row-item-container-height: 70px;
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   background-color: $dark-background;
@@ -188,7 +190,7 @@ $theme: mat.m2-define-dark-theme((
 $warn-colour: map.get($mat-warn, "contrast.main");
 $success-colour: map.get($mat-accent, "contrast.main");
 $danger-colour: map.get($mat-warn, "contrast.main");
-$warn-background: map.get($mat-warn, "main");
+$warn-background: map.get($mat-warn, "lighter");
 $success-background: map.get($mat-accent, "main");
 $danger-background: map.get($mat-warn, "darker");
 
@@ -201,7 +203,7 @@ mat-select {
 }
 
 mat-option {
-  font-size: x-small !important;
+  font-size: small !important;
   min-height: 30px !important;
   padding: 0 16px 0 16px !important;
 }
@@ -209,7 +211,7 @@ mat-option {
 mat-form-field {
   margin-top: 5px;
   margin-bottom: 5px;
-  font-size: x-small !important;
+  font-size: small !important;
   height: 50px !important;
 }
 
@@ -219,7 +221,7 @@ mat-hint {
 }
 
 mat-label {
-  font-size: x-small !important;
+  font-size: small !important;
 }
 
 button[mat-button] {
@@ -239,7 +241,7 @@ button[mat-raised-button] {
   font-size: small !important;
 }
 
-button[mat-flat-button] {
+button[mat-raised-button] {
   font-size: 12px;
 }
 
@@ -267,10 +269,6 @@ mat-card {
   padding: 12.5px;
 }
 
-mat-card-subtitle {
-  margin-left: 16px !important;
-}
-
 /**
   ########################################################################################################################
  */
@@ -278,10 +276,8 @@ mat-card-subtitle {
 @mixin alert {
  // position: relative;
   width: fit-content;
-  padding: 3rem;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 4rem;
+  padding: 1rem;
+  margin: 1rem auto;
   top: 5%;
   -webkit-box-shadow: 5px 5px 14px 5px #000000;
   box-shadow: 5px 5px 14px 5px #000000;
@@ -322,17 +318,20 @@ mat-card-subtitle {
 
 .alert-success {
   @include alert;
-  @include success;
+  color: $success-colour;
+  background-color: lighten($success-background, 20);
 }
 
 .alert-warning {
   @include alert;
-  @include warning;
+  color: $warn-colour;
+  background-color:  lighten($warn-background, 20);
 }
 
 .alert-danger {
   @include alert;
-  @include danger;
+  color: $danger-colour;
+  background-color:lighten($danger-background, 20);
 }
 
 .alert-success-embedded {
@@ -351,14 +350,17 @@ mat-card-subtitle {
 }
 
 mat-card-content.wait-box {
-  >mat-spinner {
-    display: inline;
-  }
   >span {
+    > mat-spinner{
+      position: absolute;
+      top: -3px;
+      left: -30px;
+    }
     position: relative;
     top: 0.4rem;
     left: 2rem;
     display: inline;
+    color: #e3e1e1;;
   }
 }
 
@@ -377,7 +379,7 @@ mat-card.hide-background {
   > span {
     background: #d9a11a;
     color: black;
-    padding: 0.9rem;
+    padding: 4px;
     border-radius: 1rem;
   }
 

@@ -14,11 +14,11 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="outline">
-            <mat-label>Motion Events</mat-label>
-            <mat-select #selector (selectionChange)="showMotionEvent($event)"
-                        matTooltip="Select a recording by date and time"
-                        matTooltipClass="tooltip">
+          <mat-form-field appearance="outline"
+                          matTooltip="Select a recording by date and time"
+                          matTooltipClass="tooltip">
+          <mat-label>Motion Events</mat-label>
+            <mat-select #selector (selectionChange)="showMotionEvent($event)">
               <mat-option *ngFor="let event of motionEvents" [value]="event">
                 {{ event.dateTime }}
               </mat-option>
@@ -29,7 +29,7 @@
           <div *ngSwitchCase="false" class="delete-button"
                matTooltip="{{isGuest ? 'Disabled for guest' : 'Delete the currently selected recording'}}"
                matTooltipClass="tooltip">
-            <button (click)="confirmDelete=true" [disabled]="isGuest" color="warn" mat-flat-button
+            <button (click)="confirmDelete=true" [disabled]="isGuest" color="warn" mat-raised-button
                     matTooltip="Delete the currently displayed recording" matTooltipClass="tooltip">
               Delete This Recording
             </button>
@@ -37,11 +37,11 @@
           <div *ngSwitchCase="true">
             Delete {{ selector.value.dateTime }},
             <div>are you sure?</div>
-            <button (click)="confirmDelete=false;deleteRecording()" color="warn" mat-flat-button
+            <button (click)="confirmDelete=false;deleteRecording()" color="warn" mat-raised-button
                     matTooltip="Delete the currently selected recording"
                     matTooltipClass="tooltip">Confirm
             </button>
-            <button (click)="confirmDelete=false" color="primary" mat-flat-button
+            <button (click)="confirmDelete=false" color="primary" mat-raised-button
                     matTooltip="Do not delete the recording"
                     matTooltipClass="tooltip">
               Cancel
@@ -49,7 +49,7 @@
           </div>
         </div>
         <div *ngIf="!confirmDelete && !downloading" class="download-button">
-          <button (click)="downloadRecording()" color="accent" mat-flat-button
+          <button (click)="downloadRecording()" color="accent" mat-raised-button
                   matTooltip="Download this recording to your PC or phone"
                   matTooltipClass="tooltip">
             Download&nbsp;Recording

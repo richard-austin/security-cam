@@ -65,11 +65,11 @@
       </div>
       <div class="connect-cancel">
         <button [disabled]="!wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting || anyInvalid()"
-                mat-flat-button
+                mat-raised-button
                 color="warn"
                 (click)="connect()">Connect
         </button>
-        <button *ngIf="needPassword" mat-flat-button color="primary" (click)="cancelPasswordEntry()">Cancel</button>
+        <button *ngIf="needPassword" mat-raised-button color="primary" (click)="cancelPasswordEntry()">Cancel</button>
         <ng-container *ngIf="connecting">
           <span class="connecting-spinner">
             <mat-spinner [diameter]="25"></mat-spinner>
