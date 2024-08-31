@@ -33,7 +33,14 @@ tr[mat-footer-row] {
 
 .expand {
   position: relative;
-  font-size: xx-large;
+  top: -1px;
+  font-size: xx-large !important;
+}
+
+.trash-can {
+  position: relative;
+  top: 5px;
+  transform: scale(1.1);
 }
 
 mat-form-field {
