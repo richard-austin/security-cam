@@ -40,7 +40,12 @@ tr[mat-footer-row] {
 .trash-can {
   position: relative;
   top: 5px;
-  transform: scale(1.1);
+  transform: scale(1.2);
+}
+
+.stream-key {
+  position: relative;
+  top: 3px;
 }
 
 mat-form-field {
