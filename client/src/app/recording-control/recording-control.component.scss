@@ -13,6 +13,19 @@ div.buttons-flex-container {
   flex-wrap: nowrap;
   justify-content: center;
   margin-top: 0.8rem;
+  > mat-card {
+    margin-top: auto;
+    margin-bottom: auto;
+    > mat-button-toggle-group {
+      > button {
+        min-height: 40px;
+      }
+      > mat-button-toggle {
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+    }
+  }
 }
 
 div[class="alert-danger"] {

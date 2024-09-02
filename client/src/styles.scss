@@ -135,10 +135,10 @@ html, body {
 }
 
 $mat-primary: (
-        main: #fff933,
-        lighter: #fffdc2,
-        darker: #fff620,
-        200: #fff933, // For slide toggle,
+        main: #2196f3,
+        lighter: #9e9eff,
+        darker: #2033ff,
+        200: #4faaff, // For slide toggle,
         contrast : (
                 main: $dark-primary-text,
                 lighter: $dark-primary-text,
@@ -231,6 +231,7 @@ mat-label {
 
 button[mat-button] {
   padding: 8px;
+  min-height: 36px;
   --mdc-text-button-label-text-size:14px;
   --mdc-text-button-label-text-tracking: normal;
 }
