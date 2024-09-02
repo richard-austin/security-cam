@@ -165,6 +165,8 @@ $mat-warn: (
         lighter: #ffdab3,
         darker: #ff6800,
         200: #ff8500, // For slide toggle,
+        danger-background: #ff9898,
+        danger: red,
         contrast : (
                 main: $dark-primary-text,
                 lighter: $dark-primary-text,
@@ -195,9 +197,8 @@ $warn-colour: map.get($mat-warn, "contrast.main");
 $success-colour: map.get($mat-accent, "contrast.main");
 $danger-colour: map.get($mat-warn, "contrast.main");
 $warn-background: map.get($mat-warn, "lighter");
-$success-background: map.get($mat-accent, "main");
-$danger-background: map.get($mat-warn, "darker");
-
+$success-background: map.get($mat-accent, "lighter");
+$danger-background: map.get($mat-warn, "danger-background");
 
 /**
   Override the Angular Material 15+ sizes which are much too large for my liking
@@ -229,6 +230,7 @@ mat-label {
 }
 
 button[mat-button] {
+  padding: 8px;
   --mdc-text-button-label-text-size:14px;
   --mdc-text-button-label-text-tracking: normal;
 }
@@ -243,12 +245,8 @@ button[mat-menu-item] {
 
 button[mat-raised-button] {
   font-size: small !important;
+  padding: 17px 5px;
 }
-
-button[mat-raised-button] {
-  font-size: 12px;
-}
-
 mat-error {
   position: relative;
   top: -6px;
@@ -331,7 +329,7 @@ mat-card {
 .alert-warning {
   @include alert;
   color: $warn-colour;
-  background-color:  lighten($warn-background, 20);
+  background-color:  $warn-background;
 }
 
 .alert-danger {
