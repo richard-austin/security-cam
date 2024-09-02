@@ -323,7 +323,7 @@ mat-card {
 .alert-success {
   @include alert;
   color: $success-colour;
-  background-color: lighten($success-background, 20);
+  background-color: $success-background;
 }
 
 .alert-warning {
@@ -335,7 +335,7 @@ mat-card {
 .alert-danger {
   @include alert;
   color: $danger-colour;
-  background-color:lighten($danger-background, 20);
+  background-color: $danger-background;
 }
 
 .alert-success-embedded {
