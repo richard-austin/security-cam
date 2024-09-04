@@ -177,16 +177,16 @@ $theme-warn: mat.m2-define-palette($mat-warn, main, lighter, darker);
 ;
 
 $theme: mat.m2-define-dark-theme((
-                color: (
-                        primary: $theme-primary,
-                        accent: $theme-accent,
-                        warn: $theme-warn,
-                        foreground: $mat-dark-theme-foreground,
-                        background: $mat-dark-theme-background,
-                ),
-                typography: mat.m2-define-typography-config(),
-                density: -5
-        )
+        color: (
+                primary: $theme-primary,
+                accent: $theme-accent,
+                warn: $theme-warn,
+                foreground: $mat-dark-theme-foreground,
+                background: $mat-dark-theme-background,
+        ),
+        typography: mat.m2-define-typography-config(),
+        density: -5
+)
 );
 
 // Theme Init
@@ -215,14 +215,9 @@ mat-option {
 
 mat-form-field {
   margin-top: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   font-size: small !important;
- // height: 14px !important;
-}
-
-mat-hint {
-  font-size: x-small !important;
-  color: $light-accent-text;
+  // height: 14px !important;
 }
 
 mat-label {
@@ -250,8 +245,15 @@ button[mat-raised-button] {
 }
 mat-error {
   position: relative;
-  top: -6px;
+  top: -4px;
   font-size: x-small;
+}
+
+mat-hint {
+  position: relative;
+  top: -4px;
+  font-size: x-small !important;
+  color: $light-accent-text;
 }
 
 // Specific Angular Material component overrides, pieces that are not in line with the general theming

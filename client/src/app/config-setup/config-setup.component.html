@@ -159,6 +159,7 @@
                 <th mat-header-cell *matHeaderCellDef>Name.</th>
                 <td mat-cell *matCellDef="let cam; dataIndex as i">
                     <mat-form-field appearance="outline" [style.width.px]="180">
+                        <mat-label>Camera name</mat-label>
                         <input matInput type="text" autocomplete="off" maxlength="25"
                                [formControl]="getCamControl(i, 'name')"
                                matTooltip="Enter the name to identify {{cam.key}} in the menus"
@@ -175,6 +176,7 @@
                     <mat-form-field appearance="outline" [style.width.px]="185"
                                     matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'Not Listed' to disable this feature, or if the camera type is not listed."
                                     matTooltipClass="tooltip">
+                        <mat-label>Camera type (if listed)</mat-label>
                         <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
                             enabled state is updated.-->
                         <mat-select [formControl]="getCamControl(i, 'cameraParamSpecs')"
@@ -226,6 +228,7 @@
                 <th mat-header-cell *matHeaderCellDef>Address.</th>
                 <td mat-cell *matCellDef="let cam; let i = dataIndex">
                     <mat-form-field appearance="outline" [style.width.px]="180">
+                        <mat-label>{{ cam.key }} IP address</mat-label>
                         <input matInput type="text" autocomplete="off" maxlength="15"
                                [formControl]="getCamControl(i, 'address')"
                                matTooltip="The IP address of {{cam.key}}. This is required if the ControlURI is set to anything other than 'None'."
@@ -237,14 +240,15 @@
             </ng-container>
 
             <ng-container matColumnDef="snapshotUri">
-                <th mat-header-cell *matHeaderCellDef>Snapshot URI.</th>
+                <th mat-header-cell *matHeaderCellDef>Snapshot URL.</th>
                 <td mat-cell *matCellDef="let cam; let i = dataIndex">
                     <mat-form-field appearance="outline" [style.width.px]="300">
+                        <mat-label>URL for snapshot from {{ cam.key }}</mat-label>
                         <input matInput type="text" autocomplete="off" maxlength="150"
                                [formControl]="getCamControl(i, 'snapshotUri')"
                                matTooltip="The URI for snapshots for {{cam.key}}. This is used to view the image from the camera by clicking on the camera ID in the Cameras Configuration editor."
                                matTooltipClass="tooltip"
-                               placeholder="Snapshot URI" (change)="updateCamField(i, 'snapshotUri')">
+                               placeholder="Snapshot URL" (change)="updateCamField(i, 'snapshotUri')">
                         <mat-error *ngIf="getCamControl(i, 'snapshotUri').invalid">Enter the URI</mat-error>
                     </mat-form-field>
                 </td>
@@ -311,6 +315,7 @@
                 <th mat-header-cell *matHeaderCellDef>ONVIF Base Address.</th>
                 <td mat-cell *matCellDef="let cam; let i = dataIndex">
                     <mat-form-field appearance="outline" [style.width.px]="200">
+                        <mat-label>ONVIF host:port</mat-label>
                         <input matInput type="text" autocomplete="off" maxlength="22"
                                [formControl]="getCamControl(i, 'onvifHost')"
                                matTooltip="The IP address and port (if not 80) for {{cam.key}} ONVIF operations. This is required if PTZ control is enabled for {{cam.key}}."
@@ -352,6 +357,7 @@
                                 <th mat-header-cell *matHeaderCellDef> Descr.</th>
                                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
                                     <mat-form-field appearance="outline">
+                                        <mat-label>Stream description</mat-label>
                                         <input matInput type="text" autocomplete="off" maxlength="20"
                                                [formControl]="getStreamControl(camIndex, streamIndex, 'descr')"
                                                matTooltip="Set the description for {{stream.key}}. This is usually relating to the resolution of the stream."
@@ -390,8 +396,9 @@
                                 <th mat-header-cell *matHeaderCellDef>Audio Encoding</th>
                                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
                                     <mat-form-field appearance="outline" [style.width.px]="120"
-                                                    matTooltip="Set the audio encoding (G711 or AAC) for {{stream.key}}. If you are unsure, select 'Not Listed'"
+                                                    matTooltip="Set the audio encoding (G711 or AAC) delivered from the camera for {{stream.key}}. If you are unsure, select 'Not Listed'"
                                                     matTooltipClass="tooltip">
+                                        <mat-label>Audio enc.</mat-label>
                                         <mat-select
                                                 [formControl]="getStreamControl(camIndex, streamIndex, 'audio_encoding')"
                                                 (selectionChange)="updateAudioEncoding($event, stream.value)">
@@ -412,9 +419,10 @@
                                 </td>
                             </ng-container>
                             <ng-container matColumnDef="netcam_uri">
-                                <th mat-header-cell *matHeaderCellDef> Netcam URI.</th>
+                                <th mat-header-cell *matHeaderCellDef> Netcam URL.</th>
                                 <td mat-cell *matCellDef="let stream; let streamIndex = index">
                                     <mat-form-field appearance="outline">
+                                        <mat-label>RTSP url for {{ stream.key }}</mat-label>
                                         <input matInput type="text" autocomplete="off" maxlength="105"
                                                [formControl]="getStreamControl(camIndex, streamIndex, 'netcam_uri')"
                                                matTooltip="Set the URI for connection to the camera stream. This is in the form 'rtsp://<ip address>/<uri>"
@@ -514,7 +522,6 @@
                                     <mat-form-field appearance="outline" [style.width.px]="70"
                                                     matTooltip="The number of frames to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value divided by the camera frame rate (seconds). Note that audio packets are also counted as frames, so a higher value may be required if audio is enabled on the stream."
                                                     matTooltipClass="tooltip">
-
                                         <mat-select
                                                 [formControl]="getStreamControl(camIndex, streamIndex, 'preambleFrames')"
                                                 (selectionChange)="updateStreamField(camIndex, streamIndex, 'preambleFrames')"

@@ -215,14 +215,9 @@ mat-option {
 
 mat-form-field {
   margin-top: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   font-size: small !important;
   // height: 14px !important;
-}
-
-mat-hint {
-  font-size: x-small !important;
-  color: $light-accent-text;
 }
 
 mat-label {
@@ -250,18 +245,25 @@ button[mat-raised-button] {
 }
 mat-error {
   position: relative;
-  top: -6px;
+  top: -4px;
   font-size: x-small;
+}
+
+mat-hint {
+  position: relative;
+  top: -4px;
+  font-size: x-small !important;
+  color: $light-accent-text;
 }
 
 // Specific Angular Material component overrides, pieces that are not in line with the general theming
 
 mat-icon {
-  font-size: 20px !important;
-  font-family: 'Material Icons Outlined', 'Material Icons', sans-serif !important;
-  //.mat-badge-content {
-  //  font-family: 'Roboto', sans-serif;
-  //}
+    font-size: 20px !important;
+    font-family: 'Material Icons Outlined', 'Material Icons', sans-serif !important;
+    //.mat-badge-content {
+    //  font-family: 'Roboto', sans-serif;
+    //}
 }
 mat-card-title {
   --mat-card-title-text-size: 24px;
@@ -274,12 +276,23 @@ mat-card {
   padding: 12.5px;
 }
 
+//.mat-mdc-notch-piece {
+//  border-top: none !important;
+//}
+//
+//.mdc-notched-outline__leading {
+//  border-left: none !important;
+//}
+//.mdc-notched-outline__trailing {
+//  border-right: none !important;
+//}
+
 /**
   ########################################################################################################################
  */
 
 @mixin alert {
-  // position: relative;
+ // position: relative;
   width: fit-content;
   padding: 1rem;
   margin: 1rem auto;
@@ -430,7 +443,7 @@ label.video-buttons {
 }
 
 mat-card-content.scrollable-content {
-  // width: 100%;
+ // width: 100%;
   overflow: auto;
 
   &::-webkit-scrollbar-track {
