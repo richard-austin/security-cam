@@ -116,7 +116,7 @@
         <button *ngIf="!_confirmReboot" mat-raised-button (click)="confirmReboot()" [disabled]="anyChanged() || anyInvalid() || isGuest"
                 matTooltip="{{isGuest ? 'Disabled for guest' : 'Click to reboot this camera'}}"
                 matTooltipClass="tooltip"
-                color="primary">Reboot Camera
+                color="warn">Reboot Camera
         </button>
         <button *ngIf="_confirmReboot" mat-raised-button (click)="cancelReboot()" [disabled]="anyChanged() || anyInvalid() || isGuest"
                 matTooltip="Click to cancel reboot of this camera"

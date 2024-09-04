@@ -58,7 +58,7 @@ tasks.register('buildClientWatch', NpmTask) {
 tasks.register('buildWar', Exec) {
     dependsOn 'buildClient'
     group = 'build'
-    workingDir "$projectDir/dist/create-user-account"
+    workingDir "$projectDir/dist/create-user-account/browser"
     executable "sh"
-    args = ['-c', 'jar -cvf ../cua.war *']
+    args = ['-c', 'jar -cvf ../../cua.war *']
 }
