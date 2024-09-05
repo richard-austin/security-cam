@@ -86,8 +86,8 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-autoconfigure"
     implementation "org.grails:grails-core"
     implementation "org.springframework.boot:spring-boot-starter-actuator"
-    implementation "org.springframework.boot:spring-boot-starter-tomcat"
-    implementation 'org.springframework.boot:spring-boot-starter-websocket:2.6.3'
+    implementation "org.springframework.boot:spring-boot-starter-tomcat:3.3.3"
+    implementation 'org.springframework.boot:spring-boot-starter-websocket:3.3.3'
     implementation "org.grails:grails-web-boot"
     implementation "org.grails:grails-logging"
     implementation "org.grails:grails-plugin-rest"
