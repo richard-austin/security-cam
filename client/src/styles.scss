@@ -267,9 +267,14 @@ mat-icon {
 }
 mat-card-title {
   --mat-card-title-text-size: 24px;
-
   padding: 0 0 0 16px;
   color: white;
+  margin-bottom: 3px !important;
+}
+
+mat-card-subtitle {
+  padding: 0 0 0 16px;
+  margin-bottom: 7px !important;
 }
 
 mat-card {
@@ -360,7 +365,7 @@ mat-card-content.wait-box {
   >span {
     > mat-spinner{
       position: absolute;
-      top: -3px;
+      top: -5px;
       left: -30px;
     }
     position: relative;
