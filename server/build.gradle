@@ -208,11 +208,6 @@ bootWar {
         include '**/*'
         into('classes/public')
     }
-
-    webInf {
-        file('../client/dist/client/3rdpartylicences.txt')
-        into('classes/public')
-    }
 }
 
 tasks.register('setVersion', Exec) {
