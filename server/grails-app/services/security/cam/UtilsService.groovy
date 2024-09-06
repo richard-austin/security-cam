@@ -155,13 +155,13 @@ class UtilsService {
         try {
             @Language("HTML")
             String response = '''
-        <h3>Angular web framework v12.0.5</h3>
+        <h3>Angular web framework v18.2.1</h3>
         <a href="https://angular.io" target="_blank">Angular</a>
         <hr>
-        <h3>Angular Material v12.0.5</h3>
+        <h3>Angular Material v18.2.2</h3>
         <a href="https://material.angular.io/" target="_blank">Angular Material</a>
         <hr>
-        <h3>Angular Forms v12.0.5</h3>
+        <h3>Angular Forms v18.2.0</h3>
         <a href="https://angular.io/guide/forms-overview/" target="_blank">Angular Forms</a>
         <hr>
         <h3>Stomp.js v7.0.0</h3>
@@ -170,7 +170,7 @@ class UtilsService {
         <h3>File Saver v2.0.5</h3>
         <a href="https://www.npmjs.com/package/@types/file-saver" target="_blank">File Saver</a>
         <hr>
-        <h3>hls.js v1.0.7</h3>
+        <h3>hls.js v1.4.12</h3>
         <a href="https://www.npmjs.com/package/hls.js?utm_source=cdnjs&utm_medium=cdnjs_link&utm_campaign=cdnjs_library" target="_blank">Hls.js</a>
         <hr>
         <h3>moment v2.29.1</h3>
@@ -191,13 +191,16 @@ class UtilsService {
         <h3>tslib v2.0.0</h3>
         <a href="https://www.npmjs.com/package/tslib" target="_blank">tslib</a>
         <hr>
-        <h3>zone.js v0.11.4</h3>
+        <h3>zone.js v0.14.10</h3>
         <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
         <hr>
-        <h3>Grails v5.3.2</h3>
+        <h3>typescript v5.4.5</h3>
+        <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
+        <hr>
+        <h3>Grails v6.2.0</h3>
         <a href="https://grails.org/" target="_blank">Grails</a>
         <hr>
-        <h3>Java OpenJDK v17.0.11</h3>
+        <h3>Java OpenJDK v17.0.12</h3>
         <a href="https://openjdk.org/" target="_blank">Java OpenJDK</a>
         <hr>
         <h3>ffmpeg v6.1.1</h3>
@@ -206,10 +209,10 @@ class UtilsService {
         <h3>Onvif for Java</h3>
         <a href="https://github.com/fpompermaier/onvif" target="_blank">Onvif for Java</a>
         <hr>
-        <h3>Motion Service v4.5.1 (for motion detection)</h3>
+        <h3>Motion Service v4.6.0 (for motion detection)</h3>
         <a href="https://motion-project.github.io/" target="_blank">Motion Service</a>
         <hr>
-        <h3>nginx v1.22.0 (Reverse proxy)</h3>
+        <h3>nginx v1.24.0 (Reverse proxy)</h3>
         <a href="https://nginx.org/en/" target="_blank">nginx</a>
         <hr>
         <h3>Apache Tomcat vTomcat/9.0.70 (Web Server)</h3>
@@ -221,7 +224,7 @@ class UtilsService {
         <h3>Chrony v4.5 (NTP Server)</h3>
         <a href="https://chrony-project.org/news.html" target="_blank">Chrony</a>
         <hr>
-        <h3>Ubuntu network-manager v1.42.4</h3>
+        <h3>Ubuntu network-manager v1.46.4</h3>
         <a href="https://ubuntu.com/core/docs/networkmanager" target="_blank">Network Manager</a>
         <hr>
         <h3>wireless-tools v30 (Wireless Tools for Linux)</h3>
