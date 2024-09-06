@@ -8,5 +8,9 @@
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
+    > mat-card-content {
+      color: white;
+      font-size: small;
+    }
   }
 }

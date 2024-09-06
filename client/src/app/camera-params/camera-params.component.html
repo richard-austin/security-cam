@@ -3,7 +3,7 @@
         <mat-card-title>View/Set Parameters</mat-card-title>
         <mat-card-subtitle>{{ cam.name }}</mat-card-subtitle>
         <mat-card-content class="wait-box" *ngIf="downloading">
-            <span>
+            <span class="wait-spinner">
                 <mat-spinner [diameter]="25"></mat-spinner>
                 <span>Please wait..</span>
             </span>
