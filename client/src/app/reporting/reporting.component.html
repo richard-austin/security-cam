@@ -22,7 +22,7 @@
     <div *ngIf="showMessageInError && !isHtml">{{error?.error}}</div>
     <div *ngIf="!showMessageInError">See logs for more information</div>
   </div>
-  <button mat-raised-button class="dismiss-button" color="default" (click)="dismiss()">Dismiss</button>
+  <button mat-raised-button class="dismiss-button" color="primary" (click)="dismiss()">Dismiss</button>
 </div>
 
 <ng-container *ngIf="embedded && (error || success || warning)">

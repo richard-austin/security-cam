@@ -120,7 +120,7 @@ body {
   --mat-table-header-headline-size: 12px;
   --mat-table-header-headline-weight: 400;
   --mat-table-row-item-container-height: 60px;
-  --mat-form-field-container-height: 24px;
+  //--mat-form-field-container-height: 24px;
   --mat-form-field-container-text-line-height: 24px;
   --mat-select-trigger-text-line-height: 24px;
   --mat-form-field-subscript-text-line-height: 0;
@@ -381,10 +381,10 @@ mat-card.hide-background {
 }
 
 .tooltip {
-  --mdc-plain-tooltip-container-color: #e3ba4f;
-  --mdc-plain-tooltip-supporting-text-color: black;
-  --mdc-plain-tooltip-supporting-text-size: 12px;
-  --mdc-plain-tooltip-container-shape: 5px;
+  //--mdc-plain-tooltip-container-color: #e3ba4f;
+  //--mdc-plain-tooltip-supporting-text-color: black;
+  //--mdc-plain-tooltip-supporting-text-size: 12px;
+  //--mdc-plain-tooltip-container-shape: 5px;
 }
 
 .confirm-group {
