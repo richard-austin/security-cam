@@ -68,8 +68,10 @@
     -->
     <Connector port="8080" protocol="HTTP/1.1"
                connectionTimeout="20000"
-               redirectPort="8443" useSendFile="false"
-               compression="on" compressionMinSize="1024"/>
+               redirectPort="8443"
+               useSendFile="false"
+               compression="on"
+               compressionMinSize="2048"/>
     <!-- A "Connector" using the shared thread pool-->
     <!--
     <Connector executor="tomcatThreadPool"
