@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import {RouterOutlet} from '@angular/router';
@@ -58,5 +58,5 @@ import { ActivemqCredentialsComponent } from './activemq-credentials/activemq-cr
         FormsModule,
         LayoutModule,
         MatDividerModule,
-        RouterOutlet], providers: [BaseUrl, provideHttpClient(withInterceptorsFromDi())] })
+        RouterOutlet], providers: [BaseUrl, provideHttpClient(withInterceptorsFromDi()), provideClientHydration()] })
 export class AppModule { }

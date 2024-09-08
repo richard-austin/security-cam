@@ -10,21 +10,26 @@ export class AppComponent implements AfterViewInit{
   amqOff: boolean = false;
 
   constructor() {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    this.amqOff = urlParams.get('amqOff') != null;
+    if(typeof(window) !== 'undefined') {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      this.amqOff = urlParams.get('amqOff') != null;
+    }
   }
 
   registerLocalAccount() {
-    window.location.href="#/registerLocalAccount"
+    if(typeof(window) !== 'undefined')
+      window.location.href="#/registerLocalAccount"
   }
 
   setupSMTPClient () {
-    window.location.href = "#/setupSMTPClient"
+    if(typeof(window) !== 'undefined')
+      window.location.href = "#/setupSMTPClient"
   }
 
   registerActiveMQAccount() {
-    window.location.href = "#/registerActiveMQAccount"
+    if(typeof(window) !== 'undefined')
+      window.location.href = "#/registerActiveMQAccount"
   }
 
   ngAfterViewInit(): void {
