@@ -136,7 +136,7 @@ html, body {
 
 $mat-primary: (
         main: #2196f3,
-        lighter: #9e9eff,
+        lighter: #638cd6,
         darker: #2033ff,
         200: #4faaff, // For slide toggle,
         contrast : (
@@ -193,12 +193,12 @@ $theme: mat.m2-define-dark-theme((
 @include mat.all-component-themes($theme);
 
 
-$warn-colour: map.get($mat-warn, "contrast.main");
-$success-colour: map.get($mat-accent, "contrast.main");
-$danger-colour: map.get($mat-warn, "contrast.main");
-$warn-background: map.get($mat-warn, "lighter");
-$success-background: map.get($mat-accent, "lighter");
-$danger-background: map.get($mat-warn, "danger-background");
+$warn-colour: map.get($mat-warn, 'contrast', 'main');
+$success-colour: map.get($mat-accent, 'contrast' 'main');
+$danger-colour: map.get($mat-warn, 'contrast', 'main');
+$warn-background: map.get($mat-warn, 'lighter');
+$success-background: map.get($mat-accent, 'lighter');
+$danger-background: map.get($mat-warn, 'danger-background');
 
 /**
   Override the Angular Material 15+ sizes which are much too large for my liking
@@ -279,6 +279,16 @@ mat-card-subtitle {
 
 mat-card {
   padding: 12.5px;
+}
+
+button.mat-cancel {
+  background-color: map.get($mat-accent, 'lighter') !important;
+  color: map.get($mat-accent, 'contrast', 'main') !important;
+}
+
+button.mat-download {
+  background-color: map.get($mat-primary, 'lighter') !important;
+  color: map.get($mat-primary, 'contrast', 'main') !important;
 }
 
 /**
@@ -388,6 +398,8 @@ mat-card.hide-background {
 }
 
 .confirm-group {
+  position: relative;
+  top: -8px;
   > span {
     background: #d9a11a;
     color: black;
@@ -396,6 +408,9 @@ mat-card.hide-background {
   }
 
   > button {
+    margin-top: -5px;
+    margin-bottom: -5px;
+   vertical-align: auto;
     margin-left: 0.5rem;
   }
 }

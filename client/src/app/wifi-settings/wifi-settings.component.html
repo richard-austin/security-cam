@@ -68,7 +68,7 @@
                 color="warn"
                 (click)="connect()">Connect
         </button>
-        <button *ngIf="needPassword" mat-raised-button color="primary" (click)="cancelPasswordEntry()">Cancel</button>
+        <button *ngIf="needPassword" mat-raised-button color="cancel" (click)="cancelPasswordEntry()">Cancel</button>
         <ng-container *ngIf="connecting">
           <span class="connecting-spinner">
             <mat-spinner [diameter]="25"></mat-spinner>

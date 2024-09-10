@@ -631,7 +631,7 @@
                             <mat-icon>note</mat-icon>
                         </button>
                         <button (click)="confirmNewLookup=true" *ngIf="!confirmNewLookup && !confirmNewLookup"
-                                [disabled]="confirmSave || confirmNewLookup" mat-icon-button
+                                [disabled]="confirmSave || confirmNewLookup || confirmNew" mat-icon-button
                                 matTooltip="Perform onvif LAN search for cameras" matTooltipClass="tooltip">
                             <mat-icon>explore</mat-icon>
                         </button>
@@ -647,29 +647,29 @@
 
                         <span *ngIf="confirmNew" class="confirm-group">
                             <span>Start a new configuration, are you sure?</span>
-                            <button (click)="confirmNew=false" color="primary" mat-raised-button>
+                            <button (click)="confirmNew=false" color="cancel" mat-flat-button>
                                 Cancel
                             </button>
-                            <button (click)="createNew();confirmNew=false;" color="warn" mat-raised-button>
+                            <button (click)="createNew();confirmNew=false;" color="warn" mat-flat-button>
                                 New
                             </button>
                         </span>
                         <span *ngIf="confirmNewLookup" class="confirm-group">
                             <span>Start Onvif camera search, are you sure?</span>
-                            <button (click)="confirmNewLookup=false" color="primary" mat-raised-button>
+                            <button (click)="confirmNewLookup=false" color="cancel" mat-flat-button>
                                 Cancel
                             </button>
-                            <button (click)="startOnvifSearch();confirmNewLookup=false;" color="warn" mat-raised-button>
+                            <button (click)="startOnvifSearch();confirmNewLookup=false;" color="warn" mat-flat-button>
                                 Search
                             </button>
                         </span>
                         <span *ngIf="confirmSave" class="confirm-group">
                             <span>Save this as the working configuration, are you sure?</span>
-                            <button (click)="confirmSave=false" color="primary" mat-raised-button>
+                            <button (click)="confirmSave=false" color="cancel" mat-flat-button>
                                 Cancel
                             </button>
                             <button (click)="commitConfig();confirmSave=false;" [disabled]="isGuest" color="warn"
-                                    mat-raised-button>
+                                    mat-flat-button>
                                 Save
                             </button>
                         </span>

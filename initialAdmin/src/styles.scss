@@ -276,16 +276,10 @@ mat-card {
   padding: 12.5px;
 }
 
-//.mat-mdc-notch-piece {
-//  border-top: none !important;
-//}
-//
-//.mdc-notched-outline__leading {
-//  border-left: none !important;
-//}
-//.mdc-notched-outline__trailing {
-//  border-right: none !important;
-//}
+button.mat-cancel {
+  background-color: map.get($mat-accent, 'lighter') !important;
+  color: map.get($mat-accent, 'contrast', 'main') !important;
+}
 
 /**
   ########################################################################################################################
