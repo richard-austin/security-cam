@@ -150,6 +150,7 @@ $theme-primary: mat.m2-define-palette($mat-primary, main, lighter, darker);
 $mat-accent: (
         main: #72d26b,
         lighter: #d5f2d3,
+        cancel-button: #a1b3a0,
         darker: #55c14e,
         200: #72d26b, // For slide toggle,
         contrast : (
@@ -282,7 +283,7 @@ mat-card {
 }
 
 button.mat-cancel {
-  background-color: map.get($mat-accent, 'lighter') !important;
+  background-color: map.get($mat-accent, 'cancel-button') !important;
   color: map.get($mat-accent, 'contrast', 'main') !important;
 }
 
