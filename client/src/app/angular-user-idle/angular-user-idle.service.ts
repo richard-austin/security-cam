@@ -85,57 +85,57 @@ export class UserIdleService {
    * Start watching for user idle and setup timer and ping.
    */
   startWatching() {
-    if (!this.activityEvents$) {
+    if (!this.activityEvents$ && typeof(window) !== 'undefined' && typeof(document) !== 'undefined') {
       this.activityEvents$ = merge(
-        fromEvent(window, 'mousemove'),
-        fromEvent(window, 'resize'),
-        fromEvent(document, 'keydown')
+          fromEvent(window, 'mousemove'),
+          fromEvent(window, 'resize'),
+          fromEvent(document, 'keydown')
       );
-    }
 
-    this.idle$ = from(this.activityEvents$);
+      this.idle$ = from(this.activityEvents$);
 
-    if (this.idleSubscription) {
-      this.idleSubscription.unsubscribe();
-    }
+      if (this.idleSubscription) {
+        this.idleSubscription.unsubscribe();
+      }
 
-    // If any of user events is not active for idle-seconds when start timer.
-    this.idleSubscription = this.idle$
-      .pipe(
-        bufferTime(this.idleSensitivityMillisec), // Starting point of detecting of user's inactivity
-        filter(
-          arr => !arr.length && !this.isIdleDetected && !this.isInactivityTimer
-        ),
-        tap(() => {
-          this.isIdleDetected = true;
-          this.idleDetected$.next(true);
-        }),
-        switchMap(() =>
-          this._ngZone.runOutsideAngular(() =>
-            interval(1000).pipe(
-              takeUntil(
-                merge(
-                  this.activityEvents$,
-                  timer(this.idleMillisec).pipe(
-                    tap(() => {
-                      this.isInactivityTimer = true;
-                      this.timerStart$.next(true);
-                    })
-                  )
-                )
+      // If any of user events is not active for idle-seconds when start timer.
+      this.idleSubscription = this.idle$
+          .pipe(
+              bufferTime(this.idleSensitivityMillisec), // Starting point of detecting of user's inactivity
+              filter(
+                  arr => !arr.length && !this.isIdleDetected && !this.isInactivityTimer
               ),
-              finalize(() => {
-                this.isIdleDetected = false;
-                this.idleDetected$.next(false);
-              })
-            )
+              tap(() => {
+                this.isIdleDetected = true;
+                this.idleDetected$.next(true);
+              }),
+              switchMap(() =>
+                  this._ngZone.runOutsideAngular(() =>
+                      interval(1000).pipe(
+                          takeUntil(
+                              merge(
+                                  this.activityEvents$,
+                                  timer(this.idleMillisec).pipe(
+                                      tap(() => {
+                                        this.isInactivityTimer = true;
+                                        this.timerStart$.next(true);
+                                      })
+                                  )
+                              )
+                          ),
+                          finalize(() => {
+                            this.isIdleDetected = false;
+                            this.idleDetected$.next(false);
+                          })
+                      )
+                  )
+              )
           )
-        )
-      )
-      .subscribe();
+          .subscribe();
 
-    this.setupTimer(this.timeout);
-    this.setupPing(this.pingMillisec);
+      this.setupTimer(this.timeout);
+      this.setupPing(this.pingMillisec);
+    }
   }
 
   stopWatching() {

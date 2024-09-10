@@ -9,8 +9,7 @@
     "startProxyNetwork": "ng serve --host 0.0.0.0 --proxy-config src/proxy.conf.js",
     "build": "ng build  --configuration production --base-href /cua/",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:initialAdmin": "node dist/create-user-account/server/server.mjs"
+    "test": "ng test"
   },
   "private": true,
   "dependencies": {
@@ -22,9 +21,7 @@
     "@angular/material": "^18.2.2",
     "@angular/platform-browser": "^18.2.2",
     "@angular/platform-browser-dynamic": "^18.2.2",
-    "@angular/platform-server": "^18.2.3",
     "@angular/router": "^18.2.2",
-    "@angular/ssr": "^18.2.2",
     "@material/menu": "^15.0.0-canary.684e33d25.0",
     "@material/tooltip": "^15.0.0-canary.684e33d25.0",
     "material-icons": "^1.13.4",

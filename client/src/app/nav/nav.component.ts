@@ -243,7 +243,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     // Get the initial core temperature
     this.getTemperature();
-
+    if (typeof (window) !== 'undefined') {
     //Start watching for user inactivity.
     this.userIdle.startWatching();
     this.userIdle.resetTimer();
@@ -290,6 +290,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
         location.href = 'logoff';
       }
     };
+    }
   }
 
   ngAfterViewInit(): void {
@@ -298,12 +299,14 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.pingHandle.unsubscribe();
-    this.timerHandle.unsubscribe();
-    this.messageSubscription.unsubscribe();
-    this.logoffSubscription.unsubscribe();
-    this.talkOffSubscription.unsubscribe();
-    this.client.deactivate({force: false}).then(() => {
-    });
+    if (typeof(window) !== 'undefined') {
+      this.pingHandle.unsubscribe();
+      this.timerHandle.unsubscribe();
+      this.messageSubscription.unsubscribe();
+      this.logoffSubscription.unsubscribe();
+      this.talkOffSubscription.unsubscribe();
+      this.client.deactivate({force: false}).then(() => {
+      });
+    }
   }
 }

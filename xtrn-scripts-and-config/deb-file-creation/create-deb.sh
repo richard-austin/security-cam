@@ -25,6 +25,9 @@ mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-serv
 cp  ../../camera-recordings-service/*.py security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service
 cp  ../../camera-recordings-service/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service
 
+mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/server-side-rendering
+cp -r ../../client/dist security-cam_"${VERSION}"_arm64/etc/security-cam/server-side-rendering
+
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../wifimanagement.service  security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../camera-recordings.service security-cam_"${VERSION}"_arm64/lib/systemd/system
@@ -37,6 +40,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/recording-pids
 mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/motion/conf.d
 
 mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/ftp
+
 
 # Create recording file location for up top 50 streams
 for ((i = 1 ; i < 51 ; i++ )); do mkdir -p security-cam_"${VERSION}"_arm64/var/security-cam/rec"$i"; done
@@ -63,6 +67,7 @@ cp ../tomcat9 security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-7.3.war security-cam_"${VERSION}"_arm64/tmp
 cp ../../initialAdmin/dist/cua.war  security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9/tomcat9.service security-cam_"${VERSION}"_arm64/lib/systemd/system/
+
 cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
 Package: security-cam
 Version: $VERSION
@@ -74,6 +79,7 @@ Depends: openjdk-17-jre-headless (>=17.0.0), openjdk-17-jre-headless (<< 17.9.9)
  motion (>=4.6), motion(<<5.0.0-0),
  curl (>=8.5.0), curl(<=8.9),
  nginx (>=1.24.0), nginx(<=1.24.9),
+ nodejs (>=18.19.1), nodejs(<19.0.0),
  libraspberrypi-bin, chrony,
  network-manager (>= 1.46.0), network-manager (<< 2.0.0),
  wireless-tools (>=30~pre9-13), wireless-tools (<< 40),

@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CamerasComponent } from './cameras/cameras.component';
-import { HttpClient, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import {HttpClient, provideHttpClient, withFetch} from "@angular/common/http";
 import {BaseUrl} from "./shared/BaseUrl/BaseUrl";
 import { NavComponent } from './nav/nav.component';
 import { VideoComponent } from './video/video.component';
@@ -131,6 +131,6 @@ import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-fail
             useClass: CustomDateAdapter,
             deps: [MAT_DATE_LOCALE, Platform]
         },
-        HttpClient, BaseUrl, provideHttpClient(withInterceptorsFromDi())] })
+        HttpClient, BaseUrl, provideHttpClient(withFetch()), provideClientHydration()] })
 export class AppModule {
 }
