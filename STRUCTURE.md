@@ -38,14 +38,12 @@ nginx provides access to this service with common origin (port 443) to the Web B
 The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi. To change to a different architecture, edit the build task in fmp4-ws-media-server/build.gradle
 
 ### ffmpeg
-ffmpeg is used for re-muxing, audio transcoding and camera connectivity.
+ffmpeg is used for re-muxing, audio transcoding, camera connectivity and recording.
 
-ffmpeg version 4.4.4 is used in the NVR as versions 5 and above will not correctly mux the rtsp to fmp4 when audio is present.
-The problem is due to a lack of timestamps in one or both of the streams.
-See [FFMPEG.md](FFMPEG.md) for details of this.
+ffmpeg version 6.1.1-3ubuntu5 is used in the NVR, which is the standard version available on
+Ubuntu 24.04.
+See [FFMPEG.md](FFMPEG.md) for more about ffmpeg.
 
-ffmpeg version 4.4.4 precompiled for ARM64 is deployed with this system. If you want to run this on a platform other than ARM64, you
-will need to compile ffmpeg 4.4.4 for that platform (see [FFMPEG.md](FFMPEG.md)).
 ### Wi-Fi Setup Service
 Runs as a root Linux service. It is a web application written in Python,
 used to list Wi-Fi access points, list the NVR's LAN IP addresses and set up the NVR Wi-Fi and credentials.

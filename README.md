@@ -69,7 +69,7 @@ The firmware from Reolink main downloads site does not fully support this functi
 * ssh to the Raspberry pi.
 * ```bash
   # Install with
-  sudo apt install ./security-cam_9.1.1_arm64.deb # (or whichever version you have built or downloaded from the release area)
+  sudo apt install ./security-cam_10.0.0_arm64.deb # (or whichever version you have built or downloaded from the release area)
   ```
 * See [SETTING-UP.md](SETTING-UP.md) for how to set up user account, wifi, cameras etc.
 
@@ -77,6 +77,7 @@ The firmware from Reolink main downloads site does not fully support this functi
 You can find further documentation in these files: -
 * [STRUCTURE.md](STRUCTURE.md)
 * [DEVELOPMENT.md](DEVELOPMENT.md)
+* [TOMCAT.md](TOMCAT.md)
 * [FFMPEG.md](FFMPEG.md)
 * [SETTING-UP.md](SETTING-UP.md)
 * [USING-THE-NVR.md](USING-THE-NVR.md)
