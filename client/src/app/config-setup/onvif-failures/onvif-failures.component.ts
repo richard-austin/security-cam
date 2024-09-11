@@ -3,7 +3,7 @@ import {CameraService} from "../../cameras/camera.service";
 import {Camera} from "../../cameras/Camera";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {BehaviorSubject} from "rxjs";
-import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-onvif-failures',
@@ -17,7 +17,7 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   @Output() fixUpCamerasData: EventEmitter<void> = new EventEmitter<void>();
 
   list$!: BehaviorSubject<[string, string][]>;
-  failControls!: FormArray;
+  failControls!: UntypedFormArray;
   onvifUserName: string = "";
   onvifPassword: string = "";
   gettingCameraDetails: boolean = false;
@@ -67,20 +67,20 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   setupTableFormControls() {
     this.list$ = new BehaviorSubject<[string, string][]>(Array.from(this.failures));
     const toFailureGroups = this.list$.value.map(camera => {
-      return new FormGroup(
+      return new UntypedFormGroup(
         {
-          onvifUserName: new FormControl({
+          onvifUserName: new UntypedFormControl({
             value: this.onvifUserName,
             disabled: this.gettingCameraDetails
           }, [Validators.maxLength(20), Validators.minLength(0), Validators.pattern(/^[a-zA-Z0-9](_(?!([._]))|\.(?!([_.]))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/)]),
-          onvifPassword: new FormControl({
+          onvifPassword: new UntypedFormControl({
             value: this.onvifPassword,
             disabled: this.gettingCameraDetails
           }, [Validators.maxLength(25), Validators.minLength(0), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/)])
         });
     });
 
-    this.failControls = new FormArray(toFailureGroups);
+    this.failControls = new UntypedFormArray(toFailureGroups);
 
     // Ensure camera form controls highlight immediately if invalid
     for (let i = 0; i < this.failControls.length; ++i) {
@@ -88,8 +88,8 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
     }
   }
 
-  getControl(index: number, fieldName: string): FormControl {
-    return this.failControls?.at(index).get(fieldName) as FormControl;
+  getControl(index: number, fieldName: string): UntypedFormControl {
+    return this.failControls?.at(index).get(fieldName) as UntypedFormControl;
   }
   anyInvalid(i: number) : boolean {
     return this.failControls?.at(i).invalid;

@@ -14,17 +14,17 @@ import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {
   AbstractControl,
-  FormArray,
-  FormControl,
-  FormGroup,
+  UntypedFormArray,
+  UntypedFormControl,
+  UntypedFormGroup,
   ValidationErrors,
   ValidatorFn,
   Validators
 } from "@angular/forms";
 import {BehaviorSubject} from 'rxjs';
 import {MatCheckboxChange} from "@angular/material/checkbox";
-import {MatSelectChange} from '@angular/material/select/select';
-import {HttpErrorResponse} from "@angular/common/http";
+import {MatSelectChange} from '@angular/material/select';
+import { HttpErrorResponse } from "@angular/common/http";
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {KeyValue} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
@@ -96,7 +96,7 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
 export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
   @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
-  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement>
+  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement> | null
   downloading: boolean = true;
   updating: boolean = false;
   discovering: boolean = false;
@@ -108,8 +108,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'threshold', 'trigger_recording_on', 'preambleFrames', 'mask_file', 'video_width', 'video_height'];
   streamFooterColumns = ['buttons']
 //  camSetupFormGroup!: FormGroup;
-  camControls!: FormArray;
-  streamControls: FormArray[] = [];
+  camControls!: UntypedFormArray;
+  streamControls: UntypedFormArray[] = [];
   list$!: BehaviorSubject<Camera[]>;
   confirmSave: boolean = false;
   confirmNew: boolean = false;
@@ -129,14 +129,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
   }
 
-  getCamControl(index: number, fieldName: string): FormControl {
-    return this.camControls.at(index).get(fieldName) as FormControl;
+  getCamControl(index: number, fieldName: string): UntypedFormControl {
+    return this.camControls.at(index).get(fieldName) as UntypedFormControl;
   }
 
   setPTZControlsCheckboxDisabledState(index: number): boolean {
-    let ptzc: FormControl = this.getCamControl(index, 'ptzControls');
+    let ptzc: UntypedFormControl = this.getCamControl(index, 'ptzControls');
 
-    let ovhc: FormControl = this.getCamControl(index, 'onvifHost')
+    let ovhc: UntypedFormControl = this.getCamControl(index, 'onvifHost')
     if (ovhc.value == '')
       ptzc.setValue(false);  // Ensure PTZ is set to "off" if onvifHost has the (valid) value empty
     return ovhc.value == '' || !ovhc.valid;
@@ -161,8 +161,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  getStreamControl(camIndex: number, streamIndex: number, fieldName: string): FormControl {
-    return this.streamControls[camIndex].at(streamIndex).get(fieldName) as FormControl;
+  getStreamControl(camIndex: number, streamIndex: number, fieldName: string): UntypedFormControl {
+    return this.streamControls[camIndex].at(streamIndex).get(fieldName) as UntypedFormControl;
   }
 
   updateStream(camIndex: number, streamIndex: number, field: string, value: any) {
@@ -226,87 +226,87 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
       let streamList$: BehaviorSubject<Stream[]> = new BehaviorSubject<Stream[]>(Array.from(camera.streams.values()));
 
       const toStreamGroups = streamList$.value.map((stream: Stream) => {
-        return new FormGroup({
-          descr: new FormControl({
+        return new UntypedFormGroup({
+          descr: new UntypedFormControl({
             value: stream.descr,
             disabled: false
           }, [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9\\ ]{2,20}$/)]),
-          audio: new FormControl(stream.audio, [Validators.required]),
-          audio_encoding: new FormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|G726|None|Not Listed)$/)]),
-          netcam_uri: new FormControl(stream.netcam_uri, [Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
-          video_width: new FormControl({
+          audio: new UntypedFormControl(stream.audio, [Validators.required]),
+          audio_encoding: new UntypedFormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|G726|None|Not Listed)$/)]),
+          netcam_uri: new UntypedFormControl(stream.netcam_uri, [Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
+          video_width: new UntypedFormControl({
             value: stream.video_width,
             disabled: !stream.motion?.enabled
           }, [Validators.required, Validators.min(90), Validators.max(5000)]),
-          video_height: new FormControl({
+          video_height: new UntypedFormControl({
             value: stream.video_height,
             disabled: !stream.motion?.enabled
           }, [Validators.required, Validators.min(90), Validators.max(3000)]),
           //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
-          threshold: new FormControl({
+          threshold: new UntypedFormControl({
             value: stream.motion?.threshold != undefined ? stream.motion.threshold : 1500,
             disabled: !stream.motion.enabled
           }, [Validators.required, Validators.min(1), Validators.max(2147483647)]),
-          trigger_recording_on: new FormControl({
+          trigger_recording_on: new UntypedFormControl({
             value: stream.motion.trigger_recording_on,
             disabled: !stream.motion.enabled
           }, [Validators.nullValidator]),
-          preambleFrames: new FormControl({
+          preambleFrames: new UntypedFormControl({
             value: stream.preambleFrames,
             disabled: this.getPreambleFramesDisabledState(camera, stream),
           }, [Validators.min(0), Validators.max(400)]),
-          mask_file: new FormControl({
+          mask_file: new UntypedFormControl({
             value: stream.motion.mask_file,
             disabled: !stream.motion.enabled
           }, [isValidMaskFileName(this.cameras), Validators.maxLength(55)])
         }, {updateOn: "change"});
       });
 
-      this.streamControls.push(new FormArray(toStreamGroups));
-      return new FormGroup({
-        name: new FormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
-        address: new FormControl({
+      this.streamControls.push(new UntypedFormArray(toStreamGroups));
+      return new UntypedFormGroup({
+        name: new UntypedFormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
+        address: new UntypedFormControl({
           value: camera.address,
           disabled: this.getCameraAddressDisabledState(camera)
         }, [Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
-        cameraParamSpecs: new FormControl({
+        cameraParamSpecs: new UntypedFormControl({
           value: this.getCameraParamSpecsReferenceCopy(camera),
           disabled: false
         }, [Validators.maxLength(55)]),
-        ftp: new FormControl({
+        ftp: new UntypedFormControl({
             value: camera?.ftp != undefined ? camera.ftp : 'none',
             disabled: false,
           }, [Validators.pattern(/^none|stream[1-9]+$/)]
         ),
-        retriggerWindow: new FormControl({
+        retriggerWindow: new UntypedFormControl({
             value: camera?.retriggerWindow != undefined ? camera.retriggerWindow : 30,
             disabled: false,
           }, [Validators.pattern(/^10$|20|30|40|50|60|70|80|90|100/)]
         ),
-        snapshotUri: new FormControl({
+        snapshotUri: new UntypedFormControl({
           value: camera.snapshotUri,
           disabled: false
         }, [Validators.maxLength(150)]),
-        ptzControls: new FormControl({
+        ptzControls: new UntypedFormControl({
           value: camera.ptzControls,
           disabled: false
         }, [validateTrueOrFalse({ptzControls: true})]),
-        onvifHost: new FormControl({
+        onvifHost: new UntypedFormControl({
           value: camera.onvifHost,
           disabled: false,
         }, [Validators.maxLength(22),
           Validators.pattern(/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/)]),
-        useRtspAuth: new FormControl({
+        useRtspAuth: new UntypedFormControl({
           value: camera.useRtspAuth == undefined ? false : camera.useRtspAuth,
           disabled: false,
         }, [validateTrueOrFalse({useRtspAuth: true})]),
-        rtspTransport: new FormControl({
+        rtspTransport: new UntypedFormControl({
           value: camera.rtspTransport,
           disabled: false,
         }, [Validators.required, Validators.pattern(/^(udp|tcp)$/)])
       }, {updateOn: "change"});
     });
-    this.camControls = new FormArray(toCameraGroups);
+    this.camControls = new UntypedFormArray(toCameraGroups);
 
     // Ensure camera form controls highlight immediately if invalid
     for (let i = 0; i < this.camControls.length; ++i) {
@@ -314,7 +314,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Ensure stream form controls highlight immediately if invalid
-    this.streamControls.forEach((fa: FormArray) => {
+    this.streamControls.forEach((fa: UntypedFormArray) => {
       for (let i = 0; i < fa.length; ++i) {
         fa.at(i).markAllAsTouched();
       }
@@ -708,7 +708,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
       stream.motion.mask_file = fileUploadInput?.files[0].name;
 
-      let control: FormControl = this.getStreamControl(camIndex, streamIndex, 'mask_file');
+      let control: UntypedFormControl = this.getStreamControl(camIndex, streamIndex, 'mask_file');
       control.setValue(stream.motion.mask_file);
       if (control.valid) {
         // Upload file to server
@@ -848,19 +848,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   toggleBackChannelAudio(cam: Camera) {
     cam.backchannelAudioSupported = !cam.backchannelAudioSupported;
-  }
-
-  getScrollableContentStyle(): string {
-    const scrollableContent = this.scrollableContent?.nativeElement;
-    // Calculated scrollbar height, don't use or we Expression changed after it was checked error will occur
-    //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
-    const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
-    const extraBit = 1;  // To make browser window vertical scrollbar disappear
-
-    if (scrollableContent !== undefined) {
-      const boundingRect = scrollableContent.getBoundingClientRect()
-      return `height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
-    } else return ""
   }
 
   ngOnInit(): void {

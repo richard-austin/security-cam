@@ -2,12 +2,12 @@ import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from
 import {CameraService, cameraType} from '../cameras/camera.service';
 import {Camera, Stream} from '../cameras/Camera';
 import {ReportingComponent} from '../reporting/reporting.component';
-import {HttpErrorResponse} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import {Subscription} from 'rxjs';
 import {IdleTimeoutStatusMessage, Message, messageType, UtilsService} from '../shared/utils.service';
 import {MatDialog} from '@angular/material/dialog';
 import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-modal.component';
-import {MatDialogRef} from '@angular/material/dialog/dialog-ref';
+import {MatDialogRef} from '@angular/material/dialog';
 import {UserIdleConfig} from '../angular-user-idle/angular-user-idle.config';
 import {UserIdleService} from '../angular-user-idle/angular-user-idle.service';
 import {Client, IMessage, StompSubscription} from "@stomp/stompjs";

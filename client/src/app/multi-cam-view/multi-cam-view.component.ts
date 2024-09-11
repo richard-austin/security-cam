@@ -4,7 +4,7 @@ import {Camera, Stream} from '../cameras/Camera';
 import {MatCheckboxChange} from '@angular/material/checkbox';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {VideoComponent} from '../video/video.component';
-import {HttpErrorResponse} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import {timer} from 'rxjs';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';

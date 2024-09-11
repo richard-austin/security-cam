@@ -1,4 +1,4 @@
-<mat-card *ngIf="!embedded &&(error || success || warning || htmlWarning)"
+<div *ngIf="!embedded &&(error || success || warning || htmlWarning)"
           [ngClass]="{'alert-danger': error, 'alert-success': success, 'alert-warning': warning || htmlWarning}"
           class="reporting mat-elevation-z8">
   <div *ngIf="success">
@@ -22,11 +22,11 @@
     <div *ngIf="showMessageInError && !isHtml">{{error?.error}}</div>
     <div *ngIf="!showMessageInError">See logs for more information</div>
   </div>
-  <button mat-flat-button class="dismiss-button" color="default" (click)="dismiss()">Dismiss</button>
-</mat-card>
+  <button mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
+</div>
 
 <ng-container *ngIf="embedded && (error || success || warning)">
-  <div
+  <div class="reporting"
     [ngClass]="{'alert-danger-embedded': error, 'alert-success-embedded': success, 'alert-warning-embedded': warning}"
        (click)="dismiss()">
     <ng-container *ngIf="success">
@@ -51,7 +51,7 @@
     <ng-container *ngIf="!success && !warning && error?.status != 400">
       <div>
         <ng-container *ngIf="error && error.status != 0">
-          <div>Error status: {{error?.status}}</div>
+          <div>Error status: {{error.status}}</div>
         </ng-container>
         <br>
         <div *ngIf="isHtml" [innerHTML]="error?.error"></div>

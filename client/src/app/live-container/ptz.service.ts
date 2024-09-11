@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable, throwError} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
-import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
+import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
 import {eMoveDirections} from "./ptzcontrols/ptzbutton/ptzbutton.component";
 import {BaseUrl} from '../shared/BaseUrl/BaseUrl';
 import {ePresetOperations} from "./ptzcontrols/preset-button/preset-button.component";

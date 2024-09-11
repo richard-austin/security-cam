@@ -147,20 +147,22 @@ export class AudioBackchannel {
     //  the end of the speech getting cut off
     let timerSubscription = timer(1000+this.timeForStartAudioOutResponse).subscribe(() => {
       this.video.muted = false;
-      this.stopAudioOut();
+      this.stopAudioOut().then();
       timerSubscription.unsubscribe();
     });
   }
 
-  stopAudioOut(): void {
-    this.recorder?.stop();
-    this.utilsService.stopAudioOut().subscribe(() => {
-      this.client?.deactivate({force: false}).then(() => {
+  async stopAudioOut() {
+    if (!(await this.utilsService.isGuest()).guestAccount) {
+      this.recorder?.stop();
+      this.utilsService.stopAudioOut().subscribe(() => {
+        this.client?.deactivate({force: false}).then(() => {
+        });
+      }, reason => {
+        this.reporting.errorMessage = reason;
       });
-    }, reason => {
-      this.reporting.errorMessage = reason;
-    });
-    this.audioToggle = false;
+      this.audioToggle = false;
+    }
   }
 
   audioButtonTooltip(): string {

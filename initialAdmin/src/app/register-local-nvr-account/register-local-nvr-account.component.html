@@ -1,94 +1,114 @@
 <div class="nvr-register-container">
-  <mat-card class="mat-elevation-z8">
-    <mat-card-header>
-      <mat-card-title>{{title}}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <app-reporting [embedded]="true" (click)="checkForLocalAccount()"></app-reporting>
-      <div class="form-container">
-        <mat-form-field appearance="legacy" class="register-account-input">
-          <input #username matInput type="text" autocomplete="off" maxlength="20"
-                 [formControl]="getFormControl('username')"
-                 (beforeinput)="confirmOnReturn($event)"
-                 title=""
-                 matTooltip="Enter user name"
-                 matTooltipClass="tooltip"
-                 placeholder="New User name">
-          <mat-hint>User name for NVR online access</mat-hint>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['username'].hasError('pattern')">5 or more characters and numbers
-          </mat-error>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['username'].hasError('required')">User name is required</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="legacy" class="register-account-input">
-          <input matInput type="password" autocomplete="off" maxlength="25"
-                 [formControl]="getFormControl('password')"
-                 (beforeinput)="confirmOnReturn($event)"
-                 title=""
-                 matTooltip="Enter your password"
-                 matTooltipClass="tooltip"
-                 placeholder="Password">
-          <mat-hint>Password for NVR online access</mat-hint>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['password'].hasError('pattern')">Upper, lower case, numbers and special
-            chars
-          </mat-error>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['password'].hasError('required')">Password is required</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="legacy" class="register-account-input">
-          <input matInput type="password" autocomplete="off" maxlength="25"
-                 [formControl]="getFormControl('confirmPassword')"
-                 (beforeinput)="confirmOnReturn($event)"
-                 title=""
-                 matTooltip="Confirm your NVR account password"
-                 matTooltipClass="tooltip"
-                 placeholder="Confirm Password">
-          <mat-hint>Confirm the password</mat-hint>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['confirmPassword'].hasError('notMatching')">Must match password
-          </mat-error>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['confirmPassword'].hasError('required')">Confirm Password is required</mat-error>
-        </mat-form-field>
-       <mat-form-field appearance="legacy" class="email-input">
-          <input matInput type="email" autocomplete="off" maxlength="40"
-                 [formControl]="getFormControl('email')"
-                 (beforeinput)="confirmOnReturn($event)"
-                 title=""
-                 matTooltip="Enter your email address. This is required to provide a means of resetting forgotten passwords"
-                 matTooltipClass="tooltip"
-                 placeholder="email address">
-          <mat-hint>Your email address</mat-hint>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['email'].hasError('pattern')">Please enter valid email address
-          </mat-error>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['email'].hasError('required')">email address is required</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="legacy" class="email-input">
-          <input matInput type="email" autocomplete="off" maxlength="40"
-                 [formControl]="getFormControl('confirmEmail')"
-                 (beforeinput)="confirmOnReturn($event)"
-                 title=""
-                 matTooltip="Confirm your email address"
-                 matTooltipClass="tooltip"
-                 placeholder="Confirm email address">
-          <mat-hint>Confirm email address</mat-hint>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['confirmEmail'].hasError('notMatching')">Must match email address
-          </mat-error>
-          <mat-error *ngIf="nvrAccountRegistrationForm.controls['confirmEmail'].hasError('required')">Confirm Password is required</mat-error>
-        </mat-form-field>
-      </div>
-      <span class="confirm-group">
-      <button color="default" mat-flat-button (click)="hideRegisterForm()"
+    <mat-card class="mat-elevation-z8">
+        <mat-card-header>
+            <mat-card-title>{{ title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <app-reporting [embedded]="true" (click)="checkForLocalAccount()"></app-reporting>
+            <div class="form-container">
+                <mat-form-field appearance="outline" class="register-account-input">
+                    <mat-label>User Name</mat-label>
+                    <input #username matInput type="text" autocomplete="off" maxlength="20"
+                           [formControl]="getFormControl('username')"
+                           (beforeinput)="confirmOnReturn($event)"
+                           title=""
+                           matTooltip="Enter user name"
+                           matTooltipClass="tooltip"
+                           placeholder="New User name">
+                    <mat-hint>User name for NVR online access</mat-hint>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['username'].hasError('pattern')">5 or more
+                        characters and numbers
+                    </mat-error>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['username'].hasError('required')">User name is
+                        required
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="register-account-input">
+                    <mat-label>Password</mat-label>
+                    <input matInput type="password" autocomplete="off" maxlength="25"
+                           [formControl]="getFormControl('password')"
+                           (beforeinput)="confirmOnReturn($event)"
+                           title=""
+                           matTooltip="Enter your password"
+                           matTooltipClass="tooltip"
+                           placeholder="Password">
+                    <mat-hint>Password for NVR online access</mat-hint>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['password'].hasError('pattern')">Upper, lower
+                        case, numbers and special
+                        chars
+                    </mat-error>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['password'].hasError('required')">Password is
+                        required
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="register-account-input">
+                    <mat-label>Confirm Password</mat-label>
+                    <input matInput type="password" autocomplete="off" maxlength="25"
+                           [formControl]="getFormControl('confirmPassword')"
+                           (beforeinput)="confirmOnReturn($event)"
+                           title=""
+                           matTooltip="Confirm your NVR account password"
+                           matTooltipClass="tooltip"
+                           placeholder="Confirm Password">
+                    <mat-hint>Confirm the password</mat-hint>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['confirmPassword'].hasError('notMatching')">
+                        Must match password
+                    </mat-error>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['confirmPassword'].hasError('required')">
+                        Confirm Password is required
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="email-input">
+                    <mat-label>Email Address</mat-label>
+                    <input matInput type="email" autocomplete="off" maxlength="40"
+                           [formControl]="getFormControl('email')"
+                           (beforeinput)="confirmOnReturn($event)"
+                           title=""
+                           matTooltip="Enter your email address. This is required to provide a means of resetting forgotten passwords"
+                           matTooltipClass="tooltip"
+                           placeholder="email address">
+                    <mat-hint>Your email address</mat-hint>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['email'].hasError('pattern')">Please enter
+                        valid email address
+                    </mat-error>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['email'].hasError('required')">email address
+                        is required
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="email-input">
+                    <mat-label>Confirm Email Address</mat-label>
+                    <input matInput type="email" autocomplete="off" maxlength="40"
+                           [formControl]="getFormControl('confirmEmail')"
+                           (beforeinput)="confirmOnReturn($event)"
+                           title=""
+                           matTooltip="Confirm your email address"
+                           matTooltipClass="tooltip"
+                           placeholder="Confirm email address">
+                    <mat-hint>Confirm email address</mat-hint>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['confirmEmail'].hasError('notMatching')">Must
+                        match email address
+                    </mat-error>
+                    <mat-error *ngIf="nvrAccountRegistrationForm.controls['confirmEmail'].hasError('required')">Confirm
+                        Password is required
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <span class="confirm-group">
+      <button color="cancel" mat-raised-button (click)="hideRegisterForm()"
               matTooltip="{{reporting.success == undefined ? 'Close this dialogue and abandon setting up an account': 'Close this dialogue box'}}"
               matTooltipClass="tooltip">
-        {{reporting.success == undefined ? 'Cancel' : 'Exit'}}
+        {{ reporting.success == undefined ? 'Cancel' : 'Exit' }}
       </button>
-      <button color="warning" mat-flat-button
+      <button color="warn" mat-raised-button
               [disabled]="error || anyInvalid() || reporting.success != undefined"
               (click)="register()"
               matTooltip="Register the new account"
               matTooltipClass="tooltip">
-        {{buttonTitle}}
+        {{ buttonTitle }}
       </button>
     </span>
-    </mat-card-content>
-  </mat-card>
+        </mat-card-content>
+    </mat-card>
 </div>
 
 

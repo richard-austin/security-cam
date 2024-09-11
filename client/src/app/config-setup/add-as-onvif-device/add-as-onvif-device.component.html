@@ -3,7 +3,7 @@
   <mat-card-subtitle>As Onvif Device</mat-card-subtitle>
   <mat-card-content>
     <div>
-      <mat-form-field appearance="legacy" [style.width.px]="400">
+      <mat-form-field appearance="outline" [style.width.px]="400">
         <input matInput type="text" autocomplete="off" maxlength="60"
                [formControl]="getFormControl('onvifUrl')"
                matTooltip="Enter the URL for the Onvif device."
@@ -19,12 +19,12 @@
     </div>
     <br>
     <span class="add-camera-confirm-group">
-      <button color="default" mat-flat-button (click)="hideAddCameraDialogue()"
+      <button color="cancel" mat-raised-button (click)="hideAddCameraDialogue()"
               matTooltip="Close this dialogue and don't look up camera details"
               matTooltipClass="tooltip">
         Cancel
       </button>
-      <button color="warning" mat-flat-button
+      <button color="warn" mat-raised-button
               [disabled]="anyInvalid()"
               (click)="startCapabilitiesDiscovery()"
               matTooltip="Try to find the camera details for the given Onvif URL"

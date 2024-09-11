@@ -13,6 +13,19 @@ div.buttons-flex-container {
   flex-wrap: nowrap;
   justify-content: center;
   margin-top: 0.8rem;
+  > mat-card {
+    margin-top: auto;
+    margin-bottom: auto;
+    > mat-button-toggle-group {
+      > button {
+        min-height: 40px;
+      }
+      > mat-button-toggle {
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+    }
+  }
 }
 
 div[class="alert-danger"] {
@@ -50,6 +63,8 @@ div.no-display {
 
 div.delete-button-set {
   > div {
+    color: white;
+    font-size: 12px;
     button {
       margin-top: 0.4rem;
       margin-right: 0.4rem;
@@ -57,9 +72,18 @@ div.delete-button-set {
   }
 }
 
+div.delete-button {
+  > button {
+    width: 173px;
+  }
+
+  margin-top: 0.4rem;
+}
+
+
 div.download-button {
   > button {
-    width: 167.38px;
+    width: 173px;
   }
 
   margin-top: 0.4rem;

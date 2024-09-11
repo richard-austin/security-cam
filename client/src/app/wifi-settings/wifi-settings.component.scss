@@ -1,7 +1,7 @@
 .wifi-settings-container
 {
   margin-top: 1rem;
-  font-size: 2rem;
+  font-size: 16px;
   display: inline-flex;
   width: 100%;
   >mat-card
@@ -24,11 +24,6 @@ div.button-container{
   }
 }
 
-div.reset-connection-button {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
 mat-form-field.password-field
 {
     margin-bottom: 2rem;
@@ -38,15 +33,22 @@ span.connecting-spinner {
   position: relative;;
   top: 0.5rem;
   display: flex;
+  color: white;
   > mat-spinner {
+    position: relative;
+    top: -5px;
     margin-right: 0.5rem;
     margin-left: 0.5rem;
   }
 }
 
 div.loading-spinner {
+  position: relative;
+  top: 0.5rem;
   display: flex;
   > mat-spinner {
+    position: relative;
+    top: -5px;
     margin-right: 0.5rem;
     margin-left: 0.5rem;
   }

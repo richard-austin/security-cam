@@ -13,6 +13,9 @@ $about-box-fixed-content-height: 250px;
     width: 450px;
     margin-left: auto;
     margin-right: auto;
+    > mat-card-title {
+      color: black;
+    }
     > mat-card-content {
       > :nth-child(6) {
         margin: 0.3rem;

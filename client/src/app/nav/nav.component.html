@@ -17,7 +17,7 @@
       <button mat-button [matMenuTriggerFor]="$any(menuSelectCamera)" id="cameraDropdown">
         Select Camera
       </button>
-      <mat-menu #menuSelectCamera="matMenu">
+      <mat-menu #menuSelectCamera>
         <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
           <ng-container *ngFor="let streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn">
             <button mat-menu-item (click)="setVideoStream(camKV.value, streamKV.value);menuClosed()">
@@ -31,7 +31,7 @@
 
     <div>
       <button mat-button [matMenuTriggerFor]="$any(menuSelectRecording)">Select Recording</button>
-      <mat-menu #menuSelectRecording="matMenu">
+      <mat-menu #menuSelectRecording>
         <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
           <ng-container *ngFor="let streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn">
             <button mat-menu-item (click)="showRecording(camKV.value, streamKV.value);menuClosed()" *ngIf="streamKV.value.recording.enabled">
@@ -44,11 +44,11 @@
 
     <div>
       <button mat-button [matMenuTriggerFor]="$any(cameraSettings)">Camera Settings</button>
-      <mat-menu #cameraSettings="matMenu">
+      <mat-menu #cameraSettings>
         <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraSettings)">Quick Camera Setup</button>
         <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraAdmin)">Camera Admin</button>
       </mat-menu>
-      <mat-menu #menuCameraSettings="matMenu">
+      <mat-menu #menuCameraSettings>
         <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
           <button *ngIf="camKV.value.address!=''&&camKV.value.cameraParamSpecs.camType !== cameraTypes.none" mat-menu-item
                   (click)="cameraControl(camKV.value);menuClosed()">
@@ -56,7 +56,7 @@
           </button>
         </ng-container>
       </mat-menu>
-      <mat-menu #menuCameraAdmin="matMenu">
+      <mat-menu #menuCameraAdmin>
         <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
           <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
             <button *ngIf="camKV.value.address!=''" mat-menu-item
@@ -72,7 +72,7 @@
 
     <div>
       <button mat-button [matMenuTriggerFor]="$any(menuGeneral)">General</button>
-      <mat-menu #menuGeneral="matMenu">
+      <mat-menu #menuGeneral>
         <button mat-menu-item (click)="configSetup();menuClosed()"
                 matTooltip="Discover and configure the cameras for live view, recording, audio back channel and various other features."
                 matTooltipClass="tooltip">
@@ -100,7 +100,7 @@
           </button>
         </span>
         <button mat-menu-item [matMenuTriggerFor]="$any(wifiAdmin)">Wifi Admin</button>
-        <mat-menu #wifiAdmin="matMenu">
+        <mat-menu #wifiAdmin>
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="getLocalWifiDetails(); menuClosed()">
             Local Wifi Details
@@ -125,13 +125,13 @@
     </div>
   </div>
 </div>
-<mat-card class="mat-elevation-z8 confirm-logout alert-warning" *ngIf="confirmLogout">
-  <mat-card-subtitle style="color: inherit">
+<mat-card class="mat-elevation-z8 confirm-logout" *ngIf="confirmLogout">
+  <mat-card-subtitle>
     Logout from Security Cam, Are you sure?
   </mat-card-subtitle>
   <mat-card-content>
-    <button mat-flat-button color="warn" (click)="logOff(true)">Confirm</button>
-    <button mat-flat-button color="primary" (click)="logOff(false)">Cancel</button>
+    <button mat-raised-button color="warn" (click)="logOff(true)">Confirm</button>
+    <button mat-raised-button color="cancel" (click)="logOff(false)">Cancel</button>
   </mat-card-content>
 </mat-card>
 <div *ngIf="utilsService.cloudProxyRunning && !utilsService.activeMQTransportActive" class="no-transport-warning">

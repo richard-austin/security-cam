@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
-import {HttpErrorResponse} from "@angular/common/http";
+import { HttpErrorResponse } from "@angular/common/http";
 import {UtilsService} from '../shared/utils.service';
 import {MatCheckboxChange} from '@angular/material/checkbox';
 
@@ -11,7 +11,7 @@ import {MatCheckboxChange} from '@angular/material/checkbox';
   styleUrls: ['./set-up-guest-account.component.scss']
 })
 export class SetUpGuestAccountComponent implements OnInit {
-  setupGuestAccountForm!: FormGroup;
+  setupGuestAccountForm!: UntypedFormGroup;
   private originalEnabledState!: boolean
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   private currentEnabledState!: boolean;
@@ -70,7 +70,7 @@ export class SetUpGuestAccountComponent implements OnInit {
    * @param control
    */
   comparePasswords(control: AbstractControl): { [key: string]: boolean } | null {
-    let fg: FormGroup = control.parent as FormGroup;
+    let fg: UntypedFormGroup = control.parent as UntypedFormGroup;
     let ac: AbstractControl = fg?.controls['password'];
     if (control.value !== undefined && control.value !== ac?.value) {
       return {'confirmPassword': true};
@@ -88,10 +88,10 @@ export class SetUpGuestAccountComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    this.setupGuestAccountForm = new FormGroup({
-      enabled: new FormControl('', []),
-      password: new FormControl('', [Validators.pattern(/^$|^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/)]),
-      confirmPassword: new FormControl('', [this.comparePasswords])
+    this.setupGuestAccountForm = new UntypedFormGroup({
+      enabled: new UntypedFormControl('', []),
+      password: new UntypedFormControl('', [Validators.pattern(/^$|^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/)]),
+      confirmPassword: new UntypedFormControl('', [this.comparePasswords])
     }, {updateOn: "change"});
 
     // Trigger revalidation on confirmPassword when password is changed.

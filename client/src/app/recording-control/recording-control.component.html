@@ -4,7 +4,7 @@
       <mat-card-title>Select a Motion Event</mat-card-title>
       <mat-card-content>
         <div>
-          <mat-form-field appearance="fill">
+          <mat-form-field appearance="outline">
             <mat-label>Choose a date</mat-label>
             <input matInput readonly [matDatepickerFilter]="dateFilter" [min]="minDate" [max]="maxDate"
                    [value]="selectedDate" (dateChange)="setDateSlot($event)" [matDatepicker]="picker">
@@ -14,11 +14,11 @@
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field appearance="fill">
-            <mat-label>Motion Events</mat-label>
-            <mat-select #selector (selectionChange)="showMotionEvent($event)"
-                        matTooltip="Select a recording by date and time"
-                        matTooltipClass="tooltip">
+          <mat-form-field appearance="outline"
+                          matTooltip="Select a recording by date and time"
+                          matTooltipClass="tooltip">
+          <mat-label>Motion Events</mat-label>
+            <mat-select #selector (selectionChange)="showMotionEvent($event)">
               <mat-option *ngFor="let event of motionEvents" [value]="event">
                 {{ event.dateTime }}
               </mat-option>
@@ -26,10 +26,10 @@
           </mat-form-field>
         </div>
         <div *ngIf="!downloading" [ngSwitch]="confirmDelete" class="delete-button-set">
-          <div *ngSwitchCase="false"
+          <div *ngSwitchCase="false" class="delete-button"
                matTooltip="{{isGuest ? 'Disabled for guest' : 'Delete the currently selected recording'}}"
                matTooltipClass="tooltip">
-            <button (click)="confirmDelete=true" [disabled]="isGuest" color="warning" mat-flat-button
+            <button (click)="confirmDelete=true" [disabled]="isGuest" color="warn" mat-raised-button
                     matTooltip="Delete the currently displayed recording" matTooltipClass="tooltip">
               Delete This Recording
             </button>
@@ -37,11 +37,11 @@
           <div *ngSwitchCase="true">
             Delete {{ selector.value.dateTime }},
             <div>are you sure?</div>
-            <button (click)="confirmDelete=false;deleteRecording()" color="danger" mat-flat-button
+            <button (click)="confirmDelete=false;deleteRecording()" color="warn" mat-raised-button
                     matTooltip="Delete the currently selected recording"
                     matTooltipClass="tooltip">Confirm
             </button>
-            <button (click)="confirmDelete=false" color="default" mat-flat-button
+            <button (click)="confirmDelete=false" color="cancel" mat-raised-button
                     matTooltip="Do not delete the recording"
                     matTooltipClass="tooltip">
               Cancel
@@ -49,14 +49,14 @@
           </div>
         </div>
         <div *ngIf="!confirmDelete && !downloading" class="download-button">
-          <button (click)="downloadRecording()" color="light" mat-flat-button
+          <button (click)="downloadRecording()" color="download" mat-raised-button
                   matTooltip="Download this recording to your PC or phone"
                   matTooltipClass="tooltip">
-            Download Recording
+            Download&nbsp;Recording
           </button>
         </div>
       </mat-card-content>
-      <mat-card-content class="wait-box mat-form-field-flex" *ngIf="downloading">
+      <mat-card-content class="wait-box" *ngIf="downloading">
         <mat-spinner [diameter]="25"></mat-spinner>
         <span>Please wait..</span>
       </mat-card-content>
@@ -111,8 +111,8 @@
   </div>
 </div>
 <br>
-<div [ngClass]="{'no-display': !noVideo}" class="alert-warning">No Video Clips Available For {{ cam?.name }}
-  ({{ stream?.descr }})
+<div [ngClass]="{'no-display': !noVideo}" class="alert-warning">No Video Clips Available For {{ cam.name }}
+  ({{ stream.descr }})
 </div>
 <app-reporting></app-reporting>
 

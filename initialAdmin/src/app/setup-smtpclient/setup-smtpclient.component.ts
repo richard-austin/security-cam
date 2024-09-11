@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
-import {MatCheckboxChange} from "@angular/material/checkbox";
+import {MatCheckboxChange as MatCheckboxChange} from "@angular/material/checkbox";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {UtilsService} from "../shared/utils.service";
 import {timer} from "rxjs";

@@ -1,8 +1,9 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import {BaseUrl} from '../shared/BaseUrl/BaseUrl';
 import {catchError} from 'rxjs/operators';
 import {Observable, throwError} from 'rxjs';
+import {UtilsService} from "../shared/utils.service";
 
 export class IsMQConnected {
   transportActive: boolean = false;
@@ -20,7 +21,7 @@ export class CloudProxyService {
     })
   };
 
-  constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
+  constructor(private http: HttpClient, private _baseUrl: BaseUrl, private utils: UtilsService) {
   }
 
   getStatus(): Observable<boolean> {
@@ -38,8 +39,12 @@ export class CloudProxyService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
   isTransportActive():Observable<IsMQConnected> {
-    return this.http.post<IsMQConnected>(this._baseUrl.getLink("cloudProxy", "isTransportActive"), '', this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
-    );
+    if (!this.utils.isGuestAccount) {
+      return this.http.post<IsMQConnected>(this._baseUrl.getLink("cloudProxy", "isTransportActive"), '', this.httpJSONOptions).pipe(
+          catchError((err: HttpErrorResponse) => throwError(err))
+      );
+    }
+    else
+      return new Observable<IsMQConnected>()
   }
 }

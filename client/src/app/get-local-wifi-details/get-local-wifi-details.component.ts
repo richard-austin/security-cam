@@ -15,7 +15,7 @@ import {UtilsService} from "../shared/utils.service";
 })
 export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement>
+  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement> | null
 
   wifiDetails!: WifiDetails[];
   displayedColumns: string[] = ["InUse", "Ssid", "Rate", "Signal", "Channel", "Security", "Mode", "Bssid"];

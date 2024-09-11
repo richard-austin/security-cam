@@ -7,7 +7,6 @@ sudo -u tomcat rm -rf bin include lib lib64 pyvenv.cfg
 pushd /etc/security-cam/wifi-setup-service || true
 #bin/pip uninstall -r requirements.txt
 rm -rf bin include lib lib64 pyvenv.cfg
-rm /usr/local/bin/ffmpeg
 
 #
 popd || true

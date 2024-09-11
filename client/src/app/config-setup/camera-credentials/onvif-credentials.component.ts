@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {Camera} from 'src/app/cameras/Camera';
 import {CameraService, OnvifCredentials} from "../../cameras/camera.service";
 import {ReportingComponent} from "../../reporting/reporting.component";
@@ -22,7 +22,7 @@ export class OnvifCredentialsComponent implements OnInit, AfterViewInit {
 
   username: string = '';
   password: string = '';
-  setPasswordForm!: FormGroup;
+  setPasswordForm!: UntypedFormGroup;
   usernameTooltip: string = "Enter the user name for administrative access to the cameras. Note this is to give this application access to the cameras not to set it on the cameras.";
   passwordTooltip: string = "Enter the password for administrative access to the cameras. Note this is to give this application access to the cameras not to set it on the cameras.";
   hidePasswordDialogue() {
@@ -53,8 +53,8 @@ export class OnvifCredentialsComponent implements OnInit, AfterViewInit {
     }
   }
 
-  getFormControl(fcName: string): FormControl {
-    return this.setPasswordForm.get(fcName) as FormControl;
+  getFormControl(fcName: string): UntypedFormControl {
+    return this.setPasswordForm.get(fcName) as UntypedFormControl;
   }
 
   anyInvalid(): boolean {
@@ -62,9 +62,9 @@ export class OnvifCredentialsComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.setPasswordForm = new FormGroup({
-      cameraUserName: new FormControl(this.username, [Validators.required, Validators.maxLength(20), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
-      cameraPassword: new FormControl(this.password, [Validators.required, Validators.maxLength(25), Validators.pattern("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")])
+    this.setPasswordForm = new UntypedFormGroup({
+      cameraUserName: new UntypedFormControl(this.username, [Validators.required, Validators.maxLength(20), Validators.pattern("^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$")]),
+      cameraPassword: new UntypedFormControl(this.password, [Validators.required, Validators.maxLength(25), Validators.pattern("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")])
     }, {updateOn: "change"});
 
     // Ensure camera form controls highlight immediately if invalid

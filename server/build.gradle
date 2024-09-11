@@ -78,15 +78,16 @@ dependencies {
 
 //    implementation 'org.projectlombok:lombok:1.18.16'
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-    implementation 'org.grails.plugins:spring-security-core:4.0.3'
+// https://mvnrepository.com/artifact/org.grails.plugins/spring-security-core
+    implementation group: 'org.grails.plugins', name: 'spring-security-core', version: '6.1.1'
     implementation 'io.netty:netty-all:4.1.93.Final'
     implementation group: 'org.grails.plugins', name: 'grails-spring-websocket', version: '2.4.1'
     implementation "org.springframework.boot:spring-boot-starter-logging"
     implementation "org.springframework.boot:spring-boot-autoconfigure"
     implementation "org.grails:grails-core"
     implementation "org.springframework.boot:spring-boot-starter-actuator"
-    implementation "org.springframework.boot:spring-boot-starter-tomcat"
-    implementation 'org.springframework.boot:spring-boot-starter-websocket:2.6.3'
+    implementation "org.springframework.boot:spring-boot-starter-tomcat:3.3.3"
+    implementation 'org.springframework.boot:spring-boot-starter-websocket:3.3.3'
     implementation "org.grails:grails-web-boot"
     implementation "org.grails:grails-logging"
     implementation "org.grails:grails-plugin-rest"
@@ -119,7 +120,9 @@ dependencies {
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.apache.tomcat:tomcat-jdbc"
 
-    runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
+// https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api
+    implementation group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: '4.0.2'
+
     runtimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.1'
 
     implementation "com.bertramlabs.plugins:asset-pipeline-grails:3.3.6"
@@ -201,13 +204,13 @@ bootWar.dependsOn(':client:buildClient')
 
 bootWar {
     webInf {
-        from('../client/dist/client')
+        from('../client/dist/client/browser')
         include '**/*'
         into('classes/public')
     }
 }
 
-task setVersion(type: Exec) {
+tasks.register('setVersion', Exec) {
     group = 'build'
     description = 'Sets the version.txt file with the current version from git describe'
     workingDir "$projectDir"
@@ -215,7 +218,9 @@ task setVersion(type: Exec) {
     args = ['-c', 'mkdir -p grails-app/assets/version && git describe --tags --dirty | tr -d \'\\n\' > grails-app/assets/version/version.txt']
 }
 
-task buildDebFile(type: Exec, dependsOn: [':server:assemble', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar']) {
+tasks.register('buildDebFile', Exec) {
+    group='build'
+    dependsOn([':server:assemble', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar'])
     group = 'build'
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'
@@ -225,7 +230,7 @@ task buildDebFile(type: Exec, dependsOn: [':server:assemble', ':generateProductK
 //    duplicatesStrategy = DuplicatesStrategy.INHERIT
 //}
 
-tasks.withType(GroovyCompile) {
+tasks.withType(GroovyCompile).configureEach {
     configure(groovyOptions) {
         forkOptions.jvmArgs = ['-Xmx1024m']
     }
@@ -236,13 +241,12 @@ webdriverBinaries {
     geckodriver '0.24.0'
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
     systemProperty "geb.env", System.getProperty('geb.env')
     systemProperty "geb.build.reportsDir", reporting.file("geb/integrationTest")
     systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
     systemProperty "webdriver.gecko.driver", System.getProperty('webdriver.gecko.driver')
 }
-
 
 assets {
     minifyJs = true

@@ -16,7 +16,19 @@ div.camera-params-container
   }
 }
 
+div.title-padding {
+  padding-left: 16px;
+}
+
 .button-container {
   display: flex;
   justify-content: space-between;
+}
+span.wait-spinner {
+  display: flex;
+  > span {
+    position: relative;
+    top: -5px;
+    font-size: large;
+  }
 }

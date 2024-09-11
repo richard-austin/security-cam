@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {ReportingComponent} from '../reporting/reporting.component';
-import {HttpErrorResponse} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { UtilsService } from '../shared/utils.service';
 import { AfterViewInit } from '@angular/core';
 
@@ -12,7 +12,7 @@ import { AfterViewInit } from '@angular/core';
 })
 export class ChangeEmailComponent implements OnInit, AfterViewInit {
 
-  changeEmailForm!: FormGroup;
+  changeEmailForm!: UntypedFormGroup;
   @ViewChild(ReportingComponent) reporting!:ReportingComponent;
 
   constructor(private utilsService:UtilsService) { }
@@ -61,7 +61,7 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
    * @param control
    */
   compareEmails(control: AbstractControl): { [key: string]: boolean } | null {
-    let fg: FormGroup=control.parent as FormGroup;
+    let fg: UntypedFormGroup=control.parent as UntypedFormGroup;
     let ac: AbstractControl = fg?.controls['newEmail'];
     if (control.value !== undefined && control.value !== ac?.value) {
       return { 'confirmNewEmail': true };
@@ -74,10 +74,10 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.changeEmailForm = new FormGroup({
-      password: new FormControl('', [Validators.required]),
-      newEmail: new FormControl('', [Validators.required, Validators.pattern(RegExp("^([a-zA-Z0-9_\\-.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(]?)$"))]),
-      confirmNewEmail: new FormControl('', [Validators.required, this.compareEmails])
+    this.changeEmailForm = new UntypedFormGroup({
+      password: new UntypedFormControl('', [Validators.required]),
+      newEmail: new UntypedFormControl('', [Validators.required, Validators.pattern(RegExp("^([a-zA-Z0-9_\\-.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(]?)$"))]),
+      confirmNewEmail: new UntypedFormControl('', [Validators.required, this.compareEmails])
     });
     this.changeEmailForm.markAllAsTouched();
   }

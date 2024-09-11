@@ -15,10 +15,12 @@ div.onvif-failures-container
     > mat-card-subtitle {
       > mat-icon {
         position: relative;
-        top: 5px;
+        top: 4px;
         color: white;
         background-color: black;
         border-radius: 50%;
+        width: 20px;
+        height: 20px;
       }
       color: black;
     }

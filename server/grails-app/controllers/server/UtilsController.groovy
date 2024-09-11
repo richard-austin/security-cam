@@ -203,7 +203,7 @@ class UtilsController {
             render(status: 200, text: response.responseObject as JSON)
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     def audioInUse() {
          render(status: 200, text: [audioInUse: utilsService.getAudioInUse()] as JSON)
     }

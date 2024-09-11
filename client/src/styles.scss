@@ -1,67 +1,306 @@
 @use '@angular/material' as mat;
-@include mat.core;
+@use 'sass:map';
+@use 'sass:color';
 
-// Basic colours used in theme
-$sec-cam-primary: mat.define-palette(mat.$light-green-palette);
-$sec-cam-accent: mat.define-palette(mat.$blue-palette);
-$sec-cam-warn: mat.define-palette(mat.$orange-palette);
+//root {
+//  @include mat.form-field-density(-5);
+//  @include mat.all-component-densities(-5);
+//}
 
-// Colours used for buttons and alter boxes.
-$sec-cam-danger: mat.define-palette(mat.$red-palette);
-$sec-cam-secondary: mat.define-palette(mat.$green-palette, 600);
-$sec-cam-light: mat.define-palette(mat.$yellow-palette, 400);
-$sec-cam-grey: mat.define-palette(mat.$grey-palette);
+/**
+* Generated theme by Material Theme Generator
+* https://materialtheme.arcsine.dev
+* Fork at: https://materialtheme.arcsine.dev/?c=YHBhbGV0dGU$YHByaW1hcnk$YF48I2ZmZjkzMyIsIj9lcjwjZmZmZGMyIiwiO2VyPCNmZmY2MjB$LCIlPmBePCM3MmQyNmIiLCI~ZXI8I2Q1ZjJkMyIsIjtlcjwjNTVjMTRlfiwid2Fybj5gXjwjZmY4NTAwIiwiP2VyPCNmZmRhYjMiLCI7ZXI8I2ZmNjgwMH4sIj9UZXh0PCMwMDAwMDAiLCI~PTwjZmFmYWZhIiwiO1RleHQ8I2ZmZmZmZiIsIjs9PCMyYzJjMmN$LCJmb250cz5bYEA8KC00fixgQDwoLTN$LGBAPCgtMn4sYEA8KC0xfixgQDxoZWFkbGluZX4sYEA8dGl0bGV$LGBAPHN1YiktMn4sYEA8c3ViKS0xfixgQDxib2R5LTJ$LGBAPGJvZHktMX4sYEA8YnV0dG9ufixgQDxjYXB0aW9ufixgQDxpbnB1dCIsInNpemU$bnVsbH1dLCJpY29uczxPdXRsaW5lZCIsIj9uZXNzPmZhbHNlLCJ2ZXJzaW9uPjEzfQ==
+*/
 
-// All the following are defined from the sec-cam- group above
-$success-background: mat.get-color-from-palette($sec-cam-secondary, 100);
-$danger-background: mat.get-color-from-palette($sec-cam-danger, 200);
-$warn-background: mat.get-color-from-palette($sec-cam-warn, 100);
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
 
-$success-colour: mat.get-contrast-color-from-palette($sec-cam-secondary, 400);
-$danger-colour:  mat.get-contrast-color-from-palette($sec-cam-danger, 400);
-$warn-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
+// Fonts
+@import 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined';
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
 
-$light-button-bkgnd: mat.get-color-from-palette($sec-cam-light, 400);
-$danger-button-bkgnd: mat.get-color-from-palette($sec-cam-danger, A700);
-$warn-button-bkgnd: mat.get-color-from-palette($sec-cam-warn,A400);
-$secondary-button-bkgnd: mat.get-color-from-palette($sec-cam-accent, 900);
-$default-button-bkgnd: mat.get-color-from-palette($sec-cam-grey, 500);
+$fontConfig: (
+        display-4: mat.m2-define-typography-level(112px, 112px, 300, 'Roboto', -0.0134em),
+        display-3: mat.m2-define-typography-level(56px, 56px, 400, 'Roboto', -0.0089em),
+        display-2: mat.m2-define-typography-level(45px, 48px, 400, 'Roboto', 0.0000em),
+        display-1: mat.m2-define-typography-level(34px, 40px, 400, 'Roboto', 0.0074em),
+        headline: mat.m2-define-typography-level(24px, 32px, 400, 'Roboto', 0.0000em),
+        title: mat.m2-define-typography-level(20px, 32px, 500, 'Roboto', 0.0075em),
+        subheading-2: mat.m2-define-typography-level(16px, 28px, 400, 'Roboto', 0.0094em),
+        subheading-1: mat.m2-define-typography-level(15px, 24px, 500, 'Roboto', 0.0067em),
+        body-2: mat.m2-define-typography-level(14px, 24px, 500, 'Roboto', 0.0179em),
+        body-1: mat.m2-define-typography-level(14px, 20px, 400, 'Roboto', 0.0179em),
+        button: mat.m2-define-typography-level(14px, 14px, 500, 'Roboto', 0.0893em),
+        caption: mat.m2-define-typography-level(12px, 20px, 400, 'Roboto', 0.0333em),
+        input: mat.m2-define-typography-level(inherit, 1.125, 400, 'Roboto', 1.5px)
+);
 
-$light-button-colour: mat.get-contrast-color-from-palette($sec-cam-light, 900);
-$danger-button-colour: mat.get-contrast-color-from-palette($sec-cam-danger, 900);
-$warn-button-colour: mat.get-contrast-color-from-palette($sec-cam-warn, 400);
-$secondary-button-colour: mat.get-contrast-color-from-palette($sec-cam-accent, 500);
-$default-button-colour: mat.get-contrast-color-from-palette($sec-cam-grey, 500);
+// Foreground Elements
 
-$theme: mat.define-dark-theme((color: (primary: $sec-cam-primary, secondary: $sec-cam-secondary, accent: $sec-cam-accent, warn: $sec-cam-warn)));
+// Light Theme Text
+$dark-text: #000000;
+$dark-primary-text: rgba($dark-text, 0.87);
+$dark-accent-text: rgba($dark-primary-text, 0.54);
+$dark-disabled-text: rgba($dark-primary-text, 0.38);
+$dark-dividers: rgba($dark-primary-text, 0.12);
+$dark-focused: rgba($dark-primary-text, 0.12);
 
-$mat-theme-background: map-get($theme, background);
-$background-colour: mat.get-color-from-palette($mat-theme-background, background);
-$color: mat.get-contrast-color-from-palette($sec-cam-primary, 900);
-@include mat.all-component-themes($theme);
+// Dark Theme text
+$light-text: #ffffff;
+$light-primary-text: $light-text;
+$light-accent-text: rgba($light-primary-text, 0.7);
+$light-disabled-text: rgba($light-primary-text, 0.5);
+$light-dividers: rgba($light-primary-text, 0.12);
+$light-focused: rgba($light-primary-text, 0.12);
 
+$mat-dark-theme-foreground: (
+        base:              $light-text,
+        divider:           $light-dividers,
+        dividers:          $light-dividers,
+        disabled:          $light-disabled-text,
+        disabled-button:   rgba($light-text, 0.3),
+        disabled-text:     $light-disabled-text,
+        elevation:         black,
+        hint-text:         $light-disabled-text,
+        secondary-text:    $light-accent-text,
+        accent-text:       $light-accent-text,
+        icon:              $light-text,
+        icons:             $light-text,
+        text:              $light-text,
+        slider-min:        $light-text,
+        slider-off:        rgba($light-text, 0.3),
+        slider-off-active: rgba($light-text, 0.3),
+);
+
+// Background config
+// Dark bg
+$dark-background:     #2c2c2c;
+$dark-bg-lighter-5:   lighten($dark-background, 5%);
+$dark-bg-lighter-10:  lighten($dark-background, 10%);
+$dark-bg-lighter-20:  lighten($dark-background, 20%);
+$dark-bg-lighter-30:  lighten($dark-background, 30%);
+$light-bg-alpha-4:    rgba(#fafafa, 0.04);
+$light-bg-alpha-12:   rgba(#fafafa, 0.12);
+
+// Background palette for dark themes.
+$mat-dark-theme-background: (
+        background:               $dark-background,
+        status-bar:               $dark-bg-lighter-20,
+        app-bar:                  $dark-bg-lighter-5,
+        hover:                    $light-bg-alpha-4,
+        card:                     $dark-bg-lighter-5,
+        dialog:                   $dark-bg-lighter-5,
+      //  tooltip:                  $dark-bg-lighter-20,
+        disabled-button:          $light-bg-alpha-12,
+        raised-button:            $dark-bg-lighter-5,
+        focused-button:           $light-focused,
+        selected-button:          $dark-bg-lighter-20,
+        selected-disabled-button: $dark-bg-lighter-30,
+        disabled-button-toggle:   $dark-bg-lighter-10,
+        unselected-chip:          $dark-bg-lighter-20,
+        disabled-list-option:     $dark-bg-lighter-10,
+);
+
+// Compute font config
+@include mat.core();
+
+// Theme Config
 body {
+  /**
+  Override the Angular Material 15+ sizes which are much too large for my liking
+ */
+  --mat-menu-item-label-text-size: 14px;
+  --mat-menu-item-label-text-font: Roboto, "Helvetica Neue", sans-serif;
+  --mat-menu-item-label-text-weight: 400;
+  --mat-select-trigger-text-size: small;
+  //--mdc-text-button-container-height: 15px;
+  --mat-menu-item-label-text-line-height: 15px;
+  //--mdc-plain-tooltip-container-shape: 2rem;
+  --mat-table-header-headline-size: 12px;
+  --mat-table-header-headline-weight: 400;
+  --mat-table-row-item-container-height: 60px;
+  //--mat-form-field-container-height: 24px;
+  --mat-form-field-container-text-line-height: 24px;
+  --mat-select-trigger-text-line-height: 24px;
+  --mat-form-field-subscript-text-line-height: 0;
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: $background-colour;
+  background-color: $dark-background;
   //  margin: 0;
 }
 html, body {
   height: 100%;
+
 }
 
-.global-colours {
-  background-color: $background-colour;
-  color: $color
+$mat-primary: (
+        main: #2196f3,
+        lighter: #638cd6,
+        darker: #2033ff,
+        200: #4faaff, // For slide toggle,
+        contrast : (
+                main: $dark-primary-text,
+                lighter: $dark-primary-text,
+                darker: $dark-primary-text,
+        )
+);
+$theme-primary: mat.m2-define-palette($mat-primary, main, lighter, darker);
+
+$mat-accent: (
+        main: #72d26b,
+        lighter: #d5f2d3,
+        cancel-button: #a1b3a0,
+        darker: #55c14e,
+        200: #72d26b, // For slide toggle,
+        contrast : (
+                main: $dark-primary-text,
+                lighter: $dark-primary-text,
+                darker: $dark-primary-text,
+        )
+);
+$theme-accent: mat.m2-define-palette($mat-accent, main, lighter, darker);
+
+$mat-warn: (
+        main: #ff8500,
+        lighter: #ffdab3,
+        darker: #ff6800,
+        200: #ff8500, // For slide toggle,
+        danger-background: #ff9898,
+        danger: red,
+        contrast : (
+                main: $dark-primary-text,
+                lighter: $dark-primary-text,
+                darker: $dark-primary-text,
+        )
+);
+$theme-warn: mat.m2-define-palette($mat-warn, main, lighter, darker);
+;
+
+$theme: mat.m2-define-dark-theme((
+        color: (
+                primary: $theme-primary,
+                accent: $theme-accent,
+                warn: $theme-warn,
+                foreground: $mat-dark-theme-foreground,
+                background: $mat-dark-theme-background,
+        ),
+        typography: mat.m2-define-typography-config(),
+        density: -5
+)
+);
+
+// Theme Init
+@include mat.all-component-themes($theme);
+
+
+$warn-colour: map.get($mat-warn, 'contrast', 'main');
+$success-colour: map.get($mat-accent, 'contrast' 'main');
+$danger-colour: map.get($mat-warn, 'contrast', 'main');
+$warn-background: map.get($mat-warn, 'lighter');
+$success-background: map.get($mat-accent, 'lighter');
+$danger-background: map.get($mat-warn, 'danger-background');
+
+/**
+  Override the Angular Material 15+ sizes which are much too large for my liking
+ */
+mat-select {
+  height: 12px !important;
 }
+
+mat-option {
+  font-size: small !important;
+  min-height: 30px !important;
+  padding: 0 16px 0 16px !important;
+}
+
+mat-form-field {
+  margin-top: 5px;
+  margin-bottom: 3px;
+  font-size: small !important;
+  // height: 14px !important;
+}
+
+mat-label {
+  font-size: small !important;
+}
+
+button[mat-button] {
+  padding: 8px;
+  min-height: 36px;
+  --mdc-text-button-label-text-size:14px;
+  --mdc-text-button-label-text-tracking: normal;
+}
+
+button[mat-menu-item] {
+  //min-height: 30px !important;
+  --mdc-text-button-label-text-size: 14px;
+  --mat-menu-item-label-text-weight: 400;
+
+  //--mat-menu-item-label-text-weight: 400;
+}
+
+button[mat-raised-button] {
+  font-size: small !important;
+  padding: 17px 5px;
+}
+mat-error {
+  position: relative;
+  top: -4px;
+  font-size: x-small;
+}
+
+mat-hint {
+  position: relative;
+  top: -4px;
+  font-size: x-small !important;
+  color: $light-accent-text;
+}
+
+// Specific Angular Material component overrides, pieces that are not in line with the general theming
+
+mat-icon {
+    font-size: 20px !important;
+    font-family: 'Material Icons Outlined', 'Material Icons', sans-serif !important;
+    //.mat-badge-content {
+    //  font-family: 'Roboto', sans-serif;
+    //}
+}
+mat-card-title {
+  --mat-card-title-text-size: 24px;
+  padding: 0 0 0 16px;
+  color: white;
+  margin-bottom: 3px !important;
+}
+
+mat-card-subtitle {
+  padding: 0 0 0 16px;
+  margin-bottom: 7px !important;
+}
+
+mat-card {
+  padding: 12.5px;
+}
+
+button.mat-cancel {
+  background-color: map.get($mat-accent, 'cancel-button') !important;
+  color: map.get($mat-accent, 'contrast', 'main') !important;
+}
+
+button.mat-download {
+  background-color: map.get($mat-primary, 'lighter') !important;
+  color: map.get($mat-primary, 'contrast', 'main') !important;
+}
+
+/**
+  ########################################################################################################################
+ */
 
 @mixin alert {
  // position: relative;
   width: fit-content;
-  padding: 3rem;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 4rem;
+  padding: 1rem;
+  margin: 1rem auto;
   top: 5%;
   -webkit-box-shadow: 5px 5px 14px 5px #000000;
   box-shadow: 5px 5px 14px 5px #000000;
@@ -102,17 +341,20 @@ html, body {
 
 .alert-success {
   @include alert;
-  @include success;
+  color: $success-colour;
+  background-color: $success-background;
 }
 
 .alert-warning {
   @include alert;
-  @include warning;
+  color: $warn-colour;
+  background-color:  $warn-background;
 }
 
 .alert-danger {
   @include alert;
-  @include danger;
+  color: $danger-colour;
+  background-color: $danger-background;
 }
 
 .alert-success-embedded {
@@ -130,44 +372,18 @@ html, body {
   @include danger;
 }
 
-.mat-danger {
-  background-color: $danger-button-bkgnd;
-  color: $danger-button-colour;
-}
-
-.mat-secondary {
-  background-color: $secondary-button-bkgnd;
-  color: $secondary-button-colour;
-}
-
-.mat-light {
-  background-color: $light-button-bkgnd;
-  color: $light-button-colour;
-}
-.mat-light {
-  background-color: $light-button-bkgnd;
-  color: $light-button-colour;
-}
-
-.mat-warning {
-  background-color: $warn-button-bkgnd;
-  color: $warn-button-colour;
-}
-
-.mat-default {
-  background-color: $default-button-bkgnd;
-  color: $default-button-colour;
-}
-
 mat-card-content.wait-box {
-  >mat-spinner {
-    display: inline;
-  }
   >span {
+    > mat-spinner{
+      position: absolute;
+      top: -5px;
+      left: -30px;
+    }
     position: relative;
     top: 0.4rem;
     left: 2rem;
     display: inline;
+    color: #e3e1e1;;
   }
 }
 
@@ -175,21 +391,27 @@ mat-card.hide-background {
   background-color: transparent;
 }
 
-.mat-tooltip.tooltip {
-  background-color: #e3ba4f;
-  color: black;
-  font-size: 12px;
+.tooltip {
+  --mdc-plain-tooltip-container-color: #e3ba4f;
+  --mdc-plain-tooltip-supporting-text-color: black;
+  --mdc-plain-tooltip-supporting-text-size: 12px;
+  --mdc-plain-tooltip-container-shape: 5px;
 }
 
 .confirm-group {
+  position: relative;
+  top: -8px;
   > span {
     background: #d9a11a;
     color: black;
-    padding: 0.9rem;
+    padding: 4px;
     border-radius: 1rem;
   }
 
   > button {
+    margin-top: -5px;
+    margin-bottom: -5px;
+   vertical-align: auto;
     margin-left: 0.5rem;
   }
 }
@@ -231,7 +453,7 @@ label.video-buttons {
 }
 
 mat-card-content.scrollable-content {
-  width: 100%;
+ // width: 100%;
   overflow: auto;
 
   &::-webkit-scrollbar-track {

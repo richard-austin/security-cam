@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CamerasComponent } from './cameras/cameras.component';
-import {HttpClient, HttpClientModule} from "@angular/common/http";
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import {BaseUrl} from "./shared/BaseUrl/BaseUrl";
 import { NavComponent } from './nav/nav.component';
 import { VideoComponent } from './video/video.component';
@@ -62,83 +62,75 @@ import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/ad
 import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-failures.component';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    CamerasComponent,
-    NavComponent,
-    VideoComponent,
-    LiveContainerComponent,
-    MultiCamViewComponent,
-    RecordingControlComponent,
-    ReportingComponent,
-    ChangePasswordComponent,
-    AboutComponent,
-    SetIpComponent,
-    IdleTimeoutModalComponent,
-    CameraParamsComponent,
-    DrawdownCalcContainerComponent,
-    ConfigSetupComponent,
-    ExcludeOwnStreamPipe,
-    DisableControlDirective,
-    OnvifCredentialsComponent,
-    CloudProxyComponent,
-    ChangeEmailComponent,
-    ChangeEmailComponent,
-    SetUpGuestAccountComponent,
-    PTZControlsComponent,
-    PTZButtonComponent,
-    PresetButtonComponent,
-    CameraAdminPageHostingComponent,
-    GetActiveIPAddressesComponent,
-    GetLocalWifiDetailsComponent,
-    WifiSettingsComponent,
-    CreateUserAccountContainerComponent,
-    AudioInputPipe,
-    AddAsOnvifDeviceComponent,
-    SafeHtmlPipe,
-    OnvifFailuresComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    MatCardModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatCheckboxModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatInputModule,
-    MatIconModule,
-    MatSelectModule,
-    MatDialogModule,
-    MatMenuModule,
-    MatProgressSpinnerModule,
-    FormsModule,
-    ReactiveFormsModule,
-    // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
-    // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
-    // and `ping` is 6q0 (1 minutes).
-    UserIdleModule.forRoot({idle: 600, timeout: 60, ping: 60}),
-    LayoutModule,
-    MatTableModule,
-    MatSortModule,
-    MatTooltipModule,
-    MatDividerModule,
-    MatSlideToggleModule,
-    MatDatepickerModule,
-    MatNativeDateModule
-  ],
-  providers: [    {
-    provide: DateAdapter,
-    useClass: CustomDateAdapter,
-    deps: [MAT_DATE_LOCALE, Platform]
-  },
-    HttpClient, BaseUrl],
-  bootstrap: [AppComponent],
-  entryComponents: [IdleTimeoutModalComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        CamerasComponent,
+        NavComponent,
+        VideoComponent,
+        LiveContainerComponent,
+        MultiCamViewComponent,
+        RecordingControlComponent,
+        ReportingComponent,
+        ChangePasswordComponent,
+        AboutComponent,
+        SetIpComponent,
+        IdleTimeoutModalComponent,
+        CameraParamsComponent,
+        DrawdownCalcContainerComponent,
+        ConfigSetupComponent,
+        ExcludeOwnStreamPipe,
+        DisableControlDirective,
+        OnvifCredentialsComponent,
+        CloudProxyComponent,
+        ChangeEmailComponent,
+        ChangeEmailComponent,
+        SetUpGuestAccountComponent,
+        PTZControlsComponent,
+        PTZButtonComponent,
+        PresetButtonComponent,
+        CameraAdminPageHostingComponent,
+        GetActiveIPAddressesComponent,
+        GetLocalWifiDetailsComponent,
+        WifiSettingsComponent,
+        CreateUserAccountContainerComponent,
+        AudioInputPipe,
+        AddAsOnvifDeviceComponent,
+        SafeHtmlPipe,
+        OnvifFailuresComponent
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        MatCardModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatCheckboxModule,
+        MatButtonModule,
+        MatButtonToggleModule,
+        MatInputModule,
+        MatIconModule,
+        MatSelectModule,
+        MatDialogModule,
+        MatMenuModule,
+        MatProgressSpinnerModule,
+        FormsModule,
+        ReactiveFormsModule,
+        // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
+        // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
+        // and `ping` is 6q0 (1 minutes).
+        UserIdleModule.forRoot({ idle: 600, timeout: 60, ping: 60 }),
+        LayoutModule,
+        MatTableModule,
+        MatSortModule,
+        MatTooltipModule,
+        MatDividerModule,
+        MatSlideToggleModule,
+        MatDatepickerModule,
+        MatNativeDateModule], providers: [{
+            provide: DateAdapter,
+            useClass: CustomDateAdapter,
+            deps: [MAT_DATE_LOCALE, Platform]
+        },
+        HttpClient, BaseUrl, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {
 }

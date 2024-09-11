@@ -1,2 +1,9 @@
-include 'client', 'server', 'fmp4-ws-media-server', 'generateProductKey', 'initialAdmin'
+//pluginManagement {
+//    repositories {
+//        maven { url "https://plugins.gradle.org/m2/" }
+//        gradlePluginPortal()
+//    }
+//}
+
+include 'client', 'server', 'fmp4-ws-media-server', 'camera-recordings-service', 'wifi-setup-service', 'generateProductKey', 'initialAdmin'
 

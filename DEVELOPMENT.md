@@ -4,25 +4,33 @@ The requirements to build the project yourself are detailed below: -
 #### Platform for Development
 * Ubuntu 24.04 (Noble Numbat) on PC (Windows WSL2 or direct boot)
 
-#### The project is verified to build with the following:-
+#### The project uses the following SDK's/package managers:-
 * go version go1.20.1
-* Angular CLI: 15.2.0 or greater
-* Node: 18.17.1
-* Package Manager: npm 9.6.7
-* Grails Version: 5.3.2
+* Angular CLI: 18.2.3 or greater
+* Node: 18.20.4
+* Package Manager: npm 10.7.0
+* Grails Version: 6.2.0
 * openjdk version "17.0.10" 2024-01-16
-* Gradle 7.6
-* Python 3.11.6
+* Gradle 7.6.4 (Grails 6.2.0 will not run with Gradle 8+)
+* Python 3.12.3
+
+*To perform a Gradle build, only openjdk needs to be installed as the
+other tools are specified as plugins for the gradle build.
+To do further development work on the project, you may
+need to install some or all of these tools.*
 
 Using other versions may cause build issues in some cases.
 
 ### Set up build environment
+The project should build on most linux machines with a bash shell. 
+
+*openjdk 17 must be installed on the build machine.*
 ```
 git clone git@github.com:richard-austin/security-cam.git
 cd security-cam
 ```
 ### Build for deployment to Raspberry pi
-The Raspberry pi should be running Ubuntu 24.04 (Noble Numbat) OS.
+
 ```
 ./gradlew buildDebFile 
 ```
@@ -39,6 +47,7 @@ cd xtrn-scripts-and-config/deb-file-creation
 ```
 scp the .deb file to the Raspberry pi
 ## Installation on the Raspberry pi
+The Raspberry pi should be running Ubuntu 24.04 (Noble Numbat) OS.
 ```
 sudo apt update
 sudo apt upgrade 

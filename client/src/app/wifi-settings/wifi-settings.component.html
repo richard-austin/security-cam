@@ -21,9 +21,8 @@
         You may need to log in again.
         Return to WiFi Admin ->  WiFi Settings and you should now be able to change the wifi configuration.
       </div>
-      <div class="reset-connection-button loading-spinner">
-      </div>
       <app-reporting [embedded]="true"></app-reporting>
+      <br>
       <mat-checkbox [color]="'primary'" [checked]="wifiEnabled"
                     #wifiStatusCheckbox
                     matTooltip="Wi-Fi is currently {{wifiEnabled ? 'enabled' : 'disabled'}}, click to {{wifiEnabled ? 'disable' : 'enable'}}"
@@ -33,13 +32,13 @@
         {{wifiEnabled ? 'Disable' : 'Enable'}} Wi-Fi
       </mat-checkbox>
       <div>
-        <mat-form-field appearance="fill" [style.width.px]="315">
+        <mat-form-field appearance="outline" [style.width.px]="315">
           <mat-label *ngIf="!loading">
             {{wifiEnabled ? 'Select Wi-Fi Access Point' : 'Wi-Fi Is Off'}}
           </mat-label>
           <mat-label *ngIf="loading">
             <div class="loading-spinner">
-              <mat-spinner [diameter]="25"></mat-spinner>
+              <mat-spinner [diameter]="20"></mat-spinner>
               Loading..
             </div>
           </mat-label>
@@ -53,7 +52,7 @@
         </mat-form-field>
       </div>
       <div *ngIf="needPassword">
-        <mat-form-field class="password-field" appearance="fill">
+        <mat-form-field class="password-field" appearance="outline">
           <input matInput type="password" [formControl]="getFormControl(enterPasswordForm, 'password')"
                  matTooltip="Enter password for {{selector.value}}"
                  matTooltipClass="tooltip"
@@ -65,11 +64,11 @@
       </div>
       <div class="connect-cancel">
         <button [disabled]="!wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting || anyInvalid()"
-                mat-flat-button
+                mat-raised-button
                 color="warn"
                 (click)="connect()">Connect
         </button>
-        <button *ngIf="needPassword" mat-flat-button color="primary" (click)="cancelPasswordEntry()">Cancel</button>
+        <button *ngIf="needPassword" mat-raised-button color="cancel" (click)="cancelPasswordEntry()">Cancel</button>
         <ng-container *ngIf="connecting">
           <span class="connecting-spinner">
             <mat-spinner [diameter]="25"></mat-spinner>

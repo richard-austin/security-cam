@@ -11,9 +11,6 @@
     margin-right: auto;
     >mat-card-content {
       >div {
-        > mat-form-field {
-          margin-bottom: 1rem;
-        }
         display: flex;
         flex-direction: column;
       }
