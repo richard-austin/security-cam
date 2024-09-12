@@ -200,15 +200,15 @@ bootRun {
 }
 
 assetCompile.dependsOn(':server:setVersion')
-//bootWar.dependsOn(':client:buildClient')
+bootWar.dependsOn(':client:buildClient')
 
-//bootWar {
-//    webInf {
-//        from('../client/dist/client/browser')
-//        include '**/*'
-//        into('classes/public')
-//    }
-//}
+bootWar {
+    webInf {
+        from('../client/dist/client/browser')
+        include '**/*'
+        into('classes/public')
+    }
+}
 
 tasks.register('setVersion', Exec) {
     group = 'build'

@@ -261,9 +261,7 @@ export class UtilsService {
   }
 
   audioInUse() {
-    return this.http.post<{
-      audioInUse: boolean
-    }>(this._baseUrl.getLink("utils", "audioInUse"), "", this.httpJSONOptions).pipe(
+    return this.http.post<{audioInUse: boolean}>(this._baseUrl.getLink("utils", "audioInUse"), "", this.httpJSONOptions).pipe(
       tap((result) => {
         this.speakActive = result.audioInUse;
       }),
