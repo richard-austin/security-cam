@@ -79,7 +79,7 @@ Depends: openjdk-17-jre-headless (>=17.0.0), openjdk-17-jre-headless (<< 17.9.9)
  motion (>=4.6), motion(<<5.0.0-0),
  curl (>=8.5.0), curl(<=8.9),
  nginx (>=1.24.0), nginx(<=1.24.9),
- nodejs (>=18.19.1), nodejs(<19.0.0),
+ nodejs (>=18.19.1), nodejs(<<19.0.0),
  libraspberrypi-bin, chrony,
  network-manager (>= 1.46.0), network-manager (<< 2.0.0),
  wireless-tools (>=30~pre9-13), wireless-tools (<< 40),

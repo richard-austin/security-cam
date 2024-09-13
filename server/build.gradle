@@ -203,11 +203,11 @@ assetCompile.dependsOn(':server:setVersion')
 bootWar.dependsOn(':client:buildClient')
 
 bootWar {
-    webInf {
-        from('../client/dist/client/browser')
-        include '**/*'
-        into('classes/public')
-    }
+//    webInf {
+//        from('../client/dist/client/browser')
+//        include '**/*'
+//        into('classes/public')
+//    }
 }
 
 tasks.register('setVersion', Exec) {
