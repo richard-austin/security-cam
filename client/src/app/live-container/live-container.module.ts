@@ -11,8 +11,7 @@ import {PresetButtonComponent} from "./ptzcontrols/preset-button/preset-button.c
 import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
 import {MatDivider} from "@angular/material/divider";
 import {MatSlideToggle} from "@angular/material/slide-toggle";
-
-
+import {LiveContainerRoutingModule} from "./live-container-routing.module";
 
 @NgModule({
     declarations: [
@@ -24,6 +23,7 @@ import {MatSlideToggle} from "@angular/material/slide-toggle";
     exports: [
     ],
     imports: [
+        LiveContainerRoutingModule,
         CommonModule,
         SharedModule,
         MatIcon,
