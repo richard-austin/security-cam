@@ -1,7 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {LiveContainerComponent} from "./live-container/live-container.component";
-import {MultiCamViewComponent} from "./multi-cam-view/multi-cam-view.component";
 import {RecordingControlComponent} from "./recording-control/recording-control.component";
 import {ChangePasswordComponent} from "./change-password/change-password.component";
 import {AboutComponent} from "./about/about.component";
@@ -19,10 +17,10 @@ import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active
 import {CreateUserAccountContainerComponent} from './create-user-account-container/create-user-account-container.component';
 
 const routes: Routes = [
-  {path: 'live/:streamName', component: LiveContainerComponent},
+  {path: 'live/:streamName', loadChildren: () => import('./live-container/live-container.module').then(m => m.LiveContainerModule)},
   {path: 'recording/:streamName', component: RecordingControlComponent},
-  {path: 'multicam', component: MultiCamViewComponent},
-  {path: 'changepassword', component: ChangePasswordComponent},
+  {path: 'multicam', loadChildren: () => import('./multi-cam-view/multi-cam-view.module').then(m => m.MultiCamViewModule)},
+  {path: 'changepassword2', component: ChangePasswordComponent},
   {path: 'changeemail', component: ChangeEmailComponent},
   {path: 'about', component: AboutComponent},
   {path: 'setip', component: SetIpComponent},
@@ -35,7 +33,8 @@ const routes: Routes = [
   {path: 'cloudproxy', component: CloudProxyComponent},
   {path: 'getactiveipaddresses', component: GetActiveIPAddressesComponent},
   {path: 'getlocalwifidetails', component: GetLocalWifiDetailsComponent},
-  {path: 'wifisettings', component: WifiSettingsComponent}
+  {path: 'wifisettings', component: WifiSettingsComponent},
+ { path: 'changepassword', loadChildren: () => import('./change-password/change-password.module').then(m => m.ChangePasswordModule) }
 ];
 
 @NgModule({

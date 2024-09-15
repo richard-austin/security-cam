@@ -7,9 +7,6 @@ import { CamerasComponent } from './cameras/cameras.component';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import {BaseUrl} from "./shared/BaseUrl/BaseUrl";
 import { NavComponent } from './nav/nav.component';
-import { VideoComponent } from './video/video.component';
-import { LiveContainerComponent } from './live-container/live-container.component';
-import { MultiCamViewComponent } from './multi-cam-view/multi-cam-view.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -18,8 +15,6 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {MatCardModule} from "@angular/material/card";
 import { RecordingControlComponent } from './recording-control/recording-control.component';
 import {MatSelectModule} from "@angular/material/select";
-import { ReportingComponent } from './reporting/reporting.component';
-import { ChangePasswordComponent } from './change-password/change-password.component';
 import {MatIconModule} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import { AboutComponent } from './about/about.component';
@@ -43,9 +38,6 @@ import { OnvifCredentialsComponent } from './config-setup/camera-credentials/onv
 import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-account.component';
-import { PTZControlsComponent } from './live-container/ptzcontrols/ptzcontrols.component';
-import { PTZButtonComponent } from './live-container/ptzcontrols/ptzbutton/ptzbutton.component';
-import { PresetButtonComponent } from './live-container/ptzcontrols/preset-button/preset-button.component';
 import {MatDividerModule} from "@angular/material/divider";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {MatDatepickerModule} from "@angular/material/datepicker";
@@ -57,21 +49,16 @@ import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-w
 import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
 import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
-import { AudioInputPipe } from './video/audio-input.pipe';
 import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/add-as-onvif-device.component';
-import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-failures.component';
+import {SharedModule} from "./shared/shared.module";
 
-@NgModule({ declarations: [
+@NgModule({
+    declarations: [
         AppComponent,
         CamerasComponent,
         NavComponent,
-        VideoComponent,
-        LiveContainerComponent,
-        MultiCamViewComponent,
         RecordingControlComponent,
-        ReportingComponent,
-        ChangePasswordComponent,
         AboutComponent,
         SetIpComponent,
         IdleTimeoutModalComponent,
@@ -85,17 +72,12 @@ import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-fail
         ChangeEmailComponent,
         ChangeEmailComponent,
         SetUpGuestAccountComponent,
-        PTZControlsComponent,
-        PTZButtonComponent,
-        PresetButtonComponent,
         CameraAdminPageHostingComponent,
         GetActiveIPAddressesComponent,
         GetLocalWifiDetailsComponent,
         WifiSettingsComponent,
         CreateUserAccountContainerComponent,
-        AudioInputPipe,
         AddAsOnvifDeviceComponent,
-        SafeHtmlPipe,
         OnvifFailuresComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
@@ -118,7 +100,7 @@ import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-fail
         // Optionally you can set time for `idle`, `timeout` and `ping` in seconds.
         // Default values: `idle` is 600 (10 minutes), `timeout` is 300 (5 minutes)
         // and `ping` is 6q0 (1 minutes).
-        UserIdleModule.forRoot({ idle: 600, timeout: 60, ping: 60 }),
+        UserIdleModule.forRoot({idle: 600, timeout: 60, ping: 60}),
         LayoutModule,
         MatTableModule,
         MatSortModule,
@@ -126,11 +108,16 @@ import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-fail
         MatDividerModule,
         MatSlideToggleModule,
         MatDatepickerModule,
-        MatNativeDateModule], providers: [{
-            provide: DateAdapter,
-            useClass: CustomDateAdapter,
-            deps: [MAT_DATE_LOCALE, Platform]
-        },
-        HttpClient, BaseUrl, provideHttpClient(withInterceptorsFromDi())] })
+        MatNativeDateModule,
+        SharedModule],
+    exports: [
+    ],
+    providers: [{
+        provide: DateAdapter,
+        useClass: CustomDateAdapter,
+        deps: [MAT_DATE_LOCALE, Platform]
+    },
+        HttpClient, BaseUrl, provideHttpClient(withInterceptorsFromDi())]
+})
 export class AppModule {
 }
