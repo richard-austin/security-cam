@@ -71,7 +71,7 @@
                connectionTimeout="20000"
                redirectPort="8443"
                useSendFile="false"
-               compression="on"
+               compression="off"
                compressionMinSize="2048"/>
     <!-- A "Connector" using the shared thread pool-->
     <!--

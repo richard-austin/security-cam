@@ -34,7 +34,6 @@ import {MatDividerModule} from "@angular/material/divider";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import { CameraAdminPageHostingComponent } from './camera-admin-page-hosting/camera-admin-page-hosting.component';
 import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-wifi-details.component';
-import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
 import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
 import {SharedModule} from "./shared/shared.module";
@@ -55,7 +54,6 @@ import {Platform} from "@angular/cdk/platform";
         CameraAdminPageHostingComponent,
         GetActiveIPAddressesComponent,
         GetLocalWifiDetailsComponent,
-        WifiSettingsComponent,
         CreateUserAccountContainerComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,

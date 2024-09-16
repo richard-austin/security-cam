@@ -6,7 +6,6 @@ import {DrawdownCalcContainerComponent} from "./drawdown-calc-container/drawdown
 import {CloudProxyComponent} from './cloud-proxy/cloud-proxy.component';
 import {SetUpGuestAccountComponent} from "./set-up-guest-account/set-up-guest-account.component";
 import {CameraAdminPageHostingComponent} from './camera-admin-page-hosting/camera-admin-page-hosting.component';
-import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-wifi-details.component';
 import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
 import {CreateUserAccountContainerComponent} from './create-user-account-container/create-user-account-container.component';
@@ -28,7 +27,7 @@ const routes: Routes = [
   {path: 'cloudproxy', component: CloudProxyComponent},
   {path: 'getactiveipaddresses', component: GetActiveIPAddressesComponent},
   {path: 'getlocalwifidetails', component: GetLocalWifiDetailsComponent},
-  {path: 'wifisettings', component: WifiSettingsComponent},
+  {path: 'wifisettings', loadChildren: () => import('./wifi-settings/wifi-settings.module').then(m => m.WifiSettingsModule)},
 
 ];
 
