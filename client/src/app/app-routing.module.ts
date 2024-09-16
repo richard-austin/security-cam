@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {RecordingControlComponent} from "./recording-control/recording-control.component";
 import {AboutComponent} from "./about/about.component";
 import {SetIpComponent} from "./set-ip/set-ip.component";
 import {CameraParamsComponent} from "./camera-params/camera-params.component";
@@ -15,7 +14,7 @@ import {CreateUserAccountContainerComponent} from './create-user-account-contain
 
 const routes: Routes = [
   {path: 'live/:streamName', loadChildren: () => import('./live-container/live-container.module').then(m => m.LiveContainerModule)},
-  {path: 'recording/:streamName', component: RecordingControlComponent},
+  {path: 'recording/:streamName', loadChildren: () => import('./recording-control/rec-control.module').then(m => m.RecControlModule)},
   {path: 'multicam', loadChildren: () => import('./multi-cam-view/multi-cam-view.module').then(m => m.MultiCamViewModule)},
   {path: 'changeemail', loadChildren: () => import('./change-email/change-email.module').then(m => m.ChangeEmailModule)},
   {path: 'changepassword', loadChildren: () => import('./change-password/change-password.module').then(m => m.ChangePasswordModule) }  ,

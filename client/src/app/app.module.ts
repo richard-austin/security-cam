@@ -13,7 +13,6 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {MatCardModule} from "@angular/material/card";
-import { RecordingControlComponent } from './recording-control/recording-control.component';
 import {MatSelectModule} from "@angular/material/select";
 import {MatIconModule} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -35,23 +34,21 @@ import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
 import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-account.component';
 import {MatDividerModule} from "@angular/material/divider";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
-import {MatDatepickerModule} from "@angular/material/datepicker";
-import {DateAdapter, MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
-import {Platform} from "@angular/cdk/platform";
-import {CustomDateAdapter} from "./cameras/camera.service";
 import { CameraAdminPageHostingComponent } from './camera-admin-page-hosting/camera-admin-page-hosting.component';
 import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-wifi-details.component';
 import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
 import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
 import {SharedModule} from "./shared/shared.module";
+import {DateAdapter, MAT_DATE_LOCALE} from "@angular/material/core";
+import {CustomDateAdapter} from "./cameras/camera.service";
+import {Platform} from "@angular/cdk/platform";
 
 @NgModule({
     declarations: [
         AppComponent,
         CamerasComponent,
         NavComponent,
-        RecordingControlComponent,
         AboutComponent,
         SetIpComponent,
         IdleTimeoutModalComponent,
@@ -92,16 +89,16 @@ import {SharedModule} from "./shared/shared.module";
         MatTooltipModule,
         MatDividerModule,
         MatSlideToggleModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
         SharedModule],
     exports: [
     ],
-    providers: [{
-        provide: DateAdapter,
-        useClass: CustomDateAdapter,
-        deps: [MAT_DATE_LOCALE, Platform]
-    },
+    providers: [
+        {
+            provide: DateAdapter,
+            useClass: CustomDateAdapter,
+            deps: [MAT_DATE_LOCALE, Platform]
+        },
+
         HttpClient, BaseUrl, provideHttpClient(withInterceptorsFromDi())]
 })
 export class AppModule {
