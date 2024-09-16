@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {RecControlRoutingModule} from "./rec-control-routing.module";
+import {RecordingControlRoutingModule} from "./recording-control-routing.module";
 import {RecordingControlComponent} from "./recording-control.component";
 import {MatCardModule} from "@angular/material/card";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -25,7 +25,7 @@ import {Platform} from "@angular/cdk/platform";
         RecordingControlComponent
     ],
     imports: [
-        RecControlRoutingModule,
+        RecordingControlRoutingModule,
         SharedModule,
         CommonModule,
         MatCardModule,
@@ -51,5 +51,5 @@ import {Platform} from "@angular/cdk/platform";
         }
     ]
 })
-export class RecControlModule {
+export class RecordingControlModule {
 }

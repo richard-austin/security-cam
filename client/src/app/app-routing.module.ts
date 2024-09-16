@@ -13,7 +13,7 @@ import {CreateUserAccountContainerComponent} from './create-user-account-contain
 
 const routes: Routes = [
   {path: 'live/:streamName', loadChildren: () => import('./live-container/live-container.module').then(m => m.LiveContainerModule)},
-  {path: 'recording/:streamName', loadChildren: () => import('./recording-control/rec-control.module').then(m => m.RecControlModule)},
+  {path: 'recording/:streamName', loadChildren: () => import('./recording-control/recording-control.module').then(m => m.RecordingControlModule)},
   {path: 'multicam', loadChildren: () => import('./multi-cam-view/multi-cam-view.module').then(m => m.MultiCamViewModule)},
   {path: 'changeemail', loadChildren: () => import('./change-email/change-email.module').then(m => m.ChangeEmailModule)},
   {path: 'changepassword', loadChildren: () => import('./change-password/change-password.module').then(m => m.ChangePasswordModule) }  ,

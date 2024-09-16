@@ -7,4 +7,4 @@ const routes: Routes = [{ path: '', component: RecordingControlComponent }];
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class RecControlRoutingModule { }
+export class RecordingControlRoutingModule { }
