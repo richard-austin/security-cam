@@ -28,13 +28,9 @@ import {MatMenuModule} from "@angular/material/menu";
 import { LayoutModule } from '@angular/cdk/layout';
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {MatInputModule} from "@angular/material/input";
-import { ConfigSetupComponent } from './config-setup/config-setup.component';
 import {MatTableModule} from "@angular/material/table";
 import {MatSortModule} from "@angular/material/sort";
 import {MatTooltipModule} from "@angular/material/tooltip";
-import { ExcludeOwnStreamPipe } from './config-setup/exclude-own-stream.pipe';
-import { DisableControlDirective } from './shared/disable-control.directive';
-import { OnvifCredentialsComponent } from './config-setup/camera-credentials/onvif-credentials.component';
 import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
 import { SetUpGuestAccountComponent } from './set-up-guest-account/set-up-guest-account.component';
 import {MatDividerModule} from "@angular/material/divider";
@@ -48,8 +44,6 @@ import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-w
 import {WifiSettingsComponent} from './wifi-settings/wifi-settings.component';
 import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
 import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
-import { AddAsOnvifDeviceComponent } from './config-setup/add-as-onvif-device/add-as-onvif-device.component';
-import { OnvifFailuresComponent } from './config-setup/onvif-failures/onvif-failures.component';
 import {SharedModule} from "./shared/shared.module";
 
 @NgModule({
@@ -63,19 +57,13 @@ import {SharedModule} from "./shared/shared.module";
         IdleTimeoutModalComponent,
         CameraParamsComponent,
         DrawdownCalcContainerComponent,
-        ConfigSetupComponent,
-        ExcludeOwnStreamPipe,
-        DisableControlDirective,
-        OnvifCredentialsComponent,
         CloudProxyComponent,
         SetUpGuestAccountComponent,
         CameraAdminPageHostingComponent,
         GetActiveIPAddressesComponent,
         GetLocalWifiDetailsComponent,
         WifiSettingsComponent,
-        CreateUserAccountContainerComponent,
-        AddAsOnvifDeviceComponent,
-        OnvifFailuresComponent
+        CreateUserAccountContainerComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,

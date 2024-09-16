@@ -420,7 +420,7 @@
                             </ng-container>
                             <ng-container matColumnDef="defaultOnMultiDisplay">
                                 <th *matHeaderCellDef mat-header-cell>Default On Multi Display</th>
-                                <td *matCellDef="let stream; let streamIndex = index" mat-cell>
+                                <td *matCellDef="let stream" mat-cell>
                                     <mat-checkbox
                                             (change)="setDefaultOnMultiDisplayStatus($event, stream.value,  cam.value)"
                                             [checked]="stream.value.defaultOnMultiDisplay" [color]="'primary'"
@@ -432,7 +432,7 @@
                             </ng-container>
                             <ng-container matColumnDef="motion">
                                 <th *matHeaderCellDef mat-header-cell>Motion Sensing</th>
-                                <td *matCellDef="let stream; let streamIndex = index" [style.width.px]="95" mat-cell>
+                                <td *matCellDef="let stream" [style.width.px]="95" mat-cell>
                                     <mat-checkbox (change)="setMotionStatus($event, stream.value,  cam.value)"
                                                   [checked]="stream.value.motion.enabled" [color]="'primary'"
                                                   [disabled]="ftpSet(cam.value)" [style.width.px]="95"

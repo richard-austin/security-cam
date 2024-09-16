@@ -5,7 +5,6 @@ import {AboutComponent} from "./about/about.component";
 import {SetIpComponent} from "./set-ip/set-ip.component";
 import {CameraParamsComponent} from "./camera-params/camera-params.component";
 import {DrawdownCalcContainerComponent} from "./drawdown-calc-container/drawdown-calc-container.component";
-import {ConfigSetupComponent} from "./config-setup/config-setup.component";
 import {CloudProxyComponent} from './cloud-proxy/cloud-proxy.component';
 import {SetUpGuestAccountComponent} from "./set-up-guest-account/set-up-guest-account.component";
 import {CameraAdminPageHostingComponent} from './camera-admin-page-hosting/camera-admin-page-hosting.component';
@@ -24,7 +23,7 @@ const routes: Routes = [
   {path: 'setip', component: SetIpComponent},
   {path: 'cameraparams/:camera', component: CameraParamsComponent},
   {path: 'camadmin/:camera', component:  CameraAdminPageHostingComponent},
-  {path: 'configsetup', component: ConfigSetupComponent},
+  {path: 'configsetup', loadChildren: () => import('./config-setup/config-setup.module').then(m => m.ConfigSetupModule)},
   {path: 'setupguestaccount', component: SetUpGuestAccountComponent},
   {path: 'cua', component: CreateUserAccountContainerComponent},
   {path: 'dc', component: DrawdownCalcContainerComponent},
