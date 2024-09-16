@@ -2,7 +2,7 @@ const PROXY_CONFIG = [
   {  context: [
       "/application",
       "/assets",
-      "/cam",
+      "/cam/",
       "/motion",
       "/onvif",
       "/user",

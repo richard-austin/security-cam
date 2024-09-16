@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { CamerasComponent } from './cameras/cameras.component';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import {BaseUrl} from "./shared/BaseUrl/BaseUrl";
 import { NavComponent } from './nav/nav.component';
@@ -20,7 +19,6 @@ import { AboutComponent } from './about/about.component';
 import { SetIpComponent } from './set-ip/set-ip.component';
 import {MatDialogModule} from "@angular/material/dialog";
 import { IdleTimeoutModalComponent } from './idle-timeout-modal/idle-timeout-modal.component';
-import { CameraParamsComponent } from './camera-params/camera-params.component';
 import { DrawdownCalcContainerComponent } from './drawdown-calc-container/drawdown-calc-container.component';
 import {UserIdleModule} from "./angular-user-idle/angular-user-idle.module";
 import {MatMenuModule} from "@angular/material/menu";
@@ -47,12 +45,10 @@ import {Platform} from "@angular/cdk/platform";
 @NgModule({
     declarations: [
         AppComponent,
-        CamerasComponent,
         NavComponent,
         AboutComponent,
         SetIpComponent,
         IdleTimeoutModalComponent,
-        CameraParamsComponent,
         DrawdownCalcContainerComponent,
         CloudProxyComponent,
         SetUpGuestAccountComponent,
@@ -66,7 +62,6 @@ import {Platform} from "@angular/cdk/platform";
         AppRoutingModule,
         BrowserAnimationsModule,
         MatCardModule,
-        ReactiveFormsModule,
         MatFormFieldModule,
         MatCheckboxModule,
         MatButtonModule,

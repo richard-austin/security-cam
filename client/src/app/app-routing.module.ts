@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {AboutComponent} from "./about/about.component";
 import {SetIpComponent} from "./set-ip/set-ip.component";
-import {CameraParamsComponent} from "./camera-params/camera-params.component";
 import {DrawdownCalcContainerComponent} from "./drawdown-calc-container/drawdown-calc-container.component";
 import {CloudProxyComponent} from './cloud-proxy/cloud-proxy.component';
 import {SetUpGuestAccountComponent} from "./set-up-guest-account/set-up-guest-account.component";
@@ -20,7 +19,7 @@ const routes: Routes = [
   {path: 'changepassword', loadChildren: () => import('./change-password/change-password.module').then(m => m.ChangePasswordModule) }  ,
   {path: 'about', component: AboutComponent},
   {path: 'setip', component: SetIpComponent},
-  {path: 'cameraparams/:camera', component: CameraParamsComponent},
+  {path: 'cameraparams/:camera', loadChildren: () => import('./camera-params/cam-params.module').then(m => m.CamParamsModule)},
   {path: 'camadmin/:camera', component:  CameraAdminPageHostingComponent},
   {path: 'configsetup', loadChildren: () => import('./config-setup/config-setup.module').then(m => m.ConfigSetupModule)},
   {path: 'setupguestaccount', component: SetUpGuestAccountComponent},
