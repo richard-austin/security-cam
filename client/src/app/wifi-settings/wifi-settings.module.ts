@@ -12,12 +12,24 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {MatOption, MatSelect} from "@angular/material/select";
 import {MatButton} from "@angular/material/button";
 import {MatInput} from "@angular/material/input";
+import {GetLocalWifiDetailsComponent} from "../get-local-wifi-details/get-local-wifi-details.component";
+import {MatIcon} from "@angular/material/icon";
+import {
+    MatCell,
+    MatCellDef,
+    MatColumnDef,
+    MatHeaderCell, MatHeaderCellDef,
+    MatHeaderRow, MatHeaderRowDef,
+    MatRow, MatRowDef,
+    MatTable
+} from "@angular/material/table";
 
 
 
 @NgModule({
   declarations: [
-      WifiSettingsComponent
+      WifiSettingsComponent,
+      GetLocalWifiDetailsComponent
   ],
     imports: [
         WifiSettingsRoutingModule,
@@ -38,7 +50,18 @@ import {MatInput} from "@angular/material/input";
         MatSelect,
         MatOption,
         MatButton,
-        MatInput
+        MatInput,
+        MatIcon,
+        MatCell,
+        MatHeaderCell,
+        MatColumnDef,
+        MatTable,
+        MatCellDef,
+        MatRow,
+        MatHeaderRow,
+        MatRowDef,
+        MatHeaderCellDef,
+        MatHeaderRowDef
     ]
 })
 export class WifiSettingsModule { }

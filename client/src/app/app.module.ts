@@ -14,10 +14,7 @@ import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/m
 import {MatFormField} from "@angular/material/select";
 import {MatIcon} from "@angular/material/icon";
 import {MatError, MatHint, MatLabel} from "@angular/material/form-field";
-import { AboutComponent } from './about/about.component';
-import { SetIpComponent } from './set-ip/set-ip.component';
 import { IdleTimeoutModalComponent } from './idle-timeout-modal/idle-timeout-modal.component';
-import { DrawdownCalcContainerComponent } from './drawdown-calc-container/drawdown-calc-container.component';
 import {UserIdleModule} from "./angular-user-idle/angular-user-idle.module";
 import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
@@ -31,11 +28,6 @@ import {
     MatTable,
 } from "@angular/material/table";
 import {MatTooltip} from "@angular/material/tooltip";
-import { CloudProxyComponent } from './cloud-proxy/cloud-proxy.component';
-import { CameraAdminPageHostingComponent } from './camera-admin-page-hosting/camera-admin-page-hosting.component';
-import {GetLocalWifiDetailsComponent} from './get-local-wifi-details/get-local-wifi-details.component';
-import {GetActiveIPAddressesComponent} from './get-active-ipaddresses/get-active-ipaddresses.component';
-import { CreateUserAccountContainerComponent } from './create-user-account-container/create-user-account-container.component';
 import {SharedModule} from "./shared/shared.module";
 import {DateAdapter, MAT_DATE_LOCALE} from "@angular/material/core";
 import {CustomDateAdapter} from "./cameras/camera.service";
@@ -46,15 +38,7 @@ import {RouterOutlet} from "@angular/router";
     declarations: [
         AppComponent,
         NavComponent,
-        AboutComponent,
-        SetIpComponent,
-        IdleTimeoutModalComponent,
-        DrawdownCalcContainerComponent,
-        CloudProxyComponent,
-        CameraAdminPageHostingComponent,
-        GetActiveIPAddressesComponent,
-        GetLocalWifiDetailsComponent,
-        CreateUserAccountContainerComponent
+        IdleTimeoutModalComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,

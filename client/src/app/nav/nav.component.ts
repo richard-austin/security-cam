@@ -77,7 +77,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   cameraAdmin(cam: Camera) {
-    window.location.href = '#/camadmin/' + btoa(cam.address);
+    window.location.href = '#/general/camadmin/' + btoa(cam.address);
   }
 
   changePassword() {
@@ -106,7 +106,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   about() {
-    window.location.href = '#/about';
+    window.location.href = '#/general/about';
   }
 
   private getTemperature(): void {
@@ -136,19 +136,19 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setIp() {
-    window.location.href = '#/setip';
+    window.location.href = '#/general/setip';
   }
 
   cloudProxy() {
-    window.location.href = '#/cloudproxy';
+    window.location.href = '#/general/cloudproxy';
   }
 
   drawdownCalc() {
-    window.location.href = '#/dc';
+    window.location.href = '#/general/dc';
   }
 
   admin() {
-    window.location.href = '#/cua';
+    window.location.href = '#/general/cua';
   }
 
   configSetup() {
@@ -156,19 +156,19 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setUpGuestAccount() {
-    window.location.href = '#/setupguestaccount';
+    window.location.href = '#/general/setupguestaccount';
   }
 
   getLocalWifiDetails() {
-    window.location.href = '#/getlocalwifidetails';
+    window.location.href = '#/wifi/getlocalwifidetails';
   }
 
   wifiSettings() {
-    window.location.href = '#/wifisettings';
+    window.location.href = '#/wifi/wifisettings';
   }
 
   getActiveIPAddresses() {
-    window.location.href = '#/getactiveipaddresses';
+    window.location.href = '#/general/getactiveipaddresses';
   }
 
   openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
