@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {RecordingControlRoutingModule} from "./recording-control-routing.module";
 import {RecordingControlComponent} from "./recording-control.component";
 import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
-import {MatHint, MatLabel} from "@angular/material/form-field";
+import {MatHint, MatLabel, MatSuffix} from "@angular/material/form-field";
 import {MatInput} from "@angular/material/input";
 import {MatTooltip} from "@angular/material/tooltip";
 import {MatFormField, MatOption, MatSelect} from "@angular/material/select";
@@ -14,13 +14,13 @@ import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-to
 import {MatButton} from "@angular/material/button";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {DateAdapter, MAT_DATE_LOCALE, MatNativeDateModule} from "@angular/material/core";
-import {
-    MatDatepicker,
-    MatDatepickerInput,
-    MatDatepickerToggle
-} from "@angular/material/datepicker";
 import {CustomDateAdapter} from "../cameras/camera.service";
 import {Platform} from "@angular/cdk/platform";
+import {
+    MatDatepickerInput,
+    MatDatepickerModule,
+    MatDatepickerToggle,
+} from "@angular/material/datepicker";
 
 
 @NgModule({
@@ -44,14 +44,15 @@ import {Platform} from "@angular/cdk/platform";
         MatFormField,
         MatLabel,
         MatHint,
-        MatDatepicker,
-        MatNativeDateModule,
         MatCardTitle,
         MatCardContent,
+        MatOption,
+        MatButtonToggleGroup,
+        MatNativeDateModule,
+        MatDatepickerModule,
         MatDatepickerToggle,
         MatDatepickerInput,
-        MatOption,
-        MatButtonToggleGroup
+        MatSuffix
     ],
     providers: [
         {
