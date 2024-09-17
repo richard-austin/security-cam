@@ -17,6 +17,8 @@ import {ChangeEmailRoutingModule} from "./change-email-routing.module";
     ChangeEmailRoutingModule,
     CommonModule,
     SharedModule,
+    FormsModule,
+    ReactiveFormsModule,
     MatCard,
     MatCardTitle,
     MatLabel,
@@ -25,9 +27,7 @@ import {ChangeEmailRoutingModule} from "./change-email-routing.module";
     MatCardContent,
     MatFormField,
     MatButton,
-    MatInput,
-    FormsModule,
-    ReactiveFormsModule
+    MatInput
   ]
 })
 export class ChangeEmailModule { }

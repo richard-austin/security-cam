@@ -16,9 +16,11 @@ import {SharedModule} from "../shared/shared.module";
     ChangePasswordComponent,
   ],
     imports: [
-        CommonModule,
         ChangePasswordRoutingModule,
+        CommonModule,
+        ReactiveFormsModule,
         FormsModule,
+        SharedModule,
         MatButton,
         MatCard,
         MatCardContent,
@@ -27,9 +29,7 @@ import {SharedModule} from "../shared/shared.module";
         MatFormField,
         MatHint,
         MatInput,
-        MatLabel,
-        ReactiveFormsModule,
-        SharedModule,
+        MatLabel
     ]
 })
 export class ChangePasswordModule { }

@@ -8,6 +8,7 @@ import {MatTooltip} from "@angular/material/tooltip";
 import {MatIcon} from "@angular/material/icon";
 import {FormsModule} from "@angular/forms";
 import {AudioInputPipe} from "../video/audio-input.pipe";
+import {MatButton} from "@angular/material/button";
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import {AudioInputPipe} from "../video/audio-input.pipe";
         MatTooltip,
         MatIcon,
         FormsModule,
+        MatButton,
     ],
     exports: [
         ReportingComponent,
