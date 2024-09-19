@@ -33,6 +33,7 @@ import {DateAdapter, MAT_DATE_LOCALE} from "@angular/material/core";
 import {CustomDateAdapter} from "./cameras/camera.service";
 import {Platform} from "@angular/cdk/platform";
 import {RouterOutlet} from "@angular/router";
+import {MatDialogActions, MatDialogContent, MatDialogTitle} from "@angular/material/dialog";
 
 @NgModule({
     declarations: [
@@ -75,7 +76,7 @@ import {RouterOutlet} from "@angular/router";
         MatInput,
         MatLabel,
         MatHint,
-        MatError],
+        MatError, MatDialogTitle, MatDialogContent, MatDialogActions],
     exports: [
     ],
     providers: [
