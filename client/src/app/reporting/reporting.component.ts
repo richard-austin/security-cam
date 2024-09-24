@@ -13,8 +13,10 @@ export class ReportingComponent implements OnInit {
   isHtml: boolean = false;
   validationErrors!:string[];
   showMessageInError:boolean = true;
+  showMessageFromMessage: boolean = false;
   htmlWarning: string | undefined;
   @Input() embedded: boolean = false;
+
 
 
   constructor() {
@@ -33,6 +35,9 @@ export class ReportingComponent implements OnInit {
       }
     } else if (typeof (error.error) !== 'string') {
         this.showMessageInError=false;
+        if(typeof(error.message) === 'string' ) {
+          this.showMessageFromMessage = true;
+        }
       }
   }
 
