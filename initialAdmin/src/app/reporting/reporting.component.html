@@ -1,5 +1,5 @@
-<mat-card *ngIf="!embedded &&(error || success || warning)"
-          [ngClass]="{'alert-danger': error, 'alert-success': success, 'alert-warning': warning}"
+<div *ngIf="!embedded &&(error || success || warning || htmlWarning)"
+          [ngClass]="{'alert-danger': error, 'alert-success': success, 'alert-warning': warning || htmlWarning}"
           class="reporting mat-elevation-z8">
   <div *ngIf="success">
     Success: {{success}}
@@ -13,19 +13,21 @@
   <div *ngIf="warning">
     {{warning}}
   </div>
+  <div *ngIf="htmlWarning" [innerHTML]="htmlWarning | safeHtml"></div>
   <div *ngIf="!success && error?.status != 400">
     <div *ngIf="error !== undefined && error?.status !== undefined && error?.status != 0">Error
-      status: {{error.status}}</div>
+      status: {{error?.status}}</div>
     <br>
     <div *ngIf="isHtml" [innerHTML]="error?.error"></div>
     <div *ngIf="showMessageInError && !isHtml">{{error?.error}}</div>
-    <div *ngIf="!showMessageInError">See logs for more information</div>
+    <div *ngIf="!showMessageInError && !showMessageFromMessage">See logs for more information</div>
+      <div *ngIf="showMessageFromMessage">{{error?.message}}</div>
   </div>
   <button mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
-</mat-card>
+</div>
 
 <ng-container *ngIf="embedded && (error || success || warning)">
-  <div
+  <div class="reporting"
     [ngClass]="{'alert-danger-embedded': error, 'alert-success-embedded': success, 'alert-warning-embedded': warning}"
     (click)="dismiss()">
     <ng-container *ngIf="success">
@@ -55,7 +57,8 @@
         <br>
         <div *ngIf="isHtml" [innerHTML]="error?.error"></div>
         <div *ngIf="showMessageInError && !isHtml">{{error?.error}}</div>
-        <ng-container *ngIf="!showMessageInError">
+        <div *ngIf="showMessageFromMessage">{{error?.message}}</div>
+        <ng-container *ngIf="!showMessageInError && !showMessageFromMessage">
           <div>See logs for more information</div>
         </ng-container>
       </div>

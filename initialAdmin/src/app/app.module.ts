@@ -27,11 +27,13 @@ import {LayoutModule} from '@angular/cdk/layout';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { SetupSMTPClientComponent } from './setup-smtpclient/setup-smtpclient.component';
 import { ActivemqCredentialsComponent } from './activemq-credentials/activemq-credentials.component';
+import {SafeHtmlPipe} from "./reporting/safe-html.pipe";
 
 @NgModule({ declarations: [
         AppComponent,
         RegisterLocalNvrAccountComponent,
         ReportingComponent,
+        SafeHtmlPipe,
         SetupSMTPClientComponent,
         ActivemqCredentialsComponent
     ],
