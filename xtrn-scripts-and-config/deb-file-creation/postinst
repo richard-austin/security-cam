@@ -71,7 +71,7 @@ find /etc/security-cam -type d -print0 | xargs -0 chmod 775
 find /etc/security-cam -type f -print0 | xargs -0 chmod 664
 
 chgrp -R security-cam /etc/security-cam/
-chown sec-cam:security-cam /var/log/motion
+chown -R sec-cam:security-cam /var/log/motion
 chown -R tomcat:security-cam /var/log/security-cam
 chown -R tomcat:security-cam /var/log/camera-recordings-service
 chown -R tomcat:security-cam /var/log/fmp4-ws-media-service
