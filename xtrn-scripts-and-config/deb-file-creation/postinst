@@ -20,11 +20,9 @@ deb-systemd-invoke stop motion  # And motion
 sleep 2
 
 useradd tomcat
-useradd sec-cam
 groupadd security-cam
 usermod -a -G video tomcat
 usermod -a -G security-cam tomcat
-usermod -a -G security-cam sec-cam
 usermod -a -G security-cam www-data
 
 chown -R tomcat:security-cam /etc/security-cam
@@ -62,16 +60,13 @@ chown root:tomcat /var/lib/tomcat9/conf/server.xml
 chown root:root /etc/security-cam/wifi-setup-service/*.py
 chown tomcat:tomcat -R /etc/fmp4-ws-media-server
 
-#A new group, security-cam, is added, then the users tomcat and sec-cam added to that group.
-# The security-cam group is then given group access to sec-cam and it's subdirectories. The user and group permissions are then set up.
-
 # Give directories only permission 775
 find /etc/security-cam -type d -print0 | xargs -0 chmod 775
 # Give files permission 664
 find /etc/security-cam -type f -print0 | xargs -0 chmod 664
 
 chgrp -R security-cam /etc/security-cam/
-chown -R sec-cam:security-cam /var/log/motion
+chown -R tomcat:security-cam /var/log/motion
 chown -R tomcat:security-cam /var/log/security-cam
 chown -R tomcat:security-cam /var/log/camera-recordings-service
 chown -R tomcat:security-cam /var/log/fmp4-ws-media-service
