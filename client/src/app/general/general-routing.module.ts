@@ -10,15 +10,16 @@ import {DrawdownCalcContainerComponent} from "../drawdown-calc-container/drawdow
 import {
   CreateUserAccountContainerComponent
 } from "../create-user-account-container/create-user-account-container.component";
+import {OnlyClientUsersService} from "../guards/only-client-users.service";
 
 const routes: Routes = [
-  {path: 'setupguestaccount', component: SetUpGuestAccountComponent},
-  {path: 'setip', component: SetIpComponent},
-  {path: 'cloudproxy', component: CloudProxyComponent},
-  {path: 'cua', component: CreateUserAccountContainerComponent},
-  {path: 'getactiveipaddresses', component: GetActiveIPAddressesComponent},
+  {path: 'setupguestaccount', component: SetUpGuestAccountComponent, canActivate: [OnlyClientUsersService]},
+  {path: 'setip', component: SetIpComponent, canActivate: [OnlyClientUsersService]},
+  {path: 'cloudproxy', component: CloudProxyComponent, canActivate: [OnlyClientUsersService]},
+  {path: 'cua', component: CreateUserAccountContainerComponent, canActivate: [OnlyClientUsersService]},
+  {path: 'getactiveipaddresses', component: GetActiveIPAddressesComponent, canActivate: [OnlyClientUsersService]},
   {path: 'dc', component: DrawdownCalcContainerComponent},
-  {path: 'camadmin/:camera', component: CameraAdminPageHostingComponent},
+  {path: 'camadmin/:camera', component: CameraAdminPageHostingComponent, canActivate: [OnlyClientUsersService]},
   {path: 'about', component: AboutComponent}
 ];
 @NgModule({

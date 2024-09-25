@@ -72,10 +72,10 @@ find /etc/security-cam -type f -print0 | xargs -0 chmod 664
 
 chgrp -R security-cam /etc/security-cam/
 chown sec-cam:security-cam /var/log/motion
-chown tomcat:security-cam /var/log/security-cam
-chown tomcat:security-cam /var/log/camera-recordings-service
-chown tomcat:security-cam /var/log/fmp4-ws-media-service
-chown tomcat:tomcat /var/log/tomcat9
+chown -R tomcat:security-cam /var/log/security-cam
+chown -R tomcat:security-cam /var/log/camera-recordings-service
+chown -R tomcat:security-cam /var/log/fmp4-ws-media-service
+chown -R tomcat:tomcat /var/log/tomcat9
 # Make the following scripts executable
 chmod +x /etc/security-cam/install-cert.sh
 chmod +x /etc/security-cam/processmotionrecordings.sh || true
