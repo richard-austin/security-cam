@@ -7,12 +7,14 @@ import { HttpErrorResponse } from '@angular/common/http';
   styleUrls: ['./reporting.component.scss']
 })
 export class ReportingComponent implements OnInit {
-  error: HttpErrorResponse | undefined;
+  error: HttpErrorResponse | undefined | null;
   success: string | undefined;
   warning: string | undefined;
   isHtml: boolean = false;
   validationErrors!: string[];
   showMessageInError: boolean = true;
+  showMessageFromMessage: boolean = false;
+  htmlWarning: string | undefined;
   @Input() embedded: boolean = false;
 
   constructor() {
@@ -31,6 +33,9 @@ export class ReportingComponent implements OnInit {
       }
     } else if (typeof (error.error) !== 'string') {
       this.showMessageInError = false;
+        if(typeof(error.message) === 'string' ) {
+          this.showMessageFromMessage = true;
+        }
     }
   }
 
@@ -44,6 +49,10 @@ export class ReportingComponent implements OnInit {
     this.warning = warning;
   }
 
+  set htmlWarningMessage(warning: string) {
+    this.clearMessage();
+    this.htmlWarning = warning;
+  }
   dismiss() {
     this.clearMessage();
   }
@@ -52,6 +61,7 @@ export class ReportingComponent implements OnInit {
     this.error = undefined;
     this.success = undefined;
     this.warning = undefined;
+    this.htmlWarning = undefined;
   }
 
   ngOnInit(): void {

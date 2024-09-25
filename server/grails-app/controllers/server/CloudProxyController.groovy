@@ -19,7 +19,7 @@ class CloudProxyController {
             render(status: 500, text: resp.error)
     }
 
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_GUEST'])
     def isTransportActive() {
         ObjectCommandResponse resp =  cloudProxyService.isTransportActive()
         if(resp.status == PassFail.PASS)

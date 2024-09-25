@@ -39,12 +39,7 @@ export class CloudProxyService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
   isTransportActive():Observable<IsMQConnected> {
-    if (!this.utils.isGuestAccount) {
-      return this.http.post<IsMQConnected>(this._baseUrl.getLink("cloudProxy", "isTransportActive"), '', this.httpJSONOptions).pipe(
-          catchError((err: HttpErrorResponse) => throwError(err))
-      );
-    }
-    else
-      return new Observable<IsMQConnected>()
+    return this.http.post<IsMQConnected>(this._baseUrl.getLink("cloudProxy", "isTransportActive"), '', this.httpJSONOptions).pipe(
+        catchError((err: HttpErrorResponse) => throwError(err)));
   }
 }

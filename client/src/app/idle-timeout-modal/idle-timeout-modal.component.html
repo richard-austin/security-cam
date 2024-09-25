@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>Session Timing Out</h1>
 <div mat-dialog-content>
-  <p>The session has been idle for more than {{data.idle / 60}} minutes</p>
+  <p>The session has been idle for more than {{Math.round((data.idle / 60+Number.EPSILON)*10)/10}} minute{{data.idle > 60 ? 's' : ''}}</p>
   <p>The Session Will Time Out in {{data.remainingSecs}} seconds</p>
 </div>
 <div mat-dialog-actions>

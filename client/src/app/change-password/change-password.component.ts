@@ -5,7 +5,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { UtilsService } from '../shared/utils.service';
 
 @Component({
-  selector: 'app-change-password',
+  selector: 'app-change-password2',
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss']
 })
@@ -17,7 +17,7 @@ export class ChangePasswordComponent implements OnInit {
   constructor(private utilsService: UtilsService) { }
 
   changePasswordButtonDisabled():boolean {
-     return this.anyInvalid();
+    return this.anyInvalid();
   }
 
   hasError = (controlName: string, errorName: string):boolean =>{
@@ -30,28 +30,28 @@ export class ChangePasswordComponent implements OnInit {
     let confirmNewPassword: AbstractControl = this.changePasswordForm.controls['confirmNewPassword'];
 
     this.utilsService.changePassword(oldPassword.value, newPassword.value, confirmNewPassword.value).subscribe(() => {
-      this.reporting.successMessage="Password changed";
-    },
-    (reason: HttpErrorResponse) => {
-      if(reason.status === 400)
-      {
-        for(const key of Object.keys(reason.error)) {
-            if(key === 'oldPassword')
-              this.invalidPassword();
-        }
-        this.reporting.errorMessage = reason;
-      }
-      else
-        this.reporting.errorMessage = reason;
-    });
+          this.reporting.successMessage="Password changed";
+        },
+        (reason: HttpErrorResponse) => {
+          if(reason.status === 400)
+          {
+            for(const key of Object.keys(reason.error)) {
+              if(key === 'oldPassword')
+                this.invalidPassword();
+            }
+            this.reporting.errorMessage = reason;
+          }
+          else
+            this.reporting.errorMessage = reason;
+        });
   }
 
   invalidPassword()
   {
-      let oldPasswordCtl: AbstractControl = this.changePasswordForm.controls['oldPassword'];
-      let errors:{[key: string]: any} = {pattern: {badPassword:"Password Incorrect"}};
-      oldPasswordCtl.setErrors(errors);
-      oldPasswordCtl.markAsTouched({onlySelf: true}); //updateValueAndValidity({onlySelf: true, emitEvent: true});
+    let oldPasswordCtl: AbstractControl = this.changePasswordForm.controls['oldPassword'];
+    let errors:{[key: string]: any} = {pattern: {badPassword:"Password Incorrect"}};
+    oldPasswordCtl.setErrors(errors);
+    oldPasswordCtl.markAsTouched({onlySelf: true}); //updateValueAndValidity({onlySelf: true, emitEvent: true});
   }
 
   /**

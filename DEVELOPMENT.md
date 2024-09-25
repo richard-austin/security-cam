@@ -14,8 +14,10 @@ The requirements to build the project yourself are detailed below: -
 * Gradle 7.6.4 (Grails 6.2.0 will not run with Gradle 8+)
 * Python 3.12.3
 
-*To perform a Gradle build, only openjdk needs to be installed as the
-other tools are specified as plugins for the gradle build.
+*To perform a Gradle build, only openjdk and git need to be installed as the
+other tools are specified as plugins for the gradle build. The project structure
+should be a git repository, as the version number generation uses information from
+git about the repo.
 To do further development work on the project, you may
 need to install some or all of these tools.*
 
