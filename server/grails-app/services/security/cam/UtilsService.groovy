@@ -12,6 +12,7 @@ import org.springframework.core.io.Resource
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.security.core.context.SecurityContextHolder
 import security.cam.audiobackchannel.RtspClient
 import security.cam.commands.SMTPData
 import security.cam.commands.SetupSMTPAccountCommand
@@ -452,4 +453,24 @@ class UtilsService {
             }
         }
     }
+
+    ObjectCommandResponse getUserAuthorities() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            if(SecurityContextHolder.getContext().getAuthentication() == null) {
+                def ex = new Expando()
+                ex.setProperty('authority', 'ROLE_CLIENT')
+                result.responseObject = [ex.properties]  // In development/debug mode
+            }
+            else  // Logged in
+                result.responseObject = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+        }
+        catch (Exception ex) {
+            logService.cam.error("${ex.getClass().getName()} in getUserAuthorities: ${ex.getCause()} ${ex.getMessage()}")
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
 }
+

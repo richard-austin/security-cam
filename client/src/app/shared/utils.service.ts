@@ -308,4 +308,10 @@ export class UtilsService {
   set cloudProxyRunning(value: boolean) {
     this._cloudProxyRunning = value;
   }
+
+  getUserAuthorities(): Observable<{ authority: string }[]> {
+    return this.http.post<{ authority: string }[]>(this._baseUrl.getLink('utils', 'getUserAuthorities'), '', this.httpJSONOptions).pipe(
+        catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
 }

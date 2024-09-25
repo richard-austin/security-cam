@@ -212,4 +212,17 @@ class UtilsController {
     protected def audio(@Payload byte[] data) {
         utilsService.audio(data)
     }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_GUEST'])
+    def getUserAuthorities() {
+        ObjectCommandResponse result
+        result = utilsService.getUserAuthorities()
+        if (result.status != PassFail.PASS) {
+            logService.cam.error "getUserAuthorities: error: ${result.error}"
+            render(status: 500, text: result.error)
+        } else {
+            logService.cam.info("getUserAuthorities: success")
+            render result.responseObject as JSON
+        }
+    }
 }
