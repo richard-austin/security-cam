@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "spring-security.enabled",
+      "type": "java.lang.Boolean"
+    }
+  ]
+}

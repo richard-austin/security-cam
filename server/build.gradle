@@ -40,17 +40,13 @@ dependencies {
     implementation group: 'org.jboss.aerogear', name: 'aerogear-otp-java', version: '1.0.0'
     // https://mvnrepository.com/artifact/jakarta.annotation/jakarta.annotation-api
 
-
-
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-
-
-
-
-
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor:3.1.0'
+}
 
+bootRun {
+    jvmArgs('-Dspring.profiles.active=dev')
 }
 
 tasks.named('test') {
