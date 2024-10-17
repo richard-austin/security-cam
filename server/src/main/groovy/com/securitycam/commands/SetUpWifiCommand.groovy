@@ -1,5 +1,7 @@
 package com.securitycam.commands
 
+import com.securitycam.validators.IsBoolean
+
 class SetUpWifiCommand {
 
     SetUpWifiCommand() {

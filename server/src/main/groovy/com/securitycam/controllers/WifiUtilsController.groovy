@@ -1,11 +1,11 @@
 package com.securitycam.controllers
 
 import com.securitycam.commands.SetUpWifiCommand
-import com.securitycam.custom.SetupWifiValidator
 import com.securitycam.interfacebjects.Greeting
 import com.securitycam.interfacebjects.HelloMessage
 import com.securitycam.interfacebjects.ObjectCommandResponse
 import com.securitycam.services.LogService
+import com.securitycam.validators.SetupWifiValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -89,28 +89,36 @@ class WifiUtilsController {
     @PostMapping("/setupWifi2")
     @Secured("ROLE_CLIENT")
     ResponseEntity<?> setupWifi2(@Valid @RequestBody SetUpWifiCommand cmd) {
+        Errors errors = new BeanPropertyBindingResult(cmd, "setupwifi");
+        setupWifiValidator.validate(cmd, errors);
+        if (errors.hasErrors()) {
+            errors.allErrors.forEach {
+                System.out.println(it)
+            }
+        }
 
 //        if(result.hasErrors()) {
 //            System.out.println("There are errors")
 //            return ResponseEntity.badRequest()
 //        }
-//        else
+        else {
             logService.setLogLevel("DEBUG")
             logService.cam.debug("About to write to topic/greetings")
             brokerMessagingTemplate.convertAndSend("/topic/greetings", new Greeting("This is the payload"))
             return ResponseEntity.ok("Wifi settings are valid")
-    }
+        }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.defaultMessage;
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
+
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+//        Map<String, String> errors = new HashMap<>();
+//        ex.getBindingResult().getAllErrors().forEach((error) -> {
+//            String fieldName = ((FieldError) error).getField();
+//            String errorMessage = error.defaultMessage;
+//            errors.put(fieldName, errorMessage);
+//        });
+//        return errors;
     }
 
     // The audio websocket listener

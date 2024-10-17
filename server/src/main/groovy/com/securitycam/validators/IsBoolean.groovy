@@ -1,4 +1,4 @@
-package com.securitycam.custom
+package com.securitycam.validators
 
 import jakarta.validation.Constraint
 import org.springframework.messaging.handler.annotation.Payload

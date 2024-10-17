@@ -1,4 +1,4 @@
-package com.securitycam.custom
+package com.securitycam.validators
 
 import com.securitycam.commands.SetUpWifiCommand
 import org.springframework.stereotype.Service
