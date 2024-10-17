@@ -5,7 +5,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.6'
 }
 
-group = 'com.security-cam'
+group = "server"
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -43,6 +43,9 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
+    // https://mvnrepository.com/artifact/gradle.plugin.com.github.erdi.webdriver-binaries/webdriver-binaries-gradle-plugin
+ //   implementation group: 'gradle.plugin.com.github.erdi.webdriver-binaries', name: 'webdriver-binaries-gradle-plugin', version: '2.7'
+
 }
 
 bootRun {
@@ -52,3 +55,57 @@ bootRun {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+//assetCompile.dependsOn(':server:setVersion')
+bootWar.dependsOn(':client:buildClient',':server:setVersion')
+
+bootWar {
+    webInf {
+        from('../client/dist/client/browser')
+        include '**/*'
+        into('classes/public')
+    }
+}
+
+tasks.register('setVersion', Exec) {
+    group = 'build'
+    description = 'Sets the version.txt file with the current version from git describe'
+    workingDir "$projectDir"
+    executable "sh"
+    args = ['-c', 'mkdir -p grails-app/assets/version && git describe --tags --dirty | tr -d \'\\n\' > grails-app/assets/version/version.txt']
+}
+
+tasks.register('buildDebFile', Exec) {
+    group='build'
+    dependsOn([':server:assemble', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar'])
+    group = 'build'
+    workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
+    commandLine './create-deb.sh'
+}
+
+//tasks.withType(Copy) {
+//    duplicatesStrategy = DuplicatesStrategy.INHERIT
+//}
+
+tasks.withType(GroovyCompile).configureEach {
+    configure(groovyOptions) {
+        forkOptions.jvmArgs = ['-Xmx1024m']
+    }
+}
+
+//webdriverBinaries {
+//    chromedriver '2.45.0'
+//    geckodriver '0.24.0'
+//}
+
+tasks.withType(Test).configureEach {
+    systemProperty "geb.env", System.getProperty('geb.env')
+    systemProperty "geb.build.reportsDir", reporting.file("geb/integrationTest")
+    systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
+    systemProperty "webdriver.gecko.driver", System.getProperty('webdriver.gecko.driver')
+}
+
+//assets {
+//    minifyJs = true
+//    minifyCss = true
+//}
