@@ -3,10 +3,11 @@ plugins {
     id 'war'
     id 'org.springframework.boot' version '3.3.4'
     id 'io.spring.dependency-management' version '1.1.6'
+    id("com.github.erdi.webdriver-binaries") version "3.2"
 }
 
 group = "server"
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 java {
     toolchain {
@@ -43,8 +44,6 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
-    // https://mvnrepository.com/artifact/gradle.plugin.com.github.erdi.webdriver-binaries/webdriver-binaries-gradle-plugin
- //   implementation group: 'gradle.plugin.com.github.erdi.webdriver-binaries', name: 'webdriver-binaries-gradle-plugin', version: '2.7'
 
 }
 
@@ -63,7 +62,7 @@ bootWar {
     webInf {
         from('../client/dist/client/browser')
         include '**/*'
-        into('classes/public')
+        into('classes/static')
     }
 }
 
@@ -72,7 +71,7 @@ tasks.register('setVersion', Exec) {
     description = 'Sets the version.txt file with the current version from git describe'
     workingDir "$projectDir"
     executable "sh"
-    args = ['-c', 'mkdir -p grails-app/assets/version && git describe --tags --dirty | tr -d \'\\n\' > grails-app/assets/version/version.txt']
+    args = ['-c', 'mkdir -p version && git describe --tags --dirty | tr -d \'\\n\' > version/version.txt']
 }
 
 tasks.register('buildDebFile', Exec) {
@@ -93,10 +92,14 @@ tasks.withType(GroovyCompile).configureEach {
     }
 }
 
-//webdriverBinaries {
-//    chromedriver '2.45.0'
-//    geckodriver '0.24.0'
-//}
+webdriverBinaries {
+    chromedriver {
+        versionRegexp = '.*'  // Use latest version
+    }
+
+    geckodriver '0.24.0'
+    edgedriver '86.0.601.0'
+}
 
 tasks.withType(Test).configureEach {
     systemProperty "geb.env", System.getProperty('geb.env')

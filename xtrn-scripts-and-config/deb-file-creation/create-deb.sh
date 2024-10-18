@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export VERSION
-VERSION=$(< ../../server/grails-app/assets/version/version.txt)
+VERSION=$(< ../../server/version/version.txt)
 
 rm -r security-cam_*_arm64
 
@@ -60,7 +60,7 @@ tar -xzf ../apache-tomcat-9/apache-tomcat-9.0.93.tar.gz -C security-cam_"${VERSI
 rmdir security-cam_"${VERSION}"_arm64/var/lib/tomcat9/logs
 ln -s /var/log/tomcat9 security-cam_"${VERSION}"_arm64/var/lib/tomcat9/logs
 cp ../tomcat9 security-cam_"${VERSION}"_arm64/tmp
-cp ../../server/build/libs/server-7.3.war security-cam_"${VERSION}"_arm64/tmp
+cp ../../server/build/libs/server-0.0.1.war security-cam_"${VERSION}"_arm64/tmp
 cp ../../initialAdmin/dist/cua.war  security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-9/tomcat9.service security-cam_"${VERSION}"_arm64/lib/systemd/system/
 cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
