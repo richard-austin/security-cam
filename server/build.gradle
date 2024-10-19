@@ -52,7 +52,7 @@ dependencies {
 
     // Onvif dependencies
 
-    implementation 'org.jetbrains:annotations:24.0.0'
+    implementation 'org.jetbrains:annotations:24.1.0'
     implementation group: 'org.apache.cxf', name: 'cxf-rt-frontend-jaxws', version: '3.3.2'
 //    implementation group: 'org.apache.cxf', name: 'cxf-rt-transports-http-jetty', version: '3.3.2'
     implementation group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1'
@@ -75,10 +75,10 @@ dependencies {
     implementation group: 'javax.activation', name: 'activation', version: '1.1.1'
     implementation group: 'com.sun.xml.messaging.saaj', name: 'saaj-impl', version: '1.5.1'
 
-    implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.1'
-    implementation 'org.apache.cxf:cxf-rt-ws-security:3.3.2'
-    implementation 'org.apache.cxf:cxf-rt-transports-http:3.3.2'
-    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
+    implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:4.0.1'
+    implementation 'org.apache.cxf:cxf-rt-ws-security:4.0.4'
+    implementation 'org.apache.cxf:cxf-rt-transports-http:4.0.5'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
 
 //    implementation 'org.apache.commons:commons-lang3:3.4'
 }
