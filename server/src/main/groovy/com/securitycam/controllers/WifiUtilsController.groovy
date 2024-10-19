@@ -1,14 +1,13 @@
 package com.securitycam.controllers
 
 import com.securitycam.commands.SetUpWifiCommand
-import com.securitycam.interfacebjects.Greeting
-import com.securitycam.interfacebjects.HelloMessage
-import com.securitycam.interfacebjects.ObjectCommandResponse
+import com.securitycam.interfaceobjects.Greeting
+import com.securitycam.interfaceobjects.HelloMessage
+import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.services.LogService
 import com.securitycam.validators.SetupWifiValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.Errors
-import org.springframework.validation.FieldError
-import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.HtmlUtils

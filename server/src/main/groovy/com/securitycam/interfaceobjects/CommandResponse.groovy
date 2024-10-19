@@ -1,4 +1,4 @@
-package com.securitycam.interfacebjects
+package com.securitycam.interfaceobjects
 
 import com.securitycam.enums.PassFail
 

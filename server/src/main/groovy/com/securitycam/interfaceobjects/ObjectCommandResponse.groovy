@@ -1,4 +1,4 @@
-package com.securitycam.interfacebjects
+package com.securitycam.interfaceobjects
 
 // needed to add a generic object to the base class command response which only handles strings
 class ObjectCommandResponse extends CommandResponse {
