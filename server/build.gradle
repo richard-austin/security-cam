@@ -19,6 +19,10 @@ repositories {
     mavenCentral()
 }
 
+springBoot {
+    mainClass.set("com.securitycam.ServerApplication")
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-groovy-templates'
     implementation 'org.springframework.boot:spring-boot-starter-security'
