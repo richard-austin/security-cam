@@ -3,19 +3,19 @@
 cp /tmp/motion.conf /etc/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/chrony.conf /etc/chrony
-mv /tmp/server.xml /var/lib/tomcat9/conf
-#### mv /tmp/tomcat9 /etc/default/  # Updated tomcat9 default file to enable use of Java 17
-mv /tmp/tomcat-users.xml /var/lib/tomcat9/conf
-mv /tmp/server-0.0.1.war /var/lib/tomcat9/webapps/ROOT.war
-mv /tmp/cua.war /var/lib/tomcat9/webapps/cua.war
+mv /tmp/server.xml /var/lib/tomcat10/conf
+#### mv /tmp/tomcat10 /etc/default/  # Updated tomcat10 default file to enable use of Java 17
+mv /tmp/tomcat-users.xml /var/lib/tomcat10/conf
+mv /tmp/server-0.0.1.war /var/lib/tomcat10/webapps/ROOT.war
+mv /tmp/cua.war /var/lib/tomcat10/webapps/cua.war
 # Get the drawdown calculator from the 2.1.0 release area
-wget -O /var/lib/tomcat9/webapps/dc.war https://github.com/richard-austin/drawdown-calculator/releases/download/2.1.0/dc.war
+wget -O /var/lib/tomcat10/webapps/dc.war https://github.com/richard-austin/drawdown-calculator/releases/download/2.1.0/dc.war
 
-rm -rf /var/lib/tomcat9/webapps/ROOT
-rm -rf /var/lib/tomcat9/webapps/cua
+rm -rf /var/lib/tomcat10/webapps/ROOT
+rm -rf /var/lib/tomcat10/webapps/cua
 
 rm -r /tmp/motion.conf
-deb-systemd-invoke stop tomcat9.service  # Stop tomcat before making changes
+deb-systemd-invoke stop tomcat10.service  # Stop tomcat before making changes
 deb-systemd-invoke stop motion  # And motion
 sleep 2
 
@@ -29,7 +29,7 @@ chown -R tomcat:security-cam /etc/security-cam
 chown -R tomcat:security-cam /var/security-cam
 
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
-chown -R tomcat:tomcat /var/lib/tomcat9
+chown -R tomcat:tomcat /var/lib/tomcat10
 
 
 # Create the client keystore for connection to the Cloud server via ActiveMQ
@@ -53,10 +53,10 @@ EOF
   chmod 400 $KEYSTORE_FILE
 fi
 
-chmod 640 /var/lib/tomcat9/conf/tomcat-users.xml
-chown root:tomcat /var/lib/tomcat9/conf/tomcat-users.xml
-chmod 640 /var/lib/tomcat9/conf/server.xml
-chown root:tomcat /var/lib/tomcat9/conf/server.xml
+chmod 640 /var/lib/tomcat10/conf/tomcat-users.xml
+chown root:tomcat /var/lib/tomcat10/conf/tomcat-users.xml
+chmod 640 /var/lib/tomcat10/conf/server.xml
+chown root:tomcat /var/lib/tomcat10/conf/server.xml
 chown root:root /etc/security-cam/wifi-setup-service/*.py
 chown tomcat:tomcat -R /etc/fmp4-ws-media-server
 
@@ -70,7 +70,7 @@ chown -R tomcat:security-cam /var/log/motion
 chown -R tomcat:security-cam /var/log/security-cam
 chown -R tomcat:security-cam /var/log/camera-recordings-service
 chown -R tomcat:security-cam /var/log/fmp4-ws-media-service
-chown -R tomcat:tomcat /var/log/tomcat9
+chown -R tomcat:tomcat /var/log/tomcat10
 # Make the following scripts executable
 chmod +x /etc/security-cam/install-cert.sh
 chmod +x /etc/security-cam/processmotionrecordings.sh || true
@@ -94,17 +94,28 @@ sed -i 's/User=motion/User=tomcat/' /lib/systemd/system/motion.service
 # AddToTomcatUnitFileIfNotPresent: Add ReadWriteFilePaths to the tomcat unit file to enable access to /etc/security-cam
 #                                  and /var/log/security-cam.
 #
-#AddToTomcatUnitFileIfNotPresent() {
-#  lineToWrite=$1
-#  lineToWriteUnder=$2
-#  unitFile=$3
-#  # Enter lineToWrite after lineToWriteUnder if not already present
-#  if ! grep "$lineToWrite" "$unitFile"; then
-#    # Add the line after lineToWriteUnder escaping all '/' as the regex is within / delimiters.
-#    result=$(awk '/'"${lineToWriteUnder//\//\\/}"'/ { print; print '\""${lineToWrite}"\"'; next }1' "$unitFile")
-#    echo "$result" >"$unitFile"
-#  fi
-#}
+AddToTomcatUnitFileIfNotPresent() {
+  lineToWrite=$1
+  lineToWriteUnder=$2
+  unitFile=$3
+  # Enter lineToWrite after lineToWriteUnder if not already present
+  if ! grep "$lineToWrite" "$unitFile"; then
+    # Add the line after lineToWriteUnder escaping all '/' as the regex is within / delimiters.
+    result=$(awk '/'"${lineToWriteUnder//\//\\/}"'/ { print; print '\""${lineToWrite}"\"'; next }1' "$unitFile")
+    echo "$result" >"$unitFile"
+  fi
+}
+
+# Give tomcat permission to write to some additional directories
+lineToWrite="ReadWritePaths=/var/log/security-cam/"
+lineToWrite2="ReadWritePaths=/etc/security-cam/"
+lineToWrite3="ReadWritePaths=/var/security-cam/"
+lineToWriteUnder="ReadWritePaths=/var/log/tomcat10/"
+unitFile="/usr/lib/systemd/system/tomcat10.service"
+
+AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
+AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
+AddToTomcatUnitFileIfNotPresent $lineToWrite3 $lineToWriteUnder $unitFile
 
 systemctl daemon-reload  # Register the motion service file change
 
@@ -135,8 +146,8 @@ fi
 deb-systemd-invoke stop chrony
 deb-systemd-invoke start chrony
 
-deb-systemd-invoke enable tomcat9.service
-deb-systemd-invoke start tomcat9.service
+deb-systemd-invoke enable tomcat10.service
+deb-systemd-invoke start tomcat10.service
 
 
 # Generate the product key if it does not already exist

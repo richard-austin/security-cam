@@ -47,29 +47,24 @@ mkdir -p security-cam_"${VERSION}"_arm64/var/log/fmp4-ws-media-service
 
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr
-mkdir -p security-cam_"${VERSION}"_arm64/var/log/tomcat9
-mkdir -p security-cam_"${VERSION}"_arm64/var/lib/tomcat9
 
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 
 cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf security-cam_"${VERSION}"_arm64/tmp
-cp ../apache-tomcat-9/conf/server.xml ../apache-tomcat-9/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
-tar -xzf ../apache-tomcat-9/apache-tomcat-9.0.93.tar.gz -C security-cam_"${VERSION}"_arm64/var/lib/tomcat9 --strip-components=1
-rmdir security-cam_"${VERSION}"_arm64/var/lib/tomcat9/logs
-ln -s /var/log/tomcat9 security-cam_"${VERSION}"_arm64/var/lib/tomcat9/logs
-cp ../tomcat9 security-cam_"${VERSION}"_arm64/tmp
+cp ../apache-tomcat-10/conf/server.xml ../apache-tomcat-10/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.0.1.war security-cam_"${VERSION}"_arm64/tmp
 cp ../../initialAdmin/dist/cua.war  security-cam_"${VERSION}"_arm64/tmp
-cp ../apache-tomcat-9/tomcat9.service security-cam_"${VERSION}"_arm64/lib/systemd/system/
 cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
 Package: security-cam
 Version: $VERSION
 Architecture: arm64
 Maintainer: Richard Austin <richard.david.austin@gmail.com>
 Description: A security camera system accessed through a secure web based interface.
-Depends: openjdk-17-jre-headless (>=17.0.0), openjdk-17-jre-headless (<< 17.9.9),
+Depends: openjdk-21-jre-headless (>=21.0.0), openjdk-21-jre-headless (<< 21.9.9),
+ tomcat10 (>=10.0.0), tomcat10 (<= 11.0.0),
+ tomcat10-admin (>=10.0.0), tomcat10-admin (<= 11.0.0),
  ffmpeg (>=7:6.1.1), ffmpeg (<<7:6.9.9),
  motion (>=4.6), motion(<<5.0.0-0),
  curl (>=8.5.0), curl(<=8.9),
