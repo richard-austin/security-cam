@@ -40,7 +40,7 @@ class CamController {
     def getPublicKey() {
         ObjectCommandResponse response = camService.getPublicKey()
         if(response.status == PassFail.PASS)
-            return response.responseObject as byte[]
+            return response.responseObject
         else
             throw new Exception(response.error)
     }

@@ -44,9 +44,23 @@ class CamService {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             File file = new File("/etc/security-cam/id_rsa.pub")
-
             byte[] bytes = file.readBytes()
-            result.responseObject = bytes
+
+            // Make into string representation of an array of signed bytes. (This is to keep the format the same
+            //  as Grails render function returns a byte array
+            // TODO: Look at returning the raw binary (bytes) and modify the client
+            StringBuilder retVal = new StringBuilder()
+            retVal.append('[')
+            boolean first = true
+            for (byte val in bytes) {
+                if (first) {
+                    first = false
+                } else
+                    retVal.append(', ')
+                retVal.append(String.format("%d", val))
+            }
+            retVal.append(']')
+            result.responseObject = retVal
         }
         catch(Exception ex) {
             logService.cam.error "getPublicKey() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
