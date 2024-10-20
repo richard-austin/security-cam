@@ -4,19 +4,14 @@ import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.services.CamService
 import com.securitycam.services.LogService
-import org.apache.coyote.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
-
-import javax.management.BadAttributeValueExpException
 
 @RestController
+@RequestMapping("/cam")
 class CamController {
     @Autowired
     LogService logService
@@ -25,7 +20,7 @@ class CamController {
     CamService camService
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
-    @GetMapping('/cam/getCameras')
+    @RequestMapping('/getCameras')
     def getCameras() {
         ObjectCommandResponse cameras = camService.getCameras()
 //        throw new ResponseStatusException(
@@ -39,4 +34,16 @@ class CamController {
             return cameras.responseObject
         }
     }
+
+   @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @RequestMapping('/getPublicKey')
+    def getPublicKey() {
+        ObjectCommandResponse response = camService.getPublicKey()
+        if(response.status == PassFail.PASS)
+            return response.responseObject as byte[]
+        else
+            throw new Exception(response.error)
+    }
+
+
 }

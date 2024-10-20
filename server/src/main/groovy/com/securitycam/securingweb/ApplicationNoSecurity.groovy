@@ -2,7 +2,6 @@ package com.securitycam.securingweb
 
 import com.securitycam.services.LogService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,7 +21,8 @@ class ApplicationNoSecurity {
             logService.cam.info("============================================")
             logService.cam.info("Spring Security is DISABLED!!!")
             logService.cam.info("============================================")
-            return (web) -> web.ignoring()
+            return (web) ->
+                    web.ignoring()
                     .requestMatchers(new AntPathRequestMatcher("/**"))
         }
         else {

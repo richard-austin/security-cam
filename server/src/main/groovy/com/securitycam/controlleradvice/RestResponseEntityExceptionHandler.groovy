@@ -16,7 +16,7 @@ class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler 
         if(ex instanceof ResponseStatusException)
             return new ResponseEntity<Object>([exception: ex.getClass(), request: req.requestURI, error: ex.getMessage(), reason: ""], ex.getStatusCode())
         else
-            return new ResponseEntity<Object>([exception: ex.getCause().getClass(), request: req.requestURI, error: ex.getCause().getMessage(), reason: ""], HttpStatus.INTERNAL_SERVER_ERROR)
+            return new ResponseEntity<Object>([exception: ex.getCause().getClass(), request: req.requestURI, error: ex.getMessage(), reason: ""], HttpStatus.INTERNAL_SERVER_ERROR)
     }
         // If the exception is annotated with @ResponseStatus rethrow it and let
 

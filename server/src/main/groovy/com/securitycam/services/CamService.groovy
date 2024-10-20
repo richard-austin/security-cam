@@ -40,5 +40,19 @@ class CamService {
         return result
     }
 
+    def getPublicKey() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            File file = new File("/etc/security-cam/id_rsa.pub")
 
+            byte[] bytes = file.readBytes()
+            result.responseObject = bytes
+        }
+        catch(Exception ex) {
+            logService.cam.error "getPublicKey() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
 }

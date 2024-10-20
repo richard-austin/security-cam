@@ -4,6 +4,9 @@ import com.securitycam.security.MyUserDetailsService;
 import com.securitycam.security.TwoFactorAuthenticationDetailsSource;
 import com.securitycam.security.TwoFactorAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,29 +19,39 @@ import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 @Configuration
+@ConditionalOnProperty(prefix="spring-security", name="enabled", havingValue="true")
 public class SecSecurityConfig {
-    @Autowired
-    private MyUserDetailsService userDetailsService;
+    @Value("${spring-security.enabled}")
+     boolean enabled;
 //    @Autowired
 //    UserRepository userRepository;
+    @Autowired
+    private MyUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)  // @TODO Makes Restful API calls available to any role, or no role
-                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/home", "/login/authenticate").permitAll()
-  //                     .requestMatchers("/setupWifi2").hasAnyAuthority("ROLE_CLIENT")
-                        .requestMatchers("/hello").hasRole("CLIENT")
-                        .anyRequest().authenticated()
-                )
-                .rememberMe(rememberMe -> rememberMe.key("uniqueAndSecret"))
-                .formLogin((form) -> form
-                        .authenticationDetailsSource(authenticationDetailsSource())
-                        .loginPage("/login")
-                        .permitAll()
-                )
-                .logout((logout) -> logout.permitAll());
+        if(enabled) {
+            http
+                    .csrf(AbstractHttpConfigurer::disable)  // @TODO Makes Restful API calls available to any role, or no role
+                    .authorizeHttpRequests((requests) -> requests
+                            .requestMatchers("/", "/home", "/login/authenticate").permitAll()
+                            //                     .requestMatchers("/setupWifi2").hasAnyAuthority("ROLE_CLIENT")
+                            .requestMatchers("/hello").hasRole("CLIENT")
+                            .anyRequest().authenticated()
+                    )
+                    .rememberMe(rememberMe -> rememberMe.key("uniqueAndSecret"))
+                    .formLogin((form) -> form
+                            .authenticationDetailsSource(authenticationDetailsSource())
+                            .loginPage("/login")
+                            .permitAll()
+                    )
+                    .logout((logout) -> logout.permitAll());
+        }
+//        else {
+//            http
+//                    .csrf(AbstractHttpConfigurer::disable)
+//                    .authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
+//        }
 
         return http.build();
     }

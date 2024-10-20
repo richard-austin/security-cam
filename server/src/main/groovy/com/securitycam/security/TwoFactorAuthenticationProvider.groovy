@@ -3,6 +3,7 @@ package com.securitycam.security
 import com.securitycam.model.User
 import com.securitycam.services.LogService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
+@ConditionalOnProperty(prefix="spring-security", name="enabled", havingValue="true")
 class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     @Autowired
     LogService logService

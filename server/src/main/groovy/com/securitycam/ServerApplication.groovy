@@ -13,6 +13,7 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
 
@@ -27,6 +28,7 @@ class ServerApplication {
     RoleRepository roleRepository
 
     @Bean
+    @ConditionalOnProperty(prefix="spring-security", name="enabled", havingValue="true")
     CommandLineRunner run(UserService userService) {
         return (String[] args) -> {
             if(!userService.roleExists('ROLE_CLIENT'))

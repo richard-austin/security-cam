@@ -2,17 +2,17 @@ package com.securitycam.interfaceobjects
 
 class Greeting {
 
-    private String content;
+    private String content
 
     Greeting() {
     }
 
     Greeting(String content) {
-        this.content = content;
+        this.content = content
     }
 
     String getContent() {
-        return content;
+        return content
     }
 
 }
