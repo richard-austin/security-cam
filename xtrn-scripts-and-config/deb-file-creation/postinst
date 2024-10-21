@@ -19,7 +19,6 @@ deb-systemd-invoke stop tomcat10.service  # Stop tomcat before making changes
 deb-systemd-invoke stop motion  # And motion
 sleep 2
 
-useradd tomcat
 groupadd security-cam
 usermod -a -G video tomcat
 usermod -a -G security-cam tomcat

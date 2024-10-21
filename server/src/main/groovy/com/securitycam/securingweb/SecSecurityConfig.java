@@ -36,7 +36,12 @@ public class SecSecurityConfig {
                     .authorizeHttpRequests((requests) -> requests
                             .requestMatchers("/", "/home", "/login/authenticate").permitAll()
                             //                     .requestMatchers("/setupWifi2").hasAnyAuthority("ROLE_CLIENT")
-                            .requestMatchers("/hello").hasRole("CLIENT")
+                            .requestMatchers("/stomp").hasAnyRole("CLIENT", "CLOUD", "GUEST")
+                            .requestMatchers("/*.css").hasAnyRole("CLIENT", "CLOUD", "GUEST")
+                            .requestMatchers("/*.js").hasAnyRole("CLIENT", "CLOUD", "GUEST")
+                            .requestMatchers("/*.ttf").hasAnyRole("CLIENT", "CLOUD", "GUEST")
+                            .requestMatchers("/audio").hasAnyRole("CLIENT", "CLOUD")
+                            .requestMatchers("/*.woff2").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .anyRequest().authenticated()
                     )
                     .rememberMe(rememberMe -> rememberMe.key("uniqueAndSecret"))

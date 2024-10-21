@@ -118,29 +118,6 @@ class WifiUtilsController {
 //        return errors;
     }
 
-    // The audio websocket listener
-    boolean started = false
-    int count = 0
-    OutputStream os
-    boolean done = false
-    @MessageMapping(value = "/audio")
-    protected def audio(@Payload byte[] data) {
-        if(!done) {
-            if (!started) {
-                os = new FileOutputStream("/home/richard/soundfile.bin")
-                started = true
-            }
-            if (++count < 1000)
-                os.write(data)
-            else {
-                os.close()
-                done = true
-            }
-        }
-        else
-            logService.cam.info("Audio message of ${data.length} bytes received")
-    }
-
     @MessageMapping("/hello")
     @SendTo("/topic/greetings")
     Greeting greeting(HelloMessage message) throws Exception {

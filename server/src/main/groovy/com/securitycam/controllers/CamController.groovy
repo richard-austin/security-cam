@@ -6,7 +6,6 @@ import com.securitycam.services.CamService
 import com.securitycam.services.LogService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -23,10 +22,6 @@ class CamController {
     @RequestMapping('/getCameras')
     def getCameras() {
         ObjectCommandResponse cameras = camService.getCameras()
-//        throw new ResponseStatusException(
-//                HttpStatus.BAD_REQUEST, "entity not found"
-//        )
-//        throw new BadAttributeValueExpException("entity not found")
         if (cameras.status != PassFail.PASS)
             throw new Exception(cameras.error) //render(status: 500, text: cameras.error)
         else {

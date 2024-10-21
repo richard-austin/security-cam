@@ -26,4 +26,18 @@ class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler 
 //        else
 //            return new ResponseEntity<Object>([exception: ex.getClass(), request: request.getDescription(false), error: ex.getMessage(), reason: ""], HttpStatus.INTERNAL_SERVER_ERROR)
 //    }
+
+}
+
+class ErrorResponse {
+    Object exception
+    String request
+    String error
+    String reason
+    ErrorResponse(Object exception, String request, String error, String reason) {
+        this.exception = exception
+        this.request = request
+        this.error = error
+        this.reason = reason
+    }
 }
