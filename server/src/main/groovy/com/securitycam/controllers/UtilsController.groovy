@@ -3,6 +3,7 @@ package com.securitycam.controllers
 import com.securitycam.controlleradvice.ErrorResponse
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
+import com.securitycam.services.RestfulCallErrorService
 import com.securitycam.services.UtilsService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -19,6 +20,8 @@ class UtilsController {
     @Autowired
     UtilsService utilsService
 
+    @Autowired
+    RestfulCallErrorService restfulCallErrorService
     /**
      * getTemperature: Get the core temperature (Raspberry pi only). This is called at intervals to keep the session alive
      * @return: The temperature as a string. On non Raspberry pi systems an error is returned.
@@ -29,7 +32,7 @@ class UtilsController {
         ObjectCommandResponse response = utilsService.getTemperature()
 
         if (response.status != PassFail.PASS)
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse(new Exception().getClass(), "cam/getTemperature", response.error, ""), HttpStatus.INTERNAL_SERVER_ERROR)
+            return restfulCallErrorService.returnError(new Exception(), "cam/getTemperature", response.error, "", HttpStatus.INTERNAL_SERVER_ERROR)
         else
             return response.responseObject
     }
