@@ -1,0 +1,92 @@
+POST http://192.168.1.238:8080/login/authenticate HTTP/1.1
+Host: 149.22.128.178
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:131.0) Gecko/20100101 Firefox/131.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8
+Accept-Language: en-GB,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Content-Type: application/x-www-form-urlencoded
+Origin: https://149.22.128.178
+Connection: keep-alive
+x-auth-token: 7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!
+Referer: https://149.22.128.178/login/auth
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+username=cloud&password=DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU
+
+<> 2024-10-15T185231.200.html
+<> 2024-10-15T185141.200.html
+<> 2024-10-15T184954.200.html
+<> 2024-10-15T184848.200.html
+
+###
+POST http://localhost:8080/cam/getCameras
+Cookie: Idea-5846b23=e7e28179-dafb-4e30-934d-7945085e96e4; JSESSIONID=C78493F4365FB8C2C7164D06DFE5BA22
+
+<> 2024-10-20T124322.200.json
+<> 2024-10-20T124312.200.json
+<> 2024-10-20T124107.200.html
+<> 2024-10-20T124058.200.json
+<> 2024-10-19T212426.200.json
+<> 2024-10-19T145102.409.txt
+<> 2024-10-19T144430.200.json
+<> 2024-10-19T144227.200.html
+
+###
+POST https://149.22.128.178/cam/getPublicKey
+Cookie: Idea-5846b23=e7e28179-dafb-4e30-934d-7945085e96e4; JSESSIONID=C78493F4365FB8C2C7164D06DFE5BA22
+
+<> 2024-10-20T124001.200.html
+<> 2024-10-19T224752.200.html
+<> 2024-10-19T224639.200.html
+<> 2024-10-19T213347.200.html
+<> 2024-10-19T212918.200.html
+
+###
+
+POST localhost:8080/cam/getPublicKey
+Cookie: Idea-5846b23=e7e28179-dafb-4e30-934d-7945085e96e4; JSESSIONID=C78493F4365FB8C2C7164D06DFE5BA2p
+
+<> 2024-10-20T124333.200.octet-stream
+<> 2024-10-20T124038.200.octet-stream
+<> 2024-10-20T123157.200.octet-stream
+<> 2024-10-19T225054.200.octet-stream
+<> 2024-10-19T225008.200.html
+<> 2024-10-19T224754.200.octet-stream
+
+###
+
+POST http://192.168.1.136:8080/utils/getTemperature
+Cookie: JSESSIONID=6FB9F149CB2DFEE9E5B2AF96C78D112D
+
+###
+POST http://localhost:8080/utils/startAudioOut
+Content-Type: application/json
+
+{
+  "cam": {
+    "address": "192.168.1.43",
+    "backchannelAudioSupported": true,
+    "cameraParamSpecs": {
+      "camType": 0,
+      "params": "",
+      "uri": "",
+      "name": "Not Listed"
+    },
+    "cred": "eCCvpyP2xlQBAf1IbklAzeq1BtflUGh6QRclJk5AsOllCBu9J++YjR7Cq8jgkKhApHlwPcQbexnBjiMpRAHC4CIXgZdvCHpgIpeUF7FozU1MTY8v6Jc0nl5XZ8Ed5AgGgxEAhYKL4pPLO1FQO/Q3ZwBazqBJ6rN9IDGZYq6FPxOtxFNjLHPC8novnWMMM+SlLGgktj0i62UyQFtxX0tOhcx75hG7sXqJNlkYXEwv32XaQkj8F1JW6KuUh/LG0RolpQzqASi+15qFB5seGKWNHkXktFD/nDeI6WiR9mZV8MvC+ScvCdMqKn0ARVH0aCZu0h/s0mgP7F/fxuFQVMwyvQ==",
+    "ftp": "stream9",
+    "name": "Doorbell",
+    "onvifHost": "192.168.1.43:8000",
+    "ptzControls": false,
+    "retriggerWindow": 30,
+    "rtspTransport": "tcp",
+    "snapshotUri": "http://192.168.1.43/cgi-bin/api.cgi?cmd=onvifSnapPic&channel=0",
+    "streams": {},
+    "useRtspAuth": true
+  },
+  "netcam_uri": "rtsp://192.168.1.43:554/Preview_01_main"
+}
