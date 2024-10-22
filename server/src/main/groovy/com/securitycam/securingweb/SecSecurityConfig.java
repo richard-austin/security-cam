@@ -41,7 +41,7 @@ public class SecSecurityConfig {
                             .requestMatchers("/*.js").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/*.ttf").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/audio").hasAnyRole("CLIENT", "CLOUD")
-                            .requestMatchers("/*.woff2").hasAnyRole("CLIENT", "CLOUD", "GUEST")
+                            .requestMatchers("/assets/*.woff2").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .anyRequest().authenticated()
                     )
                     .rememberMe(rememberMe -> rememberMe.key("uniqueAndSecret"))
