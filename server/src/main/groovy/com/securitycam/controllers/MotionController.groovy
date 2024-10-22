@@ -1,7 +1,6 @@
 package com.securitycam.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.gson.internal.LinkedHashTreeMap
 import com.securitycam.interfaceobjects.Asymmetric
 import org.springframework.stereotype.Controller
 
@@ -69,7 +68,7 @@ class Camera {
     String ftp = "none"
     String snapshotUri=''
     boolean ptzControls = false
-    Map<String, Stream> streams = new LinkedHashTreeMap<String, Stream>()
+    Map<String, Stream> streams = new HashMap<String, Stream>()
     String onvifHost=''
     boolean backchannelAudioSupported = false
     String rtspTransport = "tcp"

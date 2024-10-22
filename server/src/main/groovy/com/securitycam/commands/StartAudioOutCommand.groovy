@@ -5,11 +5,10 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
 class StartAudioOutCommand{
-    @NotNull
-    @NotBlank
+    @NotNull(message="Camera is mandatory")
     Camera cam
 
-    @NotNull
-    @NotBlank
+    @NotNull(message="netcam_uri is mandatory")
+    @NotBlank(message="netcam_uri must not be empty")
     String netcam_uri
 }

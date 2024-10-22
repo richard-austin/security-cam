@@ -9,6 +9,8 @@ import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.core.env.Environment
+import org.springframework.http.ResponseEntity
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -49,6 +51,10 @@ class UtilsService {
 
     @Autowired
     Environment environment
+
+    @Autowired
+    SimpMessagingTemplate brokerMessagingTemplate
+
     Queue<byte[]> audioQueue = new ConcurrentLinkedQueue<>()
     /**
      * executeLinuxCommand: Execute a linux command

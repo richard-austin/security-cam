@@ -1,6 +1,7 @@
 package com.securitycam.audiobackchannel
 
 import com.securitycam.controllers.Camera
+import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.MessageCallback
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.interfaceobjects.OnReady

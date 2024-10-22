@@ -6,6 +6,7 @@ import com.securitycam.services.RestfulCallErrorService
 import com.securitycam.services.UserAdminService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -27,7 +28,7 @@ class UserController {
         if (result.status != PassFail.PASS)
             return restfulCallErrorService.returnError(new Exception(), "isGuest", result.error, "", HttpStatus.INTERNAL_SERVER_ERROR)
         else
-           return result.responseObject
+           return ResponseEntity.ok(result.responseObject)
     }
 
     @Secured(['ROLE_CLIENT'])
@@ -37,7 +38,7 @@ class UserController {
         if (result.status != PassFail.PASS)
             return restfulCallErrorService.returnError(new Exception(), "guestAccountEnabled", result.error, "", HttpStatus.INTERNAL_SERVER_ERROR)
         else
-            return result.responseObject
+            return  ResponseEntity.ok(result.responseObject)
     }
 
 }

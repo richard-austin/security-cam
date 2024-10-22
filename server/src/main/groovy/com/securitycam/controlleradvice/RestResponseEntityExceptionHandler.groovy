@@ -1,32 +1,42 @@
 package com.securitycam.controlleradvice
 
-import jakarta.servlet.http.HttpServletRequest
+import com.securitycam.services.LogService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
+import org.springframework.validation.FieldError
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.server.ResponseStatusException
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import org.springframework.web.bind.annotation.ResponseStatus
 
+//@Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
-class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+class RestResponseEntityExceptionHandler {
+    @Autowired
+    LogService logService
 
-    @ExceptionHandler(value = [ResponseStatusException.class, Exception.class])
-    defaultErrorHandler(HttpServletRequest req, Exception ex) throws Exception {
-        if(ex instanceof ResponseStatusException)
-            return new ResponseEntity<Object>([exception: ex.getClass(), request: req.requestURI, error: ex.getMessage(), reason: ""], ex.getStatusCode())
-        else
-            return new ResponseEntity<Object>([exception: ex.getCause().getClass(), request: req.requestURI, error: ex.getMessage(), reason: ""], HttpStatus.INTERNAL_SERVER_ERROR)
+    // Exception handler for invalid method arguments
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        logService.cam.warn("MethodArgumentNotValidException ${errors.toString()}")
+        return new ResponseEntity<Object>(errors, HttpStatus.BAD_REQUEST)
     }
-        // If the exception is annotated with @ResponseStatus rethrow it and let
 
-//    protected ResponseEntity<Object> handleConflict(Exception ex, WebRequest request) {
-//        if(ex instanceof ResponseStatusException)
-//            return new ResponseEntity<Object>([exception: ex.getClass(), request: request.getDescription(false), error: ex.getMessage(), reason: ex.getReason()], ex.getStatusCode())
-//        else
-//            return new ResponseEntity<Object>([exception: ex.getClass(), request: request.getDescription(false), error: ex.getMessage(), reason: ""], HttpStatus.INTERNAL_SERVER_ERROR)
-//    }
-
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<Object> handleGeneralException(Exception ex) {
+        logService.cam.error("${ex.getClass()} has occurredc: ${ex.getMessage()}: ${ex.getCause()}")
+        logService.cam.error(ex.getStackTrace().toString())
+        ErrorResponse retVal = new ErrorResponse(ex)
+        return new ResponseEntity<Object>(retVal, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 }
 
 class ErrorResponse {
@@ -39,5 +49,12 @@ class ErrorResponse {
         this.request = request
         this.error = error
         this.reason = reason
+    }
+
+    ErrorResponse(Exception ex) {
+        exception = ex.class
+        request = "?"
+        error = ex.getMessage()
+        reason = ex.getCause()
     }
 }
