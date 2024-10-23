@@ -1,8 +1,9 @@
 package com.securitycam.controllers
 
 import com.securitycam.enums.PassFail
+import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.ObjectCommandResponse
-import com.securitycam.services.RestfulCallErrorService
+
 import com.securitycam.services.UserAdminService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -17,16 +18,13 @@ class UserController {
     @Autowired
     UserAdminService userAdminService
 
-    @Autowired
-    RestfulCallErrorService restfulCallErrorService
-
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     @RequestMapping("isGuest")
     def isGuest() {
         ObjectCommandResponse result = userAdminService.isGuest()
 
         if (result.status != PassFail.PASS)
-            return restfulCallErrorService.returnError(new Exception(), "isGuest", result.error, "", HttpStatus.INTERNAL_SERVER_ERROR)
+            throw new NVRRestMethodException(result.error, "user/isGuest", "See logs")
         else
            return ResponseEntity.ok(result.responseObject)
     }
@@ -36,7 +34,7 @@ class UserController {
     def guestAccountEnabled() {
         ObjectCommandResponse result = userAdminService.guestAccountEnabled()
         if (result.status != PassFail.PASS)
-            return restfulCallErrorService.returnError(new Exception(), "guestAccountEnabled", result.error, "", HttpStatus.INTERNAL_SERVER_ERROR)
+            throw new NVRRestMethodException(result.error, "user/guestAccountEnabled", "See logs")
         else
             return  ResponseEntity.ok(result.responseObject)
     }

@@ -2,9 +2,10 @@ package com.securitycam.controllers
 
 import com.securitycam.commands.StartAudioOutCommand
 import com.securitycam.enums.PassFail
+import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.services.LogService
-import com.securitycam.services.RestfulCallErrorService
+
 import com.securitycam.services.UtilsService
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,15 +14,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.security.access.annotation.Secured
-import org.springframework.validation.FieldError
-import org.springframework.web.bind.MethodArgumentNotValidException
-import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-
-import javax.management.BadAttributeValueExpException
 
 @RestController
 @RequestMapping("/utils")
@@ -32,8 +27,6 @@ class UtilsController {
     @Autowired
     LogService logService
 
-    @Autowired
-    RestfulCallErrorService restfulCallErrorService
     /**
      * getTemperature: Get the core temperature (Raspberry pi only). This is called at intervals to keep the session alive
      * @return: The temperature as a string. On non Raspberry pi systems an error is returned.
@@ -44,7 +37,7 @@ class UtilsController {
         ObjectCommandResponse response = utilsService.getTemperature()
 
         if (response.status != PassFail.PASS)
-            return restfulCallErrorService.returnError(new Exception(), "utils/getTemperature", response.error, "", HttpStatus.INTERNAL_SERVER_ERROR)
+            throw new NVRRestMethodException(response.error, "utils/getTemperature", "See logs")
         else
             return response.responseObject
     }
@@ -61,7 +54,7 @@ class UtilsController {
         ObjectCommandResponse response = utilsService.startAudioOut(cmd)
 
         if (response.status != PassFail.PASS)
-            return restfulCallErrorService.returnError(new Exception(), "utils/startAudioOut", response.error, "", HttpStatus.INTERNAL_SERVER_ERROR)
+            throw new NVRRestMethodException(response.error, "utils/startAudioOut", "See logs")
         else
             return ResponseEntity.ok(response.responseObject)
     }

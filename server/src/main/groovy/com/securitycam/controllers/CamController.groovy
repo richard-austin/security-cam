@@ -1,6 +1,7 @@
 package com.securitycam.controllers
 
 import com.securitycam.enums.PassFail
+import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.services.CamService
 import com.securitycam.services.LogService
@@ -23,7 +24,7 @@ class CamController {
     def getCameras() {
         ObjectCommandResponse cameras = camService.getCameras()
         if (cameras.status != PassFail.PASS)
-            throw new Exception(cameras.error) //render(status: 500, text: cameras.error)
+            throw new NVRRestMethodException(cameras.error, "cam/getCameras", "See logs") //render(status: 500, text: cameras.error)
         else {
             logService.cam.info("getCameras: success")
             return cameras.responseObject
@@ -37,8 +38,7 @@ class CamController {
         if(response.status == PassFail.PASS)
             return response.responseObject
         else
-            throw new Exception(response.error)
+            throw new NVRRestMethodException(response.error, "cam/getPublicKey", "See logs")
     }
-
 
 }

@@ -1,6 +1,4 @@
 package com.securitycam.interfaceobjects;
-
-
 import org.apache.tomcat.util.codec.binary.Base64;
 
 import javax.crypto.BadPaddingException;
@@ -8,7 +6,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
