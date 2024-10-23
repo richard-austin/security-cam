@@ -6,6 +6,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -57,14 +58,14 @@ public class AsymmetricCryptography {
     public String encryptText(String msg, PublicKey key)
             throws UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
         this.cipher.init(Cipher.ENCRYPT_MODE, key);
-        return new String(Base64.encodeBase64(cipher.doFinal(msg.getBytes("UTF-8")), false));
+        return new String(Base64.encodeBase64(cipher.doFinal(msg.getBytes(StandardCharsets.UTF_8)), false));
     }
 
     public String decryptText(String msg, PrivateKey key)
             throws InvalidKeyException, UnsupportedEncodingException,
             IllegalBlockSizeException, BadPaddingException {
         this.cipher.init(Cipher.DECRYPT_MODE, key);
-        return new String(cipher.doFinal(Base64.decodeBase64(msg)), "UTF-8");
+        return new String(cipher.doFinal(Base64.decodeBase64(msg)), StandardCharsets.UTF_8);
     }
 
     public byte[] getFileInBytes(File f) throws IOException {

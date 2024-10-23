@@ -21,12 +21,12 @@ class RestResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> errors = new HashMap<>()
         ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
+            String fieldName = ((FieldError) error).getField()
+            String errorMessage = error.getDefaultMessage()
+            errors.put(fieldName, errorMessage)
+        })
         logService.cam.warn("MethodArgumentNotValidException ${errors.toString()}")
         return new ResponseEntity<Object>(errors, HttpStatus.BAD_REQUEST)
     }

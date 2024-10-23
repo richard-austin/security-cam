@@ -1,8 +1,21 @@
 package com.securitycam.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.securitycam.commands.GetMotionEventsCommand
+import com.securitycam.enums.PassFail
+import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.Asymmetric
+import com.securitycam.interfaceobjects.ObjectCommandResponse
+import com.securitycam.services.LogService
+import com.securitycam.services.MotionService
+import jakarta.validation.Valid
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 class MotionEvents {
     MotionEvents(String[] events) {
@@ -86,7 +99,31 @@ class Camera {
     }
 }
 
-@Controller
+@RestController
+@RequestMapping("/motion")
 class MotionController
 {
+    @Autowired
+    LogService logService
+
+    @Autowired
+    MotionService motionService
+
+    /**
+     * getMotionEvents: Get the motion events for the given camera.
+     * @param cmd : camera: Camera to get motion events for
+     * @return
+     */
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @RequestMapping("/getMotionEvents")
+    def getMotionEvents(@Valid @RequestBody GetMotionEventsCommand cmd) {
+        ObjectCommandResponse motionEvents = motionService.getMotionEvents(cmd)
+
+        if (motionEvents.status != PassFail.PASS) {
+            return new NVRRestMethodException(motionEvents.error, "motion/getMotionEvents")
+        } else {
+            logService.cam.info("getMotionEvents: success")
+            return new MotionEvents(motionEvents.responseObject as String[])
+        }
+    }
 }

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.security.access.annotation.Secured
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -62,6 +63,16 @@ class UtilsController {
     @MessageMapping(value = "/audio")
     protected def audio(@Payload byte[] data) {
         utilsService.audio(data)
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @PostMapping("/stopAudioOut")
+    def stopAudioOut() {
+        ObjectCommandResponse response = utilsService.stopAudioOut()
+        if (response.status != PassFail.PASS)
+            return new NVRRestMethodException(response.error, "/utile/stopAudioOut", "See logs")
+        else
+            return response.responseObject
     }
 
 
