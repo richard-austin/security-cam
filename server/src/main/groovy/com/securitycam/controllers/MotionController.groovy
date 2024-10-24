@@ -1,21 +1,35 @@
 package com.securitycam.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.securitycam.commands.DownloadRecordingCommand
 import com.securitycam.commands.GetMotionEventsCommand
+import com.securitycam.configuration.Config
+import com.securitycam.controlleradvice.ErrorResponse
 import com.securitycam.enums.PassFail
 import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.Asymmetric
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.services.LogService
 import com.securitycam.services.MotionService
+import com.securitycam.validators.BadRequestResult
+import com.securitycam.validators.DownloadRecordingCommandValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
-import org.springframework.stereotype.Controller
+import org.springframework.util.MultiValueMap
+import org.springframework.validation.BindingResult
+import org.springframework.validation.DataBinder
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
+import java.net.http.HttpHeaders
+import java.nio.file.Files
 
 class MotionEvents {
     MotionEvents(String[] events) {
@@ -109,6 +123,9 @@ class MotionController
     @Autowired
     MotionService motionService
 
+    @Autowired
+    Config config
+
     /**
      * getMotionEvents: Get the motion events for the given camera.
      * @param cmd : camera: Camera to get motion events for
@@ -124,6 +141,63 @@ class MotionController
         } else {
             logService.cam.info("getMotionEvents: success")
             return new MotionEvents(motionEvents.responseObject as String[])
+        }
+    }
+
+    /**
+     * downloadRecording: API call for downloading recordings
+     * @param cmd : manifest: The manifest file name.
+     *             camera: The camera the recording is from
+     * @return: Binary stream for the .mp4 file
+     */
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @PostMapping("/downloadRecording")
+    def downloadRecording(@RequestBody DownloadRecordingCommand cmd) {
+        def downloadRecordingCommandValidator = new DownloadRecordingCommandValidator(config)
+        DataBinder binder = new DataBinder(cmd)
+        binder.setValidator(downloadRecordingCommandValidator)
+        // validate the target object
+        binder.validate()
+        BindingResult results = binder.getBindingResult()
+        if (results.hasErrors()) {
+            def retVal = new BadRequestResult(results)
+            return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
+         } else {
+            ObjectCommandResponse result
+
+            try {
+                result = motionService.downloadRecording(cmd)
+                if (result.status == PassFail.FAIL) {
+                    logService.cam.error "MotionController.downloadNamedPatternsFile() ${result.error}"
+                    ErrorResponse retVal = new ErrorResponse(new Exception("Error in downloadRecording"), "motion/downloadRecording", result.error, "")
+                    return new ResponseEntity<Object>(retVal, HttpStatus.BAD_REQUEST)
+                } else {
+                    File recordingFile = result.responseObject as File
+
+                    String fileName = recordingFile.getName()
+                    try (def fis = new FileInputStream(recordingFile)) {
+                        Files.delete(recordingFile.toPath())
+
+                        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders()
+                        headers.add("Content-disposition", "attachment;filename=${fileName}")
+                        def body = fis.getBytes()
+                        ResponseEntity ent = ResponseEntity
+                                .ok()
+                                .headers(headers)
+                                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                .contentLength(body.length)
+                                .headers(headers)
+                                .body(body)
+                        return ent
+                    }
+                }
+            }
+            catch (Exception ex) {
+                logService.cam.error "MotionController.downloadNamedPatternsFile() " + ex.getMessage()
+                MultiValueMap<String, String> headers = new HashMap<>() as MultiValueMap<String, String>
+                headers.set("Content-Type", "application/json")
+                return new ResponseEntity<Object>([text: ex.getMessage()], headers, HttpStatus.INTERNAL_SERVER_ERROR)
+            }
         }
     }
 }

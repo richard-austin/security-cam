@@ -90,3 +90,91 @@ Content-Type: application/json
   },
   "netcam_uri": "rtsp://192.168.1.43:554/Preview_01_main"
 }
+###
+POST http://localhost:8080/motion/getMotionEvents
+Content-Type: application/json
+
+{
+  "cam": {
+    "address": "192.168.1.30",
+    "backchannelAudioSupported": false,
+    "cameraParamSpecs": {
+      "camType": 2,
+      "params": "cmd=getvideoattr&cmd=getlampattrex&cmd=getimageattr&cmd=getinfrared&cmd=getserverinfo&cmd=getoverlayattr&-region=0&cmd=getserverinfo&cmd=getoverlayattr&-region=1",
+      "uri": "web/cgi-bin/hi3510/param.cgi",
+      "name": "ZTech MCW5B10X"
+    },
+    "cred": "JFM3r9UZRmLGPN4ts+xjQSco3tjM07DD5ITS0kviMzVttgqUBLc0b+kpLn88+mTPj6esN8is2QGjqGZvQXKruWIp+38llSmuNctNbR8pucNKYpyszy+Mh1DUxQjh9OPEPZTo9mRLMiJ4x0ai+Vvs2jEij5On3XTKLyIpyfKjXvsRmqcBJ4bFU5877rJpjjBbyKwiMr4IK8lPMu2MZpx/8TF/vkNF3ryFaMOfu2xFG38DxVe8k03g4jz1yemMLHzIS5g8Bd6BvGW9795orn0oRWC8NuxBGHGcgXHLxc89/TMUFVkGqGdSIMbv8gKQalSQiAJ1hedZMITuDt3whIi4Zg==",
+    "ftp": "stream1",
+    "name": "Garden PTZ",
+    "onvifHost": "192.168.1.30:8080",
+    "ptzControls": true,
+    "retriggerWindow": 30,
+    "rtspTransport": "tcp",
+    "snapshotUri": "http://192.168.1.30/tmpfs/auto.jpg",
+    "streams": {},
+    "useRtspAuth": false
+  },
+  "stream": {
+    "audio": true,
+    "audio_bitrate": "16000",
+    "audio_encoding": "G711",
+    "audio_sample_rate": 8000,
+    "defaultOnMultiDisplay": false,
+    "descr": "HD",
+    "media_server_input_uri": "http://localhost:8085/live/stream?suuid=stream1",
+    "motion": {
+      "enabled": false,
+      "mask_file": "",
+      "threshold": 1500,
+      "trigger_recording_on": ""
+    },
+    "netcam_uri": "rtsp://192.168.1.30:554/11",
+    "preambleFrames": 375,
+    "recording": {
+      "enabled": true,
+      "location": "rec1",
+      "recording_src_url": "http://localhost:8085/h/stream?suuid=stream1",
+      "uri": "http://localhost:8084/recording/rec1/"
+    },
+    "uri": "ws://localhost:8085/ws/stream?suuid=stream1",
+    "video_height": 1440,
+    "video_width": 2560,
+    "selected": false
+  }
+}
+
+###
+POST http://localhost:8080/motion/downloadRecording
+Content-Type: application/json
+
+{
+  "stream": {
+    "audio": true,
+    "audio_bitrate": "16000",
+    "audio_encoding": "G711",
+    "audio_sample_rate": 8000,
+    "defaultOnMultiDisplay": false,
+    "descr": "HD",
+    "media_server_input_uri": "http://localhost:8085/live/stream?suuid=stream1",
+    "motion": {
+      "enabled": false,
+      "mask_file": "",
+      "threshold": 1500,
+      "trigger_recording_on": ""
+    },
+    "netcam_uri": "rtsp://192.168.1.30:554/11",
+    "preambleFrames": 375,
+    "recording": {
+      "enabled": true,
+      "location": "rec1",
+      "recording_src_url": "http://localhost:8085/h/stream?suuid=stream1",
+      "uri": "http://localhost:8084/recording/rec1/"
+    },
+    "uri": "ws://localhost:8085/ws/stream?suuid=stream1",
+    "video_height": 1440,
+    "video_width": 2560,
+    "selected": false
+  },
+  "manifest": "rec1-1708346095_.m3u8"
+}

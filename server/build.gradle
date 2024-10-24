@@ -34,6 +34,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation:3.3.2'
     implementation 'org.projectlombok:lombok:1.18.30'
 
+
     implementation 'com.h2database:h2:2.2.224'
 //    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -63,6 +64,8 @@ dependencies {
     implementation group: 'org.apache.cxf.services.wsn', name: 'cxf-services-wsn-core', version: '3.3.2'
     compileOnly group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
     implementation group: 'commons-codec', name: 'commons-codec', version: '1.10'
+    implementation 'commons-io:commons-io:2.17.0'
+
     implementation group: 'org.apache.wss4j', name: 'wss4j-ws-security-common', version: '2.2.3'
 //    implementation group: 'org.apache.cxf.xjc-utils', name: 'cxf-xjc-runtime', version: '3.3.0'
 //    implementation group: 'org.apache.cxf', name: 'cxf-rt-bindings-soap', version: '3.1.0'

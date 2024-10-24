@@ -12,6 +12,6 @@ class CameraConstraint  implements ConstraintValidator<IsCamera, Camera> {
     @Override
     boolean isValid(Camera cam, ConstraintValidatorContext context) {
         // TODO: Make this more comprehensive
-        return cam != null && cam.name != ""
+        return cam != null && cam.name != null && cam.name != ""
     }
 }
