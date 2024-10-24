@@ -178,3 +178,39 @@ Content-Type: application/json
   },
   "manifest": "rec1-1708346095_.m3u8"
 }
+
+###
+
+POST http://localhost:8080/motion/deleteRecording
+Content-Type: application/json
+
+{
+"stream": {
+"audio": true,
+"audio_bitrate": "16000",
+"audio_encoding": "G711",
+"audio_sample_rate": 8000,
+"defaultOnMultiDisplay": false,
+"descr": "HD",
+"media_server_input_uri": "http://localhost:8085/live/stream?suuid=stream1",
+"motion": {
+"enabled": false,
+"mask_file": "",
+"threshold": 1500,
+"trigger_recording_on": ""
+},
+"netcam_uri": "rtsp://192.168.1.30:554/11",
+"preambleFrames": 375,
+"recording": {
+"enabled": true,
+"location": "rec1",
+"recording_src_url": "http://localhost:8085/h/stream?suuid=stream1",
+"uri": "http://localhost:8084/recording/rec1/"
+},
+"uri": "ws://localhost:8085/ws/stream?suuid=stream1",
+"video_height": 1440,
+"video_width": 2560,
+"selected": false
+},
+"fileName": ""
+}

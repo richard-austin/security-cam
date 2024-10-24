@@ -1,5 +1,6 @@
 package com.securitycam.services
 
+import com.securitycam.commands.DeleteRecordingCommand
 import com.securitycam.commands.DownloadRecordingCommand
 import com.securitycam.commands.GetMotionEventsCommand
 import com.securitycam.configuration.Config
@@ -9,6 +10,8 @@ import org.apache.commons.io.FilenameUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
+import java.nio.file.AccessDeniedException
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -98,5 +101,41 @@ class MotionService {
         }
         return result
     }
+    /**
+     * deleteRecording: Delete all the files in the set for a recording
+     * @param cmd: camera: The camera which the recording to be deleted is from
+     *             fileName: The name of one of the files in the recording
+     * @return
+     */
+    ObjectCommandResponse deleteRecording(DeleteRecordingCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try
+        {
+            File[] files = cmd.folder.listFiles(new FilenameFilter() {
+                @Override
+                boolean accept(File file, String name) {
+                    return name.matches('.+'+cmd.epoch+'.+')
+                }
+            })
+
+            for(File file : files)
+                Files.delete(file.toPath())
+        }
+        catch(AccessDeniedException ex)
+        {
+            logService.cam.error("Access denied exception in getMotionEvents: "+ ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = "Cannot delete " + ex.getMessage() +", access denied"
+        }
+        catch(Exception ex)
+        {
+            logService.cam.error("Exception in getMotionEvents: "+ex.getCause()+ ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+
+        return result
+    }
+
 
 }
