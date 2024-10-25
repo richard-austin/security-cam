@@ -3,7 +3,11 @@ package com.securitycam
 import com.securitycam.dao.RoleRepository
 import com.securitycam.dto.UserDto
 import com.securitycam.model.Role
+import com.securitycam.services.LogService
+import com.securitycam.services.OnvifService
+import com.securitycam.services.Sc_processesService
 import com.securitycam.services.UserService
+import jakarta.annotation.PreDestroy
 import jakarta.validation.ConstraintViolation
 import jakarta.validation.Validation
 import jakarta.validation.Validator
@@ -26,6 +30,10 @@ class ServerApplication {
 
     @Autowired
     RoleRepository roleRepository
+    @Autowired
+    LogService logService
+    @Autowired
+    Sc_processesService sc_processesService
 
     @Bean
     @ConditionalOnProperty(prefix="spring-security", name="enabled", havingValue="true")
@@ -38,8 +46,8 @@ class ServerApplication {
                 userService.addRole('ROLE_CLOUD')
 
             if(!userService.userNameExists('austin')) {
-                ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-                Validator validator = factory.getValidator();
+                ValidatorFactory factory = Validation.buildDefaultValidatorFactory()
+                Validator validator = factory.getValidator()
 
                 Role role = roleRepository.findByName("ROLE_CLIENT")
                 if(role != null) {
@@ -56,11 +64,28 @@ class ServerApplication {
         }
     }
 
-    @Bean
-    ApplicationRunner applicationRunner(Environment environment) {
-        return (args) -> {
-            System.out.println("message from application.properties " + environment.getProperty("spring.jpa.properties.hibernate.globally_quoted_identifiers"))
+//    @Bean
+//    ApplicationRunner applicationRunner(OnvifService onvifService/*Environment environment*/) {
+//        return (args) -> {
+//            try {
+//            }
+//            catch (Exception ex) {
+//                logService.cam.error("${ex.getClass()} when starting services: ${ex.getMessage()}")
+//            }
+//            //System.out.println("message from application.properties " + environment.getProperty("spring.jpa.properties.hibernate.globally_quoted_identifiers"))
+//            logService.cam.info("Started NVR services")
+//        }
+//    }
+
+    @PreDestroy
+    void onExit() {
+        try {
+            sc_processesService.stopProcesses()
+            logService.cam.info("NVR Services have been shut down")
+        } catch (Exception ex) {
+            logService.cam.error("${ex.getClass()} when shutting down services: ${ex.getMessage()}")
         }
     }
-
 }
+
+

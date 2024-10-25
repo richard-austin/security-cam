@@ -2,9 +2,11 @@ package com.securitycam.services
 
 import com.google.gson.Gson
 import com.securitycam.configuration.Config
+import com.securitycam.controllers.Camera
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import org.apache.cxf.helpers.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.stereotype.Service
 import com.securitycam.enums.PassFail
 
@@ -38,6 +40,42 @@ class CamService {
         }
 
         return result
+    }
+
+    Integer getCameraType(String cameraHost) {
+        Integer camType = null
+        ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
+        if (getCamerasResult.status == PassFail.PASS) {
+            JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
+            def keys = jo.keys()
+            while (keys.hasNext()) {
+                def key = keys.next()
+                Camera camera = (Camera) jo.get(key.toString())
+                if (Objects.equals(camera.getAddress(), cameraHost))
+                    camType = camera.cameraParamSpecs.camType
+            }
+        }
+        return camType
+    }
+
+    Camera getCamera(String cameraHost) {
+        Camera retVal = null
+        if (!cameraHost.contains("localhost")) {
+            ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
+            if (getCamerasResult.status == PassFail.PASS) {
+                JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
+                def keys = jo.keys()
+                while (keys.hasNext()) {
+                    def key = keys.next()
+                    Camera camera = (Camera) jo.get(key.toString())
+                    if (Objects.equals(camera.getAddress(), cameraHost))
+                        retVal = camera
+                }
+            }
+            if (retVal == null)
+                logService.cam.error("getCamera: Could not find a camera with the address ${cameraHost}")
+        }
+        return retVal
     }
 
     def getPublicKey() {

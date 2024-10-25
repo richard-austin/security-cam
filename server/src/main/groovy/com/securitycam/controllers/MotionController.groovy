@@ -15,6 +15,7 @@ import com.securitycam.services.MotionService
 import com.securitycam.validators.BadRequestResult
 import com.securitycam.validators.DeleteRecordingCommandValidator
 import com.securitycam.validators.DownloadRecordingCommandValidator
+import com.securitycam.validators.GeneralValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -156,12 +157,8 @@ class MotionController
     @PostMapping("/downloadRecording")
     def downloadRecording(@RequestBody DownloadRecordingCommand cmd) {
         // This more convoluted validation is used as setting up the folder property in cmd is done during validation
-        def downloadRecordingCommandValidator = new DownloadRecordingCommandValidator(config)
-        DataBinder binder = new DataBinder(cmd)
-        binder.setValidator(downloadRecordingCommandValidator)
-        // validate the target object
-        binder.validate()
-        BindingResult results = binder.getBindingResult()
+        GeneralValidator gv = new GeneralValidator(cmd,  new DownloadRecordingCommandValidator(config))
+        BindingResult results = gv.validate()
         if (results.hasErrors()) {
             def retVal = new BadRequestResult(results)
             return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
@@ -210,18 +207,14 @@ class MotionController
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @PostMapping("/deleteRecording")
     def deleteRecording(@RequestBody DeleteRecordingCommand cmd) {
-        ObjectCommandResponse result
         // This more convoluted validation is used as setting up the folder property in cmd is done during validation
-        def deleteRecordingCommandValidator = new DeleteRecordingCommandValidator(config)
-        DataBinder binder = new DataBinder(cmd)
-        binder.setValidator(deleteRecordingCommandValidator)
-        // validate the target object
-        binder.validate()
-        BindingResult results = binder.getBindingResult()
+        GeneralValidator gv = new GeneralValidator(cmd,  new DeleteRecordingCommandValidator(config))
+        BindingResult results = gv.validate()
         if (results.hasErrors()) {
             def retVal = new BadRequestResult(results)
             return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
         } else {
+            ObjectCommandResponse result
             result = motionService.deleteRecording(cmd)
             if (result.status != PassFail.PASS) {
                 throw new NVRRestMethodException(result.error, "motion/deleteRecording")
