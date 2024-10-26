@@ -1,11 +1,11 @@
 package com.securitycam.validators
 
 import com.securitycam.commands.PTZPresetsCommand
+import com.securitycam.commands.PtzCommand
 import com.securitycam.services.LogService
-import com.securitycam.services.UtilsService
 import org.springframework.validation.Errors
 
-class PtzPresetsCommandValidator extends PtzCommandsValidator{
+class PtzPresetsCommandValidator extends PtzCommandValidator{
     final def operations = Set<PTZPresetsCommand.ePresetOperations>.of(
             PTZPresetsCommand.ePresetOperations.moveTo,
             PTZPresetsCommand.ePresetOperations.saveTo,
@@ -17,7 +17,7 @@ class PtzPresetsCommandValidator extends PtzCommandsValidator{
 
     @Override
     boolean supports(Class<?> clazz) {
-        return PTZPresetsCommand.class == clazz
+        return super.supports(PtzCommand.class) && PTZPresetsCommand.class == clazz
     }
 
     @Override
@@ -30,13 +30,6 @@ class PtzPresetsCommandValidator extends PtzCommandsValidator{
                 if(!operations.contains(cmd.operation))
                     errors.rejectValue("operation", "operation is not a valid value")
             }
-
-            if(cmd.onvifBaseAddress == null)
-                errors.rejectValue("onvifBaseAddress", "onvifBaseAddress cannot be null")
-            else if(cmd.onvifBaseAddress == "")
-                errors.rejectValue("onvifBaseAddress", "onvifBaseAddress cannot be empty")
-            else if(!cmd.onvifBaseAddress.matches(UtilsService.onvifBaseAddressRegex))
-                errors.rejectValue("onvifBaseAddress", "Invalid onvifBaseAddress ${cmd.onvifBaseAddress}")
 
             if(cmd.preset == null)
                 errors.rejectValue("preset", "preset cannot be null")

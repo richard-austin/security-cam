@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.internal.LinkedTreeMap
 import com.securitycam.audiobackchannel.RtspClient
 import com.securitycam.commands.DiscoverCameraDetailsCommand
-import com.securitycam.commands.MoveCommand
 import com.securitycam.commands.PTZPresetsCommand
-import com.securitycam.commands.PTZPresetsInfoCommand
-import com.securitycam.commands.StopCommand
+import com.securitycam.commands.PtzCommand
 import com.securitycam.controllers.Camera
 import com.securitycam.controllers.CameraAdminCredentials
 import com.securitycam.controllers.Stream
@@ -26,6 +24,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.utils.OnvifCredentials
 import org.utils.TestDevice
+import com.securitycam.commands.MoveCommand
 
 import javax.net.ssl.*
 import javax.xml.ws.WebServiceException
@@ -479,14 +478,14 @@ class OnvifService {
             if (profile != null) {
                 PTZ ptz = device.getPtz()
                 PTZSpeed ptzSpd = new PTZSpeed()
-                if (cmd.getMoveDirection() == eMoveDirections.panRight || cmd.getMoveDirection() == eMoveDirections.panLeft ||
-                        cmd.moveDirection == eMoveDirections.tiltDown || cmd.moveDirection == eMoveDirections.tiltUp) {
+                if (cmd.getMoveDirection() == MoveCommand.eMoveDirections.panRight || cmd.getMoveDirection() == MoveCommand.eMoveDirections.panLeft ||
+                        cmd.moveDirection == MoveCommand.eMoveDirections.tiltDown || cmd.moveDirection == MoveCommand.eMoveDirections.tiltUp) {
                     Vector2D panTilt = new Vector2D()
                     XYZValues xyzValues = ptzDataMap.get(cmd.getOnvifBaseAddress()).xyzMap.get(cmd.getMoveDirection())
                     panTilt.setX(xyzValues.getX())
                     panTilt.setY(xyzValues.getY())
                     ptzSpd.setPanTilt(panTilt)
-                } else if (cmd.getMoveDirection() == eMoveDirections.zoomIn || cmd.getMoveDirection() == eMoveDirections.zoomOut) {
+                } else if (cmd.getMoveDirection() == MoveCommand.eMoveDirections.zoomIn || cmd.getMoveDirection() == MoveCommand.eMoveDirections.zoomOut) {
                     Vector1D zoom = new Vector1D()
                     XYZValues xyzValues = ptzDataMap.get(cmd.getOnvifBaseAddress()).xyzMap.get(cmd.getMoveDirection())
                     zoom.setX(xyzValues.getZ())
@@ -506,7 +505,7 @@ class OnvifService {
         return result
     }
 
-    ObjectCommandResponse stop(StopCommand cmd) {
+    ObjectCommandResponse stop(PtzCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             OnvifDevice device = getDevice(cmd.onvifBaseAddress, cmd.user, cmd.password)
@@ -567,7 +566,7 @@ class OnvifService {
 
     private final Map<String, SC_PTZData> ptzDataMap = new HashMap<>()
 
-    ObjectCommandResponse ptzPresetsInfo(PTZPresetsInfoCommand cmd) {
+    ObjectCommandResponse ptzPresetsInfo(PtzCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             OnvifDevice device = getDevice(cmd.onvifBaseAddress, cmd.user, cmd.password)
@@ -589,12 +588,12 @@ class OnvifService {
                 // TODO: What do we do if there is more than one of these spaces
                 Space1DDescription czvs = spaces.continuousZoomVelocitySpace[0]
 
-                xyzMap.put(eMoveDirections.panLeft, new XYZValues(cptvs.XRange.min, 0, 0))
-                xyzMap.put(eMoveDirections.panRight, new XYZValues(cptvs.XRange.max, 0, 0))
-                xyzMap.put(eMoveDirections.tiltDown, new XYZValues(0, cptvs.YRange.min, 0))
-                xyzMap.put(eMoveDirections.tiltUp, new XYZValues(0, cptvs.YRange.max, 0))
-                xyzMap.put(eMoveDirections.zoomIn, new XYZValues(0, 0, czvs.XRange.max))
-                xyzMap.put(eMoveDirections.zoomOut, new XYZValues(0, 0, czvs.XRange.min))
+                xyzMap.put(MoveCommand.eMoveDirections.panLeft, new XYZValues(cptvs.XRange.min, 0, 0))
+                xyzMap.put(MoveCommand.eMoveDirections.panRight, new XYZValues(cptvs.XRange.max, 0, 0))
+                xyzMap.put(MoveCommand.eMoveDirections.tiltDown, new XYZValues(0, cptvs.YRange.min, 0))
+                xyzMap.put(MoveCommand.eMoveDirections.tiltUp, new XYZValues(0, cptvs.YRange.max, 0))
+                xyzMap.put(MoveCommand.eMoveDirections.zoomIn, new XYZValues(0, 0, czvs.XRange.max))
+                xyzMap.put(MoveCommand.eMoveDirections.zoomOut, new XYZValues(0, 0, czvs.XRange.min))
 
                 // Set up the arrays (up to max size 32) for the preset tokens
                 List<PTZPreset> presets = new ArrayList()

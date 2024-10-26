@@ -183,6 +183,7 @@ Content-Type: application/json
 
 POST http://localhost:8080/motion/deleteRecording
 Content-Type: application/json
+Accept: application/json
 
 {
 "stream": {
@@ -214,3 +215,45 @@ Content-Type: application/json
 },
 "fileName": ""
 }
+
+###
+POST http://localhost:8080/ptz/preset
+Content-Type: application/json
+
+{
+  "onvifBaseAddress": "192.168.1.30:8080",
+  "creds": "JFM3r9UZRmLGPN4ts+xjQSco3tjM07DD5ITS0kviMzVttgqUBLc0b+kpLn88+mTPj6esN8is2QGjqGZvQXKruWIp+38llSmuNctNbR8pucNKYpyszy+Mh1DUxQjh9OPEPZTo9mRLMiJ4x0ai+Vvs2jEij5On3XTKLyIpyfKjXvsRmqcBJ4bFU5877rJpjjBbyKwiMr4IK8lPMu2MZpx/8TF/vkNF3ryFaMOfu2xFG38DxVe8k03g4jz1yemMLHzIS5g8Bd6BvGW9795orn0oRWC8NuxBGHGcgXHLxc89/TMUFVkGqGdSIMbv8gKQalSQiAJ1hedZMITuDt3whIi4Zg==",
+  "operation": 2,
+  "preset": "Preset032"
+}
+
+###
+
+POST http://localhost:8080/ptz/move
+Content-Type: application/json
+
+{
+  "onvifBaseAddress": "192.168.1.308:8080",
+  "creds": "JFM3r9UZRmLGPN4ts+xjQSco3tjM07DD5ITS0kviMzVttgqUBLc0b+kpLn88+mTPj6esN8is2QGjqGZvQXKruWIp+38llSmuNctNbR8pucNKYpyszy+Mh1DUxQjh9OPEPZTo9mRLMiJ4x0ai+Vvs2jEij5On3XTKLyIpyfKjXvsRmqcBJ4bFU5877rJpjjBbyKwiMr4IK8lPMu2MZpx/8TF/vkNF3ryFaMOfu2xFG38DxVe8k03g4jz1yemMLHzIS5g8Bd6BvGW9795orn0oRWC8NuxBGHGcgXHLxc89/TMUFVkGqGdSIMbv8gKQalSQiAJ1hedZMITuDt3whIi4Zg==",
+  "moveDirection": 3
+}
+
+###
+
+POST http://localhost:8080/ptz/stop
+Content-Type: application/json
+
+{
+  "onvifBaseAddress": "192.168.1.30:8080",
+  "creds": "JFM3r9UZRmLGPN4ts+xjQSco3tjM07DD5ITS0kviMzVttgqUBLc0b+kpLn88+mTPj6esN8is2QGjqGZvQXKruWIp+38llSmuNctNbR8pucNKYpyszy+Mh1DUxQjh9OPEPZTo9mRLMiJ4x0ai+Vvs2jEij5On3XTKLyIpyfKjXvsRmqcBJ4bFU5877rJpjjBbyKwiMr4IK8lPMu2MZpx/8TF/vkNF3ryFaMOfu2xFG38DxVe8k03g4jz1yemMLHzIS5g8Bd6BvGW9795orn0oRWC8NuxBGHGcgXHLxc89/TMUFVkGqGdSIMbv8gKQalSQiAJ1hedZMITuDt3whIi4Zg=="
+}
+
+###
+POST http://localhost:8080/ptz/ptzPresetsInfo
+Content-Type: application/json
+
+{
+  "onvifBaseAddress": "192.168.1.30:8080",
+  "creds": "JFM3r9UZRmLGPN4ts+xjQSco3tjM07DD5ITS0kviMzVttgqUBLc0b+kpLn88+mTPj6esN8is2QGjqGZvQXKruWIp+38llSmuNctNbR8pucNKYpyszy+Mh1DUxQjh9OPEPZTo9mRLMiJ4x0ai+Vvs2jEij5On3XTKLyIpyfKjXvsRmqcBJ4bFU5877rJpjjBbyKwiMr4IK8lPMu2MZpx/8TF/vkNF3ryFaMOfu2xFG38DxVe8k03g4jz1yemMLHzIS5g8Bd6BvGW9795orn0oRWC8NuxBGHGcgXHLxc89/TMUFVkGqGdSIMbv8gKQalSQiAJ1hedZMITuDt3whIi4Zg=="
+}
+

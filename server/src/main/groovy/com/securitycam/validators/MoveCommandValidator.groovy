@@ -1,11 +1,11 @@
 package com.securitycam.validators
 
 import com.securitycam.commands.MoveCommand
+import com.securitycam.commands.PtzCommand
 import com.securitycam.services.LogService
-import com.securitycam.services.UtilsService
 import org.springframework.validation.Errors
 
-class MoveCommandValidator extends PtzCommandsValidator {
+class MoveCommandValidator extends PtzCommandValidator {
 
     Set<MoveCommand.eMoveDirections> commands = Set<MoveCommand.eMoveDirections>.of(
             MoveCommand.eMoveDirections.tiltUp,
@@ -21,7 +21,7 @@ class MoveCommandValidator extends PtzCommandsValidator {
 
     @Override
     boolean supports(Class<?> clazz) {
-        return MoveCommand.class == clazz
+        return super.supports(PtzCommand.class) && MoveCommand.class == clazz
     }
 
     @Override
@@ -32,9 +32,6 @@ class MoveCommandValidator extends PtzCommandsValidator {
                 errors.rejectValue("moveDirection", "moveDirectionCannot be null")
             else if (!commands.contains(cmd.moveDirection))
                 errors.rejectValue("moveDirection", "moveDirection is not a valid value (${cmd.moveDirection})")
-
-            if(!cmd.onvifBaseAddress.matches(UtilsService.onvifBaseAddressRegex))
-                errors.rejectValue("onvifBaseAddress", "Onvif Base Address is invalid")
         }
     }
 }
