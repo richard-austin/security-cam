@@ -138,9 +138,7 @@ class PtzController {
                 throw new NVRRestMethodException(response.error, "ptz/ptzPresetsInfo", "")
             }
             else
-                return ResponseEntity.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(response.responseObject)
+                return ResponseEntity.ok().body(response.responseObject)
         }
     }
 }

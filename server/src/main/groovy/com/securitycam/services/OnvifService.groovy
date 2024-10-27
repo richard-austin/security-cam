@@ -1,11 +1,14 @@
 package com.securitycam.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
 import com.securitycam.audiobackchannel.RtspClient
 import com.securitycam.commands.DiscoverCameraDetailsCommand
 import com.securitycam.commands.PTZPresetsCommand
 import com.securitycam.commands.PtzCommand
+import com.securitycam.commands.SetOnvifCredentialsCommand
+import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
 import com.securitycam.controllers.CameraAdminCredentials
 import com.securitycam.controllers.Stream
@@ -15,9 +18,21 @@ import com.securitycam.interfaceobjects.ObjectCommandResponse
 import common.Authentication
 import onvif.discovery.OnvifDiscovery
 import onvif.soap.OnvifDevice
+import org.apache.commons.io.IOUtils
 import org.apache.http.protocol.BasicHttpContext
 import org.onvif.ver10.media.wsdl.Media
-import org.onvif.ver10.schema.*
+import org.onvif.ver10.schema.AudioEncoderConfiguration
+import org.onvif.ver10.schema.PTZNode
+import org.onvif.ver10.schema.PTZPreset
+import org.onvif.ver10.schema.PTZSpaces
+import org.onvif.ver10.schema.PTZSpeed
+import org.onvif.ver10.schema.Profile
+import org.onvif.ver10.schema.Space1DDescription
+import org.onvif.ver10.schema.Space2DDescription
+import org.onvif.ver10.schema.Vector1D
+import org.onvif.ver10.schema.Vector2D
+import org.onvif.ver10.schema.VideoEncoderConfiguration
+import org.onvif.ver10.schema.VideoResolution
 import org.onvif.ver20.ptz.wsdl.PTZ
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -68,6 +83,9 @@ class OnvifService {
     CamService camService
     @Autowired
     Sc_processesService sc_processesService
+    @Autowired
+    Config config
+
     private ExecutorService deviceUpdateExecutor = Executors.newSingleThreadExecutor()
 
     def populateDeviceMap() {
@@ -92,10 +110,40 @@ class OnvifService {
             throw new Exception("Error in populateDeviceMap: " + getCamerasResult.error)
     }
 
+    /**
+     * getOnvifCredentials: Get the user name and password to authenticate on the cameras Onvif services.
+     * These are set up with the setOnvifCredentials call
+     *
+     * @return The user name
+     */
+    def getOnvifCreds() {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            FileInputStream fis
+
+            fis = new FileInputStream("${config.camerasHomeDirectory}/onvifCredentials.json")
+
+            String data = IOUtils.toString(fis, "UTF-8")
+            Gson gson2 = new Gson()
+            Object obj = gson2.fromJson(data, Object.class)
+            response.responseObject = obj
+        }
+        catch(FileNotFoundException ignore) {
+            response.responseObject = [onvifUserName: "", onvifPassword: ""]
+        }
+        catch (Exception ex) {
+            logService.cam.error "getOnvifCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            response.status = PassFail.FAIL
+            response.error = ex.getMessage()
+        }
+        return response
+    }
+
+
     private def getOnvifCredentials() {
         def user = ""
         def password = ""
-        def response = camService.getOnvifCredentials()
+        def response = getOnvifCreds()
 
         if (response.status == PassFail.PASS) {
             user = response.responseObject?.onvifUserName
@@ -103,6 +151,7 @@ class OnvifService {
         }
         return [user, password]
     }
+
     /**
      * getMediaProfiles: Get the details of Onvif compliant cameras which are online on the LAN.
      * @return: LinkedHashMap<String, Camera> containing discovered cameras with all fields populated which can be.
@@ -623,4 +672,55 @@ class OnvifService {
         }
         return result
     }
+
+    def haveOnvifCredentials() {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        try {
+            String pw = "", un = ""
+            response = getOnvifCreds() as ObjectCommandResponse
+            if (response.status == PassFail.PASS) {
+                un = response.responseObject?.onvifUserName
+                pw = response.responseObject?.onvifPassword
+            }
+            response.responseObject = !un.isEmpty() && !pw.isEmpty()
+        }
+        catch (Exception ex) {
+            String msg = "${ex.getClass().getName()} in haveCameraCredentials: ${ex.getMessage()}"
+            response.responseObject = false
+            response.status = PassFail.FAIL
+            response.error = msg
+            logService.getCam().error(msg)
+        }
+        return response
+    }
+
+    /**
+     * setOnvifCredentials: Set the access credentials required by some cameras to return onvif query results
+     * @param cmd : Command object containing the username and password
+     * @return: ObjectCommandResponse with success/error state.
+     */
+    def setOnvifCredentials(SetOnvifCredentialsCommand cmd) {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+
+        try {
+            String json = """{
+    \"onvifUserName\": \"${cmd.onvifUserName}\",
+    \"onvifPassword\": \"${cmd.onvifPassword}\"
+}
+"""
+            String fileName = "${grailsApplication.config.camerasHomeDirectory}/onvifCredentials.json"
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
+            writer.write(json)
+
+            writer.close()
+        }
+        catch (Exception ex) {
+            logService.cam.error "setCameraAccessCredentials() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            response.status = PassFail.FAIL
+            response.error = ex.getMessage()
+        }
+
+        return response
+    }
+
 }

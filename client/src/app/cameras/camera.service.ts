@@ -206,7 +206,7 @@ export class CameraService {
   }
 
   haveOnvifCredentials(): Observable<string> {
-    return this.http.post(this._baseUrl.getLink("cam", "haveOnvifCredentials"), '', {responseType: 'text'}).pipe(
+    return this.http.post(this._baseUrl.getLink("onvif", "haveOnvifCredentials"), '', {responseType: 'text'}).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
@@ -235,11 +235,8 @@ export class CameraService {
   }
 
   discoverCameraDetails(onvifUrl: string, onvifUserName: string = "", onvifPassword: string = ""): Observable<{cam: Camera, failed: Map<string, string>}> {
-    const formData: FormData = new FormData();
-    formData.append('onvifUrl', onvifUrl)
-    formData.append("onvifUserName", onvifUserName);
-    formData.append("onvifPassword", onvifPassword);
-    return this.http.post<any>(this._baseUrl.getLink("onvif", "discoverCameraDetails"), formData, this.httpUploadOptions).pipe(
+    let params: {} = {onvifUrl: onvifUrl, onvifUserName: onvifUserName, onvifPassword: onvifPassword}
+    return this.http.post<any>(this._baseUrl.getLink("onvif", "discoverCameraDetails"), params, this.httpJSONOptions).pipe(
       map(result => {
         let map: Map<string, Camera> = CameraService.convertCamsObjectToMap(result.cams);
         if (map.size == 1)
@@ -279,7 +276,7 @@ export class CameraService {
   }
   setOnvifCredentials(creds: OnvifCredentials): Observable<any> {
     const msg = {onvifUserName: creds.userName, onvifPassword: creds.password};
-    return this.http.post<any>(this._baseUrl.getLink("cam", "setOnvifCredentials"), JSON.stringify(msg), this.httpJSONOptions).pipe(
+    return this.http.post<any>(this._baseUrl.getLink("onvif", "setOnvifCredentials"), JSON.stringify(msg), this.httpJSONOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

@@ -40,5 +40,4 @@ class CamController {
         else
             throw new NVRRestMethodException(response.error, "cam/getPublicKey", "See logs")
     }
-
 }

@@ -42,7 +42,7 @@ class RestResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     ResponseEntity<Object> handleGeneralException(Exception ex) {
         logService.cam.error("${ex.getClass()} has occurredc: ${ex.getMessage()}: ${ex.getCause()}")
-        logService.cam.error(ex.getStackTrace().toString())
+ //       logService.cam.error(ex.getStackTrace().toString())
         ErrorResponse retVal = new ErrorResponse(ex)
         return new ResponseEntity<Object>(retVal, HttpStatus.INTERNAL_SERVER_ERROR)
     }
