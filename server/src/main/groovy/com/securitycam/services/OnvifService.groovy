@@ -715,7 +715,7 @@ class OnvifService {
     \"onvifPassword\": \"${cmd.onvifPassword}\"
 }
 """
-            String fileName = "${grailsApplication.config.camerasHomeDirectory}/onvifCredentials.json"
+            String fileName = "${config.camerasHomeDirectory}/onvifCredentials.json"
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
             writer.write(json)
 

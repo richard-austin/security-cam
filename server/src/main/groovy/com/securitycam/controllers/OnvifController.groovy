@@ -92,14 +92,14 @@ class OnvifController {
      * @return: Success/error state.
      */
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
-    @PostMapping("/setOnvifCredentials")
+    @PostMapping(value="/setOnvifCredentials", consumes = "application/json", produces = "text/html")
     def setOnvifCredentials(@Valid @RequestBody SetOnvifCredentialsCommand cmd) {
         ObjectCommandResponse response = onvifService.setOnvifCredentials(cmd)
 
         if (response.status != PassFail.PASS)
             return ResponseEntity.badRequest().body(response.error)
         else
-            return ResponseEntity.ok()
+            return ResponseEntity.ok("")
 
     }
 

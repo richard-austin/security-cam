@@ -63,8 +63,7 @@ public class NettyHttpAuthenticator extends ChannelDuplexHandler {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        if (msg instanceof FullHttpRequest) {
-            HttpRequest req = (HttpRequest) msg;
+        if (msg instanceof FullHttpRequest req) {
 
             String method = req.method().name();
             String uri = req.uri();
