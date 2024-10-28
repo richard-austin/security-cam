@@ -257,3 +257,35 @@ Content-Type: application/json
   "creds": "JFM3r9UZRmLGPN4ts+xjQSco3tjM07DD5ITS0kviMzVttgqUBLc0b+kpLn88+mTPj6esN8is2QGjqGZvQXKruWIp+38llSmuNctNbR8pucNKYpyszy+Mh1DUxQjh9OPEPZTo9mRLMiJ4x0ai+Vvs2jEij5On3XTKLyIpyfKjXvsRmqcBJ4bFU5877rJpjjBbyKwiMr4IK8lPMu2MZpx/8TF/vkNF3ryFaMOfu2xFG38DxVe8k03g4jz1yemMLHzIS5g8Bd6BvGW9795orn0oRWC8NuxBGHGcgXHLxc89/TMUFVkGqGdSIMbv8gKQalSQiAJ1hedZMITuDt3whIi4Zg=="
 }
 
+###
+
+POST http://localhost:8080/onvif/getSnapshot HTTP/1.1
+Accept: application/json, text/plain, */*
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-GB,en-US;q=0.9,en;q=0.8
+Authorization: my-auth-token
+Connection: keep-alive
+Content-Length: 398
+Content-Type: application/json
+Host: localhost:4200
+Origin: http://localhost:4200
+Referer: http://localhost:4200/
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+sec-ch-ua: "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+
+{
+  "url": "http://192.168.1.43/cgi-bin/api.cgi?cmd=onvifSnapPic&channel=0",
+  "cred": "jIgm9mSRneOwtulK1E2cU50+NmP0BIg/jxHGN/OtPhC6+rR6yue5SIR7LCigRWP35rr8bHLhN5hXPlkKMh2v0m0M3HoFvDObK/Q6JfTHHyrMxinvTOkUmiif02odX/KJup/Xf1Z/I2dYaAIEOlaoj0t/t+GfKnbqE+bFc3Pj5fiBP0ToP/2SPSjoVhAsc6CySeLLZdRsaFtsmX86CIpP5LjjLmPDhIjhgrtzdu6E/hCuhAnBu1G3QJy671XQz+v5/A1W8566ye/hK3Hzi15TLvigwTMc3mZTT5DaDaopF3E4eqNfe19/PvjfzJwCYjgga8OTAncQSA+8UF+Zinms2Q=="
+}
+
+###
+
+{
+  "url": "http://192.168.1.30/tmpfs/auto.jpg",
+  "cred": "JFM3r9UZRmLGPN4ts+xjQSco3tjM07DD5ITS0kviMzVttgqUBLc0b+kpLn88+mTPj6esN8is2QGjqGZvQXKruWIp+38llSmuNctNbR8pucNKYpyszy+Mh1DUxQjh9OPEPZTo9mRLMiJ4x0ai+Vvs2jEij5On3XTKLyIpyfKjXvsRmqcBJ4bFU5877rJpjjBbyKwiMr4IK8lPMu2MZpx/8TF/vkNF3ryFaMOfu2xFG38DxVe8k03g4jz1yemMLHzIS5g8Bd6BvGW9795orn0oRWC8NuxBGHGcgXHLxc89/TMUFVkGqGdSIMbv8gKQalSQiAJ1hedZMITuDt3whIi4Zg=="
+}

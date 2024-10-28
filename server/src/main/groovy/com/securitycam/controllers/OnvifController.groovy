@@ -67,11 +67,18 @@ class OnvifController {
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
-    @PostMapping("/getSnapshot")
+    @PostMapping(value="/getSnapshot", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     def getSnapshot(@Valid @RequestBody GetSnapshotCommand cmd) {
         def result = onvifService.getSnapshot(cmd.url, cmd.cred)
-        if (result.status == PassFail.PASS)
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(result.responseObject)
+        if (result.status == PassFail.PASS) {
+            byte[] bytes = result.responseObject as byte[]
+            ResponseEntity ent = ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentLength(bytes.length)
+                    .body(bytes)
+            return ent
+        }
         else if (result.errno == 401) {
             return new ResponseEntity<Object>(result.error, HttpStatus.UNAUTHORIZED)
         } else {

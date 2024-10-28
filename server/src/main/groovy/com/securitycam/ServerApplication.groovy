@@ -13,18 +13,21 @@ import jakarta.validation.Validation
 import jakarta.validation.Validator
 import jakarta.validation.ValidatorFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
-import org.springframework.core.env.Environment
+
+import java.util.logging.Level
+import java.util.logging.Logger
 
 @SpringBootApplication
 class ServerApplication {
 
     static void main(String[] args) {
+        var logger = Logger.getLogger("org.apache");
+        logger.setLevel(Level.OFF);
         SpringApplication.run(ServerApplication, args)
     }
 

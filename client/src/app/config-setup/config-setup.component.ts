@@ -741,8 +741,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     else if (cam.value.snapshotUri !== '') {
       this.snapShotKey = cam.key;
       this.cameraSvc.getSnapshot(cam.value).subscribe(result => {
-          this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(result));
-          this.snapshotLoading = false;
+            if (result !== null && result.body !== null) {
+              let ab = result.body.arrayBuffer()
+              ab.then((body => {
+                this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(body));
+                this.snapshotLoading = false;
+              }))
+            }
         },
         reason => {
           if (reason.status === 401) {
@@ -775,7 +780,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     return hasMotionSet;
   }
 
-  toBase64(data: Array<any>): string {
+  toBase64(data: ArrayBuffer): string {
     let binary: string = '';
     let bytes: Uint8Array = new Uint8Array(data);
     let len: number = bytes.byteLength;

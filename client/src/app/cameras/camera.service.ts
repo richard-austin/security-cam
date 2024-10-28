@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable} from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
@@ -65,6 +65,14 @@ export class CameraService {
       'Content-Type': 'application/json',
       'Authorization': 'my-auth-token'
     })
+  };
+
+  readonly httpConsumeBlobOptions = {
+      headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': 'my-auth-token',
+          'ResponseType': 'blob'
+      })
   };
 
   readonly httpUploadOptions = {
@@ -255,12 +263,14 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getSnapshot(cam: Camera): Observable<Array<any>> {
-    const formData: FormData = new FormData();
-    formData.append('url', cam.snapshotUri);
-    formData.append('cred', cam.cred)
-    return this.http.post<Array<any>>(this._baseUrl.getLink("onvif", "getSnapshot"), formData, this.httpUploadOptions).pipe(
-      tap(),
+  getSnapshot(cam: Camera): Observable<HttpResponse<Blob>> {
+    let params: {} = {url: cam.snapshotUri, cred: cam.cred}
+    return this.http.post(this._baseUrl.getLink("onvif", "getSnapshot"), params, {observe: "response", responseType: "blob"}).pipe(
+      tap(
+          content => {
+              let y = content;
+          }
+      ),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 

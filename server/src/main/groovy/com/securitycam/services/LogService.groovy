@@ -3,7 +3,9 @@ package com.securitycam.services
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import com.proxy.ILogService
+import com.securitycam.configuration.Config
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import jakarta.annotation.PostConstruct
@@ -13,7 +15,8 @@ import jakarta.annotation.PostConstruct
 class LogService implements ILogService {
 
     Logger cam = null
-  //  GrailsApplication grailsApplication
+    @Autowired
+    Config config
 
     static Logger logger = null
 
@@ -35,6 +38,6 @@ class LogService implements ILogService {
 
     @PostConstruct
     def initialise() {
-        setLogLevel(/*grailsApplication.config.logLevel as String*/ "DEBUG")
+        setLogLevel(config.logLevel as String)
     }
 }

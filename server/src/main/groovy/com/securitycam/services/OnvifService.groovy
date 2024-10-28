@@ -214,7 +214,7 @@ class OnvifService {
                         if (device == null)
                             throw new Exception("No camera found at ${cmd?.onvifUrl == null ? credentials.host : cmd.onvifUrl}")
 
-                        List<Profile> profiles
+                        List<Profile> profiles = null
                         try {
                             Media media = device.getMedia()
                             profiles = media.getProfiles()
@@ -224,41 +224,48 @@ class OnvifService {
                             failed.put(credentials.getOnvifUrl(), "Failed to get media profile: ${ex.getMessage()}")
                             return
                         }
+                        catch(Exception ex) {
+                            failed.put(credentials.getOnvifUrl(), "${ex.getClass()} when getting media profiles: ${ex.getMessage()}: ${ex.getCause()}")
+                            return
+                        }
 
                         int streamNum = 0
 
-                        profiles.forEach({ Profile profile ->
-                            Stream stream = new Stream()
-                            String profileToken = profile.getToken()
-                            cam.streams.put('stream' + ++streamNum, stream)
-                            String streamUrl = device.getStreamUri(profileToken)
-                            cam.address = getIPFromUrl(streamUrl)
-                            stream.netcam_uri = streamUrl
-                            VideoEncoderConfiguration vec = profile.getVideoEncoderConfiguration()
-                            VideoResolution resolution = vec.resolution
-                            stream.video_width = resolution.getWidth()
-                            stream.video_height = resolution.getHeight()
+                        if(profiles != null) {
+                            profiles.forEach({ Profile profile ->
+                                Stream stream = new Stream()
+                                String profileToken = profile.getToken()
+                                cam.streams.put('stream' + ++streamNum, stream)
+                                String streamUrl = device.getStreamUri(profileToken)
+                                cam.address = getIPFromUrl(streamUrl)
+                                stream.netcam_uri = streamUrl
+                                VideoEncoderConfiguration vec = profile.getVideoEncoderConfiguration()
+                                VideoResolution resolution = vec.resolution
+                                stream.video_width = resolution.getWidth()
+                                stream.video_height = resolution.getHeight()
 
-                            AudioEncoderConfiguration aec = profile.getAudioEncoderConfiguration()
-                            int bitRate = aec.getBitrate()
-                            // bitRate should be in Kbps, though it is in bps from SV3C type cameras.
-                            if (bitRate < 200)
-                                bitRate *= 1000
-                            stream.audio_bitrate = bitRate
-                            String encoding = aec.getEncoding().value()
-                            if (isSupportedAudioOutputFmt(encoding)) {
-                                stream.audio_encoding = encoding
-                                stream.audio = true
-                            } else {
-                                stream.audio_encoding = "None"
-                                stream.audio = false
-                            }
-                            stream.audio_sample_rate = aec.getSampleRate()
+                                AudioEncoderConfiguration aec = profile.getAudioEncoderConfiguration()
+                                int bitRate = aec.getBitrate()
+                                // bitRate should be in Kbps, though it is in bps from SV3C type cameras.
+                                if (bitRate < 200)
+                                    bitRate *= 1000
+                                stream.audio_bitrate = bitRate
+                                String encoding = aec.getEncoding().value()
+                                if (isSupportedAudioOutputFmt(encoding)) {
+                                    stream.audio_encoding = encoding
+                                    stream.audio = true
+                                } else {
+                                    stream.audio_encoding = "None"
+                                    stream.audio = false
+                                }
+                                stream.audio_sample_rate = aec.getSampleRate()
 
-                            //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
-                        })
+                                //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
+                            })
+                        }
                         logService.cam.info("Connected to device %s (%s)%n", device.getDeviceInfo(), device.streamUri.toString())
-                        logService.cam.info(TestDevice.inspect(device))
+                        // This was causing an exception (caught within the same function)  (and on the Grails version)
+//                        logService.cam.info(TestDevice.inspect(device))
 
                         String snapshotUri = device.getSnapshotUri()
                         if (!snapshotUri.isEmpty()) {

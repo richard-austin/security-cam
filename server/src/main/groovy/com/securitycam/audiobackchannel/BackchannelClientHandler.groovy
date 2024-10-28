@@ -1,5 +1,6 @@
 package com.securitycam.audiobackchannel
 
+import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.interfaceobjects.OnReady
 import gov.nist.javax.sdp.MediaDescriptionImpl
