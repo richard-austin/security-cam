@@ -8,6 +8,7 @@ import com.securitycam.commands.DiscoverCameraDetailsCommand
 import com.securitycam.commands.PTZPresetsCommand
 import com.securitycam.commands.PtzCommand
 import com.securitycam.commands.SetOnvifCredentialsCommand
+import com.securitycam.commands.UploadMaskFileCommand
 import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
 import com.securitycam.controllers.CameraAdminCredentials
@@ -37,6 +38,7 @@ import org.onvif.ver20.ptz.wsdl.PTZ
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 import org.utils.OnvifCredentials
 import org.utils.TestDevice
 import com.securitycam.commands.MoveCommand
@@ -728,6 +730,21 @@ class OnvifService {
         }
 
         return response
+    }
+
+    def uploadMaskFile(MultipartFile maskFile) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            File file
+            file = new File("${config.camerasHomeDirectory}/motion/" + maskFile.originalFilename)
+            maskFile.transferTo(file)
+        }
+        catch (Exception ex) { // Some other type of exception
+            logService.cam.error "uploadMaskFile() caught " + ex.getClass().getName() + " with message = " + ex.getMessage()
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
     }
 
 }

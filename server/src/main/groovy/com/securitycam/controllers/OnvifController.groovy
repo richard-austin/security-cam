@@ -3,8 +3,8 @@ package com.securitycam.controllers
 import com.securitycam.commands.DiscoverCameraDetailsCommand
 import com.securitycam.commands.GetSnapshotCommand
 import com.securitycam.commands.SetOnvifCredentialsCommand
+import com.securitycam.commands.UploadMaskFileCommand
 import com.securitycam.enums.PassFail
-import com.securitycam.interfaceobjects.CommandResponse
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.validators.DiscoverCameraDetailsCommandValidator
 import groovy.json.JsonOutput
@@ -12,18 +12,22 @@ import com.securitycam.services.LogService
 import com.securitycam.services.OnvifService
 import com.securitycam.validators.BadRequestResult
 import com.securitycam.validators.GeneralValidator
-import com.securitycam.validators.PtzPresetsCommandValidator
 import jakarta.validation.Valid
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.BindingResult
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/onvif")
@@ -111,5 +115,23 @@ class OnvifController {
             ResponseEntity.ok(response.responseObject ? 'true' : 'false')
         else
             return ResponseEntity.badRequest().body(response.error)
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @PostMapping(value="/uploadMaskFile")
+    def uploadMaskFile(@RequestParam("maskFile") MultipartFile maskFile) {
+        if(maskFile == null || maskFile.empty) {
+            return ResponseEntity
+                    .badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body([maskFile: "maskFile should be a valid .pgm file"])
+        }
+        logService.cam.debug "CamController.uploadMaskFile() called"
+        ObjectCommandResponse result
+            result = onvifService.uploadMaskFile(maskFile)
+            if (result.status == PassFail.PASS)
+                return ResponseEntity.ok([])
+            else
+                throw new Exception(result.error)
     }
 }

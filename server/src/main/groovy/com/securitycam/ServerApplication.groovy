@@ -26,8 +26,8 @@ import java.util.logging.Logger
 class ServerApplication {
 
     static void main(String[] args) {
-        var logger = Logger.getLogger("org.apache");
-        logger.setLevel(Level.OFF);
+        var logger = Logger.getLogger("org.apache")
+        logger.setLevel(Level.OFF)
         SpringApplication.run(ServerApplication, args)
     }
 
@@ -55,7 +55,7 @@ class ServerApplication {
                 Role role = roleRepository.findByName("ROLE_CLIENT")
                 if(role != null) {
                     var user = new UserDto(username: "austin", password: "password", matchingPassword: "password", email: "a@b.com", cloudAccount: false, role: role.getId())
-                    Set<ConstraintViolation<UserDto>> violations = validator.validate(user);
+                    Set<ConstraintViolation<UserDto>> violations = validator.validate(user)
                     userService.registerNewUserAccount(user)
                 }
             }

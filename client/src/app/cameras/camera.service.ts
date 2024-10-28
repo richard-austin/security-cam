@@ -258,7 +258,7 @@ export class CameraService {
   uploadMaskFile(uploadFile: any): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('maskFile', uploadFile);
-    return this.http.post<any>(this._baseUrl.getLink("cam", "uploadMaskFile"), formData, this.httpUploadOptions).pipe(
+    return this.http.post<any>(this._baseUrl.getLink("onvif", "uploadMaskFile"), formData, this.httpUploadOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
