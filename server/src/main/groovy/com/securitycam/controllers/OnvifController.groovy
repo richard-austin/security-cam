@@ -1,27 +1,31 @@
 package com.securitycam.controllers
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
+import com.google.gson.internal.LinkedTreeMap
 import com.securitycam.commands.DiscoverCameraDetailsCommand
 import com.securitycam.commands.GetSnapshotCommand
 import com.securitycam.commands.SetOnvifCredentialsCommand
-import com.securitycam.commands.UploadMaskFileCommand
+import com.securitycam.commands.UpdateCamerasCommand
+import com.securitycam.configuration.Config
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.validators.DiscoverCameraDetailsCommandValidator
+import com.securitycam.validators.UpdateCamerasCommandValidator
 import groovy.json.JsonOutput
 import com.securitycam.services.LogService
 import com.securitycam.services.OnvifService
 import com.securitycam.validators.BadRequestResult
 import com.securitycam.validators.GeneralValidator
 import jakarta.validation.Valid
-import jakarta.validation.constraints.NotEmpty
-import jakarta.validation.constraints.NotNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.BindingResult
-import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -37,6 +41,9 @@ class OnvifController {
 
     @Autowired
     OnvifService onvifService
+
+    @Autowired
+    Config config
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @PostMapping("/discover")
@@ -118,6 +125,28 @@ class OnvifController {
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @PostMapping("/updateCameras")
+    def updateCameras(@RequestBody UpdateCamerasCommand cmd) {
+        ObjectCommandResponse result
+        def gv = new GeneralValidator(cmd, new UpdateCamerasCommandValidator())
+        BindingResult results = gv.validate()
+        if (results.hasErrors()) {
+            logService.cam.error "/onvif/updateCameras: Validation error: " + results.toString()
+            BadRequestResult retVal = new BadRequestResult(results)
+            return ResponseEntity
+                    .badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(retVal)
+        } else {
+            result = onvifService.updateCameras(cmd)
+            if (result.status != PassFail.PASS)
+                return new ResponseEntity<Object>(result.error, HttpStatus.INTERNAL_SERVER_ERROR)
+            return result.responseObject
+        }
+    }
+
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @PostMapping(value="/uploadMaskFile")
     def uploadMaskFile(@RequestParam("maskFile") MultipartFile maskFile) {
         if(maskFile == null || maskFile.empty) {
@@ -134,4 +163,6 @@ class OnvifController {
             else
                 throw new Exception(result.error)
     }
+
+
 }

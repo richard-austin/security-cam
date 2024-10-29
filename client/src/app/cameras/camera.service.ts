@@ -221,7 +221,7 @@ export class CameraService {
   updateCameras(camerasJON: string):
     Observable<Map<string, Camera>> {
     let cameras = {camerasJSON: camerasJON};
-    return this.http.post<any>(this._baseUrl.getLink("cam", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe(
+    return this.http.post<any>(this._baseUrl.getLink("onvif", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe(
       tap((cams) => {
         this.cameras = new Map();
 

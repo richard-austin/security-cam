@@ -2,13 +2,16 @@ package com.securitycam.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
 import com.google.gson.internal.LinkedTreeMap
 import com.securitycam.audiobackchannel.RtspClient
 import com.securitycam.commands.DiscoverCameraDetailsCommand
 import com.securitycam.commands.PTZPresetsCommand
 import com.securitycam.commands.PtzCommand
 import com.securitycam.commands.SetOnvifCredentialsCommand
-import com.securitycam.commands.UploadMaskFileCommand
+import com.securitycam.commands.UpdateCamerasCommand
 import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
 import com.securitycam.controllers.CameraAdminCredentials
@@ -40,7 +43,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import org.utils.OnvifCredentials
-import org.utils.TestDevice
 import com.securitycam.commands.MoveCommand
 
 import javax.net.ssl.*
@@ -87,6 +89,8 @@ class OnvifService {
     Sc_processesService sc_processesService
     @Autowired
     Config config
+    @Autowired
+    ConfigurationUpdateService configurationUpdateService
 
     private ExecutorService deviceUpdateExecutor = Executors.newSingleThreadExecutor()
 
@@ -732,11 +736,81 @@ class OnvifService {
         return response
     }
 
+    def updateCameras(UpdateCamerasCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create()
+            JsonElement je = JsonParser.parseString(cmd.camerasJSON)
+            String prettyJsonString = gson.toJson(je)
+
+            String fileName
+            fileName = "${config.camerasHomeDirectory}/cameras.json"
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
+            writer.write(prettyJsonString)
+
+            writer.close()
+
+            ObjectCommandResponse stopResult = sc_processesService.stopProcesses()
+            result = configurationUpdateService.generateConfigs()
+            ObjectCommandResponse startResult = sc_processesService.startProcesses()
+
+            if (result.status !== PassFail.PASS)
+                throw new Exception(result.error)
+
+            Gson gson2 = new Gson()
+            LinkedTreeMap<String, Camera> obj = gson2.fromJson(prettyJsonString, Object.class) as LinkedTreeMap<String, Camera>
+
+            removeUnusedMaskFiles(obj, config)
+
+            if (stopResult.status != PassFail.PASS)
+                result = stopResult
+            else if (startResult.status != PassFail.PASS)
+                result = startResult
+
+            // Populate the Onvif device map to prevent the delay of creating the device at the start of each PTZ operation
+            populateDeviceMap()
+            result.setResponseObject(obj)
+        }
+        catch (Exception ex) {
+            logService.cam.error "Exception in updateCameras: " + ex.getMessage()
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    static private def removeUnusedMaskFiles(LinkedTreeMap<String, Camera> jsonObj, Config config) {
+        Set<String> mask_files = new HashSet<String>()
+
+        // Make a set of file names which are in use
+        for (Map.Entry<String, Camera> cam : jsonObj.entrySet())
+            for (Map.Entry<String, Stream> stream : cam.value.streams)
+                if (stream.value.motion.enabled && stream.value.motion.mask_file != "")
+                    mask_files.add(stream.value.motion.mask_file)
+
+        // Get the .pgm files in the motion directory
+        File directory = new File("${config.camerasHomeDirectory}/motion")
+        File[] files = directory.listFiles(new FilenameFilter() {
+            @Override
+            boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".pgm")
+            }
+        })
+
+        // Remove .pgm files not in the data set
+        for (File file : files) {
+            if (!mask_files.contains(file.name))
+                file.delete()
+        }
+    }
+
+
     def uploadMaskFile(MultipartFile maskFile) {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             File file
-            file = new File("${config.camerasHomeDirectory}/motion/" + maskFile.originalFilename)
+            file = new File("${config.motion.maskFileDir}/" + maskFile.originalFilename)
             maskFile.transferTo(file)
         }
         catch (Exception ex) { // Some other type of exception
@@ -746,5 +820,4 @@ class OnvifService {
         }
         return result
     }
-
 }
