@@ -135,7 +135,8 @@ class RtspClient {
                         void ready(BackchannelClientHandler handler) {
                             if (cam != null) {
                                 cam.backchannelAudioSupported = handler.backchannelAudioSupported
-                                cam.rtspTransport = handler.backchannelAudioSupported ? "udp" : "tcp"
+                                // Was there ever a good reason to do this?
+                             //   cam.rtspTransport = handler.backchannelAudioSupported ? "udp" : "tcp"
                             }
                             awaitLock.put(response)
                         }

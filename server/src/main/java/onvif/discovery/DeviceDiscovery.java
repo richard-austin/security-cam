@@ -85,14 +85,14 @@ public class DeviceDiscovery {
                         Comparator.comparing(URL::toString));
         for (String key : discoverWsDevices()) {
             try {
-                final URL url = new URL(key);
+                final URL url = new URI(key).toURL();
                 boolean ok = regexpProtocol.length() <= 0 || url.getProtocol().matches(regexpProtocol);
-                if (regexpPath.length() > 0 && !url.getPath().matches(regexpPath)) ok = false;
+                if (!regexpPath.isEmpty() && !url.getPath().matches(regexpPath)) ok = false;
                 // ignore ip6 hosts
                 if (ok && !enableIPv6 && url.getHost().startsWith("[")) ok = false;
                 if (ok) urls.add(url);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
+            } catch(Exception ex) {
+                ex.printStackTrace();
             }
         }
         return urls;

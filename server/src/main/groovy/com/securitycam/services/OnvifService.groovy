@@ -173,7 +173,7 @@ class OnvifService {
                 logService.cam.info "Camera discovery..."
                 urls = OnvifDiscovery.discoverOnvifURLs()
             } else { // Get the details for the camera with the given Onvif URL
-                urls.add(new URL(cmd?.onvifUrl))
+                urls.add(new URI(cmd?.onvifUrl).toURL())
             }
             def user, password
             if (cmd?.onvifUserName != null && cmd.onvifUserName != "")
@@ -304,7 +304,7 @@ class OnvifService {
         finally {
             // If this was for a specific camera, remove from the device map as the credentials may differ from the global creds
             if (cmd?.onvifUrl != null) {
-                def url = new URL(cmd.onvifUrl)
+                def url = new URI(cmd.onvifUrl).toURL()
                 def onvifHost = url.host+":"+url.port
                 deviceMap.remove(onvifHost)
             }
@@ -460,7 +460,7 @@ class OnvifService {
 
         HttpURLConnection uc = null
         try {
-            URL url = new URL(strUrl)
+            URL url = new URI(strUrl).toURL()
             uc = url.openConnection() as HttpURLConnection
             uc.setRequestProperty("Authorization", authString)
             InputStream input = uc.getInputStream()

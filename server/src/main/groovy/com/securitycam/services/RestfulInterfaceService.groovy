@@ -22,7 +22,7 @@ class RestfulInterfaceService {
     CamService camService
 
     /**
-     * Attempt to send a RESTFul request to a given host to perform a service
+     * Attempt to send a RESTFul request to a given host to perform a service call
      *
      * @param address : network address of the target camera
      * @param uri : uri for the camera service
@@ -43,7 +43,7 @@ class RestfulInterfaceService {
 
         try {
             Camera cam = camService.getCamera(address)
-            URL u = new URL(url)
+            URL u = new URI(url).toURL()
             conn = (HttpURLConnection) u.openConnection(Proxy.NO_PROXY)
             conn.setRequestMethod(isPOST ? "POST" : "GET")
             if (cam != null) {

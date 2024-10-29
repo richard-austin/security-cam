@@ -62,7 +62,7 @@ class Sc_processesService {
         String retVal = ""
         boolean ipOk
         do {
-            try (Scanner s = new Scanner(new URL("https://api.ipify.org").openStream(), "UTF-8").useDelimiter("\\A")) {
+            try (Scanner s = new Scanner(new URI("https://api.ipify.org").toURL().openStream(), "UTF-8").useDelimiter("\\A")) {
                 retVal = s.next()
             } catch (IOException ex) {
                 logService.cam.error "Exception in readMyIp: " + ex.getMessage()
