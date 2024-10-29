@@ -1,5 +1,6 @@
 package com.securitycam.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
 import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
@@ -63,17 +64,13 @@ class CamService {
         if (!cameraHost.contains("localhost")) {
             ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
             if (getCamerasResult.status == PassFail.PASS) {
-                JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
-                def keys = jo.keys()
-                while (keys.hasNext()) {
-                    def key = keys.next()
-                    Camera camera = (Camera) jo.get(key.toString())
-                    if (Objects.equals(camera.getAddress(), cameraHost))
-                        retVal = camera
+                (getCamerasResult.getResponseObject() as Map<String, Camera>).forEach (k, v) -> {
+                    if (v.address == cameraHost)
+                        retVal = v
                 }
+                if (retVal == null)
+                    logService.cam.error("getCamera: Could not find a camera with the address ${cameraHost}")
             }
-            if (retVal == null)
-                logService.cam.error("getCamera: Could not find a camera with the address ${cameraHost}")
         }
         return retVal
     }

@@ -24,14 +24,11 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.util.MultiValueMap
 import org.springframework.validation.BindingResult
-import org.springframework.validation.DataBinder
-import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-import java.net.http.HttpHeaders
 import java.nio.file.Files
 
 class MotionEvents {

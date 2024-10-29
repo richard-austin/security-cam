@@ -1,12 +1,20 @@
 package com.securitycam.controllers
 
+import com.securitycam.commands.CameraParamsCommand
+import com.securitycam.commands.SetCameraParamsCommand
 import com.securitycam.commands.StartAudioOutCommand
 import com.securitycam.enums.PassFail
+import com.securitycam.enums.RestfulResponseStatusEnum
 import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.ObjectCommandResponse
+import com.securitycam.interfaceobjects.RestfulResponse
 import com.securitycam.services.LogService
-
+import com.securitycam.services.RestfulInterfaceService
 import com.securitycam.services.UtilsService
+import com.securitycam.validators.BadRequestResult
+import com.securitycam.validators.CameraParamsCommandValidator
+import com.securitycam.validators.GeneralValidator
+import com.securitycam.validators.SetCameraParamsCommandValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -14,6 +22,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.security.access.annotation.Secured
+import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -27,6 +36,9 @@ class UtilsController {
 
     @Autowired
     LogService logService
+
+    @Autowired
+    RestfulInterfaceService restfulInterfaceService
 
     /**
      * getTemperature: Get the core temperature (Raspberry pi only). This is called at intervals to keep the session alive
@@ -76,17 +88,43 @@ class UtilsController {
     }
 
 
-//    // Exception handler for invalid method arguments
-//    @ResponseStatus(HttpStatus.BAD_REQUEST)
-//    @ExceptionHandler(MethodArgumentNotValidException.class)
-//    Map<String, String> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-//        Map<String, String> errors = new HashMap<>();
-//        ex.getBindingResult().getAllErrors().forEach((error) -> {
-//            String fieldName = ((FieldError) error).getField();
-//            String errorMessage = error.getDefaultMessage();
-//            errors.put(fieldName, errorMessage);
-//        });
-//        return errors;
-//    }
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @PostMapping("/cameraParams")
+    def cameraParams(@RequestBody CameraParamsCommand cmd) {
+        def gv = new GeneralValidator(cmd, new CameraParamsCommandValidator())
+        BindingResult result = gv.validate()
 
+        if (result.hasErrors()) {
+            def retVal = new BadRequestResult(result)
+            return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
+        } else {
+            logService.cam.info("Getting parameters for camera at ${cmd.address}")
+            RestfulResponse response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params)
+
+            if (response.status != RestfulResponseStatusEnum.PASS) {
+                logService.cam.error "cameraParams: error: ${response.errorMsg}"
+                throw new NVRRestMethodException(response.errorMsg, "utils/cameraParams: Failed to get camera parameters ${response.errorMsg}: for camera ${cmd.address}")
+            } else
+                return response.responseObject
+        }
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @PostMapping("/setCameraParams")
+    def setCameraParams(@RequestBody SetCameraParamsCommand cmd) {
+        def gv = new GeneralValidator(cmd, new SetCameraParamsCommandValidator())
+        BindingResult result = gv.validate()
+        if (result.hasErrors()) {
+            def retVal = new BadRequestResult(result)
+            return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
+        } else {
+            RestfulResponse response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params, true)
+
+            if (response.status != RestfulResponseStatusEnum.PASS) {
+                logService.cam.error "setCameraParams: error: ${response.errorMsg}"
+                throw new NVRRestMethodException(response.errorMsg, "utils/setCameraParams")
+            } else
+                return response.responseObject
+        }
+    }
 }
