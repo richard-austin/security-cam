@@ -4,7 +4,6 @@ import com.securitycam.dao.RoleRepository
 import com.securitycam.dto.UserDto
 import com.securitycam.model.Role
 import com.securitycam.services.LogService
-import com.securitycam.services.OnvifService
 import com.securitycam.services.Sc_processesService
 import com.securitycam.services.UserService
 import jakarta.annotation.PreDestroy

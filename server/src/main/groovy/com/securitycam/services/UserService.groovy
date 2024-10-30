@@ -29,13 +29,11 @@ class UserService {
             throw new UserAlreadyExistException("There is an account with that username: " + accountDto.getUsername())
         }
         final User user = new User()
-
         user.setUsername(accountDto.getUsername())
-        def x = accountDto.getPassword()
-        user.setPassword(passwordEncoder.encode(accountDto.getPassword()))
-        user.setEmail(accountDto.getEmail())
-        user.setCloudAccount(accountDto.getCloudAccount())
-        user.setHeader(accountDto.getHeader())
+        user.setPassword(passwordEncoder.encode(accountDto.password))
+        user.setEmail(accountDto.email)
+        user.setCloudAccount(accountDto.cloudAccount)
+        user.setHeader(accountDto.header)
         user.setEnabled(true)
         user.setRoles(Collections.singletonList(roleRepository.findByName("ROLE_CLIENT")))
         return userRepository.save(user)

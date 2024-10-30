@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 public class UserDto {
     @NotNull
@@ -11,52 +13,32 @@ public class UserDto {
     @Pattern(regexp =  "^[a-zA-Z0-9](_(?!(.|_))|.(?!(_|.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$", message = "Incorrect characters for username")
     private String username;
 
+    @Setter
+    @Getter
     @Pattern(regexp = "^[A-Za-z0-9][A-Za-z0-9(){\\[1*£$\\\\\\]}=@~?^]{7,31}$", message = "Bad password format")
     private String password;
 
+    @Setter
+    @Getter
     @NotNull
     @Size(min = 1)
     private String matchingPassword;
 
-    @NotNull
+    @Setter
+    @Getter
+    @NotNull(message = "email is not nullable")
     @Size(min = 6, message = "{Size.userDto.email}")
     @Email(message = "Incorrect email format")
     private String email;
 
+    @Setter
     private boolean cloudAccount;
+    @Setter
+    @Getter
     private String header;
 
     public boolean getCloudAccount() {
         return cloudAccount;
-    }
-    public String getPassword() {
-        return password;
-    }
-    public String getMatchingPassword() {
-        return matchingPassword;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-    public String getHeader() {
-        return header;
-    }
-
-    public void setCloudAccount(boolean cloudAccount) {
-        this.cloudAccount = cloudAccount;
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    public void setMatchingPassword(String matchingPassword) {
-        this.matchingPassword = matchingPassword;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    public void setHeader(String header) {
-        this.header = header;
     }
 
     private Integer role;
@@ -73,5 +55,4 @@ public class UserDto {
                 ", role=" +
                 role + "]";
     }
-
 }
