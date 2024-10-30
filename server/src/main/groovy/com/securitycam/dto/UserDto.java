@@ -4,11 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class UserDto {
     @NotNull
     @Size(min = 5, max=30)
@@ -32,6 +28,35 @@ public class UserDto {
 
     public boolean getCloudAccount() {
         return cloudAccount;
+    }
+    public String getPassword() {
+        return password;
+    }
+    public String getMatchingPassword() {
+        return matchingPassword;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+    public String getHeader() {
+        return header;
+    }
+
+    public void setCloudAccount(boolean cloudAccount) {
+        this.cloudAccount = cloudAccount;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    public void setMatchingPassword(String matchingPassword) {
+        this.matchingPassword = matchingPassword;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public void setHeader(String header) {
+        this.header = header;
     }
 
     private Integer role;

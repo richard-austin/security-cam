@@ -25,12 +25,13 @@ class UserService {
     private PasswordEncoder passwordEncoder
 
     User registerNewUserAccount(final UserDto accountDto) {
-        if (userNameExists(accountDto.getEmail())) {
+        if (userNameExists(accountDto.getUsername())) {
             throw new UserAlreadyExistException("There is an account with that username: " + accountDto.getUsername())
         }
         final User user = new User()
 
         user.setUsername(accountDto.getUsername())
+        def x = accountDto.getPassword()
         user.setPassword(passwordEncoder.encode(accountDto.getPassword()))
         user.setEmail(accountDto.getEmail())
         user.setCloudAccount(accountDto.getCloudAccount())

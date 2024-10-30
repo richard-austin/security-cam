@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
@@ -53,12 +56,6 @@ public class SecSecurityConfig {
                     )
                     .logout(LogoutConfigurer::permitAll);
         }
-//        else {
-//            http
-//                    .csrf(AbstractHttpConfigurer::disable)
-//                    .authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
-//        }
-
         return http.build();
     }
 
@@ -90,18 +87,14 @@ public class SecSecurityConfig {
         return rememberMe;
     }
 
-//    @Bean
-//    RememberMeAuthenticationFilter rememberMeFilter() {
-//        return new RememberMeAuthenticationFilter(theAuthenticationManager, rememberMeServices());
-//    }
-//
-//    @Bean
-//    TokenBasedRememberMeServices rememberMeServices() {
-//        return new TokenBasedRememberMeServices("supersecret", userDetailsService);
-//    }
-//
-//    @Bean
-//    RememberMeAuthenticationProvider rememberMeAuthenticationProvider() {
-//        return new RememberMeAuthenticationProvider("springRocks");
-//    }
+    @Bean
+    public AuthenticationManager authenticationManager(
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+
+        return new ProviderManager(authenticationProvider);
+    }
 }
