@@ -144,4 +144,30 @@ class UtilsController {
             return result.responseObject
         }
     }
+
+    /**
+     * getVersion: Get the version number from application.yml config
+     * @return: The version strig
+     */
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @PostMapping("/getVersion")
+    def getVersion() {
+        ObjectCommandResponse response = utilsService.getVersion()
+        if (response.status != PassFail.PASS)
+            throw new NVRRestMethodException(response.error, "utils/getVersion")
+        else
+            response.responseObject
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
+    @PostMapping("/getOpenSourceInfo")
+    def getOpenSourceInfo() {
+        ObjectCommandResponse response = utilsService.getOpenSourceInfo()
+        if (response.status != PassFail.PASS)
+            throw new NVRRestMethodException(response.error, "utils/getOpenSourceInfo")
+        else
+            return response.response
+    }
+
+
 }

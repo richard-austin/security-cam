@@ -119,7 +119,7 @@ tasks.register('setVersion', Exec) {
     description = 'Sets the version.txt file with the current version from git describe'
     workingDir "$projectDir"
     executable "sh"
-    args = ['-c', 'mkdir -p version && git describe --tags --dirty | tr -d \'\\n\' > version/version.txt']
+    args = ['-c', 'mkdir -p version && git describe --tags --dirty | tr -d \'\\n\' > src/main/resources/version.txt']
 }
 
 tasks.register('buildDebFile', Exec) {

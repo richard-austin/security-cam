@@ -101,7 +101,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     if (logoff) {
       localStorage.setItem('message', "logoff");
       localStorage.removeItem('message');
-      window.location.href = 'logoff';
+      window.location.href = 'logout';
     }
   }
 

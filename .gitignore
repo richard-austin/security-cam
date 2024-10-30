@@ -1,2 +1,3 @@
 /xtrn-scripts-and-config/productKeyGen/generateProductKey.jar
 /.profileconfig.json
+/server/src/main/resources/version.txt

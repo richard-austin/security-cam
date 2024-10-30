@@ -83,7 +83,7 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
                 this.reporting.errorMessage = new HttpErrorResponse({error: "Unknown message from server"});
             }
             if (msgObj.message === 'logoff' && this.isGuest) {
-              window.location.href = 'logoff';
+              window.location.href = 'logout';
               console.log(message.body);
             }
           }

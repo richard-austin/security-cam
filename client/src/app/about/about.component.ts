@@ -17,7 +17,7 @@ export class AboutComponent implements OnInit {
   }
 
   getOnvifUrl() {
-    return this._baseUrl.getLink('assets', 'onvif.png')
+    return this._baseUrl.getLink('assets/images', 'onvif.png')
   }
 
   ngOnInit(): void {

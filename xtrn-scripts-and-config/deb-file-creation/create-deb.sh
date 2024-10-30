@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export VERSION
-VERSION=$(< ../../server/version/version.txt)
+VERSION=$(< ../../server/src/main/resources/version.txt)
 
 rm -r security-cam_*_arm64
 
