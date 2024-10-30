@@ -119,6 +119,9 @@ class UtilsController {
             return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
         } else {
             RestfulResponse response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params, true)
+            // The ZXTech camera name does not get changed when the commands are all sent in one single batch
+            if(response.status == RestfulResponseStatusEnum.PASS && cmd.params2 != "")
+                response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params2, true)
 
             if (response.status != RestfulResponseStatusEnum.PASS) {
                 logService.cam.error "setCameraParams: error: ${response.errorMsg}"

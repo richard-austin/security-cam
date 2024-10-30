@@ -28,6 +28,7 @@ class SetCameraParamsCommandValidator implements Validator {
                 if (!cameraTypeValues.contains(target.cameraType))
                     errors.rejectValue("cameraType", "cameraType has an invalid value (${target.cameraType})")
             }
+            target.params = target.params2 = ""
 
             if (!infraredstatValues.contains(target.infraredstat))
                 errors.rejectValue("infraredstat", "infraredstat has an invalid value (${target.infraredstat})")
@@ -51,10 +52,10 @@ class SetCameraParamsCommandValidator implements Validator {
                 if (target.getCameraType() == cameraType.zxtechMCW5B10X.ordinal() && !target.reboot) {
                     target.params = 'cmd=setlampattrex'
                     target.params += "&-lamp_mode=${target.lamp_mode}"
-                    target.params += "&cmd=setimageattr"
-                    target.params += "&-wdr=${target.wdr}"
-                    target.params += "&cmd=setoverlayattr&-region=0&cmd=setoverlayattr&-region=1&-show=1"
-                    target.params += "&-name=${target.cameraName}&-place=0"
+                    target.params2 = "cmd=setimageattr"
+                    target.params2 += "&-wdr=${target.wdr}"
+                    target.params2 += "&cmd=setoverlayattr&-region=0&cmd=setoverlayattr&-region=1&-show=1"
+                    target.params2 += "&-name=${target.cameraName}&-place=0"
                 }
             }
 

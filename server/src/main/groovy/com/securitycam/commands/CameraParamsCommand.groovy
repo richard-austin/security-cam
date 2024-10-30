@@ -7,4 +7,5 @@ class CameraParamsCommand {
     String address
     String uri
     String params
+    String params2
 }
