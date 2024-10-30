@@ -130,4 +130,18 @@ class UtilsController {
                 return response.responseObject
         }
     }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_GUEST'])
+    @PostMapping("/getUserAuthorities")
+    def getUserAuthorities() {
+        ObjectCommandResponse result
+        result = utilsService.getUserAuthorities()
+        if (result.status != PassFail.PASS) {
+            logService.cam.error "getUserAuthorities: error: ${result.error}"
+            throw new NVRRestMethodException(result.error, "utils/getUserAuthorities")
+        } else {
+            logService.cam.info("getUserAuthorities: success")
+            return result.responseObject
+        }
+    }
 }

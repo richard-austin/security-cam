@@ -12,6 +12,7 @@ import org.springframework.core.env.Environment
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.RequestBody
@@ -221,5 +222,22 @@ class UtilsService {
             }
         }
     }
-
+    ObjectCommandResponse getUserAuthorities() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            if(SecurityContextHolder.getContext().getAuthentication() == null) {
+                def ex = new Expando()
+                ex.setProperty('authority', 'ROLE_CLIENT')
+                result.responseObject = [ex.properties]  // In development/debug mode
+            }
+            else  // Logged in
+                result.responseObject = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+        }
+        catch (Exception ex) {
+            logService.cam.error("${ex.getClass().getName()} in getUserAuthorities: ${ex.getCause()} ${ex.getMessage()}")
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
 }

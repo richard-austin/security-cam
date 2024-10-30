@@ -1,13 +1,11 @@
 package com.securitycam.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
 import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import org.apache.cxf.helpers.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.stereotype.Service
 import com.securitycam.enums.PassFail
 
@@ -47,13 +45,10 @@ class CamService {
         Integer camType = null
         ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
         if (getCamerasResult.status == PassFail.PASS) {
-            JSONObject jo = (JSONObject) getCamerasResult.getResponseObject()
-            def keys = jo.keys()
-            while (keys.hasNext()) {
-                def key = keys.next()
-                Camera camera = (Camera) jo.get(key.toString())
-                if (Objects.equals(camera.getAddress(), cameraHost))
-                    camType = camera.cameraParamSpecs.camType
+
+            (getCamerasResult.getResponseObject() as Map<String, Camera>).forEach (k, v) -> {
+                if (v.address == cameraHost)
+                    camType = v.cameraParamSpecs.camType
             }
         }
         return camType
