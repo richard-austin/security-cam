@@ -19,12 +19,8 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     LogService logService
 
     @Override
-    protected void additionalAuthenticationChecks(UserDetails userDetails,
-                                                  UsernamePasswordAuthenticationToken authentication)
-            throws AuthenticationException {
-
+    protected void additionalAuthenticationChecks(UserDetails userDetails,  UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
         super.additionalAuthenticationChecks(userDetails, authentication)
-
         Object details = authentication.details
 
         if(details != null) {  // UserDetails are null when change password used
@@ -34,13 +30,19 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
                         "AbstractUserDetailsAuthenticationProvider.badCredentials",
                         "Bad credentials"))
             }
+            if(!userDetails.isCredentialsNonExpired()) {
+                logService.cam.debug("User credentials for ${userDetails.username} have expired")
+                throw new BadCredentialsException(messages.getMessage(
+                        "AbstractUserDetailsAuthenticationProvider.badCredentials",
+                        "User credentials have expired"))
+            }
             TwoFactorAuthenticationDetails tfad = details
             String userName = userDetails.getUsername()
             if (getIsCloudAccount(userName) && tfad.xAuthToken != requiredXAuthToken(userName)) {
                 logService.cam.debug("Authentication failed: authtoken incorrect for Cloud account")
                 throw new BadCredentialsException(messages.getMessage(
                         "AbstractUserDetailsAuthenticationProvider.badCredentials",
-                        "Bad credentials"))
+                        "Bad credentials for cloud account"))
             }
         }
         else if(getIsCloudAccount(userDetails.getUsername()))
@@ -56,7 +58,7 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     boolean getIsCloudAccount(String userName)
     {
         try {
-            User user = userDetailsService.loadUserByUsername(userName)
+            User user = userDetailsService.loadUserByUsername(userName) as User
 
             return user.cloudAccount
         }
@@ -71,7 +73,7 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     String requiredXAuthToken(String userName)
     {
         try {
-            User user = userDetailsService.loadUserByUsername(userName)
+            User user = userDetailsService.loadUserByUsername(userName) as User
 
             return user.header
         }

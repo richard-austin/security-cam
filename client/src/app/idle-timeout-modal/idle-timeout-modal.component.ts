@@ -18,7 +18,7 @@ export class IdleTimeoutModalComponent implements OnInit {
 
   onClose(): void {
     this.dialogRef.close();
-    window.location.href = 'logoff';
+    window.location.href = 'logout';
   }
 
   onContinue() {

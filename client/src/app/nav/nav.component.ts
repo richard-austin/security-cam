@@ -48,12 +48,14 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reporting.errorMessage = reason;
       });
 
-    this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
-        this.utilsService.activeMQTransportActive = status.transportActive;
-      },
-      reason => {
-        this.reporting.errorMessage = reason;
-      });
+    if (!this.utilsService.isGuestAccount) {
+      this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
+            this.utilsService.activeMQTransportActive = status.transportActive;
+          },
+          reason => {
+            this.reporting.errorMessage = reason;
+          });
+    }
   }
 
   setVideoStream(cam: Camera, stream: Stream): void {
@@ -222,7 +224,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
           if (message.body) {
             let msgObj = JSON.parse(message.body);
             if (msgObj.message === 'logoff' && this.isGuest) {
-              window.location.href = 'logoff';
+              window.location.href = 'logout';
               console.log(message.body);
             }
           }
@@ -287,7 +289,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     window.onstorage = (ev: StorageEvent) => {
       let val = ev.newValue;
       if (val === 'logoff') {
-        location.href = 'logoff';
+        location.href = 'logout';
       }
     };
   }

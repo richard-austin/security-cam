@@ -26,6 +26,10 @@ public class UserDto {
 
     @Setter
     @Getter
+    private boolean credentialsNonExpired;
+
+    @Setter
+    @Getter
     @NotNull(message = "email is not nullable")
     @Size(min = 6, message = "{Size.userDto.email}")
     @Email(message = "Incorrect email format")
@@ -41,6 +45,7 @@ public class UserDto {
         return cloudAccount;
     }
 
+    @Getter
     private Integer role;
 
     public @NotNull @Size(min = 5, max = 30) String getUsername() {

@@ -2,6 +2,8 @@ package com.securitycam.controllers
 
 import com.securitycam.commands.ChangeEmailCommand
 import com.securitycam.commands.ResetPasswordCommand
+import com.securitycam.commands.SetupGuestAccountCommand
+import com.securitycam.dao.UserRepository
 import com.securitycam.enums.PassFail
 import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.ObjectCommandResponse
@@ -12,8 +14,8 @@ import com.securitycam.validators.BadRequestResult
 import com.securitycam.validators.ChangeEmailCommandValidator
 import com.securitycam.validators.GeneralValidator
 import com.securitycam.validators.ResetPasswordCommandValidator
+import com.securitycam.validators.SetupGuestAccountCommandValidator
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -28,6 +30,10 @@ class UserController {
 
     @Autowired
     UserAdminService userAdminService
+
+    @Autowired
+    UserRepository userRepository
+
     @Autowired
     LogService logService
 
@@ -87,6 +93,28 @@ class UserController {
             } else {
                 logService.cam.info("changeEmail: success")
                 return ""
+            }
+        }
+    }
+
+    @Secured(['ROLE_CLIENT'])
+    @PostMapping("/setupGuestAccount")
+    def setupGuestAccount(@RequestBody SetupGuestAccountCommand cmd) {
+        ObjectCommandResponse resp
+        def gv = new GeneralValidator(cmd, new SetupGuestAccountCommandValidator(userRepository))
+        def result = gv.validate()
+        if (result.hasErrors()) {
+            def retVal = new BadRequestResult(result)
+            logService.cam.error "setupGuestAccount: Validation error: "
+            return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
+        } else {
+            resp = userAdminService.setupGuestAccount(cmd)
+
+            if (resp.status != PassFail.PASS)
+                throw new NVRRestMethodException(resp.error, "user/setupGuestAccount", "See logs")
+            else {
+                logService.cam.info("setupGuestAccount: (= ${resp.responseObject}) success")
+                return resp.responseObject
             }
         }
     }

@@ -13,5 +13,7 @@ interface MyUserDetails extends UserDetails, Serializable {
     boolean getCloudAccount()
     String getHeader()
     boolean getEnabled()
+    @Override
+    boolean isCredentialsNonExpired()
 
 }

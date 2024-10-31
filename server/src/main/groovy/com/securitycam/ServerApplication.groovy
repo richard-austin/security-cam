@@ -47,21 +47,30 @@ class ServerApplication {
             if(!userService.roleExists('ROLE_CLOUD'))
                 userService.addRole('ROLE_CLOUD')
 
+            if(!userService.roleExists('ROLE_GUEST'))
+                userService.addRole('ROLE_GUEST')
+
             if(!userService.userNameExists('austin')) {
                 ValidatorFactory factory = Validation.buildDefaultValidatorFactory()
                 Validator validator = factory.getValidator()
 
                 Role role = roleRepository.findByName("ROLE_CLIENT")
                 if(role != null) {
-                    var user = new UserDto(username: "austin", password: "password", matchingPassword: "password", email: "a@b.com", cloudAccount: false, role: role.getId())
+                    var user = new UserDto(username: "austin", password: "password", matchingPassword: "password", credentialsNonExpired: true, email: "a@b.com", cloudAccount: false, role: role.getId())
                     Set<ConstraintViolation<UserDto>> violations = validator.validate(user)
                     userService.registerNewUserAccount(user)
                 }
             }
             if(!userService.userNameExists('cloud')) {
-                Role role = roleRepository.findByName("ROLE_CLIENT")
+                Role role = roleRepository.findByName("ROLE_CLOUD")
                 if (role != null)
-                    userService.registerNewUserAccount(new UserDto(username: "cloud", password: "password", matchingPassword: "password", email: "a@c.com", cloudAccount: true, header: "123123123", role: role.getId()))
+                    userService.registerNewUserAccount(new UserDto(username: "cloud", password: "DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU", credentialsNonExpired: true, header: "7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!",  matchingPassword: "password", email: "a@c.com", cloudAccount: true, role: role.getId()))
+            }
+
+            if(!userService.userNameExists('guest')) {
+                Role role = roleRepository.findByName("ROLE_GUEST")
+                if (role != null)
+                    userService.registerNewUserAccount(new UserDto(username: "guest", password: "", matchingPassword: "", credentialsNonExpired: false, email: "a@c.com", cloudAccount: false, header: "", role: role.getId()))
             }
         }
     }

@@ -43,6 +43,7 @@ public class User implements MyUserDetails {
     private String password;
 
     private boolean enabled;
+    private boolean credentialsNonExpired;
 
     private String secret;
 
@@ -52,11 +53,12 @@ public class User implements MyUserDetails {
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "username"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Collection<Role> roles;
 
-    public User(String username, String password, boolean enabled, boolean cloudAccount, String header, String secret) {
+    public User(String username, String password, boolean enabled, boolean credentialsNonExpired, boolean cloudAccount, String header, String secret) {
         super();
         this.username = username;
         this.password = password;
         this.enabled = enabled;
+        this.credentialsNonExpired = credentialsNonExpired;
         this.cloudAccount = cloudAccount;
         this.header = header;
         this.secret = secret;
@@ -66,6 +68,7 @@ public class User implements MyUserDetails {
         super();
         this.secret = Base32.random();
         this.enabled = false;
+        this.credentialsNonExpired = false;
     }
 
     public String getEmail() {
@@ -105,6 +108,15 @@ public class User implements MyUserDetails {
     @Override
     public boolean getEnabled() {
         return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return this.credentialsNonExpired;
+    }
+
+    public void setCredentialsNonExpired(final boolean credentialsNonExpired) {
+        this.credentialsNonExpired = credentialsNonExpired;
     }
 
     public void setHeader(final String header) {

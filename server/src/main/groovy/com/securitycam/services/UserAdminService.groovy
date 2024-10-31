@@ -2,11 +2,14 @@ package com.securitycam.services
 
 import com.securitycam.commands.ChangeEmailCommand
 import com.securitycam.commands.ResetPasswordCommand
+import com.securitycam.commands.SetupGuestAccountCommand
 import com.securitycam.dao.UserRepository
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.model.User
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.configurationprocessor.json.JSONObject
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
@@ -23,6 +26,13 @@ class UserAdminService {
 
     @Autowired
     PasswordEncoder passwordEncoder
+    @Autowired
+    SimpMessagingTemplate brokerMessagingTemplate
+
+    final String logoff = new JSONObject()
+            .put("message", "logoff")
+            .toString()
+
 
     ObjectCommandResponse resetPassword(ResetPasswordCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
@@ -142,6 +152,32 @@ class UserAdminService {
         }
         return result
     }
+
+    ObjectCommandResponse setupGuestAccount(SetupGuestAccountCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            User u = userRepository.findByUsernameAndCloudAccount('guest', false)
+            u.enabled = cmd.enabled
+            if (cmd.password != "" && cmd.password != null) {
+                u.setPassword(passwordEncoder.encode(cmd.password))
+
+            }
+            u.credentialsNonExpired = true
+            userRepository.save(u)
+
+            // Kick off any guest users who are logged in
+            // TODO: This will also kick off non-guest users, it should be changed to specify guest users only
+            if (!cmd.enabled)
+                brokerMessagingTemplate.convertAndSend("/topic/logoff", logoff)
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in setupGuestAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
 
     ObjectCommandResponse changeEmail(ChangeEmailCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()
