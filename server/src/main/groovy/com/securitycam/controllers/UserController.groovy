@@ -1,5 +1,6 @@
 package com.securitycam.controllers
 
+import com.securitycam.commands.ChangeEmailCommand
 import com.securitycam.commands.ResetPasswordCommand
 import com.securitycam.enums.PassFail
 import com.securitycam.error.NVRRestMethodException
@@ -8,6 +9,7 @@ import com.securitycam.security.TwoFactorAuthenticationProvider
 import com.securitycam.services.LogService
 import com.securitycam.services.UserAdminService
 import com.securitycam.validators.BadRequestResult
+import com.securitycam.validators.ChangeEmailCommandValidator
 import com.securitycam.validators.GeneralValidator
 import com.securitycam.validators.ResetPasswordCommandValidator
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,6 +63,29 @@ class UserController {
         } else {
             logService.cam.info("getEmail: success")
             return result.responseObject
+        }
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @PostMapping("/changeEmail")
+    def changeEmail(@RequestBody ChangeEmailCommand cmd) {
+        ObjectCommandResponse resp
+
+        def gv = new GeneralValidator(cmd, new ChangeEmailCommandValidator(authenticationManager))
+        def result = gv.validate()
+
+        if (result.hasErrors()) {
+            def retVal = new BadRequestResult(result)
+            logService.cam.error "changeEmail: Validation error: "
+            return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
+        } else {
+            resp = userAdminService.changeEgetEmail and ChangeEmailmail(cmd)
+            if (resp.status != PassFail.PASS) {
+                throw new NVRRestMethodException(resp.error, "user/changeEmail", "See logs")
+            } else {
+                logService.cam.info("changeEmail: success")
+                return ""
+            }
         }
     }
 

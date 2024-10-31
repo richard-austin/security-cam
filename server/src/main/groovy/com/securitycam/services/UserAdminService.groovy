@@ -1,5 +1,6 @@
 package com.securitycam.services
 
+import com.securitycam.commands.ChangeEmailCommand
 import com.securitycam.commands.ResetPasswordCommand
 import com.securitycam.dao.UserRepository
 import com.securitycam.enums.PassFail
@@ -21,9 +22,6 @@ class UserAdminService {
     UserRepository userRepository
 
     @Autowired
-    UserRepository userRepository1
-
-    @Autowired
     PasswordEncoder passwordEncoder
 
     ObjectCommandResponse resetPassword(ResetPasswordCommand cmd) {
@@ -34,12 +32,12 @@ class UserAdminService {
             if (principal) {
                 String userName = auth.getName()
 
-                User user = userRepository1.findByUsername(userName)
+                User user = userRepository.findByUsername(userName)
                 user.setPassword(passwordEncoder.encode(cmd.getNewPassword()))
-                userRepository1.save(user)
+                userRepository.save(user)
             }
             else
-                throw new Exception("Could not get principal")
+                throw new Exception("Could not get principal for this user")
         }
         catch (Exception ex) {
             logService.cam.error("Exception in resetPassword: " + ex.getCause() + ' ' + ex.getMessage())
@@ -124,5 +122,46 @@ class UserAdminService {
         }
         return result
     }
+    ObjectCommandResponse getEmail() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication()
+            def principal = auth.getPrincipal()
+            if(principal) {
+                String userName = auth.getName()
+                User user = userRepository.findByUsername(userName)
+                result.responseObject = [email: user.getEmail()]
+            }
+            else
+                throw new Exception("Could not get principal for this user")
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in getEmail: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
 
+    ObjectCommandResponse changeEmail(ChangeEmailCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication()
+            def principal = auth.getPrincipal()
+            if(principal) {
+                String userName = auth.getName()
+                User user = userRepository.findByUsername(userName)
+                user.setEmail(cmd.getNewEmail())
+                userRepository.save(user)
+            }
+            else
+                throw new Exception("Could not get principal for this user")
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in changeEmail: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
 }
