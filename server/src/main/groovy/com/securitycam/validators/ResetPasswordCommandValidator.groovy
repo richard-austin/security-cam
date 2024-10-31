@@ -1,6 +1,7 @@
 package com.securitycam.validators
 
 import com.securitycam.commands.ResetPasswordCommand
+import com.securitycam.security.TwoFactorAuthenticationProvider
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -10,11 +11,11 @@ import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 
 class ResetPasswordCommandValidator implements Validator {
-    ResetPasswordCommandValidator(AuthenticationManager authenticationManager) {
+    ResetPasswordCommandValidator(TwoFactorAuthenticationProvider authenticationManager) {
         this.authenticationManager = authenticationManager
     }
 
-    AuthenticationManager authenticationManager
+    TwoFactorAuthenticationProvider authenticationManager
 
     @Override
     boolean supports(Class<?> clazz) {

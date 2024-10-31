@@ -4,6 +4,7 @@ import com.securitycam.commands.ResetPasswordCommand
 import com.securitycam.enums.PassFail
 import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.ObjectCommandResponse
+import com.securitycam.security.TwoFactorAuthenticationProvider
 import com.securitycam.services.LogService
 import com.securitycam.services.UserAdminService
 import com.securitycam.validators.BadRequestResult
@@ -27,7 +28,7 @@ class UserController {
     @Autowired
     LogService logService
     @Autowired
-    AuthenticationManager authenticationManager
+    TwoFactorAuthenticationProvider authenticationManager
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @PostMapping("/changePassword")
