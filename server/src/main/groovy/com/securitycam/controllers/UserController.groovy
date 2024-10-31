@@ -13,10 +13,10 @@ import com.securitycam.validators.ChangeEmailCommandValidator
 import com.securitycam.validators.GeneralValidator
 import com.securitycam.validators.ResetPasswordCommandValidator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -25,11 +25,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/user")
 class UserController {
+
     @Autowired
     UserAdminService userAdminService
     @Autowired
     LogService logService
-    @Autowired
+
+    @Autowired()
     TwoFactorAuthenticationProvider authenticationManager
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
@@ -79,7 +81,7 @@ class UserController {
             logService.cam.error "changeEmail: Validation error: "
             return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
         } else {
-            resp = userAdminService.changeEgetEmail and ChangeEmailmail(cmd)
+            resp = userAdminService.changeEmail(cmd)
             if (resp.status != PassFail.PASS) {
                 throw new NVRRestMethodException(resp.error, "user/changeEmail", "See logs")
             } else {

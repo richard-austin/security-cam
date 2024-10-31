@@ -22,12 +22,9 @@ import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 @Configuration
-@ConditionalOnProperty(prefix="spring-security", name="enabled", havingValue="true")
 public class SecSecurityConfig {
     @Value("${spring-security.enabled}")
      boolean enabled;
-//    @Autowired
-//    UserRepository userRepository;
     @Autowired
     private MyUserDetailsService userDetailsService;
 

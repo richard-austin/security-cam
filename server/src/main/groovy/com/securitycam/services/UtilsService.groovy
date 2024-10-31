@@ -2,6 +2,7 @@ package com.securitycam.services
 
 import com.securitycam.audiobackchannel.RtspClient
 import com.securitycam.commands.StartAudioOutCommand
+import com.securitycam.configuration.Config
 import com.securitycam.controllers.CameraAdminCredentials
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
@@ -10,8 +11,6 @@ import org.intellij.lang.annotations.Language
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.core.env.Environment
-import org.springframework.core.io.Resource
-import org.springframework.http.ResponseEntity
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.core.context.SecurityContextHolder
@@ -21,6 +20,14 @@ import org.springframework.util.ResourceUtils
 import org.springframework.web.bind.annotation.RequestBody
 
 import java.nio.charset.StandardCharsets
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.attribute.GroupPrincipal
+import java.nio.file.attribute.PosixFileAttributeView
+import java.nio.file.attribute.UserPrincipalLookupService
 import java.util.concurrent.ConcurrentLinkedQueue
 
 class Temperature {
@@ -59,6 +66,9 @@ class UtilsService {
 
     @Autowired
     SimpMessagingTemplate brokerMessagingTemplate
+
+    @Autowired
+    Config config
 
     Queue<byte[]> audioQueue = new ConcurrentLinkedQueue<>()
     public static final passwordRegex = /^[A-Za-z0-9][A-Za-z0-9(){\[1*£$\\\]}=@~?^]{7,31}$/
@@ -360,6 +370,44 @@ class UtilsService {
             logService.cam.error("Exception in getOpenSourceInfo: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    /**
+     * setIP: Set the file myip to contain our current public ip address.
+     * @return: Our public ip address
+     */
+    ObjectCommandResponse setIP() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            InputStream is = new URI("https://api.ipify.org").toURL().openStream()
+            Scanner s = new Scanner(is, "UTF-8").useDelimiter("\\A")
+
+            String baseDir = config.camerasHomeDirectory
+            Path myipFile = Paths.get(baseDir as String, 'myip')
+
+            String myIp = s.next()
+            //Write the ip address to the file
+            BufferedWriter writer = new BufferedWriter(new FileWriter(myipFile.toString()))
+            writer.write(myIp)
+            writer.close()
+            s.close()
+            is.close()
+            result.responseObject = new MyIP(myIp)
+
+            // Make the myip file a member of the security-cam group
+            String secCam = "security-cam"
+            UserPrincipalLookupService lookupService = FileSystems.getDefault()
+                    .getUserPrincipalLookupService()
+            GroupPrincipal group = lookupService.lookupPrincipalByGroupName(secCam)
+            Files.getFileAttributeView(myipFile, PosixFileAttributeView.class,
+                    LinkOption.NOFOLLOW_LINKS).setGroup(group)
+        }
+        catch (IOException e) {
+            logService.cam.error "${e.getClass().getName()} in setIP: ${e.getMessage()}"
+            result.status = PassFail.FAIL
+            result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
         }
         return result
     }
