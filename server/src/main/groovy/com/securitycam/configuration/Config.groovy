@@ -14,6 +14,24 @@ class Motion {
 }
 
 @Configuration
+@ConfigurationProperties(prefix = "nvrwebserver")
+class NVRWebServer {
+    int port
+}
+
+@Configuration
+@ConfigurationProperties(prefix = "cloudproxy")
+class CloudProxy {
+    boolean enabled
+    String productKeyPath
+    String cloudActiveMQUrl
+    String activeMQInitQueue
+    String webServerForCloudProxyHost
+    int webServerForCloudProxyPort
+    String logLevel
+}
+
+@Configuration
 @ConfigurationProperties(prefix = "app")
 class Config {
     String camerasHomeDirectory
@@ -25,4 +43,10 @@ class Config {
 
     @Autowired
     Motion motion
+
+    @Autowired
+    NVRWebServer nvrWebServer
+
+    @Autowired
+    CloudProxy cloudProxy
 }

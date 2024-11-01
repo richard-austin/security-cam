@@ -1,28 +1,16 @@
 package com.securitycam.commands
 
 import com.securitycam.validators.IsBoolean
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
 
 class SetUpWifiCommand {
-
-    SetUpWifiCommand() {
-
-    }
-
+    @NotNull
+    @NotEmpty
     String ssid
 
     String password
 
-    Boolean isEnabled
-
-    String getSsid() {
-        return ssid;
-    }
-
-    String getPassword() {
-        return password;
-    }
-
-    boolean GetIsEnabled() {
-        return isEnabled;
-    }
+    @IsBoolean
+    boolean isCloud = true
  }
