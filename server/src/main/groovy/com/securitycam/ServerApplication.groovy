@@ -34,6 +34,9 @@ class ServerApplication {
         SpringApplication.run(ServerApplication, args)
     }
 
+    @Autowired
+    LogService logService
+
 
 //    @Bean
 //    ApplicationRunner applicationRunner(OnvifService onvifService/*Environment environment*/) {
@@ -47,6 +50,9 @@ class ServerApplication {
 //            logService.cam.info("Started NVR services")
 //        }
 //    }
+
+    @Autowired
+    Sc_processesService sc_processesService
 
     @PreDestroy
     void onExit() {
