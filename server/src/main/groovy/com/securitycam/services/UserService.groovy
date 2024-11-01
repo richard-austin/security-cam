@@ -7,14 +7,12 @@ import com.securitycam.error.UserAlreadyExistException
 import com.securitycam.model.Role
 import com.securitycam.model.User
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-@ConditionalOnProperty(prefix="spring-security", name="enabled", havingValue="true")
 class UserService {
     @Autowired
     UserRepository userRepository

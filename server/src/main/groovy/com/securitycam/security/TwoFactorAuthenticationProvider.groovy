@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-@ConditionalOnProperty(prefix="spring-security", name="enabled", havingValue="true")
 class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     @Autowired
     LogService logService

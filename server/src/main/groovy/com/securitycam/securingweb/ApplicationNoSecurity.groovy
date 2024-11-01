@@ -15,7 +15,6 @@ class ApplicationNoSecurity {
     LogService logService
     boolean enabled  // Set in application(-dev).properties
     @Bean
-//    @ConditionalOnProperty(name = "spring-security.enabled", havingValue = "false", matchIfMissing = false)
     WebSecurityCustomizer webSecurityCustomizer() {
         if(!enabled) {
             logService.cam.info("============================================")
@@ -23,14 +22,13 @@ class ApplicationNoSecurity {
             logService.cam.info("============================================")
             return (web) ->
                     web.ignoring()
-                    .requestMatchers(new AntPathRequestMatcher("/**"))
+                            .requestMatchers(new AntPathRequestMatcher("/**"))
         }
         else {
             logService.cam.info("++++++++++++++++++++++++++++++++++++++++++++")
             logService.cam.info("Spring Security is enabled")
             logService.cam.info("++++++++++++++++++++++++++++++++++++++++++++")
             return (web) -> web.ignoring()
-
         }
     }
 }
