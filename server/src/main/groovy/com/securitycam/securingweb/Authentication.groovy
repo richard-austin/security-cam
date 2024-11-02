@@ -36,17 +36,6 @@ class Authentication {
             if(!userService.roleExists('ROLE_GUEST'))
                 userService.addRole('ROLE_GUEST')
 
-//            if(!userService.userNameExists('austin')) {
-//                ValidatorFactory factory = Validation.buildDefaultValidatorFactory()
-//                Validator validator = factory.getValidator()
-
-//                Role role = roleRepository.findByName("ROLE_CLIENT")
-//                if(role != null) {
-//                    var user = new UserDto(username: "austin", password: "password", matchingPassword: "password", credentialsNonExpired: true, email: "a@b.com", cloudAccount: false, role: role.getId())
-//                    Set<ConstraintViolation<UserDto>> violations = validator.validate(user)
-//                    userService.registerNewUserAccount(user)
-//                }
-//            }
             if(!userService.userNameExists('cloud')) {
                 Role role = roleRepository.findByName("ROLE_CLOUD")
                 if (role != null)

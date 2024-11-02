@@ -199,6 +199,7 @@ class UserController {
     }
 
     @Secured(['ROLE_CLOUD'])
+    @PostMapping("/hasLocalAccount")
     def hasLocalAccount() {
         ObjectCommandResponse result = userAdminService.hasLocalAccount()
 
