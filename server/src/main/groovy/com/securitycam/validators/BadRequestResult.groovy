@@ -18,4 +18,24 @@ class BadRequestResult extends HashMap<String, String>{
             }
         }
     }
+
+    @Override
+    String toString() {
+        StringBuilder errors = new StringBuilder()
+        errors.append("{")
+        boolean first = true;
+        results.allErrors.forEach {
+            if (first) {
+                errors.append(', ')
+                first = false
+            }
+            if (it instanceof FieldError) {
+                FieldError fe = it
+                errors.append(fe.field + ": ")
+                errors.append(fe.code)
+            }
+        }
+        errors.append("}")
+        return errors.toString()
+    }
 }

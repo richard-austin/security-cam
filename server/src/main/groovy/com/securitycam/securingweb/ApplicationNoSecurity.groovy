@@ -21,8 +21,7 @@ class ApplicationNoSecurity {
             logService.cam.info("Spring Security is DISABLED!!!")
             logService.cam.info("============================================")
             return (web) ->
-                    web.ignoring()
-                            .requestMatchers(new AntPathRequestMatcher("/**"))
+                    web.ignoring().requestMatchers("/**")
         }
         else {
             logService.cam.info("++++++++++++++++++++++++++++++++++++++++++++")

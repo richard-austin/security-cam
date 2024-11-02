@@ -87,7 +87,7 @@ export class UtilsService {
   private _isAdmin: boolean = false;
   private _hasLocalAccount: boolean = false;
   private _hasActiveMQCreds!: boolean;
-  public readonly passwordRegex: RegExp = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/);
+  public readonly passwordRegex: RegExp = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/);
   public readonly activeMQPasswordRegex: RegExp = new RegExp(/^$|^[A-Za-z0-9]{20}$/);
   public readonly hostNameRegex =  /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/
   public readonly ipV4RegEx = /^([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))\.([0-9]|[1-9][0-9]|1([0-9][0-9])|2([0-4][0-9]|5[0-5]))$/

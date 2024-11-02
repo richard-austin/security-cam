@@ -1,8 +1,10 @@
 package com.securitycam.controllers
 
 import com.securitycam.commands.ChangeEmailCommand
+import com.securitycam.commands.CreateOrUpdateAccountCommand
 import com.securitycam.commands.ResetPasswordCommand
 import com.securitycam.commands.SetupGuestAccountCommand
+import com.securitycam.dao.RoleRepository
 import com.securitycam.dao.UserRepository
 import com.securitycam.enums.PassFail
 import com.securitycam.error.NVRRestMethodException
@@ -10,13 +12,16 @@ import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.security.TwoFactorAuthenticationProvider
 import com.securitycam.services.LogService
 import com.securitycam.services.UserAdminService
+import com.securitycam.services.UtilsService
 import com.securitycam.validators.BadRequestResult
 import com.securitycam.validators.ChangeEmailCommandValidator
+import com.securitycam.validators.CreateOrUpdateAccountCommandValidator
 import com.securitycam.validators.GeneralValidator
 import com.securitycam.validators.ResetPasswordCommandValidator
 import com.securitycam.validators.SetupGuestAccountCommandValidator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.PostMapping
@@ -33,6 +38,10 @@ class UserController {
 
     @Autowired
     UserRepository userRepository
+    @Autowired
+    RoleRepository roleRepository
+    @Autowired
+    UtilsService utilsService
 
     @Autowired
     LogService logService
@@ -137,5 +146,67 @@ class UserController {
             throw new NVRRestMethodException(result.error, "user/guestAccountEnabled", "See logs")
         else
             return  ResponseEntity.ok(result.responseObject)
+    }
+
+    @Secured(['ROLE_CLOUD'])
+    def createOrUpdateAccount(CreateOrUpdateAccountCommand cmd) {
+        ObjectCommandResponse result
+        def gv = new GeneralValidator(cmd, new CreateOrUpdateAccountCommandValidator(utilsService, userAdminService, userRepository, roleRepository))
+        def results = gv.validate()
+        if (results.hasErrors()) {
+            def retVal = new BadRequestResult(results)
+            logService.cam.error "createOrUpdateAccount: Validation error: ${retVal.toString()}"
+            return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
+        } else {
+            result = userAdminService.createOrUpdateAccount(cmd)
+            if (result.status != PassFail.PASS) {
+                throw new NVRRestMethodException(result.error, "user/createOrUpdateAccount", "See logs")
+            } else {
+                logService.cam.info("createOrUpdateAccount: success")
+                return ResponseEntity.ok("")
+            }
+        }
+    }
+
+    /**
+     * createOrUpdateAccountLocally: Unsecured to enable account creation without being logged in.
+     *                       nginx requires a session to allow access to this url to prevent
+     *                       unauthenticated external access. It is accessed locally on tomcats port 8080.
+     *
+     * @param cmd: Contains username, password, email, updateExisting
+     */
+    @PostMapping("createOrUpdateAccountLocally")
+    def createOrUpdateAccountLocally(@RequestBody CreateOrUpdateAccountCommand cmd){
+        def gv = new GeneralValidator(cmd, new CreateOrUpdateAccountCommandValidator(utilsService, userAdminService, userRepository, roleRepository))
+        def result = gv.validate()
+        if(result.hasErrors()) {
+            def retVal = new BadRequestResult(result)
+            logService.cam.error "createOrUpdateAccountLocally: Validation error: "
+            return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
+        }
+        else
+            createOrUpdateAccount(cmd)
+    }
+
+    /**
+     * checkForAccountLocally: Unsecured to enable account creation without being logged in.
+     *                       nginx requires a session to allow access to this url to prevent
+     *                       unauthenticated external access. It is accessed locally through tomcats port 8080.
+     */
+    @PostMapping("/checkForAccountLocally")
+    def checkForAccountLocally() {
+        hasLocalAccount()
+    }
+
+    @Secured(['ROLE_CLOUD'])
+    def hasLocalAccount() {
+        ObjectCommandResponse result = userAdminService.hasLocalAccount()
+
+        if (result.status != PassFail.PASS) {
+            throw new NVRRestMethodException(result.error, "user/hasLocalAccount", "")
+        } else {
+            logService.cam.info("hasLocalAccount: (= ${result.responseObject}) success")
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(result.responseObject != null)
+        }
     }
 }

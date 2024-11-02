@@ -1,12 +1,22 @@
 package com.securitycam.services
 
 import com.securitycam.commands.ChangeEmailCommand
+import com.securitycam.commands.CreateOrUpdateAccountCommand
 import com.securitycam.commands.ResetPasswordCommand
 import com.securitycam.commands.SetupGuestAccountCommand
+import com.securitycam.dao.RoleRepository
 import com.securitycam.dao.UserRepository
+import com.securitycam.dto.UserDto
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
+import com.securitycam.model.Role
 import com.securitycam.model.User
+import jakarta.transaction.Transactional
+import jakarta.validation.ConstraintViolation
+import jakarta.validation.ConstraintViolationException
+import jakarta.validation.Validation
+import jakarta.validation.Validator
+import jakarta.validation.ValidatorFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.messaging.simp.SimpMessagingTemplate
@@ -17,12 +27,19 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
+@Transactional
 class UserAdminService {
     @Autowired
     LogService logService
 
     @Autowired
     UserRepository userRepository
+
+    @Autowired
+    RoleRepository roleRepository
+
+    @Autowired
+    UserService userService
 
     @Autowired
     PasswordEncoder passwordEncoder
@@ -89,12 +106,71 @@ class UserAdminService {
 //
 //        return result
 //    }
+
+    /**
+     * createAccount: This is used to create a local web account on the NVR which can be logged into directly, rather
+     *                than via the Cloud service.
+     * @param cmd :     String username
+     *                 String password
+     *                 String confirmPassword
+     *                 String email
+     *                 String confirmEmail
+     *
+     * @return: Success/error status
+     */
+    ObjectCommandResponse createOrUpdateAccount(CreateOrUpdateAccountCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            Role role = roleRepository.findByName('ROLE_CLIENT')
+            def roles = new ArrayList<Role>()
+            if (role != null) {
+                roles.push(role)
+
+                if (cmd.updateExisting) {
+                    def u = userRepository.findByRoles(roles)
+                    userRepository.delete(u)
+                }
+
+                ValidatorFactory factory = Validation.buildDefaultValidatorFactory()
+                Validator validator = factory.getValidator()
+
+                var accountDto = new UserDto(username: cmd.username, password: cmd.password, matchingPassword: cmd.confirmPassword, credentialsNonExpired: true, email: cmd.email, cloudAccount: false, role: role.getId())
+                Set<ConstraintViolation<UserDto>> violations = validator.validate(accountDto)
+                if (violations.size() == 0)
+                    userService.registerNewUserAccount(accountDto)
+                else
+                    throw new ConstraintViolationException(violations)
+            } else
+                throw new Exception("Cannot find ROLE_CLIENT")
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in createAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+
+    ObjectCommandResponse hasLocalAccount() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            result.responseObject = userRepository.findByUsernameNotAndCloudAccount('guest', false)
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in hasLocalAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
     ObjectCommandResponse isGuest() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             boolean isGuest = false
             Authentication auth = SecurityContextHolder.getContext().getAuthentication()
-            def principal = auth.getPrincipal()
+            def principal = auth ? auth.getPrincipal() : null
             if (principal) {
                 String userName = auth.getName()
 

@@ -71,7 +71,7 @@ class UtilsService {
     Config config
 
     Queue<byte[]> audioQueue = new ConcurrentLinkedQueue<>()
-    public static final passwordRegex = /^[A-Za-z0-9][A-Za-z0-9(){\[1*£$\\\]}=@~?^]{7,31}$/
+    public static final passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@\u0024!%*#?&])[A-Za-z\d@\u0024!%*#?&]{8,}\u0024/
     public static final usernameRegex = /^[a-zA-Z0-9](_(?!(.|_))|.(?!(_|.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/
     public static final emailRegex = /^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/
     public static final onvifBaseAddressRegex = /^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/

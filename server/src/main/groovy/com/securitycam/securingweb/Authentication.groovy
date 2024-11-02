@@ -6,17 +6,13 @@ import com.securitycam.model.Role
 import com.securitycam.services.LogService
 import com.securitycam.services.Sc_processesService
 import com.securitycam.services.UserService
-import jakarta.validation.ConstraintViolation
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 import jakarta.validation.ValidatorFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
-import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 
 @Configuration
 class Authentication {
@@ -40,17 +36,17 @@ class Authentication {
             if(!userService.roleExists('ROLE_GUEST'))
                 userService.addRole('ROLE_GUEST')
 
-            if(!userService.userNameExists('austin')) {
-                ValidatorFactory factory = Validation.buildDefaultValidatorFactory()
-                Validator validator = factory.getValidator()
+//            if(!userService.userNameExists('austin')) {
+//                ValidatorFactory factory = Validation.buildDefaultValidatorFactory()
+//                Validator validator = factory.getValidator()
 
-                Role role = roleRepository.findByName("ROLE_CLIENT")
-                if(role != null) {
-                    var user = new UserDto(username: "austin", password: "password", matchingPassword: "password", credentialsNonExpired: true, email: "a@b.com", cloudAccount: false, role: role.getId())
-                    Set<ConstraintViolation<UserDto>> violations = validator.validate(user)
-                    userService.registerNewUserAccount(user)
-                }
-            }
+//                Role role = roleRepository.findByName("ROLE_CLIENT")
+//                if(role != null) {
+//                    var user = new UserDto(username: "austin", password: "password", matchingPassword: "password", credentialsNonExpired: true, email: "a@b.com", cloudAccount: false, role: role.getId())
+//                    Set<ConstraintViolation<UserDto>> violations = validator.validate(user)
+//                    userService.registerNewUserAccount(user)
+//                }
+//            }
             if(!userService.userNameExists('cloud')) {
                 Role role = roleRepository.findByName("ROLE_CLOUD")
                 if (role != null)
