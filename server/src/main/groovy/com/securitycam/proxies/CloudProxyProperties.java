@@ -20,16 +20,22 @@ public final class CloudProxyProperties {
     private String ACTIVE_MQ_INIT_QUEUE;
     private String LOG_LEVEL;
     private JsonObject cloudCreds;
+    static private CloudProxyProperties theInstance;
 
     public CloudProxyProperties(Config config, LogService logService) {
         this.config = config;
         this.logService = logService;
+        theInstance = this;
         try {
             setupConfigParams();
         }
         catch (Exception e) {
             logService.getCam().error(e.getMessage()+ " when setting up CloudProxyProperties");
         }
+    }
+
+    public static CloudProxyProperties getInstance() {
+        return theInstance;
     }
 
     private void setupConfigParams() throws Exception {

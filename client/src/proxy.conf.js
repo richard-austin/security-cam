@@ -15,7 +15,8 @@ const PROXY_CONFIG = [
       "/audio/",
       "/login/",
       "/dc/",
-      "/cua"
+      "/cua",
+      "/stomp"
     ],
     target: "http://localhost:8080/",
     ws: true,
