@@ -1,6 +1,8 @@
 package com.securitycam.controllers
 
+import com.securitycam.commands.AddOrUpdateActiveMQCredsCmd
 import com.securitycam.commands.ChangeEmailCommand
+import com.securitycam.commands.CheckNotGuestCommand
 import com.securitycam.commands.CreateOrUpdateAccountCommand
 import com.securitycam.commands.ResetPasswordCommand
 import com.securitycam.commands.SetupGuestAccountCommand
@@ -13,8 +15,10 @@ import com.securitycam.security.TwoFactorAuthenticationProvider
 import com.securitycam.services.LogService
 import com.securitycam.services.UserAdminService
 import com.securitycam.services.UtilsService
+import com.securitycam.validators.AddOrUpdateActiveMQCredsCmdValidator
 import com.securitycam.validators.BadRequestResult
 import com.securitycam.validators.ChangeEmailCommandValidator
+import com.securitycam.validators.CheckNotGuestCommandValidator
 import com.securitycam.validators.CreateOrUpdateAccountCommandValidator
 import com.securitycam.validators.GeneralValidator
 import com.securitycam.validators.ResetPasswordCommandValidator
@@ -194,8 +198,49 @@ class UserController {
      *                       unauthenticated external access. It is accessed locally through tomcats port 8080.
      */
     @PostMapping("/checkForAccountLocally")
-    def checkForAccountLocally() {
-        hasLocalAccount()
+    def checkForAccountLocally(CheckNotGuestCommand cmd) {
+        def gv = new GeneralValidator(cmd, new CheckNotGuestCommandValidator(userAdminService))
+        def result = gv.validate()
+        if(result.hasErrors()) {
+            def retVal = new BadRequestResult(result)
+            logService.cam.error "checkForAccountLocally: Validation error: "
+            return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
+        }
+        else
+            hasLocalAccount()
+    }
+
+    @PostMapping("/checkForActiveMQCreds")
+    def checkForActiveMQCreds(CheckNotGuestCommand cmd) {
+        def gv = new GeneralValidator(cmd, new CheckNotGuestCommandValidator(userAdminService))
+        def result = gv.validate()
+        if(result.hasErrors()) {
+            def retVal = new BadRequestResult(result)
+            logService.cam.error "checkForActiveMQCreds: Validation error: "
+            return new ResponseEntity<BadRequestResult>(retVal, HttpStatus.BAD_REQUEST)
+        }
+            hasActiveMQCreds()
+    }
+
+    @PostMapping("/addOrUpdateActiveMQCreds")
+    def addOrUpdateActiveMQCreds(@RequestBody AddOrUpdateActiveMQCredsCmd cmd) {
+        ObjectCommandResponse response
+
+        def gv = new GeneralValidator(cmd, new AddOrUpdateActiveMQCredsCmdValidator(userAdminService))
+        def result = gv.validate()
+        if (result.hasErrors()) {
+            def errorsMap = new BadRequestResult(result)
+            logService.cam.error "addOrUpdateActiveMQCreds: Validation error: " + errorsMap.toString()
+            return new ResponseEntity<BadRequestResult>(errorsMap, HttpStatus.BAD_REQUEST)
+        } else {
+            response = userAdminService.addOrUpdateActiveMQCreds(cmd)
+            if (response.status != PassFail.PASS) {
+                throw new NVRRestMethodException(response.error, "user/createOrUpdateAccount", "See logs")
+            } else {
+                logService.cam.info("addOrUpdateActiveMQCreds: success")
+                ResponseEntity.ok("")
+            }
+        }
     }
 
     @Secured(['ROLE_CLOUD'])
@@ -208,6 +253,19 @@ class UserController {
         } else {
             logService.cam.info("hasLocalAccount: (= ${result.responseObject}) success")
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(result.responseObject != null)
+        }
+    }
+
+    @Secured(['ROLE_CLOUD', 'ROLE_CLIENT'])
+    @PostMapping("/hasActiveMQCreds")
+    def hasActiveMQCreds() {
+        ObjectCommandResponse result = userAdminService.hasActiveMQCreds()
+
+        if (result.status != PassFail.PASS) {
+            throw new NVRRestMethodException(result.error, "user/hasActiveMQCreds", "")
+        } else {
+            logService.cam.info("hasActiveMQCreds: (= ${result.responseObject}) success")
+            return ResponseEntity.ok(result.responseObject)
         }
     }
 }

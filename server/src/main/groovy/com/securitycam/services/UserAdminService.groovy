@@ -1,5 +1,7 @@
 package com.securitycam.services
 
+import com.google.gson.JsonObject
+import com.securitycam.commands.AddOrUpdateActiveMQCredsCmd
 import com.securitycam.commands.ChangeEmailCommand
 import com.securitycam.commands.CreateOrUpdateAccountCommand
 import com.securitycam.commands.ResetPasswordCommand
@@ -11,6 +13,7 @@ import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.model.Role
 import com.securitycam.model.User
+import com.securitycam.proxies.CloudProxyProperties
 import jakarta.transaction.Transactional
 import jakarta.validation.ConstraintViolation
 import jakarta.validation.ConstraintViolationException
@@ -45,6 +48,9 @@ class UserAdminService {
     PasswordEncoder passwordEncoder
     @Autowired
     SimpMessagingTemplate brokerMessagingTemplate
+
+    @Autowired
+    CloudProxyProperties cloudProxyProperties
 
     final String logoff = new JSONObject()
             .put("message", "logoff")
@@ -152,6 +158,19 @@ class UserAdminService {
     }
 
 
+    ObjectCommandResponse addOrUpdateActiveMQCreds(AddOrUpdateActiveMQCredsCmd cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            cloudProxyProperties.setCloudCreds(cmd.username, cmd.password, cmd.mqHost)
+        }
+        catch(Exception ex) {
+            logService.cam.error("Exception in createAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
     ObjectCommandResponse hasLocalAccount() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
@@ -223,6 +242,21 @@ class UserAdminService {
         }
         catch (Exception ex) {
             logService.cam.error("Exception in getEmail: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    ObjectCommandResponse hasActiveMQCreds() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            JsonObject creds = cloudProxyProperties.getCloudCreds()
+            final String mqHost = creds.get("mqHost")?.getAsString()
+            result.responseObject = "{\"hasActiveMQCreds\": ${creds.get("mqUser").getAsString() != ""}, \"mqHost\": ${mqHost == null ? "\"<none>\"" : "\"$mqHost\""}}"
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in hasActiveMQCreds: " + ex.getCause() + ' ' + ex.getMessage())
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }

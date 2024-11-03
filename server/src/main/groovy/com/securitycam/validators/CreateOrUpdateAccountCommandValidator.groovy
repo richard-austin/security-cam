@@ -11,13 +11,14 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 
-class CreateOrUpdateAccountCommandValidator implements Validator {
+class CreateOrUpdateAccountCommandValidator extends CheckNotGuestCommandValidator {
     final UtilsService utilsService
     final UserAdminService userAdminService
     final UserRepository userRepository
     final RoleRepository roleRepository
 
     CreateOrUpdateAccountCommandValidator(UtilsService utilsService, UserAdminService userAdminService, UserRepository userRepository, RoleRepository roleRepository) {
+        super(userAdminService)
         this.utilsService = utilsService
         this.userAdminService = userAdminService
         this.userRepository = userRepository
@@ -33,6 +34,7 @@ class CreateOrUpdateAccountCommandValidator implements Validator {
     @Override
     void validate(Object target, Errors errors) {
         if (target instanceof CreateOrUpdateAccountCommand) {
+            super.validate(target, errors)
             if (target.username == null || target.username == "")
                 errors.rejectValue("username", "username must not be null or empty")
             else {

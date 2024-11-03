@@ -1,8 +1,10 @@
 package com.securitycam
 
+import com.securitycam.configuration.Config
 import com.securitycam.dao.RoleRepository
 import com.securitycam.dto.UserDto
 import com.securitycam.model.Role
+import com.securitycam.proxies.CloudProxyProperties
 import com.securitycam.services.LogService
 import com.securitycam.services.Sc_processesService
 import com.securitycam.services.UserService
@@ -37,7 +39,6 @@ class ServerApplication {
     @Autowired
     LogService logService
 
-
 //    @Bean
 //    ApplicationRunner applicationRunner(OnvifService onvifService/*Environment environment*/) {
 //        return (args) -> {
@@ -62,6 +63,12 @@ class ServerApplication {
         } catch (Exception ex) {
             logService.cam.error("${ex.getClass()} when shutting down services: ${ex.getMessage()}")
         }
+    }
+
+
+    @Bean
+    CloudProxyProperties cloudProxyProperties(Config config, LogService logService) {
+        return new CloudProxyProperties(config, logService);
     }
 }
 

@@ -1,6 +1,6 @@
 package com.securitycam.commands
 
-class CreateOrUpdateAccountCommand {
+class CreateOrUpdateAccountCommand extends CheckNotGuestCommand{
     String username
     String password
     String confirmPassword

@@ -35,7 +35,6 @@ public class SecSecurityConfig {
                     .csrf(AbstractHttpConfigurer::disable)  // @TODO Makes Restful API calls available to any role, or no role
                     .authorizeHttpRequests((requests) -> requests
                             .requestMatchers("/", "/login/authenticate").permitAll()
-                            //                     .requestMatchers("/setupWifi2").hasAnyAuthority("ROLE_CLIENT")
                             .requestMatchers("/stomp").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/*.css").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/*.js").hasAnyRole("CLIENT", "CLOUD", "GUEST")
@@ -43,7 +42,6 @@ public class SecSecurityConfig {
                             .requestMatchers("/audio").hasAnyRole("CLIENT", "CLOUD")
                             .requestMatchers("/assets/*.woff2").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/assets/images/*.png").hasAnyRole("CLIENT", "CLOUD", "GUEST")
-                            .requestMatchers("/cua").permitAll()
                             .requestMatchers(("/user/createOrUpdateAccountLocally")).permitAll()
                             .requestMatchers(("/user/checkForAccountLocally")).permitAll()
                             .requestMatchers(("/user/checkForActiveMQCreds")).permitAll()
