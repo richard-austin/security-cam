@@ -1,7 +1,9 @@
 package com.securitycam.controllers
 
 import com.securitycam.commands.CameraParamsCommand
+import com.securitycam.commands.CheckNotGuestCommand
 import com.securitycam.commands.SetCameraParamsCommand
+import com.securitycam.commands.SetupSMTPAccountCommand
 import com.securitycam.commands.StartAudioOutCommand
 import com.securitycam.enums.PassFail
 import com.securitycam.enums.RestfulResponseStatusEnum
@@ -10,14 +12,18 @@ import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.interfaceobjects.RestfulResponse
 import com.securitycam.services.LogService
 import com.securitycam.services.RestfulInterfaceService
+import com.securitycam.services.UserAdminService
 import com.securitycam.services.UtilsService
 import com.securitycam.validators.BadRequestResult
 import com.securitycam.validators.CameraParamsCommandValidator
+import com.securitycam.validators.CheckNotGuestCommandValidator
 import com.securitycam.validators.GeneralValidator
 import com.securitycam.validators.SetCameraParamsCommandValidator
+import com.securitycam.validators.SetupSMTPAccountCommandValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
@@ -33,6 +39,9 @@ import org.springframework.web.bind.annotation.RestController
 class UtilsController {
     @Autowired
     UtilsService utilsService
+
+    @Autowired
+    UserAdminService userAdminService
 
     @Autowired
     LogService logService
@@ -60,6 +69,74 @@ class UtilsController {
     def audioInUse() {
         return [audioInUse: utilsService.getAudioInUse()]
     }
+
+    @PostMapping(value="/setupSMTPClientLocally")
+    def setupSMTPClientLocally(@RequestBody SetupSMTPAccountCommand cmd) {
+        def gv = new GeneralValidator(cmd, new SetupSMTPAccountCommandValidator(userAdminService))
+        def result = gv.validate()
+
+        if (result.hasErrors()) {
+            BadRequestResult retVal = new BadRequestResult(result)
+            logService.cam.error "setupSMTPClientLocally: Validation error: " + retVal.toString()
+            return ResponseEntity
+                    .badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(retVal)
+        } else {
+            ObjectCommandResponse response = utilsService.setupSMTPClient(cmd)
+            if (response.status != PassFail.PASS)
+                return new ResponseEntity<Object>(response.error, HttpStatus.INTERNAL_SERVER_ERROR)
+            else
+                return ResponseEntity.ok("")
+        }
+    }
+
+    @PostMapping("/getSMTPClientParamsLocally")
+    def getSMTPClientParamsLocally(CheckNotGuestCommand cmd) {
+        def gv = new GeneralValidator(cmd, new CheckNotGuestCommandValidator(userAdminService))
+        def result = gv.validate()
+
+        if (result.hasErrors()) {
+            BadRequestResult retVal = new BadRequestResult(result)
+            return ResponseEntity
+                    .badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(retVal)
+        } else {
+            ObjectCommandResponse response = utilsService.getSMTPClientParams()
+            if (response.status != PassFail.PASS)
+                return new ResponseEntity<Object>(response.error, HttpStatus.INTERNAL_SERVER_ERROR)
+            else if (response.response != null)
+                return ResponseEntity
+                        .badRequest()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(response.response)
+            else
+                return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response.responseObject)
+        }
+    }
+
+//    Sc_processesService sc_processesService
+//    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+//    def startProcs()
+//    {
+//        ObjectCommandResponse response = sc_processesService.startProcesses()
+//        if(response.status != PassFail.PASS)
+//            render (status: 500, text: response.error)
+//        else
+//            render "success"
+//    }
+//
+//    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+//    def stopProcs()
+//    {
+//        ObjectCommandResponse response = sc_processesService.stopProcesses()
+//        if(response.status != PassFail.PASS)
+//            render (status: 500, text: response.error)
+//        else
+//            render "success"
+//
+//    }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @RequestMapping("startAudioOut")

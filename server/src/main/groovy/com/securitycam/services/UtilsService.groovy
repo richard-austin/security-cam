@@ -1,6 +1,9 @@
 package com.securitycam.services
 
+import com.google.gson.GsonBuilder
 import com.securitycam.audiobackchannel.RtspClient
+import com.securitycam.commands.SMTPData
+import com.securitycam.commands.SetupSMTPAccountCommand
 import com.securitycam.commands.StartAudioOutCommand
 import com.securitycam.configuration.Config
 import com.securitycam.controllers.CameraAdminCredentials
@@ -13,6 +16,7 @@ import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.core.env.Environment
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -144,6 +148,70 @@ class UtilsService {
     private Socket clientSocket
     private OutputStream out
     Thread serverThread
+
+    ObjectCommandResponse setupSMTPClient(SetupSMTPAccountCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            def gson = new GsonBuilder()
+                    .setPrettyPrinting()
+                    .create()
+
+            String res = gson.toJson(cmd.getData())
+            def writer = new BufferedWriter(new FileWriter("/var/security-cam/smtp.json"))
+            writer.write(res)
+            writer.close()
+        }
+        catch (Exception e) {
+            logService.cam.error "${e.getClass().getName()} in setupSMTPClient: ${e.getMessage()}"
+            result.status = PassFail.FAIL
+            result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
+        }
+        return result
+    }
+
+    ObjectCommandResponse getSMTPClientParams() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            result.responseObject = getSMTPConfigData()
+        }
+        catch (FileNotFoundException fnf) {
+            final String noConfigFile = "No existing config file for SMTP client. It will be created when the SMTP parameters are entered and saved."
+            logService.cam.warn(noConfigFile)
+            result.status = PassFail.PASS
+            result.response = noConfigFile
+            result.error = "${fnf.getClass().getName()} -- ${fnf.getMessage()}"
+        }
+        catch (Exception e) {
+            logService.cam.error "${e.getClass().getName()} in getSMTPClientParams: ${e.getMessage()}"
+            result.status = PassFail.FAIL
+            result.response = null
+            result.error = "${e.getClass().getName()} -- ${e.getMessage()}"
+        }
+        return result
+    }
+
+    def getSMTPConfigData() {
+        def configFileName = config.mail.smtp.configFile
+        File file = new File(configFileName)
+        byte[] bytes = file.readBytes()
+        String json = new String(bytes, StandardCharsets.UTF_8)
+        def gson = new GsonBuilder().create()
+        def smtpData = gson.fromJson(json, SMTPData)
+        return smtpData
+    }
+
+    // Execute every second. If the audio input feed is running it increments the audioInputStreamCheckCount which is
+    //  zeroed by each time an audio packet is received. If the count gets past 3, the audio feed is assumed to have
+    //  stopped (maybe by the audio session not being closed cleanly), so it stops the feed properly.
+    @Scheduled(fixedRate = 1000L)
+    def audioFeedCheck() {
+        if (audioInUse) {
+            // Shut down the sudio receiver if the websocket data stream has stopped
+            if (++audioInputStreamCheckCount > audioInSessionTimeout) {
+                stopAudioOut()
+            }
+        }
+    }
 
     def startAudioOut(@Valid @RequestBody StartAudioOutCommand cmd) {
         ObjectCommandResponse result = new ObjectCommandResponse()

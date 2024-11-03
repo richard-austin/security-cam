@@ -32,6 +32,19 @@ class CloudProxy {
 }
 
 @Configuration
+@ConfigurationProperties(prefix = "mail.smtp")
+class Smtp {
+    String configFile
+}
+
+@Configuration
+@ConfigurationProperties(prefix = "smtp")
+class Mail {
+    @Autowired
+    Smtp smtp
+}
+
+@Configuration
 @ConfigurationProperties(prefix = "app")
 class Config {
     String camerasHomeDirectory
@@ -49,4 +62,7 @@ class Config {
 
     @Autowired
     CloudProxy cloudProxy
+
+    @Autowired
+    Mail mail
 }
