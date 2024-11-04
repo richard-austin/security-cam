@@ -39,6 +39,12 @@ class RestResponseEntityExceptionHandler {
         return new ResponseEntity<Object>(retVal, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+//    @ExceptionHandler(NoResourceFoundException.class)
+//    RedirectView handleNoResourceFoundException(NoResourceFoundException ex) {
+//        ErrorResponse retVal = new ErrorResponse(ex)
+//        return new RedirectView("notFound") //  new ResponseEntity<Object>(retVal, HttpStatus.NOT_FOUND).body("notFound")
+//    }
+//
     @ExceptionHandler(Exception.class)
     ResponseEntity<Object> handleGeneralException(Exception ex) {
         logService.cam.error("${ex.getClass()} has occurredc: ${ex.getMessage()}: ${ex.getCause()}")
