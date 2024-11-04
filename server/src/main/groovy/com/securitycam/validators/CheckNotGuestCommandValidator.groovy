@@ -11,7 +11,6 @@ class CheckNotGuestCommandValidator implements Validator {
         this.userAdminService = userAdminService
     }
 
-
     @Override
     boolean supports(Class<?> clazz) {
         return CheckNotGuestCommand.class == clazz

@@ -4,14 +4,10 @@ import com.securitycam.commands.SetupSMTPAccountCommand
 import com.securitycam.services.UserAdminService
 import com.securitycam.services.UtilsService
 import org.springframework.validation.Errors
-import org.springframework.validation.Validator
 
 class SetupSMTPAccountCommandValidator extends CheckNotGuestCommandValidator {
-    final UserAdminService userAdminService
-
     SetupSMTPAccountCommandValidator(UserAdminService userAdminService) {
         super(userAdminService)
-        this.userAdminService = userAdminService
     }
 
     @Override
@@ -21,12 +17,8 @@ class SetupSMTPAccountCommandValidator extends CheckNotGuestCommandValidator {
 
     @Override
     void validate(Object target, Errors errors) {
-        super.validate(target, errors)
         if (target instanceof SetupSMTPAccountCommand) {
-            def response = userAdminService.isGuest()
-            if (response.responseObject.guestAccount)
-                errors.rejectValue("auth", "Guest not authorised to administer SMTP client account")
-
+            super.validate(target, errors)
             if (target.auth) {
                 if (target.username == null || target.username == "")
                     errors.rejectValue("username", "username is required")

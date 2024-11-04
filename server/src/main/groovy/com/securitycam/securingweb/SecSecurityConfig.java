@@ -5,7 +5,6 @@ import com.securitycam.security.TwoFactorAuthenticationDetailsSource;
 import com.securitycam.security.TwoFactorAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,16 +41,16 @@ public class SecSecurityConfig {
                             .requestMatchers("/audio").hasAnyRole("CLIENT", "CLOUD")
                             .requestMatchers("/assets/*.woff2").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/assets/images/*.png").hasAnyRole("CLIENT", "CLOUD", "GUEST")
-                            .requestMatchers(("/user/createOrUpdateAccountLocally")).permitAll()
-                            .requestMatchers(("/user/checkForAccountLocally")).permitAll()
-                            .requestMatchers(("/user/checkForActiveMQCreds")).permitAll()
-                            .requestMatchers(("/user/addOrUpdateActiveMQCreds")).permitAll()
-                            .requestMatchers(("/user/setupSMTPClientLocally")).permitAll()
-                            .requestMatchers(("/user/getSMTPClientParamsLocally")).permitAll()
-                            .requestMatchers(("/recover/sendResetPasswordLink")).permitAll()
-                            .requestMatchers(("/recover/forgotPassword")).permitAll()
-                            .requestMatchers(("/recover/resetPasswordForm")).permitAll()
-                            .requestMatchers(("/recover/resetPassword")).permitAll()
+                            .requestMatchers("/user/createOrUpdateAccountLocally").permitAll()
+                            .requestMatchers("/user/checkForAccountLocally").permitAll()
+                            .requestMatchers("/user/checkForActiveMQCreds").permitAll()
+                            .requestMatchers("/user/addOrUpdateActiveMQCreds").permitAll()
+                            .requestMatchers("/utils/setupSMTPClientLocally").permitAll()
+                            .requestMatchers("/utils/getSMTPClientParamsLocally").permitAll()
+                            .requestMatchers("/recover/sendResetPasswordLink").permitAll()
+                            .requestMatchers("/recover/forgotPassword").permitAll()
+                            .requestMatchers("/recover/resetPasswordForm").permitAll()
+                            .requestMatchers("/recover/resetPassword").permitAll()
                             .anyRequest().authenticated()
                     )
                     .rememberMe(rememberMe -> rememberMe.key("uniqueAndSecret"))

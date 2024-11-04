@@ -7,13 +7,10 @@ import com.securitycam.model.Role
 import com.securitycam.model.User
 import com.securitycam.services.UserAdminService
 import com.securitycam.services.UtilsService
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.validation.Errors
-import org.springframework.validation.Validator
 
 class CreateOrUpdateAccountCommandValidator extends CheckNotGuestCommandValidator {
     final UtilsService utilsService
-    final UserAdminService userAdminService
     final UserRepository userRepository
     final RoleRepository roleRepository
 
@@ -38,15 +35,11 @@ class CreateOrUpdateAccountCommandValidator extends CheckNotGuestCommandValidato
             if (target.username == null || target.username == "")
                 errors.rejectValue("username", "username must not be null or empty")
             else {
-                def response = userAdminService.isGuest()
-                if (response.responseObject.guestAccount)
-                    errors.rejectValue("username", "Guest not authorised to administer user account")
-
                 User user = userRepository.findByUsername(target.username)
                 if (user) {
                     Set<Role> roles = user.getRoles()
                     roles.forEach { role ->
-                        if (role.name == 'ROLE_GUEST' || role.name == 'ROLE_CLOUD')
+                        if (role.name == 'ROLE_CLOUD')
                             errors.rejectValue("username", "Invalid user, only the CLIENT role can use this function")
                     }
                 }

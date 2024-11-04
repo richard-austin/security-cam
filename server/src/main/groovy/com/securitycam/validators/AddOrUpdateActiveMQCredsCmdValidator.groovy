@@ -6,11 +6,9 @@ import com.securitycam.services.UtilsService
 import org.springframework.validation.Errors
 
 class AddOrUpdateActiveMQCredsCmdValidator extends CheckNotGuestCommandValidator {
-    UserAdminService userAdminService
 
     AddOrUpdateActiveMQCredsCmdValidator(UserAdminService userAdminService) {
         super(userAdminService)
-        this.userAdminService = userAdminService
     }
 
     public static final activeMQPasswordRegex = /^$|^[A-Za-z0-9]{20}$/
@@ -22,11 +20,8 @@ class AddOrUpdateActiveMQCredsCmdValidator extends CheckNotGuestCommandValidator
 
     @Override
     void validate(Object target, Errors errors) {
-
         if (target instanceof AddOrUpdateActiveMQCredsCmd) {
-            def response = userAdminService.isGuest()
-            if (response.responseObject.guestAccount)
-                errors.rejectValue("guest", "Guest not authorised to administer ActiveMQ Credentials")
+            super.validate(target, errors)
 
             if (target.username != null && target.username != "") {
                 if (target.username == null)
