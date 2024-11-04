@@ -2,7 +2,7 @@ package com.securitycam.services
 
 import com.securitycam.configuration.Config
 import com.securitycam.enums.PassFail
-import com.securitycam.interfaceobjects.CloudProxyRestartTask
+import com.securitycam.timers.CloudProxyRestartTask
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.proxies.CloudAMQProxy
 import org.springframework.beans.factory.annotation.Autowired

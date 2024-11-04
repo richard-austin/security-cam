@@ -1,4 +1,4 @@
-package com.securitycam.interfaceobjects
+package com.securitycam.timers
 
 import com.securitycam.services.CloudProxyService
 
@@ -13,6 +13,7 @@ class CloudProxyRestartTask extends TimerTask {
     @Override
     void run() {
         try {
+
             synchronized (synchObject) {
                 cloudProxyService.stop()
                 synchObject.wait(3000)

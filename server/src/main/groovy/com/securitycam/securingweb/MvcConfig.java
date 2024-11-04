@@ -10,5 +10,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class MvcConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/login").setViewName("login");
+        registry.addViewController("/forgotPassword").setViewName("forgotPassword");
+        registry.addViewController("/resetPasswordForm").setViewName("resetPasswordForm");
+        registry.addViewController("/notFound").setViewName("notFound");
     }
 }
