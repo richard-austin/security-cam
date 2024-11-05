@@ -1,20 +1,20 @@
 import {Component, Input, OnInit} from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
+export enum styles {success, warning, danger}
 @Component({
   selector: 'app-reporting',
   templateUrl: './reporting.component.html',
   styleUrls: ['./reporting.component.scss']
 })
 export class ReportingComponent implements OnInit {
-  error: HttpErrorResponse | undefined | null;
-  success: string | undefined;
-  warning: string | undefined;
-  isHtml: boolean = false;
+  styles: typeof styles = styles;
+  e: HttpErrorResponse | undefined | null;
+  message: string | undefined;
+  style!: styles;
   validationErrors!:string[];
   showMessageInError:boolean = true;
   showMessageFromMessage: boolean = false;
-  htmlWarning: string | undefined;
   @Input() embedded: boolean = false;
 
 
@@ -22,20 +22,21 @@ export class ReportingComponent implements OnInit {
   constructor() {
   }
 
-  set errorMessage(error: HttpErrorResponse) {
+  set errorMessage(e: HttpErrorResponse) {
     this.clearMessage();
-    this.success = undefined;
-    this.error = error;
+    this.message = undefined;
+    this.e = e;
+    this.style = styles.danger;
     this.validationErrors = [];
-    this.isHtml = /<\/?[a-z][\s\S]*>/.test(error?.error);
 
-    if (error.status === 400) {
-      for (const key of Object.keys(error.error)) {
-          this.validationErrors.push(key + ': ' + error.error[key]);
+    if (e.status === 400) {
+      this.style = styles.warning;
+      for (const key of Object.keys(e.error)) {
+          this.validationErrors.push(key + ': ' + e.error[key]);
       }
-    } else if (typeof (error.error) !== 'string') {
-        this.showMessageInError=false;
-        if(typeof(error.message) === 'string' ) {
+    } else if (typeof (e.error) !== 'string') {
+      this.showMessageInError = false;
+      if (typeof (e.message) === 'string') {
           this.showMessageFromMessage = true;
         }
       }
@@ -43,27 +44,22 @@ export class ReportingComponent implements OnInit {
 
   set successMessage(success: string) {
     this.clearMessage();
-    this.success = success;
+    this.message = success;
+    this.style = styles.success;
   }
 
   set warningMessage(warning: string) {
     this.clearMessage();
-    this.warning = warning;
+    this.message = warning;
+    this.style = styles.warning;
   }
 
-  set htmlWarningMessage(warning: string) {
-    this.clearMessage();
-    this.htmlWarning = warning;
-  }
   dismiss() {
     this.clearMessage();
   }
-
   private clearMessage() {
-    this.error = undefined;
-    this.success = undefined;
-    this.warning = undefined;
-    this.htmlWarning = undefined;
+    this.e = undefined;
+    this.message = undefined;
   }
 
   ngOnInit(): void {

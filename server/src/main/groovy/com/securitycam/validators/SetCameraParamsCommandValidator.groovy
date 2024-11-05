@@ -2,6 +2,7 @@ package com.securitycam.validators
 
 import com.securitycam.commands.SetCameraParamsCommand
 import com.securitycam.controllers.cameraType
+import com.securitycam.error.NVRRestMethodException
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 
@@ -29,7 +30,6 @@ class SetCameraParamsCommandValidator implements Validator {
                     errors.rejectValue("cameraType", "cameraType has an invalid value (${target.cameraType})")
             }
             target.params = target.params2 = ""
-
             if (!infraredstatValues.contains(target.infraredstat))
                 errors.rejectValue("infraredstat", "infraredstat has an invalid value (${target.infraredstat})")
             else {

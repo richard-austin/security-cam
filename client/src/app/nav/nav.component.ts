@@ -282,7 +282,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (error) {
       this.isGuest = true;
       // @ts-ignore
-      console.error('Error calling isGuest = ' + error.error);
+      console.error('Error calling isGuest = ' + error.e);
     }
     this.initializeWebSocketConnection();
 

@@ -10,6 +10,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.servlet.resource.NoResourceFoundException
+import org.springframework.web.servlet.view.RedirectView
 
 //@Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
@@ -28,54 +30,50 @@ class RestResponseEntityExceptionHandler {
             errors.put(fieldName, errorMessage)
         })
         logService.cam.warn("MethodArgumentNotValidException ${errors.toString()}")
-        return new ResponseEntity<Object>(errors, HttpStatus.BAD_REQUEST)
+        return ResponseEntity.badRequest().body(errors)
+    }
+
+   @ExceptionHandler(NoResourceFoundException.class)
+    RedirectView handleNoResourceFoundException(NoResourceFoundException ex) {
+        ErrorResponse retVal = new ErrorResponse(ex)
+        return new RedirectView("notFound") //  new ResponseEntity<Object>(retVal, HttpStatus.NOT_FOUND).body("notFound")
     }
 
     @ExceptionHandler(NVRRestMethodException.class)
     ResponseEntity<Object> handleNVRRestMethodException(NVRRestMethodException ex) {
-        logService.cam.error("${ex.getClass()} in ${ex.getRequestUri()}: ${ex.getMessage()}: ${ex.getReason()}")
+        logService.cam.error("${ex.getClass()}: ${ex.getReason()}")
         logService.cam.error(ex.getStackTrace().toString())
         ErrorResponse retVal = new ErrorResponse(ex)
-        return new ResponseEntity<Object>(retVal, HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.internalServerError().body(retVal)
     }
 
-//    @ExceptionHandler(NoResourceFoundException.class)
-//    RedirectView handleNoResourceFoundException(NoResourceFoundException ex) {
-//        ErrorResponse retVal = new ErrorResponse(ex)
-//        return new RedirectView("notFound") //  new ResponseEntity<Object>(retVal, HttpStatus.NOT_FOUND).body("notFound")
-//    }
-//
     @ExceptionHandler(Exception.class)
     ResponseEntity<Object> handleGeneralException(Exception ex) {
         logService.cam.error("${ex.getClass()} has occurredc: ${ex.getMessage()}: ${ex.getCause()}")
  //       logService.cam.error(ex.getStackTrace().toString())
         ErrorResponse retVal = new ErrorResponse(ex)
-        return new ResponseEntity<Object>(retVal, HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.internalServerError().body(retVal)
     }
 }
 
 class ErrorResponse {
     Object exception
-    String request
     String error
     String reason
-    ErrorResponse(Object exception, String request, String error, String reason) {
+    ErrorResponse(Object exception, String error, String reason) {
         this.exception = exception
-        this.request = request
         this.error = error
         this.reason = reason
     }
 
     ErrorResponse(Exception ex) {
         exception = ex.class
-        request = "?"
         error = ex.getMessage()
-        reason = ex.getCause()
+        reason = "Caused by: " + ex.getCause()
     }
 
     ErrorResponse(NVRRestMethodException ex) {
         exception = ex.class
-        request = ex.getRequestUri()
         error = ex.getMessage()
         reason = ex.getReason()
     }

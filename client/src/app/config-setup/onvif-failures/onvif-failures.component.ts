@@ -54,7 +54,7 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
           let msg = "Couldn't get camera details: - ";
           if (result.failed !== undefined && result.failed.size > 0)
             msg += result.failed.entries().next().value
-          this.reporting.warning = msg;
+          this.reporting.warningMessage = msg
         }
         this.gettingCameraDetails = false;
       },

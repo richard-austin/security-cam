@@ -59,7 +59,7 @@ class UtilsController {
         ObjectCommandResponse response = utilsService.getTemperature()
 
         if (response.status != PassFail.PASS)
-            throw new NVRRestMethodException(response.error, "utils/getTemperature", "See logs")
+            throw new NVRRestMethodException(response.error, "See logs")
         else
             return response.responseObject
     }
@@ -144,7 +144,7 @@ class UtilsController {
         ObjectCommandResponse response = utilsService.startAudioOut(cmd)
 
         if (response.status != PassFail.PASS)
-            throw new NVRRestMethodException(response.error, "utils/startAudioOut", "See logs")
+            throw new NVRRestMethodException(response.error, "See logs")
         else
             return ResponseEntity.ok(response.responseObject)
     }
@@ -159,7 +159,7 @@ class UtilsController {
     def stopAudioOut() {
         ObjectCommandResponse response = utilsService.stopAudioOut()
         if (response.status != PassFail.PASS)
-            return new NVRRestMethodException(response.error, "/utile/stopAudioOut", "See logs")
+            return new NVRRestMethodException(response.error, "See logs")
         else
             return response.responseObject
     }
@@ -191,10 +191,9 @@ class UtilsController {
         } else {
             logService.cam.info("Getting parameters for camera at ${cmd.address}")
             RestfulResponse response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params)
-
             if (response.status != RestfulResponseStatusEnum.PASS) {
                 logService.cam.error "cameraParams: error: ${response.errorMsg}"
-                throw new NVRRestMethodException(response.errorMsg, "utils/cameraParams: Failed to get camera parameters ${response.errorMsg}: for camera ${cmd.address}")
+                throw new NVRRestMethodException("response.errorMsg", "Failed to get camera parameters for camera ${cmd.address}")
             } else
                 return response.responseObject
         }

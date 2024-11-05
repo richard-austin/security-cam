@@ -226,7 +226,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
           status: error.status
         });
       };
-      reader.readAsText(error.error);
+      reader.readAsText(error.e);
     }
     this.downloading = false;
   }
