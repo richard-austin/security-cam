@@ -8,7 +8,7 @@ import org.springframework.validation.Validator
 class SendResetPasswordLinkCommandValidator implements Validator {
     @Override
     boolean supports(Class<?> clazz) {
-        return SendResetPasswordLinkCommandValidator.class == clazz
+        return SendResetPasswordLinkCommand.class == clazz
     }
 
     @Override

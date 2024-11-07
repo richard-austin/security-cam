@@ -9,15 +9,16 @@ import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.interfaceobjects.RestfulResponse
 import com.securitycam.model.User
 import groovy.json.JsonSlurper
+import org.springframework.core.env.Environment
 import org.springframework.beans.factory.annotation.Autowired
 
 import org.springframework.transaction.annotation.Transactional
 
-import javax.mail.*
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeBodyPart
-import javax.mail.internet.MimeMessage
-import javax.mail.internet.MimeMultipart
+import jakarta.mail.*
+import jakarta.mail.internet.InternetAddress
+import jakarta.mail.internet.MimeBodyPart
+import jakarta.mail.internet.MimeMessage
+import jakarta.mail.internet.MimeMultipart
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -32,6 +33,9 @@ class Sc_processesService {
     Config config
     @Autowired
     UtilsService utilsService
+
+    @Autowired
+    Environment environment
 
     OnvifService onvifService
 
@@ -128,7 +132,7 @@ class Sc_processesService {
                 logService.cam.warn("Current IP (${currentIp}) now matches the saved IP address. Stop sending warning emails")
             } else {
                 // IP address does not match the saved IP, send a warning email
-                if (Environment.current.name == 'development') {
+                if (environment.getProperty("spring.profiles.active") == "dev") {
                     sendEmail("Richard", "richard.david.austin@gmail.com", currentIp)
                 } else {
                     User user = userRepository.findByUsernameNotAndCloudAccount("guest", false)

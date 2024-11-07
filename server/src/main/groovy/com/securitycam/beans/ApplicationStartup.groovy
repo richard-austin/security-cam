@@ -23,7 +23,7 @@ class ApplicationStartup
      * the application is ready to service requests.
      */
     @Override
-    void onApplicationEvent(final ApplicationReadyEvent evente) {
+    void onApplicationEvent(final ApplicationReadyEvent event) {
         sc_processesService.setOnvifService(onvifService)
         sc_processesService.startProcesses()
 

@@ -11,9 +11,15 @@ import com.securitycam.validators.GeneralValidator
 import com.securitycam.validators.ResetPasswordFromLinkCommandValidator
 import com.securitycam.validators.SendResetPasswordLinkCommandValidator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.servlet.view.RedirectView
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 
 
 @Controller
@@ -29,8 +35,8 @@ class RecoverController {
         return "forgotPassword"
     }
 
-    @RequestMapping("/sendResetPasswordLink")
-    def sendResetPasswordLink(SendResetPasswordLinkCommand cmd) {
+    @PostMapping(value="/sendResetPasswordLink", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    def sendResetPasswordLink(RedirectAttributes redirectAttributes, SendResetPasswordLinkCommand cmd) {
         ObjectCommandResponse result
 
         def gv = new GeneralValidator(cmd, new SendResetPasswordLinkCommandValidator())
@@ -39,33 +45,36 @@ class RecoverController {
             def retVal = new BadRequestResult(results)
 
             logService.cam.error "sendResetPasswordLink: Validation error: " + retVal.toString()
-            flash.error = "Validation error: "
+            String error = "Validation error: "
             boolean doneOne = false
             retVal.forEach {k, v ->
                 if(doneOne) {
-                    flash.error += ", "
+                    error += ", "
                 }
                 doneOne = true
-                flash.error += (k + ":" + v)
+                error += (k + ":" + v)
+                redirectAttributes.addFlashAttribute("error", error)
             }
-            redirect(action: "forgotPassword")
+            return "redirect:/recover/forgotPassword"
         } else {
             result = userAdminService.sendResetPasswordLink(cmd)
             if (result.status != PassFail.PASS) {
                 logService.cam.error "sendResetPasswordLink: error: ${result.error}"
-                flash.error = result.error
-                redirect(action: "forgotPassword")
+                redirectAttributes.addFlashAttribute("error", result.error)
+                return "redirect:/recover/forgotPassword"
             } else {
                 logService.cam.info("sendResetPasswordLink: success")
-                flash.message = "Please check your email for the reset password link"
-                redirect(action: "forgotPassword")
+                redirectAttributes.addFlashAttribute("message", "Please check your email for the reset password link")
+                return "redirect:/recover/forgotPassword"
             }
         }
     }
 
+    @RequestMapping("/resetPasswordForm")
     def resetPasswordForm() {
-     //   redirect(action: 'resetPasswordForm')
+     return "redirect:/resetPasswordForm"
     }
+
     @RequestMapping("/resetPassword")
     def resetPassword(ResetPasswordFromLinkCommand cmd) {
         ObjectCommandResponse result

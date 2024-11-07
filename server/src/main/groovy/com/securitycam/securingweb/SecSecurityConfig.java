@@ -34,9 +34,11 @@ public class SecSecurityConfig {
                     .csrf(AbstractHttpConfigurer::disable)  // @TODO Makes Restful API calls available to any role, or no role
                     .authorizeHttpRequests((requests) -> requests
                             .requestMatchers("/recover/forgotPassword").anonymous()
+                            .requestMatchers("/recover/sendResetPasswordLink").anonymous()
+                            .requestMatchers("/recover/resetPasswordForm").anonymous()
+                            .requestMatchers("/recover/resetPassword").anonymous()
                     )
                     .authorizeHttpRequests((requests) -> requests
-//                            .requestMatchers("/", "/login/authenticate").permitAll()
                             .requestMatchers("/stomp").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/*.css").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/*.js").hasAnyRole("CLIENT", "CLOUD", "GUEST")
@@ -46,15 +48,13 @@ public class SecSecurityConfig {
                             .requestMatchers("/assets/images/*.png").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/favicon.ico").permitAll()
                             .requestMatchers("/stylesheets/*.css").permitAll()
+                            .requestMatchers("/javascripts/*.css").permitAll()
                             .requestMatchers("/user/createOrUpdateAccountLocally").permitAll()
                             .requestMatchers("/user/checkForAccountLocally").permitAll()
                             .requestMatchers("/user/checkForActiveMQCreds").permitAll()
                             .requestMatchers("/user/addOrUpdateActiveMQCreds").permitAll()
                             .requestMatchers("/utils/setupSMTPClientLocally").permitAll()
                             .requestMatchers("/utils/getSMTPClientParamsLocally").permitAll()
-                            .requestMatchers("/recover/sendResetPasswordLink").permitAll()
-                            .requestMatchers("/recover/resetPasswordForm").permitAll()
-                            .requestMatchers("/recover/resetPassword").permitAll()
                             .anyRequest().authenticated()
                     )
 

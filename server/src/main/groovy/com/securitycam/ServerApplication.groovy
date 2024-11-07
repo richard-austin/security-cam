@@ -17,13 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
-
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -68,7 +62,7 @@ class ServerApplication {
 
     @Bean
     CloudProxyProperties cloudProxyProperties(Config config, LogService logService) {
-        return new CloudProxyProperties(config, logService);
+        return new CloudProxyProperties(config, logService)
     }
 }
 

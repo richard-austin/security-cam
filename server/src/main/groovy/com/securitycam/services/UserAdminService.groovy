@@ -17,6 +17,16 @@ import com.securitycam.model.Role
 import com.securitycam.model.User
 import com.securitycam.proxies.CloudProxyProperties
 import com.securitycam.timers.ResetPasswordParameterTimerTask
+import jakarta.mail.Authenticator
+import jakarta.mail.Message
+import jakarta.mail.Multipart
+import jakarta.mail.PasswordAuthentication
+import jakarta.mail.Session
+import jakarta.mail.Transport
+import jakarta.mail.internet.InternetAddress
+import jakarta.mail.internet.MimeBodyPart
+import jakarta.mail.internet.MimeMessage
+import jakarta.mail.internet.MimeMultipart
 import jakarta.transaction.Transactional
 import jakarta.validation.ConstraintViolation
 import jakarta.validation.ConstraintViolationException
@@ -31,17 +41,6 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-
-import javax.mail.Authenticator
-import javax.mail.Message
-import javax.mail.Multipart
-import javax.mail.PasswordAuthentication
-import javax.mail.Session
-import javax.mail.Transport
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeBodyPart
-import javax.mail.internet.MimeMessage
-import javax.mail.internet.MimeMultipart
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
@@ -406,6 +405,8 @@ class UserAdminService {
                 }
                 prop.put("mail.smtp.host", smtpData.host)
                 prop.put("mail.smtp.port", smtpData.port)
+                prop.put("mail.smtp.connectiontimeout", "10000")
+                prop.put("mail.smtp.timeout", "10000")
 
                 logService.cam.trace("mail.smtp.auth=${smtpData.auth}")
                 logService.cam.trace("mail.smtp.starttls.enable=${smtpData.enableStartTLS}")
@@ -414,13 +415,14 @@ class UserAdminService {
                 logService.cam.trace("mail.smtp.port=${smtpData.port}")
                 logService.cam.trace("mail.smtp.ssl.trust=${smtpData.sslTrust}")
 
+
                 Session session = Session.getInstance(prop, new Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(smtpData.username, smtpData.password)
                     }
                 })
-
+                session.debug = true
                 Message message = new MimeMessage(session)
                 message.setFrom(new InternetAddress(smtpData.fromAddress))
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email))
@@ -437,7 +439,6 @@ class UserAdminService {
                 multipart.addBodyPart(mimeBodyPart)
 
                 message.setContent(multipart)
-
                 Transport.send(message)
             }
         }
