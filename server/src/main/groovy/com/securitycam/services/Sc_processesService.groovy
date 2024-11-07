@@ -159,42 +159,6 @@ class Sc_processesService {
      * @return
      */
     private void sendEmail(String userName, String recipientAddress, String currentIP) {
-        def smtpData = utilsService.getSMTPConfigData()
-
-        Properties prop = new Properties()
-        prop.put("mail.smtp.auth", smtpData.auth)
-        prop.put("mail.smtp.starttls.enable", smtpData.enableStartTLS)
-        if(smtpData.enableStartTLS) {
-            prop.put("mail.smtp.ssl.protocols", smtpData.sslProtocols)
-            prop.put("mail.smtp.ssl.trust", smtpData.sslTrust)
-        }
-        prop.put("mail.smtp.host", smtpData.host)
-        prop.put("mail.smtp.port", smtpData.port)
-
-        logService.cam.trace("mail.smtp.auth=${smtpData.auth}")
-        logService.cam.trace("mail.smtp.starttls.enable=${smtpData.enableStartTLS}")
-        logService.cam.trace("mail.smtp.ssl.protocols=${smtpData.sslProtocols}")
-        logService.cam.trace("mail.smtp.host=${smtpData.host}")
-        logService.cam.trace("mail.smtp.port=${smtpData.port}")
-        logService.cam.trace("mail.smtp.ssl.trust=${smtpData.sslTrust}")
-
-        Session session = Session.getInstance(prop, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                logService.cam.trace("Authenticating: ${smtpData.username}:xxxxxxxxxx")
-                return new PasswordAuthentication(smtpData.username, smtpData.password)
-            }
-        })
-        session.setDebug(true)
-        FileOutputStream fs = new FileOutputStream("/var/log/security-cam/javaxMailLog.log")
-        PrintStream ps = new PrintStream(fs, true)
-        session.setDebugOut(ps)
-        Message message = new MimeMessage(session)
-        logService.cam.trace("fromaddress: ${smtpData.fromAddress}")
-        message.setFrom(new InternetAddress(smtpData.fromAddress))
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientAddress))
-        message.setSubject("Change of public IP address")
-
         String msg = """Dear NVR user.
 <div>
     I have detected a change of broadband IP address, this is now ${currentIP}
@@ -211,15 +175,8 @@ class Sc_processesService {
     Raspberry pi
 </div>
 """
-        MimeBodyPart mimeBodyPart = new MimeBodyPart()
-        mimeBodyPart.setContent(msg, "text/html; charset=utf-8")
-
-        Multipart multipart = new MimeMultipart()
-        multipart.addBodyPart(mimeBodyPart)
-
-        message.setContent(multipart)
         logService.cam.debug("Sending email to ${recipientAddress}")
-        Transport.send(message)
+        utilsService.sendEmail(msg, "Change of public IP address", recipientAddress)
     }
 
     /**

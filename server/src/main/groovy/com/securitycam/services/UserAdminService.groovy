@@ -356,8 +356,8 @@ class UserAdminService {
                     timer.schedule(task, resetPasswordParameterTimeout)
                     timerMap.put(uniqueId, timer)
 
-                    sendResetPasswordEmail(cmd.getEmail(), uniqueId, cmd.getClientUri())
-                }
+                    sendResetPasswordEmail(cmd.getEmail(), uniqueId, user.username, cmd.getClientUri())
+                } // No error if email address was wrong, just ignore it
             }
         }
         catch (Exception ex) {
@@ -383,66 +383,12 @@ class UserAdminService {
         return generatedString
     }
 
-    private def sendResetPasswordEmail(String email, String idStr, String clientUri) {
-        User user = userRepository.findByEmail(email)
-        if (user != null) {
-            def auths = user.getAuthorities()
-            boolean isClient = false
-            auths.forEach { role ->
-                if (role.authority == 'ROLE_CLIENT')
-                    isClient = true
-            }
-            if (isClient) {   // Correct email name and role is ROLE_CLIENT
-                //noinspection DuplicatedCode
-                def smtpData = utilsService.getSMTPConfigData()
+    private def sendResetPasswordEmail(String email, String idStr, String username, String clientUri) {
+        String msg = "<h2>Reset Password for user: ${username}</h2>" +
+                      "An NVR password reset link was requested. If this was not you, please ignore this email.<br> " +
+                      "Please click <a href=\"" + clientUri + "/recover/resetPasswordForm?key=${idStr}\">here</a> to reset your NVR password."
 
-                Properties prop = new Properties()
-                prop.put("mail.smtp.auth", smtpData.auth)
-                prop.put("mail.smtp.starttls.enable", smtpData.enableStartTLS)
-                if (smtpData.enableStartTLS) {
-                    prop.put("mail.smtp.ssl.protocols", smtpData.sslProtocols)
-                    prop.put("mail.smtp.ssl.trust", smtpData.sslTrust)
-                }
-                prop.put("mail.smtp.host", smtpData.host)
-                prop.put("mail.smtp.port", smtpData.port)
-                prop.put("mail.smtp.connectiontimeout", "10000")
-                prop.put("mail.smtp.timeout", "10000")
-
-                logService.cam.trace("mail.smtp.auth=${smtpData.auth}")
-                logService.cam.trace("mail.smtp.starttls.enable=${smtpData.enableStartTLS}")
-                logService.cam.trace("mail.smtp.ssl.protocols=${smtpData.sslProtocols}")
-                logService.cam.trace("mail.smtp.host=${smtpData.host}")
-                logService.cam.trace("mail.smtp.port=${smtpData.port}")
-                logService.cam.trace("mail.smtp.ssl.trust=${smtpData.sslTrust}")
-
-
-                Session session = Session.getInstance(prop, new Authenticator() {
-                    @Override
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(smtpData.username, smtpData.password)
-                    }
-                })
-                session.debug = true
-                Message message = new MimeMessage(session)
-                message.setFrom(new InternetAddress(smtpData.fromAddress))
-                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email))
-                message.setSubject("Reset Password")
-
-                String msg = "<h2>Reset Password for user: ${user.username}</h2>" +
-                        "An NVR password reset link was requested. If this was not you, please ignore this email.<br> " +
-                        "Please click <a href=\"" + clientUri + "/recover/resetPasswordForm?key=${idStr}\">here</a> to reset your NVR password."
-
-                MimeBodyPart mimeBodyPart = new MimeBodyPart()
-                mimeBodyPart.setContent(msg, "text/html; charset=utf-8")
-
-                Multipart multipart = new MimeMultipart()
-                multipart.addBodyPart(mimeBodyPart)
-
-                message.setContent(multipart)
-                Transport.send(message)
-            }
-        }
-        // No error if email address was wrong, just ignore it
+        utilsService.sendEmail(msg, "Reset Password", email)
     }
 
     private def clearPasswordResetKeyMapAndTimer() {

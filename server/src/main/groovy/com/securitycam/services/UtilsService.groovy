@@ -9,6 +9,17 @@ import com.securitycam.configuration.Config
 import com.securitycam.controllers.CameraAdminCredentials
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
+import com.securitycam.model.User
+import jakarta.mail.Authenticator
+import jakarta.mail.Message
+import jakarta.mail.Multipart
+import jakarta.mail.PasswordAuthentication
+import jakarta.mail.Session
+import jakarta.mail.Transport
+import jakarta.mail.internet.InternetAddress
+import jakarta.mail.internet.MimeBodyPart
+import jakarta.mail.internet.MimeMessage
+import jakarta.mail.internet.MimeMultipart
 import jakarta.validation.Valid
 import org.intellij.lang.annotations.Language
 import org.springframework.beans.factory.annotation.Autowired
@@ -224,7 +235,7 @@ class UtilsService {
                         clientSocket = serverSocket.accept()
                         out = clientSocket.getOutputStream()
                     }
-                    catch(Exception ex) {
+                    catch (Exception ex) {
                         stopAudioOut()
                         logService.cam.error "${ex.getClass().getName()} in startAudioOut accept thread: ${ex.getMessage()}"
                     }
@@ -239,7 +250,7 @@ class UtilsService {
                 brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
 
                 final URI netcam_uri = new URI(cmd.netcam_uri)
-                CameraAdminCredentials creds  = cmd.cam.credentials()
+                CameraAdminCredentials creds = cmd.cam.credentials()
                 client = new RtspClient(netcam_uri.getHost(), netcam_uri.getPort(), creds.userName, creds.password, logService)
                 client.start()
                 result = client.await()
@@ -287,6 +298,7 @@ class UtilsService {
     private final long audioInSessionTimeout = 3
     // Stop audio input session after 3 seconds without a websocket message
     private long audioInputStreamCheckCount = 0
+
     def audio(byte[] bytes) {
         audioQueue.add(bytes)
         // Reset the stream check count to indicate the stream is still active
@@ -304,15 +316,15 @@ class UtilsService {
             }
         }
     }
+
     ObjectCommandResponse getUserAuthorities() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            if(SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 def ex = new Expando()
                 ex.setProperty('authority', 'ROLE_CLIENT')
                 result.responseObject = [ex.properties]  // In development/debug mode
-            }
-            else  // Logged in
+            } else  // Logged in
                 result.responseObject = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
         }
         catch (Exception ex) {
@@ -479,4 +491,55 @@ class UtilsService {
         }
         return result
     }
+
+    def sendEmail(String msg, String subject, String recipientAddrs) {
+        def smtpData = getSMTPConfigData()
+
+        Properties prop = new Properties()
+        prop.put("mail.smtp.auth", smtpData.auth)
+        prop.put("mail.smtp.starttls.enable", smtpData.enableStartTLS)
+        if (smtpData.enableStartTLS) {
+            prop.put("mail.smtp.ssl.protocols", smtpData.sslProtocols)
+            prop.put("mail.smtp.ssl.trust", smtpData.sslTrust)
+        }
+        prop.put("mail.smtp.host", smtpData.host)
+        prop.put("mail.smtp.port", smtpData.port)
+        prop.put("mail.smtp.connectiontimeout", "10000")
+        prop.put("mail.smtp.timeout", "10000")
+
+        logService.cam.trace("mail.smtp.auth=${smtpData.auth}")
+        logService.cam.trace("mail.smtp.starttls.enable=${smtpData.enableStartTLS}")
+        logService.cam.trace("mail.smtp.ssl.protocols=${smtpData.sslProtocols}")
+        logService.cam.trace("mail.smtp.host=${smtpData.host}")
+        logService.cam.trace("mail.smtp.port=${smtpData.port}")
+        logService.cam.trace("mail.smtp.ssl.trust=${smtpData.sslTrust}")
+
+
+        Session session = Session.getInstance(prop, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(smtpData.username, smtpData.password)
+            }
+        })
+
+        FileOutputStream fs = new FileOutputStream("/var/log/security-cam/javaxMailLog.log")
+        PrintStream ps = new PrintStream(fs, true)
+        session.setDebugOut(ps)
+        session.debug = true
+        Message message = new MimeMessage(session)
+        message.setFrom(new InternetAddress(smtpData.fromAddress))
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientAddrs))
+        message.setSubject(subject)
+
+        MimeBodyPart mimeBodyPart = new MimeBodyPart()
+        mimeBodyPart.setContent(msg, "text/html; charset=utf-8")
+
+        Multipart multipart = new MimeMultipart()
+        multipart.addBodyPart(mimeBodyPart)
+
+        message.setContent(multipart)
+        Transport.send(message)
+    }
 }
+
+
