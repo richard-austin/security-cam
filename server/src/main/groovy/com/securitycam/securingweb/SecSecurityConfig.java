@@ -41,6 +41,7 @@ public class SecSecurityConfig {
                     .authorizeHttpRequests((requests) -> requests
                             .requestMatchers("/stomp").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/*.css").hasAnyRole("CLIENT", "CLOUD", "GUEST")
+                            .requestMatchers("/*.map").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/*.js").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/*.ttf").hasAnyRole("CLIENT", "CLOUD", "GUEST")
                             .requestMatchers("/audio").hasAnyRole("CLIENT", "CLOUD")
@@ -49,6 +50,10 @@ public class SecSecurityConfig {
                             .requestMatchers("/favicon.ico").permitAll()
                             .requestMatchers("/stylesheets/*.css").permitAll()
                             .requestMatchers("/javascripts/*.css").permitAll()
+                            .requestMatchers("/recover/forgotPassword").permitAll()
+                            .requestMatchers("/recover/sendResetPasswordLink").permitAll()
+                            .requestMatchers("/recover/resetPasswordForm").permitAll()
+                            .requestMatchers("/recover/resetPassword").permitAll()
                             .requestMatchers("/user/createOrUpdateAccountLocally").permitAll()
                             .requestMatchers("/user/checkForAccountLocally").permitAll()
                             .requestMatchers("/user/checkForActiveMQCreds").permitAll()

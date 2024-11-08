@@ -109,8 +109,8 @@ class UserAdminService {
                     def auths = user.getAuthorities()
                     auths.forEach { role ->
                         if (role.authority == 'ROLE_CLIENT') {
-                            user.setPassword(cmd.getNewPassword())
-                            userRepository.save()
+                            user.setPassword(passwordEncoder.encode(cmd.getNewPassword()))
+                            userRepository.save(user)
                             return result
                         }
                     }
