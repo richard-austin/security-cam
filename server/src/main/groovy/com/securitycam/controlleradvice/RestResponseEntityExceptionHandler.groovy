@@ -37,12 +37,14 @@ class RestResponseEntityExceptionHandler {
 
    @ExceptionHandler(NoResourceFoundException.class)
     RedirectView handleNoResourceFoundException(RedirectAttributes redirectAttributes, NoResourceFoundException ex) {
-       def resourcePath = ex.getResourcePath()
+       def requestUri = ex.getResourcePath()
        def message = ex.getMessage()
+       def status = ex.statusCode
 
-       redirectAttributes.addFlashAttribute("resourcePath", resourcePath)
+       redirectAttributes.addFlashAttribute("requestUri", requestUri)
        redirectAttributes.addFlashAttribute("message", message)
-       return new RedirectView("/notFound") //  new ResponseEntity<Object>(retVal, HttpStatus.NOT_FOUND).body("notFound")
+       redirectAttributes.addFlashAttribute("status", status)
+       return new RedirectView("/error") //  new ResponseEntity<Object>(retVal, HttpStatus.NOT_FOUND).body("notFound")
     }
 
     @ExceptionHandler(NVRRestMethodException.class)
