@@ -3,13 +3,27 @@
     <head>
         <title>NVR Error</title>
         <link rel="stylesheet" href="/stylesheets/errors.css">
+        <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+        <style>
+            .home-btn {
+                margin-left: 1rem;
+            }
+        </style>
     </head>
     <body style="background-color: #4a4a4a">
         <h3 style="color: ghostwhite" th:text="${message+': '+status}"></h3>
-        <ul class="error-details">
-            <li th:text="${'HTTP Status Code: '+status}"></li>
-            <li th:text="${message}"></li>
-            <li th:text="${'Request URI: '+requestUri}"></li>
-        </ul>
+        <div class="error-details">
+            <ul>
+                <li th:text="${'HTTP Status Code: '+status}"></li>
+                <li th:text="${message}"></li>
+                <li th:text="${'Request URI: '+requestUri}"></li>
+            </ul>
+            <button class="btn btn-sm btn-primary text-uppercase home-btn" onclick="home()">Home</button>
+        </div>
+        <script>
+            function home() {
+                window.location.href = '/';
+            }
+        </script>
     </body>
 </html>
