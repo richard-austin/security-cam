@@ -11,7 +11,7 @@ class LoginController {
     @GetMapping("/login")
     def login() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication()
-        if (auth && auth.authorities[0] == new SimpleGrantedAuthority('ROLE_ANONYMOUS'))
+        if (!auth || auth.authorities[0] == new SimpleGrantedAuthority('ROLE_ANONYMOUS'))
             return  'login'
         else
             return 'redirect:/'

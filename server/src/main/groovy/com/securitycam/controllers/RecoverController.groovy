@@ -135,9 +135,4 @@ class RecoverController {
             }
         }
     }
-
-    @RequestMapping("/notFound")
-    def notFound() {
-        return "notFound"
-    }
 }

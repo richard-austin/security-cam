@@ -184,6 +184,7 @@ class UtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
             result.responseObject = getSMTPConfigData()
+            result.responseObject.confirmPassword = result.responseObject.password = ""
         }
         catch (FileNotFoundException fnf) {
             final String noConfigFile = "No existing config file for SMTP client. It will be created when the SMTP parameters are entered and saved."

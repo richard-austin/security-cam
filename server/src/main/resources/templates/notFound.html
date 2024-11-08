@@ -1,14 +1,14 @@
 <!doctype html>
 <html lang="EN_gb">
     <head>
-        <title>Security Cam Page Not Found</title>
-    <meta name="layout" content="main">
-        <link href=/stylesheets/errors.css>
+        <title>Security Cam</title>
+        <link rel="stylesheet" href="/stylesheets/errors.css">
     </head>
-    <body>
-        <ul class="errors">
-            <li>Error: Page Not Found (404)</li>
-            <li>Path: ${request.forwardURI}</li>
+    <body style="background-color: #4a4a4a">
+        <h3 style="color: ghostwhite">NVR Page Not Found: 404</h3>
+        <ul class="error-details">
+            <li th:text="${message}"></li>
+            <li class="filename" th:text="${'Path: /'+resourcePath}"></li>
         </ul>
     </body>
 </html>

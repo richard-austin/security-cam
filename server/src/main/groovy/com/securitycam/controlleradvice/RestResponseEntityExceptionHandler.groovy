@@ -5,11 +5,13 @@ import com.securitycam.services.LogService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
+import org.springframework.ui.Model
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import org.springframework.web.servlet.view.RedirectView
 
@@ -34,9 +36,13 @@ class RestResponseEntityExceptionHandler {
     }
 
    @ExceptionHandler(NoResourceFoundException.class)
-    RedirectView handleNoResourceFoundException(NoResourceFoundException ex) {
-        ErrorResponse retVal = new ErrorResponse(ex)
-        return new RedirectView("notFound") //  new ResponseEntity<Object>(retVal, HttpStatus.NOT_FOUND).body("notFound")
+    RedirectView handleNoResourceFoundException(RedirectAttributes redirectAttributes, NoResourceFoundException ex) {
+       def resourcePath = ex.getResourcePath()
+       def message = ex.getMessage()
+
+       redirectAttributes.addFlashAttribute("resourcePath", resourcePath)
+       redirectAttributes.addFlashAttribute("message", message)
+       return new RedirectView("/notFound") //  new ResponseEntity<Object>(retVal, HttpStatus.NOT_FOUND).body("notFound")
     }
 
     @ExceptionHandler(NVRRestMethodException.class)
