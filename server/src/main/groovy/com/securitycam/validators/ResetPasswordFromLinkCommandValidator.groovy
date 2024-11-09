@@ -25,7 +25,7 @@ class ResetPasswordFromLinkCommandValidator implements Validator{
                     errors.rejectValue("newPassword", "Invalid password, must be minimum eight characters, at least one letter, one number and one special character. (must be <= 64 characters)")
             }
             if (target.confirmNewPassword != target.newPassword)
-                errors.rejectValue("password", "New passwords do not match")
+                errors.rejectValue("newPassword", "New passwords do not match")
         }
     }
 }

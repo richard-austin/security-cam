@@ -118,20 +118,21 @@ class RecoverController {
             }
             logService.cam.error "resetPassword:  ${error}"
             redirectAttributes.addFlashAttribute("error", error)
-            def params = [key: cmd.resetKey]
-            redirectAttributes.addFlashAttribute("params", params)
-            return "redirect:/recover/resetPasswordForm"
+            redirectAttributes.addFlashAttribute("passwordSet", false)
+            redirectAttributes.addFlashAttribute("key", cmd.resetKey)
+            return "redirect:/recover/resetPasswordForm?key=${cmd.resetKey}"
         } else {
             result = userAdminService.resetPasswordFromLink(cmd)
             if(result.status == PassFail.PASS) {
                 redirectAttributes.addFlashAttribute("message", "Password reset successfully")
-                def params = [passwordSet: true]
-                redirectAttributes.addFlashAttribute("params", params)
+                redirectAttributes.addFlashAttribute("passwordSet", true)
                 return "redirect:/recover/resetPasswordForm"
             }
             else {
                 redirectAttributes.addFlashAttribute("error", result.error)
-                return "redirect:/recover/resetPasswordForm"
+                redirectAttributes.addFlashAttribute("key", cmd.resetKey)
+                redirectAttributes.addFlashAttribute("passwordSet", false)
+                return "redirect:/recover/resetPasswordForm?key=${cmd.resetKey}"
             }
         }
     }
