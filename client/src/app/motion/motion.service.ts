@@ -54,7 +54,7 @@ export class MotionService {
 
   /**
    * downloadRecording: Download a .mp4 file for the recording whose manifest file name is provided
-   * @param stream:   The stream that the recordings are from.
+   * @param stream: The stream that the recordings are from.
    * @param manifest: The manifest file for the recording from which the .mp4 file will be created and downloaded
    */
   async downloadRecording(stream: Stream, manifest: string) {

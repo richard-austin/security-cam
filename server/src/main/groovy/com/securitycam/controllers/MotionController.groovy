@@ -18,6 +18,7 @@ import com.securitycam.validators.DownloadRecordingCommandValidator
 import com.securitycam.validators.GeneralValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -151,7 +152,6 @@ class MotionController
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     @PostMapping("/downloadRecording")
     def downloadRecording(@RequestBody DownloadRecordingCommand cmd) {
-        // This more convoluted validation is used as setting up the folder property in cmd is done during validation
         GeneralValidator gv = new GeneralValidator(cmd,  new DownloadRecordingCommandValidator(config))
         BindingResult results = gv.validate()
         if (results.hasErrors()) {
@@ -164,7 +164,7 @@ class MotionController
                 result = motionService.downloadRecording(cmd)
                 if (result.status == PassFail.FAIL) {
                     logService.cam.error "MotionController.downloadRecording() ${result.error}"
-                    ErrorResponse retVal = new ErrorResponse(new Exception("Error in downloadRecording"), "motion/downloadRecording", result.error, "")
+                    ErrorResponse retVal = new ErrorResponse(new Exception("Error in downloadRecording"), "motion/downloadRecording", result.error)
                     return new ResponseEntity<Object>(retVal, HttpStatus.BAD_REQUEST)
                 } else {
                     File recordingFile = result.responseObject as File
@@ -173,7 +173,7 @@ class MotionController
                     try (def fis = new FileInputStream(recordingFile)) {
                         Files.delete(recordingFile.toPath())
 
-                        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders()
+                        HttpHeaders headers = new HttpHeaders()
                         headers.add("Content-disposition", "attachment;filename=${fileName}")
                         def body = fis.getBytes()
                         ResponseEntity ent = ResponseEntity
@@ -202,7 +202,6 @@ class MotionController
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @PostMapping("/deleteRecording")
     def deleteRecording(@RequestBody DeleteRecordingCommand cmd) {
-        // This more convoluted validation is used as setting up the folder property in cmd is done during validation
         GeneralValidator gv = new GeneralValidator(cmd,  new DeleteRecordingCommandValidator(config))
         BindingResult results = gv.validate()
         if (results.hasErrors()) {

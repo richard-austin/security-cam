@@ -21,7 +21,7 @@
   <div *ngIf="message && style==styles.warning">
     {{message}}
   </div>
-  <ng-container *ngIf="!message && e?.status != 400">
+  <div *ngIf="!message && e?.status != 400">
     <div *ngIf="e !== undefined && e?.status !== undefined && e?.status != 0">Error
       status: {{e?.status}} {{e?.statusText}}</div>
     <ng-container *ngIf="showMessageInError">{{e?.error}}</ng-container>
@@ -33,6 +33,7 @@
               <li *ngIf="e?.error?.reason != '' && e?.error?.reason != null">{{ e?.error?.reason }}</li>
           </ul>
       </ng-container>
-  </ng-container>
+  </div>
+    <br>
   <button  *ngIf="!embedded" mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
 </div>

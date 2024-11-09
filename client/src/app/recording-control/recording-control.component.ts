@@ -221,12 +221,13 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     } catch (error: any) {
       let reader: FileReader = new FileReader();
       reader.onload = () => {
+        let result = JSON.parse(reader.result as string)
         this.reporting.errorMessage = new HttpErrorResponse({
-          error: JSON.parse(reader.result as string),
-          status: error.status
+          error: result.reason,
+          status: 500 /*error.status */
         });
       };
-      reader.readAsText(error.e);
+      reader.readAsText(error.error);
     }
     this.downloading = false;
   }
