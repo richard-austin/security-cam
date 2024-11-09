@@ -16,8 +16,7 @@ export class ReportingComponent implements OnInit {
   showMessageInError:boolean = true;
   showMessageFromMessage: boolean = false;
   @Input() embedded: boolean = false;
-
-
+  isHTML: boolean = false;
 
   constructor() {
   }
@@ -36,6 +35,11 @@ export class ReportingComponent implements OnInit {
       }
     } else if (typeof (e.error) !== 'string') {
       this.showMessageInError = false;
+      if(e.error !== undefined && e.error.text !== undefined) {
+        let text: string = e.error.text;
+        this.isHTML = text.startsWith("<!doctype html>");
+      }
+
       if (typeof (e.message) === 'string') {
           this.showMessageFromMessage = true;
         }
@@ -60,6 +64,7 @@ export class ReportingComponent implements OnInit {
   private clearMessage() {
     this.e = undefined;
     this.message = undefined;
+    this.isHTML = false;
   }
 
   ngOnInit(): void {

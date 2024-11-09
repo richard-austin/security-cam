@@ -16,7 +16,8 @@ const PROXY_CONFIG = [
       "/login/",
       "/dc/",
       "/cua/",
-      "/stomp"
+      "/stomp",
+      "/error"
     ],
     target: "http://localhost:8080/",
     ws: true,

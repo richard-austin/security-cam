@@ -51,7 +51,7 @@ class PtzController {
             ObjectCommandResponse response = onvifService.move(cmd)
             if(response.status != PassFail.PASS) {
                 logService.cam.error("Error in ptz/move: ${response.error}")
-                throw new NVRRestMethodException(response.error, "ptz/move", "")
+                throw new NVRRestMethodException(response.error, "ptz/move")
             }
             else
                 return ResponseEntity.ok()
@@ -79,7 +79,7 @@ class PtzController {
             ObjectCommandResponse response = onvifService.stop(cmd)
             if(response.status != PassFail.PASS) {
                 logService.cam.error("Error in ptz/move: ${response.error}")
-                throw new NVRRestMethodException(response.error, "ptz/stop", "")
+                throw new NVRRestMethodException(response.error, "ptz/stop")
             }
             else
                 return ResponseEntity.ok()
@@ -107,7 +107,7 @@ class PtzController {
             ObjectCommandResponse response = onvifService.preset(cmd)
             if(response.status != PassFail.PASS) {
                 logService.cam.error("Error in ptz/preset: ${response.error}")
-                throw new NVRRestMethodException(response.error, "ptz/preset", "")
+                throw new NVRRestMethodException(response.error, "ptz/preset")
             }
             else
                 return ResponseEntity.ok()
@@ -135,7 +135,7 @@ class PtzController {
             ObjectCommandResponse response = onvifService.ptzPresetsInfo(cmd)
             if(response.status != PassFail.PASS) {
                 logService.cam.error("Error in ptz/preset: ${response.error}")
-                throw new NVRRestMethodException(response.error, "ptz/ptzPresetsInfo", "")
+                throw new NVRRestMethodException(response.error, "ptz/ptzPresetsInfo")
             }
             else
                 return ResponseEntity.ok().body(response.responseObject)

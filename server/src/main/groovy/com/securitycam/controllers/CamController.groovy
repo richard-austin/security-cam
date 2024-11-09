@@ -41,7 +41,7 @@ class CamController {
     def getCameras() {
         ObjectCommandResponse cameras = camService.getCameras()
         if (cameras.status != PassFail.PASS)
-            throw new NVRRestMethodException(cameras.error, "cam/getCameras", "See logs") //render(status: 500, text: cameras.error)
+            throw new NVRRestMethodException(cameras.error, "cam/getCameras") //render(status: 500, text: cameras.error)
         else {
             logService.cam.info("getCameras: success")
             return cameras.responseObject
@@ -55,7 +55,7 @@ class CamController {
         if(response.status == PassFail.PASS)
             return response.responseObject
         else
-            throw new NVRRestMethodException(response.error, "cam/getPublicKey", "See logs")
+            throw new NVRRestMethodException(response.error, "cam/getPublicKey")
     }
 
     /**
@@ -79,7 +79,7 @@ class CamController {
         } else {
             ObjectCommandResponse response = cameraAdminPageHostingService.getAccessToken(cmd)
             if (response.status != PassFail.PASS)
-                throw new NVRRestMethodException(response.error, "cam/getAccessToken", "See logs")
+                throw new NVRRestMethodException(response.error, "cam/getAccessToken")
             else
                 return response.responseObject
         }
@@ -90,7 +90,7 @@ class CamController {
     def resetTimer(@Valid @RequestBody ResetTimerCommand cmd) {
             ObjectCommandResponse response = cameraAdminPageHostingService.resetTimer(cmd)
             if (response.status != PassFail.PASS)
-                throw new NVRRestMethodException(response.error, "cam/resetTimer", "See logs")
+                throw new NVRRestMethodException(response.error, "cam/resetTimer")
             else
                 return response.responseObject
     }
@@ -100,7 +100,7 @@ class CamController {
     def closeClients(@Valid @RequestBody CloseClientsCommand cmd) {
             ObjectCommandResponse response = cameraAdminPageHostingService.closeClients(cmd)
             if (response.status != PassFail.PASS)
-                throw new NVRRestMethodException(response.error, "cam/closeClients", "See logs")
+                throw new NVRRestMethodException(response.error, "cam/closeClients")
             else
                 return response.responseObject
         }

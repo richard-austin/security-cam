@@ -22,7 +22,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
-import org.springframework.util.MultiValueMap
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -135,7 +134,6 @@ class MotionController
     @RequestMapping("/getMotionEvents")
     def getMotionEvents(@Valid @RequestBody GetMotionEventsCommand cmd) {
         ObjectCommandResponse motionEvents = motionService.getMotionEvents(cmd)
-
         if (motionEvents.status != PassFail.PASS) {
             throw new NVRRestMethodException(motionEvents.error, "motion/getMotionEvents")
         } else {
@@ -191,7 +189,7 @@ class MotionController
             }
             catch (Exception ex) {
                 logService.cam.error "MotionController.downloadRecording() " + ex.getMessage()
-                throw new NVRRestMethodException(ex.getMessage(), "motion/downloadRecording", ex.getCause().getMessage())
+                throw new NVRRestMethodException(ex.getMessage(), "motion/downloadRecording")
             }
         }
     }

@@ -67,7 +67,7 @@ class UserController {
         } else {
             resp = userAdminService.resetPassword(cmd)
             if (resp.status != PassFail.PASS) {
-                throw new NVRRestMethodException(resp.error, "user/changePassword", "See logs")
+                throw new NVRRestMethodException(resp.error, "user/changePassword")
             } else {
                 logService.cam.info("changePassword: success")
                 return ""
@@ -80,7 +80,7 @@ class UserController {
     def getEmail() {
         ObjectCommandResponse result = userAdminService.getEmail()
         if (result.status != PassFail.PASS) {
-            throw new NVRRestMethodException(result.error, "user/getEmail", "See logs")
+            throw new NVRRestMethodException(result.error, "user/getEmail")
         } else {
             logService.cam.info("getEmail: success")
             return result.responseObject
@@ -102,7 +102,7 @@ class UserController {
         } else {
             resp = userAdminService.changeEmail(cmd)
             if (resp.status != PassFail.PASS) {
-                throw new NVRRestMethodException(resp.error, "user/changeEmail", "See logs")
+                throw new NVRRestMethodException(resp.error, "user/changeEmail")
             } else {
                 logService.cam.info("changeEmail: success")
                 return ""
@@ -124,7 +124,7 @@ class UserController {
             resp = userAdminService.setupGuestAccount(cmd)
 
             if (resp.status != PassFail.PASS)
-                throw new NVRRestMethodException(resp.error, "user/setupGuestAccount", "See logs")
+                throw new NVRRestMethodException(resp.error, "user/setupGuestAccount")
             else {
                 logService.cam.info("setupGuestAccount: (= ${resp.responseObject}) success")
                 return resp.responseObject
@@ -137,7 +137,7 @@ class UserController {
     def isGuest() {
         ObjectCommandResponse result = userAdminService.isGuest()
         if (result.status != PassFail.PASS)
-            throw new NVRRestMethodException(result.error, "user/isGuest", "See logs")
+            throw new NVRRestMethodException(result.error, "user/isGuest")
         else
            return ResponseEntity.ok(result.responseObject)
     }
@@ -147,7 +147,7 @@ class UserController {
     def guestAccountEnabled() {
         ObjectCommandResponse result = userAdminService.guestAccountEnabled()
         if (result.status != PassFail.PASS)
-            throw new NVRRestMethodException(result.error, "user/guestAccountEnabled", "See logs")
+            throw new NVRRestMethodException(result.error, "user/guestAccountEnabled")
         else
             return  ResponseEntity.ok(result.responseObject)
     }
@@ -164,7 +164,7 @@ class UserController {
         } else {
             result = userAdminService.createOrUpdateAccount(cmd)
             if (result.status != PassFail.PASS) {
-                throw new NVRRestMethodException(result.error, "user/createOrUpdateAccount", "See logs")
+                throw new NVRRestMethodException(result.error, "user/createOrUpdateAccount")
             } else {
                 logService.cam.info("createOrUpdateAccount: success")
                 return ResponseEntity.ok("")
@@ -235,7 +235,7 @@ class UserController {
         } else {
             response = userAdminService.addOrUpdateActiveMQCreds(cmd)
             if (response.status != PassFail.PASS) {
-                throw new NVRRestMethodException(response.error, "user/createOrUpdateAccount", "See logs")
+                throw new NVRRestMethodException(response.error, "user/createOrUpdateAccount")
             } else {
                 logService.cam.info("addOrUpdateActiveMQCreds: success")
                 ResponseEntity.ok("")
@@ -249,7 +249,7 @@ class UserController {
         ObjectCommandResponse result = userAdminService.hasLocalAccount()
 
         if (result.status != PassFail.PASS) {
-            throw new NVRRestMethodException(result.error, "user/hasLocalAccount", "")
+            throw new NVRRestMethodException(result.error, "user/hasLocalAccount")
         } else {
             logService.cam.info("hasLocalAccount: (= ${result.responseObject}) success")
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(result.responseObject != null)
@@ -262,7 +262,7 @@ class UserController {
         ObjectCommandResponse result = userAdminService.hasActiveMQCreds()
 
         if (result.status != PassFail.PASS) {
-            throw new NVRRestMethodException(result.error, "user/hasActiveMQCreds", "")
+            throw new NVRRestMethodException(result.error, "user/hasActiveMQCreds")
         } else {
             logService.cam.info("hasActiveMQCreds: (= ${result.responseObject}) success")
             return ResponseEntity.ok(result.responseObject)

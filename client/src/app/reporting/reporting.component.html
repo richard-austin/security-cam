@@ -1,4 +1,10 @@
-<div *ngIf="e || message"
+<ng-container *ngIf="isHTML">
+    <div class="alert-danger reporting">
+        <div [innerHTML]="e?.error?.text"></div>
+        <button  style="top: -25px; margin-bottom: -24px" *ngIf="!embedded" mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
+    </div>
+</ng-container>
+<div *ngIf="!isHTML && e || message"
           [ngClass]="{'alert-danger': style==styles.danger, 'alert-success': style==styles.success, 'alert-warning': style==styles.warning}"
           class="reporting" (click)="embedded ? dismiss() : null">
   <div *ngIf="message && style==styles.success">
@@ -28,5 +34,5 @@
           </ul>
       </ng-container>
   </ng-container>
-  <button *ngIf="!embedded" mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
+  <button  *ngIf="!embedded" mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
 </div>

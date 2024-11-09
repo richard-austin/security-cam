@@ -193,7 +193,7 @@ class UtilsController {
             RestfulResponse response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params)
             if (response.status != RestfulResponseStatusEnum.PASS) {
                 logService.cam.error "cameraParams: error: ${response.errorMsg}"
-                throw new NVRRestMethodException("response.errorMsg", "Failed to get camera parameters for camera ${cmd.address}")
+                throw new NVRRestMethodException(response.errorMsg, "Failed to get camera parameters for camera ${cmd.address}")
             } else
                 return response.responseObject
         }

@@ -25,7 +25,7 @@ class CloudProxyController {
         if(resp.status == PassFail.PASS)
             return [transportActive: resp.responseObject]
         else
-            throw new NVRRestMethodException(resp.error, "cloudProxy/isTransportActive", "See logs")
+            throw new NVRRestMethodException(resp.error, "cloudProxy/isTransportActive")
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
@@ -69,6 +69,6 @@ class CloudProxyController {
         if(resp.status == PassFail.PASS)
            return resp.responseObject
         else
-            throw new NVRRestMethodException(resp.error , "cloudProxy/status", "See logs")
+            throw new NVRRestMethodException(resp.error , "cloudProxy/status")
     }
 }
