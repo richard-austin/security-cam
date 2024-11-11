@@ -24,6 +24,7 @@ public class User implements MyUserDetails {
 //    private Long id;
 
     @Email
+    @Column(unique = true)
     private String email;
 
     private boolean cloudAccount = false;
@@ -183,15 +184,12 @@ public class User implements MyUserDetails {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("User [username=")
-                .append(username)
-                .append(", email=").append(email)
-                .append(", enabled=").append(enabled)
-                .append(", secret=").append(secret)
-                .append(", roles=").append(roles)
-                .append("]");
-        return builder.toString();
-    }
-
+        return "User [username=" +
+                username +
+                ", email=" + email +
+                ", enabled=" + enabled +
+                ", secret=" + secret +
+                ", roles=" + roles +
+                "]";
+   }
 }

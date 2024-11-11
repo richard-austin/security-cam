@@ -70,7 +70,6 @@ class MyIP {
 }
 
 @Service
-@Transactional
 @EnableScheduling
 class UtilsService {
     @Autowired

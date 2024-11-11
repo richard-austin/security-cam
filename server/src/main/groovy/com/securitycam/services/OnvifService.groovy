@@ -78,7 +78,6 @@ class DiscoveryResult {
     Map<String, String> failed
 }
 
-@Transactional
 @Service
 class OnvifService {
     @Autowired
@@ -220,7 +219,7 @@ class OnvifService {
                         if (device == null)
                             throw new Exception("No camera found at ${cmd?.onvifUrl == null ? credentials.host : cmd.onvifUrl}")
 
-                        List<Profile> profiles = null
+                        List<Profile> profiles
                         try {
                             Media media = device.getMedia()
                             profiles = media.getProfiles()
@@ -471,7 +470,7 @@ class OnvifService {
             result.error = "IO Error connecting to camera at ${strUrl}: ${ex.getMessage()}"
             if (uc != null) {
                 try {
-                    def rm = uc.getRequestMethod()
+                   // def rm = uc.getRequestMethod()
                     result.response = uc.getHeaderField("WWW-Authenticate")
 
                     result.errno = uc.getResponseCode()

@@ -11,19 +11,11 @@ import com.securitycam.model.User
 import groovy.json.JsonSlurper
 import org.springframework.core.env.Environment
 import org.springframework.beans.factory.annotation.Autowired
-
-import org.springframework.transaction.annotation.Transactional
-
-import jakarta.mail.*
-import jakarta.mail.internet.InternetAddress
-import jakarta.mail.internet.MimeBodyPart
-import jakarta.mail.internet.MimeMessage
-import jakarta.mail.internet.MimeMultipart
+import org.springframework.stereotype.Service
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-@org.springframework.stereotype.Service
-@Transactional
+@Service
 class Sc_processesService {
     @Autowired
     LogService logService
@@ -121,7 +113,6 @@ class Sc_processesService {
     /**
      * emailTask: Task called periodically by the email timer
      */
-    @Transactional
     protected void emailTask() {
         try {
             String savedIp = getSavedIP()
@@ -215,7 +206,12 @@ class Sc_processesService {
                     true, startServicesTimeout)
 
             // Populate the onvif device map so the devices don't have to be created each time a PTZ operation is done
-            onvifService.populateDeviceMap()
+            try {
+                onvifService.populateDeviceMap()
+            }
+            catch(Exception ex) {
+                logService.cam.warn("${ex.getClass().getName()} in populateDeviceMap: ${ex.getMessage()}")
+            }
 
             if (restResponse.responseCode != 200) {
                 logService.cam.error("Error starting motion service: ${restResponse.errorMsg}")

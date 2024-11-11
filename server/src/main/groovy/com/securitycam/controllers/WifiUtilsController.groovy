@@ -7,12 +7,17 @@ import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.Greeting
 import com.securitycam.interfaceobjects.HelloMessage
 import com.securitycam.interfaceobjects.ObjectCommandResponse
+import com.securitycam.interfaceobjects.WifiConnectResult
 import com.securitycam.services.LogService
 import com.securitycam.services.WifiUtilsService
 import com.securitycam.validators.SetupWifiValidator
 import groovy.json.JsonOutput
 import jakarta.validation.Valid
+import org.opensaml.saml.saml1.core.StatusCode
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.configurationprocessor.json.JSON
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.MessageMapping
@@ -66,8 +71,8 @@ class WifiUtilsController {
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(result.responseObject)
         } else {
             logService.cam.error "setUpWifi: error: ${result.error}"
-            result.status = PassFail.FAIL
-            throw new NVRRestMethodException(result.error, "wifiUtils/setUpWifi")
+         //  result.status = PassFail.FAIL
+            return new ResponseEntity<WifiConnectResult>(result.responseObject as WifiConnectResult, HttpStatus.BAD_REQUEST)
         }
     }
 

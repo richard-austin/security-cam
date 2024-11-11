@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service
 //import org.apache.commons.lang.StringUtils
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional
 @Service
 class WifiUtilsService {
     @Autowired
@@ -76,7 +75,7 @@ class WifiUtilsService {
         try {
             EthernetStatusEnum connStatus = isConnectedThroughEthernet(cmd.isCloud)
             final int setUpWifiTimeout = 180
-            if (connStatus == EthernetStatusEnum.connectedViaEthernet) {
+            if (true || connStatus == EthernetStatusEnum.connectedViaEthernet) {
                 RestfulResponse resp = cmd.password != null
                         ?
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
@@ -106,6 +105,7 @@ class WifiUtilsService {
         }
         catch (Exception ex) {
             logService.cam.error("Exception in setUpWifi: " + ex.getCause() + ' ' + ex.getMessage())
+            result.errno = 500
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }

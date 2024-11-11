@@ -106,7 +106,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
       },
       (reason) => {
         this.connecting = false;
-        let err: WifiConnectResult = reason.e;
+        let err: WifiConnectResult = reason.error;
         let response: any = JSON.parse(err.message);
 
         if (err.errorCode === 400) {

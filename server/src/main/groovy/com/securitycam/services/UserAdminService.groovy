@@ -188,6 +188,34 @@ class UserAdminService {
         return result
     }
 
+    /**
+     * removeAccount: Remove the local NVR direct web access account
+     * @return Success/error status
+     */
+    ObjectCommandResponse removeAccount() {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+
+        try {
+            User user = userRepository.findByUsernameNotAndCloudAccount("guest", false)
+            if (user != null) {
+                result.responseObject = [username: user.getUsername()]
+                userRepository.delete(user)
+
+                // Disable the guest account
+                user = userRepository.findByUsername('guest')
+                user.setEnabled(false)
+                userRepository.save(user)
+            } else
+                throw new Exception("There is no local web account present on this NVR")
+        }
+        catch (Exception ex) {
+            logService.cam.error("Exception in removeAccount: " + ex.getCause() + ' ' + ex.getMessage())
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
     ObjectCommandResponse hasLocalAccount() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {

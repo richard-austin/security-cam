@@ -53,7 +53,6 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
         }
     }
 
-    @Transactional
     boolean getIsCloudAccount(String userName)
     {
         try {
@@ -68,7 +67,6 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
         false
     }
 
-    @Transactional
     String requiredXAuthToken(String userName)
     {
         try {
@@ -85,6 +83,6 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
 
     @Override
     boolean supports(Class<?> authentication) {
-        return authentication == UsernamePasswordAuthenticationToken.class;
+        return authentication == UsernamePasswordAuthenticationToken.class
     }
 }

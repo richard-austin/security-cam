@@ -256,6 +256,23 @@ class UserController {
         }
     }
 
+
+    /**
+     * removeAccount: Remove the local web account used for direct access to to NVR
+     */
+    @Secured(['ROLE_CLOUD'])
+    @PostMapping("/removeAccount")
+    def removeAccount()
+    {
+        ObjectCommandResponse result = userAdminService.removeAccount()
+        if (result.status != PassFail.PASS) {
+            return new NVRRestMethodException(result.error, "/user/removeAccount")
+        } else {
+            logService.cam.info("removeAccount: success")
+            return result.responseObject
+        }
+    }
+
     @Secured(['ROLE_CLOUD', 'ROLE_CLIENT'])
     @PostMapping("/hasActiveMQCreds")
     def hasActiveMQCreds() {
