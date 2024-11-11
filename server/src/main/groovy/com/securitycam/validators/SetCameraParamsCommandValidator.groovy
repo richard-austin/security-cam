@@ -29,7 +29,7 @@ class SetCameraParamsCommandValidator implements Validator {
                 if (!cameraTypeValues.contains(target.cameraType))
                     errors.rejectValue("cameraType", "cameraType has an invalid value (${target.cameraType})")
             }
-            target.params = target.params2 = ""
+            target.params = target.params2 = target.params3 = ""
             if (!infraredstatValues.contains(target.infraredstat))
                 errors.rejectValue("infraredstat", "infraredstat has an invalid value (${target.infraredstat})")
             else {
@@ -53,9 +53,9 @@ class SetCameraParamsCommandValidator implements Validator {
                     target.params = 'cmd=setlampattrex'
                     target.params += "&-lamp_mode=${target.lamp_mode}"
                     target.params2 = "cmd=setimageattr"
-                    target.params2 += "&-wdr=${target.wdr}"
-                    target.params2 += "&cmd=setoverlayattr&-region=0&cmd=setoverlayattr&-region=1&-show=1"
-                    target.params2 += "&-name=${target.cameraName}&-place=0"
+                    target.params2 += "&-wdr=${target.wdr}&-wdrvalue=15&-image_type=0&-imgmode=1"
+                    target.params3 = "&cmd=setoverlayattr&-region=0&cmd=setoverlayattr&-region=1&-show=1"
+                    target.params3 += "&-name=${target.cameraName}&-place=0"
                 }
             }
 

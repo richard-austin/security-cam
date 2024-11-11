@@ -213,6 +213,9 @@ class UtilsController {
             if(response.status == RestfulResponseStatusEnum.PASS && cmd.params2 != "")
                 response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params2, true)
 
+            if(response.status == RestfulResponseStatusEnum.PASS && cmd.params3 != "")
+                response = restfulInterfaceService.sendRequest(cmd.address, cmd.uri, cmd.params3, true)
+
             if (response.status != RestfulResponseStatusEnum.PASS) {
                 logService.cam.error "setCameraParams: error: ${response.errorMsg}"
                 throw new NVRRestMethodException(response.errorMsg, "utils/setCameraParams")

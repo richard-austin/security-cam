@@ -95,6 +95,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
           } else {
             this.lampStatus.setValue(this.cameraParams.lamp_mode);
             this.wdrStatus.setValue(this.cameraParams.wdr);
+            this.wdrStatus.disable();  // Disabling fro now till I decide whether to make it work (with associated fields) or remove it.
           }
           this.startDate.setValue(this.cameraParams.startdate);
           this.cameraName.setValue(this.cameraParams.name_1);
