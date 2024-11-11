@@ -39,13 +39,13 @@ class Authentication {
             if(!userService.userNameExists('cloud')) {
                 Role role = roleRepository.findByName("ROLE_CLOUD")
                 if (role != null)
-                    userService.registerNewUserAccount(new UserDto(username: "cloud", password: "DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU", credentialsNonExpired: true, header: "7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!",  matchingPassword: "password", email: "", cloudAccount: true, role: role.getId()))
+                    userService.registerNewUserAccount(new UserDto(username: "cloud", password: "DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU", credentialsNonExpired: true, header: "7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!",  matchingPassword: "password", email: "nonexistent2@hfytrbhxgafdj.com", cloudAccount: true, role: role.getId()))
             }
 
             if(!userService.userNameExists('guest')) {
                 Role role = roleRepository.findByName("ROLE_GUEST")
                 if (role != null)
-                    userService.registerNewUserAccount(new UserDto(username: "guest", password: "", matchingPassword: "", credentialsNonExpired: false, email: "", cloudAccount: false, header: "", role: role.getId()))
+                    userService.registerNewUserAccount(new UserDto(username: "guest", password: "", matchingPassword: "", credentialsNonExpired: false, email: "nonexistent@hfytrbhxgafdj.com", cloudAccount: false, header: "", role: role.getId()))
             }
         }
     }
