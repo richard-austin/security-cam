@@ -1,28 +1,17 @@
 package com.securitycam
 
 import com.securitycam.configuration.Config
-import com.securitycam.dao.RoleRepository
-import com.securitycam.dto.UserDto
-import com.securitycam.model.Role
 import com.securitycam.proxies.CloudProxyProperties
 import com.securitycam.services.LogService
 import com.securitycam.services.Sc_processesService
-import com.securitycam.services.UserService
 import jakarta.annotation.PreDestroy
 import jakarta.servlet.ServletContext
 import jakarta.servlet.ServletException
-import jakarta.validation.ConstraintViolation
-import jakarta.validation.Validation
-import jakarta.validation.Validator
-import jakarta.validation.ValidatorFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.web.servlet.ServletContextInitializer
 import org.springframework.context.annotation.Bean
-import org.springframework.session.web.http.CookieSerializer
-import org.springframework.session.web.http.DefaultCookieSerializer
 
 import java.util.logging.Level
 import java.util.logging.Logger

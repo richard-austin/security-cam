@@ -47,15 +47,6 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       reason => {
         this.reporting.errorMessage = reason;
       });
-
-    if (!this.utilsService.isGuestAccount) {
-      this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
-            this.utilsService.activeMQTransportActive = status.transportActive;
-          },
-          reason => {
-            this.reporting.errorMessage = reason;
-          });
-    }
   }
 
   setVideoStream(cam: Camera, stream: Stream): void {
@@ -286,6 +277,15 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.initializeWebSocketConnection();
 
+    if (!this.isGuest) {
+      this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
+            this.utilsService.activeMQTransportActive = status.transportActive;
+          },
+          reason => {
+            this.reporting.errorMessage = reason;
+          });
+    }
+
     window.onstorage = (ev: StorageEvent) => {
       let val = ev.newValue;
       if (val === 'logoff') {
@@ -297,6 +297,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // If the camera service got any errors while getting the camera setup, then we report it here.
     this.cameraSvc.errorEmitter.subscribe((error: HttpErrorResponse) => this.reporting.errorMessage = error);
+
   }
 
   ngOnDestroy(): void {

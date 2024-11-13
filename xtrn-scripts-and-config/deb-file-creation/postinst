@@ -120,15 +120,12 @@ systemctl daemon-reload  # Register the motion service file change
 
 # Start the services
 deb-systemd-invoke enable motion.service
-deb-systemd-invoke start motion.service
 deb-systemd-invoke enable nginx.service
 deb-systemd-invoke enable fmp4-ws-media-server
-deb-systemd-invoke start fmp4-ws-media-server
 
 deb-systemd-invoke enable wifimanagement.service
 deb-systemd-invoke start wifimanagement.service
 deb-systemd-invoke enable camera-recordings.service
-deb-systemd-invoke start camera-recordings.service
 
 CERT_FILE=/etc/nginx/security-cam.crt
 if test -f "$CERT_FILE"; then
