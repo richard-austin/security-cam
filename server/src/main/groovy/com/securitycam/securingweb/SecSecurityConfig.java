@@ -64,6 +64,7 @@ public class SecSecurityConfig {
                     .formLogin((form) -> form
                             .authenticationDetailsSource(authenticationDetailsSource())
                             .loginPage("/login")
+                            .defaultSuccessUrl("/", true)
                             .permitAll()
                     )
                     .logout(LogoutConfigurer::permitAll);
