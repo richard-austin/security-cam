@@ -9,6 +9,8 @@ import com.securitycam.services.LogService
 import com.securitycam.services.Sc_processesService
 import com.securitycam.services.UserService
 import jakarta.annotation.PreDestroy
+import jakarta.servlet.ServletContext
+import jakarta.servlet.ServletException
 import jakarta.validation.ConstraintViolation
 import jakarta.validation.Validation
 import jakarta.validation.Validator
@@ -17,12 +19,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.web.servlet.ServletContextInitializer
 import org.springframework.context.annotation.Bean
+import org.springframework.session.web.http.CookieSerializer
+import org.springframework.session.web.http.DefaultCookieSerializer
+
 import java.util.logging.Level
 import java.util.logging.Logger
 
 @SpringBootApplication
-class ServerApplication {
+class ServerApplication implements ServletContextInitializer{
 
     static void main(String[] args) {
         var logger = Logger.getLogger("org.apache")
@@ -63,6 +69,11 @@ class ServerApplication {
     @Bean
     CloudProxyProperties cloudProxyProperties(Config config, LogService logService) {
         return new CloudProxyProperties(config, logService)
+    }
+
+    @Override
+    void onStartup(ServletContext servletContext) throws ServletException {
+        servletContext.getSessionCookieConfig().setName("NVRSESSIONID")
     }
 }
 
