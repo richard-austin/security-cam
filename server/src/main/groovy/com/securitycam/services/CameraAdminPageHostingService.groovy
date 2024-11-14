@@ -3,6 +3,7 @@ package com.securitycam.services
 import com.securitycam.commands.CloseClientsCommand
 import com.securitycam.commands.GetAccessTokenCommand
 import com.securitycam.commands.ResetTimerCommand
+import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.proxies.CamWebadminHostProxy
 import org.springframework.beans.factory.annotation.Autowired
