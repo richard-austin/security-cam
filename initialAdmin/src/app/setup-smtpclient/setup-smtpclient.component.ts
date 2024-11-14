@@ -27,6 +27,8 @@ export class SetupSMTPClientComponent implements OnInit {
   setupSMTPForm!: FormGroup;
   smtpData: SMTPData = new SMTPData();
   error: boolean = false;
+  callFailed: boolean = false;
+  committed: boolean = false;
 
   @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
 
@@ -86,12 +88,15 @@ export class SetupSMTPClientComponent implements OnInit {
       (this.smtpData as any)[key] = ctl.value
     });
 
+    this.callFailed = this.committed = false;
     this.utilsService.setupSMTPClientLocally(this.smtpData).subscribe({
       complete: () => {
         this.reporting.successMessage = "SMTP settings updated";
+        this.committed = true;
       },
       error: (reason) => {
         this.reporting.errorMessage = reason;
+        this.callFailed = true;
       }
     });
   }
@@ -160,7 +165,7 @@ export class SetupSMTPClientComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    this.callFailed = false;
     this.utilsService.getSMTPClientParamsLocally().subscribe({
       next: (smtpData) => {
         this.smtpData = smtpData;
@@ -174,6 +179,7 @@ export class SetupSMTPClientComponent implements OnInit {
             this.reporting.warningMessage = reason.error;
           } else {
             this.reporting.errorMessage = reason;
+            this.callFailed = true;
           }
         })
       }

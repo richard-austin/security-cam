@@ -1,14 +1,15 @@
 package com.securitycam.securingweb
 
+import com.securitycam.configuration.Config
 import com.securitycam.dao.RoleRepository
+import com.securitycam.dao.UserRepository
 import com.securitycam.dto.UserDto
 import com.securitycam.model.Role
+import com.securitycam.model.User
+import com.securitycam.services.CloudProxyService
 import com.securitycam.services.LogService
 import com.securitycam.services.Sc_processesService
 import com.securitycam.services.UserService
-import jakarta.validation.Validation
-import jakarta.validation.Validator
-import jakarta.validation.ValidatorFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean
@@ -20,9 +21,15 @@ class Authentication {
     @Autowired
     RoleRepository roleRepository
     @Autowired
+    UserRepository userRepository
+    @Autowired
     LogService logService
     @Autowired
     Sc_processesService sc_processesService
+    @Autowired
+    Config config
+    @Autowired
+    CloudProxyService cloudProxyService
 
     @Bean
     CommandLineRunner run(UserService userService) {
@@ -47,6 +54,11 @@ class Authentication {
                 if (role != null)
                     userService.registerNewUserAccount(new UserDto(username: "guest", password: "", matchingPassword: "", credentialsNonExpired: false, email: "nonexistent@hfytrbhxgafdj.com", cloudAccount: false, header: "", role: role.getId()))
             }
+
+            User u = userRepository.findByUsernameNotAndCloudAccount('guest', false)
+            // Start CloudAMQProxy if enabled in the config or if there is no local web account other than guest on the NVR
+            if (config.cloudProxy.enabled || u == null)
+                cloudProxyService.start()
         }
     }
 }

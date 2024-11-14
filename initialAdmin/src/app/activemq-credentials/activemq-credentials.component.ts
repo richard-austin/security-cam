@@ -12,6 +12,8 @@ export class ActivemqCredentialsComponent implements OnInit {
   public title = ''
   buttonTitle!: string;
   error: boolean = false;
+  callFailed: boolean = false;
+  committed: boolean = false;
   cloudCredsForm!: FormGroup;
   username: string = '';
   password: string = '';
@@ -106,20 +108,23 @@ export class ActivemqCredentialsComponent implements OnInit {
     this.reporting.dismiss();
 
     this.username = this.getFormControl('username').value;
-
+    this.callFailed = this.committed = false;
     this.utilsService.addOrUpdateActiveMQCreds(this.username, this.password, this.confirmPassword, this.mqHost).subscribe(
       {
         complete: () => {
           this.utilsService.getHasLocalAccount();
           this.reporting.successMessage = "ActiveMQ client credentials " + (this.updateExisting ? " updated" : " created") + " successfully" + (this.updateExisting ? " username now: " + this.username : "");
+          this.committed = true;
         },
         error: (reason) => {
           this.reporting.errorMessage = reason;
+          this.callFailed = true;
         }
       });
   }
 
   checkForActiveMQACreds() {
+    this.callFailed = false;
     this.utilsService.checkForActiveMQCreds().subscribe({
       next: (value: { hasActiveMQCreds: boolean, mqHost: string }) => {
         this.updateExisting = value.hasActiveMQCreds;
@@ -133,7 +138,7 @@ export class ActivemqCredentialsComponent implements OnInit {
         this.reporting.errorMessage = reason;
         this.title = "Problem!"
         this.buttonTitle = "Problem!";
-        this.error = true;
+        this.error = this.callFailed = true;
       }
     });
   }

@@ -1,6 +1,11 @@
 button.dismiss-button
 {
-  margin-top: 1rem;
+ // margin-top: 1rem;
+}
+
+ul.errors-list {
+  list-style-type: square;
+  margin-left: -1.3rem;
 }
 
 .reporting
