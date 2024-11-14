@@ -29,6 +29,9 @@ class Sc_processesService {
     @Autowired
     Environment environment
 
+    @Autowired
+    UserRepository userRepository
+
     OnvifService onvifService
 
     // Set from OnvifService
@@ -37,7 +40,6 @@ class Sc_processesService {
     }
 
     ArrayList<Process> processes
-    UserRepository userRepository
     ExecutorService processExecutors
 
     boolean running = false
