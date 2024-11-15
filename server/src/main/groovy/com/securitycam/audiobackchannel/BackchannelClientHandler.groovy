@@ -15,6 +15,7 @@ import io.netty.handler.codec.rtsp.RtspHeaderNames
 import io.netty.handler.codec.rtsp.RtspMethods
 import io.netty.handler.codec.rtsp.RtspVersions
 import com.securitycam.interfaceobjects.MessageCallback
+import io.netty.util.ReferenceCountUtil
 
 import javax.sdp.Origin
 import javax.sdp.SdpFactory
@@ -336,6 +337,16 @@ class BackchannelClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             if (++unauthorisedCount < 2 && request != null) {
                 request.headers().remove("CSeq")
                 request.headers().add("CSeq", getSeqNumber())
+                if(request instanceof DefaultFullHttpRequest) {
+//                    HttpRequest describe = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0,
+//                            RtspMethods.DESCRIBE, url)
+//                    request.headers().forEach {
+//                        describe.headers().add(it.key, it.value)
+//                    }
+//                    addGeneralHeaders(describe)
+//                    request = describe
+                }
+//                ReferenceCountUtil.retain(request, 1)
                 ctx.writeAndFlush(request)
             } else {
                 request = null

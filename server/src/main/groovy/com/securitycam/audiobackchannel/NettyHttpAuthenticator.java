@@ -30,6 +30,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.*;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.http.protocol.BasicHttpContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -75,7 +76,7 @@ public class NettyHttpAuthenticator extends ChannelDuplexHandler {
                     header = header.replace("MD5", "\"MD5\"");
                 req.headers().set(HttpHeaderNames.AUTHORIZATION, header);
             }
+            super.write(ctx, req, promise);
         }
-        super.write(ctx, msg, promise);
     }
 }

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("userDetailsService")
-@Transactional
+//@Transactional
 public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
@@ -28,29 +28,17 @@ public class MyUserDetailsService implements UserDetailsService {
     }
 
     // API
-
     @Override
     public MyUserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-//        if (loginAttemptService.isBlocked()) {
-//            throw new RuntimeException("blocked");
-//        }
-//
-        try {
             final User user = userRepository.findByUsername(username);
 
             if (user == null) {
                 throw new UsernameNotFoundException("No user found with username: " + username);
             }
-         //   return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), user.isEnabled(), true, true, true, getAuthorities(user.getRoles()));
-
            return user;
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     // UTIL
-
     private List<GrantedAuthority> getGrantedAuthorities(final List<String> privileges) {
         final List<GrantedAuthority> authorities = new ArrayList<>();
         for (final String privilege : privileges) {

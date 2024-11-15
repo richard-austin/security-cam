@@ -1,5 +1,6 @@
 package com.securitycam.securingweb;
 
+import com.securitycam.eventlisteners.SecCamSecurityEventListener;
 import com.securitycam.security.MyUserDetailsService;
 import com.securitycam.security.TwoFactorAuthenticationDetailsSource;
 import com.securitycam.security.TwoFactorAuthenticationProvider;
@@ -12,7 +13,6 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +26,9 @@ public class SecSecurityConfig {
      boolean enabled;
     @Autowired
     private MyUserDetailsService userDetailsService;
+
+    @Autowired
+    SecCamSecurityEventListener secCamSecurityEventListener;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -60,14 +63,20 @@ public class SecSecurityConfig {
                             .anyRequest().authenticated()
                     )
 
-                    .rememberMe(rememberMe -> rememberMe.key("uniqueAndSecret"))
+                    .rememberMe(rememberMe -> rememberMe
+                            .rememberMeServices(rememberMeServices))
                     .formLogin((form) -> form
+                            //      .failureHandler(eventAuthenticationFailureHandler)
                             .authenticationDetailsSource(authenticationDetailsSource())
                             .loginPage("/login")
                             .defaultSuccessUrl("/", true)
                             .permitAll()
                     )
-                    .logout(LogoutConfigurer::permitAll);
+                    .logout(httpSecurityLogoutConfigurer ->
+                            httpSecurityLogoutConfigurer
+                                    .logoutUrl("/logout")
+                                    .addLogoutHandler(secCamSecurityEventListener)
+                                    .permitAll());
         }
         return http.build();
     }
@@ -92,13 +101,8 @@ public class SecSecurityConfig {
         return new BCryptPasswordEncoder(11);
     }
 
-    @Bean
-    RememberMeServices rememberMeServices(UserDetailsService userDetailsService) {
-        TokenBasedRememberMeServices.RememberMeTokenAlgorithm encodingAlgorithm = TokenBasedRememberMeServices.RememberMeTokenAlgorithm.SHA256;
-        TokenBasedRememberMeServices rememberMe = new TokenBasedRememberMeServices("supersecret", userDetailsService, encodingAlgorithm);
-        rememberMe.setMatchingAlgorithm(TokenBasedRememberMeServices.RememberMeTokenAlgorithm.MD5);
-        return rememberMe;
-    }
+    @Autowired
+    RememberMeServices rememberMeServices;
 
     @Bean
     public AuthenticationManager authenticationManager(
