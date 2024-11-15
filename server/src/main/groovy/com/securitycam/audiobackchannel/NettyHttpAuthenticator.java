@@ -30,6 +30,8 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.rtsp.RtspMethods;
+import io.netty.handler.codec.rtsp.RtspVersions;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.http.protocol.BasicHttpContext;
 import org.jetbrains.annotations.NotNull;
@@ -74,7 +76,15 @@ public class NettyHttpAuthenticator extends ChannelDuplexHandler {
             if (header != null) {
                 if (!header.contains("\"MD5\"") && header.contains("MD5"))
                     header = header.replace("MD5", "\"MD5\"");
-                req.headers().set(HttpHeaderNames.AUTHORIZATION, header);
+
+                // Create a new request instead of reusing the old one as that results in a ref count exception
+                FullHttpRequest newReq = new DefaultFullHttpRequest(RtspVersions.RTSP_1_0,
+                        req.method(), uri);
+                newReq.headers().set(HttpHeaderNames.AUTHORIZATION, header);
+                req.headers().forEach((it) -> {
+                    newReq.headers().add(it.getKey(), it.getValue());
+                });
+                req = newReq;
             }
             super.write(ctx, req, promise);
         }
