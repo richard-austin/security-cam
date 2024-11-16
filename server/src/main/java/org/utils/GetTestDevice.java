@@ -13,7 +13,7 @@ import java.util.Scanner;
 public class GetTestDevice {
 
 	static String PROPERTY_NAME = "ONVIF_HOST";
-	private static final Logger LOG = LoggerFactory.getLogger(GetTestDevice.class);
+	private static final Logger LOG = LoggerFactory.getLogger("CAM");
 
 	// Get a camera host, user name, and password for tests.
 	// Add an environment variable or java Property called "TEST_CAM" and set to

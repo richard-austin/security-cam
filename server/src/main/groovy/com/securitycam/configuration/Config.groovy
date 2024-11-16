@@ -52,6 +52,7 @@ class Config {
     String recordingsHomeDirectory
     String myipFileLocation
     String logLevel
+
     int camAdminHostPort
 
     @Autowired

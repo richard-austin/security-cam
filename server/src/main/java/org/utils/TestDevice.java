@@ -28,7 +28,7 @@ import static org.utils.GetTestDevice.getOnvifCredentials;
 
 /** @author Brad Lowe */
 public class TestDevice {
-  private static final Logger LOG = LoggerFactory.getLogger(TestDevice.class);
+  private static final Logger LOG = LoggerFactory.getLogger("CAM");
 
   public static String testCamera(OnvifCredentials creds) throws SOAPException, IOException {
     URL u =
