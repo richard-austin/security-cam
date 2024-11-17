@@ -28,6 +28,7 @@ class CloudProxy {
     String activeMQInitQueue
     String webServerForCloudProxyHost
     int webServerForCloudProxyPort
+    String logFileName
     String logLevel
 }
 
@@ -51,8 +52,8 @@ class Config {
     String appHomeDirectory
     String recordingsHomeDirectory
     String myipFileLocation
+    String logFileName
     String logLevel
-
     int camAdminHostPort
 
     @Autowired
