@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 
 @Controller
 class LoginController {
-    @GetMapping("/login")
+    @GetMapping("/login/auth")
     def login() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication()
         if (!auth || auth.authorities[0] == new SimpleGrantedAuthority('ROLE_ANONYMOUS'))

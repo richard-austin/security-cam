@@ -18,7 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.RememberMeServices;
-import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 @Configuration
 public class SecSecurityConfig {
@@ -68,7 +67,8 @@ public class SecSecurityConfig {
                     .formLogin((form) -> form
                             //      .failureHandler(eventAuthenticationFailureHandler)
                             .authenticationDetailsSource(authenticationDetailsSource())
-                            .loginPage("/login")
+                            .loginPage("/login/auth")
+                            .loginProcessingUrl("/login/authenticate")
                             .defaultSuccessUrl("/", true)
                             .permitAll()
                     )
