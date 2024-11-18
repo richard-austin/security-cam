@@ -92,7 +92,7 @@ class UserController {
     def changeEmail(@RequestBody ChangeEmailCommand cmd) {
         ObjectCommandResponse resp
 
-        def gv = new GeneralValidator(cmd, new ChangeEmailCommandValidator(authenticationManager))
+        def gv = new GeneralValidator(cmd, new ChangeEmailCommandValidator(authenticationManager, userRepository))
         def result = gv.validate()
 
         if (result.hasErrors()) {

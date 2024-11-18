@@ -23,7 +23,7 @@
     <appender name="ROLLING_FILE" class="RollingFileAppender">
         <file>${secCamLogFile}</file>
         <rollingPolicy class="SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${secCamLogFile}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${secCamLogFile}-%d{yyyy-MM-dd}.%i</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
@@ -35,7 +35,7 @@
     <appender name="ROLLING_FILE2" class="RollingFileAppender">
         <file>${cloudProxyLogFile}</file>
         <rollingPolicy class="SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${cloudProxyLogFile}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${cloudProxyLogFile}-%d{yyyy-MM-dd}.%i</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
         </rollingPolicy>

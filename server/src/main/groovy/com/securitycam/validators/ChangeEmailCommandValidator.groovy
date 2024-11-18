@@ -1,6 +1,8 @@
 package com.securitycam.validators
 
 import com.securitycam.commands.ChangeEmailCommand
+import com.securitycam.dao.UserRepository
+import com.securitycam.model.User
 import com.securitycam.security.TwoFactorAuthenticationProvider
 import com.securitycam.services.UtilsService
 import org.springframework.security.authentication.BadCredentialsException
@@ -11,8 +13,9 @@ import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 
 class ChangeEmailCommandValidator implements Validator {
-    ChangeEmailCommandValidator(TwoFactorAuthenticationProvider authenticationManager) {
+    ChangeEmailCommandValidator(TwoFactorAuthenticationProvider authenticationManager, UserRepository userRepository) {
         this.authenticationManager = authenticationManager
+        this.userRepository = userRepository
     }
 
     @Override
@@ -21,9 +24,12 @@ class ChangeEmailCommandValidator implements Validator {
     }
 
     TwoFactorAuthenticationProvider authenticationManager
+    UserRepository userRepository
 
     @Override
     void validate(Object target, Errors errors) {
+        String username = ""
+
         if (target instanceof ChangeEmailCommand) {
             if (target.password == null || target.password == "")
                 errors.rejectValue("password", "password must not be null or blank")
@@ -32,11 +38,11 @@ class ChangeEmailCommandValidator implements Validator {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication()
                 def principal = auth.getPrincipal()
                 if (principal) {   // No principal in dev mode
-                    String userName = principal.getUsername()
+                    username = principal.getUsername()
 
                     boolean valid = true
                     try {
-                        authenticationManager.authenticate new UsernamePasswordAuthenticationToken(userName, target.password)
+                        authenticationManager.authenticate new UsernamePasswordAuthenticationToken(username, target.password)
                     }
                     catch (BadCredentialsException ignored) {
                         valid = false
@@ -53,6 +59,11 @@ class ChangeEmailCommandValidator implements Validator {
 
             else if (!target.newEmail.matches(UtilsService.emailRegex))
                 errors.rejectValue("newEmail", "Email address is not in the correct format")
+            else {
+                User u = userRepository.findByEmail(target.newEmail)
+                if(u != null && u.username != username)
+                    errors.rejectValue("newEmail", "Cannot use this email address")
+            }
 
             if (target.confirmNewEmail != target.newEmail)
                 errors.rejectValue("confirmNewEmail", "newEmail and conformEmail must match")

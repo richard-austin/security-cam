@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,6 +17,11 @@ import org.springframework.transaction.annotation.Transactional
 class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     @Autowired
     LogService logService
+
+    TwoFactorAuthenticationProvider(MyUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        super.userDetailsService = userDetailsService
+        super.passwordEncoder = passwordEncoder
+    }
 
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails,  UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {

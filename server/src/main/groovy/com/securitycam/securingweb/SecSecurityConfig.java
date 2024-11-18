@@ -1,19 +1,13 @@
 package com.securitycam.securingweb;
 
 import com.securitycam.eventlisteners.SecCamSecurityEventListener;
-import com.securitycam.security.MyUserDetailsService;
 import com.securitycam.security.TwoFactorAuthenticationDetailsSource;
-import com.securitycam.security.TwoFactorAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,8 +17,9 @@ import org.springframework.security.web.authentication.RememberMeServices;
 public class SecSecurityConfig {
     @Value("${spring-security.enabled}")
      boolean enabled;
+
     @Autowired
-    private MyUserDetailsService userDetailsService;
+    RememberMeServices rememberMeServices;
 
     @Autowired
     SecCamSecurityEventListener secCamSecurityEventListener;
@@ -81,17 +76,6 @@ public class SecSecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider() {
-        final TwoFactorAuthenticationProvider authProvider = new TwoFactorAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        //      authProvider.setPostAuthenticationChecks(differentLocationChecker());
-        return authProvider;
-
-    }
-
-    @Bean
     public TwoFactorAuthenticationDetailsSource authenticationDetailsSource() {
         return new TwoFactorAuthenticationDetailsSource();
     }
@@ -99,19 +83,5 @@ public class SecSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(11);
-    }
-
-    @Autowired
-    RememberMeServices rememberMeServices;
-
-    @Bean
-    public AuthenticationManager authenticationManager(
-            UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
-
-        return new ProviderManager(authenticationProvider);
     }
 }
