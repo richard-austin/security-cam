@@ -1,7 +1,9 @@
 package com.securitycam.securingweb;
 
 import com.securitycam.eventlisteners.SecCamSecurityEventListener;
+import com.securitycam.security.MyUserDetailsService;
 import com.securitycam.security.TwoFactorAuthenticationDetailsSource;
+import com.securitycam.security.TwoFactorAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -78,6 +80,11 @@ public class SecSecurityConfig {
 
     public TwoFactorAuthenticationDetailsSource authenticationDetailsSource() {
         return new TwoFactorAuthenticationDetailsSource();
+    }
+
+    @Bean
+    TwoFactorAuthenticationProvider authenticationProvider(MyUserDetailsService userDetailsService) {
+        return new TwoFactorAuthenticationProvider(userDetailsService, passwordEncoder());
     }
 
     @Bean
