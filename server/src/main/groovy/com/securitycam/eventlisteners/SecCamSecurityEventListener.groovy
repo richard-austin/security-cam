@@ -30,11 +30,11 @@ class SecCamSecurityEventListener implements ApplicationListener<AuthenticationS
     }
 
     def loginSuccess(String userName) {
-        logAudit("USER-LOGIN_SUCCESS: ", "user='${userName}")
+        logAudit("USER-LOGIN_SUCCESS: ", "user=${userName}")
     }
 
     def logoutAction(String userName) {
-        logAudit("USER-LOGOUT", "user='${userName}")
+        logAudit("USER-LOGOUT", "user=${userName}")
     }
 
     private void logAudit(String auditType, def message) {
@@ -58,7 +58,7 @@ class SecCamAuthFailEventListener implements ApplicationListener<AuthenticationF
     }
 
     def loginFailure(String userName) {
-        logAudit("USER-LOGIN-FAILURE", "user='${userName}")
+        logAudit("USER-LOGIN-FAILURE", "user=${userName}")
     }
 
     private void logAudit(String auditType, def message) {

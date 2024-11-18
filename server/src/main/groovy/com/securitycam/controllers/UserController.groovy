@@ -28,6 +28,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -44,20 +45,21 @@ class UserController {
     UserRepository userRepository
     @Autowired
     RoleRepository roleRepository
+
+    @Autowired
+    PasswordEncoder passwordEncoder
+
     @Autowired
     UtilsService utilsService
 
     @Autowired
     LogService logService
 
-    @Autowired()
-    TwoFactorAuthenticationProvider authenticationManager
-
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @PostMapping("/changePassword")
     def changePassword(@RequestBody ResetPasswordCommand cmd) {
         ObjectCommandResponse resp
-        def gv = new GeneralValidator(cmd, new ResetPasswordCommandValidator(authenticationManager))
+        def gv = new GeneralValidator(cmd, new ResetPasswordCommandValidator(userRepository, passwordEncoder))
         def result = gv.validate()
 
         if (result.hasErrors()) {
@@ -92,7 +94,7 @@ class UserController {
     def changeEmail(@RequestBody ChangeEmailCommand cmd) {
         ObjectCommandResponse resp
 
-        def gv = new GeneralValidator(cmd, new ChangeEmailCommandValidator(authenticationManager, userRepository))
+        def gv = new GeneralValidator(cmd, new ChangeEmailCommandValidator(userRepository, passwordEncoder))
         def result = gv.validate()
 
         if (result.hasErrors()) {

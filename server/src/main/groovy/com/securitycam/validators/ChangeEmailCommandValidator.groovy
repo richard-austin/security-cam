@@ -9,13 +9,15 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 
-class ChangeEmailCommandValidator implements Validator {
-    ChangeEmailCommandValidator(TwoFactorAuthenticationProvider authenticationManager, UserRepository userRepository) {
-        this.authenticationManager = authenticationManager
+class ChangeEmailCommandValidator extends UserPasswordValidator implements Validator {
+    ChangeEmailCommandValidator(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        super(userRepository, passwordEncoder)
         this.userRepository = userRepository
+        this.passwordEncoder = passwordEncoder
     }
 
     @Override
@@ -23,8 +25,8 @@ class ChangeEmailCommandValidator implements Validator {
         return ChangeEmailCommand.class == clazz
     }
 
-    TwoFactorAuthenticationProvider authenticationManager
     UserRepository userRepository
+    PasswordEncoder passwordEncoder
 
     @Override
     void validate(Object target, Errors errors) {
@@ -33,26 +35,8 @@ class ChangeEmailCommandValidator implements Validator {
         if (target instanceof ChangeEmailCommand) {
             if (target.password == null || target.password == "")
                 errors.rejectValue("password", "password must not be null or blank")
-            else {
-                // Check the old password is correct
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication()
-                def principal = auth.getPrincipal()
-                if (principal) {   // No principal in dev mode
-                    username = principal.getUsername()
-
-                    boolean valid = true
-                    try {
-                        authenticationManager.authenticate new UsernamePasswordAuthenticationToken(username, target.password)
-                    }
-                    catch (BadCredentialsException ignored) {
-                        valid = false
-                    }
-
-                    if (!valid /*!passwordEncoder.matches(oldPassword, pw)*/)
-                        errors.rejectValue("password", "The password is incorrect")
-                } else
-                    errors.rejectValue("password", "Could not get principal for this user")
-            }
+            else if (!isPasswordValid(target.password))
+                errors.rejectValue("password", "The password is incorrect")
 
             if (target.newEmail == null || target.newEmail == "")
                 errors.rejectValue("newEmail", "newEmail must not be null or blank")

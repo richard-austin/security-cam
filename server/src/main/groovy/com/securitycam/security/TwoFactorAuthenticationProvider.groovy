@@ -11,12 +11,12 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 
 class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
-    @Autowired
     LogService logService
 
-    TwoFactorAuthenticationProvider(MyUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    TwoFactorAuthenticationProvider(MyUserDetailsService userDetailsService, PasswordEncoder passwordEncoder, LogService logService) {
         super.userDetailsService = userDetailsService
         super.passwordEncoder = passwordEncoder
+        this.logService = logService
     }
 
     @Override
