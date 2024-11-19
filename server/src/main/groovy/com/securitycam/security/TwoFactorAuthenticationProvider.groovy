@@ -2,18 +2,21 @@ package com.securitycam.security
 
 import com.securitycam.model.User
 import com.securitycam.services.LogService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Component
 
+
+@Component
 class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     LogService logService
 
     TwoFactorAuthenticationProvider(MyUserDetailsService userDetailsService, PasswordEncoder passwordEncoder, LogService logService) {
+        super(passwordEncoder)
         super.userDetailsService = userDetailsService
         super.passwordEncoder = passwordEncoder
         this.logService = logService
