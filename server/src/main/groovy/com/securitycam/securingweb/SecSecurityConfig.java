@@ -3,6 +3,7 @@ package com.securitycam.securingweb;
 import com.securitycam.eventlisteners.SecCamSecurityEventListener;
 import com.securitycam.security.MyUserDetailsService;
 import com.securitycam.security.TwoFactorAuthenticationDetailsSource;
+import com.securitycam.security.TwoFactorAuthenticationProvider;
 import com.securitycam.services.LogService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -65,14 +66,15 @@ public class SecSecurityConfig  {
                             .requestMatchers("/utils/getSMTPClientParamsLocally").permitAll()
                             .anyRequest().authenticated()
                     )
+                    .authenticationProvider(new TwoFactorAuthenticationProvider(myUserDetailsService, passwordEncoder(), logService))
                     .rememberMe(rememberMe -> rememberMe
                             .rememberMeServices(rememberMeServices))
                     .formLogin((form) -> form
                             .authenticationDetailsSource(authenticationDetailsSource())
                             .loginPage("/login/auth")
                             .loginProcessingUrl("/login/authenticate")
-                            .failureUrl("/login/auth?error")
                             .defaultSuccessUrl("/", true)
+                            .failureUrl("/login/auth?error")
                             .permitAll()
                     )
                     .logout(httpSecurityLogoutConfigurer ->

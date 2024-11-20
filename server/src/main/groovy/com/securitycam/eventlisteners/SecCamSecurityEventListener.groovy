@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationListener
+import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent
 import org.springframework.security.core.Authentication
@@ -30,15 +31,15 @@ class SecCamSecurityEventListener implements ApplicationListener<AuthenticationS
     }
 
     def loginSuccess(String userName) {
-        logAudit("USER-LOGIN_SUCCESS: ", "user=${userName}")
+        logAudit("USER-LOGIN_SUCCESS:", "user=${userName}")
     }
 
     def logoutAction(String userName) {
-        logAudit("USER-LOGOUT", "user=${userName}")
+        logAudit("USER-LOGOUT:", "user=${userName}")
     }
 
     private void logAudit(String auditType, def message) {
-        logService.cam.info "Audit:${auditType}- ${message.toString()}"
+        logService.cam.info "Audit:${auditType} - ${message.toString()}"
     }
 
 }
@@ -47,21 +48,19 @@ class SecCamSecurityEventListener implements ApplicationListener<AuthenticationS
  * SecCamAuthFailEventListener: Bean to log unsuccessful log in events
  */
 @Component
-class SecCamAuthFailEventListener implements ApplicationListener<AuthenticationFailureBadCredentialsEvent>
-{
+class SecCamAuthFailEventListener implements ApplicationListener<AbstractAuthenticationFailureEvent> {
     @Autowired LogService logService
-
     @Override
-    void onApplicationEvent(AuthenticationFailureBadCredentialsEvent event) {
+    void onApplicationEvent(AbstractAuthenticationFailureEvent event) {
+        String username = event?.authentication?.principal as String
 
-        loginFailure(event?.authentication?.principal as String)
-    }
-
-    def loginFailure(String userName) {
-        logAudit("USER-LOGIN-FAILURE", "user=${userName}")
+        if (event instanceof AuthenticationFailureBadCredentialsEvent)
+            logAudit("USER-LOGIN-FAILURE:", "user=${username}")
+        else
+            logService.cam.warn "Unexpected auth event ${event.getClass().getName()} thrown attempted login as ${username}"
     }
 
     private void logAudit(String auditType, def message) {
-        logService.cam.info "Audit:${auditType}- ${message.toString()}"
+        logService.cam.info "Audit:${auditType} - ${message.toString()}"
     }
 }

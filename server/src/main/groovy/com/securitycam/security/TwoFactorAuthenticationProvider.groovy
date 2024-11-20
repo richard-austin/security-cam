@@ -1,5 +1,6 @@
 package com.securitycam.security
 
+import com.securitycam.interfaceobjects.TwoFactorAuthenticationException
 import com.securitycam.model.User
 import com.securitycam.services.LogService
 import org.springframework.security.authentication.BadCredentialsException
@@ -8,10 +9,8 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.stereotype.Component
+import org.springframework.security.authentication.AccountExpiredException
 
-
-@Component
 class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     LogService logService
 
@@ -26,7 +25,6 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     protected void additionalAuthenticationChecks(UserDetails userDetails,  UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
         super.additionalAuthenticationChecks(userDetails, authentication)
         Object details = authentication.details
-
         if(details != null) {  // UserDetails are null when change password used
             if (!(details instanceof TwoFactorAuthenticationDetails)) {
                 logService.cam.debug("Authentication failed: authenticationToken principal is not a TwoFactorPrincipal")
@@ -36,15 +34,15 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
             }
             if(!userDetails.isCredentialsNonExpired()) {
                 logService.cam.debug("User credentials for ${userDetails.username} have expired")
-                throw new BadCredentialsException(messages.getMessage(
+                throw new AccountExpiredException(messages.getMessage(
                         "AbstractUserDetailsAuthenticationProvider.badCredentials",
                         "User credentials have expired"))
             }
             TwoFactorAuthenticationDetails tfad = details
-            String userName = userDetails.getUsername()
-            if (getIsCloudAccount(userName) && tfad.xAuthToken != requiredXAuthToken(userName)) {
+            if (getIsCloudAccount(userDetails.getUsername()) && tfad.xAuthToken != requiredXAuthToken(userDetails.getUsername())) {
                 logService.cam.debug("Authentication failed: authtoken incorrect for Cloud account")
-                throw new BadCredentialsException(messages.getMessage(
+                logService.cam.info("Audit:USER-LOGIN-FAILURE: - user=${userDetails.getUsername()}")
+                throw new TwoFactorAuthenticationException(messages.getMessage(
                         "AbstractUserDetailsAuthenticationProvider.badCredentials",
                         "Bad credentials for cloud account"))
             }
@@ -52,7 +50,7 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
         else if(getIsCloudAccount(userDetails.getUsername()))
         {
             logService.cam.debug("Authentication failed: no TwoFactorAuthenticationDetails for cloud account: "+userDetails.getUsername())
-            throw new BadCredentialsException(messages.getMessage(
+            throw new TwoFactorAuthenticationException(messages.getMessage(
                     "AbstractUserDetailsAuthenticationProvider.badCredentials",
                     "Bad credentials"))
         }

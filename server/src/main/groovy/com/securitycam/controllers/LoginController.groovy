@@ -16,4 +16,10 @@ class LoginController {
         else
             return 'redirect:/'
     }
+
+    // The uri /login takes you the the login view even when logged in, so redirect to base uri
+    @GetMapping("/login")
+    def loginRedirect() {
+        return 'redirect:/'
+    }
 }
