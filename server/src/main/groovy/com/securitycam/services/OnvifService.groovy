@@ -40,7 +40,6 @@ import org.onvif.ver10.schema.VideoResolution
 import org.onvif.ver20.ptz.wsdl.PTZ
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import org.utils.OnvifCredentials
 import com.securitycam.commands.MoveCommand
