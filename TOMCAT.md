@@ -1,7 +1,3 @@
-### Tomcat 9
-Tomcat 9 is a Java webserver used for this application. The version of tomcat available for installation 
-on Ubuntu 24.04 is Tomcat 10 only, which unfortunately is not compatible with Grails
-6 applications on which this project is built. Until Grails 7 is available, and 
-this project is upgraded to use it, I have to deploy Tomcat 9 with the application. 
-Tomcat 9 is installed transparently from a tar file by the .deb installer with the rest of the 
-application. 
+### Tomcat 10
+Tomcat 10 is the Java webserver used for this application. Tomcat 10 is the current version downloadable (apt install tomcat10)
+on Ubuntu 24.04. The application is built on the Spring Boot 3 framework which is fully compatible with Tomcat 10.

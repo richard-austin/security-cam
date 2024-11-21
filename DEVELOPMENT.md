@@ -9,9 +9,8 @@ The requirements to build the project yourself are detailed below: -
 * Angular CLI: 18.2.3 or greater
 * Node: 18.20.4
 * Package Manager: npm 10.7.0
-* Grails Version: 6.2.0
-* openjdk version "17.0.10" 2024-01-16
-* Gradle 7.6.4 (Grails 6.2.0 will not run with Gradle 8+)
+* openjdk version "21.0.5" 2024-01-16
+* Gradle 8.10.2 
 * Python 3.12.3
 
 *To perform a Gradle build, only openjdk and git need to be installed as the

@@ -20,9 +20,8 @@ The Web Front End (client) is an Angular application using [Angular CLI](https:/
 This forms the user interface of the web application.
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
 ### Web Back End
-The Web Back End (server) is a Grails application (https://grails.org/), which provides
-the Restful API for the Angular Web Front End.
-It provides the services to get and set application data as
+The Web Back End (server) is a Spring Boot 3.3.4 application (https://spring.io/projects/spring-boot), which provides
+the Restful API for the Angular Web Front End.It provides the services to get and set application data as
 well as configuring the Camera setup.
 
 ### Media Server

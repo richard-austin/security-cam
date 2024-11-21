@@ -77,7 +77,7 @@ class CamService {
             byte[] bytes = file.readBytes()
 
             // Make into string representation of an array of signed bytes. (This is to keep the format the same
-            //  as Grails render function returns a byte array
+            //  as the previously used Grails render function returns a byte array
             // TODO: Look at returning the raw binary (bytes) and modify the client
             StringBuilder retVal = new StringBuilder()
             retVal.append('[')
