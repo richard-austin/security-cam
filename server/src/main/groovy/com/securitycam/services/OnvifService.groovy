@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import org.utils.OnvifCredentials
 import com.securitycam.commands.MoveCommand
+import org.utils.TestDevice
 
 import javax.net.ssl.*
 import javax.xml.ws.WebServiceException
@@ -268,8 +269,7 @@ class OnvifService {
                             })
                         }
                         logService.cam.info("Connected to device %s (%s)%n", device.getDeviceInfo(), device.streamUri.toString())
-                        // This was causing an exception (caught within the same function)  (and on the Grails version)
-//                        logService.cam.info(TestDevice.inspect(device))
+                        logService.cam.debug(TestDevice.inspect(device))
 
                         String snapshotUri = device.getSnapshotUri()
                         if (!snapshotUri.isEmpty()) {
