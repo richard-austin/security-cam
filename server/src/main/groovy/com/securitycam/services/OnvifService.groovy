@@ -20,8 +20,8 @@ import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.Asymmetric
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import common.Authentication
-import onvif.discovery.OnvifDiscovery
-import onvif.soap.OnvifDevice
+import de.onvif.discovery.OnvifDiscovery
+import de.onvif.soap.OnvifDevice
 import org.apache.commons.io.IOUtils
 import org.apache.http.protocol.BasicHttpContext
 import org.onvif.ver10.media.wsdl.Media
@@ -41,9 +41,9 @@ import org.onvif.ver20.ptz.wsdl.PTZ
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import org.utils.OnvifCredentials
+import de.onvif.utils.OnvifCredentials
 import com.securitycam.commands.MoveCommand
-import org.utils.TestDevice
+import de.onvif.utils.TestDevice
 
 import javax.net.ssl.*
 import javax.xml.ws.WebServiceException
