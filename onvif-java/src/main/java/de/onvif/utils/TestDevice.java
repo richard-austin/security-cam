@@ -18,7 +18,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.soap.SOAPException;
+import jakarta.xml.soap.SOAPException;
 import java.io.IOException;
 import java.lang.Object;
 import java.net.URL;
@@ -175,7 +175,7 @@ public class TestDevice {
   }
 
   public static String testCamera(URL url, String user, String password)
-      throws SOAPException, IOException {
+          throws SOAPException, IOException {
     LOG.info("Testing camera:" + url);
     OnvifDevice device = new OnvifDevice(url, user, password);
     return inspect(device);

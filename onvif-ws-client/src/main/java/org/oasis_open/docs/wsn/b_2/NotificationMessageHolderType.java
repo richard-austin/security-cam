@@ -1,12 +1,12 @@
 
 package org.oasis_open.docs.wsn.b_2;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAnyElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.ws.wsaddressing.W3CEndpointReference;
 import org.w3c.dom.Element;
 
 
@@ -190,8 +190,8 @@ public class NotificationMessageHolderType {
          * 
          * @return
          *     possible object is
-         *     {@link Element }
          *     {@link Object }
+         *     {@link Element }
          *     
          */
         public Object getAny() {
@@ -203,8 +203,8 @@ public class NotificationMessageHolderType {
          * 
          * @param value
          *     allowed object is
-         *     {@link Element }
          *     {@link Object }
+         *     {@link Element }
          *     
          */
         public void setAny(Object value) {

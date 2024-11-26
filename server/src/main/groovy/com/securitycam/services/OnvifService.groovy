@@ -46,7 +46,7 @@ import com.securitycam.commands.MoveCommand
 import de.onvif.utils.TestDevice
 
 import javax.net.ssl.*
-import javax.xml.ws.WebServiceException
+import jakarta.xml.ws.WebServiceException
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.concurrent.CopyOnWriteArrayList

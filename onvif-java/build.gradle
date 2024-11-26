@@ -35,32 +35,23 @@ clean.dependsOn(":onvif-ws-client:clean")
 compileJava.dependsOn(":onvif-ws-client:build")
 
 dependencies {
-    implementation 'org.apache.cxf:cxf-rt-frontend-jaxws:3.3.2'
-    implementation 'org.apache.cxf:cxf-rt-ws-security:3.3.2'
-    implementation 'org.apache.cxf:cxf-rt-transports-http:3.3.2'
-    implementation group: 'org.apache.cxf.services.wsn', name: 'cxf-services-wsn-core', version: '3.3.2'
+    implementation 'org.apache.cxf:cxf-rt-frontend-jaxws:4.0.0'
+    implementation 'org.apache.cxf:cxf-rt-ws-security:4.0.0'
+    implementation 'org.apache.cxf:cxf-rt-transports-http:4.0.0'
+    implementation group: 'org.apache.cxf.services.wsn', name: 'cxf-services-wsn-core', version: '4.0.0'
 1G
-   //implementation files('../onvif-ws-client/build/libs/onvif-ws-client.jar')
-  //  testImplementation files('../onvif-ws-client/build/libs/onvif-ws-client.jar')
     implementation project(':onvif-ws-client')
-    //testImplementation project(':onvif-ws-client')
+
 
     implementation 'commons-io:commons-io:2.14.0'
     implementation 'commons-codec:commons-codec:1.10'
     implementation 'org.apache.commons:commons-lang3:3.4'
-    implementation 'com.sun.xml.messaging.saaj:saaj-impl:1.5.1'
-    implementation 'com.sun.activation:javax.activation:1.2.0'
-    implementation 'javax.xml.bind:jaxb-api:2.3.1'
-    implementation group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1'
+    compileOnly    'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
+    compileOnly   'jakarta.xml.ws:jakarta.xml.ws-api:4.0.2'
+    implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
+    implementation 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.2'
 
-    implementation group: 'javax.xml.soap', name: 'javax.xml.soap-api', version: '1.4.0'
-    implementation group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1'
- //   implementation group: 'org.apache.activemq', name: 'activemq-broker', version: '6.1.4'
-
-
-//    implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
-    implementation 'com.sun.xml.bind:jaxb-impl:2.3.1'
- //   implementation testFixtures(project(':onvif-ws-client'))
+    implementation 'org.glassfish.hk2:osgi-resource-locator:1.0.3'
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.26'
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.12'
 }

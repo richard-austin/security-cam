@@ -5,20 +5,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlMixed;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAnyAttribute;
+import jakarta.xml.bind.annotation.XmlAnyElement;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlMixed;
+import jakarta.xml.bind.annotation.XmlSchemaType;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlValue;
+import jakarta.xml.ws.wsaddressing.W3CEndpointReference;
 import org.oasis_open.docs.wsn.b_2.InvalidFilterFaultType;
 import org.oasis_open.docs.wsn.b_2.InvalidMessageContentExpressionFaultType;
 import org.oasis_open.docs.wsn.b_2.InvalidProducerPropertiesExpressionFaultType;
@@ -149,7 +149,7 @@ public class BaseFaultType {
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
+     * returned list will be present inside the Jakarta XML Binding object.
      * This is why there is not a <CODE>set</CODE> method for the any property.
      * 
      * <p>
@@ -161,8 +161,8 @@ public class BaseFaultType {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Element }
      * {@link Object }
+     * {@link Element }
      * 
      * 
      */
@@ -251,7 +251,7 @@ public class BaseFaultType {
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
+     * returned list will be present inside the Jakarta XML Binding object.
      * This is why there is not a <CODE>set</CODE> method for the description property.
      * 
      * <p>
@@ -435,7 +435,7 @@ public class BaseFaultType {
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
-         * returned list will be present inside the JAXB object.
+         * returned list will be present inside the Jakarta XML Binding object.
          * This is why there is not a <CODE>set</CODE> method for the content property.
          * 
          * <p>
@@ -447,8 +447,8 @@ public class BaseFaultType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link Element }
          * {@link String }
+         * {@link Element }
          * 
          * 
          */
@@ -537,8 +537,8 @@ public class BaseFaultType {
          * 
          * @return
          *     possible object is
-         *     {@link Element }
          *     {@link Object }
+         *     {@link Element }
          *     
          */
         public Object getAny() {
@@ -550,8 +550,8 @@ public class BaseFaultType {
          * 
          * @param value
          *     allowed object is
-         *     {@link Element }
          *     {@link Object }
+         *     {@link Element }
          *     
          */
         public void setAny(Object value) {

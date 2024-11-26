@@ -6,9 +6,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import javax.xml.soap.SOAPException;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.Holder;
+import jakarta.xml.soap.SOAPException;
+import jakarta.xml.ws.BindingProvider;
+import jakarta.xml.ws.Holder;
 import org.apache.cxf.binding.soap.Soap12;
 import org.apache.cxf.binding.soap.SoapBindingConfiguration;
 import org.apache.cxf.endpoint.Client;
@@ -40,8 +40,8 @@ import org.onvif.ver20.ptz.wsdl.PtzService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.MessageContext;
+import jakarta.xml.ws.handler.Handler;
+import jakarta.xml.ws.handler.MessageContext;
 
 /**
  * @author Robin Dick

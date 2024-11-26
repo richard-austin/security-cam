@@ -33,8 +33,9 @@ repositories {
 dependencies {
 //    implementation 'org.apache.cxf:cxf-rt-frontend-jaxws:3.3.2'
 //    implementation 'org.apache.cxf:cxf-rt-transports-http-jetty:3.3.2'
-    implementation 'javax.xml.ws:jaxws-api:2.3.1'
-    implementation 'javax.jws:javax.jws-api:1.1'
+    compileOnly 'jakarta.xml.ws:jakarta.xml.ws-api:4.0.2'
+    implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
+
 //    implementation 'org.apache.cxf.services.wsn:cxf-services-wsn-core:3.3.2'
     implementation 'org.apache.commons:commons-lang3:3.4'
     implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.0'
@@ -65,7 +66,7 @@ wsdl2java {
     options.set(["-wsdlLocation", "null", "-catalog", "${layout.projectDirectory.dir('src/wsdl/resources/wsdl/jax-ws-catalog.xml')}"])
     generatedSourceDir.set(layout.projectDirectory.dir("src/main/java"))
     wsdlDir.set(layout.projectDirectory.dir("src/wsdl/resources"))
-    useJakarta.set(false)
-    cxfVersion.set("3.3.2")
+    useJakarta.set(true)
+    cxfVersion.set("4.0.0")
 }
 description = 'onvif-ws-client'
