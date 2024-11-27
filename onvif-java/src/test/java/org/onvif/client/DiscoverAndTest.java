@@ -24,7 +24,7 @@ public class DiscoverAndTest {
 
     Collection<URL> urls = OnvifDiscovery.discoverOnvifURLs();
     for (URL u : urls) {
-      out.append("Discovered URL:" + u.toString() + sep);
+      out.append("Discovered URL:").append(u.toString()).append(sep);
     }
     ArrayList<String> results = new ArrayList<>();
 
@@ -51,9 +51,9 @@ public class DiscoverAndTest {
         else results.add(u + ":" + trace);
       }
     }
-    out.append("RESULTS: " + sep);
-    for (String s : results) out.append(s + sep);
-    out.append("cameras found:" + urls.size() + " good=" + good + ", bad=" + bad + sep);
+    out.append("RESULTS: ").append(sep);
+    for (String s : results) out.append(s).append(sep);
+    out.append("cameras found:").append(urls.size()).append(" good=").append(good).append(", bad=").append(bad).append(sep);
     return out.toString();
   }
 

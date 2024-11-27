@@ -25,12 +25,14 @@ public final class SSLUtilities {
    *
    * @deprecated see {@link #_hostnameVerifier}.
    */
+  @Deprecated
   private static HostnameVerifier __hostnameVerifier;
   /**
    * Thrust managers for the Sun's deprecated API.
    *
    * @deprecated see {@link #_trustManagers}.
    */
+  @Deprecated
   private static TrustManager[] __trustManagers;
   /** Hostname verifier. */
   private static HostnameVerifier _hostnameVerifier;
@@ -43,6 +45,7 @@ public final class SSLUtilities {
    *
    * @deprecated see {@link #_trustAllHostnames()}.
    */
+  @Deprecated
   private static void __trustAllHostnames() {
     // Create a trust manager that does not validate certificate chains
     if (__hostnameVerifier == null) {
@@ -59,6 +62,7 @@ public final class SSLUtilities {
    *
    * @deprecated see {@link #_trustAllHttpsCertificates()}.
    */
+  @Deprecated
   private static void __trustAllHttpsCertificates() {
     SSLContext context;
 
@@ -149,6 +153,7 @@ public final class SSLUtilities {
    * @author Francis Labrie
    * @deprecated see {@link SSLUtilities.FakeHostnameVerifier}.
    */
+  @Deprecated
   public static class _FakeHostnameVerifier implements HostnameVerifier {
 
     /**
@@ -172,6 +177,7 @@ public final class SSLUtilities {
    * @author Francis Labrie
    * @deprecated see {@link SSLUtilities.FakeX509TrustManager}.
    */
+  @Deprecated
   public static class _FakeX509TrustManager implements X509TrustManager {
 
     /** Empty array of certificate authority certificates. */
