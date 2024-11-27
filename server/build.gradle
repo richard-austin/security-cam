@@ -64,20 +64,18 @@ dependencies {
     implementation group: 'jakarta.mail', name: 'jakarta.mail-api', version: '2.1.3'
 
     // Onvif dependencies
-    implementation group: 'org.apache.cxf', name: 'cxf-rt-frontend-jaxws', version: project.property('cxfVersion')
-    implementation group: 'org.apache.cxf.services.wsn', name: 'cxf-services-wsn-core', version: project.property('cxfVersion')
-    implementation "org.apache.cxf:cxf-rt-transports-http:${project.property('cxfVersion')}"
-    implementation group: 'org.apache.cxf.services.wsn', name: 'cxf-services-wsn-core', version: project.property('cxfVersion')
+ //   implementation group: 'org.apache.cxf', name: 'cxf-rt-frontend-jaxws', version: project.property('cxfVersion')
+    compileOnly "org.apache.cxf:cxf-rt-transports-http-jetty:${project.property('cxfVersion')}"
 
     // Required for cxf version 4.0.5
 //    compileOnly 'org.checkerframework:checker-qual:3.48.2'
 //    compileOnly 'com.google.errorprone:error_prone_annotations:2.36.0'
 //    compileOnly 'com.google.j2objc:j2objc-annotations:3.0.0'
 
-    compileOnly 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
+//    compileOnly 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
     compileOnly 'jakarta.xml.ws:jakarta.xml.ws-api:4.0.2'
     compileOnly 'jakarta.jws:jakarta.jws-api:3.0.0'
-    compileOnly 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.2'
+//    compileOnly 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.2'
 
     compileOnly 'org.glassfish.hk2:osgi-resource-locator:1.0.3'
 
@@ -103,6 +101,7 @@ tasks.named('test') {
 }
 
 bootWar.dependsOn([':server:setVersion', ':client:buildClient']).mustRunAfter(':server:setVersion')
+clean.dependsOn([':onvif-java:clean'])
 
 bootWar {
     webInf {
@@ -128,9 +127,9 @@ tasks.register('buildDebFile', Exec) {
     commandLine './create-deb.sh'
 }
 
-tasks.withType(War).configureEach {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-}
+//tasks.withType(War).configureEach {
+//    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+//}
 
 tasks.withType(GroovyCompile).configureEach {
     configure(groovyOptions) {
@@ -150,8 +149,8 @@ tasks.withType(GroovyCompile).configureEach {
 tasks.withType(Test).configureEach {
     systemProperty "geb.env", System.getProperty('geb.env')
     systemProperty "geb.build.reportsDir", reporting.file("geb/integrationTest")
-    systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
-    systemProperty "webdriver.gecko.driver", System.getProperty('webdriver.gecko.driver')
+//    systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
+//    systemProperty "webdriver.gecko.driver", System.getProperty('webdriver.gecko.driver')
 }
 
 description = 'server'

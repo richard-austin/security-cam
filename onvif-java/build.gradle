@@ -35,11 +35,11 @@ clean.dependsOn(":onvif-ws-client:clean")
 compileJava.dependsOn(":onvif-ws-client:build")
 
 dependencies {
-    compileOnly 'org.apache.cxf:cxf-rt-frontend-jaxws:4.0.0'
-    compileOnly 'org.apache.cxf:cxf-rt-ws-security:4.0.0'
-    compileOnly 'org.apache.cxf:cxf-rt-transports-http:4.0.0'
-    compileOnly group: 'org.apache.cxf.services.wsn', name: 'cxf-services-wsn-core', version: '4.0.0'
-    testCompileOnly "org.apache.cxf:cxf-rt-transports-http-jetty:${project.property('cxfVersion')}"
+    implementation "org.apache.cxf:cxf-rt-frontend-jaxws:${project.property('cxfVersion')}"
+    implementation "org.apache.cxf:cxf-rt-ws-security:${project.property('cxfVersion')}"
+    implementation "org.apache.cxf:cxf-rt-transports-http:${project.property('cxfVersion')}"
+    implementation group: "org.apache.cxf.services.wsn", name: "cxf-services-wsn-core", version: project.property('cxfVersion')
+    implementation "org.apache.cxf:cxf-rt-transports-http-jetty:${project.property('cxfVersion')}"
     testCompileOnly "org.apache.cxf:cxf-rt-frontend-jaxws:${project.property('cxfVersion')}"
     testCompileOnly "org.apache.cxf:cxf-rt-ws-security:${project.property('cxfVersion')}"
     testCompileOnly "org.apache.cxf:cxf-rt-transports-http:${project.property('cxfVersion')}"
