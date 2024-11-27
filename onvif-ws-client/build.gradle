@@ -40,7 +40,7 @@ dependencies {
     implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
 
     implementation 'org.apache.commons:commons-lang3:3.4'
-    implementation 'org.apache.cxf.xjc-utils:cxf-xjc-runtime:3.3.0'
+    implementation "org.apache.cxf.xjc-utils:cxf-xjc-runtime:${project.property('cxfVersion')}"
     implementation 'org.apache.maven:maven-model-builder:3.6.1'
 }
 

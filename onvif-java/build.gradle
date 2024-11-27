@@ -36,15 +36,11 @@ compileJava.dependsOn(":onvif-ws-client:build")
 
 dependencies {
     implementation "org.apache.cxf:cxf-rt-frontend-jaxws:${project.property('cxfVersion')}"
-    implementation "org.apache.cxf:cxf-rt-ws-security:${project.property('cxfVersion')}"
-    implementation "org.apache.cxf:cxf-rt-transports-http:${project.property('cxfVersion')}"
     implementation group: "org.apache.cxf.services.wsn", name: "cxf-services-wsn-core", version: project.property('cxfVersion')
-    implementation "org.apache.cxf:cxf-rt-transports-http-jetty:${project.property('cxfVersion')}"
-    testCompileOnly "org.apache.cxf:cxf-rt-frontend-jaxws:${project.property('cxfVersion')}"
-    testCompileOnly "org.apache.cxf:cxf-rt-ws-security:${project.property('cxfVersion')}"
-    testCompileOnly "org.apache.cxf:cxf-rt-transports-http:${project.property('cxfVersion')}"
-    testCompileOnly "org.apache.cxf.services.wsn:cxf-services-wsn-core:${project.property('cxfVersion')}"
+    compileOnly "org.apache.cxf:cxf-rt-ws-security:${project.property('cxfVersion')}"
+    implementation "org.apache.cxf:cxf-rt-transports-http:${project.property('cxfVersion')}"
 
+//    implementation "org.apache.cxf:cxf-rt-transports-http-jetty:${project.property('cxfVersion')}"
 
     // Required for cxf version > 4.0.1
 //    compileOnly 'org.checkerframework:checker-qual:3.48.2'
