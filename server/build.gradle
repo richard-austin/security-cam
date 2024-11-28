@@ -72,8 +72,9 @@ dependencies {
 //    compileOnly 'com.google.errorprone:error_prone_annotations:2.36.0'
 //    compileOnly 'com.google.j2objc:j2objc-annotations:3.0.0'
 
-//    compileOnly 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
-    compileOnly 'jakarta.xml.ws:jakarta.xml.ws-api:4.0.2'
+    // There is a version 4.0.3, but 3.0.1 is referenced by org.apache.cxf.services.wsn:cxf-services-wsn-core:4.0.0 internally. It seems that the jakarta web app
+    //  fleet has not yet been fully brought up to version 4
+    compileOnly 'jakarta.xml.ws:jakarta.xml.ws-api:3.0.1'
     compileOnly 'jakarta.jws:jakarta.jws-api:3.0.0'
 //    compileOnly 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.2'
 

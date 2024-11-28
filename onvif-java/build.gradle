@@ -59,7 +59,6 @@ dependencies {
     implementation 'commons-codec:commons-codec:1.10'
     implementation 'org.apache.commons:commons-lang3:3.4'
     compileOnly    'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
-    compileOnly   'jakarta.xml.ws:jakarta.xml.ws-api:4.0.2'
     implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
     implementation 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.2'
 
