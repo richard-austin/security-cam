@@ -31,11 +31,6 @@ repositories {
 //targetCompatibility = "1.8"
 
 dependencies {
-    // Required for cxf version > 4.0.1
-//    implementation 'org.checkerframework:checker-qual:3.48.2'
-//    implementation 'com.google.errorprone:error_prone_annotations:2.36.0'
-//    implementation 'com.google.j2objc:j2objc-annotations:3.0.0'
-
     implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
 
     implementation 'org.apache.commons:commons-lang3:3.4'
