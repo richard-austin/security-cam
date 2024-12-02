@@ -49,9 +49,9 @@ wsdl2java {
     //   layout.buildDirectory = "${projectDir}/onvif-ws-client/src/main/resources/wsdl"
     verbose.set(true)
     suppressGeneratedDate.set(true)
-    options.set(["-wsdlLocation", "null", "-catalog", "${layout.projectDirectory.dir('src/wsdl/resources/wsdl/jax-ws-catalog.xml')}"])
+    options.set(["-wsdlLocation", "null", "-catalog", "${layout.projectDirectory.dir('src/main/resources/wsdl/jax-ws-catalog.xml')}"])
     generatedSourceDir.set(layout.projectDirectory.dir("src/main/java"))
-    wsdlDir.set(layout.projectDirectory.dir("src/wsdl/resources"))
+    wsdlDir.set(layout.projectDirectory.dir("src/main/resources/wsdl"))
     useJakarta.set(true)
     cxfVersion.set(project.property('cxfVersion') as String)
 }
