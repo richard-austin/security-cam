@@ -10,11 +10,11 @@ The requirements to build the project yourself are detailed below: -
 * Node: 18.20.4
 * Package Manager: npm 10.7.0
 * openjdk version "21.0.5" 2024-01-16
-* Gradle 8.10.2 
+* Gradle 8.11.1 
 * Python 3.12.3
 
 *To perform a Gradle build, only openjdk and git need to be installed as the
-other tools are specified as plugins for the gradle build. The project structure
+other tools are specified as plugins in Gradle. The project structure
 should be a git repository, as the version number generation uses information from
 git about the repo.
 To do further development work on the project, you may
@@ -25,7 +25,7 @@ Using other versions may cause build issues in some cases.
 ### Set up build environment
 The project should build on most linux machines with a bash shell. 
 
-*openjdk 17 must be installed on the build machine.*
+*openjdk 21 must be installed on the build machine.*
 ```
 git clone git@github.com:richard-austin/security-cam.git
 cd security-cam

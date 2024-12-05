@@ -45,7 +45,8 @@ is done on the raspberry pi to keep CPU utilisation low*
 older machines, the GPU may not support H265 (HEVC) decoding. There are special chromium forks which can render H265
 with software decoding (see <a href="https://thorium.rocks/">Thorium</a> and <a href="https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding">Special Chromium Build</a>)
   * For Chromium based browsers running on Ubuntu 23.04 with VAAPI installed and a suitable Intel GPU, you may need to use the parameters 
-  ```--enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoDecoder,VaapiVideoEncoder``` 
+  ```--enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoDecoder,VaapiVideoEncoder```  or in the case of Chromium or Brave, or
+any browser base of Chromium 131 or higher ```--enable-features=AcceleratedVideoDecodeLinuxGL```
    in the command line to enable hevc decoding.
 This will also enable hardware decoding generally.
 * Web admin hosting where the camera uses https and rstps (secure rtsp streaming from cameras) are not currently supported.

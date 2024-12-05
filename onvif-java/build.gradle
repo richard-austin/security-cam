@@ -54,10 +54,10 @@ dependencies {
     implementation project(':onvif-ws-client')
 
 
-    implementation 'commons-io:commons-io:2.14.0'
+    implementation 'commons-io:commons-io:2.18.0'
     implementation 'commons-codec:commons-codec:1.10'
-    implementation 'org.apache.commons:commons-lang3:3.4'
-    compileOnly    'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
+//    compileOnly    'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
     implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
     implementation 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.2'
 

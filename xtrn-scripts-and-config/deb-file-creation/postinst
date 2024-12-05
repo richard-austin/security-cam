@@ -30,7 +30,6 @@ chown -R tomcat:security-cam /var/security-cam
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown -R tomcat:tomcat /var/lib/tomcat10
 
-
 # Create the client keystore for connection to the Cloud server via ActiveMQ
 MQ_CREDS_FILE=/var/security-cam/cloud-creds.json
 KEYSTORE_FILE=/etc/security-cam/client.ks
@@ -128,15 +127,13 @@ deb-systemd-invoke start wifimanagement.service
 deb-systemd-invoke enable camera-recordings.service
 
 CERT_FILE=/etc/nginx/security-cam.crt
-if test -f "$CERT_FILE"; then
-   deb-systemd-invoke start nginx.service
-else
-   deb-systemd-invoke stop nginx.service  # On initial install, the certificate won't be present so
-                                          # stop
-                                          # nginx as it can't work till that is set up.
-   echo "To add or update the site key/certificate, run sudo install-cert.sh at /etc/security-cam"
-   echo "Use sudo systemctl start nginx to run nginx."
+if [ ! -f "$CERT_FILE" ]; then
+  # Create the default security certificates for nginx SSL (may be changed with the install-cert.sh script
+  openssl req -x509 -newkey rsa:4096 -keyout security-cam.key -out security-cam.crt -nodes -days 2000 -subj "/C=UA/ST=anywhere/L=anywhere/O=MyNVR/OU=IT Department/CN=example.com"
+  mv security-cam.key security-cam.crt /etc/nginx
 fi
+
+deb-systemd-invoke start nginx.service
 
 # Let chrony use the updated conf file
 deb-systemd-invoke stop chrony
