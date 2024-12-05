@@ -70,14 +70,41 @@ sudo apt install ./<i>deb_file_name</i>.deb
       ```
         This will be required if you use the Cloud Service to connect
         to the NVR, otherwise it is not required.
-      * <i>Generate the site certificate..</i>
+* **Only do this if you want to replace the default site certificate with a personalised (but  still untrusted) one!**
+     * <i>Generate the site certificate.</i>
         ```
         cd /etc/security-cam
         sudo ./install-cert.sh
         ```
         Fill in the details it requests (don't put in any information you are not happy with being publicly visible, for
         example you may want to put in a fake email address etc.)
-      * nginx will not have started in the absence of the site certificate, so restart nginx.
+        <br><br>
+        Restart nginx to use the new certificate.
         ```
         sudo systemctl restart nginx
         ```
+## Java ONVIF (Open Network Video Interface Forum)
+* Onvif modules
+
+  There are two modules in the security project which provide the onvif functionality (camera discovery and PTZ functions).
+  These are onvif-ws-client and onvif-java. They are not separate programs but together form a dependency of the server module.
+  When the server project is built, these will be built beforehand if their generated code is not up to date.
+
+
+ONVIF is a community to standardize communication between IP-based security products (like cameras).
+
+This project aims to improve https://github.com/milg0/onvif-java-lib.<br>
+I've tried to convice its author to use to my code but it seems we have different objectives: my goal is to create a project that focus on the funny part of the development of an ONVIF application, **keeping the interaction with the WS as simple as possible** and delege that annoying part to Apache CXF in order to not waste the developer time in writing (and MAINTAINING) code that interacts with ONVIF web services.<br>
+My wish is to help other developers willing to contribute to an enterprise-level Java library for ONVIF devices.
+
+### Rebuilding WS stubs
+
+
+If you need to change the list of managed WSDLs (in onvif/onvif-ws-tests/src/main/resources/wsdl) and thus you need to regenerate the WS Java stubs using the [Apache CXF codegen maven plugin](http://cxf.apache.org/docs/maven-cxf-codegen-plugin-wsdl-to-java.html), you need to go through the following steps:
+1. **Download Onvif WSDLs** to onvif/onvif-ws-tests/src/main/resources/wsdl appending the version before the .wsdl suffix.
+   For example, from main dir (onvif) use you can run the following shell commmand:<br>
+   ```wget http://www.onvif.org/onvif/ver10/device/wsdl/devicemgmt.wsdl onvif-ws-client/src/main/resources/wsdl/devicemgmt_2.5.wsdl ```
+1. **Add required url-rewriting rules (if needed)** to onvif/onvif-ws-tests/src/main/resources/wsdl/jax-ws-catalog.xml
+1. **Run the class generation command**: ```./gradlew onvif-java:clean onvif-java:build```
+1. To see how to properly add a new ONVIF service to OnvifDevice look into OnvifDevice.init()
+

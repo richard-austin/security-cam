@@ -26,11 +26,6 @@ repositories {
   //  uri = uri("https://build.shibboleth.net/maven/releases/org/opensaml/")
 }
 
-tasks.register('xxx', Exec) {
-    def f = files('../onvif-ws-client/build/libs/onvif-ws-client.jar')
-    def y = f
-}
-
 clean.dependsOn(":onvif-ws-client:clean")
 compileJava.dependsOn(":onvif-ws-client:build")
 
