@@ -101,7 +101,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-bootWar.dependsOn([':server:setVersion', ':client:buildClient']).mustRunAfter(':server:setVersion')
+bootWar.dependsOn([':client:buildClient'])
 clean.dependsOn([':onvif-java:clean'])
 
 bootWar {
@@ -122,7 +122,7 @@ tasks.register('setVersion', Exec) {
 
 tasks.register('buildDebFile', Exec) {
     group='build'
-    dependsOn([':server:bootWar', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar'])
+    dependsOn([':server:setVersion', ':server:bootWar', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar'])
     group = 'build'
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'

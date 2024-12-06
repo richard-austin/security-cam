@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("userDetailsService")
-//@Transactional
 public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
