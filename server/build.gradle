@@ -115,6 +115,7 @@ bootWar {
 tasks.register('setVersion', Exec) {
     group = 'build'
     description = 'Sets the version.txt file with the current version from git describe'
+    dependsOn(':server:bootWar')
     workingDir "$projectDir"
     executable "sh"
     args = ['-c', 'mkdir -p version && git describe --tags --dirty | tr -d \'\\n\' > src/main/resources/version.txt']
@@ -122,11 +123,12 @@ tasks.register('setVersion', Exec) {
 
 tasks.register('buildDebFile', Exec) {
     group='build'
-    dependsOn([':server:setVersion', ':server:bootWar', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar'])
+    dependsOn([':server:setVersion', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar'])
     group = 'build'
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'
 }
+
 
 //tasks.withType(War).configureEach {
 //    duplicatesStrategy = DuplicatesStrategy.INCLUDE
