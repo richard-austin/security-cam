@@ -676,11 +676,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   startOnvifSearch() {
     this.discovering = true;
     this.failed = new Map<string, string>();
+    this.reporting.dismiss();
     this.cameraSvc.discover().subscribe((result: { cams: Map<string, Camera>, failed: Map<string, string> }) => {
         this.cameras = result.cams;
         this.discovering = false;
         this.FixUpCamerasData();
         this.failed = result.failed;
+        if(this.cameras.size == 0)
+          this.reporting.warningMessage = "No cameras were found on this network"
       },
       reason => {
         this.reporting.errorMessage = reason;
