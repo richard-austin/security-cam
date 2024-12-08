@@ -177,11 +177,11 @@ class WifiUtilsService {
     def getCurrentWifiConnection() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            String[] lines = utilsService.executeLinuxCommand('iwconfig').split('\n')
+            String[] lines = utilsService.executeLinuxCommand("nmcli", "-t", "-f", "active,ssid", "dev", "wifi").split('\n')
             String accessPoint = ""
             for (line in lines)
-                if (line.contains("SSID")) {
-                    accessPoint = StringUtils.substringBetween(line, 'SSID:"', '"')
+                if (line.contains("yes")) {
+                    accessPoint = StringUtils.substringAfter(line, 'yes:')
                     break
                 }
 

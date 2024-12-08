@@ -64,14 +64,13 @@ Maintainer: Richard Austin <richard.david.austin@gmail.com>
 Description: A security camera system accessed through a secure web based interface.
 Depends: openjdk-21-jre-headless (>=21.0.0), openjdk-21-jre-headless (<< 21.9.9),
  tomcat10 (>=10.0.0), tomcat10 (<= 11.0.0),
- tomcat10-admin (>=10.0.0), tomcat10-admin (<= 11.0.0),
- ffmpeg (>=7:6.1.1), ffmpeg (<<7:6.9.9),
+ tomcat10-admin (>=10.0.0), tomcat10-admin (<= 10.99.99),
+ ffmpeg (>=7:6.1.1), ffmpeg (<<7:7.99.99),
  motion (>=4.6), motion(<<5.0.0-0),
- curl (>=8.5.0), curl(<=8.9),
- nginx (>=1.24.0), nginx(<=1.24.9),
+ curl (>=8.5.0), curl(<<9.0.0),
+ nginx (>=1.24.0), nginx(<=1.27.99),
  libraspberrypi-bin, chrony,
  network-manager (>= 1.46.0), network-manager (<< 2.0.0),
- wireless-tools (>=30~pre9-13), wireless-tools (<< 40),
  moreutils,
  python3-pip, python3.12-venv
 EOF

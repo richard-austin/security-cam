@@ -14,7 +14,6 @@ popd || true
 
 # This will clear out the unit file refs for wifimanagement service
 systemctl daemon-reload
-userdel sec-cam || true
 groupdel security-cam || true
 
 #!/bin/bash

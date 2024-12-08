@@ -70,8 +70,8 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
       this.wifiUtilsService.setWifiStatus(status).subscribe((result) => {
           this.wifiEnabled = result.status === 'on';
           if (this.wifiEnabled) {
-            // Allow time for the Wi-Fi connection to re-establish so iwconfig can detect it
-            timer(7000).subscribe(() => {
+            // Allow time for the Wi-Fi connection to re-establish so nmcli can detect it
+            timer(10000).subscribe(() => {
               this.getLocalWifiDetails();
               this.loading = false;
             });
