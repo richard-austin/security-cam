@@ -101,6 +101,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+compileJava.dependsOn(":server:setVersion")
 bootWar.dependsOn([':client:buildClient'])
 clean.dependsOn([':onvif-java:clean'])
 
@@ -115,7 +116,7 @@ bootWar {
 tasks.register('setVersion', Exec) {
     group = 'build'
     description = 'Sets the version.txt file with the current version from git describe'
-    dependsOn(':server:bootWar')
+    dependsOn(':onvif-java:build')
     workingDir "$projectDir"
     executable "sh"
     args = ['-c', 'git describe --tags --dirty | tr -d \'\\n\' > src/main/resources/version.txt']
@@ -123,7 +124,7 @@ tasks.register('setVersion', Exec) {
 
 tasks.register('buildDebFile', Exec) {
     group='build'
-    dependsOn([':server:setVersion', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar'])
+    dependsOn([':server:bootWar', ':generateProductKey:uberJar', ':fmp4-ws-media-server:deploy', ':initialAdmin:buildWar'])
     group = 'build'
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'
