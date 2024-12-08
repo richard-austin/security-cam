@@ -118,7 +118,7 @@ tasks.register('setVersion', Exec) {
     dependsOn(':server:bootWar')
     workingDir "$projectDir"
     executable "sh"
-    args = ['-c', 'mkdir -p version && git describe --tags --dirty | tr -d \'\\n\' > src/main/resources/version.txt']
+    args = ['-c', 'git describe --tags --dirty | tr -d \'\\n\' > src/main/resources/version.txt']
 }
 
 tasks.register('buildDebFile', Exec) {
