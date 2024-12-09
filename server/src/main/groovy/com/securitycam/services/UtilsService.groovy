@@ -343,7 +343,7 @@ class UtilsService {
     def getVersion() {
         ObjectCommandResponse result = new ObjectCommandResponse()
         try {
-            File verFile = ResourceUtils.getFile("classpath:version.txt")
+            File verFile = new File("${config.appHomeDirectory}/version.txt")
             List verLst = verFile.readLines()
             Version ver = new Version(verLst.get(0))
             result.responseObject = ver

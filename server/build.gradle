@@ -101,8 +101,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-compileJava.dependsOn(":server:setVersion")
-bootWar.dependsOn([':client:buildClient'])
+bootWar.dependsOn([':client:buildClient', ':server:setVersion'])
 clean.dependsOn([':onvif-java:clean'])
 
 bootWar {
@@ -114,9 +113,9 @@ bootWar {
 }
 
 tasks.register('setVersion', Exec) {
+    mustRunAfter(':server:compileJava')
     group = 'build'
     description = 'Sets the version.txt file with the current version from git describe'
-    dependsOn(':onvif-java:build')
     workingDir "$projectDir"
     executable "sh"
     args = ['-c', 'git describe --tags --dirty | tr -d \'\\n\' > src/main/resources/version.txt']

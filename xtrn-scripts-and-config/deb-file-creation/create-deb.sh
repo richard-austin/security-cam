@@ -10,6 +10,7 @@ mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam
 cp ../processmotionrecordings.sh \
   ../productKeyGen/generateProductKey.jar ../productKeyGen/publicKey \
   ../productKeyGen/productKeyGen.sh \
+  ../../server/src/main/resources/version.txt \
  security-cam_"${VERSION}"_arm64/etc/security-cam
 
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service &&
