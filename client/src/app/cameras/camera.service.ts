@@ -85,6 +85,7 @@ export class CameraService {
 
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
  private _publicKey!: Uint8Array;
+    private _numColumns: number = 2;
 
   public readonly _cameraParamSpecs: CameraParamSpec[] =
     [new CameraParamSpec(
@@ -127,9 +128,19 @@ export class CameraService {
   private _preambleFrameValues: number[] = [
     0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400
   ]
-  get cameraParamSpecs() {
-    return this._cameraParamSpecs;
-  };
+
+    // Number of columns (minus one) on the multi cam screen
+    get numColumns(): number {
+        return this._numColumns;
+    }
+
+    set numColumns(column: number) {
+        this._numColumns = column;
+    }
+
+    get cameraParamSpecs() {
+        return this._cameraParamSpecs;
+    };
 
   get audioEncodings() {
     return this._audioEncodings;

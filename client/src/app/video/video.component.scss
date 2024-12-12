@@ -1,31 +1,13 @@
 @mixin common-characteristics {
   width: fit-content;
-  @media handheld and (min-device-width: 900px), handheld and (orientation: landscape), screen and (min-width: 900px) {
-    border: 0.25rem solid darkblue;
-    border-right-color: #3939f3;
-    border-bottom-color: #3939f3;
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
-  }
+  border: 0.1rem solid darkblue;
+  border-right-color: #3939f3;
+  border-bottom-color: #3939f3;
   overflow: hidden;
   cursor: zoom-in;
 }
 
 div.video {
-  video {
-    max-width: 100dvw;
-    max-height: 100dvh;
-    @media handheld and (min-device-width: 800px), screen and (min-width: 800px) and (min-height: 400px){
-      width: 700px;
-    }
-    @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) and (min-height: 700px) {
-      width: 900px;
-    }
-    @media handheld and (min-device-width: 1500px), screen and (min-width: 1500px) and (min-height: 900px) {
-      width: 1200px;
-    }
-  }
-
   @include common-characteristics;
 }
 
@@ -33,17 +15,16 @@ div.video {
   display: flex;
   flex-direction: column;
   align-items: center;
+  > div:nth-child(2) {
+    position: relative;
+    > div {
+      position: absolute;
+    }
+  }
 }
 
 // Smaller video size in multi display
 div.multi {
-  > video {
-    max-width: 100dvw;
-    max-height: 100dvh;
-    @media handheld and (min-device-width: 800px), screen and (min-width: 800px) and (min-height: 400px){
-      width: 700px;
-    }
-  }
   @include common-characteristics;
 }
 

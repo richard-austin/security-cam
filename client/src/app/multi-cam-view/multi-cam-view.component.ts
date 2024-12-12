@@ -8,6 +8,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {timer} from 'rxjs';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
+import {VideoSizing} from "../video/VideoSizing";
 
 @Component({
   selector: 'app-multi-cam-view',
@@ -43,8 +44,11 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   expandedElement!: Camera | null;
   cameraColumns = ['name', 'expand'];
   streamColumns = ['select'];
+  numColumns: number;
+  sizing:Array<VideoSizing> = new Array<VideoSizing>();
 
   constructor(public cameraSvc: CameraService, private utilsService: UtilsService) {
+    this.numColumns = cameraSvc.numColumns;
   }
 
   cams: Map<string, Camera> = new Map<string, Camera>();
@@ -52,6 +56,14 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleStreamSelector() {
     this.showStreamSelector = !this.showStreamSelector;
+  }
+  static colsToSize: Map<number, number> = new Map<number, number>([[0,100], [1, 50], [2,33.33], [3, 25]]);
+  setNumColumns(column: number) {
+    this.numColumns = column;
+    this.cameraSvc.numColumns=column;
+    const size = MultiCamViewComponent.colsToSize.get(column);
+    if(typeof size == "number")
+      this.sizing.forEach((sz) => sz.changeSize(size));
   }
 
   setupVideo() {
@@ -70,6 +82,13 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
             video.mute();
             video.setSource(cam, stream);
             video.visible = true;
+            let sizing = new VideoSizing(video.video);
+            this.sizing.push(sizing);
+            const size = MultiCamViewComponent.colsToSize.get(this.cameraSvc.numColumns);
+            if(typeof size == "number")
+              sizing.setup(size);
+            else
+              sizing.setup(50);
             ++index;
           }
         });
@@ -160,5 +179,9 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     // Re-enable the user idle service
     this.utilsService.sendMessage(new IdleTimeoutStatusMessage(true));
+
+    this.sizing.forEach((vs) => {
+      vs._destroy();
+    });
   }
 }

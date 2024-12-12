@@ -7,6 +7,7 @@ import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {ActivatedRoute} from '@angular/router';
+import {VideoSizing} from "../video/VideoSizing";
 
 @Component({
   selector: 'app-live-container',
@@ -20,6 +21,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   timerHandle!: Subscription;
   camera!: Camera;
   stream!: Stream;
+  sizeing!: VideoSizing;
 
   constructor(private route: ActivatedRoute, public cameraSvc: CameraService, private utilsService: UtilsService, private cd: ChangeDetectorRef) {
     // Use route.paramMap to get the stream name correctly if we switch directly between live streams
@@ -80,13 +82,15 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngAfterViewInit(): void {
       this.cd.detectChanges();
+    this.sizeing = new VideoSizing(this.video.video);
+    this.sizeing.setup(100);
   }
-
 
   ngOnDestroy(): void {
     this.video.stop();
     this.timerHandle?.unsubscribe();
     // Re-enable the user idle service
     this.utilsService.sendMessage(new IdleTimeoutStatusMessage(true));
+    this.sizeing._destroy();
   }
 }

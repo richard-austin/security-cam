@@ -37,7 +37,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   vt!: VideoTransformations;
   currentTime: string = "";
   totalTime: string = "";
-
   constructor(public utilsService: UtilsService) {
     this.videoFeeder = new MediaFeeder(this.buffering_sec)
   }
