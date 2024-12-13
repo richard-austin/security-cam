@@ -43,16 +43,20 @@ export class VideoSizing {
 
     // Increase video size when window is narrower on multi cam display
     adjustVideoSizeForScreen(size: number): number {
-        return window.innerWidth < 850 && size < 100 ? 100 :
-            window.innerWidth < 1300 && size < 50 ? 50 :
-                window.innerWidth < 1800 && size < 33.33 ? 33.33 : size;
+        const innerWidth = window.visualViewport == null ? window.innerWidth : window.visualViewport.width;
+        return innerWidth < 850 && size < 100 ? 100 :
+            innerWidth < 1300 && size < 50 ? 50 :
+                innerWidth < 1800 && size < 33.33 ? 33.33 : size;
     }
 
     setVideoSize(size: number) {
+        const innerWidth = window.visualViewport == null ? window.innerWidth : window.visualViewport.width;
+        const innerHeight = window.visualViewport == null ? window.innerHeight : window.visualViewport.height;
+
         const sz = this.adjustVideoSizeForScreen(size);
-        let width = sz / 100 * window.innerWidth - VideoSizing.bordersEtc;
+        let width = sz / 100 * innerWidth - VideoSizing.bordersEtc;
         let height = width * this.aspectRatio;
-        const maxHeight = window.innerHeight - VideoSizing.bordersEtc - VideoSizing.navbarTitleAndControls;
+        const maxHeight = innerHeight - VideoSizing.bordersEtc - VideoSizing.navbarTitleAndControls;
         if (height > maxHeight) {
             width /= height / maxHeight;
         }
