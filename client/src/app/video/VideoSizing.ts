@@ -1,12 +1,16 @@
+import {VideoTransformations} from "./VideoTransformations";
+import {timer} from "rxjs";
+
 export class VideoSizing {
     el: HTMLVideoElement;
 
     // To allow for border around video elements
-    static readonly bordersEtc: number = 12;
+    static readonly bordersEtc: number = 28;
     static readonly navbarTitleAndControls: number = 150;
 
-    private _aspectRatio: number = 0;
+    private _aspectRatio: number = 1;
     private size: number = 100
+    private landscape = false;
 
     get aspectRatio(): number {
         return this._aspectRatio
@@ -39,6 +43,7 @@ export class VideoSizing {
             this.setVideoSize(this.size)
         };
         window.addEventListener('resize', this.resizeHandler);
+        // For mobile
     }
 
     // Increase video size when window is narrower on multi cam display
@@ -49,20 +54,34 @@ export class VideoSizing {
                 innerWidth < 1800 && size < 33.33 ? 33.33 : size;
     }
 
-    setVideoSize(size: number) {
-        const innerWidth = window.visualViewport == null ? window.innerWidth : window.visualViewport.width;
-        const innerHeight = window.visualViewport == null ? window.innerHeight : window.visualViewport.height;
+    setVideoSize(size: number, landscape?: boolean) {
+        if (!this.landscape || landscape !== undefined) {
+            const innerWidth = document.documentElement.clientWidth; // window.visualViewport == null ? window.innerWidth : window.visualViewport.width;
+            const innerHeight = document.documentElement.clientHeight;// window.visualViewport == null ? window.innerHeight : window.visualViewport.height;
 
-        const sz = this.adjustVideoSizeForScreen(size);
-        let width = sz / 100 * innerWidth - VideoSizing.bordersEtc;
-        let height = width * this.aspectRatio;
-        const maxHeight = innerHeight - VideoSizing.bordersEtc - VideoSizing.navbarTitleAndControls;
-        if (height > maxHeight) {
-            width /= height / maxHeight;
+            this.landscape = landscape !== undefined ? landscape : this.landscape;
+            const sz = this.adjustVideoSizeForScreen(size);
+
+            if (!this.landscape) {
+                // Fix size on height or width
+                if ((innerHeight - VideoSizing.bordersEtc - VideoSizing.navbarTitleAndControls) / this.aspectRatio * 100 / sz > innerWidth) {
+                    // By width
+                    this.el.style.width = "calc((100dvw - "+VideoSizing.bordersEtc+"px) / "+ 100 / sz+")";
+                    this.el.style.height = "auto";
+                } else { // By height
+                    this.el.style.width = "auto";
+                    this.el.style.height = "calc((100dvh - " + (VideoSizing.bordersEtc + VideoSizing.navbarTitleAndControls) + "px)";
+                }
+            } else {  // Landscape on mobile
+                if ((innerHeight - VideoSizing.bordersEtc) / this.aspectRatio > (innerWidth)) {
+                    this.el.style.width = "calc((100dvw - "+VideoSizing.bordersEtc+"px) / "+ 100 / sz+")";
+                    this.el.style.height = "auto";
+                } else {
+                    this.el.style.width = "auto";
+                    this.el.style.height = "calc(100dvh - "+VideoSizing.bordersEtc+"px)";
+                }
+            }
         }
-        this.el.style.width = width + "px";
-        this.el.style.height = "auto"
-        console.log("Changing size to " + size + " => " + this.el.style.width + " x " + this.el.style.height)
     }
 
     _destroy() {

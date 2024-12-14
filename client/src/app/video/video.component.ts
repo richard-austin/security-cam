@@ -14,6 +14,7 @@ import {Subscription, timer} from "rxjs";
 import {MediaFeeder} from './MediaFeeder';
 import {AudioBackchannel} from './AudioBackchannel';
 import {VideoTransformations} from "./VideoTransformations";
+import {VideoSizing} from "./VideoSizing";
 
 @Component({
   selector: 'app-video',
@@ -37,6 +38,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   vt!: VideoTransformations;
   currentTime: string = "";
   totalTime: string = "";
+  sizeing!: VideoSizing;
+
   constructor(public utilsService: UtilsService) {
     this.videoFeeder = new MediaFeeder(this.buffering_sec)
   }
@@ -90,6 +93,46 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.videoFeeder.mute(mute);
   }
 
+  setSize(size: number): void {
+    this.sizeing.setup(size)
+  }
+  changeSize(size: number) {
+    this.sizeing.changeSize(size);
+  }
+
+  reset($event: MouseEvent) {
+    if ($event.button === 1) {
+      this.vt.reset(true);
+      $event.preventDefault();
+    } else if ($event.button === 0)
+      this.vt.mouseDown($event);
+  }
+
+  orientationChangeHandler = (ev: Event) => {
+    // Set up VideoTransformations again to take account of viewport dimension changes
+    this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
+    if (ev.currentTarget instanceof ScreenOrientation) {
+      let target: ScreenOrientation = ev.currentTarget;
+      if (!this.multi) {
+        this.vt.reset();  // Clear any pan/zoom
+        // Timer to ensure screen is settled before scrolling to position
+        const sub = timer(60).subscribe(() => {
+          sub.unsubscribe();
+          if (target.type.toString().includes('portrait')) {
+            document.body.scrollTop = document.documentElement.scrollTop = 0;  // Scroll to top of page
+            this.sizeing.setVideoSize(100, false);
+          }
+          else {
+            this.sizeing.setVideoSize(100, true);
+            // Scroll to fit video in screen
+            window.scrollTo({left: 0, top: this.video.getBoundingClientRect().y + window.scrollY});
+          }
+        });
+      }
+    }
+  }
+
+
   ngOnInit(): void {
   }
 
@@ -107,26 +150,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.video.duration !== null && !isNaN(this.video.duration))
         this.totalTime = new Date(this.video.duration * 1000).toISOString().substring(11, 19);
     };
-    window.screen.orientation.onchange = (ev: Event) => {
-      // Set up VideoTransformations again to take account of viewport dimension changes
-      this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
-      if (ev.currentTarget instanceof ScreenOrientation) {
-        let target: ScreenOrientation = ev.currentTarget;
-        if (!this.multi) {
-          this.vt.reset();
-          // Timer to ensure screen is settled before scrolling to position
-          const sub = timer(60).subscribe(() => {
-            sub.unsubscribe();
-            if (target.type.toString().includes('portrait'))
-              document.body.scrollTop = document.documentElement.scrollTop = 0;  // Scroll to top of page
-            else
-              // Scroll to fit video in screen
-              window.scrollTo({left: 0, top: this.video.getBoundingClientRect().y + window.scrollY});
-          });
-        }
-      }
-    }
-  }
+
+    this.sizeing = new VideoSizing(this.video);
+
+    screen.orientation.addEventListener('change', this.orientationChangeHandler)  }
 
   ngOnDestroy(): void {
     this.videoFeeder.stop();
@@ -137,13 +164,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       timerSubscription.unsubscribe();
     });
     window.screen.orientation.onchange = null;
-  }
-
-  reset($event: MouseEvent) {
-    if ($event.button === 1) {
-      this.vt.reset(true);
-      $event.preventDefault();
-    } else if ($event.button === 0)
-      this.vt.mouseDown($event);
+    this.sizeing._destroy();
   }
 }
