@@ -8,7 +8,6 @@ export class VideoSizing {
     private _aspectRatio: number = 1;
     private size: number = 100
     private landscapeOnMobile = false;
-    private multi: boolean = false;
 
     get aspectRatio(): number {
         return this._aspectRatio
@@ -18,9 +17,8 @@ export class VideoSizing {
         this.el = el;
     }
 
-    setup(size: number, multi: boolean) {
+    setup(size: number) {
         this.size = size;
-        this.multi = multi;
         this.windowResize();
         if(this.el.style.height == "" ) {
             this.el.style.height = "45dvw";  // Prevent flash up of full pixel size image on first access
@@ -83,9 +81,6 @@ export class VideoSizing {
                 this.el.style.width = "auto";
                 this.el.style.height = "calc(100dvh - " + VideoSizing.bordersEtc + "px)";
             }
-            // Scroll to fit video in screen if single cam display
-            if(!this.multi)
-                window.scrollTo({left: 0, top: this.el.getBoundingClientRect().y + window.scrollY});
         }
     }
 
