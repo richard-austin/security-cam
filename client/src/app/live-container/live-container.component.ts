@@ -7,7 +7,6 @@ import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {ActivatedRoute} from '@angular/router';
-import {VideoSizing} from "../video/VideoSizing";
 
 @Component({
   selector: 'app-live-container',

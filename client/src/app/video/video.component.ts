@@ -94,7 +94,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setSize(size: number): void {
-    this.sizeing.setup(size)
+    this.sizeing.setup(size, this.multi)
   }
   changeSize(size: number) {
     this.sizeing.changeSize(size);
@@ -109,29 +109,14 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   orientationChangeHandler = (ev: Event) => {
-    // Set up VideoTransformations again to take account of viewport dimension changes
-    this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
     if (ev.currentTarget instanceof ScreenOrientation) {
-      let target: ScreenOrientation = ev.currentTarget;
       if (!this.multi) {
+        // Set up VideoTransformations again to take account of viewport dimension changes
+        this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
         this.vt.reset();  // Clear any pan/zoom
-        // Timer to ensure screen is settled before scrolling to position
-        const sub = timer(60).subscribe(() => {
-          sub.unsubscribe();
-          if (target.type.toString().includes('portrait')) {
-            document.body.scrollTop = document.documentElement.scrollTop = 0;  // Scroll to top of page
-            this.sizeing.setVideoSize(100, false);
-          }
-          else {
-            this.sizeing.setVideoSize(100, true);
-            // Scroll to fit video in screen
-            window.scrollTo({left: 0, top: this.video.getBoundingClientRect().y + window.scrollY});
-          }
-        });
       }
     }
   }
-
 
   ngOnInit(): void {
   }

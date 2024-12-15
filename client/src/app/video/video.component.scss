@@ -17,13 +17,13 @@ div.video {
   align-items: center;
   > div:nth-child(2) {
     position: relative;
+    height: 15px;
     > div {
       position: absolute;
     }
   }
 }
 
-// Smaller video size in multi display
 div.multi {
   @include common-characteristics;
 }
