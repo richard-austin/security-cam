@@ -114,8 +114,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         // Set up VideoTransformations again to take account of viewport dimension changes
         this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
         this.vt.reset();  // Clear any pan/zoom
-        // Scroll to fit video in screen if single cam display
-          window.scrollTo({left: 0, top: this.video.getBoundingClientRect().y + window.scrollY});
       }
     }
   }

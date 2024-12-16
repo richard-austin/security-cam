@@ -55,6 +55,7 @@ export class VideoSizing {
                 innerWidth < 1800 && size < 33.33 ? 33.33 : size;
     }
 
+    private static scrolledToTop = false;
     setVideoSize(size: number) {
         const innerWidth = document.documentElement.clientWidth; // window.visualViewport == null ? window.innerWidth : window.visualViewport.width;
         const innerHeight = document.documentElement.clientHeight;// window.visualViewport == null ? window.innerHeight : window.visualViewport.height;
@@ -73,6 +74,7 @@ export class VideoSizing {
                 this.el.style.width = "auto";
                 this.el.style.height = "calc((100dvh - " + (VideoSizing.bordersEtc + VideoSizing.navbarTitleAndControls) + "px)";
             }
+            VideoSizing.scrolledToTop = false;
         } else {  // Landscape on mobile
             if ((innerHeight - VideoSizing.bordersEtc) / this.aspectRatio > (innerWidth)) {
                 this.el.style.width = "calc((100dvw - " + VideoSizing.bordersEtc + "px) / " + 100 / sz + ")";
@@ -80,6 +82,11 @@ export class VideoSizing {
             } else {
                 this.el.style.width = "auto";
                 this.el.style.height = "calc(100dvh - " + VideoSizing.bordersEtc + "px)";
+            }
+            if(!VideoSizing.scrolledToTop) {
+                // Scroll to fit video in screen if single cam display
+                window.scrollTo({left: 0, top: this.el.getBoundingClientRect().y + window.scrollY});
+                VideoSizing.scrolledToTop = true;
             }
         }
     }

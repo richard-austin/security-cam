@@ -8,6 +8,16 @@
 }
 
 div.video {
+  video {
+   // max-height: calc(100dvh - 260px);
+    @media screen and (min-width: 700px) {
+      width: calc(100dvw - 360px);
+    }
+    @media screen and (max-width: 699px) {
+      width: 100dvw;
+    }
+  }
+
   @include common-characteristics;
 }
 
