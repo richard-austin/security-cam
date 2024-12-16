@@ -93,8 +93,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.videoFeeder.mute(mute);
   }
 
-  setSize(size: number): void {
-    this.sizeing.setup(size)
+  setSize(size: number, isRecording: boolean = false): void {
+    this.sizeing.setup(size, isRecording)
   }
   changeSize(size: number) {
     this.sizeing.changeSize(size);

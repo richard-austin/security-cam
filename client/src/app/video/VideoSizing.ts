@@ -4,10 +4,13 @@ export class VideoSizing {
     // To allow for border around video elements
     static readonly bordersEtc: number = 28;
     static readonly navbarTitleAndControls: number = 150;
+    static readonly recordingSelectionForm: number = 380;
+    static readonly recordingTitleAndControls = 220;
 
     private _aspectRatio: number = 1;
     private size: number = 100
     private landscapeOnMobile = false;
+    private isRecording: boolean = false;
 
     get aspectRatio(): number {
         return this._aspectRatio
@@ -17,7 +20,8 @@ export class VideoSizing {
         this.el = el;
     }
 
-    setup(size: number) {
+    setup(size: number, isRecording: boolean = false) {
+        this.isRecording = isRecording;
         this.size = size;
         this.windowResize();
         if(this.el.style.height == "" ) {
@@ -64,11 +68,52 @@ export class VideoSizing {
         let ls = window.matchMedia("screen and (orientation: landscape) and (max-height: 500px)");
         this.landscapeOnMobile = ls.matches;
         const sz = this.adjustVideoSizeForScreen(size);
+        if (this.isRecording)
+            this.recordingSize(innerHeight, innerWidth)
+        else
+            this.liveAndMultiSize(innerHeight, innerWidth, sz);
+    }
+
+    // Set size of recording playback videos
+    recordingSize(innerHeight: number, innerWidth: number) {
+        if (!this.landscapeOnMobile) {
+            // Fix size on height or width
+            if ((innerHeight - VideoSizing.bordersEtc - VideoSizing.recordingTitleAndControls) / this.aspectRatio > innerWidth - VideoSizing.recordingSelectionForm - VideoSizing.bordersEtc) {
+                // By width
+                let mq = window.matchMedia("screen and (min-width: 686px)");
+                if (mq.matches)
+                    this.el.style.width = "calc(100dvw - " + (VideoSizing.bordersEtc + VideoSizing.recordingSelectionForm) + "px)";
+                else
+                    this.el.style.width = "calc(100dvw - " + VideoSizing.bordersEtc + "px)";
+                this.el.style.height = "auto";
+            } else { // By height
+                this.el.style.width = "auto";
+                this.el.style.height = "calc(100dvh - " + (VideoSizing.bordersEtc + VideoSizing.recordingTitleAndControls) + "px)";
+            }
+            VideoSizing.scrolledToTop = false;
+        } else {  // Landscape on mobile
+            if ((innerHeight - VideoSizing.bordersEtc) / this.aspectRatio > (innerWidth - VideoSizing.bordersEtc)) {
+                this.el.style.width = "calc(100dvw - " + (VideoSizing.bordersEtc + VideoSizing.recordingSelectionForm) + "px)";
+                this.el.style.height = "auto";
+            } else {
+                this.el.style.width = "auto";
+                this.el.style.height = "calc(100dvh - " + VideoSizing.bordersEtc + "px)";
+            }
+            if (!VideoSizing.scrolledToTop) {
+                // Scroll to fit video in screen if single cam display
+                window.scrollTo({left: 0, top: this.el.getBoundingClientRect().y + window.scrollY});
+                VideoSizing.scrolledToTop = true;
+            }
+        }
+    }
+
+    // Set size of single and multi live videos
+    liveAndMultiSize(innerHeight: number, innerWidth: number, sz: number) {
         if (!this.landscapeOnMobile) {
             // Fix size on height or width
             if ((innerHeight - VideoSizing.bordersEtc - VideoSizing.navbarTitleAndControls) / this.aspectRatio * 100 / sz > innerWidth) {
                 // By width
-                this.el.style.width = "calc((100dvw - " + VideoSizing.bordersEtc + "px) / " + 100 / sz + ")";
+                this.el.style.width = "calc((100dvw - " + (VideoSizing.bordersEtc + "px) / " + 100 / sz + ")");
                 this.el.style.height = "auto";
             } else { // By height
                 this.el.style.width = "auto";
@@ -83,7 +128,7 @@ export class VideoSizing {
                 this.el.style.width = "auto";
                 this.el.style.height = "calc(100dvh - " + VideoSizing.bordersEtc + "px)";
             }
-            if(!VideoSizing.scrolledToTop) {
+            if (!VideoSizing.scrolledToTop) {
                 // Scroll to fit video in screen if single cam display
                 window.scrollTo({left: 0, top: this.el.getBoundingClientRect().y + window.scrollY});
                 VideoSizing.scrolledToTop = true;

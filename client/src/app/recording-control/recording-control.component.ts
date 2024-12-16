@@ -360,6 +360,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.video.video.controls = false;  // Turn off controls to prevent full screen on reorientation to landscape
                                         // Also in some browsers (Firefox on Android), having the controls enabled
                                         // prevents pan and pinch zoom from working.
+    this.video.setSize(100, true);
   }
 
   ngOnDestroy(): void {
