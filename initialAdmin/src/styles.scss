@@ -103,7 +103,8 @@ $mat-dark-theme-background: (
 );
 
 // Compute font config
-@include mat.core();
+@include mat.elevation-classes();
+@include mat.app-background();
 
 // Theme Config
 body {
