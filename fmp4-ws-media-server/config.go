@@ -9,6 +9,7 @@ import (
 type Config struct {
 	LogPath             string  `json:"log_path"`
 	LogLevelStr         string  `json:"log_level"`
+	FfmpegLogLevelStr   string  `json:"ffmpeg_log_level"`
 	CamerasJsonPath     string  `json:"cameras_json_path"`
 	PrivateKeyPath      string  `json:"private_key_path"`
 	ServerPort          int     `json:"server_port"`
@@ -30,9 +31,38 @@ func (c *Config) LogLevel() (err error, level log.Level) {
 	level, ok := levelMap[c.LogLevelStr]
 
 	if !ok {
-		log.Fatalln("Unknown log level specified")
+		log.Fatalln("Unknown log level specified{", c.LogLevelStr, ")")
+		panic(err)
 	}
 
+	return
+}
+
+func (c *Config) FfmpegLogLevel() (err error, level string) {
+	levelMap := map[string]string{
+		"quiet":   "quiet",
+		"panic":   "panic",
+		"fatal":   "fatal",
+		"error":   "error",
+		"warning": "warning",
+		"info":    "info",
+		"verbose": "verbose",
+		"debug":   "debug",
+		"trace":   "trace",
+		"-8":      "quiet",
+		"0":       "panic",
+		"8":       "fatal",
+		"16":      "error",
+		"24":      "warning",
+		"32":      "info",
+		"40":      "verbose",
+		"48":      "debug",
+		"56":      "trace",
+	}
+	level, ok := levelMap[c.FfmpegLogLevelStr]
+	if !ok {
+		log.Fatalln("Unknown ffmpeg log level specified (", c.FfmpegLogLevelStr, ")")
+	}
 	return
 }
 
