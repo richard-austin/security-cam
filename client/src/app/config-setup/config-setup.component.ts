@@ -67,31 +67,32 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
 }
 
 @Component({
-  selector: 'app-config-setup',
-  templateUrl: './config-setup.component.html',
-  styleUrls: ['./config-setup.component.scss'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-    trigger('openClose', [
-      // ...
-      state('open', style({
-        transform: 'rotate(90deg)'
-      })),
-      state('closed', style({
-        transform: 'rotate(0deg)'
-      })),
-      transition('open => closed', [
-        animate('.2s')
-      ]),
-      transition('closed => open', [
-        animate('.2s')
-      ]),
-    ])
-  ],
+    selector: 'app-config-setup',
+    templateUrl: './config-setup.component.html',
+    styleUrls: ['./config-setup.component.scss'],
+    animations: [
+        trigger('detailExpand', [
+            state('collapsed', style({ height: '0px', minHeight: '0' })),
+            state('expanded', style({ height: '*' })),
+            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        ]),
+        trigger('openClose', [
+            // ...
+            state('open', style({
+                transform: 'rotate(90deg)'
+            })),
+            state('closed', style({
+                transform: 'rotate(0deg)'
+            })),
+            transition('open => closed', [
+                animate('.2s')
+            ]),
+            transition('closed => open', [
+                animate('.2s')
+            ]),
+        ])
+    ],
+    standalone: false
 })
 export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
@@ -827,12 +828,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.gettingCameraDetails = true;
     this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe((result: { cam: Camera, failed: Map<string, string> }) => {
         if (result.failed.size == 1) {
-          const fKey: string = result.failed.keys().next().value;
+          const fKey = result.failed.keys().next().value;
           if (this.failed === undefined)
             this.failed = result.failed;
-          else if (!this.failed.has(fKey)) {
-            const fVal: string = result.failed.values().next().value;
-            this.failed.set(fKey, fVal);
+          else if (fKey !== undefined && !this.failed.has(fKey)) {
+            const fVal = result.failed.values().next().value;
+            if(fVal !== undefined)
+              this.failed.set(fKey, fVal);
           }
         }
         if(result.cam !== undefined) {

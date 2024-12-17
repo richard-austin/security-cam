@@ -9,9 +9,10 @@ import {AfterViewInit} from '@angular/core';
 import {UtilsService} from "../shared/utils.service";
 
 @Component({
-  selector: 'app-get-local-wifi-details',
-  templateUrl: './get-local-wifi-details.component.html',
-  styleUrls: ['./get-local-wifi-details.component.scss']
+    selector: 'app-get-local-wifi-details',
+    templateUrl: './get-local-wifi-details.component.html',
+    styleUrls: ['./get-local-wifi-details.component.scss'],
+    standalone: false
 })
 export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;

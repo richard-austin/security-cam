@@ -5,9 +5,10 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { UtilsService } from '../shared/utils.service';
 
 @Component({
-  selector: 'app-change-password2',
-  templateUrl: './change-password.component.html',
-  styleUrls: ['./change-password.component.scss']
+    selector: 'app-change-password2',
+    templateUrl: './change-password.component.html',
+    styleUrls: ['./change-password.component.scss'],
+    standalone: false
 })
 export class ChangePasswordComponent implements OnInit {
 

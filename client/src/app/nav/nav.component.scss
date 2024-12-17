@@ -58,12 +58,12 @@ div.general {
 
   // Navbar collapse button
   > button:nth-child(3) {
+    // display: inline;
+    margin-top: 3px;
+    float: right;
     @media handheld and (min-device-width: 1001px), screen and (min-width: 1001px) {
       display: none;
     }
-   // display: inline;
-    margin-top: 3px;
-    float: right;
   }
 
   // The menus
@@ -82,13 +82,14 @@ div.general {
 }
 
 .collapse {
+  width: 100%;
+  margin-right: 1rem;
+
   @media handheld and (max-device-width: 1000px), screen and (max-width: 1000px) {
     max-height: 0;
     overflow-y: hidden;
     transition: max-height 1s ease-out;
   }
-  width: 100%;
-  margin-right: 1rem;
 }
 
 .navbar-toggler {

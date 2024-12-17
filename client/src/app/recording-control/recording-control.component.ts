@@ -28,9 +28,10 @@ Date.prototype.addDays = function(days: number): Date {
 };
 
 @Component({
-  selector: 'app-recording-control',
-  templateUrl: './recording-control.component.html',
-  styleUrls: ['./recording-control.component.scss']
+    selector: 'app-recording-control',
+    templateUrl: './recording-control.component.html',
+    styleUrls: ['./recording-control.component.scss'],
+    standalone: false
 })
 export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(VideoComponent) video!: VideoComponent;

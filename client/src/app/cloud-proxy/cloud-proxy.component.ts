@@ -7,9 +7,10 @@ import { HttpErrorResponse } from "@angular/common/http";
 import {MatCheckboxChange} from "@angular/material/checkbox";
 
 @Component({
-  selector: 'app-cloud-proxy',
-  templateUrl: './cloud-proxy.component.html',
-  styleUrls: ['./cloud-proxy.component.scss']
+    selector: 'app-cloud-proxy',
+    templateUrl: './cloud-proxy.component.html',
+    styleUrls: ['./cloud-proxy.component.scss'],
+    standalone: false
 })
 export class CloudProxyComponent implements OnInit, OnDestroy {
   cps: boolean = true;

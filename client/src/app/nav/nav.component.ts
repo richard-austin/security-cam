@@ -14,9 +14,10 @@ import {Client, IMessage, StompSubscription} from "@stomp/stompjs";
 import {CloudProxyService, IsMQConnected} from "../cloud-proxy/cloud-proxy.service";
 
 @Component({
-  selector: 'app-nav',
-  templateUrl: './nav.component.html',
-  styleUrls: ['./nav.component.scss']
+    selector: 'app-nav',
+    templateUrl: './nav.component.html',
+    styleUrls: ['./nav.component.scss'],
+    standalone: false
 })
 export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 

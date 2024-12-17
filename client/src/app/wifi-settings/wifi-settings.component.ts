@@ -13,9 +13,10 @@ import {WifiConnectResult} from '../shared/wifi-connect-result';
 import {IPDetails} from '../shared/IPDetails';
 
 @Component({
-  selector: 'app-wifi-settings',
-  templateUrl: './wifi-settings.component.html',
-  styleUrls: ['./wifi-settings.component.scss']
+    selector: 'app-wifi-settings',
+    templateUrl: './wifi-settings.component.html',
+    styleUrls: ['./wifi-settings.component.scss'],
+    standalone: false
 })
 export class WifiSettingsComponent implements OnInit, OnDestroy {
   @ViewChild('selector') selector!: MatSelect;

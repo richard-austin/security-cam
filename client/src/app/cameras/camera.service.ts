@@ -258,8 +258,9 @@ export class CameraService {
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discoverCameraDetails"), params, this.httpJSONOptions).pipe(
       map(result => {
         let map: Map<string, Camera> = CameraService.convertCamsObjectToMap(result.cams);
-        if (map.size == 1)
-          return {cam: map.entries().next().value[1],  failed: CameraService.convertFailureReasonsToMap(result.failed)};
+        let next = map.entries().next();
+        if (map.size == 1 && next !== undefined && next.value !== undefined)
+          return {cam: next.value[1],  failed: CameraService.convertFailureReasonsToMap(result.failed)};
         else
           return {cam: result.cam, failed: CameraService.convertFailureReasonsToMap(result.failed)}
       })

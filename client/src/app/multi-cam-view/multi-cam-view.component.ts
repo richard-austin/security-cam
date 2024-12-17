@@ -11,31 +11,32 @@ import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import {VideoSizing} from "../video/VideoSizing";
 
 @Component({
-  selector: 'app-multi-cam-view',
-  templateUrl: './multi-cam-view.component.html',
-  styleUrls: ['./multi-cam-view.component.scss'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-    trigger('openClose', [
-      // ...
-      state('open', style({
-        transform: 'rotate(90deg)'
-      })),
-      state('closed', style({
-        transform: 'rotate(0deg)'
-      })),
-      transition('open => closed', [
-        animate('.2s')
-      ]),
-      transition('closed => open', [
-        animate('.2s')
-      ]),
-    ])
-  ]
+    selector: 'app-multi-cam-view',
+    templateUrl: './multi-cam-view.component.html',
+    styleUrls: ['./multi-cam-view.component.scss'],
+    animations: [
+        trigger('detailExpand', [
+            state('collapsed', style({ height: '0px', minHeight: '0' })),
+            state('expanded', style({ height: '*' })),
+            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        ]),
+        trigger('openClose', [
+            // ...
+            state('open', style({
+                transform: 'rotate(90deg)'
+            })),
+            state('closed', style({
+                transform: 'rotate(0deg)'
+            })),
+            transition('open => closed', [
+                animate('.2s')
+            ]),
+            transition('closed => open', [
+                animate('.2s')
+            ]),
+        ])
+    ],
+    standalone: false
 })
 export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren(VideoComponent) videos!: QueryList<VideoComponent>;

@@ -7,9 +7,10 @@ import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from 
 import {ActivatedRoute} from '@angular/router';
 
 @Component({
-  selector: 'app-camera-params',
-  templateUrl: './camera-params.component.html',
-  styleUrls: ['./camera-params.component.scss']
+    selector: 'app-camera-params',
+    templateUrl: './camera-params.component.html',
+    styleUrls: ['./camera-params.component.scss'],
+    standalone: false
 })
 export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   irselector!: AbstractControl;
