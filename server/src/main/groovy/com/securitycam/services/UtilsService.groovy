@@ -361,13 +361,13 @@ class UtilsService {
         try {
             @Language("HTML")
             String response = '''
-        <h3>Angular web framework v18.2.1</h3>
+        <h3>Angular web framework v19.0.4</h3>
         <a href="https://angular.io" target="_blank">Angular</a>
         <hr>
-        <h3>Angular Material v18.2.2</h3>
+        <h3>Angular Material v19.0.3</h3>
         <a href="https://material.angular.io/" target="_blank">Angular Material</a>
         <hr>
-        <h3>Angular Forms v18.2.0</h3>
+        <h3>Angular Forms v19.0.4</h3>
         <a href="https://angular.io/guide/forms-overview/" target="_blank">Angular Forms</a>
         <hr>
         <h3>Stomp.js v7.0.0</h3>
