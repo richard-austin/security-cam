@@ -8,9 +8,10 @@ import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {environment} from '../../environments/environment';
 
 @Component({
-  selector: 'app-camera-admin-page-hosting',
-  templateUrl: './camera-admin-page-hosting.component.html',
-  styleUrls: ['./camera-admin-page-hosting.component.scss']
+    selector: 'app-camera-admin-page-hosting',
+    templateUrl: './camera-admin-page-hosting.component.html',
+    styleUrls: ['./camera-admin-page-hosting.component.scss'],
+    standalone: false
 })
 export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, OnDestroy {
   cam!: Camera;

@@ -7,9 +7,10 @@ import {PTZMove, PTZService, PTZStop} from '../../ptz.service';
 export enum eMoveDirections {tiltUp, tiltDown, panLeft, panRight, zoomIn, zoomOut}
 
 @Component({
-  selector: 'app-ptzbutton',
-  templateUrl: './ptzbutton.component.html',
-  styleUrls: ['./ptzbutton.component.scss']
+    selector: 'app-ptzbutton',
+    templateUrl: './ptzbutton.component.html',
+    styleUrls: ['./ptzbutton.component.scss'],
+    standalone: false
 })
 export class PTZButtonComponent implements OnInit {
   @Input() matIcon!: string;

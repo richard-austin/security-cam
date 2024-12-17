@@ -6,9 +6,10 @@ import {UtilsService} from '../shared/utils.service';
 import {MatCheckboxChange} from '@angular/material/checkbox';
 
 @Component({
-  selector: 'app-set-up-guest-account',
-  templateUrl: './set-up-guest-account.component.html',
-  styleUrls: ['./set-up-guest-account.component.scss']
+    selector: 'app-set-up-guest-account',
+    templateUrl: './set-up-guest-account.component.html',
+    styleUrls: ['./set-up-guest-account.component.scss'],
+    standalone: false
 })
 export class SetUpGuestAccountComponent implements OnInit {
   setupGuestAccountForm!: UntypedFormGroup;

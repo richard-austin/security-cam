@@ -6,9 +6,10 @@ import { UtilsService } from '../shared/utils.service';
 import { AfterViewInit } from '@angular/core';
 
 @Component({
-  selector: 'app-change-email',
-  templateUrl: './change-email.component.html',
-  styleUrls: ['./change-email.component.scss']
+    selector: 'app-change-email',
+    templateUrl: './change-email.component.html',
+    styleUrls: ['./change-email.component.scss'],
+    standalone: false
 })
 export class ChangeEmailComponent implements OnInit, AfterViewInit {
 
