@@ -4,9 +4,10 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {UtilsService} from '../shared/utils.service';
 
 @Component({
-  selector: 'app-register-local-nvr-account',
-  templateUrl: './register-local-nvr-account.component.html',
-  styleUrls: ['./register-local-nvr-account.component.scss']
+    selector: 'app-register-local-nvr-account',
+    templateUrl: './register-local-nvr-account.component.html',
+    styleUrls: ['./register-local-nvr-account.component.scss'],
+    standalone: false
 })
 export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   username: string = '';

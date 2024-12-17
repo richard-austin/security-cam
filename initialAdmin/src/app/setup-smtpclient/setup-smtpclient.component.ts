@@ -19,9 +19,10 @@ export class SMTPData {
 }
 
 @Component({
-  selector: 'app-setup-smtpclient',
-  templateUrl: './setup-smtpclient.component.html',
-  styleUrls: ['./setup-smtpclient.component.scss']
+    selector: 'app-setup-smtpclient',
+    templateUrl: './setup-smtpclient.component.html',
+    styleUrls: ['./setup-smtpclient.component.scss'],
+    standalone: false
 })
 export class SetupSMTPClientComponent implements OnInit {
   setupSMTPForm!: FormGroup;

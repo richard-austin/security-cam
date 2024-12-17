@@ -3,9 +3,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 export enum styles {success, warning, danger}
 @Component({
-  selector: 'app-reporting',
-  templateUrl: './reporting.component.html',
-  styleUrls: ['./reporting.component.scss']
+    selector: 'app-reporting',
+    templateUrl: './reporting.component.html',
+    styleUrls: ['./reporting.component.scss'],
+    standalone: false
 })
 export class ReportingComponent implements OnInit {
   styles: typeof styles = styles;

@@ -4,9 +4,10 @@ import {UtilsService} from "../shared/utils.service";
 import {ReportingComponent} from "../reporting/reporting.component";
 
 @Component({
-  selector: 'app-activemq-credentials',
-  templateUrl: './activemq-credentials.component.html',
-  styleUrls: ['./activemq-credentials.component.scss']
+    selector: 'app-activemq-credentials',
+    templateUrl: './activemq-credentials.component.html',
+    styleUrls: ['./activemq-credentials.component.scss'],
+    standalone: false
 })
 export class ActivemqCredentialsComponent implements OnInit {
   public title = ''
