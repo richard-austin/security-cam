@@ -1,6 +1,6 @@
 module fmp4-ws-media-server
 
-go 1.18
+go 1.23.4
 
 require (
 	github.com/gin-gonic/gin v1.10.0
@@ -36,3 +36,4 @@ require (
 	google.golang.org/protobuf v1.36.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
