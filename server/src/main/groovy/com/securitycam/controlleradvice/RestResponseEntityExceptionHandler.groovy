@@ -57,7 +57,7 @@ class RestResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<Object> handleGeneralException(Exception ex) {
-        logService.cam.error("${ex.getClass()} has occurredc: ${ex.getMessage()}: ${ex.getCause()}")
+        logService.cam.error("${ex.getClass()} has occurred: ${ex.getMessage()}: ${ex.getCause()}")
  //       logService.cam.error(ex.getStackTrace().toString())
         ErrorResponse retVal = new ErrorResponse(ex)
         return ResponseEntity.internalServerError().body(retVal)
@@ -65,10 +65,10 @@ class RestResponseEntityExceptionHandler {
 }
 
 class ErrorResponse {
-    Object exception
+    String exception
     String error
     String reason
-    ErrorResponse(Object exception, String error, String reason) {
+    ErrorResponse(String exception, String error, String reason) {
         this.exception = exception
         this.error = error
         this.reason = reason
@@ -77,11 +77,11 @@ class ErrorResponse {
     ErrorResponse(Exception ex) {
         exception = ex.class
         error = ex.getMessage()
-        reason = "Caused by: " + ex.getCause()
+        reason = "Caused by: " + ex.getCause()?.getClass()?.getName()
     }
 
     ErrorResponse(NVRRestMethodException ex) {
-        exception = ex.class
+        exception = ex.getClass().getName()
         error = ex.getMessage()
         reason = ex.getReason()
     }

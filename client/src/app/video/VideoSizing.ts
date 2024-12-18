@@ -1,3 +1,5 @@
+import {Subscription, timer} from "rxjs";
+
 export class VideoSizing {
     el: HTMLVideoElement;
 
@@ -20,6 +22,14 @@ export class VideoSizing {
         this.el = el;
     }
 
+    timerSubscription!: Subscription
+
+    playEventHandler = (ev:Event | null) => {
+        this.timerSubscription.unsubscribe();
+        this._aspectRatio = this.el.videoHeight / this.el.videoWidth;
+        this.setVideoSize(this.size);
+    }
+
     setup(size: number, isRecording: boolean = false) {
         this.isRecording = isRecording;
         this.size = size;
@@ -28,10 +38,11 @@ export class VideoSizing {
             this.el.style.height = "45dvw";  // Prevent flash up of full pixel size image on first access
             this.el.style.width="auto";
         }
-        this.el.onplaying = ev => {
-            this._aspectRatio = this.el.videoHeight / this.el.videoWidth;
-            this.setVideoSize(this.size);
-        }
+        this.timerSubscription = timer(1000).subscribe(() => {
+            // Backup for if the play event doesn't fire (Firefox with hevc)
+            this.playEventHandler(null);
+         });
+        this.el.addEventListener('play', this.playEventHandler);
     }
 
     changeSize(size: number) {
@@ -138,6 +149,6 @@ export class VideoSizing {
 
     _destroy() {
         window.removeEventListener('resize', this.resizeHandler)
-        this.el.onplaying = null;
+        this.el.removeEventListener('play', this.playEventHandler);
     }
 }
