@@ -1,10 +1,5 @@
 package com.securitycam.controllers
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonElement
-import com.google.gson.JsonParser
-import com.google.gson.internal.LinkedTreeMap
 import com.securitycam.commands.DiscoverCameraDetailsCommand
 import com.securitycam.commands.GetSnapshotCommand
 import com.securitycam.commands.SetOnvifCredentialsCommand
