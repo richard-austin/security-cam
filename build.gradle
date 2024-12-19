@@ -1,5 +1,5 @@
 ext {
-    cxfVersion='4.0.5'  // In version above 4.0.1, JaxwsNotificationBroker has changed so that there is no setAddress method
-    cxfXjcRuntimeVersion='4.0.2' // cxf-xjc-runtime has a lower latest version than the other cxf libs
+    cxfVersion = '4.1.0' // In version above 4.0.1, JaxwsNotificationBroker has changed so that there is no setAddress method
+    cxfXjcRuntimeVersion = '4.1.0'
 }
 
