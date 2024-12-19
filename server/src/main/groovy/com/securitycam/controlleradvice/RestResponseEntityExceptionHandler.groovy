@@ -3,6 +3,7 @@ package com.securitycam.controlleradvice
 import com.securitycam.error.NVRRestMethodException
 import com.securitycam.services.LogService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.ui.Model
@@ -50,17 +51,16 @@ class RestResponseEntityExceptionHandler {
     @ExceptionHandler(NVRRestMethodException.class)
     ResponseEntity<Object> handleNVRRestMethodException(NVRRestMethodException ex) {
         logService.cam.error("${ex.getClass()}: ${ex.getReason()}")
-        logService.cam.error(ex.getStackTrace().toString())
+        logService.cam.trace(ex.getStackTrace().toString())
         ErrorResponse retVal = new ErrorResponse(ex)
-        return ResponseEntity.internalServerError().body(retVal)
+        return ResponseEntity.internalServerError().contentType(MediaType.APPLICATION_JSON).body(retVal)
     }
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<Object> handleGeneralException(Exception ex) {
         logService.cam.error("${ex.getClass()} has occurred: ${ex.getMessage()}: ${ex.getCause()}")
- //       logService.cam.error(ex.getStackTrace().toString())
         ErrorResponse retVal = new ErrorResponse(ex)
-        return ResponseEntity.internalServerError().body(retVal)
+        return ResponseEntity.internalServerError().contentType(MediaType.APPLICATION_JSON).body(retVal)
     }
 }
 
