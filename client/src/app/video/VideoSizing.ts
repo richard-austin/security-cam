@@ -9,7 +9,7 @@ export class VideoSizing {
     static readonly recordingSelectionForm: number = 380;
     static readonly recordingTitleAndControls = 220;
 
-    private _aspectRatio: number = 1;
+    private _aspectRatio: number = 0.55;  // Default before setup from running video element
     private size: number = 100
     private landscapeOnMobile = false;
     private isRecording: boolean = false;
@@ -26,13 +26,19 @@ export class VideoSizing {
 
     playEventHandler = (ev:Event | null) => {
         this.timerSubscription.unsubscribe();
-        this._aspectRatio = this.el.videoHeight / this.el.videoWidth;
-        this.setVideoSize(this.size);
+        if(this.el.videoWidth !== 0 && this.el.videoHeight !== 0) {
+            // This will only occur if this call was from the timer when the video hasn't started yet.
+            this._aspectRatio = this.el.videoHeight / this.el.videoWidth;
+            this.setVideoSize(this.size);
+        }
     }
 
     setup(size: number, isRecording: boolean = false) {
         this.isRecording = isRecording;
         this.size = size;
+        this.setVideoSize(size);  // Set the borders to size with the default aspect ratio before the video
+                                  // starts. This prevents silly sized borders popping up before their video has started
+                                  // when multi cam view is first started.
         this.windowResize();
         if(this.el.style.height == "" ) {
             this.el.style.height = "45dvw";  // Prevent flash up of full pixel size image on first access
