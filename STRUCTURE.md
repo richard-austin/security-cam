@@ -11,7 +11,7 @@ These ports, plus port 80,  are set up for port forwarding on the router when di
 from outside the LAN is required.
 
 ### Tomcat Web Server
-Tomcat 9 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
+Tomcat 10 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
 to these through port 8080.
 
 ###### nginx makes the web server, media server and other services available through the single port 443

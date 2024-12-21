@@ -2,7 +2,9 @@
 Pre built .deb files for deployment on a Raspberry pi 4 are available in the Releases section.
 The requirements to build the project yourself are detailed below: -
 #### Platform for Development
-* Ubuntu 24.04 (Noble Numbat) on PC (Windows WSL2 or direct boot)
+* Ubuntu 24.04 (Noble Numbat), or Debian with dpkg version 1.22.06 or later version.
+* Open JDK version 21
+* git 2.43.0 or later version.
 
 #### The project uses the following SDK's/package managers:-
 * go version go1.20.1
@@ -23,7 +25,7 @@ need to install some or all of these tools.*
 Using other versions may cause build issues in some cases.
 
 ### Set up build environment
-The project should build on most linux machines with a bash shell. 
+The project should build on most linux machines with a bash shell, dpkg, openjdk 21 and git installed. 
 
 *openjdk 21 must be installed on the build machine.*
 ```
