@@ -268,7 +268,7 @@ class OnvifService {
                                 //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
                             })
                         }
-                        logService.cam.info("Connected to device %s (%s)%n", device.getDeviceInfo(), device.streamUri.toString())
+                        logService.cam.info("Connected to device "+device.getDeviceInfo().manufacturer +": "+device.getDeviceInfo().model + ": at "+ device.streamUri.toString())
                         logService.cam.debug(TestDevice.inspect(device))
 
                         String snapshotUri = device.getSnapshotUri()
