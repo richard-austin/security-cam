@@ -27,9 +27,7 @@ import org.onvif.ver20.ptz.wsdl.PtzService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.ConnectException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -62,8 +60,8 @@ public class OnvifDevice {
     if (!f.isEmpty()) {
       String out = u.toString().replace(f, "");
       try {
-        return new URL(out);
-      } catch (MalformedURLException e) {
+        return new URI(out).toURL();
+      } catch (MalformedURLException | URISyntaxException e) {
         throw new ConnectException("MalformedURLException " + u);
       }
     }
@@ -93,9 +91,9 @@ public class OnvifDevice {
    * @throws SOAPException
    */
   public OnvifDevice(String deviceIp, String user, String password)
-      throws ConnectException, SOAPException, MalformedURLException {
+          throws ConnectException, SOAPException, MalformedURLException, URISyntaxException {
     this(
-        deviceIp.startsWith("http") ? new URL(deviceIp) : new URL("http://" + deviceIp),
+        deviceIp.startsWith("http") ? new URI(deviceIp).toURL() : new URI("http://" + deviceIp).toURL(),
         user,
         password);
   }
@@ -109,7 +107,7 @@ public class OnvifDevice {
    *     doesn't answer to SOAP messages
    * @throws SOAPException
    */
-  public OnvifDevice(String hostIp) throws ConnectException, SOAPException, MalformedURLException {
+  public OnvifDevice(String hostIp) throws ConnectException, SOAPException, MalformedURLException, URISyntaxException {
     this(hostIp, null, null);
   }
 
@@ -223,7 +221,7 @@ public class OnvifDevice {
     // avoid -4:-30 issue
     minutes = Math.abs(minutes);
 
-    String result = "";
+    String result;
     if (hours > 0) {
       result = String.format("GMT+%02d:%02d", hours, minutes);
     } else {

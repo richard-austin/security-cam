@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.List;
 import jakarta.xml.soap.SOAPException;
 import org.onvif.ver10.schema.Profile;
@@ -35,15 +36,17 @@ public class ReadCommandsFromStdInput {
     }
 
     System.out.println("Connect to camera, please wait ...");
-    OnvifDevice cam;
+    OnvifDevice cam = null;
     try {
       cam = new OnvifDevice(cameraAddress, user, password);
     } catch (MalformedURLException | ConnectException | SOAPException e1) {
       System.err.println("No connection to camera, please try again.");
       return;
+    } catch (URISyntaxException e) {
+       System.err.println(e.getClass().getName() + ": " + e.getMessage());
     }
 
-    System.out.println("Connection to camera successful!");
+      System.out.println("Connection to camera successful!");
 
     while (true) {
       try {
@@ -54,13 +57,15 @@ public class ReadCommandsFromStdInput {
         switch (input) {
           case "url":
             {
-              List<Profile> profiles = cam.getMedia().getProfiles();
-              for (Profile p : profiles) {
-                System.out.println(
-                        "URL from Profile '"
-                        + p.getName()
-                        + "': "
-                        + cam.getMedia().getSnapshotUri(p.getToken()));
+              if(cam != null) {
+                List<Profile> profiles = cam.getMedia().getProfiles();
+                for (Profile p : profiles) {
+                  System.out.println(
+                          "URL from Profile '"
+                                  + p.getName()
+                                  + "': "
+                                  + cam.getMedia().getSnapshotUri(p.getToken()));
+                }
               }
               break;
             }
