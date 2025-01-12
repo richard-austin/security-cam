@@ -9,9 +9,10 @@ import {ReportingComponent} from '../reporting/reporting.component';
 import {ActivatedRoute} from '@angular/router';
 
 @Component({
-  selector: 'app-live-container',
-  templateUrl: './live-container.component.html',
-  styleUrls: ['./live-container.component.scss']
+    selector: 'app-live-container',
+    templateUrl: './live-container.component.html',
+    styleUrls: ['./live-container.component.scss'],
+    standalone: false
 })
 export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
@@ -80,8 +81,8 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngAfterViewInit(): void {
       this.cd.detectChanges();
+      this.video.setSize(100);
   }
-
 
   ngOnDestroy(): void {
     this.video.stop();

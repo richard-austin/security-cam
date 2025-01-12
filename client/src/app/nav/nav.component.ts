@@ -14,9 +14,10 @@ import {Client, IMessage, StompSubscription} from "@stomp/stompjs";
 import {CloudProxyService, IsMQConnected} from "../cloud-proxy/cloud-proxy.service";
 
 @Component({
-  selector: 'app-nav',
-  templateUrl: './nav.component.html',
-  styleUrls: ['./nav.component.scss']
+    selector: 'app-nav',
+    templateUrl: './nav.component.html',
+    styleUrls: ['./nav.component.scss'],
+    standalone: false
 })
 export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -43,13 +44,6 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(public cameraSvc: CameraService, public utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog, private cpService: CloudProxyService) {
     this.cpService.getStatus().subscribe((status: boolean) => {
         this.utilsService.cloudProxyRunning = status;
-      },
-      reason => {
-        this.reporting.errorMessage = reason;
-      });
-
-    this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
-        this.utilsService.activeMQTransportActive = status.transportActive;
       },
       reason => {
         this.reporting.errorMessage = reason;
@@ -101,7 +95,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     if (logoff) {
       localStorage.setItem('message', "logoff");
       localStorage.removeItem('message');
-      window.location.href = 'logoff';
+      window.location.href = 'logout';
     }
   }
 
@@ -222,7 +216,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
           if (message.body) {
             let msgObj = JSON.parse(message.body);
             if (msgObj.message === 'logoff' && this.isGuest) {
-              window.location.href = 'logoff';
+              window.location.href = 'logout';
               console.log(message.body);
             }
           }
@@ -280,14 +274,23 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (error) {
       this.isGuest = true;
       // @ts-ignore
-      console.error('Error calling isGuest = ' + error.error);
+      console.error('Error calling isGuest = ' + error.e);
     }
     this.initializeWebSocketConnection();
+
+    if (!this.isGuest) {
+      this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
+            this.utilsService.activeMQTransportActive = status.transportActive;
+          },
+          reason => {
+            this.reporting.errorMessage = reason;
+          });
+    }
 
     window.onstorage = (ev: StorageEvent) => {
       let val = ev.newValue;
       if (val === 'logoff') {
-        location.href = 'logoff';
+        location.href = 'logout';
       }
     };
   }
@@ -295,6 +298,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // If the camera service got any errors while getting the camera setup, then we report it here.
     this.cameraSvc.errorEmitter.subscribe((error: HttpErrorResponse) => this.reporting.errorMessage = error);
+
   }
 
   ngOnDestroy(): void {

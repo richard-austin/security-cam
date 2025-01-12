@@ -9,6 +9,7 @@ import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
 import {MatError, MatFormField, MatHint, MatLabel} from "@angular/material/form-field";
 import {MatInput} from "@angular/material/input";
 import {SharedModule} from "../shared/shared.module";
+import {MatTooltip} from "@angular/material/tooltip";
 
 
 @NgModule({
@@ -29,7 +30,8 @@ import {SharedModule} from "../shared/shared.module";
         MatFormField,
         MatHint,
         MatInput,
-        MatLabel
+        MatLabel,
+        MatTooltip
     ]
 })
 export class ChangePasswordModule { }

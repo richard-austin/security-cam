@@ -31,9 +31,10 @@ export function isValidDeviceIP(componentObject: AddAsOnvifDeviceComponent): Val
 }
 
 @Component({
-  selector: 'app-add-as-onvif-device',
-  templateUrl: './add-as-onvif-device.component.html',
-  styleUrls: ['./add-as-onvif-device.component.scss']
+    selector: 'app-add-as-onvif-device',
+    templateUrl: './add-as-onvif-device.component.html',
+    styleUrls: ['./add-as-onvif-device.component.scss'],
+    standalone: false
 })
 export class AddAsOnvifDeviceComponent implements OnInit {
   @Output() hideDialogue: EventEmitter<void> = new EventEmitter<void>();

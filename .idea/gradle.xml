@@ -8,7 +8,7 @@
         <option name="testRunner" value="PLATFORM" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="/opt/gradle/gradle-7.4.2" />
-        <option name="gradleJvm" value="17" />
+        <option name="gradleJvm" value="21" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
@@ -17,6 +17,8 @@
             <option value="$PROJECT_DIR$/fmp4-ws-media-server" />
             <option value="$PROJECT_DIR$/generateProductKey" />
             <option value="$PROJECT_DIR$/initialAdmin" />
+            <option value="$PROJECT_DIR$/onvif-java" />
+            <option value="$PROJECT_DIR$/onvif-ws-client" />
             <option value="$PROJECT_DIR$/server" />
             <option value="$PROJECT_DIR$/wifi-setup-service" />
           </set>

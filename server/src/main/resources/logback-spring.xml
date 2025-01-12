@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration>
+
+<configuration scan="true">
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+    <import class="ch.qos.logback.core.ConsoleAppender"/>
+    <import class="ch.qos.logback.core.FileAppender"/>
+    <import class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy"/>
+    <import class="ch.qos.logback.core.rolling.RollingFileAppender"/>
+
+    <springProperty scope="context" name="secCamLogFile" source="app.logFileName" default="/var/log/security-cam/security-cam.log"/>
+    <springProperty scope="context" name="nvrLogLevel" source="app.logLevel"/>
+
+    <springProperty scope="context" name="cloudProxyLogFile" source="cloudproxy.logFileName" default="/var/log/security-cam/cloud-proxy.log"/>
+    <springProperty scope="context" name="cloudProxyLogLevel" source="cloudproxy.logLevel"/>
+
+    <appender name="STDOUT" class="ConsoleAppender">
+        <encoder class="PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd} %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%kvp- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ROLLING_FILE" class="RollingFileAppender">
+        <file>${secCamLogFile}</file>
+        <rollingPolicy class="SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${secCamLogFile}-%d{yyyy-MM-dd}.%i</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd} %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ROLLING_FILE2" class="RollingFileAppender">
+        <file>${cloudProxyLogFile}</file>
+        <rollingPolicy class="SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${cloudProxyLogFile}-%d{yyyy-MM-dd}.%i</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd} %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="CAM" level="${nvrLogLevel}">
+        <appender-ref ref="ROLLING_FILE"/>
+        <appender-ref ref="org.springframework.web"/>
+    </logger>
+
+    <logger name="CLOUDPROXY" level="${cloudProxyLogLevel}" additivity="false">
+        <appender-ref ref="ROLLING_FILE2"/>
+    </logger>
+
+    <root level="${nvrLogLevel}">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="ROLLING_FILE"/>
+    </root>
+</configuration>

@@ -14,12 +14,11 @@ popd || true
 
 # This will clear out the unit file refs for wifimanagement service
 systemctl daemon-reload
-userdel sec-cam || true
 groupdel security-cam || true
 
 #!/bin/bash
 if [ "$1" == purge ] ; then
-  rm -r /var/log/tomcat9
-  rm -r /var/lib/tomcat9
+  rm -r /var/log/tomcat10
+  rm -r /var/lib/tomcat10
 fi
 

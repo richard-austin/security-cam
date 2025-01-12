@@ -28,9 +28,10 @@ Date.prototype.addDays = function(days: number): Date {
 };
 
 @Component({
-  selector: 'app-recording-control',
-  templateUrl: './recording-control.component.html',
-  styleUrls: ['./recording-control.component.scss']
+    selector: 'app-recording-control',
+    templateUrl: './recording-control.component.html',
+    styleUrls: ['./recording-control.component.scss'],
+    standalone: false
 })
 export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(VideoComponent) video!: VideoComponent;
@@ -221,9 +222,10 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     } catch (error: any) {
       let reader: FileReader = new FileReader();
       reader.onload = () => {
+        let result = JSON.parse(reader.result as string)
         this.reporting.errorMessage = new HttpErrorResponse({
-          error: JSON.parse(reader.result as string),
-          status: error.status
+          error: result.reason,
+          status: 500 /*error.status */
         });
       };
       reader.readAsText(error.error);
@@ -359,6 +361,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.video.video.controls = false;  // Turn off controls to prevent full screen on reorientation to landscape
                                         // Also in some browsers (Firefox on Android), having the controls enabled
                                         // prevents pan and pinch zoom from working.
+    this.video.setSize(100, true);
   }
 
   ngOnDestroy(): void {

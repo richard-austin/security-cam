@@ -7,9 +7,10 @@ import {ReportingComponent} from "../../../reporting/reporting.component";
 export enum ePresetOperations {moveTo, saveTo, clearFrom}
 
 @Component({
-  selector: 'app-preset-button',
-  templateUrl: './preset-button.component.html',
-  styleUrls: ['./preset-button.component.scss']
+    selector: 'app-preset-button',
+    templateUrl: './preset-button.component.html',
+    styleUrls: ['./preset-button.component.scss'],
+    standalone: false
 })
 export class PresetButtonComponent implements OnInit {
   @Input() camera!: Camera;

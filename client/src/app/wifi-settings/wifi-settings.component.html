@@ -52,13 +52,13 @@
         </mat-form-field>
       </div>
       <div *ngIf="needPassword">
-        <mat-form-field class="password-field" appearance="outline">
+        <mat-form-field class="password-field" appearance="outline" [style.width.px]="315">
           <input matInput type="password" [formControl]="getFormControl(enterPasswordForm, 'password')"
                  matTooltip="Enter password for {{selector.value}}"
                  matTooltipClass="tooltip"
                  placeholder="Password for {{selector.value}}">
-          <mat-hint>New password for {{selector.value}}</mat-hint>
-          <mat-error *ngIf="hasError('password', 'minlength')">Password must be at least 8 characters in length</mat-error>
+          <mat-label>New password for {{selector.value}}</mat-label>
+          <mat-error *ngIf="hasError('password', 'minlength') && !hasError('password', 'required')">Password must be at least 8 characters in length</mat-error>
           <mat-error *ngIf="hasError('password', 'required')">Password is required</mat-error>
         </mat-form-field>
       </div>

@@ -31,5 +31,10 @@
       <option name="name" value="maven" />
       <option name="url" value="https://mvnrepository.com/artifact/org.springframework/spring-jdbc" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven" />
+      <option name="name" value="maven" />
+      <option name="url" value="https://build.shibboleth.net/maven/releases/" />
+    </remote-repository>
   </component>
 </project>

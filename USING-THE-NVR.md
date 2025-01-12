@@ -36,7 +36,14 @@ from each camera in the configuration. The default stream shown
 for a camera will be the one selected as Default On Multi Display.
 The camera streams can be switched by clicking the
 <img src="README.images/settings-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
-button at the top left of the page and changing the selection.
+button at the top left of the page and changing the selection on the displayed pop-up form.
+The number of display columns can also be selected on this form.
+###### Number of columns
+The Multi Camera View shows the cameras in a grid view which fills the width of the
+viewport. The number of columns is selectable from one to four using radio buttons at the top 
+of the pop-up form. Note that the number of displayed columns are reduced if the 
+viewport width is too narrow, so if you have four columns selected, it will
+actually show four then three then two then one as you reduce the browser width. 
 > Each video on multi camera view will have the latency chasing setter below it. Any
 > cameras with two-way audio enabled will also have the <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button and device selector.
 >

@@ -67,31 +67,32 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
 }
 
 @Component({
-  selector: 'app-config-setup',
-  templateUrl: './config-setup.component.html',
-  styleUrls: ['./config-setup.component.scss'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-    trigger('openClose', [
-      // ...
-      state('open', style({
-        transform: 'rotate(90deg)'
-      })),
-      state('closed', style({
-        transform: 'rotate(0deg)'
-      })),
-      transition('open => closed', [
-        animate('.2s')
-      ]),
-      transition('closed => open', [
-        animate('.2s')
-      ]),
-    ])
-  ],
+    selector: 'app-config-setup',
+    templateUrl: './config-setup.component.html',
+    styleUrls: ['./config-setup.component.scss'],
+    animations: [
+        trigger('detailExpand', [
+            state('collapsed', style({ height: '0px', minHeight: '0' })),
+            state('expanded', style({ height: '*' })),
+            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        ]),
+        trigger('openClose', [
+            // ...
+            state('open', style({
+                transform: 'rotate(90deg)'
+            })),
+            state('closed', style({
+                transform: 'rotate(0deg)'
+            })),
+            transition('open => closed', [
+                animate('.2s')
+            ]),
+            transition('closed => open', [
+                animate('.2s')
+            ]),
+        ])
+    ],
+    standalone: false
 })
 export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('errorReporting') reporting!: ReportingComponent;
@@ -676,11 +677,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   startOnvifSearch() {
     this.discovering = true;
     this.failed = new Map<string, string>();
+    this.reporting.dismiss();
     this.cameraSvc.discover().subscribe((result: { cams: Map<string, Camera>, failed: Map<string, string> }) => {
         this.cameras = result.cams;
         this.discovering = false;
         this.FixUpCamerasData();
         this.failed = result.failed;
+        if(this.cameras.size == 0)
+          this.reporting.warningMessage = "No cameras were found on this network"
       },
       reason => {
         this.reporting.errorMessage = reason;
@@ -741,8 +745,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     else if (cam.value.snapshotUri !== '') {
       this.snapShotKey = cam.key;
       this.cameraSvc.getSnapshot(cam.value).subscribe(result => {
-          this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(result));
-          this.snapshotLoading = false;
+            if (result !== null && result.body !== null) {
+              let ab = result.body.arrayBuffer()
+              ab.then((body => {
+                this.snapshot = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpeg;base64,' + this.toBase64(body));
+                this.snapshotLoading = false;
+              }))
+            }
         },
         reason => {
           if (reason.status === 401) {
@@ -775,7 +784,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     return hasMotionSet;
   }
 
-  toBase64(data: Array<any>): string {
+  toBase64(data: ArrayBuffer): string {
     let binary: string = '';
     let bytes: Uint8Array = new Uint8Array(data);
     let len: number = bytes.byteLength;
@@ -819,12 +828,13 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.gettingCameraDetails = true;
     this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe((result: { cam: Camera, failed: Map<string, string> }) => {
         if (result.failed.size == 1) {
-          const fKey: string = result.failed.keys().next().value;
+          const fKey = result.failed.keys().next().value;
           if (this.failed === undefined)
             this.failed = result.failed;
-          else if (!this.failed.has(fKey)) {
-            const fVal: string = result.failed.values().next().value;
-            this.failed.set(fKey, fVal);
+          else if (fKey !== undefined && !this.failed.has(fKey)) {
+            const fVal = result.failed.values().next().value;
+            if(fVal !== undefined)
+              this.failed.set(fKey, fVal);
           }
         }
         if(result.cam !== undefined) {

@@ -6,16 +6,29 @@
     <mat-icon>settings</mat-icon>
   </button>
   <div class="mat-elevation-z15" [@detailExpand]="showStreamSelector ? 'expanded' : 'collapsed'">
-    <div class="setting_item">
+    <div>
       <div>
       </div>
       <mat-card class="camera-select mat-elevation-z8 hide-background">
-        <mat-card-title>
-          Select Camera streams
-        </mat-card-title>
-
+          <mat-card-content>
+              <mat-card-subtitle>
+                  Number of columns
+              </mat-card-subtitle>
+              <mat-radio-group [value]="numColumns">
+                  @for (column of [0,1,2,3]; track column) {
+                      <mat-radio-button (click)="setNumColumns(column)" [value]="column">
+                          {{["one","two","three","four"][column]}}
+                      </mat-radio-button>
+                      <span>&nbsp;&nbsp;</span>
+                  }
+              </mat-radio-group>
+          </mat-card-content>
         <mat-card-content>
-          <table mat-table [dataSource]="cams | keyvalue: cameraSvc.compareFn" multiTemplateDataRows class="mat-elevation-z8">
+            <mat-card-subtitle>
+                Select Camera streams
+            </mat-card-subtitle>
+
+            <table mat-table [dataSource]="cams | keyvalue: cameraSvc.compareFn" multiTemplateDataRows class="mat-elevation-z8">
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Camera</th>
               <td mat-cell *matCellDef="let cam">{{cam.value.name}}</td>

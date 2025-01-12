@@ -6,9 +6,10 @@ import {ReportingComponent} from "../../reporting/reporting.component";
 import {Encryption} from "./encryption";
 
 @Component({
-  selector: 'app-camera-credentials',
-  templateUrl: './onvif-credentials.component.html',
-  styleUrls: ['./onvif-credentials.component.scss']
+    selector: 'app-camera-credentials',
+    templateUrl: './onvif-credentials.component.html',
+    styleUrls: ['./onvif-credentials.component.scss'],
+    standalone: false
 })
 export class OnvifCredentialsComponent implements OnInit, AfterViewInit {
 

@@ -1,8 +1,8 @@
 package com.proxy;
 
 import ch.qos.logback.classic.Logger;
+import jakarta.annotation.PostConstruct;
 
-import javax.annotation.PostConstruct;
 
 public interface ILogService {
     Logger getCam ();

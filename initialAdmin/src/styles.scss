@@ -76,10 +76,10 @@ $mat-dark-theme-foreground: (
 // Background config
 // Dark bg
 $dark-background:     #2c2c2c;
-$dark-bg-lighter-5:   lighten($dark-background, 5%);
-$dark-bg-lighter-10:  lighten($dark-background, 10%);
-$dark-bg-lighter-20:  lighten($dark-background, 20%);
-$dark-bg-lighter-30:  lighten($dark-background, 30%);
+$dark-bg-lighter-5:   color.adjust($dark-background, $lightness: 5%);
+$dark-bg-lighter-10:  color.adjust($dark-background, $lightness: 10%);
+$dark-bg-lighter-20:  color.adjust($dark-background, $lightness: 20%);
+$dark-bg-lighter-30:  color.adjust($dark-background, $lightness: 30%);
 $light-bg-alpha-4:    rgba(#fafafa, 0.04);
 $light-bg-alpha-12:   rgba(#fafafa, 0.12);
 
@@ -103,7 +103,8 @@ $mat-dark-theme-background: (
 );
 
 // Compute font config
-@include mat.core();
+@include mat.elevation-classes();
+@include mat.app-background();
 
 // Theme Config
 body {
@@ -223,6 +224,10 @@ mat-form-field {
 
 mat-label {
   font-size: small !important;
+}
+
+.mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
+  top: calc(var(--mat-form-field-container-height) / 2.24) !important;
 }
 
 button[mat-button] {

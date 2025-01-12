@@ -4,9 +4,10 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 
 @Component({
-  selector: 'app-about',
-  templateUrl: './about.component.html',
-  styleUrls: ['./about.component.scss']
+    selector: 'app-about',
+    templateUrl: './about.component.html',
+    styleUrls: ['./about.component.scss'],
+    standalone: false
 })
 export class AboutComponent implements OnInit {
   @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
@@ -17,7 +18,7 @@ export class AboutComponent implements OnInit {
   }
 
   getOnvifUrl() {
-    return this._baseUrl.getLink('assets', 'onvif.png')
+    return this._baseUrl.getLink('assets/images', 'onvif.png')
   }
 
   ngOnInit(): void {

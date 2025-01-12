@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable} from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse} from "@angular/common/http";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {Observable, throwError} from "rxjs";
 import {catchError, map, tap} from "rxjs/operators";
@@ -67,6 +67,14 @@ export class CameraService {
     })
   };
 
+  readonly httpConsumeBlobOptions = {
+      headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': 'my-auth-token',
+          'ResponseType': 'blob'
+      })
+  };
+
   readonly httpUploadOptions = {
     headers: new HttpHeaders({
       'Authorization': 'my-auth-token'
@@ -77,6 +85,7 @@ export class CameraService {
 
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
  private _publicKey!: Uint8Array;
+    private _numColumns: number = 2;
 
   public readonly _cameraParamSpecs: CameraParamSpec[] =
     [new CameraParamSpec(
@@ -119,9 +128,19 @@ export class CameraService {
   private _preambleFrameValues: number[] = [
     0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400
   ]
-  get cameraParamSpecs() {
-    return this._cameraParamSpecs;
-  };
+
+    // Number of columns (minus one) on the multi cam screen
+    get numColumns(): number {
+        return this._numColumns;
+    }
+
+    set numColumns(column: number) {
+        this._numColumns = column;
+    }
+
+    get cameraParamSpecs() {
+        return this._cameraParamSpecs;
+    };
 
   get audioEncodings() {
     return this._audioEncodings;
@@ -206,14 +225,14 @@ export class CameraService {
   }
 
   haveOnvifCredentials(): Observable<string> {
-    return this.http.post(this._baseUrl.getLink("cam", "haveOnvifCredentials"), '', {responseType: 'text'}).pipe(
+    return this.http.post(this._baseUrl.getLink("onvif", "haveOnvifCredentials"), '', {responseType: 'text'}).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
   updateCameras(camerasJON: string):
     Observable<Map<string, Camera>> {
     let cameras = {camerasJSON: camerasJON};
-    return this.http.post<any>(this._baseUrl.getLink("cam", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe(
+    return this.http.post<any>(this._baseUrl.getLink("onvif", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe(
       tap((cams) => {
         this.cameras = new Map();
 
@@ -235,15 +254,13 @@ export class CameraService {
   }
 
   discoverCameraDetails(onvifUrl: string, onvifUserName: string = "", onvifPassword: string = ""): Observable<{cam: Camera, failed: Map<string, string>}> {
-    const formData: FormData = new FormData();
-    formData.append('onvifUrl', onvifUrl)
-    formData.append("onvifUserName", onvifUserName);
-    formData.append("onvifPassword", onvifPassword);
-    return this.http.post<any>(this._baseUrl.getLink("onvif", "discoverCameraDetails"), formData, this.httpUploadOptions).pipe(
+    let params: {} = {onvifUrl: onvifUrl, onvifUserName: onvifUserName, onvifPassword: onvifPassword}
+    return this.http.post<any>(this._baseUrl.getLink("onvif", "discoverCameraDetails"), params, this.httpJSONOptions).pipe(
       map(result => {
         let map: Map<string, Camera> = CameraService.convertCamsObjectToMap(result.cams);
-        if (map.size == 1)
-          return {cam: map.entries().next().value[1],  failed: CameraService.convertFailureReasonsToMap(result.failed)};
+        let next = map.entries().next();
+        if (map.size == 1 && next !== undefined && next.value !== undefined)
+          return {cam: next.value[1],  failed: CameraService.convertFailureReasonsToMap(result.failed)};
         else
           return {cam: result.cam, failed: CameraService.convertFailureReasonsToMap(result.failed)}
       })
@@ -253,17 +270,19 @@ export class CameraService {
   uploadMaskFile(uploadFile: any): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('maskFile', uploadFile);
-    return this.http.post<any>(this._baseUrl.getLink("cam", "uploadMaskFile"), formData, this.httpUploadOptions).pipe(
+    return this.http.post<any>(this._baseUrl.getLink("onvif", "uploadMaskFile"), formData, this.httpUploadOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getSnapshot(cam: Camera): Observable<Array<any>> {
-    const formData: FormData = new FormData();
-    formData.append('url', cam.snapshotUri);
-    formData.append('cred', cam.cred)
-    return this.http.post<Array<any>>(this._baseUrl.getLink("onvif", "getSnapshot"), formData, this.httpUploadOptions).pipe(
-      tap(),
+  getSnapshot(cam: Camera): Observable<HttpResponse<Blob>> {
+    let params: {} = {url: cam.snapshotUri, cred: cam.cred}
+    return this.http.post(this._baseUrl.getLink("onvif", "getSnapshot"), params, {observe: "response", responseType: "blob"}).pipe(
+      tap(
+          content => {
+              let y = content;
+          }
+      ),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
@@ -279,7 +298,7 @@ export class CameraService {
   }
   setOnvifCredentials(creds: OnvifCredentials): Observable<any> {
     const msg = {onvifUserName: creds.userName, onvifPassword: creds.password};
-    return this.http.post<any>(this._baseUrl.getLink("cam", "setOnvifCredentials"), JSON.stringify(msg), this.httpJSONOptions).pipe(
+    return this.http.post<any>(this._baseUrl.getLink("onvif", "setOnvifCredentials"), JSON.stringify(msg), this.httpJSONOptions).pipe(
       tap(),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

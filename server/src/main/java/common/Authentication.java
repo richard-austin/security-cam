@@ -1,9 +1,13 @@
 package common;
 
+
 import com.proxy.ILogService;
 import org.apache.http.Header;
 import org.apache.http.HttpRequest;
-import org.apache.http.auth.*;
+import org.apache.http.auth.AUTH;
+import org.apache.http.auth.ContextAwareAuthScheme;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.message.BasicHeader;

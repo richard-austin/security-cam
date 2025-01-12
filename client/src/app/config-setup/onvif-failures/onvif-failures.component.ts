@@ -6,9 +6,10 @@ import {BehaviorSubject} from "rxjs";
 import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 
 @Component({
-  selector: 'app-onvif-failures',
-  templateUrl: './onvif-failures.component.html',
-  styleUrls: ['./onvif-failures.component.scss']
+    selector: 'app-onvif-failures',
+    templateUrl: './onvif-failures.component.html',
+    styleUrls: ['./onvif-failures.component.scss'],
+    standalone: false
 })
 export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   @Input() failures!: Map<string, string>;
@@ -36,12 +37,13 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
         failed: Map<string, string>
       }) => {
         if (result.failed.size == 1) {
-          const fKey: string = result.failed.keys().next().value;
+          const fKey = result.failed.keys().next().value;
           if (this.failures === undefined)
             this.failures = result.failed;
-          else if (!this.failures.has(fKey)) {
-            const fVal: string = result.failed.values().next().value;
-            this.failures.set(fKey, fVal);
+          else if (fKey !== undefined && !this.failures.has(fKey)) {
+            const fVal = result.failed.values().next().value;
+            if(fVal !== undefined)
+              this.failures.set(fKey, fVal);
           }
         }
         if (result.cam !== undefined) {
@@ -54,7 +56,7 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
           let msg = "Couldn't get camera details: - ";
           if (result.failed !== undefined && result.failed.size > 0)
             msg += result.failed.entries().next().value
-          this.reporting.warning = msg;
+          this.reporting.warningMessage = msg
         }
         this.gettingCameraDetails = false;
       },

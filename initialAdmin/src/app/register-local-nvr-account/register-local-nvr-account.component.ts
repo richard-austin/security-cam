@@ -4,9 +4,10 @@ import {ReportingComponent} from "../reporting/reporting.component";
 import {UtilsService} from '../shared/utils.service';
 
 @Component({
-  selector: 'app-register-local-nvr-account',
-  templateUrl: './register-local-nvr-account.component.html',
-  styleUrls: ['./register-local-nvr-account.component.scss']
+    selector: 'app-register-local-nvr-account',
+    templateUrl: './register-local-nvr-account.component.html',
+    styleUrls: ['./register-local-nvr-account.component.scss'],
+    standalone: false
 })
 export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   username: string = '';
@@ -16,6 +17,8 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   confirmEmail: string = '';
   updateExisting: boolean = false;
   nvrAccountRegistrationForm!: FormGroup;
+  callFailed: boolean = false;
+  committed: boolean = false;
   // errorMessage: string = '';
   // successMessage: string = '';
   @ViewChild('username') usernameInput!: ElementRef<HTMLInputElement>;
@@ -26,6 +29,7 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   title!: string;
   buttonTitle!: string;
   error: boolean = false;
+
 
   constructor(private utilsService: UtilsService) {
   }
@@ -90,14 +94,16 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
     this.reporting.dismiss();
 
     this.username = this.getFormControl('username').value;
-
+    this.callFailed = this.committed = false;
     this.utilsService.createOrUpdateLocalNVRAccount(this.username, this.password, this.confirmPassword, this.email, this.confirmEmail, this.updateExisting).subscribe(
       {complete: () => {
         this.utilsService.getHasLocalAccount();
         this.reporting.successMessage = "Local client account " + (this.updateExisting ? " updated":" created") + " successfully"+ (this.updateExisting?" username now: "+this.username:"");
+        this.committed = true;
       },
       error: (reason) => {
         this.reporting.errorMessage = reason;
+        this.callFailed = true;
       }});
   }
 
@@ -114,6 +120,7 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   }
 
   checkForLocalAccount() {
+    this.callFailed = false;
     this.utilsService.checkForAccountLocally().subscribe({
       next: (value: boolean) => {
         this.updateExisting = value;
@@ -125,7 +132,7 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
         this.reporting.errorMessage = reason;
         this.title = "Problem!"
         this.buttonTitle = "Problem!";
-        this.error = true;
+        this.error = this.callFailed = true;
       }
     });
   }

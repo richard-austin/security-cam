@@ -8,9 +8,10 @@ import {UtilsService} from "../../shared/utils.service";
 import {PTZPresetsInfoCommand, PTZPresetsInfoResponse, PTZService} from "../ptz.service";
 
 @Component({
-  selector: 'app-ptzcontrols',
-  templateUrl: './ptzcontrols.component.html',
-  styleUrls: ['./ptzcontrols.component.scss']
+    selector: 'app-ptzcontrols',
+    templateUrl: './ptzcontrols.component.html',
+    styleUrls: ['./ptzcontrols.component.scss'],
+    standalone: false
 })
 export class PTZControlsComponent implements OnInit {
   @Input() camera!: Camera;

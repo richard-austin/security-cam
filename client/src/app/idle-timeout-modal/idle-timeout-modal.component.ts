@@ -3,9 +3,10 @@ import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {UserIdleService} from "../angular-user-idle/angular-user-idle.service";
 
 @Component({
-  selector: 'app-idle-timeout-modal',
-  templateUrl: './idle-timeout-modal.component.html',
-  styleUrls: ['./idle-timeout-modal.component.scss']
+    selector: 'app-idle-timeout-modal',
+    templateUrl: './idle-timeout-modal.component.html',
+    styleUrls: ['./idle-timeout-modal.component.scss'],
+    standalone: false
 })
 export class IdleTimeoutModalComponent implements OnInit {
 
@@ -18,7 +19,7 @@ export class IdleTimeoutModalComponent implements OnInit {
 
   onClose(): void {
     this.dialogRef.close();
-    window.location.href = 'logoff';
+    window.location.href = 'logout';
   }
 
   onContinue() {

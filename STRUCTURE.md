@@ -11,18 +11,17 @@ These ports, plus port 80,  are set up for port forwarding on the router when di
 from outside the LAN is required.
 
 ### Tomcat Web Server
-Tomcat 9 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
+Tomcat 10 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
 to these through port 8080.
 
 ###### nginx makes the web server, media server and other services available through the single port 443
 ### Web Front End
-The Web Front End (client) is an Angular application using [Angular CLI](https://github.com/angular/angular-cli) version 12.0.5 or later.
+The Web Front End (client) is an Angular application using [Angular CLI](https://github.com/angular/angular-cli) version 18.5.
 This forms the user interface of the web application.
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
 ### Web Back End
-The Web Back End (server) is a Grails application (https://grails.org/), which provides
-the Restful API for the Angular Web Front End.
-It provides the services to get and set application data as
+The Web Back End (server) is a Spring Boot 3.3.4 application (https://spring.io/projects/spring-boot), which provides
+the Restful API for the Angular Web Front End.It provides the services to get and set application data as
 well as configuring the Camera setup.
 
 ### Media Server

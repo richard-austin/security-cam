@@ -5,9 +5,10 @@ import {ReportingComponent} from '../reporting/reporting.component';
 import {UtilsService} from "../shared/utils.service";
 
 @Component({
-  selector: 'app-get-active-ipaddresses',
-  templateUrl: './get-active-ipaddresses.component.html',
-  styleUrls: ['./get-active-ipaddresses.component.scss']
+    selector: 'app-get-active-ipaddresses',
+    templateUrl: './get-active-ipaddresses.component.html',
+    styleUrls: ['./get-active-ipaddresses.component.scss'],
+    standalone: false
 })
 export class GetActiveIPAddressesComponent implements OnInit {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent

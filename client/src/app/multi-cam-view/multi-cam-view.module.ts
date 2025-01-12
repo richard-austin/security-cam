@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {MultiCamViewComponent} from "./multi-cam-view.component";
 import {MatIcon} from "@angular/material/icon";
-import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
+import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
 import {
   MatCell, MatCellDef,
   MatColumnDef,
@@ -19,6 +19,7 @@ import {MatCheckbox} from "@angular/material/checkbox";
 import {SharedModule} from "../shared/shared.module";
 import {LiveContainerModule} from "../live-container/live-container.module";
 import {MultiCamViewRoutingModule} from "./multi-cam-view-routing.module";
+import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
 
 @NgModule({
   declarations: [
@@ -47,6 +48,9 @@ import {MultiCamViewRoutingModule} from "./multi-cam-view-routing.module";
     MatHeaderRowDef,
     MatHeaderCellDef,
     MatCellDef,
+    MatCardSubtitle,
+    MatRadioGroup,
+    MatRadioButton,
   ]
 })
 export class MultiCamViewModule { }

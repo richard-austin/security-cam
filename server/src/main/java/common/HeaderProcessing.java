@@ -1,5 +1,6 @@
 package common;
 
+
 import com.proxy.BinarySearcher;
 import com.proxy.ILogService;
 import org.jetbrains.annotations.NotNull;

@@ -5,9 +5,11 @@
       <form (ngSubmit)="$event.preventDefault(); formSubmitted()" [formGroup]="changeEmailForm">
         <div>
           <mat-form-field appearance="outline">
-            <mat-label>Password</mat-label>
             <input matInput type="password" formControlName="password"
-                   placeholder="Enter password">
+                   placeholder="Enter password"
+                   matTooltip="Enter the user password"
+                   matTooltipClass="tooltip">
+            <mat-label>Password</mat-label>
             <mat-error *ngIf="hasError('password', 'required')">Password is required</mat-error>
             <mat-error *ngIf="hasError('password', 'pattern')">Password incorrect</mat-error>
             <mat-hint>Enter password</mat-hint>
@@ -15,22 +17,26 @@
         </div>
         <div>
           <mat-form-field appearance="outline" class="email-input">
-            <mat-label>New email address</mat-label>
             <input matInput type="text" formControlName="newEmail" autocomplete="off" maxlength="40"
-                   placeholder="New password">
+                   placeholder="New email address"
+                   matTooltip="Enter the required email address"
+                   matTooltipClass="tooltip">
+            <mat-label>New email address</mat-label>
             <mat-error *ngIf="hasError('newEmail', 'required')">Email address required</mat-error>
-            <mat-error *ngIf="hasError('newEmail', 'pattern')">Email format is incorrect
+            <mat-error *ngIf="hasError('newEmail', 'pattern') && !hasError('newEmail', 'required')">Email format is incorrect
             </mat-error>
             <mat-hint>Enter new email address</mat-hint>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline" class="email-input">
-            <mat-label>Confirm new email address</mat-label>
             <input matInput type="text" formControlName="confirmNewEmail" height="12" autocomplete="off" maxlength="40"
-                   placeholder="Confirm new email address">
+                   placeholder="Confirm new email address"
+                   matTooltip="Please confirm the email address"
+                   matTooltipClass="tooltip">
+            <mat-label>Confirm new email address</mat-label>
             <mat-error *ngIf="hasError('confirmNewEmail', 'required')">Confirm new email address is required</mat-error>
-            <mat-error *ngIf="hasError('confirmNewEmail', 'confirmNewEmail')">Confirm new email and new email differ
+            <mat-error *ngIf="hasError('confirmNewEmail', 'confirmNewEmail') ">Confirm new email and new email differ
             </mat-error>
             <mat-hint>Enter new email again</mat-hint>
           </mat-form-field>
