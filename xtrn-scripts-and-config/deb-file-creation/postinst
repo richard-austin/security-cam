@@ -4,7 +4,6 @@ cp /tmp/motion.conf /etc/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/chrony.conf /etc/chrony
 mv /tmp/server.xml /var/lib/tomcat10/conf
-#### mv /tmp/tomcat10 /etc/default/  # Updated tomcat10 default file to enable use of Java 17
 mv /tmp/tomcat-users.xml /var/lib/tomcat10/conf
 mv /tmp/server-0.0.1.war /var/lib/tomcat10/webapps/ROOT.war
 mv /tmp/cua.war /var/lib/tomcat10/webapps/cua.war
