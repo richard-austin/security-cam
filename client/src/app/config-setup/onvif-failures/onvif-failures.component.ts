@@ -3,13 +3,51 @@ import {CameraService} from "../../cameras/camera.service";
 import {Camera} from "../../cameras/Camera";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {BehaviorSubject} from "rxjs";
-import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
+import {ReactiveFormsModule, UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
+import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
+import {MatIcon} from "@angular/material/icon";
+import {KeyValuePipe, NgIf} from "@angular/common";
+import {
+  MatCell,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderRow, MatRow, MatTable
+} from "@angular/material/table";
+import {MatFormField, MatFormFieldModule} from "@angular/material/form-field";
+import {MatInput} from "@angular/material/input";
+import {DisableControlDirective} from "../../shared/disable-control.directive";
+import {MatTooltip} from "@angular/material/tooltip";
+import {MatProgressSpinner} from "@angular/material/progress-spinner";
+import {MatIconButton} from "@angular/material/button";
 
 @Component({
-    selector: 'app-onvif-failures',
-    templateUrl: './onvif-failures.component.html',
-    styleUrls: ['./onvif-failures.component.scss'],
-    standalone: false
+  selector: 'app-onvif-failures',
+  templateUrl: './onvif-failures.component.html',
+  styleUrls: ['./onvif-failures.component.scss'],
+  imports: [
+    MatFormFieldModule,
+    MatCard,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatIcon,
+    MatCardContent,
+    NgIf,
+    MatTable,
+    KeyValuePipe,
+    MatColumnDef,
+    MatHeaderCell,
+    MatCell,
+    MatFormField,
+    MatInput,
+    ReactiveFormsModule,
+    DisableControlDirective,
+    MatTooltip,
+    MatProgressSpinner,
+    MatHeaderRow,
+    MatRow,
+    MatIconButton
+  ],
+  standalone: true
 })
 export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   @Input() failures!: Map<string, string>;

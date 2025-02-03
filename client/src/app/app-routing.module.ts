@@ -9,7 +9,7 @@ const routes: Routes = [
   {path: 'changeemail', loadChildren: () => import('./change-email/change-email.module').then(m => m.ChangeEmailModule), canActivate: [OnlyClientUsersService]},
   {path: 'changepassword', loadChildren: () => import('./change-password/change-password.module').then(m => m.ChangePasswordModule), canActivate: [OnlyClientUsersService]},
   {path: 'cameraparams/:camera', loadChildren: () => import('./camera-params/cam-params.module').then(m => m.CamParamsModule)},
-  {path: 'configsetup', loadChildren: () => import('./config-setup/config-setup.module').then(m => m.ConfigSetupModule)},
+  {path: 'configsetup', loadComponent: () => import('./config-setup/config-setup.component').then(m => m.ConfigSetupComponent)},
   {path: 'general', loadChildren: () => import('./general/general.module').then(m => m.GeneralModule)},
   {path: 'wifi', loadChildren: () => import('./wifi-settings/wifi-settings.module').then(m => m.WifiSettingsModule), canActivate: [OnlyClientUsersService]},
 ];

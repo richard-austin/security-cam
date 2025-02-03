@@ -1,7 +1,21 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {AbstractControl, UntypedFormControl, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
+import {
+  AbstractControl,
+  ReactiveFormsModule,
+  UntypedFormControl,
+  UntypedFormGroup,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from "@angular/forms";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {Camera} from "../../cameras/Camera";
+import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
+import {MatFormField, MatFormFieldModule} from "@angular/material/form-field";
+import {MatInput} from "@angular/material/input";
+import {MatTooltip} from "@angular/material/tooltip";
+import {MatButton} from "@angular/material/button";
+import {NgIf} from "@angular/common";
 
 /**
  * isValidDeviceIP: Custom validator to check that the onvif URL presented for getting camera details does not have
@@ -31,10 +45,23 @@ export function isValidDeviceIP(componentObject: AddAsOnvifDeviceComponent): Val
 }
 
 @Component({
-    selector: 'app-add-as-onvif-device',
-    templateUrl: './add-as-onvif-device.component.html',
-    styleUrls: ['./add-as-onvif-device.component.scss'],
-    standalone: false
+  selector: 'app-add-as-onvif-device',
+  templateUrl: './add-as-onvif-device.component.html',
+  styleUrls: ['./add-as-onvif-device.component.scss'],
+  imports: [
+    MatFormFieldModule,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCard,
+    MatCardContent,
+    MatFormField,
+    MatInput,
+    ReactiveFormsModule,
+    MatTooltip,
+    MatButton,
+    NgIf
+  ],
+  standalone: true
 })
 export class AddAsOnvifDeviceComponent implements OnInit {
   @Output() hideDialogue: EventEmitter<void> = new EventEmitter<void>();

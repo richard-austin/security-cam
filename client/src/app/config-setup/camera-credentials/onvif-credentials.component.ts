@@ -1,15 +1,34 @@
 import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
+import {ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {Camera} from 'src/app/cameras/Camera';
 import {CameraService, OnvifCredentials} from "../../cameras/camera.service";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {Encryption} from "./encryption";
+import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
+import {MatFormField, MatFormFieldModule} from "@angular/material/form-field";
+import {MatInput} from "@angular/material/input";
+import {MatTooltip} from "@angular/material/tooltip";
+import {NgIf} from "@angular/common";
+import {MatButton} from "@angular/material/button";
 
 @Component({
-    selector: 'app-camera-credentials',
-    templateUrl: './onvif-credentials.component.html',
-    styleUrls: ['./onvif-credentials.component.scss'],
-    standalone: false
+  selector: 'app-camera-credentials',
+  templateUrl: './onvif-credentials.component.html',
+  styleUrls: ['./onvif-credentials.component.scss'],
+  imports: [
+    MatFormFieldModule,
+    MatCard,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCardContent,
+    MatFormField,
+    ReactiveFormsModule,
+    MatInput,
+    MatTooltip,
+    NgIf,
+    MatButton
+  ],
+  standalone: true
 })
 export class OnvifCredentialsComponent implements OnInit, AfterViewInit {
 

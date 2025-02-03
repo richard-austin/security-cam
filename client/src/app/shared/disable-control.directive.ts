@@ -3,8 +3,7 @@ import {NgControl} from "@angular/forms";
 import {timer} from "rxjs";
 
 @Directive({
-    selector: '[disableControl]',
-    standalone: false
+  selector: '[disableControl]'
 })
 export class DisableControlDirective {
   @Input() set disableControl(condition: boolean) {
