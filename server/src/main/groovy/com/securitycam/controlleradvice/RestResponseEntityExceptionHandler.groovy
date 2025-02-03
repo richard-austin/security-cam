@@ -79,14 +79,14 @@ class ErrorResponse {
     String exception
     String error
     String reason
-    ErrorResponse(String exception, String error, String reason) {
-        this.exception = exception
+    ErrorResponse(Exception ex, String error, String reason) {
+        this.exception = ex.class.getName()
         this.error = error
         this.reason = reason
     }
 
     ErrorResponse(Exception ex) {
-        exception = ex.class
+        exception = ex.class.getName()
         error = ex.getMessage()
         reason = ex.getCause() != null ? ("Caused by: " + ex.getCause().getClass().getName() + ": " +  ex.getCause().getMessage()) : ""
     }

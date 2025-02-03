@@ -102,6 +102,7 @@ class Camera {
     boolean useRtspAuth = false
     int retriggerWindow = 30
     String cred = ""
+    List<String> pullPointEvents = new ArrayList<>()
     CameraAdminCredentials credentials() {
         Asymmetric crypto = new Asymmetric()
         String jsonCreds = crypto.decrypt(cred)

@@ -111,4 +111,5 @@ export class Camera
     useRtspAuth: boolean = false;
     retriggerWindow: number = 30;
     cred: string = "";
+    pullPointEvents: string[] = [];
 }
