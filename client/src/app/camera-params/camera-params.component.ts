@@ -5,12 +5,14 @@ import {Camera, CameraParams} from '../cameras/Camera';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
+import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
+import {SharedModule} from "../shared/shared.module";
 
 @Component({
     selector: 'app-camera-params',
     templateUrl: './camera-params.component.html',
     styleUrls: ['./camera-params.component.scss'],
-    standalone: false
+  imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   irselector!: AbstractControl;

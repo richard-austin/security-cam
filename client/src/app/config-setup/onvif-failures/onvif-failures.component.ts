@@ -3,49 +3,16 @@ import {CameraService} from "../../cameras/camera.service";
 import {Camera} from "../../cameras/Camera";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {BehaviorSubject} from "rxjs";
-import {ReactiveFormsModule, UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
-import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
-import {MatIcon} from "@angular/material/icon";
-import {KeyValuePipe, NgIf} from "@angular/common";
-import {
-  MatCell,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderRow, MatRow, MatTable
-} from "@angular/material/table";
-import {MatFormField, MatFormFieldModule} from "@angular/material/form-field";
-import {MatInput} from "@angular/material/input";
-import {DisableControlDirective} from "../../shared/disable-control.directive";
-import {MatTooltip} from "@angular/material/tooltip";
-import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {MatIconButton} from "@angular/material/button";
-
+import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
+import {SharedModule} from "../../shared/shared.module";
+import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
 @Component({
   selector: 'app-onvif-failures',
   templateUrl: './onvif-failures.component.html',
   styleUrls: ['./onvif-failures.component.scss'],
   imports: [
-    MatFormFieldModule,
-    MatCard,
-    MatCardTitle,
-    MatCardSubtitle,
-    MatIcon,
-    MatCardContent,
-    NgIf,
-    MatTable,
-    KeyValuePipe,
-    MatColumnDef,
-    MatHeaderCell,
-    MatCell,
-    MatFormField,
-    MatInput,
-    ReactiveFormsModule,
-    DisableControlDirective,
-    MatTooltip,
-    MatProgressSpinner,
-    MatHeaderRow,
-    MatRow,
-    MatIconButton
+    SharedModule,
+    SharedAngularMaterialModule
   ],
   standalone: true
 })

@@ -13,7 +13,7 @@ import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {
-  AbstractControl, ReactiveFormsModule,
+  AbstractControl,
   UntypedFormArray,
   UntypedFormControl,
   UntypedFormGroup,
@@ -21,31 +21,19 @@ import {
   ValidatorFn,
   Validators
 } from "@angular/forms";
+import {MatCheckboxChange} from '@angular/material/checkbox';
+import {MatSelectChange} from '@angular/material/select';
 import {BehaviorSubject} from 'rxjs';
-import {MatCheckbox, MatCheckboxChange} from "@angular/material/checkbox";
-import {MatOption, MatSelect, MatSelectChange} from '@angular/material/select';
 import { HttpErrorResponse } from "@angular/common/http";
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
-import {KeyValue, KeyValuePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {KeyValue, KeyValuePipe} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
-import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
-import {MatTooltip} from "@angular/material/tooltip";
-import {MatIcon} from "@angular/material/icon";
 import {OnvifCredentialsComponent} from "./camera-credentials/onvif-credentials.component";
-import {SharedModule} from "../shared/shared.module";
-import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {
-  MatCell, MatCellDef, MatColumnDef,
-  MatFooterCell, MatFooterCellDef, MatFooterRow, MatFooterRowDef,
-  MatHeaderCell, MatHeaderCellDef, MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable
-} from "@angular/material/table";
-import {MatButton, MatIconButton} from "@angular/material/button";
-import {MatError, MatFormField, MatFormFieldModule, MatLabel} from "@angular/material/form-field";
-import {MatInput} from "@angular/material/input";
-import {AddAsOnvifDeviceComponent} from "./add-as-onvif-device/add-as-onvif-device.component";
-import {DisableControlDirective} from "../shared/disable-control.directive";
 import {ExcludeOwnStreamPipe} from "./exclude-own-stream.pipe";
 import {OnvifFailuresComponent} from "./onvif-failures/onvif-failures.component";
+import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
+import {AddAsOnvifDeviceComponent} from "./add-as-onvif-device/add-as-onvif-device.component";
+import {SharedModule} from "../shared/shared.module";
 
 declare let objectHash: (obj: Object) => string;
 
@@ -111,50 +99,15 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
     ])
   ],
   imports: [
-    MatFormFieldModule,
-    MatCard,
-    MatCardTitle,
-    MatTooltip,
-    MatIcon,
-    NgClass,
-    OnvifCredentialsComponent,
     SharedModule,
-    MatCardContent,
-    MatProgressSpinner,
-    MatTable,
-    KeyValuePipe,
-    MatIconButton,
-    MatColumnDef,
-    MatCell,
-    ReactiveFormsModule,
-    MatLabel,
-    MatFormField,
-    MatSelect,
-    MatOption,
-    MatHeaderCell,
-    MatError,
-    MatInput,
-    NgIf,
-    MatCheckbox,
-    AddAsOnvifDeviceComponent,
-    MatFooterCell,
-    MatHeaderRow,
-    MatRow,
-    MatFooterRow,
-    MatButton,
-    NgForOf,
-    DisableControlDirective,
-    ExcludeOwnStreamPipe,
+    SharedAngularMaterialModule,
+    OnvifCredentialsComponent,
     OnvifFailuresComponent,
-    MatCellDef,
-    MatHeaderCellDef,
-    MatHeaderRowDef,
-    MatRowDef,
-    MatFooterRowDef,
-    MatFooterCellDef
+    AddAsOnvifDeviceComponent,
+    KeyValuePipe,
+    ExcludeOwnStreamPipe,
   ],
   schemas: [],
-  standalone: true
 })
 export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('errorReporting') reporting!: ReportingComponent;

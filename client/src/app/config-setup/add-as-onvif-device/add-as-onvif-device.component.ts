@@ -1,7 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {
   AbstractControl,
-  ReactiveFormsModule,
   UntypedFormControl,
   UntypedFormGroup,
   ValidationErrors,
@@ -10,12 +9,8 @@ import {
 } from "@angular/forms";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {Camera} from "../../cameras/Camera";
-import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
-import {MatFormField, MatFormFieldModule} from "@angular/material/form-field";
-import {MatInput} from "@angular/material/input";
-import {MatTooltip} from "@angular/material/tooltip";
-import {MatButton} from "@angular/material/button";
-import {NgIf} from "@angular/common";
+import {SharedModule} from "../../shared/shared.module";
+import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
 
 /**
  * isValidDeviceIP: Custom validator to check that the onvif URL presented for getting camera details does not have
@@ -49,17 +44,8 @@ export function isValidDeviceIP(componentObject: AddAsOnvifDeviceComponent): Val
   templateUrl: './add-as-onvif-device.component.html',
   styleUrls: ['./add-as-onvif-device.component.scss'],
   imports: [
-    MatFormFieldModule,
-    MatCardTitle,
-    MatCardSubtitle,
-    MatCard,
-    MatCardContent,
-    MatFormField,
-    MatInput,
-    ReactiveFormsModule,
-    MatTooltip,
-    MatButton,
-    NgIf
+    SharedModule,
+    SharedAngularMaterialModule
   ],
   standalone: true
 })
