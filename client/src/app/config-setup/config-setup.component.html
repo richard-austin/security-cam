@@ -169,6 +169,15 @@
                     </mat-form-field>
                 </td>
             </ng-container>
+            <ng-container matColumnDef="recording">
+                <th *matHeaderCellDef mat-header-cell>Set Up Recording</th>
+                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                    <button mat-icon-button color="red"
+                            matTooltip="Set up recording trigger for {{cam.key}}" matTooltipClass="tooltip">
+                        <mat-icon class="voicemail">voicemail</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
             <ng-container matColumnDef="ftp">
                 <th *matHeaderCellDef mat-header-cell>FTP From Camera.</th>
                 <td *matCellDef="let cam; let i = dataIndex" mat-cell>

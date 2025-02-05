@@ -117,7 +117,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   updating: boolean = false;
   discovering: boolean = false;
   cameras: Map<string, Camera> = new Map<string, Camera>();
-  cameraColumns = ['sorting', 'camera_id', 'creds', 'delete', 'expand', 'name', 'cameraParamSpecs', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'useRtspAuth', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
+  cameraColumns = ['sorting', 'camera_id', 'creds', 'delete', 'expand', 'name', 'cameraParamSpecs', 'recording', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'useRtspAuth', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
   cameraFooterColumns = ['buttons'];
 
   expandedElement!: Camera | null;
@@ -291,7 +291,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         ftp: new UntypedFormControl({
             value: camera?.ftp != undefined ? camera.ftp : 'none',
             disabled:this.getFTPDisabledState(camera),
-          }, [Validators.pattern(/^none|stream[1-9]+$/)]
+          }, [Validators.pattern(/^none|stream[1-9]|[10-19]|[20-29]+$/)]
         ),
         retriggerWindow: new UntypedFormControl({
             value: camera?.retriggerWindow != undefined ? camera.retriggerWindow : 30,
