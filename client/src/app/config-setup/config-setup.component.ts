@@ -276,12 +276,12 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         }, [Validators.maxLength(55)]),
         ftp: new UntypedFormControl({
             value: camera?.ftp != undefined ? camera.ftp : 'none',
-            disabled: false,
+            disabled:this.getFTPDisabledState(camera),
           }, [Validators.pattern(/^none|stream[1-9]+$/)]
         ),
         retriggerWindow: new UntypedFormControl({
             value: camera?.retriggerWindow != undefined ? camera.retriggerWindow : 30,
-            disabled: false,
+            disabled: camera.ftp=='none',
           }, [Validators.pattern(/^10$|20|30|40|50|60|70|80|90|100/)]
         ),
         snapshotUri: new UntypedFormControl({
