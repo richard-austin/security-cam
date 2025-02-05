@@ -12,10 +12,8 @@ import {MatButton} from "@angular/material/button";
 import {SetIpComponent} from "../set-ip/set-ip.component";
 import {SetUpGuestAccountComponent} from "../set-up-guest-account/set-up-guest-account.component";
 import {AboutComponent} from "../about/about.component";
-import {CameraAdminPageHostingComponent} from "../camera-admin-page-hosting/camera-admin-page-hosting.component";
 import {CloudProxyComponent} from "../cloud-proxy/cloud-proxy.component";
 import {DrawdownCalcContainerComponent} from "../drawdown-calc-container/drawdown-calc-container.component";
-import {GetActiveIPAddressesComponent} from "../get-active-ipaddresses/get-active-ipaddresses.component";
 import {
   MatCell,
   MatCellDef,
@@ -32,11 +30,9 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
 
 @NgModule({
   declarations: [
-      CameraAdminPageHostingComponent,
       SetUpGuestAccountComponent,
       SetIpComponent,
       DrawdownCalcContainerComponent,
-      GetActiveIPAddressesComponent,
       CreateUserAccountContainerComponent,
       CloudProxyComponent,
       AboutComponent

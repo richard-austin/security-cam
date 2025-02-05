@@ -71,7 +71,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   cameraAdmin(cam: Camera) {
-    window.location.href = '#/general/camadmin/' + btoa(cam.address);
+    window.location.href = '#/camadmin/' + btoa(cam.address);
   }
 
   changePassword() {
@@ -162,7 +162,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getActiveIPAddresses() {
-    window.location.href = '#/general/getactiveipaddresses';
+    window.location.href = '#/getactiveipaddresses';
   }
 
   openIdleTimeoutDialog(idle: number, timeout: number, count: number): void {
