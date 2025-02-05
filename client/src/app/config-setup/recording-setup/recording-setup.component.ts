@@ -5,7 +5,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './recording-setup.component.html',
   styleUrl: './recording-setup.component.scss',
-  standalone: true
 })
 export class RecordingSetupComponent {
 }

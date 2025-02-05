@@ -10,7 +10,7 @@ import {
   MatHeaderRow, MatHeaderRowDef,
   MatRow, MatRowDef, MatTable
 } from "@angular/material/table";
-import {ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatError, MatFormField, MatHint, MatLabel} from "@angular/material/form-field";
 import {MatOption, MatSelect} from "@angular/material/select";
 import {MatInput} from "@angular/material/input";
@@ -20,6 +20,15 @@ import {MatTooltip} from "@angular/material/tooltip";
 import {MatIcon} from "@angular/material/icon";
 import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
+import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
+import {
+  MatDatepicker,
+  MatDatepickerInput,
+  MatDatepickerModule,
+  MatDatepickerToggle
+} from "@angular/material/datepicker";
+import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
+import {MatNativeDateModule} from "@angular/material/core";
 
 @NgModule({
   declarations: [],
@@ -59,7 +68,17 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
     MatIcon,
     MatCardContent,
     MatProgressSpinner,
-    MatTable
+    MatTable,
+    MatRadioGroup,
+    MatRadioButton,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatDatepicker,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatButtonToggleGroup,
+    FormsModule,
+    MatButtonToggle
   ],
   exports: [
     CommonModule,
@@ -97,7 +116,16 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
     MatIcon,
     MatCardContent,
     MatProgressSpinner,
-    MatTable
-  ]
+    MatTable,
+    MatRadioGroup,
+    MatRadioButton,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatDatepicker,
+    MatButtonToggleGroup,
+    FormsModule,
+    MatButtonToggle
+  ],
+  providers:[MatDatepickerModule]
 })
 export class SharedAngularMaterialModule { }

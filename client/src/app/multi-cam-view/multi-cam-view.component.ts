@@ -8,11 +8,15 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {timer} from 'rxjs';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
+import {SharedModule} from "../shared/shared.module";
+import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
+import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
 
 @Component({
     selector: 'app-multi-cam-view',
     templateUrl: './multi-cam-view.component.html',
     styleUrls: ['./multi-cam-view.component.scss'],
+    imports: [SharedModule, SharedAngularMaterialModule, VideoComponent],
     animations: [
         trigger('detailExpand', [
             state('collapsed', style({ height: '0px', minHeight: '0' })),
@@ -35,7 +39,6 @@ import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
             ]),
         ])
     ],
-    standalone: false
 })
 export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren(VideoComponent) videos!: QueryList<VideoComponent>;

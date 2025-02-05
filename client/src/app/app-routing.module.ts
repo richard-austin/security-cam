@@ -3,11 +3,11 @@ import { RouterModule, Routes } from '@angular/router';
 import {OnlyClientUsersService} from "./guards/only-client-users.service";
 
 const routes: Routes = [
-  {path: 'live/:streamName', loadChildren: () => import('./live-container/live-container.module').then(m => m.LiveContainerModule)},
-  {path: 'recording/:streamName', loadChildren: () => import('./recording-control/recording-control.module').then(m => m.RecordingControlModule)},
-  {path: 'multicam', loadChildren: () => import('./multi-cam-view/multi-cam-view.module').then(m => m.MultiCamViewModule)},
-  {path: 'changeemail', loadChildren: () => import('./change-email/change-email.module').then(m => m.ChangeEmailModule), canActivate: [OnlyClientUsersService]},
-  {path: 'changepassword', loadChildren: () => import('./change-password/change-password.module').then(m => m.ChangePasswordModule), canActivate: [OnlyClientUsersService]},
+  {path: 'live/:streamName', loadComponent: () => import('./live-container/live-container.component').then(m => m.LiveContainerComponent)},
+  {path: 'recording/:streamName', loadComponent: () => import('./recording-control/recording-control.component').then(m => m.RecordingControlComponent)},
+  {path: 'multicam', loadComponent: () => import('./multi-cam-view/multi-cam-view.component').then(m => m.MultiCamViewComponent)},
+  {path: 'changeemail', loadComponent: () => import('./change-email/change-email.component').then(m => m.ChangeEmailComponent), canActivate: [OnlyClientUsersService]},
+  {path: 'changepassword', loadComponent: () => import('./change-password/change-password.component').then(m => m.ChangePasswordComponent), canActivate: [OnlyClientUsersService]},
   {path: 'cameraparams/:camera', loadComponent: () => import('./camera-params/camera-params.component').then(m => m.CameraParamsComponent)},
   {path: 'configsetup', loadComponent: () => import('./config-setup/config-setup.component').then(m => m.ConfigSetupComponent)},
   {path: 'general', loadChildren: () => import('./general/general.module').then(m => m.GeneralModule)},

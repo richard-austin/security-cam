@@ -3,14 +3,17 @@ import { Component, OnInit } from '@angular/core';
 import {Preset, PTZPresetCommand, PTZService} from "../../ptz.service";
 import {Camera} from "../../../cameras/Camera";
 import {ReportingComponent} from "../../../reporting/reporting.component";
+import {MatMiniFabButton} from "@angular/material/button";
 
 export enum ePresetOperations {moveTo, saveTo, clearFrom}
 
 @Component({
-    selector: 'app-preset-button',
-    templateUrl: './preset-button.component.html',
-    styleUrls: ['./preset-button.component.scss'],
-    standalone: false
+  selector: 'app-preset-button',
+  templateUrl: './preset-button.component.html',
+  imports: [
+    MatMiniFabButton
+  ],
+  styleUrls: ['./preset-button.component.scss']
 })
 export class PresetButtonComponent implements OnInit {
   @Input() camera!: Camera;

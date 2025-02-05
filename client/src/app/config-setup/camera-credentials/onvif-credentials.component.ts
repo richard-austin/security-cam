@@ -15,7 +15,6 @@ import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/
       SharedModule,
       SharedAngularMaterialModule
   ],
-  standalone: true
 })
 export class OnvifCredentialsComponent implements OnInit, AfterViewInit {
 

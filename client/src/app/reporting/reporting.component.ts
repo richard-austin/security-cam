@@ -1,12 +1,19 @@
 import {Component, Input, OnInit} from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import {NgClass, NgForOf, NgIf} from "@angular/common";
+import {MatButton} from "@angular/material/button";
 
 export enum styles {success, warning, danger}
 @Component({
-    selector: 'app-reporting',
-    templateUrl: './reporting.component.html',
-    styleUrls: ['./reporting.component.scss'],
-    standalone: false
+  selector: 'app-reporting',
+  templateUrl: './reporting.component.html',
+  styleUrls: ['./reporting.component.scss'],
+  imports: [
+    NgIf,
+    NgClass,
+    MatButton,
+    NgForOf
+  ]
 })
 export class ReportingComponent implements OnInit {
   styles: typeof styles = styles;

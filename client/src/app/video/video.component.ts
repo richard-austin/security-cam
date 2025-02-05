@@ -15,12 +15,15 @@ import {MediaFeeder} from './MediaFeeder';
 import {AudioBackchannel} from './AudioBackchannel';
 import {VideoTransformations} from "./VideoTransformations";
 import {VideoSizing} from "./VideoSizing";
+import {SharedModule} from "../shared/shared.module";
+import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
+import {FormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-video',
     templateUrl: './video.component.html',
     styleUrls: ['./video.component.scss'],
-    standalone: false
+    imports: [SharedModule, SharedAngularMaterialModule, FormsModule]
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;

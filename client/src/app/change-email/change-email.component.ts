@@ -4,12 +4,14 @@ import {ReportingComponent} from '../reporting/reporting.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import { UtilsService } from '../shared/utils.service';
 import { AfterViewInit } from '@angular/core';
+import {SharedModule} from "../shared/shared.module";
+import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 
 @Component({
-    selector: 'app-change-email',
-    templateUrl: './change-email.component.html',
-    styleUrls: ['./change-email.component.scss'],
-    standalone: false
+  selector: 'app-change-email',
+  templateUrl: './change-email.component.html',
+  styleUrls: ['./change-email.component.scss'],
+  imports:[SharedModule, SharedAngularMaterialModule]
 })
 export class ChangeEmailComponent implements OnInit, AfterViewInit {
 
