@@ -34,6 +34,7 @@ import {OnvifFailuresComponent} from "./onvif-failures/onvif-failures.component"
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {AddAsOnvifDeviceComponent} from "./add-as-onvif-device/add-as-onvif-device.component";
 import {SharedModule} from "../shared/shared.module";
+import {RecordingSetupComponent} from "./recording-setup/recording-setup.component";
 
 declare let objectHash: (obj: Object) => string;
 
@@ -106,6 +107,7 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
     AddAsOnvifDeviceComponent,
     KeyValuePipe,
     ExcludeOwnStreamPipe,
+    RecordingSetupComponent,
   ],
   schemas: [],
 })
@@ -133,12 +135,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
   snapshot: SafeResourceUrl | String = '';
   snapShotKey: string = '';
   camForCredentialsEntry: string = "";
+  camForRecordingSetup: string = "";
   showAddCameraDialogue: boolean = false;
   isGuest: boolean = true;
   gettingCameraDetails: boolean = false;
   savedDataHash: string = "";
   haveOnvifCredentials: boolean = false;
   showOnvifCredentialsForm: boolean = false;
+
   failed: Map<string, string> = new Map<string, string>();
 
   constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
@@ -823,19 +827,26 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 
   togglePasswordDialogue(camId: string) {
     this.camForCredentialsEntry = this.camForCredentialsEntry !== camId ? camId : "";
+    this.camForRecordingSetup = "";
     this.showAddCameraDialogue = this.showOnvifCredentialsForm = false;
   }
 
   toggleOnvifPasswordDialogue() {
-    this.camForCredentialsEntry = "";
+    this.camForRecordingSetup = this.camForCredentialsEntry = "";
     this.showAddCameraDialogue = false;
     this.showOnvifCredentialsForm = !this.showOnvifCredentialsForm;
   }
 
   toggleAddCameraOnvifUriDialogue() {
     this.showAddCameraDialogue = !this.showAddCameraDialogue;
-    this.camForCredentialsEntry = "";
+    this.camForRecordingSetup = this.camForCredentialsEntry = "";
     this.showOnvifCredentialsForm = false;
+  }
+  
+  toggleRecordingSetupDialogue(camId: string) {
+    this.camForRecordingSetup = this.camForRecordingSetup !== camId ? camId : "";
+    this.camForCredentialsEntry = "";
+    this.showAddCameraDialogue = this.showOnvifCredentialsForm = false;
   }
 
   startFindCameraDetails(onvifUrl: string) {

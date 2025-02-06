@@ -158,27 +158,31 @@ button.change-password-button2 {
   top: 3px;
 }
 
-div.password-dialogue {
+@mixin top-cursor{
+  > div {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+
+    border-bottom: 10px solid #646363;
+    z-index: 3;
+  }
+  z-index: 2;
+  left: -24px;
+  top: 12px;
+  overflow: hidden;
+  position: absolute;
+}
+
+div.popup-dialogue {
   display: inline;
   position: relative;
 
   > div {
     width: 17rem;
 
-    > div {
-      width: 0;
-      height: 0;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-
-      border-bottom: 10px solid #646363;
-      z-index: 3;
-    }
-
-    z-index: 2;
-    left: -2rem;
-    overflow: hidden;
-    position: absolute;
+    @include top-cursor;
   }
 }
 
@@ -205,20 +209,7 @@ div.add-onvif-url-dialogue {
   > div {
     width: 27rem;
 
-    > div {
-      width: 0;
-      height: 0;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-
-      border-bottom: 10px solid #646363;
-      z-index: 3;
-    }
-
-    z-index: 2;
-    left: -2rem;
-    overflow: hidden;
-    position: absolute;
+    @include top-cursor;
   }
 }
 
