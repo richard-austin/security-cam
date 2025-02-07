@@ -2,8 +2,10 @@
     <mat-card-title>Set Up Recording</mat-card-title>
     <mat-card-content>
         <ng-container [formGroup]="formGroup">
-            <div><mat-label>Recording Type</mat-label></div>
-            <mat-form-field appearance="outline" [style.width.px]="225">
+            <mat-form-field appearance="outline" [style.width.px]="225"
+                            matTooltip="Select recording type: None for no recording, Motion Service to use the motion service to detect motion on a specified stream, FTP Triggered to trigger recordings when the camera sends an image to the NVR by FTP, and Pullpoint Event Triggered to trigger recordings from a specified pullpoint topic ion the camera."
+                            matTooltipClass="tooltip">
+                <mat-label>Recording Type</mat-label>
                 <mat-select formControlName="recordingType" (selectionChange)="setRecordingType($event)">
                     <mat-option value="none">None</mat-option>
                     <mat-option value="motion">Motion Service</mat-option>
@@ -17,10 +19,10 @@
 
             @if (recordingType === 'ftp') {
                 <ng-container>
-                    <div><mat-label>&nbsp;&nbsp;Stream To Record From</mat-label></div>
-                    <mat-form-field [style.width.px]="95" appearance="outline"
-                                    matTooltip="{{selectedStream != 'none' ? 'To use FTP upload from the camera, you must not have motion selected on any stream.' : 'If a stream is selected, images sent by FTP from '+ camera?.name + ' on motion being detected will trigger the NVR to make a recording on the selected stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP a .jpg (jpeg) image to ./'+camera?.name+ ' on port 2121 of the NVR. See Camera Recordings Service section of the README.md'}}"
+                    <mat-form-field [style.width.px]="185" appearance="outline"
+                                    matTooltip="Select the stream to record from. This would normally be the higher resolution stream,"
                                     matTooltipClass="tooltip">
+                        <mat-label>Stream To Record From</mat-label>
                         <mat-select (selectionChange)="setSelectedStream($event)"
                                     formControlName="ftpStreamSelect">
                             <mat-option [value]="'none'">none</mat-option>
@@ -33,10 +35,10 @@
                 </ng-container>
                 <div></div>
                 <ng-container>
-                    <div><mat-label>&nbsp;&nbsp;Retrigger Window</mat-label></div>
-                    <mat-form-field [style.width.px]="70" appearance="outline"
+                    <mat-form-field [style.width.px]="158" appearance="outline"
                                     matTooltip="Select the maximum time in seconds that can elapse between FTP uploads from the camere for the recording to be extended further by this selected time. The absence of another FTP within this window will result in the recording being completed."
                                     matTooltipClass="tooltip">
+                        <mat-label>Retrigger Window</mat-label>
                         <mat-select (selectionChange)="setRetriggerWindow($event)"
                                     formControlName="retriggerWindow">
                             <mat-option *ngFor="let win of cameraSvc.ftpRetriggerWindows" [value]="win.value">

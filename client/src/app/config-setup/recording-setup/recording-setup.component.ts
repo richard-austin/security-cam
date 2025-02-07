@@ -43,7 +43,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
   }
 
   anyInvalid(): boolean {
-    return false;
+    return this.recordingType === 'ftp' && this.selectedStream === 'none';
   }
 
   confirmChanges() {
