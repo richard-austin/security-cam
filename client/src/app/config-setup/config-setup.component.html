@@ -175,12 +175,12 @@
                             matTooltipClass="tooltip">
                         <mat-icon class="voicemail">voicemail</mat-icon>
                     </button>
-                    <div class="popup-dialogue">
+                    <div class="popup-recording-type-dialogue ">
                         <div [@detailExpand]="camForRecordingSetup==cam.key ? 'expanded' : 'collapsed'"
                              class="mat-elevation-z15">
                             <div>
                             </div>
-                            <app-recording-setup (hideDialogue)="togglePasswordDialogue('')" [camera]="cam.value"
+                            <app-recording-setup (hideDialogue)="toggleRecordingSetupDialogue(cam.key)" [camera]="cam.value"
                                                  [reporting]="reporting">
                             </app-recording-setup>
                         </div>

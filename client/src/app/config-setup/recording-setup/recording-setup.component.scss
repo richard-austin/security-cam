@@ -1,0 +1,15 @@
+.recording-setup {
+  width: 450px;
+}
+.recording-setup-confirm-group {
+  > span {
+    background: #d9a11a;
+    color: black;
+    padding: 0.9rem;
+    border-radius: 1rem;
+  }
+
+  > button:nth-child(2) {
+    margin-left: 0.5rem;
+  }
+}

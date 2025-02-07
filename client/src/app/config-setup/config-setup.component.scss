@@ -186,6 +186,17 @@ div.popup-dialogue {
   }
 }
 
+div.popup-recording-type-dialogue {
+  display: inline;
+  position: relative;
+
+  > div {
+    width: 23rem;
+
+    @include top-cursor;
+  }
+}
+
 mat-icon.backchannel {
   position: relative;
   top: 3px;

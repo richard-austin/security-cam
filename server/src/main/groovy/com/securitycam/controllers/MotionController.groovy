@@ -92,6 +92,7 @@ class Camera {
     String name=''
     String address=''
     CameraParamSpecs cameraParamSpecs = null
+    String recordingType = "none"
     String ftp = "none"
     String snapshotUri=''
     boolean ptzControls = false
