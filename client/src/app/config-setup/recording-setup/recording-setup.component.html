@@ -14,11 +14,8 @@
                 </mat-select>
             </mat-form-field>
 
-            <div>
-            </div>
-
-            @if (recordingType === 'ftp') {
-                <ng-container>
+            @if (localCamera.recordingType === 'ftp') {
+                <div>
                     <mat-form-field [style.width.px]="185" appearance="outline"
                                     matTooltip="Select the stream to record from. This would normally be the higher resolution stream,"
                                     matTooltipClass="tooltip">
@@ -26,27 +23,47 @@
                         <mat-select (selectionChange)="setSelectedStream($event)"
                                     formControlName="ftpStreamSelect">
                             <mat-option [value]="'none'">none</mat-option>
-                            <mat-option *ngFor="let stream of camera?.streams | keyvalue: cameraSvc.compareFn"
-                                        [value]="stream.key">
-                                {{stream.key }}
-                            </mat-option>
+                            @for(stream of camera?.streams | keyvalue: cameraSvc.compareFn; track stream) {
+                                <mat-option [value]="stream.key">
+                                    {{stream.key }}
+                                </mat-option>
+                            }
                         </mat-select>
                     </mat-form-field>
-                </ng-container>
-                <div></div>
-                <ng-container>
+                </div>
+
+                <div>
                     <mat-form-field [style.width.px]="158" appearance="outline"
                                     matTooltip="Select the maximum time in seconds that can elapse between FTP uploads from the camere for the recording to be extended further by this selected time. The absence of another FTP within this window will result in the recording being completed."
                                     matTooltipClass="tooltip">
                         <mat-label>Retrigger Window</mat-label>
                         <mat-select (selectionChange)="setRetriggerWindow($event)"
                                     formControlName="retriggerWindow">
-                            <mat-option *ngFor="let win of cameraSvc.ftpRetriggerWindows" [value]="win.value">
-                                {{ win.name }}
-                            </mat-option>
+                            @for (win of cameraSvc.ftpRetriggerWindows; track win.value) {
+                                <mat-option [value]="win.value">
+                                    {{ win.name }}
+                                </mat-option>
+                            }
                         </mat-select>
                     </mat-form-field>
-                </ng-container>
+                </div>
+            } @else if (localCamera.recordingType === 'motion') {
+                <div>
+                    <mat-form-field [style.width.px]="225" appearance="outline"
+                                    matTooltip="Select the stream to monitor for motion. This would normally be the lower resolution stream,"
+                                    matTooltipClass="tooltip">
+                        <mat-label>Stream To Monitor For Motion</mat-label>
+                        <mat-select (selectionChange)="setSelectedStream($event)"
+                                    formControlName="ftpStreamSelect">
+                            <mat-option [value]="'none'">none</mat-option>
+                            @for(stream of camera?.streams | keyvalue; track stream) {
+                                <mat-option [value]="stream.key">
+                                    {{stream.key }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
             }
         </ng-container>
         <br>
