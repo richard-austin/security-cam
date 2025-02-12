@@ -104,7 +104,7 @@ export class Camera
     snapshotUri: string="";
     ptzControls: boolean = false;
     recordingType: string = "none"
-    ftp: string | boolean = "none";  // | boolean is only used for a test which can detect ftp's boolean value in earlier versions
+    ftp: string = "none";
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
     backchannelAudioSupported: boolean = false
