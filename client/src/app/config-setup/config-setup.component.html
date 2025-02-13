@@ -180,9 +180,11 @@
                              class="mat-elevation-z15">
                             <div>
                             </div>
-                            <app-recording-setup (hideDialogue)="toggleRecordingSetupDialogue(cam.key)" [camera]="cam.value"
-                                                 [camKey]="cam.key" [reporting]="reporting">
-                            </app-recording-setup>
+                            @defer {
+                                <app-recording-setup (hideDialogue)="toggleRecordingSetupDialogue(cam.key)" [camera]="cam.value"
+                                                     [cameras]="cameras" [camKey]="cam.key" [reporting]="reporting">
+                                </app-recording-setup>
+                            }
                         </div>
                     </div>
                 </td>
