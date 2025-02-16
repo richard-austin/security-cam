@@ -39,18 +39,27 @@ class MotionEvents {
     String[] events
 }
 
+enum RecordingType {none, motionService, ftpTriggered, pullPointEventTriggered}
+
 class Recording {
+    RecordingType recordingType = RecordingType.none
     boolean enabled=false
     String recording_src_url=''
     String uri=''
     String location=''
+    Integer preambleFrames = 100
 }
 
 class Motion {
     boolean enabled=false    // If true, motion detection is enabled for the stream
+    String motion_detection_stream='none'
     String mask_file=''  // Mask file which defines area used in motion sensing
-    String trigger_recording_on=''  // The name of the camera stream on which recordings will be triggered following
+    String trigger_recording_on='none'  // The key of the camera stream on which recordings will be triggered following
     // Motion events on this camera stream (usually another stream on the same physical camera).
+
+    Integer video_width=0
+    Integer video_height=0
+
     Integer threshold = 1500// Threshold for declaring motion.
 }
 
@@ -92,7 +101,6 @@ class Camera {
     String name=''
     String address=''
     CameraParamSpecs cameraParamSpecs = null
-    String recordingType = "none"
     String ftp = "none"
     String snapshotUri=''
     boolean ptzControls = false
@@ -104,6 +112,9 @@ class Camera {
     int retriggerWindow = 30
     String cred = ""
     List<String> pullPointEvents = new ArrayList<>()
+    Recording recording=new Recording()
+    Motion motion=new Motion()
+
     CameraAdminCredentials credentials() {
         Asymmetric crypto = new Asymmetric()
         String jsonCreds = crypto.decrypt(cred)
