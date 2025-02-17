@@ -499,7 +499,7 @@
                                         <mat-select (selectionChange)="setRecordingTrigger($event, stream.value)"
                                                     [disableControl]="!stream.value.motion.enabled"
                                                     [formControl]="getStreamControl(camIndex, streamIndex, 'trigger_recording_on')">
-                                            <mat-option [value]="''">
+                                            <mat-option [value]="'none'">
                                                 None
                                             </mat-option>
                                             <mat-option
