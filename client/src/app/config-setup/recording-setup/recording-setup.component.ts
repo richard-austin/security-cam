@@ -103,6 +103,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
 
   setSelectedStream($event: MatSelectChange) {
     this.localCamera.ftp = $event.value;
+    this.setUpFormGroup();
   }
 
   getControl(fieldName: string): UntypedFormControl {
@@ -151,8 +152,13 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
 
   updatePreambleFrames() {
     const control = this.getControl('preambleFrames');
+    const cam = this.localCamera;
     if (control) {
-      const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
+      let stream = cam.streams.get(cam.motion_detection_stream);
+      stream =
+          cam.recordingType === RecordingType.motionService ? stream :
+              RecordingType.ftpTriggered ? cam.streams.get(cam.ftp) : undefined;
+
       if(stream !== undefined) {
         stream.preambleFrames = control.value;
       }
@@ -241,39 +247,41 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
 
   setUpFormGroup() {
     if (this.localCamera !== undefined && this.localCamera !== null) {
-
-      const motionDetectStream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
+      const cam = this.localCamera;
+      const motionDetectStream = cam.streams.get(cam.motion_detection_stream);
       const zeroValue = 0;
-
+      const activeStream =
+          cam.recordingType === RecordingType.motionService ? motionDetectStream :
+          RecordingType.ftpTriggered ? cam.streams.get(cam.ftp) : undefined;
       this.formGroup = new UntypedFormGroup({
         video_width: new UntypedFormControl({
           value: motionDetectStream !== undefined ? motionDetectStream.video_width : zeroValue,
-          disabled: this.localCamera.motion_detection_stream === 'none'
+          disabled: cam.motion_detection_stream === 'none'
         }, [Validators.required, Validators.min(90), Validators.max(5000)]),
         video_height: new UntypedFormControl({
           value:  motionDetectStream !== undefined ? motionDetectStream.video_height : zeroValue,
-          disabled: this.localCamera.motion_detection_stream === 'none'
+          disabled: cam.motion_detection_stream === 'none'
         }, [Validators.required, Validators.min(90), Validators.max(3000)]),
         //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
         threshold: new UntypedFormControl({
           value: motionDetectStream !== undefined ? motionDetectStream.motion.threshold : 1500,
-          disabled: this.localCamera.motion_detection_stream === 'none'
+          disabled: cam.motion_detection_stream === 'none'
         }, [Validators.required, Validators.min(1), Validators.max(2147483647)]),
         trigger_recording_on: new UntypedFormControl({
           value: motionDetectStream !== undefined ? motionDetectStream.motion.trigger_recording_on : 'none',
-          disabled: this.localCamera.motion_detection_stream === 'none'
+          disabled: cam.motion_detection_stream === 'none'
         }, [Validators.nullValidator]),
 
-        recordingType: new UntypedFormControl(this.localCamera.recordingType, [Validators.required]),
-        ftpStreamSelect: new UntypedFormControl(this.localCamera.ftp, [Validators.required]),
-        streamForMotionDetection: new UntypedFormControl(this.localCamera.motion_detection_stream, [Validators.required]),
+        recordingType: new UntypedFormControl(cam.recordingType, [Validators.required]),
+        ftpStreamSelect: new UntypedFormControl(cam.ftp, [Validators.required]),
+        streamForMotionDetection: new UntypedFormControl(cam.motion_detection_stream, [Validators.required]),
         preambleFrames: new UntypedFormControl({
-          value: motionDetectStream !== undefined ? motionDetectStream.preambleFrames : 0,
+          value: activeStream !== undefined ? activeStream.preambleFrames : 0,
           disabled: this.getPreambleFramesDisabledState(),
         }, [Validators.min(0), Validators.max(400)]),
           mask_file: new UntypedFormControl({
             value: motionDetectStream !== undefined ? motionDetectStream.motion.mask_file : '',
-            disabled: this.localCamera.motion_detection_stream === 'none'
+            disabled: cam.motion_detection_stream === 'none'
           }, [isValidMaskFileName(this.cameras), Validators.maxLength(55)])
       }, {updateOn: "change"});
     }
