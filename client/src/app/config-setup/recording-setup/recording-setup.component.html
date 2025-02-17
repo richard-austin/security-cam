@@ -13,7 +13,7 @@
                     <mat-option [value]="RecordingType.pullPointEventTriggered">Pull point Event Triggered</mat-option>
                 </mat-select>
             </mat-form-field>
-            @switch (localCamera.recording.recordingType) {
+            @switch (localCamera.recordingType) {
                 @case (RecordingType.ftpTriggered) {
                     <div>
                         <mat-form-field [style.width.px]="185" appearance="outline"
@@ -49,64 +49,58 @@
                             </mat-select>
                         </mat-form-field>
                     </div>
-                    <div>
-                        <ng-container>
-                            <mat-form-field [style.width.px]="95" appearance="outline">
+                    <mat-form-field [style.width.px]="120" appearance="outline">
                                 <mat-label>Motion Threshold</mat-label>
-                                <input (input)="setThreshold($event)"
-                                       [disableControl]="localCamera.motion.motion_detection_stream === 'none'"
+                        <input (input)="updateThreshold()"
+                                       [disableControl]="localCamera.motion_detection_stream === 'none'"
                                        [formControl]="getControl('threshold')"
                                        autocomplete="off" matInput
                                        matTooltip="Threshold for declaring motion. The threshold is the number of changed pixels counted after noise filtering, masking, despeckle, and labelling"
                                        matTooltipClass="tooltip" maxlength="10" placeholder="Threshold"
                                        type="number">
-                                <mat-error
-                                        *ngIf="getControl('threshold').hasError('max')">
-                                    Should be a number between 1 and 2147483647
-                                </mat-error>
-                                <mat-error
-                                        *ngIf="getControl('threshold').hasError('min')">
-                                    Should be a number between 1 and 2147483647
-                                </mat-error>
-                                <mat-error
-                                        *ngIf="getControl('threshold').hasError('required')">
-                                    Threshold is required
-                                </mat-error>
-                            </mat-form-field>
-                        </ng-container>
-                    </div>
+                        <mat-error
+                                *ngIf="getControl('threshold').hasError('max')">
+                            Should be a number between 1 and 2147483647
+                        </mat-error>
+                        <mat-error
+                                *ngIf="getControl('threshold').hasError('min')">
+                            Should be a number between 1 and 2147483647
+                        </mat-error>
+                        <mat-error
+                                *ngIf="getControl('threshold').hasError('required')">
+                            Threshold is required
+                        </mat-error>
+                    </mat-form-field>
                 }
             }
         </ng-container>
-        @if (localCamera.recording.recordingType === RecordingType.motionService) {
-            <ng-container>
-                <mat-form-field [style.width.px]="110" appearance="outline"
-                                matTooltip="Select another stream on the camera to trigger a recording on when motion is detected on {{localCamera.motion.motion_detection_stream}}. Normally you would select the highest resolution stream on the camera."
-                                matTooltipClass="tooltip">
-                    <mat-label>Trigger Recording On</mat-label>
-                    <mat-select (selectionChange)="setRecordingTrigger($event)"
-                                [disableControl]="localCamera.recording.recordingType !== RecordingType.motionService"
-                                [formControl]="getControl('trigger_recording_on')">
-                        <mat-option [value]="'none'">
-                            None
-                        </mat-option>
-                        @for (camStream of localCamera.streams | keyvalue; track camStream) {
-                            @if (localCamera.motion.motion_detection_stream !== 'none' && camStream.key !== localCamera.motion.motion_detection_stream) {
-                                <mat-option [value]="camKey+'.'+camStream.key">
-                                    {{ camStream.key }}
-                                </mat-option>
-                            }
+        @if (localCamera.recordingType === RecordingType.motionService) {
+            <mat-form-field [style.width.px]="170" appearance="outline"
+                            matTooltip="Select another stream on the camera to trigger a recording on when motion is detected on {{localCamera.motion_detection_stream}}. Normally you would select the highest resolution stream on the camera."
+                            matTooltipClass="tooltip">
+                <mat-label>Trigger Recording On</mat-label>
+                <mat-select (selectionChange)="updateRecordingTrigger()"
+                            [disableControl]="localCamera.motion_detection_stream === 'none'"
+                            [formControl]="getControl('trigger_recording_on')">
+                    <mat-option [value]="'none'">
+                        None
+                    </mat-option>
+                    @for (camStream of localCamera.streams | keyvalue; track camStream) {
+                        @if (localCamera.motion_detection_stream !== 'none' && camStream.key !== localCamera.motion_detection_stream) {
+                            <mat-option [value]="camKey+'.'+camStream.key">
+                                {{ camStream.key }}
+                            </mat-option>
                         }
-                    </mat-select>
-                </mat-form-field>
-            </ng-container>
+                    }
+                </mat-select>
+            </mat-form-field>
         }
-        <ng-container>
-            <mat-form-field [style.width.px]="70" appearance="outline"
+        <div></div>
+        <mat-form-field [style.width.px]="149" appearance="outline"
                             matTooltip="The number of frames to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value divided by the camera frame rate (seconds). Note that audio packets are also counted as frames, so a higher value may be required if audio is enabled on the stream."
                             matTooltipClass="tooltip">
                 <mat-label>Preamble Frames</mat-label>
-                <mat-select (selectionChange)="updateField( 'preambleFrames', localCamera.recording)"
+            <mat-select (selectionChange)="updatePreambleFrames()"
                             [disableControl]="getPreambleFramesDisabledState()"
                             [formControl]="getControl('preambleFrames')">
                     <mat-option *ngFor="let preamble of cameraSvc.preambleFrameValues"
@@ -115,18 +109,16 @@
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-        </ng-container>
 
-        @if (localCamera.recording.recordingType === RecordingType.motionService) {
-            <ng-container>
+        @if (localCamera.recordingType === RecordingType.motionService) {
                 <mat-form-field [style.width.px]="220" appearance="outline">
-                    <mat-label>Mask File</mat-label>
+                    <!--                    <mat-label>Mask File</mat-label>-->
                     <input #fileInput
                            (change)="uploadMaskFile($event)"
                            accept=".pgm" hidden style="position: absolute" type="file"/>
                     <div class="file-upload">
                         <button (click)="fileInput.click()"
-                                [disabled]="localCamera.recording.recordingType !== RecordingType.motionService"
+                                [disabled]="localCamera.recordingType !== RecordingType.motionService"
                                 mat-icon-button
                                 matTooltip="Select a mask file to upload. This is a .pgm file where motion detection is disabled where the image is black, shades of grey attenuate motion detection sensitivity, and white areas allow full motion detection sensitivity."
                                 matTooltipClass="tooltip" type="button">
@@ -135,9 +127,8 @@
                         </button>
                         <input [formControl]="getControl('mask_file')"
                                matInput readonly type="text">
-                        <button (click)="localCamera.motion.mask_file='';
-                                        getControl('mask_file').setValue('')"
-                                [disabled]="localCamera.recording.recordingType !== RecordingType.motionService"
+                        <button (click)="getControl('mask_file').setValue('')"
+                                [disabled]="localCamera.recordingType !== RecordingType.motionService"
                                 mat-icon-button
                                 matTooltip="Click to clear this field (no mask file)"
                                 matTooltipClass="tooltip" type="button">
@@ -149,14 +140,13 @@
                         file, or clear.
                     </mat-error>
                 </mat-form-field>
-            </ng-container>
-            <ng-container>
-                <mat-form-field [style.width.px]="80" appearance="outline">
+            <div></div>
+            <mat-form-field [style.width.px]="95" appearance="outline">
                     <mat-label>Video Width</mat-label>
                     <input (blur)="updateVideoWidth()"
                            [formControl]="getControl('video_width')"
                            autocomplete="off" matInput
-                           matTooltip="The width in pixels of the video on {{localCamera.motion.motion_detection_stream}}. This is required if motion detection is enabled on {{localCamera.motion.motion_detection_stream}}."
+                           matTooltip="The width in pixels of the video on {{localCamera.motion_detection_stream}}. This is required if motion detection is enabled on {{localCamera.motion_detection_stream}}."
                            matTooltipClass="tooltip" maxlength="4" placeholder="Video Width"
                            type="number">
                     <mat-error
@@ -164,14 +154,12 @@
                         Valid: 90-5000
                     </mat-error>
                 </mat-form-field>
-            </ng-container>
-            <ng-container>
-                <mat-form-field [style.width.px]="80" appearance="outline">
+            <mat-form-field [style.width.px]="98" appearance="outline">
                     <mat-label>Video Height</mat-label>
                     <input (blur)="updateVideoHeight()"
                            [formControl]="getControl('video_height')"
                            autocomplete="off" matInput
-                           matTooltip="The height in pixels of the video on {{localCamera.motion.motion_detection_stream}}. This is required if motion detection is enabled on {{localCamera.motion.motion_detection_stream}}."
+                           matTooltip="The height in pixels of the video on {{localCamera.motion_detection_stream}}. This is required if motion detection is enabled on {{localCamera.motion_detection_stream}}."
                            matTooltipClass="tooltip" maxlength="4" placeholder="Video Height"
                            type="number">
                     <mat-error
@@ -179,7 +167,6 @@
                         Valid: 90-3000
                     </mat-error>
                 </mat-form-field>
-            </ng-container>
         }
 
     </mat-card-content>

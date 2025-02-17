@@ -42,7 +42,6 @@ class MotionEvents {
 enum RecordingType {none, motionService, ftpTriggered, pullPointEventTriggered}
 
 class Recording {
-    RecordingType recordingType = RecordingType.none
     boolean enabled=false
     String recording_src_url=''
     String uri=''
@@ -52,7 +51,6 @@ class Recording {
 
 class Motion {
     boolean enabled=false    // If true, motion detection is enabled for the stream
-    String motion_detection_stream='none'
     String mask_file=''  // Mask file which defines area used in motion sensing
     String trigger_recording_on='none'  // The key of the camera stream on which recordings will be triggered following
     // Motion events on this camera stream (usually another stream on the same physical camera).
@@ -111,9 +109,10 @@ class Camera {
     boolean useRtspAuth = false
     int retriggerWindow = 30
     String cred = ""
+
+    RecordingType recordingType = RecordingType.none
+    String motion_detection_stream='none'
     List<String> pullPointEvents = new ArrayList<>()
-    Recording recording=new Recording()
-    Motion motion=new Motion()
 
     CameraAdminCredentials credentials() {
         Asymmetric crypto = new Asymmetric()

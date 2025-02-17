@@ -14,7 +14,6 @@ import {
 import {MatSelectChange} from "@angular/material/select";
 import {CameraService} from "../../cameras/camera.service";
 import {HttpErrorResponse} from "@angular/common/http";
-import {MatCheckboxChange} from "@angular/material/checkbox";
 
 export function isValidMaskFileName(cameras: Map<string, Camera>): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -65,12 +64,14 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
   }
 
   setRecordingType($event: MatSelectChange) {
-    this.localCamera.recording.recordingType = $event.value;
-    this.localCamera.motion.motion_detection_stream = 'none';
-    this.localCamera.motion.trigger_recording_on = 'none';
+    this.localCamera.recordingType = $event.value;
+    this.localCamera.motion_detection_stream = 'none';
+    this.localCamera.streams.forEach((stream) => {
+      stream.motion.trigger_recording_on = 'none';
+    })
     this.localCamera.ftp = 'none';
 
-    switch (this.localCamera.recording.recordingType) {
+    switch (this.localCamera.recordingType) {
       case RecordingType.none:
         break;
       case RecordingType.motionService:
@@ -104,34 +105,24 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     this.localCamera.ftp = $event.value;
   }
 
-  setThreshold($event: Event) {
-    if (this.localCamera.recording.recordingType === RecordingType.motionService) {
-      let input: HTMLInputElement = $event.target as HTMLInputElement;
-      this.localCamera.motion.threshold = Number(input.value);
-    }
-  }
-
-  setRecordingTrigger($event: MatSelectChange) {
-    if (this.localCamera.recording.recordingType === RecordingType.motionService) {
-      this.localCamera.motion.trigger_recording_on = $event.value;
-    }
-  }
-
   getControl(fieldName: string): UntypedFormControl {
     return this.formGroup.get(fieldName) as UntypedFormControl;
   }
 
-  updateField(fieldName: string, field: any) {
-    const control = this.getControl(fieldName);
+  updateRecordingTrigger() {
+    const control = this.getControl('trigger_recording_on');
     if (control) {
-      field[fieldName] = control.value;
+      const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
+      if(stream !== undefined) {
+        stream.motion.trigger_recording_on = control.value;
+      }
     }
   }
 
   updateVideoWidth() {
     const control = this.getControl('video_width');
     if (control) {
-      const stream = this.localCamera.streams.get(this.localCamera.motion.motion_detection_stream);
+      const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
       if(stream !== undefined) {
         stream.video_width = control.value;
       }
@@ -141,37 +132,35 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
   updateVideoHeight() {
     const control = this.getControl('video_height');
     if (control) {
-      const stream = this.localCamera.streams.get(this.localCamera.motion.motion_detection_stream);
+      const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
       if(stream !== undefined) {
         stream.video_height = control.value;
       }
     }
   }
 
-  /**
-   * setMotionStatus: Enable/disable motion sensing on the stream according to the checkbox state.
-   * @param $event
-   * @param stream
-   * @param cam
-   */
-  setMotionStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
-    if ($event.checked) {
-      // Set all to disabled before setting this one as only one is allowed to be selected.
-      cam.streams.forEach((stream: Stream) => {
-        stream.motion.enabled = false;
-        stream.recording.enabled = false;
-        stream.motion.trigger_recording_on = '';
-      })
-    } else {
-      stream.recording.enabled = false;
+  updateThreshold() {
+    const control = this.getControl('threshold');
+    if (control) {
+      const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
+      if(stream !== undefined) {
+        stream.motion.threshold = control.value;
+      }
     }
+  }
 
-    stream.motion.enabled = $event.checked;
-    // Ensure that the trigger_recording_on setting is shown
+  updatePreambleFrames() {
+    const control = this.getControl('preambleFrames');
+    if (control) {
+      const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
+      if(stream !== undefined) {
+        stream.preambleFrames = control.value;
+      }
+    }
   }
 
   setStreamForMotionDetection($event: MatSelectChange) {
-    this.localCamera.motion.motion_detection_stream = $event.value;
+    this.localCamera.motion_detection_stream = $event.value;
     this.setUpFormGroup();
   }
 
@@ -196,32 +185,34 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
   }
 
   uploadMaskFile($event: Event) {
-    const cam = this.localCamera;
     let fileUploadInput: HTMLInputElement = $event.target as HTMLInputElement;
     if (fileUploadInput.files && fileUploadInput.files.length > 0) {
-      cam.motion.mask_file = fileUploadInput?.files[0].name;
-
       let control: AbstractControl | null = this.formGroup.get('mask_file');
-      if (control !== null) {
-        control.setValue(cam.motion.mask_file);
-        if (control.valid) {
-          // Upload file to server
-          this.cameraSvc.uploadMaskFile(fileUploadInput?.files[0])
-              .subscribe(() => {
-                    this.reporting.successMessage = cam.motion.mask_file + ' uploaded successfully'
-                  },
-                  (reason) => {
-                    this.reporting.errorMessage = reason
-                  });
-        } else
-          this.reporting.errorMessage = new HttpErrorResponse({
-            error: "The file " + cam.motion.mask_file + (control.errors?.mask_file ? " is not a valid mask file"
-                : control.errors?.duplicate ? " is used with more than one stream"
-                    : " has an unspecified error"),
-            status: 0,
-            statusText: "",
-            url: undefined
-          });
+      if (control) {
+        const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
+        if(stream !== undefined) {
+          stream.motion.mask_file = fileUploadInput?.files[0].name;
+          control.setValue(stream.motion.mask_file);
+
+          if (control.valid) {
+            // Upload file to server
+            this.cameraSvc.uploadMaskFile(fileUploadInput?.files[0])
+                .subscribe(() => {
+                      this.reporting.successMessage = stream.motion.mask_file + ' uploaded successfully'
+                    },
+                    (reason) => {
+                      this.reporting.errorMessage = reason
+                    });
+          } else
+            this.reporting.errorMessage = new HttpErrorResponse({
+              error: "The file " + stream.motion.mask_file + (control.errors?.mask_file ? " is not a valid mask file"
+                  : control.errors?.duplicate ? " is used with more than one stream"
+                      : " has an unspecified error"),
+              status: 0,
+              statusText: "",
+              url: undefined
+            });
+        }
       }
 
       // Clear the input so that selecting the same file again still triggers an onchange event
@@ -231,47 +222,58 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
 
   getPreambleFramesDisabledState(): boolean {
     const cam = this.localCamera;
-
-    return cam.recording.recordingType === RecordingType.motionService && cam.motion.trigger_recording_on === 'none'
-    || cam.recording.recordingType === RecordingType.ftpTriggered && cam.ftp === 'none'
-    || cam.recording.recordingType === RecordingType.none;
+    const motionDetectStream = cam.streams.get(cam.motion_detection_stream);
+    let disabled: boolean = true;
+    switch(cam.recordingType) {
+      case RecordingType.none:
+        break;
+      case RecordingType.motionService:
+        if(motionDetectStream !== undefined && motionDetectStream.motion.trigger_recording_on !== 'none')
+          disabled = false;
+        break;
+      case RecordingType.ftpTriggered:
+        if(cam.ftp !== 'none')
+          disabled = false;
+        break;
+    }
+    return disabled;
   }
 
   setUpFormGroup() {
     if (this.localCamera !== undefined && this.localCamera !== null) {
 
-      const motionDetectStream = this.localCamera.streams.get(this.localCamera.motion.motion_detection_stream);
+      const motionDetectStream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
       const zeroValue = 0;
 
       this.formGroup = new UntypedFormGroup({
         video_width: new UntypedFormControl({
           value: motionDetectStream !== undefined ? motionDetectStream.video_width : zeroValue,
-          disabled: this.localCamera.motion.motion_detection_stream === 'none'
+          disabled: this.localCamera.motion_detection_stream === 'none'
         }, [Validators.required, Validators.min(90), Validators.max(5000)]),
         video_height: new UntypedFormControl({
           value:  motionDetectStream !== undefined ? motionDetectStream.video_height : zeroValue,
-          disabled: this.localCamera.motion.motion_detection_stream === 'none'
+          disabled: this.localCamera.motion_detection_stream === 'none'
         }, [Validators.required, Validators.min(90), Validators.max(3000)]),
         //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
         threshold: new UntypedFormControl({
-          value: this.localCamera.motion?.threshold != undefined ? this.localCamera.motion.threshold : 1500,
-          disabled: this.localCamera.motion.motion_detection_stream === 'none'
+          value: motionDetectStream !== undefined ? motionDetectStream.motion.threshold : 1500,
+          disabled: this.localCamera.motion_detection_stream === 'none'
         }, [Validators.required, Validators.min(1), Validators.max(2147483647)]),
         trigger_recording_on: new UntypedFormControl({
-          value: this.localCamera.motion.trigger_recording_on,
-          disabled: this.localCamera.motion.motion_detection_stream === 'none'
+          value: motionDetectStream !== undefined ? motionDetectStream.motion.trigger_recording_on : 'none',
+          disabled: this.localCamera.motion_detection_stream === 'none'
         }, [Validators.nullValidator]),
 
-        recordingType: new UntypedFormControl(this.localCamera.recording.recordingType, [Validators.required]),
+        recordingType: new UntypedFormControl(this.localCamera.recordingType, [Validators.required]),
         ftpStreamSelect: new UntypedFormControl(this.localCamera.ftp, [Validators.required]),
-        streamForMotionDetection: new UntypedFormControl(this.localCamera.motion.motion_detection_stream, [Validators.required]),
+        streamForMotionDetection: new UntypedFormControl(this.localCamera.motion_detection_stream, [Validators.required]),
         preambleFrames: new UntypedFormControl({
-          value: this.localCamera.recording.preambleFrames,
-          disabled: this.localCamera.motion.trigger_recording_on === 'none',
+          value: motionDetectStream !== undefined ? motionDetectStream.preambleFrames : 0,
+          disabled: this.getPreambleFramesDisabledState(),
         }, [Validators.min(0), Validators.max(400)]),
           mask_file: new UntypedFormControl({
-            value: this.localCamera.motion.mask_file,
-            disabled: this.localCamera.motion.motion_detection_stream === 'none'
+            value: motionDetectStream !== undefined ? motionDetectStream.motion.mask_file : '',
+            disabled: this.localCamera.motion_detection_stream === 'none'
           }, [isValidMaskFileName(this.cameras), Validators.maxLength(55)])
       }, {updateOn: "change"});
     }

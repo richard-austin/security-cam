@@ -1,5 +1,5 @@
 .recording-setup {
-  width: 1000px;
+  width: 450px;
 }
 .recording-setup-confirm-group {
   > span {
@@ -49,4 +49,8 @@
       color: red;
     }
   }
+}
+
+mat-form-field {
+  margin-right: 5px;
 }

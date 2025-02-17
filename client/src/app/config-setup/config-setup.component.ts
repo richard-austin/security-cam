@@ -450,14 +450,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
             stream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = '/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
-            stream.motion.trigger_recording_on = '';
+            stream.motion.trigger_recording_on = 'none';
           } else if (stream.motion.enabled) {
             // stream.recording = new Recording();
             stream.recording.enabled = true
             stream.recording.recording_src_url = 'http://localhost:8085/h/stream?suuid=stream' + streamNum;
             stream.recording.uri = '/recording/rec' + streamNum + '/';
             stream.recording.location = 'rec' + streamNum;
-            if (stream.motion.trigger_recording_on !== '') {
+            if (stream.motion.trigger_recording_on !== 'none') {
               let recStreamKey: string[] = stream.motion.trigger_recording_on.split('.');
               if (recStreamKey.length === 2)  // Should have a camera and stream number
               {
@@ -488,7 +488,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
 // reference in trigger_recording_on.
     retVal.forEach((camera: Camera, camKey: string) => {
       camera.streams.forEach((stream: Stream) => {
-        if (stream.motion.trigger_recording_on !== '') {
+        if (stream.motion.trigger_recording_on !== 'none') {
           let fields: string[] = stream.motion.trigger_recording_on.split('.');
           fields[0] = camKey;
           stream.motion.trigger_recording_on = fields[0] + '.' + fields[1];

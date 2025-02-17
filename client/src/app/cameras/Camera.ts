@@ -24,14 +24,10 @@ export class CameraParams
 }
 export class Motion {
     enabled: boolean = false;
-    motion_detection_stream: string = 'none';
     mask_file: string = '';  // Mask file which defines area used in motion sensing
     trigger_recording_on: string = '';  // The name of the camera stream on which recordings will be triggered following
                                      // Motion events on this camera stream (usually another stream on the same physical
                                      // camera).
-    video_width: number = 0;
-    video_height: number = 0;
-
     threshold: number = 1500;  //Threshold for declaring motion.
                              // The threshold is the number of changed pixels counted after noise filtering, masking, despeckle, and labelling.
                              // The 'threshold' option is the most important detection setting.
@@ -54,12 +50,10 @@ export enum RecordingType {none='none', motionService="motionService", ftpTrigge
 
 export class Recording
 {
-  recordingType: RecordingType = RecordingType.none;
   enabled: boolean = false
   recording_src_url: string = "";
   uri: string = "";
   location: string = "";
-  preambleFrames: number = 100;
 }
 
 export class Stream {
@@ -119,10 +113,11 @@ export class Camera
     useRtspAuth: boolean = false;
     retriggerWindow: number = 30;
     cred: string = "";
-
-    motion: Motion = new Motion();
-    recording: Recording = new Recording();
-    preambleFrames: number = 100;
+    recordingType: RecordingType = RecordingType.none;
+    motion_detection_stream: string = 'none';
+    // motion: Motion = new Motion();
+    // recording: Recording = new Recording();
+    // preambleFrames: number = 100;
 
     pullPointEvents: string[] = [];
 }
