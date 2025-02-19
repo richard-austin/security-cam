@@ -165,6 +165,12 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     }
   }
 
+  setRetriggerWindow() {
+    const control = this.getControl('retriggerWindow');
+    if(control)
+      this.localCamera.retriggerWindow = control.value;
+  }
+
   setStreamForMotionDetection($event: MatSelectChange) {
     this.localCamera.motion_detection_stream = $event.value;
     this.setUpFormGroup();
@@ -271,7 +277,10 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
           value: motionDetectStream !== undefined ? motionDetectStream.motion.trigger_recording_on : 'none',
           disabled: cam.motion_detection_stream === 'none'
         }, [Validators.nullValidator]),
-
+        retriggerWindow: new UntypedFormControl({
+              value: cam.retriggerWindow,
+              disabled: cam.ftp=='none',
+            }, [Validators.pattern(/^10$|20|30|40|50|60|70|80|90|100/)]),
         recordingType: new UntypedFormControl(cam.recordingType, [Validators.required]),
         ftpStreamSelect: new UntypedFormControl(cam.ftp, [Validators.required]),
         streamForMotionDetection: new UntypedFormControl(cam.motion_detection_stream, [Validators.required]),
