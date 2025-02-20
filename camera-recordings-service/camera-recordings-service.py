@@ -53,7 +53,7 @@ def execute_os_command(command: str) -> [int, str]:
     return {exitcode, message}
 
 
-def get_ffmpeg_cmd(camera: any, stream: str):  
+def get_ffmpeg_cmd(camera: any, stream: str):
     ffmpeg_cmd: str = ""
     if camera is not None:
         if stream != "":
@@ -128,12 +128,6 @@ class FTPAndVideoFileProcessor(FTPHandler):
             camera_name: str = path.replace(self.ftpPath, '', 1)
             camera_name = camera_name[1: camera_name.index('/', 1)]
             camera = cams[camera_name]
-            cam_type: CameraType = camera['cameraParamSpecs']['camType']
-            match cam_type:
-                case CameraType.sv3c.value | CameraType.zxtechMCW5B10X.value | CameraType.none.value:
-                    logger.info(f"Camera type {cam_type}")
-                case _:
-                    logger.warning(f"No camera type for file {path}")
 
             if path.endswith('.jpg') or path.endswith('jpeg'):  # Only dealing with jpg files
                 if self.processDict.__contains__(
@@ -189,8 +183,7 @@ class HttpHandler(BaseHTTPRequestHandler):
                     s_obj = cam['streams'][s]
                     tro = s_obj['motion']['trigger_recording_on']
                     if tro.find('stream') != -1:
-                        dot_idx = tro.index('.')
-                        return tro[dot_idx + 1:]  # Remove the camera name from the string, just leaving the stream name
+                        return tro
 
             def finish_recording(cn: str):
                 if self.recording_procs.__contains__(cn):

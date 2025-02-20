@@ -428,11 +428,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
                         if (stream.motion.trigger_recording_on !== '') {
                             let recStreamKey: string = stream.motion.trigger_recording_on;
                             // Get the key of the stream on which recordings are to be triggered
-                            let recStream: Stream = camera.streams.get(recStreamKey[1]) as Stream;
+                            let recStream: Stream = camera.streams.get(recStreamKey) as Stream;
                             // Set up the recording
                             if (recStream !== undefined) {
                                 recStream.recording.enabled = true;
-                                recStream.recording.recording_src_url = "http://localhost:8085/h/stream?suuid="+recStreamKey;
+                                recStream.recording.recording_src_url = "http://localhost:8085/h/stream?suuid=cam" + camNum + "-" + recStreamKey;
                                 recStream.recording.uri = 'http://localhost:8084/recording/rec' + recStream.rec_num + '/';
                                 recStream.recording.location = 'rec' + recStream.rec_num;
                             }
@@ -458,7 +458,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
                         if (stream.motion.trigger_recording_on !== 'none') {
                             let recStreamKey: string = stream.motion.trigger_recording_on;
                             // Get the key of the stream on which recordings are to be triggered
-                            let recStream: Stream = camera.streams.get(recStreamKey[1]) as Stream;
+                            let recStream: Stream = camera.streams.get(recStreamKey) as Stream;
                             // Set up the recording
                             if (recStream !== undefined) {
                                 recStream.recording.enabled = true;

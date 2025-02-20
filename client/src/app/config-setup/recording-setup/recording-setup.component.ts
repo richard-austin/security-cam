@@ -97,10 +97,6 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     this.setUpFormGroup();
   }
 
-  ftpSet(cam: Camera): boolean {
-    return cam.ftp !== 'none' && typeof cam.ftp !== 'boolean';
-  }
-
   setSelectedStream($event: MatSelectChange) {
     this.localCamera.ftp = $event.value;
     this.setUpFormGroup();
