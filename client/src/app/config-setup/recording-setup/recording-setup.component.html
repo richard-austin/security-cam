@@ -108,7 +108,7 @@
                             </mat-option>
                             @for (camStream of localCamera.streams | keyvalue; track camStream) {
                                 @if (localCamera.motion_detection_stream !== 'none' && camStream.key !== localCamera.motion_detection_stream) {
-                                    <mat-option [value]="camKey+'.'+camStream.key">
+                                    <mat-option [value]="camStream.key">
                                         {{ camStream.key }}
                                     </mat-option>
                                 }
