@@ -397,7 +397,6 @@ class OnvifService {
         if (lowestResStream != "") {
             Stream lrs = camera.streams.get(lowestResStream)
             lrs.defaultOnMultiDisplay = true
-            lrs.motion.enabled = true
         }
     }
 

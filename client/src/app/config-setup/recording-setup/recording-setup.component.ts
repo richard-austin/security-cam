@@ -173,6 +173,10 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
 
   setStreamForMotionDetection($event: MatSelectChange) {
     this.localCamera.motion_detection_stream = $event.value;
+    this.localCamera.streams.forEach((stream, key) => {
+      stream.motion.enabled = this.localCamera.motion_detection_stream === key;
+    });
+
     this.setUpFormGroup();
   }
 
