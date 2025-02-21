@@ -109,10 +109,9 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
   updateRecordingTrigger() {
     const control = this.getControl('trigger_recording_on');
     if (control) {
-      const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
-      if(stream !== undefined) {
-        stream.motion.trigger_recording_on = control.value;
-      }
+      this.localCamera.streams.forEach((stream, key) => {
+        stream.motion.trigger_recording_on = this.localCamera.motion_detection_stream === key ? control.value : '';
+      });
     }
   }
 

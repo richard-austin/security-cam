@@ -11,16 +11,10 @@ import {ActivatedRoute} from '@angular/router';
 import {MatSelect} from '@angular/material/select';
 import {UtilsService} from '../shared/utils.service';
 import {
-  MatDatepicker,
-  MatDatepickerInput,
-  MatDatepickerInputEvent,
-  MatDatepickerToggle
+  MatDatepickerInputEvent
 } from '@angular/material/datepicker';
 import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
-import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
-import {FormsModule} from "@angular/forms";
-
 
 declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
 
