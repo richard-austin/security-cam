@@ -186,7 +186,29 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
 
   confirmChanges() {
     if (this.camera !== undefined && this.camera !== null) {
-      Object.assign(this.camera, this.localCamera);
+      const cam = this.localCamera;
+
+      // The values are copied over field by field rather than by using Object.assign on the whole camera objects
+      //  as doing it that way would overwrite previously edited fields which are not part of the recording set up
+      this.camera.recordingType = cam.recordingType;
+      this.camera.motion_detection_stream = cam.motion_detection_stream;
+      this.camera.ftp = cam.ftp;
+      this.camera.retriggerWindow = cam.retriggerWindow;
+
+      cam.streams.forEach((stream, key) => {
+        if(this.camera) {
+          const targetStream = this.camera.streams.get(key);
+          if(targetStream) {
+            Object.assign(targetStream.recording, stream.recording);
+            Object.assign(targetStream.motion, stream.motion);
+            targetStream.video_height = stream.video_height;
+            targetStream.video_width = stream.video_width;
+            targetStream.preambleFrames = stream.preambleFrames;
+            targetStream.rec_num = stream.rec_num;  // Don't really need to do this one as it's set up in FixUpCameras.
+          }
+        }
+      });
+
       this.hideDialogue.emit();
     }
   }

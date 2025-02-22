@@ -115,9 +115,5 @@ export class Camera
     cred: string = "";
     recordingType: RecordingType = RecordingType.none;
     motion_detection_stream: string = 'none';
-    // motion: Motion = new Motion();
-    // recording: Recording = new Recording();
-    // preambleFrames: number = 100;
-
     pullPointEvents: string[] = [];
 }

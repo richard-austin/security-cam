@@ -46,7 +46,6 @@ class Recording {
     String recording_src_url=''
     String uri=''
     String location=''
-    Integer preambleFrames = 100
 }
 
 class Motion {
@@ -54,9 +53,6 @@ class Motion {
     String mask_file=''  // Mask file which defines area used in motion sensing
     String trigger_recording_on='none'  // The key of the camera stream on which recordings will be triggered following
     // Motion events on this camera stream (usually another stream on the same physical camera).
-
-    Integer video_width=0
-    Integer video_height=0
 
     Integer threshold = 1500// Threshold for declaring motion.
 }
