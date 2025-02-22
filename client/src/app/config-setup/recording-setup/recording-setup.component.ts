@@ -110,7 +110,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     const control = this.getControl('trigger_recording_on');
     if (control) {
       this.localCamera.streams.forEach((stream, key) => {
-        stream.motion.trigger_recording_on = this.localCamera.motion_detection_stream === key ? control.value : '';
+        stream.motion.trigger_recording_on = this.localCamera.motion_detection_stream === key ? control.value : 'none';
       });
     }
   }
@@ -150,12 +150,15 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     const cam = this.localCamera;
     if (control) {
       let stream = cam.streams.get(cam.motion_detection_stream);
-      stream =
-          cam.recordingType === RecordingType.motionService ? stream :
-              RecordingType.ftpTriggered ? cam.streams.get(cam.ftp) : undefined;
-
       if(stream !== undefined) {
-        stream.preambleFrames = control.value;
+        stream =
+            cam.recordingType ===
+                RecordingType.motionService ? cam.streams.get(stream.motion.trigger_recording_on) :
+                RecordingType.ftpTriggered ? cam.streams.get(cam.ftp) : undefined;
+
+        if (stream !== undefined) {
+          stream.preambleFrames = control.value;
+        }
       }
     }
   }

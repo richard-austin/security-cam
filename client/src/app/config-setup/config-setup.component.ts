@@ -372,7 +372,7 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
                         enableFirstAsMultiDisplayDefault = false;
                     }
                     if (stream.motion.enabled)
-                        stream.motion.trigger_recording_on = '';  // Set all recording triggers to 'None' as the stream keys may be renumbered
+                        stream.motion.trigger_recording_on = 'none';  // Set all recording triggers to 'None' as the stream keys may be renumbered
                 })
             }
             this.FixUpCamerasData();
@@ -418,14 +418,14 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
                         stream.recording.recording_src_url = "http://localhost:8085/h/stream?suuid=cam" + camNum + "-stream" + streamNum;
                         stream.recording.uri = 'http://localhost:8084/recording/rec' + stream.rec_num + '/';
                         stream.recording.location = 'rec' + stream.rec_num;
-                        stream.motion.trigger_recording_on = '';
+                        stream.motion.trigger_recording_on = 'none';
                     } else if (stream.motion.enabled) {
                         // stream.recording = new Recording();
                         stream.recording.enabled = true;
                         stream.recording.recording_src_url = "http://localhost:8085/h/stream?suuid=cam" + camNum + "-stream" + streamNum;
                         stream.recording.uri = 'http://localhost:8084/recording/rec' + stream.rec_num + '/';
                         stream.recording.location = 'rec' + stream.rec_num;
-                        if (stream.motion.trigger_recording_on !== '') {
+                        if (stream.motion.trigger_recording_on !== 'none') {
                             let recStreamKey: string = stream.motion.trigger_recording_on;
                             // Get the key of the stream on which recordings are to be triggered
                             let recStream: Stream = camera.streams.get(recStreamKey) as Stream;

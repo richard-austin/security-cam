@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"sync"
 )
 
@@ -35,7 +36,7 @@ func (s *Streams) addStream(suuid string) {
 	defer s.mutex.Unlock()
 	streamC, err := getStreamC(suuid)
 	if err != nil {
-		log.Errorf("could not get a camera stream for suuid %s\n", suuid)
+		log.Errorf("Failed to get streamC: %v", err)
 	}
 	s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache), bucketBrigade: NewBucketBrigade(streamC.PreambleFrames)}
 }
@@ -149,14 +150,31 @@ func (s *Streams) putMoov(suuid string, pckt Packet) (retVal error) {
  */
 func getStreamC(suuid string) (streamC StreamC, err error) {
 	err = nil
-	for _, camera := range cameras.Cameras {
-		stream, ok := camera.Streams[suuid]
-		if ok {
-			streamC = stream
-			return
+	log.Tracef("suuid: %s", suuid)
+	if len(suuid) > 3 {
+		dashPos := strings.Index(suuid, "-")
+		if dashPos != -1 {
+			camLen := len("cam")
+			camNum := suuid[camLen : camLen+dashPos-camLen]
+			camName := "camera" + camNum
+			log.Tracef("camera: %s", camName)
+			cam, ok := cameras.Cameras[camName]
+			if ok {
+				streamName := suuid[dashPos+1:]
+				log.Tracef("Stream name: %s", streamName)
+
+				stream, ok := cam.Streams[streamName]
+				if ok {
+					return stream, err
+				} else {
+					err = fmt.Errorf("stream %s not found", streamName)
+				}
+			} else {
+				err = fmt.Errorf("camera %s not found", camName)
+			}
 		}
+		err = fmt.Errorf("cannot find dash in stream nameq: %s", suuid)
 	}
-	err = fmt.Errorf("no stream found for suuid %s", suuid)
 	return
 }
 
