@@ -106,7 +106,6 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
         OnvifFailuresComponent,
         AddAsOnvifDeviceComponent,
         KeyValuePipe,
-        ExcludeOwnStreamPipe,
         RecordingSetupComponent,
     ],
     schemas: [],
@@ -121,11 +120,11 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     updating: boolean = false;
     discovering: boolean = false;
     cameras: Map<string, Camera> = new Map<string, Camera>();
-    cameraColumns = ['sorting', 'camera_id', 'creds', 'delete', 'expand', 'name', 'cameraParamSpecs', 'recording', 'ftp', 'retrigger-window', 'address', 'snapshotUri', 'useRtspAuth', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
+    cameraColumns = ['sorting', 'camera_id', 'creds', 'delete', 'expand', 'name', 'cameraParamSpecs', 'recording', 'address', 'snapshotUri', 'useRtspAuth', 'rtspTransport', 'backchannelAudioSupported', 'ptzControls', 'onvifHost'];
     cameraFooterColumns = ['buttons'];
 
     expandedElement!: Camera | null;
-    streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay', 'motion', 'threshold', 'trigger_recording_on', 'preambleFrames', 'mask_file', 'video_width', 'video_height'];
+    streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay'];
     streamFooterColumns = ['buttons']
     camControls!: UntypedFormArray;
     streamControls: UntypedFormArray[] = [];
@@ -161,10 +160,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         if (ovhc.value == '')
             ptzc.setValue(false);  // Ensure PTZ is set to "off" if onvifHost has the (valid) value empty
         return ovhc.value == '' || !ovhc.valid;
-    }
-
-    getPreambleFramesDisabledState(cam: Camera, stream: Stream): boolean {
-        return !stream?.motion?.enabled && !cam?.ftp;
     }
 
     updateCam(index: number, field: string, value: any) {
@@ -230,13 +225,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         //   return camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X;
     }
 
-    getFTPDisabledState(camera: Camera): boolean {
-        if (camera?.cameraParamSpecs?.camType === undefined)
-            return true;
-        else
-            return this.motionSet(camera);
-    }
-
     checkForMaskFileReUse(): boolean {
         const maskFiles: Set<string> = new Set<string>();
         let retVal = false;
@@ -271,31 +259,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
                     audio: new UntypedFormControl(stream.audio, [Validators.required]),
                     audio_encoding: new UntypedFormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|G726|None|Not Listed)$/)]),
                     netcam_uri: new UntypedFormControl(stream.netcam_uri, [Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
-                    video_width: new UntypedFormControl({
-                        value: stream.video_width,
-                        disabled: !stream.motion?.enabled
-                    }, [Validators.required, Validators.min(90), Validators.max(5000)]),
-                    video_height: new UntypedFormControl({
-                        value: stream.video_height,
-                        disabled: !stream.motion?.enabled
-                    }, [Validators.required, Validators.min(90), Validators.max(3000)]),
-                    //  enabled: new FormControl(stream.motion.enabled, [Validators.nullValidator]),
-                    threshold: new UntypedFormControl({
-                        value: stream.motion?.threshold != undefined ? stream.motion.threshold : 1500,
-                        disabled: !stream.motion.enabled
-                    }, [Validators.required, Validators.min(1), Validators.max(2147483647)]),
-                    trigger_recording_on: new UntypedFormControl({
-                        value: stream.motion.trigger_recording_on,
-                        disabled: !stream.motion.enabled
-                    }, [Validators.nullValidator]),
-                    preambleFrames: new UntypedFormControl({
-                        value: stream.preambleFrames,
-                        disabled: this.getPreambleFramesDisabledState(camera, stream),
-                    }, [Validators.min(0), Validators.max(400)]),
-                    mask_file: new UntypedFormControl({
-                        value: stream.motion.mask_file,
-                        disabled: !stream.motion.enabled
-                    }, [isValidMaskFileName(this.cameras), Validators.maxLength(55)])
                 }, {updateOn: "change"});
             });
 
@@ -310,16 +273,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
                     value: this.getCameraParamSpecsReferenceCopy(camera),
                     disabled: false
                 }, [Validators.maxLength(55)]),
-                ftp: new UntypedFormControl({
-                        value: camera?.ftp != undefined ? camera.ftp : 'none',
-                        disabled: this.getFTPDisabledState(camera),
-                    }, [Validators.pattern(/^none|stream[1-9]|[10-19]|[20-29]+$/)]
-                ),
-                retriggerWindow: new UntypedFormControl({
-                        value: camera?.retriggerWindow != undefined ? camera.retriggerWindow : 30,
-                        disabled: camera.ftp == 'none',
-                    }, [Validators.pattern(/^10$|20|30|40|50|60|70|80|90|100/)]
-                ),
                 snapshotUri: new UntypedFormControl({
                     value: camera.snapshotUri,
                     disabled: false
@@ -548,29 +501,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.FixUpCamerasData();
     }
 
-    /**
-     * setMotionStatus: Enable/disable motion sensing on the stream according to the checkbox state.
-     * @param $event
-     * @param stream
-     * @param cam
-     */
-    setMotionStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
-        if ($event.checked) {
-            // Set all to disabled before setting this one as only one is allowed to be selected.
-            cam.streams.forEach((stream: Stream) => {
-                stream.motion.enabled = false;
-                stream.recording.enabled = false;
-                stream.motion.trigger_recording_on = '';
-            })
-        } else {
-            stream.recording.enabled = false;
-        }
-
-        stream.motion.enabled = $event.checked;
-        // Ensure that the trigger_recording_on setting is shown
-        this.FixUpCamerasData();
-    }
-
     setDefaultOnMultiDisplayStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
         if ($event.checked) {   // Should only ever be checked as we disable the checkbox when it is checked to
             // always retain one stream set as the default
@@ -587,20 +517,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     setAudioInEnabledStatus($event: MatCheckboxChange, stream: Stream) {
         stream.audio = $event.checked;
         this.FixUpCamerasData();
-    }
-
-    setThreshold($event: Event, stream: Stream) {
-        if (stream.motion.enabled) {
-            let input: HTMLInputElement = $event.target as HTMLInputElement;
-            stream.motion.threshold = Number(input.value);
-        }
-    }
-
-    setRecordingTrigger($event: MatSelectChange, stream: Stream) {
-        if (stream.motion.enabled) {
-            stream.motion.trigger_recording_on = $event.value;
-            // this.FixUpCamerasData();
-        }
     }
 
     async addCamera() {
@@ -722,41 +638,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         return totalStreams;
     }
 
-    uploadMaskFile($event: Event, camKey: string, camIndex: number, streamIndex: number) {
-        let fileUploadInput: HTMLInputElement = $event.target as HTMLInputElement;
-        if (fileUploadInput.files && fileUploadInput.files.length > 0) {
-            let stream: Stream = Array.from(  // Streams
-                Array.from( // Cameras
-                    this.cameras.values())[camIndex].streams.values())[streamIndex];
-
-            stream.motion.mask_file = fileUploadInput?.files[0].name;
-
-            let control: UntypedFormControl = this.getStreamControl(camIndex, streamIndex, 'mask_file');
-            control.setValue(stream.motion.mask_file);
-            if (control.valid) {
-                // Upload file to server
-                this.cameraSvc.uploadMaskFile(fileUploadInput?.files[0])
-                    .subscribe(() => {
-                            this.reporting.successMessage = stream.motion.mask_file + ' uploaded successfully'
-                        },
-                        (reason) => {
-                            this.reporting.errorMessage = reason
-                        });
-            } else
-                this.reporting.errorMessage = new HttpErrorResponse({
-                    error: "The file " + stream.motion.mask_file + (control.errors?.mask_file ? " is not a valid mask file"
-                        : control.errors?.duplicate ? " is used with more than one stream"
-                            : " has an unspecified error"),
-                    status: 0,
-                    statusText: "",
-                    url: undefined
-                });
-
-            // Clear the input so that selecting the same file again still triggers an onchange event
-            fileUploadInput.value = '';
-        }
-    }
-
     getSnapshot(cam: KeyValue<string, Camera>) {
         this.snapshotLoading = true;
         if (this.snapShotKey === cam.key)
@@ -784,10 +665,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.snapShotKey = '';
                 })
         }
-    }
-
-    ftpSet(cam: Camera): boolean {
-        return cam.ftp !== 'none' && typeof cam.ftp !== 'boolean';
     }
 
     motionSet(cam: Camera): boolean {

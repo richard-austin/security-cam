@@ -261,6 +261,8 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                                 url: undefined
                             });
                     }
+                    else
+                        stream.motion.mask_file = '';
                 }
             }
 
