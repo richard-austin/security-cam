@@ -131,7 +131,7 @@
                             </button>
                             <input [formControl]="getControl('mask_file')"
                                    matInput readonly type="text">
-                            <button (click)="getControl('mask_file').setValue('')"
+                            <button (click)="clearMaskFile();getControl('mask_file').setValue('');"
                                     [disabled]="localCamera.recordingType !== RecordingType.motionService"
                                     mat-icon-button
                                     matTooltip="Click to clear this field (no mask file)"

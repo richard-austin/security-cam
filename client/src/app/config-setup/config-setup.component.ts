@@ -5,8 +5,8 @@ import {
     ElementRef,
     isDevMode,
     OnDestroy,
-    OnInit,
-    ViewChild,
+    OnInit, QueryList,
+    ViewChild, ViewChildren,
 } from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
@@ -115,6 +115,8 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('errorReporting') reporting!: ReportingComponent;
     @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
     @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement> | null
+    @ViewChildren(RecordingSetupComponent) recordingSetupComponents!: QueryList<RecordingSetupComponent>
+
     downloading: boolean = true;
     updating: boolean = false;
     discovering: boolean = false;
@@ -235,6 +237,22 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
             return this.motionSet(camera);
     }
 
+    checkForMaskFileReUse(): boolean {
+        const maskFiles: Set<string> = new Set<string>();
+        let retVal = false;
+        this.recordingSetupComponents.forEach((r) => {
+            const maskFileName = r.getMaskFileName();
+            if(maskFileName ) {
+                if(maskFiles.has(maskFileName)) {
+                    this.reporting.errorMessage = new HttpErrorResponse({error: "Mask file " + maskFileName + " is already in use"});
+                    retVal = true;
+                }
+                else
+                    maskFiles.add(maskFileName)
+            }
+        });
+        return retVal;
+    }
     /**
      * setUpTableFormControls: Associate a FormControl with each editable field on the table
      */

@@ -181,8 +181,11 @@
                             <div>
                             </div>
                             @defer {
-                                <app-recording-setup (hideDialogue)="toggleRecordingSetupDialogue(cam.key)" [camera]="cam.value"
-                                                     [cameras]="cameras" [camKey]="cam.key" [reporting]="reporting">
+                                <app-recording-setup (hideDialogue)="toggleRecordingSetupDialogue(cam.key)"
+                                                     [parent]="this"
+                                                     [camera]="cam.value"
+                                                     [cameras]="cameras" [camKey]="cam.key"
+                                                     [reporting]="reporting">
                                 </app-recording-setup>
                             }
                         </div>
