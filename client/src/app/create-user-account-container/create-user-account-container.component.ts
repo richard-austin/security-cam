@@ -5,7 +5,6 @@ import {fromEvent, merge, Subscription} from 'rxjs';
     selector: 'app-create-user-account-container',
     templateUrl: './create-user-account-container.component.html',
     styleUrls: ['./create-user-account-container.component.scss'],
-    standalone: false
 })
 export class CreateUserAccountContainerComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('cuaframe') cuaframeEl!: ElementRef<HTMLIFrameElement>;

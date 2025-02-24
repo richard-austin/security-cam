@@ -2,12 +2,15 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {UtilsService, Version} from "../shared/utils.service";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
+import {SharedModule} from "../shared/shared.module";
+import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
+
 
 @Component({
     selector: 'app-about',
     templateUrl: './about.component.html',
     styleUrls: ['./about.component.scss'],
-    standalone: false
+    imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class AboutComponent implements OnInit {
   @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;

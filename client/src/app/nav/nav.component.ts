@@ -100,7 +100,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   about() {
-    window.location.href = '#/general/about';
+    window.location.href = '#/about';
   }
 
   private getTemperature(): void {
@@ -130,19 +130,19 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setIp() {
-    window.location.href = '#/general/setip';
+    window.location.href = '#/setip';
   }
 
   cloudProxy() {
-    window.location.href = '#/general/cloudproxy';
+    window.location.href = '#/cloudproxy';
   }
 
   drawdownCalc() {
-    window.location.href = '#/general/dc';
+    window.location.href = '#/dc';
   }
 
   admin() {
-    window.location.href = '#/general/cua';
+    window.location.href = '#/cua';
   }
 
   configSetup() {
@@ -150,15 +150,15 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setUpGuestAccount() {
-    window.location.href = '#/general/setupguestaccount';
+    window.location.href = '#/setupguestaccount';
   }
 
   getLocalWifiDetails() {
-    window.location.href = '#/wifi/getlocalwifidetails';
+    window.location.href = '#/getlocalwifidetails';
   }
 
   wifiSettings() {
-    window.location.href = '#/wifi/wifisettings';
+    window.location.href = '#/wifisettings';
   }
 
   getActiveIPAddresses() {

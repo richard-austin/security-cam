@@ -5,7 +5,6 @@ import {fromEvent, merge, Subscription} from "rxjs";
     selector: 'app-drawdown-calc-container',
     templateUrl: './drawdown-calc-container.component.html',
     styleUrls: ['./drawdown-calc-container.component.scss'],
-    standalone: false
 })
 export class DrawdownCalcContainerComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('dciframe') dciframeEl!: ElementRef<HTMLIFrameElement>;

@@ -12,8 +12,14 @@ const routes: Routes = [
   {path: 'configsetup', loadComponent: () => import('./config-setup/config-setup.component').then(m => m.ConfigSetupComponent)},
   {path: 'camadmin/:camera', loadComponent: () => import('./camera-admin-page-hosting/camera-admin-page-hosting.component').then(m => m.CameraAdminPageHostingComponent), canActivate: [OnlyClientUsersService]},
   {path: 'getactiveipaddresses', loadComponent: () => import('./get-active-ipaddresses/get-active-ipaddresses.component').then(m => m.GetActiveIPAddressesComponent), canActivate: [OnlyClientUsersService]},
-  {path: 'general', loadChildren: () => import('./general/general.module').then(m => m.GeneralModule)},
-  {path: 'wifi', loadChildren: () => import('./wifi-settings/wifi-settings.module').then(m => m.WifiSettingsModule), canActivate: [OnlyClientUsersService]},
+  {path: 'wifisettings', loadComponent: () => import('./wifi-settings/wifi-settings.component').then(m => m.WifiSettingsComponent)},
+  {path: 'getlocalwifidetails', loadComponent: () => import('./get-local-wifi-details/get-local-wifi-details.component').then(m => m.GetLocalWifiDetailsComponent)},
+  {path: 'about', loadComponent: () => import('./about/about.component').then(m =>  m.AboutComponent)},
+  {path: 'setupguestaccount', loadComponent: () => import('./set-up-guest-account/set-up-guest-account.component').then(m => m.SetUpGuestAccountComponent), canActivate: [OnlyClientUsersService]},
+  {path: 'setip', loadComponent: () => import('./set-ip/set-ip.component').then(m => m.SetIpComponent), canActivate: [OnlyClientUsersService]},
+  {path: 'cloudproxy', loadComponent: () => import('./cloud-proxy/cloud-proxy.component').then(m => m.CloudProxyComponent), canActivate: [OnlyClientUsersService]},
+  {path: 'cua', loadComponent: () => import('./create-user-account-container/create-user-account-container.component').then(m => m.CreateUserAccountContainerComponent), canActivate: [OnlyClientUsersService]},
+  {path: 'dc', loadComponent: () => import('./drawdown-calc-container/drawdown-calc-container.component').then(m => m.DrawdownCalcContainerComponent)},
 ];
 
 @NgModule({

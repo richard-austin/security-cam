@@ -5,12 +5,14 @@ import {UtilsService} from '../shared/utils.service';
 import {Client, IMessage, StompSubscription} from "@stomp/stompjs";
 import { HttpErrorResponse } from "@angular/common/http";
 import {MatCheckboxChange} from "@angular/material/checkbox";
+import {SharedModule} from "../shared/shared.module";
+import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 
 @Component({
     selector: 'app-cloud-proxy',
     templateUrl: './cloud-proxy.component.html',
     styleUrls: ['./cloud-proxy.component.scss'],
-    standalone: false
+    imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class CloudProxyComponent implements OnInit, OnDestroy {
   cps: boolean = true;
