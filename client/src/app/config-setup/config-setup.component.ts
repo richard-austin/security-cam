@@ -29,7 +29,6 @@ import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {KeyValue, KeyValuePipe} from '@angular/common';
 import {UtilsService} from '../shared/utils.service';
 import {OnvifCredentialsComponent} from "./camera-credentials/onvif-credentials.component";
-import {ExcludeOwnStreamPipe} from "./exclude-own-stream.pipe";
 import {OnvifFailuresComponent} from "./onvif-failures/onvif-failures.component";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {AddAsOnvifDeviceComponent} from "./add-as-onvif-device/add-as-onvif-device.component";
@@ -37,34 +36,6 @@ import {SharedModule} from "../shared/shared.module";
 import {RecordingSetupComponent} from "./recording-setup/recording-setup.component";
 
 declare let objectHash: (obj: Object) => string;
-
-export function isValidMaskFileName(cameras: Map<string, Camera>): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-
-        const value = control.value;
-
-        if (!value) {
-            return null;
-        }
-
-        let allFiles: Set<string> = new Set<string>();
-        let duplicateMaskFile: boolean = false;
-
-        const fileNameValid = RegExp('^[a-zA-Z0-9-_]+.pgm$').test(value);
-        // Check that no file name is being used by more than one camera
-        cameras.forEach((cam: Camera) => {
-            cam.streams.forEach((stream: Stream) => {
-                if (stream.motion.enabled && stream.motion.mask_file !== '') {
-                    if (allFiles.has(stream.motion.mask_file))
-                        duplicateMaskFile = true;
-                    else
-                        allFiles.add(stream.motion.mask_file);
-                }
-            })
-        })
-        return !fileNameValid || duplicateMaskFile ? {mask_file: !fileNameValid, duplicate: duplicateMaskFile} : null;
-    }
-}
 
 export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {

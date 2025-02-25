@@ -4,12 +4,12 @@ import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {Camera, RecordingType, Stream} from "../../cameras/Camera";
 import {
-  AbstractControl,
-  UntypedFormControl,
-  UntypedFormGroup,
-  ValidationErrors,
-  ValidatorFn,
-  Validators
+    AbstractControl,
+    UntypedFormControl,
+    UntypedFormGroup,
+    ValidationErrors,
+    ValidatorFn,
+    Validators
 } from "@angular/forms";
 import {MatSelectChange} from "@angular/material/select";
 import {CameraService} from "../../cameras/camera.service";
@@ -82,7 +82,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
             case RecordingType.motionService:
                 break;
             case RecordingType.ftpTriggered:
-                 break;
+                break;
             case RecordingType.pullPointEventTriggered:
         }
         this.setUpFormGroup();
@@ -185,7 +185,17 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     }
 
     anyInvalid(): boolean {
-        return !this.formGroup.valid;
+        const cam = this.localCamera;
+        let motionStreamSelected = false;
+        let hasFTPRecordingStream = cam.ftp !== 'none';
+
+        cam.streams.forEach((stream, key) => {
+            if (stream.motion.enabled)
+                motionStreamSelected = true;
+        });
+        return !this.formGroup.valid ||
+            cam.recordingType === RecordingType.motionService && !motionStreamSelected ||
+            cam.recordingType === RecordingType.ftpTriggered && !hasFTPRecordingStream;
     }
 
     confirmChanges() {
@@ -229,7 +239,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                 const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
                 if (stream !== undefined) {
                     stream.motion.mask_file = fileUploadInput?.files[0].name;
-                    if(!this.checkMaskFileReuse()) {
+                    if (!this.checkMaskFileReuse()) {
                         control.setValue(stream.motion.mask_file);
                         if (control.valid) {
                             // Upload file to server
@@ -249,8 +259,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                                 statusText: "",
                                 url: undefined
                             });
-                    }
-                    else
+                    } else
                         stream.motion.mask_file = '';
                 }
             }
@@ -262,8 +271,8 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
 
     clearMaskFile() {
         const stream = this.localCamera.streams.get(this.localCamera.motion_detection_stream);
-        if(stream)
-            stream.motion.mask_file=''
+        if (stream)
+            stream.motion.mask_file = ''
     }
 
     getPreambleFramesDisabledState(): boolean {
@@ -285,26 +294,27 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
         return disabled;
     }
 
-  /**
-   * getMaskFileName: This is called from the parent component when checking for multiple use of mask file names
-   */
-  getMaskFileName(): string | undefined {
-      let retVal;
-      const cam = this.localCamera;
+    /**
+     * getMaskFileName: This is called from the parent component when checking for multiple use of mask file names
+     */
+    getMaskFileName(): string | undefined {
+        let retVal;
+        const cam = this.localCamera;
 
-      if(cam.recordingType === RecordingType.motionService) {
-        const stream = cam.streams.get(cam.motion_detection_stream);
-        if(stream && stream.motion.mask_file && stream.motion.mask_file !== "")
-          retVal = stream.motion.mask_file
-      }
-      return retVal;
+        if (cam.recordingType === RecordingType.motionService) {
+            const stream = cam.streams.get(cam.motion_detection_stream);
+            if (stream && stream.motion.mask_file && stream.motion.mask_file !== "")
+                retVal = stream.motion.mask_file
+        }
+        return retVal;
     }
 
     checkMaskFileReuse() {
-      return this.parent.checkForMaskFileReUse();
+        return this.parent.checkForMaskFileReUse();
     }
 
     readonly streamsOrNoneRegex = /^(none|stream[1-9]{1,2}?)$/;
+
     setUpFormGroup() {
         if (this.localCamera !== undefined && this.localCamera !== null) {
             const cam = this.localCamera;
@@ -334,7 +344,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                     disabled: cam.ftp == 'none',
                 }, [Validators.pattern(/^(10|20|30|40|50|60|70|80|90|100)$/)]),
                 recordingType: new UntypedFormControl(cam.recordingType, [Validators.required]),
-                ftpStreamSelect: new UntypedFormControl(cam.ftp, [Validators.required,Validators.pattern(this.streamsOrNoneRegex)]),
+                ftpStreamSelect: new UntypedFormControl(cam.ftp, [Validators.required, Validators.pattern(this.streamsOrNoneRegex)]),
                 streamForMotionDetection: new UntypedFormControl(cam.motion_detection_stream, [Validators.required, Validators.pattern(this.streamsOrNoneRegex)]),
                 preambleFrames: new UntypedFormControl({
                     value: triggeredStream ? triggeredStream.preambleFrames : 0,

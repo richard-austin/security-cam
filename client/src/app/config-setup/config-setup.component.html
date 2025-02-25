@@ -422,7 +422,7 @@
                             <ng-container matColumnDef="buttons">
                                 <td *matFooterCellDef mat-footer-cell>
                                     <button (click)="addStream(cam.value)"
-                                            [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 10"
+                                            [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 50"
                                             mat-icon-button matTooltip="Add another stream for {{cam.key}}."
                                             matTooltipClass="tooltip" style>
                                         <mat-icon>add</mat-icon>
@@ -444,13 +444,13 @@
                 <td *matFooterCellDef [attr.colspan]="cameraColumns.length" mat-footer-cell>
                     <ng-container *ngIf="!gettingCameraDetails">
                         <button (click)="addCamera()"
-                                [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10"
+                                [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 50"
                                 mat-icon-button matTooltip="Add another camera, and enter the details manually."
                                 matTooltipClass="tooltip">
                             <mat-icon>add</mat-icon>
                         </button>
                         <button (click)="toggleAddCameraOnvifUriDialogue()"
-                                [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 10"
+                                [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 50"
                                 mat-icon-button matTooltip="Add another camera getting details through Onvif."
                                 matTooltipClass="tooltip">
                             <mat-icon>add_circle</mat-icon>

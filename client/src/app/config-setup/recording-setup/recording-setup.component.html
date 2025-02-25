@@ -17,7 +17,7 @@
                 @case (RecordingType.ftpTriggered) {
                     <div>
                         <mat-form-field [style.width.px]="185" appearance="outline"
-                                        matTooltip="Select the stream to record from. This would normally be the higher resolution stream,"
+                                        matTooltip="Select the stream to record from. This would normally be the higher resolution stream. If a stream is selected, images sent by FTP from {{camKey}}, on motion being detected will trigger the NVR to make a recording on the selected stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP a .jpg (jpeg) image to folder {{camKey}} on port 2121 on the NVRs IP address. See Camera Recordings Service section of the README.md"
                                         matTooltipClass="tooltip">
                             <mat-label>Stream To Record From</mat-label>
                             <mat-select (selectionChange)="setSelectedStream($event)"
