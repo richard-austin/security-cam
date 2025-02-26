@@ -622,8 +622,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         let totalStreams = 0;
         this.cameras.forEach((cam: Camera) => {
             cam.streams.forEach((stream: Stream) => {
-                if (stream.recording.enabled)
-                    ++totalStreams;
+                ++totalStreams;
             })
         })
         return totalStreams;
