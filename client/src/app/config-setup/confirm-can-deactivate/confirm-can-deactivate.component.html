@@ -1,0 +1,14 @@
+<div style="height: 0; width: auto; display:flex; justify-content: center">
+    <mat-card>
+        <mat-card-title>Some data may be lost!</mat-card-title>
+        <mat-card-subtitle>Do you want to exit without saving changes?</mat-card-subtitle>
+        <span class="exit-confirm">
+            <button (click)="confirmExit(false)" color="cancel" mat-flat-button>
+                No
+            </button>
+            <button (click)="confirmExit(true)" color="warn" mat-flat-button>
+                Yes
+            </button>
+        </span>
+    </mat-card>
+</div>

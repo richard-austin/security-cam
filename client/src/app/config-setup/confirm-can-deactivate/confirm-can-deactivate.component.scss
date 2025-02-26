@@ -1,0 +1,21 @@
+mat-card {
+  position: absolute;
+  z-index: 10;
+  background-color: #ff8500;
+}
+
+mat-card-title, mat-card-subtitle {
+  color: black;
+}
+
+.exit-confirm {
+  background-color: #2d2d2d;
+  min-height: 5rem;
+  display: flex;
+  justify-content: space-around;
+
+  > button {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+}

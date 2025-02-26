@@ -2,10 +2,13 @@
     Use of this source code is governed by an MIT-style license that
     can be found in the LICENSE file at http://angular.io/license -->
 
-<mat-card>
+@if (checkDeactivate) {
+    <app-confirm-can-deactivate (signalConfirmExit)="confirmDeactivate($event)"></app-confirm-can-deactivate>
+}
+<mat-card [ngClass]="{'grey-out': checkDeactivate}">
     <mat-card-title>Cameras Configuration
         <span [matTooltip]="!haveOnvifCredentials ? 'Onvif credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used For Onvif authentication. This is used for overall Onvif discovery.'"
-                matTooltipClass="tooltip">
+              matTooltipClass="tooltip">
             <button (click)="toggleOnvifPasswordDialogue()" [disabled]="isGuest" class="change-password-button"
                     mat-icon-button>
                 <mat-icon [ngClass]="{'no-credentials': !haveOnvifCredentials}">security</mat-icon>
@@ -91,7 +94,7 @@
                 <td *matCellDef="let cam" [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''"
                     class="snapshot" mat-cell>
                     <span [matTooltip]="cam.value.cred == '' ? 'Camera credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'"
-                            matTooltipClass="tooltip">
+                          matTooltipClass="tooltip">
                         <button (click)="togglePasswordDialogue(cam.key)" [disabled]="isGuest"
                                 class="change-password-button2" mat-icon-button>
                             <mat-icon [ngClass]="{'no-credentials': cam.value.cred == ''}">security</mat-icon>
@@ -114,10 +117,19 @@
             <ng-container matColumnDef="delete">
                 <th *matHeaderCellDef mat-header-cell>Delete</th>
                 <td *matCellDef="let cam" mat-cell>
-                    <button (click)="deleteCamera(cam.key)" [disabled]="cameras.size <= 1 || confirmSave || confirmNew"
+                    <button (click)="showCameraDeleteConfirm = showCameraDeleteConfirm !== cam.key ? cam.key : ''; showStreamDeleteConfirm=''"
+                            [disabled]="cameras.size <= 1 || confirmSave || confirmNew"
                             mat-icon-button matTooltip="Delete {{cam.key}}" matTooltipClass="tooltip">
                         <mat-icon class="trash-can">delete</mat-icon>
                     </button>
+                    <div style="top:16px;" class="popup-dialogue">
+                        <div [@detailExpand]="showCameraDeleteConfirm===cam.key ? 'expanded' : 'collapsed'" class="mat-elevation-z15">
+                            <div>
+                            </div>
+                            <app-row-delete-confirm [camKey]="cam.key" (hideDialogue)="toggleCameraDeleteConfirm($event.cam)">
+                            </app-row-delete-confirm>
+                        </div>
+                    </div>
                 </td>
             </ng-container>
 
@@ -310,11 +322,19 @@
                             <ng-container matColumnDef="delete">
                                 <th *matHeaderCellDef mat-header-cell>Delete</th>
                                 <td *matCellDef="let stream" [width]="50" mat-cell>
-                                    <button (click)="deleteStream(cam.key, stream.key)"
+                                    <button (click)="showStreamDeleteConfirm = showStreamDeleteConfirm !== cam.key+stream.key ? cam.key+stream.key : ''; showCameraDeleteConfirm=''"
                                             [disabled]="(cam.value.streams.size <= 1) || confirmSave || confirmNew"
                                             mat-icon-button matTooltip="Delete this stream" matTooltipClass="tooltip">
                                         <mat-icon class="trash-can">delete</mat-icon>
                                     </button>
+                                    <div style="top:0;" class="popup-dialogue">
+                                        <div [@detailExpand]="showStreamDeleteConfirm===cam.key+stream.key ? 'expanded' : 'collapsed'" class="mat-elevation-z15">
+                                            <div>
+                                            </div>
+                                            <app-row-delete-confirm [camKey]="cam.key" [streamKey]="stream.key" (hideDialogue)="toggleStreamDeleteConfirm($event)">
+                                            </app-row-delete-confirm>
+                                        </div>
+                                    </div>
                                 </td>
                             </ng-container>
                             <ng-container matColumnDef="descr">

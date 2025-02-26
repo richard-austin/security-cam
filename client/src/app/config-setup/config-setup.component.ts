@@ -2,7 +2,7 @@ import {
     AfterViewInit,
     ChangeDetectorRef,
     Component,
-    ElementRef,
+    ElementRef, HostListener,
     isDevMode,
     OnDestroy,
     OnInit, QueryList,
@@ -34,6 +34,9 @@ import {SharedAngularMaterialModule} from "../shared/shared-angular-material/sha
 import {AddAsOnvifDeviceComponent} from "./add-as-onvif-device/add-as-onvif-device.component";
 import {SharedModule} from "../shared/shared.module";
 import {RecordingSetupComponent} from "./recording-setup/recording-setup.component";
+import {CanComponentDeactivate, CanDeactivateType} from "../guards/can-deactivate.guard";
+import {ConfirmCanDeactivateComponent} from "./confirm-can-deactivate/confirm-can-deactivate.component";
+import {RowDeleteConfirmComponent} from "./row-delete-confirm/row-delete-confirm.component";
 
 declare let objectHash: (obj: Object) => string;
 
@@ -78,14 +81,28 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
         AddAsOnvifDeviceComponent,
         KeyValuePipe,
         RecordingSetupComponent,
+        ConfirmCanDeactivateComponent,
+        RowDeleteConfirmComponent,
     ],
     schemas: [],
 })
-export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, AfterViewInit, OnDestroy {
     @ViewChild('errorReporting') reporting!: ReportingComponent;
     @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
     @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement> | null
     @ViewChildren(RecordingSetupComponent) recordingSetupComponents!: QueryList<RecordingSetupComponent>
+
+    @HostListener('window:beforeunload', ['$event'])
+    unloadNotification($event: BeforeUnloadEvent) {
+        if (this.dataHasChanged() || this.anyInvalid()) {
+            $event.preventDefault();
+        }
+    }
+
+    @HostListener('window:unload', ['$event'])
+    beforeunload($event: any) {
+        // Do cleanup here, if necessary
+    }
 
     downloading: boolean = true;
     updating: boolean = false;
@@ -116,6 +133,9 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
     showOnvifCredentialsForm: boolean = false;
 
     failed: Map<string, string> = new Map<string, string>();
+    checkDeactivate: boolean = false;
+    showCameraDeleteConfirm: string = '';
+    showStreamDeleteConfirm: string = '';
 
     constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
     }
@@ -201,17 +221,17 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         let retVal = false;
         this.recordingSetupComponents.forEach((r) => {
             const maskFileName = r.getMaskFileName();
-            if(maskFileName ) {
-                if(maskFiles.has(maskFileName)) {
+            if (maskFileName) {
+                if (maskFiles.has(maskFileName)) {
                     this.reporting.errorMessage = new HttpErrorResponse({error: "Mask file " + maskFileName + " is already in use"});
                     retVal = true;
-                }
-                else
+                } else
                     maskFiles.add(maskFileName)
             }
         });
         return retVal;
     }
+
     /**
      * setUpTableFormControls: Associate a FormControl with each editable field on the table
      */
@@ -638,19 +658,6 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    motionSet(cam: Camera): boolean {
-        let hasMotionSet: boolean = false;
-        if (cam?.streams !== undefined) {
-            for (let stream of cam.streams.values()) {
-                if (stream?.motion?.enabled !== undefined && stream.motion.enabled) {
-                    hasMotionSet = true;
-                    break;
-                }
-            }
-        }
-        return hasMotionSet;
-    }
-
     toBase64(data: ArrayBuffer): string {
         let binary: string = '';
         let bytes: Uint8Array = new Uint8Array(data);
@@ -698,6 +705,19 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
         this.showAddCameraDialogue = this.showOnvifCredentialsForm = false;
     }
 
+    toggleCameraDeleteConfirm(key: string) {
+        if(key !== '')
+            this.deleteCamera(key)
+        this.showCameraDeleteConfirm = this.showCameraDeleteConfirm !== key ? key : '';
+    }
+
+    toggleStreamDeleteConfirm($event: { cam: string; stream: string }) {
+        if($event.cam !== '' && $event.stream !== '')
+            this.deleteStream($event.cam, $event.stream);
+        const compoundKey = $event.cam+$event.stream;
+        this.showStreamDeleteConfirm = this.showStreamDeleteConfirm !== compoundKey ? compoundKey : '';
+    }
+
     startFindCameraDetails(onvifUrl: string) {
         this.gettingCameraDetails = true;
         this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe((result: {
@@ -735,6 +755,29 @@ export class ConfigSetupComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     toggleBackChannelAudio(cam: Camera) {
         cam.backchannelAudioSupported = !cam.backchannelAudioSupported;
+    }
+
+    deactivateConfirmed = false;
+    newUri: string = '';
+
+    canDeactivate(): CanDeactivateType {
+        if (!this.dataHasChanged() && !this.anyInvalid())
+            return true;
+        else if (!this.deactivateConfirmed) {
+            this.checkDeactivate = true;
+            this.newUri = window.location.href;
+        } else if (this.deactivateConfirmed) {
+            this.deactivateConfirmed = this.checkDeactivate = false;
+            return true;
+        }
+        return false;
+    }
+
+    confirmDeactivate($event: boolean) {
+        this.checkDeactivate = false;
+        this.deactivateConfirmed = $event;
+        if (this.deactivateConfirmed)
+            window.location.href = this.newUri;
     }
 
     ngOnInit(): void {

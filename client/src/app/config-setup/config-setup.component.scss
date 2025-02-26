@@ -1,3 +1,9 @@
+.grey-out {
+  background: rgba(255, 255, 255, 0.288);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 table {
   width: 100%;
 }
