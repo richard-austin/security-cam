@@ -23,9 +23,11 @@ tr.element-row:not(.expanded-row):hover {
 tr.element-row:not(.expanded-row):active {
   background: grey;
 }
+
 tr[mat-footer-row] {
   --mat-table-footer-container-height: 55px;
 }
+
 .element-row td {
   border-bottom-width: 0;
 }
@@ -67,7 +69,7 @@ tr[mat-footer-row] {
 mat-form-field {
   margin-top: 5px;
   margin-bottom: 5px;
-// font-size: small !important;
+  // font-size: small !important;
   height: 35px !important;
 }
 
@@ -88,45 +90,7 @@ td, th {
   }
 
   width: 100%;
-  //margin-right: 160px;
   min-width: 1675px;
-}
-
-.file-upload {
-  position: relative;
-  display: flex;
-
-  > input {
-    position: relative;
-    left: 2.0rem;
-    font-style: italic;
-    cursor: default;
-  }
-
-  > button:first-of-type {
-    position: absolute;
-    left: -0.5rem;
-    top: 0;
-  }
-
-  > input {
-    width: 11rem;
-  }
-
-  > button:nth-of-type(2) {
-    position: absolute;
-
-    mat-icon {
-      font-size: medium;
-    }
-
-    right: -0.9rem;
-    top: 0;
-
-    &:enabled {
-      color: red;
-    }
-  }
 }
 
 .snapshot {
@@ -159,12 +123,13 @@ button.change-password-button {
   position: relative;
   top: 7px;
 }
+
 button.change-password-button2 {
   position: relative;
   top: 3px;
 }
 
-@mixin top-cursor{
+@mixin top-cursor {
   > div {
     width: 0;
     height: 0;
@@ -176,16 +141,17 @@ button.change-password-button2 {
   }
   z-index: 2;
   left: -24px;
-  top: 12px;
+  top: 28px;
   overflow: hidden;
   position: absolute;
 }
 
 div.popup-dialogue {
   display: inline;
-  position: relative;
+  position: absolute;
 
   > div {
+    position: relative;
     width: 17rem;
 
     @include top-cursor;
@@ -194,9 +160,10 @@ div.popup-dialogue {
 
 div.popup-recording-type-dialogue {
   display: inline;
-  position: relative;
+  position: absolute;
 
   > div {
+    position: relative;
     width: 420px;
 
     @include top-cursor;

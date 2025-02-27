@@ -10,7 +10,6 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
-import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
 
 @Component({
     selector: 'app-multi-cam-view',
@@ -18,11 +17,6 @@ import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
     styleUrls: ['./multi-cam-view.component.scss'],
     imports: [SharedModule, SharedAngularMaterialModule, VideoComponent],
     animations: [
-        trigger('detailExpand', [
-            state('collapsed', style({ height: '0px', minHeight: '0' })),
-            state('expanded', style({ height: '*' })),
-            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-        ]),
         trigger('openClose', [
             // ...
             state('open', style({
@@ -37,6 +31,11 @@ import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
             transition('closed => open', [
                 animate('.2s')
             ]),
+        ]),
+        trigger('detailExpand', [
+            state('collapsed', style({ height: '0px', minHeight: '0' })),
+            state('expanded', style({ height: '*' })),
+            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
         ])
     ],
 })

@@ -14,7 +14,7 @@
                 <mat-icon [ngClass]="{'no-credentials': !haveOnvifCredentials}">security</mat-icon>
             </button>
         <div style="top:16px;" class="popup-dialogue">
-            <div [@detailExpand]="showOnvifCredentialsForm ? 'expanded' : 'collapsed'" class="mat-elevation-z15">
+            <div [@detailExpand]="showOnvifCredentialsForm ? 'expanded' : 'collapsed'" [ngClass]="{'mat-elevation-z15': showOnvifCredentialsForm}">
                 <div>
                 </div>
                 <app-camera-credentials (haveOnvifCredentials)="checkIfOnvifCredentialsPresent()"
@@ -101,7 +101,7 @@
                         </button>
                         <div class="popup-dialogue">
                             <div [@detailExpand]="camForCredentialsEntry==cam.key ? 'expanded' : 'collapsed'"
-                                 class="mat-elevation-z15">
+                                 [ngClass]="{'mat-elevation-z15': camForCredentialsEntry==cam.key}">
                                 <div>
                                 </div>
                                 <app-camera-credentials (hideDialogue)="togglePasswordDialogue('')" [camera]="cam.value"
@@ -122,8 +122,8 @@
                             mat-icon-button matTooltip="Delete {{cam.key}}" matTooltipClass="tooltip">
                         <mat-icon class="trash-can">delete</mat-icon>
                     </button>
-                    <div style="top:16px;" class="popup-dialogue">
-                        <div [@detailExpand]="showCameraDeleteConfirm===cam.key ? 'expanded' : 'collapsed'" class="mat-elevation-z15">
+                    <div class="popup-dialogue">
+                        <div [@detailExpand]="showCameraDeleteConfirm===cam.key ? 'expanded' : 'collapsed'" [ngClass]="{'mat-elevation-z15': showCameraDeleteConfirm===cam.key}">
                             <div>
                             </div>
                             <app-row-delete-confirm [camKey]="cam.key" (hideDialogue)="toggleCameraDeleteConfirm($event.cam)">
@@ -189,7 +189,7 @@
                     </button>
                     <div class="popup-recording-type-dialogue ">
                         <div [@detailExpand]="camForRecordingSetup==cam.key ? 'expanded' : 'collapsed'"
-                             class="mat-elevation-z15">
+                             [ngClass]="{ 'mat-elevation-z15': camForRecordingSetup==cam.key}">
                             <div>
                             </div>
                             @defer {
@@ -327,11 +327,13 @@
                                             mat-icon-button matTooltip="Delete this stream" matTooltipClass="tooltip">
                                         <mat-icon class="trash-can">delete</mat-icon>
                                     </button>
-                                    <div style="top:0;" class="popup-dialogue">
-                                        <div [@detailExpand]="showStreamDeleteConfirm===cam.key+stream.key ? 'expanded' : 'collapsed'" class="mat-elevation-z15">
+                                    <div class="popup-dialogue">
+                                        <div [@detailExpand]="showStreamDeleteConfirm===cam.key+stream.key ? 'expanded' : 'collapsed'"
+                                             [ngClass]="{'mat-elevation-z15': showStreamDeleteConfirm===cam.key+stream.key}">
                                             <div>
                                             </div>
-                                            <app-row-delete-confirm [camKey]="cam.key" [streamKey]="stream.key" (hideDialogue)="toggleStreamDeleteConfirm($event)">
+                                            <app-row-delete-confirm [camKey]="cam.key" [streamKey]="stream.key"
+                                                                    (hideDialogue)="toggleStreamDeleteConfirm($event)">
                                             </app-row-delete-confirm>
                                         </div>
                                     </div>
