@@ -146,12 +146,15 @@ button.change-password-button2 {
   position: absolute;
 }
 
+.mdc-data-table__cell {
+  overflow: visible !important;
+}
 div.popup-dialogue {
   display: inline;
-  position: absolute;
+  position: relative;
 
   > div {
-    position: relative;
+    position: absolute;
     width: 17rem;
 
     @include top-cursor;
@@ -160,10 +163,10 @@ div.popup-dialogue {
 
 div.popup-recording-type-dialogue {
   display: inline;
-  position: absolute;
+  position: relative;
 
   > div {
-    position: relative;
+    position: absolute;
     width: 420px;
 
     @include top-cursor;

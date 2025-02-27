@@ -309,7 +309,7 @@
                 </td>
             </ng-container>
 
-            <!-- Expanded Streams Column - The streams row is made up of this one column that spans across all columns -->
+            <!-- Expanded Streams rows - The streams row is made up of this one column that spans across all columns -->
             <ng-container matColumnDef="expandedStreamDetail">
                 <td *matCellDef="let cam; let camIndex=dataIndex" [attr.colspan]="cameraColumns.length" mat-cell>
                     <div [@detailExpand]="cam.value == expandedElement ? 'expanded' : 'collapsed'"
