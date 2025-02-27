@@ -101,7 +101,6 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
     @HostListener('window:unload', ['$event'])
     beforeunload($event: any) {
-        // Do cleanup here, if necessary
     }
 
     downloading: boolean = true;
@@ -250,7 +249,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                     }, [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9\\ ]{2,20}$/)]),
                     audio: new UntypedFormControl(stream.audio, [Validators.required]),
                     audio_encoding: new UntypedFormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|G726|None|Not Listed)$/)]),
-                    netcam_uri: new UntypedFormControl(stream.netcam_uri, [Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
+                    netcam_uri: new UntypedFormControl(stream.netcam_uri, [Validators.required, Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
                 }, {updateOn: "change"});
             });
 

@@ -174,9 +174,11 @@
                                 enabled state is updated.-->
                         <mat-select (selectionChange)="updateCamField(i, 'cameraParamSpecs'); setUpTableFormControls()"
                                     [formControl]="getCamControl(i, 'cameraParamSpecs')">
-                            <mat-option *ngFor="let spec of cameraSvc.cameraParamSpecs" [value]="spec">
-                                {{ spec.name }}
-                            </mat-option>
+                            @for (spec of cameraSvc.cameraParamSpecs; track spec) {
+                                <mat-option [value]="spec">
+                                    {{ spec.name }}
+                                </mat-option>
+                            }
                         </mat-select>
                     </mat-form-field>
                 </td>
@@ -395,14 +397,16 @@
                                                 {{ enc.name }}
                                             </mat-option>
                                         </mat-select>
-                                        <mat-error
-                                                *ngIf="getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('required')">
-                                            Audio encoding is required
-                                        </mat-error>
-                                        <mat-error
-                                                *ngIf="getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('pattern')">
-                                            Error
-                                        </mat-error>
+                                        @if (getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('required')) {
+                                            <mat-error>
+                                                Audio encoding is required
+                                            </mat-error>
+                                        }
+                                        @if (getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('pattern')) {
+                                            <mat-error>
+                                                Invalid audio encoding
+                                            </mat-error>
+                                        }
                                     </mat-form-field>
                                 </td>
                             </ng-container>
@@ -417,16 +421,13 @@
                                                matTooltip="Set the URI for connection to the camera stream. This is in the form 'rtsp://<ip address>/<uri>"
                                                matTooltipClass="tooltip" maxlength="105" placeholder="Netcam URI"
                                                type="text">
-                                        <mat-error
-                                                *ngIf="getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('pattern')">
-                                            Should
-                                            be: rtsp://[uri..]
-                                        </mat-error>
-                                        <mat-error
-                                                *ngIf="getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('required')">
-                                            Netcam
-                                            URI is required
-                                        </mat-error>
+
+                                        @if (getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('pattern')) {
+                                            <mat-error>Should be: rtsp://[uri..]</mat-error>
+                                        }
+                                        @if (getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('required')) {
+                                            <mat-error>Netcam URI is required</mat-error>
+                                        }
                                     </mat-form-field>
                                 </td>
                             </ng-container>
@@ -465,9 +466,8 @@
 
             <!-- Cameras table Footer with the control buttons -->
             <ng-container matColumnDef="buttons">
-
                 <td *matFooterCellDef [attr.colspan]="cameraColumns.length" mat-footer-cell>
-                    <ng-container *ngIf="!gettingCameraDetails">
+                    @if (!gettingCameraDetails) {
                         <button (click)="addCamera()"
                                 [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 50"
                                 mat-icon-button matTooltip="Add another camera, and enter the details manually."
@@ -492,35 +492,43 @@
                                 </app-add-as-onvif-device>
                             </div>
                         </div>
-                        <button (click)="confirmNew=true" *ngIf="!confirmNew && !confirmNewLookup"
-                                [disabled]="anyInvalid() || confirmSave" mat-icon-button
-                                matTooltip="Start a new configuration" matTooltipClass="tooltip">
-                            <mat-icon>note</mat-icon>
-                        </button>
-                        <button (click)="confirmNewLookup=true" *ngIf="!confirmNewLookup && !confirmNewLookup"
-                                [disabled]="confirmSave || confirmNewLookup || confirmNew" mat-icon-button
-                                matTooltip="Perform onvif LAN search for cameras" matTooltipClass="tooltip">
-                            <mat-icon>explore</mat-icon>
-                        </button>
+                        @if (!confirmNew && !confirmNewLookup) {
+                            <button (click)="confirmNew=true"
+                                    [disabled]="anyInvalid() || confirmSave" mat-icon-button
+                                    matTooltip="Start a new configuration" matTooltipClass="tooltip">
+                                <mat-icon>note</mat-icon>
+                            </button>
+                        }
+                        @if (!confirmNewLookup) {
+                            <button (click)="confirmNewLookup=true"
+                                    [disabled]="confirmSave || confirmNewLookup || confirmNew" mat-icon-button
+                                    matTooltip="Perform onvif LAN search for cameras" matTooltipClass="tooltip">
+                                <mat-icon>explore</mat-icon>
+                            </button>
+                        }
                         <span matTooltip="Undo ALL changes made in this session. This will restore the camera data to the state it was when you first entered the editor in this session."
                               matTooltipClass="tooltip">
-                            <button (click)="confirmRestore=true" *ngIf="!confirmRestore && !confirmSave && !confirmNewLookup"
-                                    [disabled]="!dataHasChanged() || confirmNew || confirmNewLookup || isGuest"
-                                    mat-icon-button>
+                            @if (!confirmRestore && !confirmSave && !confirmNewLookup) {
+                                <button (click)="confirmRestore=true"
+                                        [disabled]="!dataHasChanged() || confirmNew || confirmNewLookup || isGuest"
+                                        mat-icon-button>
                                 <mat-icon>undo</mat-icon>
                             </button>
+                            }
                         </span>
 
                         <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
                               matTooltipClass="tooltip">
-                            <button (click)="confirmSave=true" *ngIf="!confirmSave && !confirmRestore && !confirmNewLookup"
-                                    [disabled]="!dataHasChanged() || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
-                                    mat-icon-button>
-                                <mat-icon>save</mat-icon>
-                            </button>
+                            @if (!confirmSave && !confirmRestore && !confirmNewLookup) {
+                                <button (click)="confirmSave=true"
+                                        [disabled]="!dataHasChanged() || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
+                                        mat-icon-button>
+                                    <mat-icon>save</mat-icon>
+                                </button>
+                            }
                         </span>
-
-                        <span *ngIf="confirmNew" class="confirm-group">
+                        @if (confirmNew) {
+                            <span class="confirm-group">
                             <span>Start a new configuration, are you sure?</span>
                             <button (click)="confirmNew=false" color="cancel" mat-flat-button>
                                 Cancel
@@ -529,7 +537,9 @@
                                 New
                             </button>
                         </span>
-                        <span *ngIf="confirmNewLookup" class="confirm-group">
+                        }
+                        @if (confirmNewLookup) {
+                            <span class="confirm-group">
                             <span>Start Onvif camera search, are you sure?</span>
                             <button (click)="confirmNewLookup=false" color="cancel" mat-flat-button>
                                 Cancel
@@ -538,7 +548,9 @@
                                 Search
                             </button>
                         </span>
-                        <span *ngIf="confirmSave" class="confirm-group">
+                        }
+                        @if (confirmSave) {
+                            <span class="confirm-group">
                             <span>Save this as the working configuration, are you sure?</span>
                             <button (click)="confirmSave=false" color="cancel" mat-flat-button>
                                 Cancel
@@ -548,23 +560,28 @@
                                 Save
                             </button>
                         </span>
-                        <span *ngIf="confirmRestore" class="confirm-group">
-                            <span>Undo ALL changes to the configuration, are you sure?</span>
-                            <button (click)="confirmRestore=false" color="cancel" mat-flat-button>
-                                Cancel
-                            </button>
-                            <button (click)="restoreConfig();confirmRestore=false;" [disabled]="isGuest" color="warn"
-                                    mat-flat-button>
-                                Restore
-                            </button>
+                        }
+                        @if (confirmRestore) {
+                            <span class="confirm-group">
+                                <span>Undo ALL changes to the configuration, are you sure?</span>
+                                <button (click)="confirmRestore=false" color="cancel" mat-flat-button>
+                                    Cancel
+                                </button>
+                                <button (click)="restoreConfig();confirmRestore=false;" [disabled]="isGuest"
+                                        color="warn"
+                                        mat-flat-button>
+                                    Restore
+                                </button>
                         </span>
-                    </ng-container>
-                    <mat-card-content *ngIf="gettingCameraDetails" class="wait-box">
+                        }
+                    } @else {
+                        <mat-card-content class="wait-box">
                         <span>
                             <mat-spinner [diameter]="25"></mat-spinner>
                             <span>Getting camera details, Please wait..</span>
                         </span>
-                    </mat-card-content>
+                        </mat-card-content>
+                    }
                 </td>
             </ng-container>
 
