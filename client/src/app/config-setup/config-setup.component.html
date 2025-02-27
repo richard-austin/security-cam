@@ -14,7 +14,8 @@
                 <mat-icon [ngClass]="{'no-credentials': !haveOnvifCredentials}">security</mat-icon>
             </button>
         <div style="top:16px;" class="popup-dialogue">
-            <div [@detailExpand]="showOnvifCredentialsForm ? 'expanded' : 'collapsed'" [ngClass]="{'mat-elevation-z15': showOnvifCredentialsForm}">
+            <div [@detailExpand]="showOnvifCredentialsForm ? 'expanded' : 'collapsed'"
+                 [ngClass]="{'mat-elevation-z15': showOnvifCredentialsForm}">
                 <div>
                 </div>
                 <app-camera-credentials (haveOnvifCredentials)="checkIfOnvifCredentialsPresent()"
@@ -123,10 +124,12 @@
                         <mat-icon class="trash-can">delete</mat-icon>
                     </button>
                     <div class="popup-dialogue">
-                        <div [@detailExpand]="showCameraDeleteConfirm===cam.key ? 'expanded' : 'collapsed'" [ngClass]="{'mat-elevation-z15': showCameraDeleteConfirm===cam.key}">
+                        <div [@detailExpand]="showCameraDeleteConfirm===cam.key ? 'expanded' : 'collapsed'"
+                             [ngClass]="{'mat-elevation-z15': showCameraDeleteConfirm===cam.key}">
                             <div>
                             </div>
-                            <app-row-delete-confirm [camKey]="cam.key" (hideDialogue)="toggleCameraDeleteConfirm($event.cam)">
+                            <app-row-delete-confirm [camKey]="cam.key"
+                                                    (hideDialogue)="toggleCameraDeleteConfirm($event.cam)">
                             </app-row-delete-confirm>
                         </div>
                     </div>
@@ -499,10 +502,18 @@
                                 matTooltip="Perform onvif LAN search for cameras" matTooltipClass="tooltip">
                             <mat-icon>explore</mat-icon>
                         </button>
-                        <span
-                                matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
-                                matTooltipClass="tooltip">
-                            <button (click)="confirmSave=true" *ngIf="!confirmSave && !confirmNewLookup"
+                        <span matTooltip="Undo ALL changes made in this session. This will restore the camera data to the state it was when you first entered the editor in this session."
+                              matTooltipClass="tooltip">
+                            <button (click)="confirmRestore=true" *ngIf="!confirmRestore && !confirmSave && !confirmNewLookup"
+                                    [disabled]="!dataHasChanged() || confirmNew || confirmNewLookup || isGuest"
+                                    mat-icon-button>
+                                <mat-icon>undo</mat-icon>
+                            </button>
+                        </span>
+
+                        <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
+                              matTooltipClass="tooltip">
+                            <button (click)="confirmSave=true" *ngIf="!confirmSave && !confirmRestore && !confirmNewLookup"
                                     [disabled]="!dataHasChanged() || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
                                     mat-icon-button>
                                 <mat-icon>save</mat-icon>
@@ -535,6 +546,16 @@
                             <button (click)="commitConfig();confirmSave=false;" [disabled]="isGuest" color="warn"
                                     mat-flat-button>
                                 Save
+                            </button>
+                        </span>
+                        <span *ngIf="confirmRestore" class="confirm-group">
+                            <span>Undo ALL changes to the configuration, are you sure?</span>
+                            <button (click)="confirmRestore=false" color="cancel" mat-flat-button>
+                                Cancel
+                            </button>
+                            <button (click)="restoreConfig();confirmRestore=false;" [disabled]="isGuest" color="warn"
+                                    mat-flat-button>
+                                Restore
                             </button>
                         </span>
                     </ng-container>

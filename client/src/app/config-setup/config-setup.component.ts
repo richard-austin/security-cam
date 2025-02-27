@@ -118,6 +118,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     streamControls: UntypedFormArray[] = [];
     list$!: BehaviorSubject<Camera[]>;
     confirmSave: boolean = false;
+    confirmRestore: boolean = false;
     confirmNew: boolean = false;
     confirmNewLookup: boolean = false;
     snapshotLoading: boolean = false;
@@ -546,6 +547,10 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
     dataHasChanged(): boolean {
         return objectHash(this.cameras) !== this.savedDataHash;
+    }
+
+    restoreConfig() {
+        this.ngOnInit();
     }
 
     commitConfig() {
