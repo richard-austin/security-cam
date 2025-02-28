@@ -44,18 +44,20 @@
             Camera discovery active, Please wait..
         </span>
     </mat-card-content>
-    <mat-card-content #scrollable_content *ngIf="!downloading  && !updating && !discovering"
-                      [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement)"
-                      class="scrollable-content">
-        <app-onvif-failures (fixUpCamerasData)="FixUpCamerasData()" *ngIf="failed.size > 0" [cameras]="cameras"
-                            [failures]="failed" [reporting]="reporting">
 
-        </app-onvif-failures>
-        <table [dataSource]="cameras | keyvalue: cameraSvc.compareFn" class="mat-elevation-z8" mat-table
-               multiTemplateDataRows>
-            <ng-container matColumnDef="sorting">
-                <th *matHeaderCellDef mat-header-cell>Sorting</th>
-                <td *matCellDef="let cam" class="sort-buttons" mat-cell>
+    @if (!downloading && !updating && !discovering) {
+        <mat-card-content #scrollable_content
+                          [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement)"
+                          class="scrollable-content">
+            <app-onvif-failures (fixUpCamerasData)="FixUpCamerasData()" *ngIf="failed.size > 0" [cameras]="cameras"
+                                [failures]="failed" [reporting]="reporting">
+
+            </app-onvif-failures>
+            <table [dataSource]="cameras | keyvalue: cameraSvc.compareFn" class="mat-elevation-z8" mat-table
+                   multiTemplateDataRows>
+                <ng-container matColumnDef="sorting">
+                    <th *matHeaderCellDef mat-header-cell>Sorting</th>
+                    <td *matCellDef="let cam" class="sort-buttons" mat-cell>
                     <span>
                         <button (click)="moveDown(cam)"
                                 [disabled]="lastElement(cam) || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
@@ -70,30 +72,30 @@
                             <mat-icon class="sort-button-icon">arrow_upward</mat-icon>
                         </button>
                     </span>
-                </td>
-            </ng-container>
+                    </td>
+                </ng-container>
 
-            <ng-container matColumnDef="camera_id">
-                <th *matHeaderCellDef mat-header-cell>Camera ID</th>
-                <td (mousedown)="getSnapshot(cam)" *matCellDef="let cam"
-                    [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''" class="snapshot" mat-cell
-                    matTooltip="The logical id of the camera (sequential numbering).{{cam.value.snapshotUri != '' ? ' Click to show a snapshot from this camera.' : ''}}"
-                    matTooltipClass="tooltip">
-                    {{ cam.key }}
-                    <div *ngIf="snapShotKey==cam.key && cam.value.snapshotUri !== ''">
-                        <mat-spinner *ngIf="snapshotLoading" [diameter]="25"></mat-spinner>
-                        <div class="snapshot mat-elevation-z8">
-                            <img #outputframeid *ngIf="!snapshotLoading" [src]="this.snapshot"
-                                 alt="Snapshot from {{cam.key}}">
+                <ng-container matColumnDef="camera_id">
+                    <th *matHeaderCellDef mat-header-cell>Camera ID</th>
+                    <td (mousedown)="getSnapshot(cam)" *matCellDef="let cam"
+                        [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''" class="snapshot" mat-cell
+                        matTooltip="The logical id of the camera (sequential numbering).{{cam.value.snapshotUri != '' ? ' Click to show a snapshot from this camera.' : ''}}"
+                        matTooltipClass="tooltip">
+                        {{ cam.key }}
+                        <div *ngIf="snapShotKey==cam.key && cam.value.snapshotUri !== ''">
+                            <mat-spinner *ngIf="snapshotLoading" [diameter]="25"></mat-spinner>
+                            <div class="snapshot mat-elevation-z8">
+                                <img #outputframeid *ngIf="!snapshotLoading" [src]="this.snapshot"
+                                     alt="Snapshot from {{cam.key}}">
+                            </div>
                         </div>
-                    </div>
-                </td>
-            </ng-container>
+                    </td>
+                </ng-container>
 
-            <ng-container matColumnDef="creds">
-                <th *matHeaderCellDef mat-header-cell>Cam. Credentials</th>
-                <td *matCellDef="let cam" [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''"
-                    class="snapshot" mat-cell>
+                <ng-container matColumnDef="creds">
+                    <th *matHeaderCellDef mat-header-cell>Cam. Credentials</th>
+                    <td *matCellDef="let cam" [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''"
+                        class="snapshot" mat-cell>
                     <span [matTooltip]="cam.value.cred == '' ? 'Camera credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'"
                           matTooltipClass="tooltip">
                         <button (click)="togglePasswordDialogue(cam.key)" [disabled]="isGuest"
@@ -111,403 +113,407 @@
                             </div>
                         </div>
                     </span>
-                </td>
-            </ng-container>
+                    </td>
+                </ng-container>
 
 
-            <ng-container matColumnDef="delete">
-                <th *matHeaderCellDef mat-header-cell>Delete</th>
-                <td *matCellDef="let cam" mat-cell>
-                    <button (click)="showCameraDeleteConfirm = showCameraDeleteConfirm !== cam.key ? cam.key : ''; showStreamDeleteConfirm=''"
-                            [disabled]="cameras.size <= 1 || confirmSave || confirmNew"
-                            mat-icon-button matTooltip="Delete {{cam.key}}" matTooltipClass="tooltip">
-                        <mat-icon class="trash-can">delete</mat-icon>
-                    </button>
-                    <div class="popup-dialogue">
-                        <div [@detailExpand]="showCameraDeleteConfirm===cam.key ? 'expanded' : 'collapsed'"
-                             [ngClass]="{'mat-elevation-z15': showCameraDeleteConfirm===cam.key}">
-                            <div>
-                            </div>
-                            <app-row-delete-confirm [camKey]="cam.key"
-                                                    (hideDialogue)="toggleCameraDeleteConfirm($event.cam)">
-                            </app-row-delete-confirm>
-                        </div>
-                    </div>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="expand">
-                <th *matHeaderCellDef mat-header-cell>Expand</th>
-                <td (click)="toggle(cam)" *matCellDef="let cam" mat-cell>
-                    <button mat-icon-button
-                            matTooltip="{{expandedElement == cam.value ? 'Hide' : 'Show'}} the streams for {{cam.key}}"
-                            matTooltipClass="tooltip">
-                        <mat-icon [@openClose]="expandedElement == cam.value ? 'open' : 'closed'" class="expand">
-                            arrow_right
-                        </mat-icon>
-                    </button>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="name">
-                <th *matHeaderCellDef mat-header-cell>Name.</th>
-                <td *matCellDef="let cam; dataIndex as i" mat-cell>
-                    <mat-form-field [style.width.px]="180" appearance="outline">
-                        <mat-label>Camera name</mat-label>
-                        <input (change)="updateCamField(i, 'name')" [formControl]="getCamControl(i, 'name')"
-                               autocomplete="off" matInput
-                               matTooltip="Enter the name to identify {{cam.key}} in the menus"
-                               matTooltipClass="tooltip" maxlength="25" placeholder="Camera Name" type="text">
-                        <mat-error *ngIf="getCamControl(i, 'name').invalid">Camera name is required</mat-error>
-                    </mat-form-field>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="cameraParamSpecs">
-                <th *matHeaderCellDef mat-header-cell>Camera Type.</th>
-                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
-                    <mat-form-field [style.width.px]="185" appearance="outline"
-                                    matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'Not Listed' to disable this feature, or if the camera type is not listed."
-                                    matTooltipClass="tooltip">
-                        <mat-label>Camera type (if listed)</mat-label>
-                        <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
-                                enabled state is updated.-->
-                        <mat-select (selectionChange)="updateCamField(i, 'cameraParamSpecs'); setUpTableFormControls()"
-                                    [formControl]="getCamControl(i, 'cameraParamSpecs')">
-                            @for (spec of cameraSvc.cameraParamSpecs; track spec) {
-                                <mat-option [value]="spec">
-                                    {{ spec.name }}
-                                </mat-option>
-                            }
-                        </mat-select>
-                    </mat-form-field>
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="recording">
-                <th *matHeaderCellDef mat-header-cell>Set Up Recording</th>
-                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
-                    <button mat-icon-button color="red"
-                            (click)="toggleRecordingSetupDialogue(cam.key)"
-                            matTooltip="Set up recording trigger for {{cam.key}}"
-                            matTooltipClass="tooltip">
-                        <mat-icon class="voicemail">voicemail</mat-icon>
-                    </button>
-                    <div class="popup-recording-type-dialogue ">
-                        <div [@detailExpand]="camForRecordingSetup==cam.key ? 'expanded' : 'collapsed'"
-                             [ngClass]="{ 'mat-elevation-z15': camForRecordingSetup==cam.key}">
-                            <div>
-                            </div>
-                            @defer {
-                                <app-recording-setup (hideDialogue)="toggleRecordingSetupDialogue(cam.key)"
-                                                     [parent]="this"
-                                                     [camera]="cam.value"
-                                                     [cameras]="cameras" [camKey]="cam.key"
-                                                     [reporting]="reporting">
-                                </app-recording-setup>
-                            }
-                        </div>
-                    </div>
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="address">
-                <th *matHeaderCellDef mat-header-cell>Address.</th>
-                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
-                    <mat-form-field [style.width.px]="180" appearance="outline">
-                        <mat-label>{{ cam.key }} IP address</mat-label>
-                        <input (change)="updateCamField(i, 'address')" [formControl]="getCamControl(i, 'address')"
-                               autocomplete="off" matInput
-                               matTooltip="The IP address of {{cam.key}}. This is required if the ControlURI is set to anything other than 'None'."
-                               matTooltipClass="tooltip" maxlength="15" placeholder="Camera IP Address" type="text">
-                        <mat-error *ngIf="getCamControl(i, 'address').invalid">Enter a valid IP address</mat-error>
-                    </mat-form-field>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="snapshotUri">
-                <th *matHeaderCellDef mat-header-cell>Snapshot URL.</th>
-                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
-                    <mat-form-field [style.width.px]="300" appearance="outline">
-                        <mat-label>URL for snapshot from {{ cam.key }}</mat-label>
-                        <input (change)="updateCamField(i, 'snapshotUri')"
-                               [formControl]="getCamControl(i, 'snapshotUri')" autocomplete="off" matInput
-                               matTooltip="The URI for snapshots for {{cam.key}}. This is used to view the image from the camera by clicking on the camera ID in the Cameras Configuration editor."
-                               matTooltipClass="tooltip" maxlength="150" placeholder="Snapshot URL" type="text">
-                        <mat-error *ngIf="getCamControl(i, 'snapshotUri').invalid">Enter the URI</mat-error>
-                    </mat-form-field>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="useRtspAuth">
-                <th *matHeaderCellDef mat-header-cell>RTSP Authentication.</th>
-                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
-                    <mat-checkbox (change)="updateCamField(i, 'useRtspAuth')"
-                                  [formControl]="getCamControl(i, 'useRtspAuth')"
-                                  matTooltip="{{'Use authentication on the RTSP streams on '+ cam.key + ' If checked. The username and password for all cameras are entered on the cameras configuration page by clicking the button to the right of the page title.'}}"
-                                  matTooltipClass="tooltip">
-                    </mat-checkbox>
-                    <mat-error *ngIf="getCamControl(i, 'useRtspAuth').invalid">Set the RTSP auth status</mat-error>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="rtspTransport">
-                <th *matHeaderCellDef mat-header-cell>RTSP Transport.</th>
-                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
-                    <mat-form-field [style.width.px]="75" appearance="outline"
-                                    matTooltip="Select the transport protocol to be used between {{cam.key}} and the NVR"
-                                    matTooltipClass="tooltip">
-                        <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
-                                enabled state is updated.-->
-                        <mat-select (selectionChange)="updateCamField(i, 'rtspTransport'); setUpTableFormControls()"
-                                    [formControl]="getCamControl(i, 'rtspTransport')">
-                            <mat-option value="tcp">
-                                TCP
-                            </mat-option>
-                            <mat-option value="udp">
-                                UDP
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="backchannelAudioSupported">
-                <th *matHeaderCellDef mat-header-cell>Audio Backchannel.</th>
-                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
-                    <mat-icon (click)="toggleBackChannelAudio(cam.value)"
-                              [matTooltip]="cam.value.backchannelAudioSupported ? 'Two way audio enabled for this device (please ensure the device supports 2 way audio)' : 'Two way audio is not enabled for this device'"
-                              [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
-                              matTooltipClass="tooltip">
-                        {{ cam.value.backchannelAudioSupported ? "check_circle" : "cancel" }}
-                    </mat-icon>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="ptzControls">
-                <th *matHeaderCellDef mat-header-cell>PTZ Controls.</th>
-                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
-                    <mat-checkbox (change)="updateCamField(i, 'ptzControls')"
-                                  [disableControl]="setPTZControlsCheckboxDisabledState(i)"
-                                  [formControl]="getCamControl(i, 'ptzControls')"
-                                  matTooltip="The Pan Tilt and Zoom controls for {{cam.key}} will be present on the live stream view if checked."
-                                  matTooltipClass="tooltip">
-                    </mat-checkbox>
-                </td>
-            </ng-container>
-
-            <ng-container matColumnDef="onvifHost">
-                <th *matHeaderCellDef mat-header-cell>ONVIF Base Address.</th>
-                <td *matCellDef="let cam; let i = dataIndex" mat-cell>
-                    <mat-form-field [style.width.px]="200" appearance="outline">
-                        <mat-label>ONVIF host:port</mat-label>
-                        <input (change)="updateCamField(i, 'onvifHost')" [formControl]="getCamControl(i, 'onvifHost')"
-                               autocomplete="off" matInput
-                               matTooltip="The IP address and port (if not 80) for {{cam.key}} ONVIF operations. This is required if PTZ control is enabled for {{cam.key}}."
-                               matTooltipClass="tooltip" maxlength="22" placeholder="ONVIF Host" type="text">
-                        <mat-error *ngIf="getCamControl(i, 'onvifHost').invalid">Enter the ONVIF base address
-                        </mat-error>
-                    </mat-form-field>
-                </td>
-            </ng-container>
-
-            <!-- Expanded Streams rows - The streams row is made up of this one column that spans across all columns -->
-            <ng-container matColumnDef="expandedStreamDetail">
-                <td *matCellDef="let cam; let camIndex=dataIndex" [attr.colspan]="cameraColumns.length" mat-cell>
-                    <div [@detailExpand]="cam.value == expandedElement ? 'expanded' : 'collapsed'"
-                         class="element-detail mat-elevation-z10">
-                        <table [dataSource]="cam.value.streams | keyvalue: cameraSvc.compareFn"
-                               class="streams-info mat-elevation-z10" mat-table>
-                            <ng-container matColumnDef="stream_id">
-                                <th *matHeaderCellDef mat-header-cell>Stream ID</th>
-                                <td *matCellDef="let stream" [width]="60" class="stream-key" mat-cell
-                                    matTooltip="The logical id of the stream (sequential numbering)"
-                                    matTooltipClass="tooltip">
-                                    {{ stream.key }}
-                                </td>
-                            </ng-container>
-                            <ng-container matColumnDef="delete">
-                                <th *matHeaderCellDef mat-header-cell>Delete</th>
-                                <td *matCellDef="let stream" [width]="50" mat-cell>
-                                    <button (click)="showStreamDeleteConfirm = showStreamDeleteConfirm !== cam.key+stream.key ? cam.key+stream.key : ''; showCameraDeleteConfirm=''"
-                                            [disabled]="(cam.value.streams.size <= 1) || confirmSave || confirmNew"
-                                            mat-icon-button matTooltip="Delete this stream" matTooltipClass="tooltip">
-                                        <mat-icon class="trash-can">delete</mat-icon>
-                                    </button>
-                                    <div class="popup-dialogue">
-                                        <div [@detailExpand]="showStreamDeleteConfirm===cam.key+stream.key ? 'expanded' : 'collapsed'"
-                                             [ngClass]="{'mat-elevation-z15': showStreamDeleteConfirm===cam.key+stream.key}">
-                                            <div>
-                                            </div>
-                                            <app-row-delete-confirm [camKey]="cam.key" [streamKey]="stream.key"
-                                                                    (hideDialogue)="toggleStreamDeleteConfirm($event)">
-                                            </app-row-delete-confirm>
-                                        </div>
-                                    </div>
-                                </td>
-                            </ng-container>
-                            <ng-container matColumnDef="descr">
-                                <th *matHeaderCellDef mat-header-cell> Descr.</th>
-                                <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="230">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Stream description</mat-label>
-                                        <input (change)="updateStreamField(camIndex, streamIndex, 'descr')"
-                                               [formControl]="getStreamControl(camIndex, streamIndex, 'descr')"
-                                               autocomplete="off" matInput
-                                               matTooltip="Set the description for {{stream.key}}. This is usually relating to the resolution of the stream."
-                                               matTooltipClass="tooltip" maxlength="20" placeholder="Stream Description"
-                                               type="text">
-                                        <mat-error
-                                                *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('required')">
-                                            Description
-                                            is required
-                                        </mat-error>
-                                        <mat-error
-                                                *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('pattern')">
-                                            2-20
-                                            characters, no special characters
-                                        </mat-error>
-                                    </mat-form-field>
-                                </td>
-                            </ng-container>
-                            <ng-container matColumnDef="audio">
-                                <th *matHeaderCellDef mat-header-cell>Audio</th>
-                                <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="50">
-                                    <mat-checkbox (change)="setAudioInEnabledStatus($event, stream.value)"
-                                                  [checked]="stream.value.audio" [color]="'primary'"
-                                                  [disabled]="stream.value.audio_encoding == 'None'"
-                                                  matTooltip="If checked, audio will be enabled on {{stream.key}} for {{cam.key}}."
-                                                  matTooltipClass="tooltip">
-                                    </mat-checkbox>
-                                    <mat-error
-                                            *ngIf="getStreamControl(camIndex, streamIndex, 'audio').hasError('required')">
-                                        audio is required
-                                    </mat-error>
-                                </td>
-                            </ng-container>
-                            <ng-container matColumnDef="audio_encoding">
-                                <th *matHeaderCellDef mat-header-cell>Audio Encoding</th>
-                                <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="125">
-                                    <mat-form-field [style.width.px]="120" appearance="outline"
-                                                    matTooltip="Set the audio encoding (G711 or AAC) delivered from the camera for {{stream.key}}. If you are unsure, select 'Not Listed'"
-                                                    matTooltipClass="tooltip">
-                                        <mat-label>Audio enc.</mat-label>
-                                        <mat-select (selectionChange)="updateAudioEncoding($event, stream.value)"
-                                                    [formControl]="getStreamControl(camIndex, streamIndex, 'audio_encoding')">
-                                            <mat-option *ngFor="let enc of cameraSvc.audioEncodings"
-                                                        [value]="enc.value">
-                                                {{ enc.name }}
-                                            </mat-option>
-                                        </mat-select>
-                                        @if (getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('required')) {
-                                            <mat-error>
-                                                Audio encoding is required
-                                            </mat-error>
-                                        }
-                                        @if (getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('pattern')) {
-                                            <mat-error>
-                                                Invalid audio encoding
-                                            </mat-error>
-                                        }
-                                    </mat-form-field>
-                                </td>
-                            </ng-container>
-                            <ng-container matColumnDef="netcam_uri">
-                                <th *matHeaderCellDef mat-header-cell> Netcam URL.</th>
-                                <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="220">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>RTSP url for {{ stream.key }}</mat-label>
-                                        <input (blur)="updateStreamField(camIndex, streamIndex, 'netcam_uri')"
-                                               [formControl]="getStreamControl(camIndex, streamIndex, 'netcam_uri')"
-                                               autocomplete="off" matInput
-                                               matTooltip="Set the URI for connection to the camera stream. This is in the form 'rtsp://<ip address>/<uri>"
-                                               matTooltipClass="tooltip" maxlength="105" placeholder="Netcam URI"
-                                               type="text">
-
-                                        @if (getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('pattern')) {
-                                            <mat-error>Should be: rtsp://[uri..]</mat-error>
-                                        }
-                                        @if (getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('required')) {
-                                            <mat-error>Netcam URI is required</mat-error>
-                                        }
-                                    </mat-form-field>
-                                </td>
-                            </ng-container>
-                            <ng-container matColumnDef="defaultOnMultiDisplay">
-                                <th *matHeaderCellDef mat-header-cell>Default On Multi Display</th>
-                                <td *matCellDef="let stream" mat-cell>
-                                    <mat-checkbox
-                                            (change)="setDefaultOnMultiDisplayStatus($event, stream.value,  cam.value)"
-                                            [checked]="stream.value.defaultOnMultiDisplay" [color]="'primary'"
-                                            matTooltip="If checked, {{stream.key}} will be the default stream for {{cam.key}} on the multi camera display."
-                                            matTooltipClass="tooltip">
-                                        {{ 'Default On Multi Display' }}
-                                    </mat-checkbox>
-                                </td>
-                            </ng-container>
-
-                            <!-- Streams table Footer with the control buttons -->
-                            <ng-container matColumnDef="buttons">
-                                <td *matFooterCellDef mat-footer-cell>
-                                    <button (click)="addStream(cam.value)"
-                                            [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 50"
-                                            mat-icon-button matTooltip="Add another stream for {{cam.key}}."
-                                            matTooltipClass="tooltip" style>
-                                        <mat-icon>add</mat-icon>
-                                    </button>
-                                </td>
-                            </ng-container>
-
-                            <tr *matHeaderRowDef="streamColumns" mat-header-row></tr>
-                            <tr *matRowDef="let stream; columns: streamColumns" mat-row></tr>
-                            <tr *matFooterRowDef="streamFooterColumns" mat-footer-row></tr>
-                        </table>
-                    </div>
-                </td>
-            </ng-container>
-
-            <!-- Cameras table Footer with the control buttons -->
-            <ng-container matColumnDef="buttons">
-                <td *matFooterCellDef [attr.colspan]="cameraColumns.length" mat-footer-cell>
-                    @if (!gettingCameraDetails) {
-                        <button (click)="addCamera()"
-                                [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 50"
-                                mat-icon-button matTooltip="Add another camera, and enter the details manually."
-                                matTooltipClass="tooltip">
-                            <mat-icon>add</mat-icon>
+                <ng-container matColumnDef="delete">
+                    <th *matHeaderCellDef mat-header-cell>Delete</th>
+                    <td *matCellDef="let cam" mat-cell>
+                        <button (click)="showCameraDeleteConfirm = showCameraDeleteConfirm !== cam.key ? cam.key : ''; showStreamDeleteConfirm=''"
+                                [disabled]="cameras.size <= 1 || confirmSave || confirmNew"
+                                mat-icon-button matTooltip="Delete {{cam.key}}" matTooltipClass="tooltip">
+                            <mat-icon class="trash-can">delete</mat-icon>
                         </button>
-                        <button (click)="toggleAddCameraOnvifUriDialogue()"
-                                [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 50"
-                                mat-icon-button matTooltip="Add another camera getting details through Onvif."
-                                matTooltipClass="tooltip">
-                            <mat-icon>add_circle</mat-icon>
-                        </button>
-                        <div class="add-onvif-url-dialogue">
-                            <div [@detailExpand]="showAddCameraDialogue ? 'expanded' : 'collapsed'"
-                                 class="mat-elevation-z15">
+                        <div class="popup-dialogue">
+                            <div [@detailExpand]="showCameraDeleteConfirm===cam.key ? 'expanded' : 'collapsed'"
+                                 [ngClass]="{'mat-elevation-z15': showCameraDeleteConfirm===cam.key}">
                                 <div>
                                 </div>
-                                <app-add-as-onvif-device (hideDialogue)="toggleAddCameraOnvifUriDialogue()"
-                                                         (startFindCameraDetails)="startFindCameraDetails($event)"
-                                                         [cameras]="cameras"
-                                                         [reporting]="reporting">
-                                </app-add-as-onvif-device>
+                                <app-row-delete-confirm [camKey]="cam.key"
+                                                        (hideDialogue)="toggleCameraDeleteConfirm($event.cam)">
+                                </app-row-delete-confirm>
                             </div>
                         </div>
-                        @if (!confirmNew && !confirmNewLookup) {
-                            <button (click)="confirmNew=true"
-                                    [disabled]="anyInvalid() || confirmSave" mat-icon-button
-                                    matTooltip="Start a new configuration" matTooltipClass="tooltip">
-                                <mat-icon>note</mat-icon>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="expand">
+                    <th *matHeaderCellDef mat-header-cell>Expand</th>
+                    <td (click)="toggle(cam)" *matCellDef="let cam" mat-cell>
+                        <button mat-icon-button
+                                matTooltip="{{expandedElement == cam.value ? 'Hide' : 'Show'}} the streams for {{cam.key}}"
+                                matTooltipClass="tooltip">
+                            <mat-icon [@openClose]="expandedElement == cam.value ? 'open' : 'closed'" class="expand">
+                                arrow_right
+                            </mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="name">
+                    <th *matHeaderCellDef mat-header-cell>Name.</th>
+                    <td *matCellDef="let cam; dataIndex as i" mat-cell>
+                        <mat-form-field [style.width.px]="180" appearance="outline">
+                            <mat-label>Camera name</mat-label>
+                            <input (change)="updateCamField(i, 'name')" [formControl]="getCamControl(i, 'name')"
+                                   autocomplete="off" matInput
+                                   matTooltip="Enter the name to identify {{cam.key}} in the menus"
+                                   matTooltipClass="tooltip" maxlength="25" placeholder="Camera Name" type="text">
+                            <mat-error *ngIf="getCamControl(i, 'name').invalid">Camera name is required</mat-error>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="cameraParamSpecs">
+                    <th *matHeaderCellDef mat-header-cell>Camera Type.</th>
+                    <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                        <mat-form-field [style.width.px]="185" appearance="outline"
+                                        matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'Not Listed' to disable this feature, or if the camera type is not listed."
+                                        matTooltipClass="tooltip">
+                            <mat-label>Camera type (if listed)</mat-label>
+                            <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
+                                    enabled state is updated.-->
+                            <mat-select
+                                    (selectionChange)="updateCamField(i, 'cameraParamSpecs'); setUpTableFormControls()"
+                                    [formControl]="getCamControl(i, 'cameraParamSpecs')">
+                                @for (spec of cameraSvc.cameraParamSpecs; track spec) {
+                                    <mat-option [value]="spec">
+                                        {{ spec.name }}
+                                    </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="recording">
+                    <th *matHeaderCellDef mat-header-cell>Set Up Recording</th>
+                    <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                        <button mat-icon-button color="red"
+                                (click)="toggleRecordingSetupDialogue(cam.key)"
+                                matTooltip="Set up recording trigger for {{cam.key}}"
+                                matTooltipClass="tooltip">
+                            <mat-icon class="voicemail">voicemail</mat-icon>
+                        </button>
+                        <div class="popup-recording-type-dialogue ">
+                            <div [@detailExpand]="camForRecordingSetup==cam.key ? 'expanded' : 'collapsed'"
+                                 [ngClass]="{ 'mat-elevation-z15': camForRecordingSetup==cam.key}">
+                                <div>
+                                </div>
+                                @defer {
+                                    <app-recording-setup (hideDialogue)="toggleRecordingSetupDialogue(cam.key)"
+                                                         [parent]="this"
+                                                         [camera]="cam.value"
+                                                         [cameras]="cameras" [camKey]="cam.key"
+                                                         [reporting]="reporting">
+                                    </app-recording-setup>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="address">
+                    <th *matHeaderCellDef mat-header-cell>Address.</th>
+                    <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                        <mat-form-field [style.width.px]="180" appearance="outline">
+                            <mat-label>{{ cam.key }} IP address</mat-label>
+                            <input (change)="updateCamField(i, 'address')" [formControl]="getCamControl(i, 'address')"
+                                   autocomplete="off" matInput
+                                   matTooltip="The IP address of {{cam.key}}. This is required if the ControlURI is set to anything other than 'None'."
+                                   matTooltipClass="tooltip" maxlength="15" placeholder="Camera IP Address" type="text">
+                            <mat-error *ngIf="getCamControl(i, 'address').invalid">Enter a valid IP address</mat-error>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="snapshotUri">
+                    <th *matHeaderCellDef mat-header-cell>Snapshot URL.</th>
+                    <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                        <mat-form-field [style.width.px]="300" appearance="outline">
+                            <mat-label>URL for snapshot from {{ cam.key }}</mat-label>
+                            <input (change)="updateCamField(i, 'snapshotUri')"
+                                   [formControl]="getCamControl(i, 'snapshotUri')" autocomplete="off" matInput
+                                   matTooltip="The URI for snapshots for {{cam.key}}. This is used to view the image from the camera by clicking on the camera ID in the Cameras Configuration editor."
+                                   matTooltipClass="tooltip" maxlength="150" placeholder="Snapshot URL" type="text">
+                            <mat-error *ngIf="getCamControl(i, 'snapshotUri').invalid">Enter the URI</mat-error>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="useRtspAuth">
+                    <th *matHeaderCellDef mat-header-cell>RTSP Authentication.</th>
+                    <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                        <mat-checkbox (change)="updateCamField(i, 'useRtspAuth')"
+                                      [formControl]="getCamControl(i, 'useRtspAuth')"
+                                      matTooltip="{{'Use authentication on the RTSP streams on '+ cam.key + ' If checked. The username and password for all cameras are entered on the cameras configuration page by clicking the button to the right of the page title.'}}"
+                                      matTooltipClass="tooltip">
+                        </mat-checkbox>
+                        <mat-error *ngIf="getCamControl(i, 'useRtspAuth').invalid">Set the RTSP auth status</mat-error>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="rtspTransport">
+                    <th *matHeaderCellDef mat-header-cell>RTSP Transport.</th>
+                    <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                        <mat-form-field [style.width.px]="75" appearance="outline"
+                                        matTooltip="Select the transport protocol to be used between {{cam.key}} and the NVR"
+                                        matTooltipClass="tooltip">
+                            <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
+                                    enabled state is updated.-->
+                            <mat-select (selectionChange)="updateCamField(i, 'rtspTransport'); setUpTableFormControls()"
+                                        [formControl]="getCamControl(i, 'rtspTransport')">
+                                <mat-option value="tcp">
+                                    TCP
+                                </mat-option>
+                                <mat-option value="udp">
+                                    UDP
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="backchannelAudioSupported">
+                    <th *matHeaderCellDef mat-header-cell>Audio Backchannel.</th>
+                    <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                        <mat-icon (click)="toggleBackChannelAudio(cam.value)"
+                                  [matTooltip]="cam.value.backchannelAudioSupported ? 'Two way audio enabled for this device (please ensure the device supports 2 way audio)' : 'Two way audio is not enabled for this device'"
+                                  [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
+                                  matTooltipClass="tooltip">
+                            {{ cam.value.backchannelAudioSupported ? "check_circle" : "cancel" }}
+                        </mat-icon>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="ptzControls">
+                    <th *matHeaderCellDef mat-header-cell>PTZ Controls.</th>
+                    <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                        <mat-checkbox (change)="updateCamField(i, 'ptzControls')"
+                                      [disableControl]="setPTZControlsCheckboxDisabledState(i)"
+                                      [formControl]="getCamControl(i, 'ptzControls')"
+                                      matTooltip="The Pan Tilt and Zoom controls for {{cam.key}} will be present on the live stream view if checked."
+                                      matTooltipClass="tooltip">
+                        </mat-checkbox>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="onvifHost">
+                    <th *matHeaderCellDef mat-header-cell>ONVIF Base Address.</th>
+                    <td *matCellDef="let cam; let i = dataIndex" mat-cell>
+                        <mat-form-field [style.width.px]="200" appearance="outline">
+                            <mat-label>ONVIF host:port</mat-label>
+                            <input (change)="updateCamField(i, 'onvifHost')"
+                                   [formControl]="getCamControl(i, 'onvifHost')"
+                                   autocomplete="off" matInput
+                                   matTooltip="The IP address and port (if not 80) for {{cam.key}} ONVIF operations. This is required if PTZ control is enabled for {{cam.key}}."
+                                   matTooltipClass="tooltip" maxlength="22" placeholder="ONVIF Host" type="text">
+                            <mat-error *ngIf="getCamControl(i, 'onvifHost').invalid">Enter the ONVIF base address
+                            </mat-error>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+
+                <!-- Expanded Streams rows - The streams row is made up of this one column that spans across all columns -->
+                <ng-container matColumnDef="expandedStreamDetail">
+                    <td *matCellDef="let cam; let camIndex=dataIndex" [attr.colspan]="cameraColumns.length" mat-cell>
+                        <div [@detailExpand]="cam.value == expandedElement ? 'expanded' : 'collapsed'"
+                             class="element-detail mat-elevation-z10">
+                            <table [dataSource]="cam.value.streams | keyvalue: cameraSvc.compareFn"
+                                   class="streams-info mat-elevation-z10" mat-table>
+                                <ng-container matColumnDef="stream_id">
+                                    <th *matHeaderCellDef mat-header-cell>Stream ID</th>
+                                    <td *matCellDef="let stream" [width]="60" class="stream-key" mat-cell
+                                        matTooltip="The logical id of the stream (sequential numbering)"
+                                        matTooltipClass="tooltip">
+                                        {{ stream.key }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="delete">
+                                    <th *matHeaderCellDef mat-header-cell>Delete</th>
+                                    <td *matCellDef="let stream" [width]="50" mat-cell>
+                                        <button (click)="showStreamDeleteConfirm = showStreamDeleteConfirm !== cam.key+stream.key ? cam.key+stream.key : ''; showCameraDeleteConfirm=''"
+                                                [disabled]="(cam.value.streams.size <= 1) || confirmSave || confirmNew"
+                                                mat-icon-button matTooltip="Delete this stream"
+                                                matTooltipClass="tooltip">
+                                            <mat-icon class="trash-can">delete</mat-icon>
+                                        </button>
+                                        <div class="popup-stream-delete-confirm-dialogue">
+                                            <div [@detailExpand]="showStreamDeleteConfirm===cam.key+stream.key ? 'expanded' : 'collapsed'"
+                                                 [ngClass]="{'mat-elevation-z15': showStreamDeleteConfirm===cam.key+stream.key}">
+                                                <div>
+                                                </div>
+                                                <app-row-delete-confirm [camKey]="cam.key" [streamKey]="stream.key"
+                                                                        (hideDialogue)="toggleStreamDeleteConfirm($event)">
+                                                </app-row-delete-confirm>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="descr">
+                                    <th *matHeaderCellDef mat-header-cell> Descr.</th>
+                                    <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="230">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Stream description</mat-label>
+                                            <input (change)="updateStreamField(camIndex, streamIndex, 'descr')"
+                                                   [formControl]="getStreamControl(camIndex, streamIndex, 'descr')"
+                                                   autocomplete="off" matInput
+                                                   matTooltip="Set the description for {{stream.key}}. This is usually relating to the resolution of the stream."
+                                                   matTooltipClass="tooltip" maxlength="20"
+                                                   placeholder="Stream Description"
+                                                   type="text">
+                                            <mat-error
+                                                    *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('required')">
+                                                Description
+                                                is required
+                                            </mat-error>
+                                            <mat-error
+                                                    *ngIf="getStreamControl(camIndex, streamIndex, 'descr').hasError('pattern')">
+                                                2-20
+                                                characters, no special characters
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="audio">
+                                    <th *matHeaderCellDef mat-header-cell>Audio</th>
+                                    <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="50">
+                                        <mat-checkbox (change)="setAudioInEnabledStatus($event, stream.value)"
+                                                      [checked]="stream.value.audio" [color]="'primary'"
+                                                      [disabled]="stream.value.audio_encoding == 'None'"
+                                                      matTooltip="If checked, audio will be enabled on {{stream.key}} for {{cam.key}}."
+                                                      matTooltipClass="tooltip">
+                                        </mat-checkbox>
+                                        <mat-error
+                                                *ngIf="getStreamControl(camIndex, streamIndex, 'audio').hasError('required')">
+                                            audio is required
+                                        </mat-error>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="audio_encoding">
+                                    <th *matHeaderCellDef mat-header-cell>Audio Encoding</th>
+                                    <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="125">
+                                        <mat-form-field [style.width.px]="120" appearance="outline"
+                                                        matTooltip="Set the audio encoding (G711 or AAC) delivered from the camera for {{stream.key}}. If you are unsure, select 'Not Listed'"
+                                                        matTooltipClass="tooltip">
+                                            <mat-label>Audio enc.</mat-label>
+                                            <mat-select (selectionChange)="updateAudioEncoding($event, stream.value)"
+                                                        [formControl]="getStreamControl(camIndex, streamIndex, 'audio_encoding')">
+                                                <mat-option *ngFor="let enc of cameraSvc.audioEncodings"
+                                                            [value]="enc.value">
+                                                    {{ enc.name }}
+                                                </mat-option>
+                                            </mat-select>
+                                            @if (getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('required')) {
+                                                <mat-error>
+                                                    Audio encoding is required
+                                                </mat-error>
+                                            }
+                                            @if (getStreamControl(camIndex, streamIndex, 'audio_encoding').hasError('pattern')) {
+                                                <mat-error>
+                                                    Invalid audio encoding
+                                                </mat-error>
+                                            }
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="netcam_uri">
+                                    <th *matHeaderCellDef mat-header-cell> Netcam URL.</th>
+                                    <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="220">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>RTSP url for {{ stream.key }}</mat-label>
+                                            <input (blur)="updateStreamField(camIndex, streamIndex, 'netcam_uri')"
+                                                   [formControl]="getStreamControl(camIndex, streamIndex, 'netcam_uri')"
+                                                   autocomplete="off" matInput
+                                                   matTooltip="Set the URI for connection to the camera stream. This is in the form 'rtsp://<ip address>/<uri>"
+                                                   matTooltipClass="tooltip" maxlength="105" placeholder="Netcam URI"
+                                                   type="text">
+
+                                            @if (getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('pattern')) {
+                                                <mat-error>Should be: rtsp://[uri..]</mat-error>
+                                            }
+                                            @if (getStreamControl(camIndex, streamIndex, 'netcam_uri').hasError('required')) {
+                                                <mat-error>Netcam URI is required</mat-error>
+                                            }
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="defaultOnMultiDisplay">
+                                    <th *matHeaderCellDef mat-header-cell>Default On Multi Display</th>
+                                    <td *matCellDef="let stream" mat-cell>
+                                        <mat-checkbox
+                                                (change)="setDefaultOnMultiDisplayStatus($event, stream.value,  cam.value)"
+                                                [checked]="stream.value.defaultOnMultiDisplay" [color]="'primary'"
+                                                matTooltip="If checked, {{stream.key}} will be the default stream for {{cam.key}} on the multi camera display."
+                                                matTooltipClass="tooltip">
+                                            {{ 'Default On Multi Display' }}
+                                        </mat-checkbox>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Streams table Footer with the control buttons -->
+                                <ng-container matColumnDef="buttons">
+                                    <td *matFooterCellDef mat-footer-cell>
+                                        <button (click)="addStream(cam.value)"
+                                                [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 50"
+                                                mat-icon-button matTooltip="Add another stream for {{cam.key}}."
+                                                matTooltipClass="tooltip" style>
+                                            <mat-icon>add</mat-icon>
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <tr *matHeaderRowDef="streamColumns" mat-header-row></tr>
+                                <tr *matRowDef="let stream; columns: streamColumns" mat-row></tr>
+                                <tr *matFooterRowDef="streamFooterColumns" mat-footer-row></tr>
+                            </table>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Cameras table Footer with the control buttons -->
+                <ng-container matColumnDef="buttons">
+                    <td *matFooterCellDef [attr.colspan]="cameraColumns.length" mat-footer-cell>
+                        @if (!gettingCameraDetails) {
+                            <button (click)="addCamera()"
+                                    [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 50"
+                                    mat-icon-button matTooltip="Add another camera, and enter the details manually."
+                                    matTooltipClass="tooltip">
+                                <mat-icon>add</mat-icon>
                             </button>
-                        }
-                        @if (!confirmNewLookup) {
-                            <button (click)="confirmNewLookup=true"
-                                    [disabled]="confirmSave || confirmNewLookup || confirmNew" mat-icon-button
-                                    matTooltip="Perform onvif LAN search for cameras" matTooltipClass="tooltip">
-                                <mat-icon>explore</mat-icon>
+                            <button (click)="toggleAddCameraOnvifUriDialogue()"
+                                    [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 50"
+                                    mat-icon-button matTooltip="Add another camera getting details through Onvif."
+                                    matTooltipClass="tooltip">
+                                <mat-icon>add_circle</mat-icon>
                             </button>
-                        }
-                        <span matTooltip="Undo ALL changes made in this session. This will restore the camera data to the state it was when you first entered the editor in this session."
-                              matTooltipClass="tooltip">
+                            <div class="add-onvif-url-dialogue">
+                                <div [@detailExpand]="showAddCameraDialogue ? 'expanded' : 'collapsed'"
+                                     class="mat-elevation-z15">
+                                    <div>
+                                    </div>
+                                    <app-add-as-onvif-device (hideDialogue)="toggleAddCameraOnvifUriDialogue()"
+                                                             (startFindCameraDetails)="startFindCameraDetails($event)"
+                                                             [cameras]="cameras"
+                                                             [reporting]="reporting">
+                                    </app-add-as-onvif-device>
+                                </div>
+                            </div>
+                            @if (!confirmNew && !confirmNewLookup) {
+                                <button (click)="confirmNew=true"
+                                        [disabled]="anyInvalid() || confirmSave" mat-icon-button
+                                        matTooltip="Start a new configuration" matTooltipClass="tooltip">
+                                    <mat-icon>note</mat-icon>
+                                </button>
+                            }
+                            @if (!confirmNewLookup) {
+                                <button (click)="confirmNewLookup=true"
+                                        [disabled]="confirmSave || confirmNewLookup || confirmNew" mat-icon-button
+                                        matTooltip="Perform onvif LAN search for cameras" matTooltipClass="tooltip">
+                                    <mat-icon>explore</mat-icon>
+                                </button>
+                            }
+                            <span matTooltip="Undo ALL changes made in this session. This will restore the camera data to the state it was when you first entered the editor in this session."
+                                  matTooltipClass="tooltip">
                             @if (!confirmRestore && !confirmSave && !confirmNewLookup) {
                                 <button (click)="confirmRestore=true"
                                         [disabled]="!dataHasChanged() || confirmNew || confirmNewLookup || isGuest"
@@ -517,8 +523,8 @@
                             }
                         </span>
 
-                        <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
-                              matTooltipClass="tooltip">
+                            <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
+                                  matTooltipClass="tooltip">
                             @if (!confirmSave && !confirmRestore && !confirmNewLookup) {
                                 <button (click)="confirmSave=true"
                                         [disabled]="!dataHasChanged() || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
@@ -527,8 +533,8 @@
                                 </button>
                             }
                         </span>
-                        @if (confirmNew) {
-                            <span class="confirm-group">
+                            @if (confirmNew) {
+                                <span class="confirm-group">
                             <span>Start a new configuration, are you sure?</span>
                             <button (click)="confirmNew=false" color="cancel" mat-flat-button>
                                 Cancel
@@ -537,9 +543,9 @@
                                 New
                             </button>
                         </span>
-                        }
-                        @if (confirmNewLookup) {
-                            <span class="confirm-group">
+                            }
+                            @if (confirmNewLookup) {
+                                <span class="confirm-group">
                             <span>Start Onvif camera search, are you sure?</span>
                             <button (click)="confirmNewLookup=false" color="cancel" mat-flat-button>
                                 Cancel
@@ -548,9 +554,9 @@
                                 Search
                             </button>
                         </span>
-                        }
-                        @if (confirmSave) {
-                            <span class="confirm-group">
+                            }
+                            @if (confirmSave) {
+                                <span class="confirm-group">
                             <span>Save this as the working configuration, are you sure?</span>
                             <button (click)="confirmSave=false" color="cancel" mat-flat-button>
                                 Cancel
@@ -560,9 +566,9 @@
                                 Save
                             </button>
                         </span>
-                        }
-                        @if (confirmRestore) {
-                            <span class="confirm-group">
+                            }
+                            @if (confirmRestore) {
+                                <span class="confirm-group">
                                 <span>Undo ALL changes to the configuration, are you sure?</span>
                                 <button (click)="confirmRestore=false" color="cancel" mat-flat-button>
                                     Cancel
@@ -573,26 +579,27 @@
                                     Restore
                                 </button>
                         </span>
-                        }
-                    } @else {
-                        <mat-card-content class="wait-box">
+                            }
+                        } @else {
+                            <mat-card-content class="wait-box">
                         <span>
                             <mat-spinner [diameter]="25"></mat-spinner>
                             <span>Getting camera details, Please wait..</span>
                         </span>
-                        </mat-card-content>
-                    }
-                </td>
-            </ng-container>
+                            </mat-card-content>
+                        }
+                    </td>
+                </ng-container>
 
-            <tr *matHeaderRowDef="cameraColumns" mat-header-row></tr>
-            <tr *matRowDef="let cam; columns: cameraColumns;"
-                [class.example-expanded-row]="expandedElement === cam.value" class="element-row" mat-row>
-            </tr>
+                <tr *matHeaderRowDef="cameraColumns" mat-header-row></tr>
+                <tr *matRowDef="let cam; columns: cameraColumns;"
+                    [class.example-expanded-row]="expandedElement === cam.value" class="element-row" mat-row>
+                </tr>
 
-            <tr *matRowDef="let e; columns: ['expandedStreamDetail']" class="detail-row" mat-row>
-            </tr>
-            <tr *matFooterRowDef="cameraFooterColumns" mat-footer-row></tr>
-        </table>
-    </mat-card-content>
+                <tr *matRowDef="let e; columns: ['expandedStreamDetail']" class="detail-row" mat-row>
+                </tr>
+                <tr *matFooterRowDef="cameraFooterColumns" mat-footer-row></tr>
+            </table>
+        </mat-card-content>
+    }
 </mat-card>

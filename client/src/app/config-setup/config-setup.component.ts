@@ -54,7 +54,7 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
     animations: [
         trigger('detailExpand', [
             state('collapsed', style({height: '0px', minHeight: '0'})),
-            state('expanded', style({height: '*', overflow: 'visible'})),
+            state('expanded', style({height: '*'})),
             transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
         ]),
         trigger('openClose', [
@@ -710,15 +710,15 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     }
 
     toggleCameraDeleteConfirm(key: string) {
-        if(key !== '')
+        if (key !== '')
             this.deleteCamera(key)
         this.showCameraDeleteConfirm = this.showCameraDeleteConfirm !== key ? key : '';
     }
 
     toggleStreamDeleteConfirm($event: { cam: string; stream: string }) {
-        if($event.cam !== '' && $event.stream !== '')
+        if ($event.cam !== '' && $event.stream !== '')
             this.deleteStream($event.cam, $event.stream);
-        const compoundKey = $event.cam+$event.stream;
+        const compoundKey = $event.cam + $event.stream;
         this.showStreamDeleteConfirm = this.showStreamDeleteConfirm !== compoundKey ? compoundKey : '';
     }
 
