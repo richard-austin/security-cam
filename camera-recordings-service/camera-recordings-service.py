@@ -179,11 +179,17 @@ class HttpHandler(BaseHTTPRequestHandler):
             stream: str = ""
 
             def get_triggered_stream(cam: any):
-                for s in cam['streams']:
-                    s_obj = cam['streams'][s]
-                    tro = s_obj['motion']['trigger_recording_on']
-                    if tro.find('stream') != -1:
-                        return tro
+                if cam['recordingType'] == "motionService":
+                    for s in cam['streams']:
+                        s_obj = cam['streams'][s]
+                        tro = s_obj['motion']['trigger_recording_on']
+                        if tro.find('stream') != -1:
+                            return tro
+                else:
+                    if cam['recordingType'] == "pullPointEventTriggered":
+                        return cam["recordingStream"]
+                    else:
+                        return ""
 
             def finish_recording(cn: str):
                 if self.recording_procs.__contains__(cn):
@@ -228,6 +234,7 @@ class HttpHandler(BaseHTTPRequestHandler):
                             logger.info("Stopping recording")
                             finish_recording(camera_name)
                             logger.info(f"Recording ended for {camera_name}")
+                            self.returnResponse(200, f"Recording ended for {camera_name}")
                         else:
                             self.returnResponse(400, f"No recording process exists for {camera_name}")
 

@@ -210,6 +210,7 @@ class Sc_processesService {
             // Populate the onvif device map so the devices don't have to be created each time a PTZ operation is done
             try {
                 onvifService.populateDeviceMap()
+                onvifService.startPullPointEventMonitor()
             }
             catch(Exception ex) {
                 logService.cam.warn("${ex.getClass().getName()} in populateDeviceMap: ${ex.getMessage()}")
@@ -247,6 +248,8 @@ class Sc_processesService {
                 response.status = PassFail.FAIL
                 response.error = restResponse.errorMsg
             }
+
+            onvifService.stopPullPointEventMonitor()
 
             ipChangeCheckTimer.cancel()
             ipChangeCheckTimer.purge()

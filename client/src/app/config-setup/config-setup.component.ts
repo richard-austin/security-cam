@@ -375,7 +375,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                     if (stream.netcam_uri === '')
                         stream.netcam_uri = 'rtsp://';
 
-                    if (camera.ftp !== 'none' && camera.ftp === streamKey) {
+                    if (camera.recordingStream !== 'none' && camera.recordingStream === streamKey) {
                         stream.recording.enabled = true
                         stream.recording.recording_src_url = "http://localhost:8085/h/stream?suuid=cam" + camNum + "-stream" + streamNum;
                         stream.recording.uri = 'http://localhost:8084/recording/rec' + stream.rec_num + '/';
@@ -405,7 +405,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                     stream.uri = "/ws/stream?suuid=cam" + camNum + "-stream" + streamNum;
                     if (stream.netcam_uri === '')
                         stream.netcam_uri = 'rtsp://';
-                    if (camera.ftp !== 'none' && camera.ftp === streamKey) {
+                    if (camera.recordingStream !== 'none' && camera.recordingStream === streamKey) {
                         stream.recording.enabled = true
                         stream.recording.recording_src_url = "http://localhost:8085/h/stream?suuid=cam" + camNum + "-stream" + streamNum;
                         stream.recording.uri = '/recording/rec' + stream.rec_num + '/';

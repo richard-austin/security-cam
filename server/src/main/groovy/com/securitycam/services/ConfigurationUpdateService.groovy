@@ -82,7 +82,6 @@ class ConfigurationUpdateService {
             Camera cam = it.value
             cam.streams.each { streamIt ->
                 Stream stream = streamIt.value
-                // TODO: Use paths from config instead of the hard coded paths used here
                 if (stream.recording.location != "") {
                     File f = new File(Paths.get(motionRecordingDir, stream.recording.location).toString())
                     f.mkdir()

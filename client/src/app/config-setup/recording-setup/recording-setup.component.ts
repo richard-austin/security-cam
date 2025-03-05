@@ -68,13 +68,14 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     setRecordingType($event: MatSelectChange) {
         this.localCamera.recordingType = $event.value;
         this.localCamera.motion_detection_stream = 'none';
-        this.localCamera.ftp = 'none';
+        this.localCamera.recordingStream = 'none';
+        this.localCamera.pullPointTopic = 'none';
         this.localCamera.streams.forEach((stream) => {
             stream.motion.trigger_recording_on = 'none';
             stream.motion.mask_file = '';
             stream.motion.enabled = false;
         })
-        this.localCamera.ftp = 'none';
+        this.localCamera.recordingStream = 'none';
 
         switch (this.localCamera.recordingType) {
             case RecordingType.none:
@@ -89,8 +90,13 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     }
 
     setSelectedStream($event: MatSelectChange) {
-        this.localCamera.ftp = $event.value;
+        this.localCamera.recordingStream = $event.value;
         this.setUpFormGroup();
+    }
+
+
+    setSelectedPullPointRecordingTrigger($event: MatSelectChange) {
+        this.localCamera.pullPointTopic = $event.value;
     }
 
     getControl(fieldName: string): UntypedFormControl {
@@ -150,7 +156,8 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                 break;
 
             case RecordingType.ftpTriggered:
-                retVal = cam.streams.get(cam.ftp);
+            case RecordingType.pullPointEventTriggered:
+                retVal = cam.streams.get(cam.recordingStream);
                 break;
         }
         return retVal;
@@ -187,7 +194,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     anyInvalid(): boolean {
         const cam = this.localCamera;
         let motionStreamSelected = false;
-        let hasFTPRecordingStream = cam.ftp !== 'none';
+        let hasFTPRecordingStream = cam.recordingStream !== 'none';
 
         cam.streams.forEach((stream, key) => {
             if (stream.motion.enabled)
@@ -206,8 +213,9 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
             //  as doing it that way would overwrite previously edited fields which are not part of the recording set up
             this.camera.recordingType = cam.recordingType;
             this.camera.motion_detection_stream = cam.motion_detection_stream;
-            this.camera.ftp = cam.ftp;
+            this.camera.recordingStream = cam.recordingStream;
             this.camera.retriggerWindow = cam.retriggerWindow;
+            this.camera.pullPointTopic = cam.pullPointTopic;
 
             cam.streams.forEach((stream, key) => {
                 if (this.camera) {
@@ -287,7 +295,11 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                     disabled = false;
                 break;
             case RecordingType.ftpTriggered:
-                if (cam.ftp !== 'none')
+                if (cam.recordingStream !== 'none')
+                    disabled = false;
+                break;
+            case RecordingType.pullPointEventTriggered:
+                if(cam.pullPointTopic !== 'none' && cam.recordingStream !== 'none')
                     disabled = false;
                 break;
         }
@@ -341,10 +353,10 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                 }, [Validators.pattern(this.streamsOrNoneRegex)]),
                 retriggerWindow: new UntypedFormControl({
                     value: cam.retriggerWindow,
-                    disabled: cam.ftp == 'none',
+                    disabled: cam.recordingStream == 'none',
                 }, [Validators.pattern(/^(10|20|30|40|50|60|70|80|90|100)$/)]),
                 recordingType: new UntypedFormControl(cam.recordingType, [Validators.required]),
-                ftpStreamSelect: new UntypedFormControl(cam.ftp, [Validators.required, Validators.pattern(this.streamsOrNoneRegex)]),
+                recordingStreamSelect: new UntypedFormControl(cam.recordingStream, [Validators.required, Validators.pattern(this.streamsOrNoneRegex)]),
                 streamForMotionDetection: new UntypedFormControl(cam.motion_detection_stream, [Validators.required, Validators.pattern(this.streamsOrNoneRegex)]),
                 preambleFrames: new UntypedFormControl({
                     value: triggeredStream ? triggeredStream.preambleFrames : 0,
@@ -353,7 +365,11 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                 mask_file: new UntypedFormControl({
                     value: motionDetectStream !== undefined ? motionDetectStream.motion.mask_file : '',
                     disabled: cam.motion_detection_stream === 'none'
-                }, [isValidMaskFileName(this.cameras), Validators.maxLength(55)])
+                }, [isValidMaskFileName(this.cameras), Validators.maxLength(55)]),
+                pullPointRecordingTrigger: new UntypedFormControl({
+                    value: cam.pullPointTopic,
+                    disabled: cam.recordingType !== RecordingType.pullPointEventTriggered || cam.pullPointEvents.length <= 0
+                }, [])
             }, {updateOn: "change"});
         }
     }

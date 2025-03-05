@@ -95,7 +95,7 @@ class Camera {
     String name=''
     String address=''
     CameraParamSpecs cameraParamSpecs = null
-    String ftp = "none"
+    String recordingStream = "none"
     String snapshotUri=''
     boolean ptzControls = false
     Map<String, Stream> streams = new HashMap<String, Stream>()
@@ -109,6 +109,7 @@ class Camera {
     RecordingType recordingType = RecordingType.none
     String motion_detection_stream='none'
     List<String> pullPointEvents = new ArrayList<>()
+    String pullPointTopic = 'none'
 
     CameraAdminCredentials credentials() {
         Asymmetric crypto = new Asymmetric()
