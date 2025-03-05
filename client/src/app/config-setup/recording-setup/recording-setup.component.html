@@ -10,7 +10,9 @@
                     <mat-option [value]="RecordingType.none">None</mat-option>
                     <mat-option [value]="RecordingType.motionService">Motion Service</mat-option>
                     <mat-option [value]="RecordingType.ftpTriggered">FTP Triggered</mat-option>
-                    <mat-option [value]="RecordingType.pullPointEventTriggered">Pull point Event Triggered</mat-option>
+                    @if (localCamera.pullPointEvents.length > 0) {
+                        <mat-option [value]="RecordingType.pullPointEventTriggered">Pull point Event Triggered</mat-option>
+                    }
                 </mat-select>
             </mat-form-field>
             @switch (localCamera.recordingType) {
@@ -21,7 +23,7 @@
                                         matTooltipClass="tooltip">
                             <mat-label>Stream To Record From</mat-label>
                             <mat-select (selectionChange)="setSelectedStream($event)"
-                                        formControlName="ftpStreamSelect">
+                                        formControlName="recordingStreamSelect">
                                 <mat-option [value]="'none'">none</mat-option>
                                 @for (stream of localCamera.streams | keyvalue: cameraSvc.compareFn; track stream) {
                                     <mat-option [value]="stream.key">
@@ -50,7 +52,7 @@
                                     matTooltipClass="tooltip">
                         <mat-label>Retrigger Window</mat-label>
                         <mat-select (selectionChange)="setRetriggerWindow()"
-                                    [disableControl]="this.localCamera.ftp === 'none'"
+                                    [disableControl]="this.localCamera.recordingStream === 'none'"
                                     [formControl]="getControl('retriggerWindow')">
                             <mat-option *ngFor="let win of cameraSvc.ftpRetriggerWindows" [value]="win.value">
                                 {{ win.name }}
@@ -77,25 +79,25 @@
                         </mat-form-field>
                     </div>
                     <mat-form-field [style.width.px]="120" appearance="outline">
-                                <mat-label>Motion Threshold</mat-label>
+                        <mat-label>Motion Threshold</mat-label>
                         <input (input)="updateThreshold()"
-                                       [disableControl]="localCamera.motion_detection_stream === 'none'"
-                                       [formControl]="getControl('threshold')"
-                                       autocomplete="off" matInput
-                                       matTooltip="Threshold for declaring motion. The threshold is the number of changed pixels counted after noise filtering, masking, despeckle, and labelling"
-                                       matTooltipClass="tooltip" maxlength="10" placeholder="Threshold"
-                                       type="number">
-                        @if(getControl('threshold').hasError('max')) {
+                               [disableControl]="localCamera.motion_detection_stream === 'none'"
+                               [formControl]="getControl('threshold')"
+                               autocomplete="off" matInput
+                               matTooltip="Threshold for declaring motion. The threshold is the number of changed pixels counted after noise filtering, masking, despeckle, and labelling"
+                               matTooltipClass="tooltip" maxlength="10" placeholder="Threshold"
+                               type="number">
+                        @if (getControl('threshold').hasError('max')) {
                             <mat-error>
                                 Should be a number between 1 and 2147483647
                             </mat-error>
                         }
-                        @if(getControl('threshold').hasError('min')) {
+                        @if (getControl('threshold').hasError('min')) {
                             <mat-error>
                                 Should be a number between 1 and 2147483647
                             </mat-error>
                         }
-                        @if(getControl('threshold').hasError('required')) {
+                        @if (getControl('threshold').hasError('required')) {
                             <mat-error>
                                 Threshold is required
                             </mat-error>
@@ -190,6 +192,54 @@
                             Valid: 90-3000
                         </mat-error>
                     </mat-form-field>
+                }
+                @case (RecordingType.pullPointEventTriggered) {
+                    <mat-form-field [style.width.px]="400" appearance="outline"
+                                    matTooltip="Select the pull point event which will trigger recording."
+                                    matTooltipClass="tooltip">
+                        <mat-label>Pull point event</mat-label>
+                        <mat-select (selectionChange)="setSelectedPullPointRecordingTrigger($event)"
+                                    formControlName="pullPointRecordingTrigger">
+                            <mat-option [value]="'none'">None</mat-option>
+                            @for (ppe of localCamera.pullPointEvents; track ppe) {
+                                <mat-option [value]="ppe">
+                                    {{ ppe }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>Invalid value</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field [style.width.px]="185" appearance="outline"
+                                    matTooltip="Select the stream to record from. This would normally be the higher resolution stream. If a stream is selected, images sent by FTP from {{camKey}}, on motion being detected will trigger the NVR to make a recording on the selected stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP a .jpg (jpeg) image to folder {{camKey}} on port 2121 on the NVRs IP address. See Camera Recordings Service section of the README.md"
+                                    matTooltipClass="tooltip">
+                        <mat-label>Stream To Record From</mat-label>
+                        <mat-select (selectionChange)="setSelectedStream($event)"
+                                    [disableControl]="localCamera.pullPointTopic === 'none'"
+                                    formControlName="recordingStreamSelect">
+                            <mat-option [value]="'none'">None</mat-option>
+                            @for (stream of localCamera.streams | keyvalue: cameraSvc.compareFn; track stream) {
+                                <mat-option [value]="stream.key">
+                                    {{ stream.key }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>Invalid value</mat-error>
+                    </mat-form-field>
+                    <mat-form-field [style.width.px]="150" appearance="outline"
+                                    matTooltip="The number of frames to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value divided by the camera frame rate (seconds). Note that audio packets are also counted as frames, so a higher value may be required if audio is enabled on the stream."
+                                    matTooltipClass="tooltip">
+                        <mat-label>Preamble Frames</mat-label>
+                        <mat-select (selectionChange)="updatePreambleFrames()"
+                                    [disableControl]="getPreambleFramesDisabledState()"
+                                    [formControl]="getControl('preambleFrames')">
+                            <mat-option *ngFor="let preamble of cameraSvc.preambleFrameValues"
+                                        [value]="preamble">
+                                {{ preamble }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
                 }
             }
         </ng-container>

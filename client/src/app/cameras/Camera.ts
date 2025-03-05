@@ -105,7 +105,7 @@ export class Camera
     cameraParamSpecs!: CameraParamSpec;
     snapshotUri: string="";
     ptzControls: boolean = false;
-    ftp: string = "none";
+    recordingStream: string = "none";
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
     backchannelAudioSupported: boolean = false
@@ -115,5 +115,6 @@ export class Camera
     cred: string = "";
     recordingType: RecordingType = RecordingType.none;
     motion_detection_stream: string = 'none';
+    pullPointTopic: string = 'none'
     pullPointEvents: string[] = [];
 }
