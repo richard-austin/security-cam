@@ -216,6 +216,27 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         //   return camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X;
     }
 
+    getStreamDeleteDisabledState(cam: { value: Camera; key: string; }, streamKey: string): boolean {
+        const camera: Camera = cam.value;
+        if(camera !== undefined) {
+            const stream = camera.streams.get(streamKey);
+            let motionTriggeredRecording = false;
+
+            camera.streams.forEach((stream) => {
+                if (stream.motion.trigger_recording_on === streamKey)
+                    motionTriggeredRecording = true;
+            })
+            const isInvolvedWithRecording = (camera.recordingStream === streamKey) ||
+                ((stream !== undefined) ? stream!.motion.enabled : false);
+            return (camera.streams.size <= 1) || this.confirmSave ||
+                this.confirmNew ||
+                isInvolvedWithRecording ||
+                motionTriggeredRecording ||
+                this.camForRecordingSetup === cam.key;
+        }
+        return false;
+    }
+
     checkForMaskFileReUse(): boolean {
         const maskFiles: Set<string> = new Set<string>();
         let retVal = false;
@@ -707,6 +728,12 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         this.camForRecordingSetup = this.camForRecordingSetup !== camId ? camId : "";
         this.camForCredentialsEntry = "";
         this.showAddCameraDialogue = this.showOnvifCredentialsForm = false;
+
+        this.recordingSetupComponents.forEach((r) => {
+            if(r.camKey === camId)
+                r.ngOnInit();  // Reload recording setup component from main config data
+        });
+
     }
 
     toggleCameraDeleteConfirm(key: string) {
@@ -806,5 +833,9 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     }
 
     ngOnDestroy() {
+    }
+
+    streamDeleteButtonToolTip(cam:{value: Camera, key: string}, stream: string) {
+        return cam.value.streams.size <= 1 ? 'Cannot delete last stream' : this.getStreamDeleteDisabledState(cam, stream) ? 'Cannot delete a stream used in recording' : 'Delete this stream';
     }
 }

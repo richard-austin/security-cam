@@ -331,12 +331,14 @@
                                 <ng-container matColumnDef="delete">
                                     <th *matHeaderCellDef mat-header-cell>Delete</th>
                                     <td *matCellDef="let stream" [width]="50" mat-cell>
-                                        <button (click)="showStreamDeleteConfirm = showStreamDeleteConfirm !== cam.key+stream.key ? cam.key+stream.key : ''; showCameraDeleteConfirm=''"
-                                                [disabled]="(cam.value.streams.size <= 1) || confirmSave || confirmNew"
-                                                mat-icon-button matTooltip="Delete this stream"
-                                                matTooltipClass="tooltip">
-                                            <mat-icon class="trash-can">delete</mat-icon>
-                                        </button>
+                                        <span [matTooltip]="streamDeleteButtonToolTip(cam, stream.key)"
+                                              matTooltipClass="tooltip">
+                                            <button (click)="showStreamDeleteConfirm = showStreamDeleteConfirm !== cam.key+stream.key ? cam.key+stream.key : ''; showCameraDeleteConfirm=''"
+                                                    [disabled]="getStreamDeleteDisabledState(cam, stream.key)"
+                                                    mat-icon-button>
+                                                <mat-icon class="trash-can">delete</mat-icon>
+                                            </button>
+                                        </span>
                                         <div class="popup-stream-delete-confirm-dialogue">
                                             <div [@detailExpand]="showStreamDeleteConfirm===cam.key+stream.key ? 'expanded' : 'collapsed'"
                                                  [ngClass]="{'mat-elevation-z15': showStreamDeleteConfirm===cam.key+stream.key}">
@@ -353,7 +355,7 @@
                                     <th *matHeaderCellDef mat-header-cell> Descr.</th>
                                     <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="230">
                                         <mat-form-field appearance="outline">
-                                            <mat-label>Stream description</mat-label>
+                                        <mat-label>Stream description</mat-label>
                                             <input (change)="updateStreamField(camIndex, streamIndex, 'descr')"
                                                    [formControl]="getStreamControl(camIndex, streamIndex, 'descr')"
                                                    autocomplete="off" matInput

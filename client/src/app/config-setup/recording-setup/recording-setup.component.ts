@@ -353,7 +353,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                 }, [Validators.pattern(this.streamsOrNoneRegex)]),
                 retriggerWindow: new UntypedFormControl({
                     value: cam.retriggerWindow,
-                    disabled: cam.recordingStream == 'none',
+                    disabled: cam.recordingStream === 'none',
                 }, [Validators.pattern(/^(10|20|30|40|50|60|70|80|90|100)$/)]),
                 recordingType: new UntypedFormControl(cam.recordingType, [Validators.required]),
                 recordingStreamSelect: new UntypedFormControl(cam.recordingStream, [Validators.required, Validators.pattern(this.streamsOrNoneRegex)]),
