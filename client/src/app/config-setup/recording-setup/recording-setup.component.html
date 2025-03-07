@@ -251,7 +251,7 @@
             Cancel
           </button>
           <button color="warn" mat-raised-button
-                  [disabled]="anyInvalid()"
+                  [disabled]="confirmButtonDisabledState()"
                   (click)="confirmChanges()"
                   matTooltip="Confirm changes and make ready for saving"
                   matTooltipClass="tooltip">

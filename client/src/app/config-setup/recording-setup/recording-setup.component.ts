@@ -187,8 +187,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     }
 
     cancel() {
-        this.ngOnInit();
-        this.hideDialogue.emit();
+       this.hideDialogue.emit();
     }
 
     anyInvalid(): boolean {
@@ -304,6 +303,15 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                 break;
         }
         return disabled;
+    }
+
+    confirmButtonDisabledState() {
+        const cam = this.localCamera;
+        const disabledState =
+            cam.recordingType === RecordingType.pullPointEventTriggered && cam.recordingStream === 'none' ||
+            cam.recordingType === RecordingType.ftpTriggered && cam.recordingStream === 'none' ||
+            cam.recordingType === RecordingType.motionService && cam.motion_detection_stream === 'none';
+        return disabledState || this.anyInvalid();
     }
 
     /**
