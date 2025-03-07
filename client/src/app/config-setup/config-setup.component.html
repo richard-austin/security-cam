@@ -51,7 +51,6 @@
                           class="scrollable-content">
             <app-onvif-failures (fixUpCamerasData)="FixUpCamerasData()" *ngIf="failed.size > 0" [cameras]="cameras"
                                 [failures]="failed" [reporting]="reporting">
-
             </app-onvif-failures>
             <table [dataSource]="cameras | keyvalue: cameraSvc.compareFn" class="mat-elevation-z8" mat-table
                    multiTemplateDataRows>
@@ -116,12 +115,11 @@
                     </td>
                 </ng-container>
 
-
                 <ng-container matColumnDef="delete">
                     <th *matHeaderCellDef mat-header-cell>Delete</th>
                     <td *matCellDef="let cam" mat-cell>
-                        <button (click)="showCameraDeleteConfirm = showCameraDeleteConfirm !== cam.key ? cam.key : ''; showStreamDeleteConfirm=''"
-                                [disabled]="cameras.size <= 1 || confirmSave || confirmNew"
+                        <button (click)="toggleCameraDeleteConfirm(cam.key)"
+                                [disabled]="getCameraDeleteDisabledState(cam)"
                                 mat-icon-button matTooltip="Delete {{cam.key}}" matTooltipClass="tooltip">
                             <mat-icon class="trash-can">delete</mat-icon>
                         </button>
@@ -131,7 +129,9 @@
                                 <div>
                                 </div>
                                 <app-row-delete-confirm [camKey]="cam.key"
-                                                        (hideDialogue)="toggleCameraDeleteConfirm($event.cam)">
+                                                        [streamKey]="''"
+                                                        (delete)="deleteCamera(cam.key);toggleCameraDeleteConfirm(cam.key)"
+                                                        (hideDialogue)="toggleCameraDeleteConfirm(cam.key)">
                                 </app-row-delete-confirm>
                             </div>
                         </div>
@@ -333,7 +333,7 @@
                                     <td *matCellDef="let stream" [width]="50" mat-cell>
                                         <span [matTooltip]="streamDeleteButtonToolTip(cam, stream.key)"
                                               matTooltipClass="tooltip">
-                                            <button (click)="showStreamDeleteConfirm = showStreamDeleteConfirm !== cam.key+stream.key ? cam.key+stream.key : ''; showCameraDeleteConfirm=''"
+                                            <button (click)="toggleStreamDeleteConfirm({cam: cam.key, stream:stream.key})"
                                                     [disabled]="getStreamDeleteDisabledState(cam, stream.key)"
                                                     mat-icon-button>
                                                 <mat-icon class="trash-can">delete</mat-icon>
@@ -345,6 +345,7 @@
                                                 <div>
                                                 </div>
                                                 <app-row-delete-confirm [camKey]="cam.key" [streamKey]="stream.key"
+                                                                        (delete)="deleteStream($event);toggleStreamDeleteConfirm($event)"
                                                                         (hideDialogue)="toggleStreamDeleteConfirm($event)">
                                                 </app-row-delete-confirm>
                                             </div>
@@ -501,14 +502,14 @@
                                 </div>
                             </div>
                             @if (!confirmNew && !confirmNewLookup) {
-                                <button (click)="confirmNew=true"
+                                <button (click)="confirmNew=true;allOff()"
                                         [disabled]="anyInvalid() || confirmSave" mat-icon-button
                                         matTooltip="Start a new configuration" matTooltipClass="tooltip">
                                     <mat-icon>note</mat-icon>
                                 </button>
                             }
                             @if (!confirmNewLookup) {
-                                <button (click)="confirmNewLookup=true"
+                                <button (click)="confirmNewLookup=true;allOff()"
                                         [disabled]="confirmSave || confirmNewLookup || confirmNew" mat-icon-button
                                         matTooltip="Perform onvif LAN search for cameras" matTooltipClass="tooltip">
                                     <mat-icon>explore</mat-icon>

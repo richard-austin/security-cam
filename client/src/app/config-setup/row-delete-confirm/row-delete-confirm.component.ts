@@ -11,13 +11,14 @@ import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/
 })
 export class RowDeleteConfirmComponent {
     @Output() hideDialogue: EventEmitter<{cam: string, stream: string}> = new EventEmitter<{cam: string, stream: string}>();
+    @Output() delete: EventEmitter<{cam: string, stream: string}> = new EventEmitter<{cam: string, stream: string}>();
     @Input() camKey!: string;
     @Input() streamKey!: string;
 
     confirmRowDelete(deleteRow: boolean) {
         if(deleteRow)
-            this.hideDialogue.emit({cam:this.camKey, stream: this.streamKey});
+            this.delete.emit({cam: this.camKey, stream:this.streamKey});
         else
-            this.hideDialogue.emit({cam:'', stream:''});
+            this.hideDialogue.emit({cam: this.camKey, stream:this.streamKey});
     }
 }

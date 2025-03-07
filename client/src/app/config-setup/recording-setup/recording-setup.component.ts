@@ -325,6 +325,12 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
         return this.parent.checkForMaskFileReUse();
     }
 
+    setupData(): void {
+        if (this.camera)
+            this.localCamera = this.clone(this.camera);
+        this.setUpFormGroup();
+    }
+
     readonly streamsOrNoneRegex = /^(none|stream[1-9]{1,2}?)$/;
 
     setUpFormGroup() {
@@ -375,9 +381,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit(): void {
-        if (this.camera)
-            this.localCamera = this.clone(this.camera);
-        this.setUpFormGroup();
+        this.setupData();
     }
 
     ngAfterViewInit(): void {

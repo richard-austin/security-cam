@@ -100,7 +100,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     }
 
     @HostListener('window:unload', ['$event'])
-    beforeunload($event: any) {
+        beforeunload($event: any) {
     }
 
     downloading: boolean = true;
@@ -214,6 +214,10 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         //   return true;
         // else
         //   return camera.cameraParamSpecs.camType !== cameraType.sv3c && camera.cameraParamSpecs.camType !== cameraType.zxtechMCW5B10X;
+    }
+
+    getCameraDeleteDisabledState(cam:{key: string, value: Camera}): boolean {
+        return this.cameras.size <= 1 || this.confirmSave || this.confirmNew || this.camForRecordingSetup === cam.key;
     }
 
     getStreamDeleteDisabledState(cam: { value: Camera; key: string; }, streamKey: string): boolean {
@@ -336,18 +340,17 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
     /**
      * deleteStream: Delete a stream from the streams map
-     * @param cameraKey
-     * @param streamKey
+     * @param c
      */
-    deleteStream(cameraKey: string, streamKey: string): boolean {
+    deleteStream(c:{cam: string, stream: string}): boolean {
         let retVal: boolean = false;
 
-        let cam: Camera = this.cameras.get(cameraKey) as Camera;
+        let cam: Camera = this.cameras.get(c.cam) as Camera;
         if (cam !== undefined) {
-            retVal = Array.from(cam.streams.keys()).find(k => k === streamKey) !== undefined;
+            retVal = Array.from(cam.streams.keys()).find(k => k === c.stream) !== undefined;
             if (retVal) {
-                let enableFirstAsMultiDisplayDefault: boolean = (cam.streams.get(streamKey) as Stream).defaultOnMultiDisplay;
-                cam.streams.delete(streamKey);
+                let enableFirstAsMultiDisplayDefault: boolean = (cam.streams.get(c.stream) as Stream).defaultOnMultiDisplay;
+                cam.streams.delete(c.stream);
                 cam.streams.forEach((stream) => {
                     // Ensure we don't land up with none selected as default stream to show on multi cameras display
                     if (enableFirstAsMultiDisplayDefault) {
@@ -693,10 +696,6 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         return window.btoa(binary);
     }
 
-    private cameraHasCredentials(cam: Camera) {
-        return cam.cred !== "";
-    }
-
     checkIfOnvifCredentialsPresent() {
         this.cameraSvc.haveOnvifCredentials().subscribe(result => {
                 this.haveOnvifCredentials = result == "true";
@@ -705,48 +704,53 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                 this.reporting.errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
             });
     }
+    allOff() {
+        this.camForRecordingSetup = this.camForCredentialsEntry = "";
+        this.showCameraDeleteConfirm= this.showStreamDeleteConfirm = '';
+        this.showAddCameraDialogue = this.showOnvifCredentialsForm = false;
+    }
 
     togglePasswordDialogue(camId: string) {
-        this.camForCredentialsEntry = this.camForCredentialsEntry !== camId ? camId : "";
-        this.camForRecordingSetup = "";
-        this.showAddCameraDialogue = this.showOnvifCredentialsForm = false;
+        const camForCredentialsEntry = this.camForCredentialsEntry !== camId ? camId : ""
+        this.allOff();
+        this.camForCredentialsEntry = camForCredentialsEntry;
     }
 
     toggleOnvifPasswordDialogue() {
-        this.camForRecordingSetup = this.camForCredentialsEntry = "";
-        this.showAddCameraDialogue = false;
-        this.showOnvifCredentialsForm = !this.showOnvifCredentialsForm;
+        const showOnvifCredentialsForm = !this.showOnvifCredentialsForm;
+        this.allOff();
+        this.showOnvifCredentialsForm = showOnvifCredentialsForm;
     }
 
     toggleAddCameraOnvifUriDialogue() {
-        this.showAddCameraDialogue = !this.showAddCameraDialogue;
-        this.camForRecordingSetup = this.camForCredentialsEntry = "";
-        this.showOnvifCredentialsForm = false;
+        const showAddCameraDialogue = !this.showAddCameraDialogue;
+        this.allOff();
+        this.showAddCameraDialogue = showAddCameraDialogue;
     }
 
     toggleRecordingSetupDialogue(camId: string) {
-        this.camForRecordingSetup = this.camForRecordingSetup !== camId ? camId : "";
-        this.camForCredentialsEntry = "";
-        this.showAddCameraDialogue = this.showOnvifCredentialsForm = false;
+        const camForRecordingSetup = this.camForRecordingSetup !== camId ? camId : "";
+        this.allOff();
+        this.camForRecordingSetup = camForRecordingSetup;
 
-        this.recordingSetupComponents.forEach((r) => {
-            if(r.camKey === camId)
-                r.ngOnInit();  // Reload recording setup component from main config data
-        });
-
+        if (this.camForRecordingSetup === camId)
+            this.recordingSetupComponents.forEach((r) => {
+                if (r.camKey === camId)
+                    r.setupData();  // Reload recording setup component from main config data
+            });
     }
 
     toggleCameraDeleteConfirm(key: string) {
-        if (key !== '')
-            this.deleteCamera(key)
-        this.showCameraDeleteConfirm = this.showCameraDeleteConfirm !== key ? key : '';
+        const showCameraDeleteConfirm = this.showCameraDeleteConfirm !== key ? key : '';
+        this.allOff();
+        this.showCameraDeleteConfirm = showCameraDeleteConfirm;
     }
 
     toggleStreamDeleteConfirm($event: { cam: string; stream: string }) {
-        if ($event.cam !== '' && $event.stream !== '')
-            this.deleteStream($event.cam, $event.stream);
         const compoundKey = $event.cam + $event.stream;
-        this.showStreamDeleteConfirm = this.showStreamDeleteConfirm !== compoundKey ? compoundKey : '';
+        const showStreamDeleteConfirm = this.showStreamDeleteConfirm !== compoundKey ? compoundKey : '';
+        this.allOff();
+        this.showStreamDeleteConfirm = showStreamDeleteConfirm;
     }
 
     startFindCameraDetails(onvifUrl: string) {
