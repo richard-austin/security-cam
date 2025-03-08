@@ -16,6 +16,7 @@ export class MediaFeeder {
   ws!: WebSocket; // websocket
   stream_started = false; // is the source_buffer updateend callback active or not
   started: boolean = false;
+  startLatencyChasing: boolean = false;
   mimeType: string = 'video/mp4';
 
   // create media source instance
@@ -89,6 +90,10 @@ export class MediaFeeder {
 
       // set MediaSource as source of video
       this.media.src = window.URL.createObjectURL(this.ms);
+      this.media.onplay = () => {
+        console.log("Playing");
+        this.startLatencyChasing = true;
+      };
     }
   }
 
@@ -163,6 +168,7 @@ export class MediaFeeder {
     let data = new Uint8Array(arr);
     if (data[0] === 9 && !this.started) {
       this.started = true;
+      this.startLatencyChasing = false;
       let codecs;  // https://wiki.whatwg.org/wiki/Video_type_parameters
       let decoded_arr = data.slice(1);
       if (window.TextDecoder) {
@@ -185,13 +191,14 @@ export class MediaFeeder {
       // https://developer.mozilla.org/en-US/docs/Web/API/source_buffer/mode
       //     let myMode = source_buffer.mode;
       this.source_buffer.mode = 'sequence';
-      // source_buffer.mode = 'segments';  // TODO: should we use this instead?
+      // this.source_buffer.mode = 'segments';  // TODO: should we use this instead?
 
       this.source_buffer.addEventListener('updateend', this.loadPacket);
     } else if (this.started) {
       // keep the latency to minimum
       let latest = this.media.duration;
-      if ((this.media.duration >= this.buffering_sec) &&
+
+      if (this.startLatencyChasing && (this.media.duration >= this.buffering_sec) &&
         ((latest - this.media.currentTime) > this.buffering_sec_seek)) {
         console.log('seek from ', this.media.currentTime, ' to ', latest);
         // Flag to show latency chasing is occurring

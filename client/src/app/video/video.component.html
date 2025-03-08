@@ -49,15 +49,16 @@
                 matTooltipClass="tooltip"
                 style="width: 90px;" #latencyLimitSelect [(ngModel)]="buffering_sec"
                 (change)="videoFeeder.setlatencyLim(buffering_sec)">
-          <option value="0.4">0.4</option>
-          <option value="0.6">0.6</option>
-          <option value="0.8"> 0.8</option>
-          <option value="1">1.0</option>
-          <option value="1.2">1.2</option>
-          <option value="1.4">1.4</option>
-          <option value="1.6">1.6</option>
-          <option value="1.8">1.8</option>
-          <option value="2">2.0</option>
+            <option value="0.4">0.4</option>
+            <option value="0.6">0.6</option>
+            <option value="0.8"> 0.8</option>
+            <option value="1">1.0</option>
+            <option value="1.2">1.2</option>
+            <option value="1.4">1.4</option>
+            <option value="1.6">1.6</option>
+            <option value="1.8">1.8</option>
+            <option value="2">2.0</option>
+            <option value="4">4.0</option>
         </select>
         <label class="video-buttons"
                matTooltip="Set full screen"
