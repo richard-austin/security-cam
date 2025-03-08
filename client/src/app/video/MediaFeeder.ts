@@ -26,7 +26,7 @@ export class MediaFeeder {
   verbose: boolean = false;
   buffering_sec!: number
   buffering_sec_seek!: number;
-  // ..seek the stream if it's this much away or
+  // Seek the stream if it's this much away or
   // from the last available timestamp
   buffering_sec_seek_distance!: number;
   latency_chasing: boolean = false;
