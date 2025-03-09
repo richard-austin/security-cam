@@ -42,7 +42,7 @@ the NVR email client must be logged into an SMTP client
   site certificate and continue to the log in dialogue box.
 * Enter the username and password you set up when creating the account.
   You can check "Remember me" to enable auto login in the future.
-* Click the SIGN IN button
+* Click the SIGN-IN button
 * You are now logged into your NVR and should see a menu bar at the top of a blank page.
 ## Set up Wi-Fi (if required)
 If you want to use Wi-Fi, and it hasn't previously been set up on the Raspberry pi, it can be done from the NVRs
@@ -67,7 +67,7 @@ Cameras Configuration.
 If camera configuration has not yet been done, the Cameras Configuration Editor will
 be empty apart from a single unpopulated camera entry.
 
-![config editor](README.images/config-editor.png)
+![config editor](README.images/config-editor3.png)
 *Cameras Configuration Editor*
 
 #### Config page button functions

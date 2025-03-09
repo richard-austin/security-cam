@@ -91,9 +91,17 @@ export class MediaFeeder {
       // set MediaSource as source of video
       this.media.src = window.URL.createObjectURL(this.ms);
       this.media.onplay = () => {
-        console.log("Playing");
+        console.log("Media Playing");
         this.startLatencyChasing = true;
       };
+      this.media.onended = () => {
+        console.log("Media Ended");
+        this.startLatencyChasing = false;
+      }
+      this.media.onerror = () => {
+        console.log("Media error");
+        this.startLatencyChasing = false;
+      }
     }
   }
 
@@ -101,6 +109,7 @@ export class MediaFeeder {
 
   opened = () => { // MediaSource object is ready to go
     console.log('Called opened');
+    this.startLatencyChasing = false;
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaSource/duration
     let getUrl = window.location;
     let baseUrl = getUrl.protocol + '//' + getUrl.host + '/' + getUrl.pathname.split('/')[1];
