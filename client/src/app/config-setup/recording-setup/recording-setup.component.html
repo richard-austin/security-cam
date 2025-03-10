@@ -11,7 +11,7 @@
                     <mat-option [value]="RecordingType.motionService">Motion Service</mat-option>
                     <mat-option [value]="RecordingType.ftpTriggered">FTP Triggered</mat-option>
                     @if (localCamera.pullPointEvents.length > 0) {
-                        <mat-option [value]="RecordingType.pullPointEventTriggered">Pull point Event Triggered</mat-option>
+                        <mat-option [value]="RecordingType.pullPointEventTriggered">Pull Point Event Triggered</mat-option>
                     }
                 </mat-select>
             </mat-form-field>
@@ -123,8 +123,9 @@
                         </mat-select>
                         <mat-error>Invalid value</mat-error>
                     </mat-form-field>
-                    <mat-form-field [style.width.px]="220" appearance="outline">
+                    <mat-form-field floatLabel="always" [style.width.px]="220" appearance="outline">
                         <!--                    <mat-label>Mask File</mat-label>-->
+                        <mat-label>Mask File</mat-label>
                         <input #fileInput
                                (change)="uploadMaskFile($event)"
                                accept=".pgm" hidden style="position: absolute" type="file"/>
@@ -137,6 +138,7 @@
 
                                 <mat-icon>file_upload</mat-icon>
                             </button>
+
                             <input [formControl]="getControl('mask_file')"
                                    matInput readonly type="text">
                             <button (click)="clearMaskFile();getControl('mask_file').setValue('');"
@@ -197,7 +199,7 @@
                     <mat-form-field [style.width.px]="400" appearance="outline"
                                     matTooltip="Select the pull point event which will trigger recording."
                                     matTooltipClass="tooltip">
-                        <mat-label>Pull point event</mat-label>
+                        <mat-label>Pull Point Event</mat-label>
                         <mat-select (selectionChange)="setSelectedPullPointRecordingTrigger($event)"
                                     formControlName="pullPointRecordingTrigger">
                             <mat-option [value]="'none'">None</mat-option>
