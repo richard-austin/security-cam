@@ -136,18 +136,22 @@ class FTPAndVideoFileProcessor(FTPHandler):
                 else:
                     stream_id = ""
                     for s in camera['streams']:
-                        if camera['streams'][s]['recording']['enabled']:
+                        if camera['streams'][s]['recording']['enabled'] and camera['recordingType'] == 'ftpTriggered':
                             stream_id = s
                             break
-
-                    ffmpeg_cmd = get_ffmpeg_cmd(camera, stream_id)
-                    subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
-                    timer: ResettableTimer = ResettableTimer(camera['retriggerWindow'],
-                                                             lambda: self.finish_recording(subproc, camera_name))
-                    timer.start()
-                    self.processDict[camera_name] = timer
-                    logger.info(
-                        f"Started recording for {camera_name}, retriggerWindow = {camera['retriggerWindow']}")
+                    if stream_id != "":
+                        ffmpeg_cmd = get_ffmpeg_cmd(camera, stream_id)
+                        subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
+                        timer: ResettableTimer = ResettableTimer(camera['retriggerWindow'],
+                                                                 lambda: self.finish_recording(subproc, camera_name))
+                        timer.start()
+                        self.processDict[camera_name] = timer
+                        logger.info(f"Started recording for {camera_name}, retriggerWindow = {camera['retriggerWindow']}")
+                    else:
+                        if camera['recordingType'] != 'ftpTriggered':
+                            logger.warning(f"Camera {camera_name} is FTPing JPG files to the recording service but recordingType is set to {camera['recordingType']}")
+                        else:
+                            logger.warning(f"Camera {camera_name} is FTPing JPG files to the recording service but no streams have recording enabled.")
 
                 os.remove(path)
 
