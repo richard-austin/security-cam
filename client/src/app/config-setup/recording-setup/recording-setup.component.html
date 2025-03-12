@@ -250,7 +250,7 @@
                         <input (blur)="updateSimpleItemPositiveValue()"
                                [formControl]="getControl('simpleItemPositiveValue')"
                                autocomplete="off" matInput
-                               matTooltip='The "Value" attribute of the SimpleItem when an object enters the cameras detection zone. This is in PullMessagesResponse Data'
+                               matTooltip='The "Value" attribute of the SimpleItem when an object enters the cameras detection zone. This value should match the value of the SimpleItem Value attribute sent when an object is detected.'
                                matTooltipClass="tooltip" maxlength="40"
                                type="text">
                         @if (getControl('simpleItemPositiveValue').invalid) {
@@ -265,7 +265,7 @@
                         <input (blur)="updateSimpleItemNegativeValue()"
                                [formControl]="getControl('simpleItemNegativeValue')"
                                autocomplete="off" matInput
-                               matTooltip='The "Value" attribute of the SimpleItem when an object leaves the cameras detection zone. This in PullMessagesResponse Data'
+                               matTooltip='The "Value" attribute of the SimpleItem when an object leaves the cameras detection zone. This value should match the value of the SimpleItem Value attribute sent when an object moves out of the detection zone.'
                                matTooltipClass="tooltip" maxlength="40"
                                type="text">
                         @if (getControl('simpleItemNegativeValue').invalid) {
