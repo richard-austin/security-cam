@@ -215,8 +215,54 @@ to choose from when selecting the recording trigger.
 #### On the Recording Type selector, select "Pull Point Event Triggered"
 ![recording-setup](README.images/recording-setup-pull-point.png)
 
-| Parameter/Control     | Function                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Set by Onvif Discovery                                                        |
-|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| Pull point event      | Select the topic that you want to trigger recording with. Some topics may not be motion detection related, for example on a Reolink Video Doorbell, there is a Visitor topic which is fired when the doorbell is pressed.                                                                                                                                                                                                                                          | No, though the topic list in the selector is populated during Onvif discovery | 
-| Stream To Record From | Recording will be made from the selected stream when the camera sends the selected topic with value true. The recording normally finishes 1 minute after the topic is received with value false. If the topic is received with value true before this 1 minute is up, the timout will start again after the topic is received with value false again.<br/><br/>*Note that some cameras may return data values other than true or false. This is not yet supported* | N/A                                                                           |
-| Preamble Frames       | This is the number of frames to delay the stream by when making the recording. The recording will then contain a period of activity before the point at which it was triggered. Note that frames also include audio frames, so the if the stream includes audio, this may need to be a higher number for the same delay.                                                                                                                                           | N/A                                                                           |
+| Parameter/Control          | Function                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Set by Onvif Discovery                                                        |
+|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| Pull point event           | Select the topic that you want to trigger recording with. Some topics may not be motion detection related, for example on a Reolink Video Doorbell, there is a Visitor topic which is fired when the doorbell is pressed.                                                                                                                                                                                                                                          | No, though the topic list in the selector is populated during Onvif discovery | 
+| Stream To Record From      | Recording will be made from the selected stream when the camera sends the selected topic with value true. The recording normally finishes 1 minute after the topic is received with value false. If the topic is received with value true before this 1 minute is up, the timout will start again after the topic is received with value false again.<br/><br/>*Note that some cameras may return data values other than true or false. This is not yet supported* | N/A                                                                           |
+| Simple Item Name           | The "Name" attribute of the SimpleItem (containing the detection state) in the PullMessagesResponse Data section. (Default = "State")                                                                                                                                                                                                                                                                                                                              | N/A                                                                           |
+| Simple Item Positive Value | The "Value" attribute of the SimpleItem when an object enters the cameras detection zone. This value should match the value of the SimpleItem Value attribute sent when an object is detected. (Default value = "true")                                                                                                                                                                                                                                            | N/A                                                                           |
+| Simple Item Negative Value | The "Value" attribute of the SimpleItem when an object leaves the cameras detection zone. This value should match the value of the SimpleItem Value attribute sent when an object moves out of the camera detection zone. (Default value = "false")                                                                                                                                                                                                                | N/A                                                                           |
+| Preamble Frames            | This is the number of frames to delay the stream by when making the recording. The recording will then contain a period of activity before the point at which it was triggered. Note that frames also include audio frames, so the if the stream includes audio, this may need to be a higher number for the same delay.                                                                                                                                           | N/A                                                                           |
+
+
+```xml
+<SOAP-ENV:Body>
+    <tev:PullMessagesResponse>
+        <tev:CurrentTime>2025-03-12T12:39:10Z</tev:CurrentTime>
+        <tev:TerminationTime>2025-03-12T12:40:09Z</tev:TerminationTime>
+        <wsnt:NotificationMessage>
+            <wsnt:Topic Dialect="http://www.onvif.org/ver10/tev/topicExpression/ConcreteSet">
+                tns1:RuleEngine/CellMotionDetector/Motion
+            </wsnt:Topic>
+            <wsnt:Message>
+                <tt:Message UtcTime="2025-03-12T12:39:19Z" PropertyOperation="Changed">
+                    <tt:Source>
+                        <tt:SimpleItem Name="VideoSourceConfigurationToken" Value="000"/>
+                        <tt:SimpleItem Name="VideoAnalyticsConfigurationToken" Value="000"/>
+                        <tt:SimpleItem Name="Rule" Value="000"/>
+                    </tt:Source>
+                    <tt:Data>
+                        <tt:SimpleItem Name="State" Value="true"/>
+                    </tt:Data>
+                </tt:Message>
+            </wsnt:Message>
+        </wsnt:NotificationMessage>
+      <wsnt:NotificationMessage>
+        <wsnt:Topic Dialect="http://www.onvif.org/ver10/tev/topicExpression/ConcreteSet">
+          tns1:RuleEngine/MyRuleDetector/PeopleDetect
+        </wsnt:Topic>
+        <wsnt:Message>
+          <tt:Message UtcTime="2025-03-12T12:39:19Z" PropertyOperation="Changed">
+            <tt:Source>
+              <tt:SimpleItem Name="Source" Value="000"/>
+            </tt:Source>
+            <tt:Data>
+              <tt:SimpleItem Name="State" Value="true"/>
+            </tt:Data>
+          </tt:Message>
+        </wsnt:Message>
+      </wsnt:NotificationMessage>
+    </tev:PullMessagesResponse>
+</SOAP-ENV:Body>
+```
+##### Part of PullMessageResponse SOAP message received from camera on an object coming into the detection zone
