@@ -20,6 +20,11 @@ class PullPointHandlerContainer implements PullMessagesCallbacks {
     private Timer timer = null
     final private recordingOverrun = 60000
 
+    // Set up defaults for the values we're looking for in the pull point events
+    private String simpleItemName = "State"
+    private String simpleItemPositiveValue = "true"
+    private String simpleItemNegativeValue = "false"
+
     PullPointHandlerContainer(final OnvifDevice device, final String camKey, final Camera cam, RestfulInterfaceService restfulInterfaceService) {
         this.device = device
         this.camKey = camKey
@@ -28,31 +33,37 @@ class PullPointHandlerContainer implements PullMessagesCallbacks {
         this.logService = restfulInterfaceService.logService
     }
 
+    void setupSimpleItemTriggerValues(String simpleItemName, String simpleItemPositiveValue, String simpleItemNegativeValue) {
+        this.simpleItemName = simpleItemName
+        this.simpleItemPositiveValue = simpleItemPositiveValue
+        this.simpleItemNegativeValue = simpleItemNegativeValue
+    }
+
     @Override
     void onPullMessagesReceived(PullMessagesResponse pullMessages) {
-        if(gettingEvents) {
+        if (gettingEvents) {
             ProcessedPullMessagesResponse ppmr = new ProcessedPullMessagesResponse(pullMessages)
             ppmr.responseData.forEach((x) ->
                     x.Data.forEach((data) -> {
                         cam.pullPointEvents.add(x.topic)
                         logService.cam.info(x.created.toString() + " " + x.topic + " " + data.Name + " " + data.Value)
                     }))
-        }
-        else // Subscribing
+        } else // Subscribing
         {
             ProcessedPullMessagesResponse ppmr = new ProcessedPullMessagesResponse(pullMessages)
-            ppmr.responseData.forEach((x) ->
-                    x.Data.forEach((data) -> {
-                        if(x.topic == cam.pullPointTopic) {
-                            logService.cam.info(x.created.toString() + " " + x.topic + " " + data.Name + " " + data.Value)
-                            if(data.Value == 'true') {
-                                startTimer()
-                            }
-                         }
-                    }))
-
+            ppmr.responseData.forEach((x) -> {
+                if (x.topic == cam.pullPointTopic) {
+                    x.Data.forEach((simpleItem) -> {
+                        logService.cam.info(x.created.toString() + " " + x.topic + " " + simpleItem.Name + " " + simpleItem.Value)
+                        if (simpleItem.Name == this.simpleItemName && simpleItem.Value == this.simpleItemPositiveValue) {
+                            startTimer()
+                        }
+                    })
+                }
+            })
         }
     }
+
 
     void getEvents() {
         gettingEvents = true

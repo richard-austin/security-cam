@@ -110,6 +110,11 @@ class Camera {
     String motion_detection_stream='none'
     List<String> pullPointEvents = new ArrayList<>()
     String pullPointTopic = 'none'
+    // Set up defaults for the values we're looking for in the pull point events
+    String simpleItemName = "State"
+    String simpleItemPositiveValue = "true"
+    String simpleItemNegativeValue = "false"
+
 
     CameraAdminCredentials credentials() {
         Asymmetric crypto = new Asymmetric()

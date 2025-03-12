@@ -189,10 +189,11 @@
                                matTooltip="The height in pixels of the video on {{localCamera.motion_detection_stream}}. This is required if motion detection is enabled on {{localCamera.motion_detection_stream}}."
                                matTooltipClass="tooltip" maxlength="4" placeholder="Video Height"
                                type="number">
-                        <mat-error
-                                *ngIf="getControl('video_height').invalid">
+                        @if (getControl('video_height').invalid) {
+                            <mat-error>
                             Valid: 90-3000
-                        </mat-error>
+                            </mat-error>
+                        }
                     </mat-form-field>
                 }
                 @case (RecordingType.pullPointEventTriggered) {
@@ -228,6 +229,52 @@
                         </mat-select>
                         <mat-error>Invalid value</mat-error>
                     </mat-form-field>
+
+                    <mat-form-field [style.width.px]="150" appearance="outline">
+                        <mat-label>Simple Item Name</mat-label>
+                        <input (blur)="updateSimpleItemName()"
+                               [formControl]="getControl('simpleItemName')"
+                               autocomplete="off" matInput
+                               matTooltip='The "Name" attribute of the SimpleItem (containing the detection state) in the PullMessagesResponse Data section'
+                               matTooltipClass="tooltip" maxlength="40"
+                               type="text">
+                        @if (getControl('simpleItemName').invalid) {
+                            <mat-error>
+                                simpleItemName is required
+                            </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field [style.width.px]="170" appearance="outline">
+                        <mat-label>Simple Item Positive Value</mat-label>
+                        <input (blur)="updateSimpleItemPositiveValue()"
+                               [formControl]="getControl('simpleItemPositiveValue')"
+                               autocomplete="off" matInput
+                               matTooltip='The "Value" attribute of the SimpleItem when an object enters the cameras detection zone. This is in PullMessagesResponse Data'
+                               matTooltipClass="tooltip" maxlength="40"
+                               type="text">
+                        @if (getControl('simpleItemPositiveValue').invalid) {
+                            <mat-error>
+                                simpleItemPositiveValue is required
+                            </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field [style.width.px]="170" appearance="outline">
+                        <mat-label>Simple Item Negative Value</mat-label>
+                        <input (blur)="updateSimpleItemNegativeValue()"
+                               [formControl]="getControl('simpleItemNegativeValue')"
+                               autocomplete="off" matInput
+                               matTooltip='The "Value" attribute of the SimpleItem when an object leaves the cameras detection zone. This in PullMessagesResponse Data'
+                               matTooltipClass="tooltip" maxlength="40"
+                               type="text">
+                        @if (getControl('simpleItemNegativeValue').invalid) {
+                            <mat-error>
+                                simpleItemNegativeValue is required
+                            </mat-error>
+                        }
+                    </mat-form-field>
+
                     <mat-form-field [style.width.px]="150" appearance="outline"
                                     matTooltip="The number of frames to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value divided by the camera frame rate (seconds). Note that audio packets are also counted as frames, so a higher value may be required if audio is enabled on the stream."
                                     matTooltipClass="tooltip">

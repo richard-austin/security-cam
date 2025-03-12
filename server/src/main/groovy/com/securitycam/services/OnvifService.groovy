@@ -24,10 +24,8 @@ import com.securitycam.interfaceobjects.PullPointHandlerContainer
 import common.Authentication
 import de.onvif.discovery.OnvifDiscovery
 import de.onvif.soap.OnvifDevice
-import de.onvif.soap.PullMessagesCallbacks
 import org.apache.commons.io.IOUtils
 import org.apache.http.protocol.BasicHttpContext
-import org.onvif.ver10.events.wsdl.PullMessagesResponse
 import org.onvif.ver10.media.wsdl.Media
 import org.onvif.ver10.schema.AudioEncoderConfiguration
 import org.onvif.ver10.schema.PTZNode
@@ -850,6 +848,7 @@ class OnvifService {
 
                 OnvifDevice device = getDevice(camera.onvifHost, user, password)
                 def pullPointHandler = new PullPointHandlerContainer(device, cam.key, camera, restfulInterfaceService)
+                pullPointHandler.setupSimpleItemTriggerValues(camera.simpleItemName, camera.simpleItemPositiveValue, camera.simpleItemNegativeValue)
                 pullPointHandler.subscribe(camera.pullPointTopic)
                 pullPointSubscriptions.add(pullPointHandler)
             }
