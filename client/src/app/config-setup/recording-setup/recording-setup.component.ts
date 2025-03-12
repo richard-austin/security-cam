@@ -133,6 +133,27 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
         }
     }
 
+    updateSimpleItemName() {
+        const control = this.getControl('simpleItemName');
+        if (control) {
+            this.localCamera.simpleItemName = control.value;
+        }
+    }
+
+    updateSimpleItemPositiveValue() {
+        const control = this.getControl('simpleItemPositiveValue');
+        if (control) {
+            this.localCamera.simpleItemPositiveValue = control.value;
+        }
+    }
+
+    updateSimpleItemNegativeValue() {
+        const control = this.getControl('simpleItemNegativeValue');
+        if (control) {
+            this.localCamera.simpleItemNegativeValue = control.value;
+        }
+    }
+
     updateThreshold() {
         const control = this.getControl('threshold');
         if (control) {
@@ -215,6 +236,9 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
             this.camera.recordingStream = cam.recordingStream;
             this.camera.retriggerWindow = cam.retriggerWindow;
             this.camera.pullPointTopic = cam.pullPointTopic;
+            this.camera.simpleItemName = cam.simpleItemName;
+            this.camera.simpleItemPositiveValue = cam.simpleItemPositiveValue;
+            this.camera.simpleItemNegativeValue = cam.simpleItemNegativeValue;
 
             cam.streams.forEach((stream, key) => {
                 if (this.camera) {
@@ -383,7 +407,19 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                 pullPointRecordingTrigger: new UntypedFormControl({
                     value: cam.pullPointTopic,
                     disabled: cam.recordingType !== RecordingType.pullPointEventTriggered || cam.pullPointEvents.length <= 0
-                }, [])
+                }, []),
+                simpleItemName: new UntypedFormControl({
+                    value: cam.simpleItemName,
+                    disabled: cam.recordingType !== RecordingType.pullPointEventTriggered || cam.pullPointEvents.length <= 0 || cam.recordingStream === 'none'
+                }, [Validators.required]),
+                simpleItemPositiveValue: new UntypedFormControl({
+                    value: cam.simpleItemPositiveValue,
+                    disabled: cam.recordingType !== RecordingType.pullPointEventTriggered || cam.pullPointEvents.length <= 0 || cam.recordingStream === 'none'
+                }, [Validators.required]),
+                simpleItemNegativeValue: new UntypedFormControl({
+                    value: cam.simpleItemNegativeValue,
+                    disabled: cam.recordingType !== RecordingType.pullPointEventTriggered || cam.pullPointEvents.length <= 0 || cam.recordingStream === 'none'
+                }, [Validators.required])
             }, {updateOn: "change"});
         }
     }

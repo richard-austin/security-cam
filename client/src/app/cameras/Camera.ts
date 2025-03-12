@@ -117,4 +117,9 @@ export class Camera
     motion_detection_stream: string = 'none';
     pullPointTopic: string = 'none'
     pullPointEvents: string[] = [];
+
+    // Set up defaults for the values we're looking for in the pull point events
+    simpleItemName: string = "State"
+    simpleItemPositiveValue: string = "true"
+    simpleItemNegativeValue: string = "false"
 }
