@@ -4,12 +4,17 @@ import {Camera} from "../../cameras/Camera";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {BehaviorSubject} from "rxjs";
 import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
-
+import {SharedModule} from "../../shared/shared.module";
+import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
 @Component({
-    selector: 'app-onvif-failures',
-    templateUrl: './onvif-failures.component.html',
-    styleUrls: ['./onvif-failures.component.scss'],
-    standalone: false
+  selector: 'app-onvif-failures',
+  templateUrl: './onvif-failures.component.html',
+  styleUrls: ['./onvif-failures.component.scss'],
+  imports: [
+    SharedModule,
+    SharedAngularMaterialModule
+  ],
+  standalone: true
 })
 export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   @Input() failures!: Map<string, string>;

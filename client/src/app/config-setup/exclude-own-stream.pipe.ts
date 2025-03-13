@@ -3,8 +3,7 @@ import {Stream} from "../cameras/Camera";
 import {KeyValue} from "@angular/common";
 
 @Pipe({
-    name: 'excludeOwnStream',
-    standalone: false
+    name: 'excludeOwnStream'
 })
 export class ExcludeOwnStreamPipe implements PipeTransform {
   transform(streams: Array<KeyValue<string, Stream>>, excludeStream: string): Array<KeyValue<string, Stream>> {

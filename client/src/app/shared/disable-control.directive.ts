@@ -3,13 +3,12 @@ import {NgControl} from "@angular/forms";
 import {timer} from "rxjs";
 
 @Directive({
-    selector: '[disableControl]',
-    standalone: false
+  selector: '[disableControl]'
 })
 export class DisableControlDirective {
   @Input() set disableControl(condition: boolean) {
     const action = condition ? 'disable' : 'enable';
-    // Deferred execution of the control action otherwise it on sets thew initial form state,
+    // Deferred execution of the control action otherwise it on sets the initial form state,
     //  and doesn't work for dynamic updates.
     const sub = timer(0).subscribe(() => {
       // @ts-ignore

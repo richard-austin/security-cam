@@ -15,6 +15,7 @@ import com.securitycam.commands.UpdateCamerasCommand
 import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
 import com.securitycam.controllers.CameraAdminCredentials
+import com.securitycam.controllers.RecordingType
 import com.securitycam.controllers.Stream
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.Asymmetric
@@ -23,10 +24,8 @@ import com.securitycam.interfaceobjects.PullPointHandlerContainer
 import common.Authentication
 import de.onvif.discovery.OnvifDiscovery
 import de.onvif.soap.OnvifDevice
-import de.onvif.soap.PullMessagesCallbacks
 import org.apache.commons.io.IOUtils
 import org.apache.http.protocol.BasicHttpContext
-import org.onvif.ver10.events.wsdl.PullMessagesResponse
 import org.onvif.ver10.media.wsdl.Media
 import org.onvif.ver10.schema.AudioEncoderConfiguration
 import org.onvif.ver10.schema.PTZNode
@@ -93,6 +92,8 @@ class OnvifService {
     Config config
     @Autowired
     ConfigurationUpdateService configurationUpdateService
+    @Autowired
+    RestfulInterfaceService restfulInterfaceService
 
     private ExecutorService deviceUpdateExecutor = Executors.newSingleThreadExecutor()
 
@@ -101,7 +102,7 @@ class OnvifService {
         def getCamerasResult = camService.getCameras()
         if (getCamerasResult.status == PassFail.PASS) {
             // Populate the Onvif device map
-            def cameras = getCamerasResult.getResponseObject() as Map<String, Camera>
+            def cameras = getCamerasResult.responseObject as Map<String, Camera>
             Asymmetric asym = new Asymmetric()
             cameras.forEach((k, cam) -> {
                 String jsonCreds = asym.decrypt(cam.cred as String)
@@ -292,7 +293,7 @@ class OnvifService {
                     // Set lowest resolution stream for default on multi display and for motion detection
                     setDefaults(cam)
 
-                    PullPointHandlerContainer hc = new PullPointHandlerContainer(device, cam, logService)
+                    PullPointHandlerContainer hc = new PullPointHandlerContainer(device, "", cam, restfulInterfaceService)
                     hc.getEvents()
                     cams.put('camera' + ++camNum, cam)
                 }
@@ -397,7 +398,6 @@ class OnvifService {
         if (lowestResStream != "") {
             Stream lrs = camera.streams.get(lowestResStream)
             lrs.defaultOnMultiDisplay = true
-            lrs.motion.enabled = true
         }
     }
 
@@ -823,5 +823,42 @@ class OnvifService {
             result.error = ex.getMessage()
         }
         return result
+    }
+
+    def pullPointSubscriptions = new ArrayList<PullPointHandlerContainer>()
+
+    def startPullPointEventMonitor() {
+        if(pullPointSubscriptions.size() > 0)
+            throw new Exception("Pull point event monitor already started")
+
+        def getCamerasResult = camService.getCameras()
+        def cameras = getCamerasResult.responseObject as Map<String, Camera>
+        Asymmetric asym = new Asymmetric()
+        for(Map.Entry<String, Camera> cam: cameras) {
+            final Camera camera = cam.value
+            if(camera.recordingType.toString() == RecordingType.pullPointEventTriggered.name()) {
+                String jsonCreds = asym.decrypt(camera.cred as String)
+                ObjectMapper mapper = new ObjectMapper()
+                def (user, password) = [null, null]
+                if (jsonCreds.length() > 0) {
+                    CameraAdminCredentials cac = mapper.readValue(jsonCreds, CameraAdminCredentials.class)
+                    user = cac.userName
+                    password = cac.password
+                }
+
+                OnvifDevice device = getDevice(camera.onvifHost, user, password)
+                def pullPointHandler = new PullPointHandlerContainer(device, cam.key, camera, restfulInterfaceService)
+                pullPointHandler.setupSimpleItemTriggerValues(camera.simpleItemName, camera.simpleItemPositiveValue, camera.simpleItemNegativeValue)
+                pullPointHandler.subscribe(camera.pullPointTopic)
+                pullPointSubscriptions.add(pullPointHandler)
+            }
+        }
+     }
+
+    def stopPullPointEventMonitor() {
+        pullPointSubscriptions.forEach(handler -> {
+            handler.terminate()
+        })
+        pullPointSubscriptions.clear()
     }
 }

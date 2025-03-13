@@ -42,7 +42,7 @@ the NVR email client must be logged into an SMTP client
   site certificate and continue to the log in dialogue box.
 * Enter the username and password you set up when creating the account.
   You can check "Remember me" to enable auto login in the future.
-* Click the SIGN IN button
+* Click the SIGN-IN button
 * You are now logged into your NVR and should see a menu bar at the top of a blank page.
 ## Set up Wi-Fi (if required)
 If you want to use Wi-Fi, and it hasn't previously been set up on the Raspberry pi, it can be done from the NVRs
@@ -67,7 +67,7 @@ Cameras Configuration.
 If camera configuration has not yet been done, the Cameras Configuration Editor will
 be empty apart from a single unpopulated camera entry.
 
-![config editor](README.images/config-editor.png)
+![config editor](README.images/config-editor3.png)
 *Cameras Configuration Editor*
 
 #### Config page button functions
@@ -121,6 +121,7 @@ described below: -
 | <img src="README.images/caret-bottom-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> &ast;                      | Hide the cameras streams                                                                                                                                                                                                                                                                                                                                                                    |
 | camera(<i>n</i>)                                                                                                                         | Camera ID. Click on this to show a snapshot from the camera. Note that this will require that the camera credentials are set up correctly (<img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button)                                                                                                                                |
 | <img src="README.images/security-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>                                | Enter or change credentials for this camera. These credentials will be used on view snapshot (on config setup), on camera settings and admin page hosting (SV3C and ZXTech cameras only) and in RTSP authentication (when selected).                                                                                                                                                        |
+| <img src="README.images/recording-sharp-svgrepo-com.svg" width="20" style="position: relative; top 5px"></img>                           | Open [recording setup](#recording-setup) dialogue box. From this, one of three recording triggers can be set, or no recording if required.                                                                                                                                                                                                                                                  |
 
 &ast; Button style toggles with context
 
@@ -135,8 +136,6 @@ All these parameters can be set manually, though some are auto-populated by Onvi
 | Delete              | Delete this camera and its streams from the configuration (trash button).                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | N/A                    |
 | Name                | The name of the camera as it will appear on the menus.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | No                     |
 | Camera Type         | Select SV3C, ZTech MCW5B10X or Not Listed. The named options enable some admin functions under Camera Settings -> Quick camera Setup                                                                                                                                                                                                                                                                                                                                                                                                         | No                     |
-| FTP From camera     | If a stream is selected, recording will be triggered when the camera sends a .jpg (jpeg) to ./<i>camera_map_key</i>  on the NVR IP address on port 2121. This is not available if Motion Sensing is set on any of the camera streams. If 'none' is selected, ftp uploads will not be processed.                                                                                                                                                                                                                                              | No                     |
-| Retrigger Window    | For FTP triggered recordings only. The time window in seconds during which the recording can be extended (by retrigger window seconds) by further FTP uploads from the camera.                                                                                                                                                                                                                                                                                                                                                               | No                     |
 | Address             | Camera IP address                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Yes                    |
 | Snapshot URI        | The cameras snapshot URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Yes                    |
 | RTSP Authentication | If checked, authentication will be used on the RTSP connection to the camera. The credentials will be those entered for the camera set on the Cameras Config page.                                                                                                                                                                                                                                                                                                                                                                           | No                     |
@@ -155,13 +154,6 @@ All these parameters can be set manually, though some are auto-populated by Onvi
 | Audio Encoding           | Set to the audio encoding on the cameras RTSP stream. If the audio format is AAC, it will be passed through as is, otherwise it will be encoded to AAC.                                                                                                                                                                                                                                                                        | Yes                    |
 | Netcam URI               | The cameras RTSP video/audio url.                                                                                                                                                                                                                                                                                                                                                                                              | Yes                    |
 | Default On Multi Display | Sets the stream as this cameras default on the Multi Camera View. The multi camera view allows switching to other streams than the default.                                                                                                                                                                                                                                                                                    | N/A                    |
-| Motion Sensing           | If checked, the motion service will be used to detect motion from this stream. To keep CPU usage down, it's best to select a lower resolution stream. Not available if FTP is selected on the camera.                                                                                                                                                                                                                          | N/A                    |
-| Motion Threshold         | See Motion project documentation <a href="https://motion-project.github.io/motion_config.html#threshold">here</a>                                                                                                                                                                                                                                                                                                              | N/A                    |
-| Trigger Recording On     | When Motion Sensing is selected for the stream, you can select another (usually higher resolution) stream to record from in addition to the stream used for motion detection. Both streams will be selectable on the Select Recording menu.                                                                                                                                                                                    | N/A                    |
-| Preamble Frames          | Used for both motion and FTP triggered recordings (not the actual recordings made by motion service). This is the number of frames to delay the stream by when making the recording. The recording will then contain a period of activity before the point at which it was triggered. Note that frames also include audio frames, so the if the stream includes audio, this may need to be a higher number for the same delay. | N/A                    |
-| Mask File                | Select a mask file for this stream in the motion service. (see https://motion-project.github.io/motion_config.html#mask_file).                                                                                                                                                                                                                                                                                                 | N/A                    |
-| Video Width              | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                                                                                                                                                                                                                                    | Yes                    |
-| Video Height             | For Motion Service, the height of the video stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                                                                                                                                                                                                                                  | Yes                    |
 
 <a id="wrong-onvif-creds"></a> ![config editor](README.images/config-editor2.png "Camera configuration page following Onvif discovery, showing a camera whose credentials are different from the global Onvif credentials")
 *Camera Configuration Editor Showing A Camera Whose Onvif Credentials Differ From The Global Onvif Credentials*
@@ -171,3 +163,138 @@ Enter the correct Onvif user name and password for the camera listed in the oran
 button beside the password to run single camera discovery using these credentials. If successful, the camera will be removed from this list and added
 tol the cameras list below, where parameter entry can be completed. Once all parameters are set, the new configuration must be saved
 (<img src="README.images/floppy-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button) to take effect.
+
+<a id="recording-setup"></a>
+## Set Up Recording
+Setting up recordings is done using the Set Up Recording dialogue which is shown by clicking on the
+<img src="README.images/recording-sharp-svgrepo-com.svg" width="20" style="position: relative; top: 6px"></img> button on the relevant camera row.
+
+### Motion Service Triggered Recordings
+The [motion service](https://github.com/Motion-Project/motion) is included in the Security Cam installation and is used to detect motion events
+on camera streams (usually a lower resolution stream to keep CPU usage lower) 
+and record those motion events from the stream. 
+Additionally, this event can trigger a recording on a second stream on the camera (normally the HD stream)
+so recordings in two different video resolutions are possible : -
+
+#### On the Recording Type selector, select "Motion Service" 
+![recording-setup](README.images/recording-setup.png)
+
+| Parameter/Control            | What To Set It To                                                                                                                                                                                                                                                                                                                                                                                                                                               | Set By Onvif |
+|------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| Stream To Monitor For Motion | Select the stream (stream1, stream2 ..) which will be monitored for motion. (To keep CPU usage as low as possible, this should be the lower resolution stream).                                                                                                                                                                                                                                                                                                 | N/A          |
+| Motion Threshold             | This adjusts the motion sensing sensitivity. See Motion project documentation <a href="https://motion-project.github.io/motion_config.html#threshold">here</a>                                                                                                                                                                                                                                                                                                  | N/A          |
+| Trigger Recording On         | Select a second stream to record from when motion is sensed on the first stream. This will normally be the higher resolution stream. Both this and the stream selected under "Stream To Monitor For Motion" will have recordings made and will be selectable from the Select Recording menu.                                                                                                                                                                    | N/A          |
+| Preamble Frames              | This is the number of frames to delay the stream by when making the recording. The recording will then contain a period of activity before the point at which it was triggered. Note that frames also include audio frames, so the if the stream includes audio, this may need to be a higher number for the same delay.  This does not affect the recording made by the motion service, it affects only the stream selected with "Trigger Recording On" above. | N/A          |
+| Mask File                    | Select a mask file for this stream in the motion service. Click on the <img src="README.images/upload-arrows-svgrepo-com.svg"  width="13"  style="position: relative; top: 0px"></img> button to bring up the file selector. (see https://motion-project.github.io/motion_config.html#mask_file).                                                                                                                                                               | N/A          |
+| Video Width                  | For motion Service, the width of the video stream in pixels (see https://motion-project.github.io/motion_config.html#width)                                                                                                                                                                                                                                                                                                                                     | Yes          |
+| Video Height                 | For Motion Service, the height of the video stream in pixels (see https://motion-project.github.io/motion_config.html#height)                                                                                                                                                                                                                                                                                                                                   | Yes          |
+
+### FTP Triggered Recordings
+FTP triggered recordings are started by the camera sending a .jpg image to the 
+NVR to the appropriate folder (the folder name must be the camera ID, e.g. camera1 ..*n* as appropriate).
+This is useful when the camera has more sophisticated motion detection than that
+provided by the motion service (people detection etc.), and it is able to FTP a still image
+on motion detection. The NVR must be set up to accommodate this.
+
+#### On the Recording Type selector, select "FTP Triggered" 
+![recording-setup](README.images/recording-setup-ftp.png)
+
+| Parameter/Control     | Function                                                                                                                                                                                                                                                                                                                 | Set by Onvif Discovery |
+|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| Stream To Record From | The selected stream will be recorded from when the camera sends a .jpg (jpeg) to ./<i>camera_map_key</i>  on the NVR IP address on port 2121.                                                                                                                                                                            | N/A                    |
+| Preamble Frames       | This is the number of frames to delay the stream by when making the recording. The recording will then contain a period of activity before the point at which it was triggered. Note that frames also include audio frames, so the if the stream includes audio, this may need to be a higher number for the same delay. | N/A                    |
+| Retrigger Window      | The minimum recording duration. During this time, further FTP transfers from the camera will extend the recording by this time. The user should ensure that this time is greater than the preamble time given by the selected preamble frames.                                                                           | N/A                    |
+
+### Pull Point Event Triggered Recordings
+This option is only available for cameras which support pull point subscription
+(Onvif profile T)*. This has the advantage over FTP triggered recordings in that
+no setting up on the camera itself is required, and also there may be several topics
+to choose from when selecting the recording trigger.
+
+&ast; *This selectable topics will be set up by Onvif discovery and cannot be added as part of a manual camera configuration.*
+#### On the Recording Type selector, select "Pull Point Event Triggered"
+![recording-setup](README.images/recording-setup-pull-point.png)
+
+| Parameter/Control            | Function                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Set by Onvif Discovery                                                        |
+|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| Pull point event             | Select the topic that you want to trigger recording with. Some topics may not be motion detection related, for example on a Reolink Video Doorbell, there is a Visitor topic which is fired when the doorbell is pressed.                                                                                                                                                                                                                                          | No, though the topic list in the selector is populated during Onvif discovery | 
+| Stream To Record From        | Recording will be made from the selected stream when the camera sends the selected topic with value true. The recording normally finishes 1 minute after the topic is received with value false. If the topic is received with value true before this 1 minute is up, the timout will start again after the topic is received with value false again.<br/><br/>*Note that some cameras may return data values other than true or false. This is not yet supported* | N/A                                                                           |
+| Simple Item Name *           | The "Name" attribute of the SimpleItem (containing the detection state) in the PullMessagesResponse Data section. (Default = "State")                                                                                                                                                                                                                                                                                                                              | N/A                                                                           |
+| Simple Item Positive Value * | The "Value" attribute of the SimpleItem when an object enters the cameras detection zone. This value should match the value of the SimpleItem Value attribute sent when an object is detected. (Default value = "true")                                                                                                                                                                                                                                            | N/A                                                                           |
+| Simple Item Negative Value * | The "Value" attribute of the SimpleItem when an object leaves the cameras detection zone. This value should match the value of the SimpleItem Value attribute sent when an object moves out of the camera detection zone. (Default value = "false")                                                                                                                                                                                                                | N/A                                                                           |
+| Preamble Frames              | This is the number of frames to delay the stream by when making the recording. The recording will then contain a period of activity before the point at which it was triggered. Note that frames also include audio frames, so the if the stream includes audio, this may need to be a higher number for the same delay.                                                                                                                                           | N/A                                                                           |
+
+&ast; These values can be checked by running the PullPointTest (with the onvif.properties file 
+set up with your devices IP address and credentials). PullPointTest is 
+in the onvif-java subproject under src/test/java/org/onvif/client.
+The onvif.properties file is at onvif-java/src/test/resources.
+let the process start and then trigger some object detection events to see 
+corresponding value changes.
+
+In the example output from PullPointTest below, it can be seen that the topic
+tns1:RuleEngine/CellMotionDetector/Motion has a value of "IsMotion" for
+Simple Item Name, true for Simple Item Positive Value and false
+for Simple Item Negative Value.
+
+Topic tns1:VideoSource/MotionAlarm has "State" for Simple Item Name, and
+true and false for Simple Item Positive and Negative values respectively.
+
+```agsl
+Thu Mar 13 12:33:53 GMT 2025 tns1:RuleEngine/CellMotionDetector/Motion IsMotion false
+Thu Mar 13 12:33:53 GMT 2025 tns1:RuleEngine/MyRuleDetector/FaceDetect State false
+Thu Mar 13 12:33:53 GMT 2025 tns1:RuleEngine/MyRuleDetector/PeopleDetect State false
+Thu Mar 13 12:33:53 GMT 2025 tns1:RuleEngine/MyRuleDetector/VehicleDetect State false
+Thu Mar 13 12:33:53 GMT 2025 tns1:RuleEngine/MyRuleDetector/DogCatDetect State false
+Thu Mar 13 12:33:53 GMT 2025 tns1:VideoSource/MotionAlarm State false
+Thu Mar 13 12:33:53 GMT 2025 tns1:RuleEngine/MyRuleDetector/Visitor State false
+Thu Mar 13 12:33:53 GMT 2025 tns1:RuleEngine/MyRuleDetector/Package State false
+Thu Mar 13 12:34:08 GMT 2025 tns1:RuleEngine/CellMotionDetector/Motion IsMotion true
+Thu Mar 13 12:34:08 GMT 2025 tns1:VideoSource/MotionAlarm State true
+Thu Mar 13 12:34:10 GMT 2025 tns1:RuleEngine/CellMotionDetector/Motion IsMotion false
+Thu Mar 13 12:34:10 GMT 2025 tns1:VideoSource/MotionAlarm State false
+```
+*Output from PullPointTest*
+
+<br>
+
+```xml
+<SOAP-ENV:Body>
+    <tev:PullMessagesResponse>
+        <tev:CurrentTime>2025-03-12T12:39:10Z</tev:CurrentTime>
+        <tev:TerminationTime>2025-03-12T12:40:09Z</tev:TerminationTime>
+        <wsnt:NotificationMessage>
+            <wsnt:Topic Dialect="http://www.onvif.org/ver10/tev/topicExpression/ConcreteSet">
+                tns1:RuleEngine/CellMotionDetector/Motion
+            </wsnt:Topic>
+            <wsnt:Message>
+                <tt:Message UtcTime="2025-03-12T12:39:19Z" PropertyOperation="Changed">
+                    <tt:Source>
+                        <tt:SimpleItem Name="VideoSourceConfigurationToken" Value="000"/>
+                        <tt:SimpleItem Name="VideoAnalyticsConfigurationToken" Value="000"/>
+                        <tt:SimpleItem Name="Rule" Value="000"/>
+                    </tt:Source>
+                    <tt:Data>
+                        <tt:SimpleItem Name="IsMotion" Value="true"/>
+                    </tt:Data>
+                </tt:Message>
+            </wsnt:Message>
+        </wsnt:NotificationMessage>
+      <wsnt:NotificationMessage>
+        <wsnt:Topic Dialect="http://www.onvif.org/ver10/tev/topicExpression/ConcreteSet">
+          tns1:RuleEngine/MyRuleDetector/PeopleDetect
+        </wsnt:Topic>
+        <wsnt:Message>
+          <tt:Message UtcTime="2025-03-12T12:39:19Z" PropertyOperation="Changed">
+            <tt:Source>
+              <tt:SimpleItem Name="Source" Value="000"/>
+            </tt:Source>
+            <tt:Data>
+              <tt:SimpleItem Name="State" Value="true"/>
+            </tt:Data>
+          </tt:Message>
+        </wsnt:Message>
+      </wsnt:NotificationMessage>
+    </tev:PullMessagesResponse>
+</SOAP-ENV:Body>
+```
+*Part of PullMessageResponse SOAP message received from camera on an object coming into the detection zone*

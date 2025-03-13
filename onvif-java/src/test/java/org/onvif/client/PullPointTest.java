@@ -46,7 +46,7 @@ public class PullPointTest implements PullMessagesCallbacks {
         try {
             PullPointSubscriptionHandler ppsh = new PullPointSubscriptionHandler(cam, this);
             ppsh.createPullPointSubscription(("tns1://."));
-            ppsh.getSupportedEvents();
+            ppsh.subcribe();
          } catch (Exception e) {
             System.out.println(e.getClass().getName() + " " + e.getMessage());
         }

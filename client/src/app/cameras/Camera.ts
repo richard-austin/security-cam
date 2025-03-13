@@ -23,12 +23,12 @@ export class CameraParams
 
 }
 export class Motion {
-  enabled: boolean = false;
-  mask_file:string = '';  // Mask file which defines area used in motion sensing
-  trigger_recording_on: string ='';  // The name of the camera stream on which recordings will be triggered following
+    enabled: boolean = false;
+    mask_file: string = '';  // Mask file which defines area used in motion sensing
+    trigger_recording_on: string = 'none';  // The name of the camera stream on which recordings will be triggered following
                                      // Motion events on this camera stream (usually another stream on the same physical
                                      // camera).
-  threshold: number = 1500;  //Threshold for declaring motion.
+    threshold: number = 1500;  //Threshold for declaring motion.
                              // The threshold is the number of changed pixels counted after noise filtering, masking, despeckle, and labelling.
                              // The 'threshold' option is the most important detection setting.
                              // When motion runs it compares the current image frame with the previous and counts the number
@@ -42,9 +42,11 @@ export class Motion {
                              // text_changes config file option to experiment to find the right threshold value.
                              // If you do not get small movements detected (see the mouse on the kitchen floor)
                              // lower the value. If motion detects too many birds or moving trees, increase the number.
-                             // (Unless of course you are one of the many many users who use Motion to bird watch!)
+                             // (Unless of course you are one of the many users who use Motion to bird watch!)
                              // Practical values would be from a few hundred to thousands.
 }
+
+export enum RecordingType {none='none', motionService="motionService", ftpTriggered="ftpTriggered", pullPointEventTriggered="pullPointEventTriggered"}
 
 export class Recording
 {
@@ -103,7 +105,7 @@ export class Camera
     cameraParamSpecs!: CameraParamSpec;
     snapshotUri: string="";
     ptzControls: boolean = false;
-    ftp: string | boolean = "none";  // | boolean is only used for a test which can detect ftp's boolean value in earlier versions
+    recordingStream: string = "none";
     streams: Map<string, Stream> = new Map<string, Stream>();
     onvifHost: string="";
     backchannelAudioSupported: boolean = false
@@ -111,5 +113,13 @@ export class Camera
     useRtspAuth: boolean = false;
     retriggerWindow: number = 30;
     cred: string = "";
+    recordingType: RecordingType = RecordingType.none;
+    motion_detection_stream: string = 'none';
+    pullPointTopic: string = 'none'
     pullPointEvents: string[] = [];
+
+    // Set up defaults for the values we're looking for in the pull point events
+    simpleItemName: string = "State"
+    simpleItemPositiveValue: string = "true"
+    simpleItemNegativeValue: string = "false"
 }

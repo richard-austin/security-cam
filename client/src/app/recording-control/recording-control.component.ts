@@ -10,8 +10,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
 import {MatSelect} from '@angular/material/select';
 import {UtilsService} from '../shared/utils.service';
-import {MatDatepickerInputEvent} from '@angular/material/datepicker';
-
+import {
+  MatDatepickerInputEvent
+} from '@angular/material/datepicker';
+import {SharedModule} from "../shared/shared.module";
+import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 
 declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
 
@@ -31,7 +34,7 @@ Date.prototype.addDays = function(days: number): Date {
     selector: 'app-recording-control',
     templateUrl: './recording-control.component.html',
     styleUrls: ['./recording-control.component.scss'],
-    standalone: false
+  imports: [SharedModule, SharedAngularMaterialModule, VideoComponent]
 })
 export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(VideoComponent) video!: VideoComponent;

@@ -2,16 +2,18 @@ import {Component, Input, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {Camera} from 'src/app/cameras/Camera';
 import {ReportingComponent} from 'src/app/reporting/reporting.component';
-import {ePresetOperations} from './preset-button/preset-button.component';
-import {eMoveDirections} from './ptzbutton/ptzbutton.component';
+import {ePresetOperations, PresetButtonComponent} from './preset-button/preset-button.component';
+import {eMoveDirections, PTZButtonComponent} from './ptzbutton/ptzbutton.component';
 import {UtilsService} from "../../shared/utils.service";
 import {PTZPresetsInfoCommand, PTZPresetsInfoResponse, PTZService} from "../ptz.service";
+import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
+import {MatDivider} from "@angular/material/divider";
 
 @Component({
     selector: 'app-ptzcontrols',
     templateUrl: './ptzcontrols.component.html',
     styleUrls: ['./ptzcontrols.component.scss'],
-    standalone: false
+  imports: [SharedAngularMaterialModule, PTZButtonComponent, MatDivider, PresetButtonComponent, MatSlideToggle]
 })
 export class PTZControlsComponent implements OnInit {
   @Input() camera!: Camera;

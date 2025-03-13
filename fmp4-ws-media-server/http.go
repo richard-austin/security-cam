@@ -216,6 +216,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	stream := streams.StreamMap[suuid]
 	bb := stream.bucketBrigade.GetFeeder()
 	defer stream.bucketBrigade.DestroyFeeder(bb)
+	log.Infof("Bucket brigade cache size for %s = %d", suuid, stream.bucketBrigade.cacheLength)
 	for {
 		var data Packet
 		data = bb.Get()

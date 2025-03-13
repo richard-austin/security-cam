@@ -1,3 +1,9 @@
+.grey-out {
+  background: rgba(255, 255, 255, 0.288);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 table {
   width: 100%;
 }
@@ -17,9 +23,11 @@ tr.element-row:not(.expanded-row):hover {
 tr.element-row:not(.expanded-row):active {
   background: grey;
 }
+
 tr[mat-footer-row] {
   --mat-table-footer-container-height: 55px;
 }
+
 .element-row td {
   border-bottom-width: 0;
 }
@@ -52,10 +60,15 @@ tr[mat-footer-row] {
   top: 3px;
 }
 
+.voicemail {
+  position: relative;
+  top: 5px;
+  color: red;
+}
+
 mat-form-field {
   margin-top: 5px;
   margin-bottom: 5px;
-// font-size: small !important;
   height: 35px !important;
 }
 
@@ -76,45 +89,7 @@ td, th {
   }
 
   width: 100%;
-  //margin-right: 160px;
   min-width: 1675px;
-}
-
-.file-upload {
-  position: relative;
-  display: flex;
-
-  > input {
-    position: relative;
-    left: 2.0rem;
-    font-style: italic;
-    cursor: default;
-  }
-
-  > button:first-of-type {
-    position: absolute;
-    left: -0.5rem;
-    top: 0;
-  }
-
-  > input {
-    width: 11rem;
-  }
-
-  > button:nth-of-type(2) {
-    position: absolute;
-
-    mat-icon {
-      font-size: medium;
-    }
-
-    right: -0.9rem;
-    top: 0;
-
-    &:enabled {
-      color: red;
-    }
-  }
 }
 
 .snapshot {
@@ -147,32 +122,84 @@ button.change-password-button {
   position: relative;
   top: 7px;
 }
+
 button.change-password-button2 {
   position: relative;
   top: 3px;
 }
 
-div.password-dialogue {
+@mixin top-cursor {
+  > div {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+
+    border-bottom: 10px solid #646363;
+    z-index: 3;
+  }
+  z-index: 2;
+  left: -24px;
+  top: 13px;
+  overflow: hidden;
+  position: absolute;
+
+}
+
+.mdc-data-table__cell {
+  overflow: visible !important;
+}
+div.popup-dialogue {
   display: inline;
   position: relative;
 
   > div {
     width: 17rem;
 
-    > div {
-      width: 0;
-      height: 0;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
+    @include top-cursor;
+  }
+}
 
-      border-bottom: 10px solid #646363;
-      z-index: 3;
-    }
+div.popup-recording-type-dialogue {
+  display: inline;
+  position: relative;
 
-    z-index: 2;
-    left: -2rem;
-    overflow: hidden;
-    position: absolute;
+  > div {
+    width: 450px;
+
+    @include top-cursor;
+  }
+}
+
+@mixin left-cursor($top) {
+  display: flex;
+  flex-direction: row;
+  > div {
+    position: relative;
+    top: $top;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid #646363;
+    z-index: 3;
+  }
+  left: -5px;
+  top: -48px;
+  z-index: 2;
+
+  overflow: hidden;
+  position: absolute;
+}
+
+
+div.popup-stream-delete-confirm-dialogue {
+  display: inline;
+  position: relative;
+  > div {
+    width: 17rem;
+
+    @include left-cursor(43px);
   }
 }
 
@@ -199,20 +226,7 @@ div.add-onvif-url-dialogue {
   > div {
     width: 27rem;
 
-    > div {
-      width: 0;
-      height: 0;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-
-      border-bottom: 10px solid #646363;
-      z-index: 3;
-    }
-
-    z-index: 2;
-    left: -2rem;
-    overflow: hidden;
-    position: absolute;
+    @include top-cursor;
   }
 }
 
@@ -253,4 +267,10 @@ mat-icon.sort-button-icon {
   100% {
     color: #800;
   }
+}
+
+mat-error {
+  left: 0.10rem;
+  position: absolute;
+  width: 24rem;
 }

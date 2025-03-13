@@ -1,0 +1,19 @@
+<mat-card>
+    <mat-card-subtitle>Delete {{streamKey === undefined ? camKey : streamKey}}, Are you sure?</mat-card-subtitle>
+    <mat-card-content>
+        <span class="row-delete-confirm-group">
+          <button color="cancel" mat-raised-button (click)="confirmRowDelete(false)"
+                  matTooltip="Close this dialogue and leave {{camKey}} in place"
+                  matTooltipClass="tooltip">
+            Cancel
+          </button>
+          <button color="warn" mat-raised-button
+                  (click)="confirmRowDelete(true)"
+                  matTooltip="Delete {{camKey}}"
+                  matTooltipClass="tooltip">
+            Confirm
+          </button>
+        </span>
+    </mat-card-content>
+</mat-card>
+

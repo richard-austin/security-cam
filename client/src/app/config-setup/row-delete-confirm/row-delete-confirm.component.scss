@@ -1,0 +1,16 @@
+mat-card-subtitle {
+  color: #fffdfd;
+}
+
+.row-delete-confirm-group {
+  > span {
+    background: #d9a11a;
+    color: black;
+    padding: 0.2rem;
+    border-radius: 1rem;
+  }
+
+  > button:nth-child(2) {
+    margin-left: 0.5rem;
+  }
+}

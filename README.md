@@ -24,13 +24,13 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * Onvif support for device and capabilities discovery and PTZ control.
 * View live stream from individual or all cameras.
 * Recordings triggered by <a href="https://github.com/Motion-Project/motion">Motion service</a>
-*OR* by FTP of an image from camera (can be used with cameras which can ftp an image on detecting motion). 
+*OR* by FTP of an image from camera (can be used with cameras which can ftp an image on detecting motion), *OR* by a specified pull point event topic firing (on cameras which support it)
 * Recordings of motion events, selectable by date and time.
 * PTZ for cameras supporting this feature through Onvif.
 * Quick reboot or setup of key camera parameters for SV3C or ZXTech type cameras.
 * Hosting of camera admin page, This allows secure access to camera web admin outside the LAN.
-  This feature requires access through port 446 as well as the usual https port 443.
-* Configuration editor supporting Onvif discovery of cameras and their capabilities. Can also find capabilities of specific cameras.
+  This feature requires access through port 446 as well as the usual https port 443. (This feature does not work with Firefox).
+* Configuration editor supporting Onvif discovery of cameras and their capabilities. Can also find capabilities of a specified individual camera.
 * email notification if public IP address changes (for when port forwarding is used).
 * Initial unauthenticated set up of user account from LAN only. Subsequent changes can be done when logged in through existing account.
 * Get NVR LAN IP addresses.
@@ -48,14 +48,13 @@ older machines, the GPU may not support H265 (HEVC) decoding. There are special 
 with software decoding (see <a href="https://thorium.rocks/">Thorium</a> and <a href="https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding">Special Chromium Build</a>)
   * For Chromium based browsers running on Ubuntu 23.04 with VAAPI installed and a suitable Intel GPU, you may need to use the parameters 
   ```--enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoDecoder,VaapiVideoEncoder```  or in the case of Chromium or Brave, or
-any browser base of Chromium 131 or higher ```--enable-features=AcceleratedVideoDecodeLinuxGL```
+any browser base of Chromium 131 or higher ```--enable-features=AcceleratedVideoDecodeLinuxZeroCopyGL,AcceleratedVideoDecodeLinuxGL,AcceleratedVideoEncoder```
    in the command line to enable hevc decoding.
 This will also enable hardware decoding generally.
 * Web admin hosting where the camera uses https and rstps (secure rtsp streaming from cameras) are not currently supported.
 * This software has been tested with SV3C and ZXTech cameras and Reolink Wi-Fi doorbell.
 There could possibly be compatibility issues with some other camera types.
-* 2 way audio (Onvif profile T) supported on the Reolink Wi-fi doorbell using firmware version v3.0.0.1996_23053101.
-The firmware from Reolink main downloads site does not fully support this functionality. 
+* 2 way audio (Onvif profile T) supported on the Reolink Wi-fi doorbell using firmware version v3.0.0.3308_2407315182.
 
 ## Installation
 * Set up Ubuntu 24.04 Server (Noble Numbat) on a Raspberry pi 4 or 5

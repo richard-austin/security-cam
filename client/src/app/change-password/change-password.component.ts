@@ -3,12 +3,14 @@ import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from 
 import {ReportingComponent} from "../reporting/reporting.component";
 import { HttpErrorResponse } from "@angular/common/http";
 import { UtilsService } from '../shared/utils.service';
+import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
+import {SharedModule} from "../shared/shared.module";
 
 @Component({
-    selector: 'app-change-password2',
-    templateUrl: './change-password.component.html',
-    styleUrls: ['./change-password.component.scss'],
-    standalone: false
+  selector: 'app-change-password2',
+  templateUrl: './change-password.component.html',
+  styleUrls: ['./change-password.component.scss'],
+  imports:[SharedModule, SharedAngularMaterialModule]
 })
 export class ChangePasswordComponent implements OnInit {
 

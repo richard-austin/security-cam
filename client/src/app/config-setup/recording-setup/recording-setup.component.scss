@@ -1,0 +1,62 @@
+.recording-setup {
+  width: 450px;
+}
+.recording-setup-confirm-group {
+  > span {
+    background: #d9a11a;
+    color: black;
+    padding: 0.9rem;
+    border-radius: 1rem;
+  }
+
+  > button:nth-child(2) {
+    margin-left: 0.5rem;
+  }
+}
+
+.file-upload {
+  position: relative;
+  display: flex;
+
+  > input {
+    position: relative;
+    left: 2.0rem;
+    font-style: italic;
+    cursor: default;
+  }
+
+  > button:first-of-type {
+    position: absolute;
+    left: -0.5rem;
+    top: 0;
+  }
+
+  > input {
+    width: 11rem;
+  }
+
+  > button:nth-of-type(2) {
+    position: absolute;
+
+    mat-icon {
+      font-size: medium;
+    }
+
+    right: -0.9rem;
+    top: 0;
+
+    &:enabled {
+      color: red;
+    }
+  }
+}
+
+mat-form-field {
+  margin-right: 5px;
+}
+
+mat-error {
+  left: -0.30rem;
+  position: absolute;
+  width: 24rem;
+}

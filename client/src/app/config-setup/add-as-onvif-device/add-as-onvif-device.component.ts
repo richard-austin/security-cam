@@ -1,7 +1,16 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {AbstractControl, UntypedFormControl, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
+import {
+  AbstractControl,
+  UntypedFormControl,
+  UntypedFormGroup,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from "@angular/forms";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {Camera} from "../../cameras/Camera";
+import {SharedModule} from "../../shared/shared.module";
+import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
 
 /**
  * isValidDeviceIP: Custom validator to check that the onvif URL presented for getting camera details does not have
@@ -31,10 +40,14 @@ export function isValidDeviceIP(componentObject: AddAsOnvifDeviceComponent): Val
 }
 
 @Component({
-    selector: 'app-add-as-onvif-device',
-    templateUrl: './add-as-onvif-device.component.html',
-    styleUrls: ['./add-as-onvif-device.component.scss'],
-    standalone: false
+  selector: 'app-add-as-onvif-device',
+  templateUrl: './add-as-onvif-device.component.html',
+  styleUrls: ['./add-as-onvif-device.component.scss'],
+  imports: [
+    SharedModule,
+    SharedAngularMaterialModule
+  ],
+  standalone: true
 })
 export class AddAsOnvifDeviceComponent implements OnInit {
   @Output() hideDialogue: EventEmitter<void> = new EventEmitter<void>();

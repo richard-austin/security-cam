@@ -3,14 +3,21 @@ import {Camera} from 'src/app/cameras/Camera';
 import {ReportingComponent} from 'src/app/reporting/reporting.component';
 import { UtilsService } from 'src/app/shared/utils.service';
 import {PTZMove, PTZService, PTZStop} from '../../ptz.service';
+import {MatTooltip} from "@angular/material/tooltip";
+import {MatIcon} from "@angular/material/icon";
+import {MatIconButton} from "@angular/material/button";
 
 export enum eMoveDirections {tiltUp, tiltDown, panLeft, panRight, zoomIn, zoomOut}
 
 @Component({
-    selector: 'app-ptzbutton',
-    templateUrl: './ptzbutton.component.html',
-    styleUrls: ['./ptzbutton.component.scss'],
-    standalone: false
+  selector: 'app-ptzbutton',
+  templateUrl: './ptzbutton.component.html',
+  imports: [
+    MatTooltip,
+    MatIcon,
+    MatIconButton
+  ],
+  styleUrls: ['./ptzbutton.component.scss']
 })
 export class PTZButtonComponent implements OnInit {
   @Input() matIcon!: string;

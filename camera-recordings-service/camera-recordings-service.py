@@ -53,7 +53,7 @@ def execute_os_command(command: str) -> [int, str]:
     return {exitcode, message}
 
 
-def get_ffmpeg_cmd(camera: any, stream: str):  
+def get_ffmpeg_cmd(camera: any, stream: str):
     ffmpeg_cmd: str = ""
     if camera is not None:
         if stream != "":
@@ -128,12 +128,6 @@ class FTPAndVideoFileProcessor(FTPHandler):
             camera_name: str = path.replace(self.ftpPath, '', 1)
             camera_name = camera_name[1: camera_name.index('/', 1)]
             camera = cams[camera_name]
-            cam_type: CameraType = camera['cameraParamSpecs']['camType']
-            match cam_type:
-                case CameraType.sv3c.value | CameraType.zxtechMCW5B10X.value | CameraType.none.value:
-                    logger.info(f"Camera type {cam_type}")
-                case _:
-                    logger.warning(f"No camera type for file {path}")
 
             if path.endswith('.jpg') or path.endswith('jpeg'):  # Only dealing with jpg files
                 if self.processDict.__contains__(
@@ -142,18 +136,22 @@ class FTPAndVideoFileProcessor(FTPHandler):
                 else:
                     stream_id = ""
                     for s in camera['streams']:
-                        if camera['streams'][s]['recording']['enabled']:
+                        if camera['streams'][s]['recording']['enabled'] and camera['recordingType'] == 'ftpTriggered':
                             stream_id = s
                             break
-
-                    ffmpeg_cmd = get_ffmpeg_cmd(camera, stream_id)
-                    subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
-                    timer: ResettableTimer = ResettableTimer(camera['retriggerWindow'],
-                                                             lambda: self.finish_recording(subproc, camera_name))
-                    timer.start()
-                    self.processDict[camera_name] = timer
-                    logger.info(
-                        f"Started recording for {camera_name}, retriggerWindow = {camera['retriggerWindow']}")
+                    if stream_id != "":
+                        ffmpeg_cmd = get_ffmpeg_cmd(camera, stream_id)
+                        subproc: subprocess.Popen = subprocess.Popen(ffmpeg_cmd.split(), stdout=subprocess.PIPE)
+                        timer: ResettableTimer = ResettableTimer(camera['retriggerWindow'],
+                                                                 lambda: self.finish_recording(subproc, camera_name))
+                        timer.start()
+                        self.processDict[camera_name] = timer
+                        logger.info(f"Started recording for {camera_name}, retriggerWindow = {camera['retriggerWindow']}")
+                    else:
+                        if camera['recordingType'] != 'ftpTriggered':
+                            logger.warning(f"Camera {camera_name} is FTPing JPG files to the recording service but recordingType is set to {camera['recordingType']}")
+                        else:
+                            logger.warning(f"Camera {camera_name} is FTPing JPG files to the recording service but no streams have recording enabled.")
 
                 os.remove(path)
 
@@ -185,12 +183,17 @@ class HttpHandler(BaseHTTPRequestHandler):
             stream: str = ""
 
             def get_triggered_stream(cam: any):
-                for s in cam['streams']:
-                    s_obj = cam['streams'][s]
-                    tro = s_obj['motion']['trigger_recording_on']
-                    if tro.find('stream') != -1:
-                        dot_idx = tro.index('.')
-                        return tro[dot_idx + 1:]  # Remove the camera name from the string, just leaving the stream name
+                if cam['recordingType'] == "motionService":
+                    for s in cam['streams']:
+                        s_obj = cam['streams'][s]
+                        tro = s_obj['motion']['trigger_recording_on']
+                        if tro.find('stream') != -1:
+                            return tro
+                else:
+                    if cam['recordingType'] == "pullPointEventTriggered":
+                        return cam["recordingStream"]
+                    else:
+                        return ""
 
             def finish_recording(cn: str):
                 if self.recording_procs.__contains__(cn):
@@ -235,6 +238,7 @@ class HttpHandler(BaseHTTPRequestHandler):
                             logger.info("Stopping recording")
                             finish_recording(camera_name)
                             logger.info(f"Recording ended for {camera_name}")
+                            self.returnResponse(200, f"Recording ended for {camera_name}")
                         else:
                             self.returnResponse(400, f"No recording process exists for {camera_name}")
 

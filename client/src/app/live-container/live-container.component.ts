@@ -5,14 +5,22 @@ import {Subscription, timer} from 'rxjs';
 import {VideoComponent} from '../video/video.component';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import {ReportingComponent} from '../reporting/reporting.component';
 import {ActivatedRoute} from '@angular/router';
+import {SharedModule} from "../shared/shared.module";
+import {PTZControlsComponent} from "./ptzcontrols/ptzcontrols.component";
+import {ReportingComponent} from "../reporting/reporting.component";
+import {NgIf} from "@angular/common";
 
 @Component({
-    selector: 'app-live-container',
-    templateUrl: './live-container.component.html',
-    styleUrls: ['./live-container.component.scss'],
-    standalone: false
+  selector: 'app-live-container',
+  templateUrl: './live-container.component.html',
+  imports: [
+    SharedModule,
+    PTZControlsComponent,
+    VideoComponent,
+    NgIf
+  ],
+  styleUrls: ['./live-container.component.scss']
 })
 export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;

@@ -2,6 +2,7 @@ package com.securitycam.interfaceobjects
 
 import com.securitycam.controllers.Camera
 import com.securitycam.services.LogService
+import com.securitycam.services.RestfulInterfaceService
 import de.onvif.soap.OnvifDevice
 import de.onvif.soap.ProcessedPullMessagesResponse
 import de.onvif.soap.PullMessagesCallbacks
@@ -10,32 +11,112 @@ import org.onvif.ver10.events.wsdl.PullMessagesResponse
 
 class PullPointHandlerContainer implements PullMessagesCallbacks {
     final private OnvifDevice device
+    final private String camKey
     final private Camera cam
     final private LogService logService
+    final int recordingSvcTimout = 60
+    private boolean gettingEvents = true
+    final private RestfulInterfaceService restfulInterfaceService
+    private Timer timer = null
+    final private recordingOverrun = 60000
 
-    PullPointHandlerContainer(final OnvifDevice device, final Camera cam, final LogService logService) {
+    // Set up defaults for the values we're looking for in the pull point events
+    private String simpleItemName = "State"
+    private String simpleItemPositiveValue = "true"
+    private String simpleItemNegativeValue = "false"
+
+    PullPointHandlerContainer(final OnvifDevice device, final String camKey, final Camera cam, RestfulInterfaceService restfulInterfaceService) {
         this.device = device
+        this.camKey = camKey
         this.cam = cam
-        this.logService = logService
+        this.restfulInterfaceService = restfulInterfaceService
+        this.logService = restfulInterfaceService.logService
+    }
+
+    void setupSimpleItemTriggerValues(String simpleItemName, String simpleItemPositiveValue, String simpleItemNegativeValue) {
+        this.simpleItemName = simpleItemName
+        this.simpleItemPositiveValue = simpleItemPositiveValue
+        this.simpleItemNegativeValue = simpleItemNegativeValue
     }
 
     @Override
     void onPullMessagesReceived(PullMessagesResponse pullMessages) {
-        ProcessedPullMessagesResponse ppmr = new ProcessedPullMessagesResponse(pullMessages)
-        ppmr.responseData.forEach((x) ->
-                x.Data.forEach((data) -> {
-                    cam.pullPointEvents.add(x.topic)
-                    logService.cam.info(x.created.toString() + " " + x.topic + " " + data.Name + " " + data.Value)
-                }))
+        if (gettingEvents) {
+            ProcessedPullMessagesResponse ppmr = new ProcessedPullMessagesResponse(pullMessages)
+            ppmr.responseData.forEach((x) ->
+                    x.Data.forEach((data) -> {
+                        cam.pullPointEvents.add(x.topic)
+                        logService.cam.info(x.created.toString() + " " + x.topic + " " + data.Name + " " + data.Value)
+                    }))
+        } else // Subscribing
+        {
+            ProcessedPullMessagesResponse ppmr = new ProcessedPullMessagesResponse(pullMessages)
+            ppmr.responseData.forEach((x) -> {
+                if (x.topic == cam.pullPointTopic) {
+                    x.Data.forEach((simpleItem) -> {
+                        logService.cam.info(x.created.toString() + " " + x.topic + " " + simpleItem.Name + " " + simpleItem.Value)
+                        if (simpleItem.Name == this.simpleItemName && simpleItem.Value == this.simpleItemPositiveValue) {
+                            startTimer()
+                        }
+                    })
+                }
+            })
+        }
     }
 
+
     void getEvents() {
+        gettingEvents = true
         try {
-            PullPointSubscriptionHandler ppsh = new PullPointSubscriptionHandler(device, this)
-            ppsh.createPullPointSubscription("")
-            ppsh.getSupportedEvents()
+            PullPointSubscriptionHandler pullPointSub = new PullPointSubscriptionHandler(device, this)
+            pullPointSub.createPullPointSubscription("")  // Get all available events
+            pullPointSub.getSupportedEvents()
         } catch (Exception e) {
             logService.cam.error(e.getClass().getName() + " " + e.getMessage())
+        }
+    }
+
+    PullPointSubscriptionHandler _pullPointSub
+
+    void subscribe(String topic) {
+        gettingEvents = false
+        try {
+            _pullPointSub = new PullPointSubscriptionHandler(device, this)
+            _pullPointSub.createPullPointSubscription(topic)
+            _pullPointSub.subcribe()
+        }
+        catch(Exception e) {
+            logService.cam.error(e.getClass().getName() + " " + e.getMessage())
+        }
+    }
+
+    void terminate() {
+        _pullPointSub.setTerminate()
+    }
+
+    def startTimer() {
+        if(timer == null) { // Start
+            timer = new Timer()
+            timer.schedule(new PullPointEventTimerTask(), recordingOverrun)
+            restfulInterfaceService.sendRequest("localhost:8086", "/", "{\"command\": \"start_recording\", \"camera_name\": \"$camKey\"}", true, recordingSvcTimout)
+        }
+        else {  // Reset
+            timer.cancel()
+            timer.purge()
+            timer = new Timer()
+            timer.schedule(new PullPointEventTimerTask(), recordingOverrun)
+        }
+    }
+
+    private class PullPointEventTimerTask extends TimerTask {
+        // The Timer run method
+        @Override
+        void run() {
+            timer.cancel()
+            timer.purge()
+            timer = null
+            restfulInterfaceService.sendRequest("localhost:8086", "/", "{\"command\": \"end_recording\", \"camera_name\": \"$camKey\"}\r\n", true, recordingSvcTimout)
+            logService.cam.info("Pull point event triggered recording for $camKey complete")
         }
     }
 }

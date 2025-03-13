@@ -4,12 +4,17 @@ import {Camera} from 'src/app/cameras/Camera';
 import {CameraService, OnvifCredentials} from "../../cameras/camera.service";
 import {ReportingComponent} from "../../reporting/reporting.component";
 import {Encryption} from "./encryption";
+import {SharedModule} from "../../shared/shared.module";
+import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
 
 @Component({
-    selector: 'app-camera-credentials',
-    templateUrl: './onvif-credentials.component.html',
-    styleUrls: ['./onvif-credentials.component.scss'],
-    standalone: false
+  selector: 'app-camera-credentials',
+  templateUrl: './onvif-credentials.component.html',
+  styleUrls: ['./onvif-credentials.component.scss'],
+  imports: [
+      SharedModule,
+      SharedAngularMaterialModule
+  ],
 })
 export class OnvifCredentialsComponent implements OnInit, AfterViewInit {
 
