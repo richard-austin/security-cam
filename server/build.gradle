@@ -81,7 +81,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:24.1.0'
 
     compileOnly group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
-    implementation group: 'commons-codec', name: 'commons-codec', version: '1.10'
+    implementation group: 'commons-codec', name: 'commons-codec', version: '1.13'
     implementation 'commons-io:commons-io:2.14.0'
     implementation 'org.apache.activemq:activemq-broker:6.1.4'
 
