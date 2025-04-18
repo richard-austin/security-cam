@@ -1,0 +1,7 @@
+{
+  "log_path": "/var/log/mp4f-server/mp4f-server.log",
+  "log_level": "INFO",
+  "server_port": 8081,
+  "gop_cache": true
+}
+

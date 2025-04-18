@@ -9,7 +9,6 @@ import (
 //
 //	/** to the point at which action was detected
 type BucketBrigade struct {
-	bbUsed      bool
 	feeders     []*BucketBrigadeFeeder
 	cacheLength int
 	mutex       sync.Mutex
@@ -34,7 +33,6 @@ func NewBucketBrigade(preambleFrames int) (bucketBrigade BucketBrigade) {
 		started:     false,
 		inputIndex:  0,
 		cacheLength: cacheLength,
-		bbUsed:      true,
 		gopCache:    NewGopCache(true)}
 	return
 }
@@ -53,16 +51,13 @@ func (bb *BucketBrigade) newFeeder() (bbFeeder *BucketBrigadeFeeder) {
 
 func (bb *BucketBrigade) Input(p Packet) (err error) {
 	err = nil
-	if !bb.bbUsed {
-		return
-	}
 	bb.mutex.Lock()
 	defer bb.mutex.Unlock()
 
 	bb.Cache[bb.inputIndex] = p
 	if bb.started {
 		opIdx := (bb.inputIndex + 1) % bb.cacheLength
-		err = bb.gopCache.Input(bb.Cache[opIdx])
+		err = bb.gopCache.RecordingInput(bb.Cache[opIdx])
 		for _, f := range bb.feeders {
 			select {
 			case f.pktFeed <- bb.Cache[opIdx]:
@@ -77,13 +72,11 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 		bb.inputIndex = 0
 		bb.started = true
 	}
+
 	return
 }
 
 func (bb *BucketBrigade) GetFeeder() (bbFeeder *BucketBrigadeFeeder) {
-	if !bb.bbUsed {
-		return
-	}
 	bbFeeder = bb.newFeeder()
 	return
 }

@@ -34,7 +34,7 @@ The http streams used for recording are delayed by a configurable amount to prov
 
 nginx provides access to this service with common origin (port 443) to the Web Back End (https port 443).
 
-The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi. To change to a different architecture, edit the build task in fmp4-ws-media-server/build.gradle
+The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi. To change to a different architecture, edit the build task in low-latency-media-server/build.gradle
 
 ### ffmpeg
 ffmpeg is used for re-muxing, audio transcoding, camera connectivity and recording.

@@ -8,4 +8,5 @@
       <excludeFolder url="file://$MODULE_DIR$/../../venv" />
     </content>
   </component>
+  <component name="Go" enabled="true" />
 </module>
