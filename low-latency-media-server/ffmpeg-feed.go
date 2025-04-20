@@ -19,16 +19,25 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 			go func(camera Camera, stream *StreamC) {
 				for {
 					time.Sleep(time.Second)
+					var audioMode string
 					var audio string
 					if !stream.Audio {
-						audio = "-an"
-					} else if strings.ToLower(stream.AudioEncoding) != "aac" {
-						audio = "-c:a aac"
+						audioMode = "-an"
+						audio = ""
 					} else {
-						audio = "-c:a copy"
-					}
+						audio = fmt.Sprintf("-f alaw -vn -c:a pcm_alaw -b:a 64K -ar 48000 -af atempo=1.03 -preset ultrafast -tune zero_latency %sa", stream.MediaServerInputUri)
+						if strings.ToLower(stream.AudioEncoding) != "aac" {
+							audioMode = "-c:a aac"
 
-					var timeout = "-timeout 1000000 "
+						} else {
+							audioMode = "-c:a copy"
+						}
+					}
+					isRecording := true
+					recording := ""
+					if isRecording {
+						recording = fmt.Sprintf("-f mp4 -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_duration 10 %s", audioMode, stream.RecordingInputUrl)
+					}
 					netcamUri := stream.NetcamUri
 					rtspTransport := strings.ToLower(camera.RtspTransport)
 
@@ -48,8 +57,8 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 
 					codec, err := codecs.getCodecString(suuid)
 					log.Info("Codec string = " + codec)
-					log.Info("Recording src url = " + stream.RecordingSrcURL)
-					cmdStr := fmt.Sprintf("/usr/bin/ffmpeg -loglevel warning -hide_banner %s-fflags nobuffer -rtsp_transport %s -i  %s  -c:v copy %s  -f %s -preset ultrafast -tune zero_latency %s -vn -c:a pcm_alaw -b:a 64K -ar 48000 -af atempo=1.03 -f alaw -preset ultrafast -tune zero_latency %sa -c:v copy -c:a aac -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_duration 10 -f mp4 %s", timeout, rtspTransport, netcamUri, audio, streamInfo.CodecName, stream.MediaServerInputUri, stream.MediaServerInputUri, stream.RecordingSrcURL)
+					log.Info("Recording src url = " + stream.RecordingInputUrl)
+					cmdStr := fmt.Sprintf("/usr/bin/ffmpeg -loglevel warning -hide_banner -timeout 1000000 -fflags nobuffer -rtsp_transport %s -i %s -f %s -c:v copy -an  -preset ultrafast -tune zero_latency %s %s %s", rtspTransport, netcamUri, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording)
 					log.Info(cmdStr)
 					cmdStr += " 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log"
 					cmd := exec.Command("bash", "-c", cmdStr)
