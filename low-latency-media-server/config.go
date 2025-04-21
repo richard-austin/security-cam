@@ -7,11 +7,13 @@ import (
 )
 
 type Config struct {
-	LogPath         string `json:"log_path"`
-	LogLevelStr     string `json:"log_level"`
-	CamerasJsonPath string `json:"cameras_json_path"`
-	ServerPort      int    `json:"server_port"`
-	GopCache        bool   `json:"gop_cache"`
+	LogPath             string  `json:"log_path"`
+	LogLevelStr         string  `json:"log_level"`
+	CamerasJsonPath     string  `json:"cameras_json_path"`
+	PrivateKeyPath      string  `json:"private_key_path"`
+	ServerPort          int     `json:"server_port"`
+	DefaultLatencyLimit float32 `json:"default_latency_limit"`
+	GopCache            bool    `json:"gop_cache"`
 }
 
 func (c *Config) LogLevel() (err error, level log.Level) {
@@ -34,23 +36,42 @@ func (c *Config) LogLevel() (err error, level log.Level) {
 	return
 }
 
+type Recording struct {
+	Enabled           bool   `json:"enabled"`
+	RecordingInputUrl string `json:"recording_input_url"`
+	RecordingSrcUrl   string `json:"recording_src_url"`
+	Uri               string `json:"uri"`
+	Location          string `json:"location"`
+}
+
 type StreamC struct {
-	Descr               string `json:"descr"`
-	Audio               bool   `json:"audio"`
-	AudioEncoding       string `json:"audio_encoding"`
-	NetcamUri           string `json:"netcam_uri"`
-	MediaServerInputUri string `json:"media_server_input_uri"`
-	URI                 string `json:"uri"`
-	RecordingInputUrl   string `json:"recording_input_url"`
+	Descr               string    `json:"descr"`
+	Audio               bool      `json:"audio"`
+	AudioEncoding       string    `json:"audio_encoding"`
+	NetcamUri           string    `json:"netcam_uri"`
+	MediaServerInputUri string    `json:"media_server_input_uri"`
+	URI                 string    `json:"uri"`
+	PreambleFrames      int       `json:"preambleFrames"`
+	Recording           Recording `json:"recording"`
+}
+
+type CameraParamSpecs struct {
+	CamType int    `json:"camType"`
+	Params  string `json:"params"`
+	Uri     string `json:"uri"`
+	Name    string `json:"name"`
 }
 
 type Camera struct {
-	Name          string             `json:"name"`
-	Address       string             `json:"address"`
-	Streams       map[string]StreamC `json:"streams"`
-	Username      string             `json:"username"`
-	Password      string             `json:"password"`
-	RtspTransport string             `json:"rtsp_transport"`
+	Name                      string             `json:"name"`
+	Address                   string             `json:"address"`
+	Streams                   map[string]StreamC `json:"streams"`
+	CamType                   int                `json:"camType"`
+	CameraParamSpecs          CameraParamSpecs   `json:"cameraParamSpecs"`
+	BackChannelAudioSupported bool               `json:"backChannelAudioSupported"`
+	RtspTransport             string             `json:"rtspTransport"`
+	UseRtspAuth               bool               `json:"useRtspAuth"`
+	Cred                      string             `json:"cred"`
 }
 
 type Cameras struct {
@@ -71,23 +92,28 @@ func loadConfig() (config *Config, cameras *Cameras) {
 	var cams Cameras
 	var conf Config
 
-	data, err := os.ReadFile("cameras.json")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = json.Unmarshal(data, &cams.Cameras)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	cameras = &cams
-	data, err = os.ReadFile("config.json")
+	// Read config.json from the executables directory
+	exPath, err := os.Getwd()
+	if exPath == "/" {
+		// Running as a service
+		exPath = "/etc/fmp4-ws-media-server"
+	}
+	data, err := os.ReadFile(exPath + "/config.json")
 	if err != nil {
-		log.Fatalln(err)
+		log.Errorln(err)
 	}
 	err = json.Unmarshal(data, &conf)
 	if err != nil {
-		log.Fatalln(err)
+		log.Errorln(err)
+	}
+	data, err = os.ReadFile(conf.CamerasJsonPath)
+	if err != nil {
+		log.Errorln(err)
+	}
+	err = json.Unmarshal(data, &cams.Cameras)
+	if err != nil {
+		log.Errorln(err)
 	}
 
 	config = &conf

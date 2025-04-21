@@ -1,7 +1,10 @@
 {
-  "log_path": "/var/log/mp4f-server/mp4f-server.log",
+  "log_path": "/var/log/fmp4-ws-media-service/fmp4-server.log",
+  "cameras_json_path": "/var/security-cam/cameras.json",
+  "private_key_path": "/etc/security-cam/id_rsa",
   "log_level": "INFO",
   "server_port": 8081,
+  "default_latency_limit": 0.8,
   "gop_cache": true
 }
 

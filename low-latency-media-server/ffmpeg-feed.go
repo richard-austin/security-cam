@@ -1,15 +1,68 @@
 package main
 
 import (
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 )
+
+type Credentials struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+/*
+ * getCredentials: Get the camera credentials from the encrypted string cred in the camera data.
+ * Private key generated like this: -
+ *	openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -pkeyopt rsa_keygen_pubexp:65537 | openssl pkcs8 -topk8 -nocrypt -outform der > /etc/security-cam/id_rsa
+ *
+ * And the public key is created from that with: -
+ *	openssl pkey -pubout -inform der -outform der -in /etc/security-cam/id_rsa -out rsa-2048-public-key.spki
+ *
+ * And the base64 format used in the encryption.ts on the client is created with: -
+ * cat rsa-2048-public-key.spki | base64
+ */
+func getCredentials(cam Camera) (err error, credentials Credentials) {
+	bytes, err := os.ReadFile(config.PrivateKeyPath)
+	if err != nil {
+		log.Errorf("Error in getCredentials reading private key (%s)", err.Error())
+		return
+	}
+	str := base64.StdEncoding.EncodeToString(bytes)
+	privateKeyBlock, _ := pem.Decode([]byte("-----BEGIN PRIVATE KEY-----\n" + str + "\n-----END PRIVATE KEY-----"))
+	get, err := x509.ParsePKCS8PrivateKey(privateKeyBlock.Bytes)
+	if err != nil {
+		log.Errorf("Error in getCredentials parsing private key (%s)", err.Error())
+		return
+	}
+	pk := get.(*rsa.PrivateKey) // Cast to type that rsa.DecryptOAEP can use
+	encrypted, _ := base64.StdEncoding.DecodeString(cam.Cred)
+	if len(encrypted) > 0 {
+		decryptedData, err := rsa.DecryptOAEP(sha256.New(), nil, pk, encrypted, nil)
+		if err != nil {
+			log.Errorf("Decrypt data error in getCredentials: %s", err.Error())
+			panic(err)
+		}
+		err = json.Unmarshal(decryptedData, &credentials)
+		if err != nil {
+			log.Errorf("Error unmarshalling JSON in getCredentials: %s", err.Error())
+			panic(err)
+		}
+	}
+	return
+}
 
 func ffmpegFeed(config *Config, cameras *Cameras) {
 	go cleanLogs()
@@ -33,17 +86,18 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 							audioMode = "-c:a copy"
 						}
 					}
-					isRecording := true
+
 					recording := ""
-					if isRecording {
-						recording = fmt.Sprintf("-f mp4 -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_duration 10 %s", audioMode, stream.RecordingInputUrl)
+					if stream.Recording.Enabled {
+						recording = fmt.Sprintf("-f mp4 -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_duration 10 %s", audioMode, stream.Recording.RecordingInputUrl)
 					}
 					netcamUri := stream.NetcamUri
 					rtspTransport := strings.ToLower(camera.RtspTransport)
-
-					if camera.Username != "" { // If credentials are given, add them to the URL
+					uri := stream.NetcamUri
+					if camera.UseRtspAuth { // Use credentials if required
+						_, creds := getCredentials(camera)
 						idx := len("rtsp://")
-						netcamUri = netcamUri[:idx] + url.QueryEscape(camera.Username) + ":" + url.QueryEscape(camera.Password) + "@" + netcamUri[idx:]
+						netcamUri = uri[:idx] + url.QueryEscape(creds.UserName) + ":" + url.QueryEscape(creds.Password) + "@" + uri[idx:]
 					}
 					//	logging :=  "2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> ${log_dir}ffmpeg_${cam.name.replace(' ', '_') + "_" + stream.descr.replace(' ', '_').replace('.', '_')}_\$(date +%Y%m%d).log"
 					suuid, err := codecs.suuidFromUrl(stream.MediaServerInputUri)
@@ -57,7 +111,7 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 
 					codec, err := codecs.getCodecString(suuid)
 					log.Info("Codec string = " + codec)
-					log.Info("Recording src url = " + stream.RecordingInputUrl)
+					log.Info("Recording src url = " + stream.Recording.RecordingInputUrl)
 					cmdStr := fmt.Sprintf("/usr/bin/ffmpeg -loglevel warning -hide_banner -timeout 1000000 -fflags nobuffer -rtsp_transport %s -i %s -f %s -c:v copy -an  -preset ultrafast -tune zero_latency %s %s %s", rtspTransport, netcamUri, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording)
 					log.Info(cmdStr)
 					cmdStr += " 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log"
