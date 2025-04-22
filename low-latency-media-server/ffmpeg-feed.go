@@ -88,7 +88,7 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 					}
 
 					recording := ""
-					if stream.Recording.Enabled {
+					if stream.Recording.Enabled && stream.Recording.RecordingInputUrl != "" {
 						recording = fmt.Sprintf("-f mp4 -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_duration 10 %s", audioMode, stream.Recording.RecordingInputUrl)
 					}
 					netcamUri := stream.NetcamUri

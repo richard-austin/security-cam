@@ -3,7 +3,7 @@
   "cameras_json_path": "/var/security-cam/cameras.json",
   "private_key_path": "/etc/security-cam/id_rsa",
   "log_level": "INFO",
-  "server_port": 8081,
+  "server_port": 8085,
   "default_latency_limit": 0.8,
   "gop_cache": true
 }

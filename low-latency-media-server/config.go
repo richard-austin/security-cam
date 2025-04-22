@@ -97,7 +97,7 @@ func loadConfig() (config *Config, cameras *Cameras) {
 	exPath, err := os.Getwd()
 	if exPath == "/" {
 		// Running as a service
-		exPath = "/etc/fmp4-ws-media-server"
+		exPath = "/etc/low-latency-media-server"
 	}
 	data, err := os.ReadFile(exPath + "/config.json")
 	if err != nil {

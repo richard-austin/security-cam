@@ -51,6 +51,7 @@ export enum RecordingType {none='none', motionService="motionService", ftpTrigge
 export class Recording
 {
   enabled: boolean = false
+  recording_input_url: string = "";
   recording_src_url: string = "";
   uri: string = "";
   location: string = "";

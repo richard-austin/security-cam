@@ -43,6 +43,7 @@ enum RecordingType {none, motionService, ftpTriggered, pullPointEventTriggered}
 
 class Recording {
     boolean enabled=false
+    String recording_input_url = ''
     String recording_src_url=''
     String uri=''
     String location=''
