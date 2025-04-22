@@ -45,7 +45,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   sizeing!: VideoSizing;
 
   constructor(public utilsService: UtilsService) {
-    this.videoFeeder = new MediaFeeder(this.buffering_sec)
+    this.videoFeeder = new MediaFeeder()
   }
 
   /**
