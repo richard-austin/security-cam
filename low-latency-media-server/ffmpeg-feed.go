@@ -35,12 +35,12 @@ type Credentials struct {
  * cat rsa-2048-public-key.spki | base64
  */
 func getCredentials(cam Camera) (err error, credentials Credentials) {
-	bytes, err := os.ReadFile(config.PrivateKeyPath)
+	data, err := os.ReadFile(config.PrivateKeyPath)
 	if err != nil {
 		log.Errorf("Error in getCredentials reading private key (%s)", err.Error())
 		return
 	}
-	str := base64.StdEncoding.EncodeToString(bytes)
+	str := base64.StdEncoding.EncodeToString(data)
 	privateKeyBlock, _ := pem.Decode([]byte("-----BEGIN PRIVATE KEY-----\n" + str + "\n-----END PRIVATE KEY-----"))
 	get, err := x509.ParsePKCS8PrivateKey(privateKeyBlock.Bytes)
 	if err != nil {
