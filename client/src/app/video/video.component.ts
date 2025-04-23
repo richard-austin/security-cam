@@ -29,13 +29,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @Input() isFmp4: boolean = false;
+  @Input() isLive: boolean = false;
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
 
   visible: boolean = false;
-  videoFeeder!: MediaFeeder;
+  mediaFeeder!: MediaFeeder;
   multi: boolean = false;
   buffering_sec: number = 1.2;
   audioBackchannel!: AudioBackchannel
@@ -45,7 +45,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   sizeing!: VideoSizing;
 
   constructor(public utilsService: UtilsService) {
-    this.videoFeeder = new MediaFeeder()
+    this.mediaFeeder = new MediaFeeder()
   }
 
   /**
@@ -57,17 +57,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
     if (this.vt !== undefined)
       this.vt.reset();
-    this.audioBackchannel.stopAudioOut(); // Ensure two way audio is off when switching streams
-    this.stop();
+    this.audioBackchannel.stopAudioOut().then(r => {}); // Ensure two way audio is off when switching streams
+    this.mediaFeeder.stop();
     this.stream = stream;
-    this.videoFeeder.setSource(cam, stream, manifest)
+    this.mediaFeeder.setSource(cam, stream, manifest)
     if (cam.backchannelAudioSupported) {
       this.audioBackchannel.getMediaDevices();
     }
-  }
-
-  stop(): void {
-    this.videoFeeder.stop();
   }
 
   setFullScreen() {
@@ -88,13 +84,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleMuteAudio() {
-    if (this.videoFeeder)
-      this.videoFeeder.mute(!this.videoFeeder.isMuted);
+    if (this.mediaFeeder)
+      this.mediaFeeder.mute(!this.mediaFeeder.isMuted);
   }
 
   mute(mute: boolean = true): void {
-    if (this.videoFeeder)
-      this.videoFeeder.mute(mute);
+    if (this.mediaFeeder)
+      this.mediaFeeder.mute(mute);
   }
 
   setSize(size: number, isRecording: boolean = false): void {
@@ -127,16 +123,16 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.videoFeeder.init(this.isFmp4, this.video);
+    this.mediaFeeder.init(this.isLive, this.video);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
     this.video.addEventListener('fullscreenchange', () => {
-      this.vt.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
+      this.vt.reset();  // Set to a normal scale for if the mouse wheel was turned while full screen showing
     });
     this.video.ontimeupdate = () => {
       if (this.video.currentTime !== null && !isNaN(this.video.currentTime))
         this.currentTime = new Date(this.video.currentTime * 1000).toISOString().substring(11, 19);
-      if (this.video.duration !== null && !isNaN(this.video.duration))
+      if (!this.isLive && this.video.duration !== null && !isNaN(this.video.duration))
         this.totalTime = new Date(this.video.duration * 1000).toISOString().substring(11, 19);
     };
 
@@ -145,11 +141,12 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     screen.orientation.addEventListener('change', this.orientationChangeHandler)  }
 
   ngOnDestroy(): void {
-    this.videoFeeder.stop();
+    this.mediaFeeder.stop();
+
     // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
     //  ffmpeg to the backchannel device. The problem does not occur when done like this
     let timerSubscription: Subscription = timer(20).subscribe(() => {
-      this.audioBackchannel.stopAudioOut();
+      this.audioBackchannel.stopAudioOut().then(r => {});
       timerSubscription.unsubscribe();
     });
     window.screen.orientation.onchange = null;

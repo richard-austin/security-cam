@@ -9,6 +9,7 @@ import (
 type Config struct {
 	LogPath             string  `json:"log_path"`
 	LogLevelStr         string  `json:"log_level"`
+	FfmpegLogLevelStr   string  `json:"ffmpeg_log_level"`
 	CamerasJsonPath     string  `json:"cameras_json_path"`
 	PrivateKeyPath      string  `json:"private_key_path"`
 	ServerPort          int     `json:"server_port"`

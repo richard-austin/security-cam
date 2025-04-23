@@ -407,8 +407,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                         stream.recording.location = 'rec' + stream.rec_num;
                         stream.motion.trigger_recording_on = 'none';
                     } else if (stream.motion.enabled) {
-                        // stream.recording = new Recording();
                         stream.recording.enabled = true;
+                        stream.recording.recording_input_url = "";
                         stream.recording.uri = 'http://localhost:8084/recording/rec' + stream.rec_num + '/';
                         stream.recording.location = 'rec' + stream.rec_num;
                         if (stream.motion.trigger_recording_on !== 'none') {
@@ -438,7 +438,6 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                         stream.recording.location = 'rec' + stream.rec_num;
                         stream.motion.trigger_recording_on = 'none';
                     } else if (stream.motion.enabled) {
-                        // stream.recording = new Recording();
                         stream.recording.enabled = true
                         stream.recording.recording_input_url = "";
                         stream.recording.recording_src_url = "http://localhost:8085/h/stream?rsuuid=cam" + camNum + "-stream" + streamNum+"r";

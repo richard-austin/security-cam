@@ -72,7 +72,6 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.videos.forEach((video) => {
       video.visible = false;
       video.multi = true;
-      video.stop();
     });
     let index: number = 0;
     if (this.cams.size > 0) {

@@ -44,7 +44,7 @@ for ((i = 1 ; i < 51 ; i++ )); do mkdir -p security-cam_"${VERSION}"_arm64/var/s
 
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/camera-recordings-service
-mkdir -p security-cam_"${VERSION}"_arm64/var/log/low-latency-media-service
+mkdir -p security-cam_"${VERSION}"_arm64/var/log/low-latency-media-server
 
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr

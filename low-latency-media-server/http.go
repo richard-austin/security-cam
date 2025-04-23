@@ -188,7 +188,7 @@ func serveHTTP() {
 
 // ServeHTTPStream For recording from
 // Recording command example which seems to work well.
-// ffmpeg -y -f mp4 -i http://localhost:8081/h/stream?rsuuid=cam1-stream1r -f mp4 test.mp4
+// ffmpeg -y -f mp4 -i http://localhost:8085/h/stream?rsuuid=cam1-stream1r -f mp4 test.mp4
 func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	log.Info("In ServeHTTPStream")
 

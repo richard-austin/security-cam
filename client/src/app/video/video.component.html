@@ -3,7 +3,7 @@
   <div class="row">
     <mat-card class="mx-auto hide-background mat-elevation-z0">
       <mat-card-title class="mat-elevation-z8">
-        {{ videoFeeder.camName + " (" + videoFeeder.streamDescr + ") "}}<span class="vid-time">{{currentTime}}</span><span *ngIf="!isFmp4" class="duration-time"> - {{totalTime}}</span>
+        {{ mediaFeeder.camName + " (" + mediaFeeder.streamDescr + ") "}}<span class="vid-time">{{currentTime}}</span><span *ngIf="!isLive" class="duration-time"> - {{totalTime}}</span>
       </mat-card-title>
     </mat-card>
   </div>
@@ -18,30 +18,30 @@
          (touchend)="vt.touchEndHandler($event)">
       <video #video></video>
     </div>
-    <div *ngIf="isFmp4" class="latency-limit-selector">
+    <div *ngIf="isLive" class="latency-limit-selector">
       <div>
         <label *ngIf="stream?.audio" class="video-buttons"
-               [matTooltip]="'Click to ' + (videoFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
+               [matTooltip]="'Click to ' + (mediaFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
                matTooltipClass="tooltip">
-          <mat-icon (click)="toggleMuteAudio()">{{ videoFeeder.isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
+          <mat-icon (click)="toggleMuteAudio()">{{ mediaFeeder.isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
         </label>
-        <label *ngIf="videoFeeder.backchannelAudioSupported"
+        <label *ngIf="mediaFeeder.backchannelAudioSupported"
                class="video-buttons"
                [matTooltip]="audioBackchannel.audioButtonTooltip()"
                matTooltipClass="tooltip">
           <mat-icon
             [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioBackchannel.audioToggle) || utilsService.isGuestAccount}"
-            (click)="audioBackchannel.toggleAudioOut(videoFeeder.camera, stream)">{{ audioBackchannel.audioToggle ? 'mic' : 'mic_off' }}
+            (click)="audioBackchannel.toggleAudioOut(mediaFeeder.camera, stream)">{{ audioBackchannel.audioToggle ? 'mic' : 'mic_off' }}
           </mat-icon>
         </label>
-        <select *ngIf="videoFeeder.backchannelAudioSupported" [disabled]="utilsService.speakActive"
+        <select *ngIf="mediaFeeder.backchannelAudioSupported" [disabled]="utilsService.speakActive"
                 [matTooltip]="audioBackchannel.audioInputSelectorTooltip()" matTooltipClass="tooltip"
                 [(ngModel)]="audioBackchannel.selectedDeviceId" (change)="audioBackchannel.setAudioInput()">
           <option *ngFor="let device of audioBackchannel.mediaDevices | audioInput"
                   [value]="device.deviceId">{{ device.label }}
           </option>
         </select>
-        <label [ngClass]="{'latency-chasing': videoFeeder.isStalled}">
+        <label [ngClass]="{'latency-chasing': mediaFeeder.isStalled}">
           <mat-icon>timer</mat-icon>
         </label>
         <label class="video-buttons"

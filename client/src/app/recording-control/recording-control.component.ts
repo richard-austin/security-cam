@@ -151,7 +151,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.setUpVideoEventHandlers();
 
         video.visible = true;  // Still hidden by enclosing div
-        video.stop();
         this.selectedPlaybackMode = 'startPause';
 
         // Get the motion events for this camera (by motionName)
@@ -373,13 +372,13 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
   toggleMuteAudio() {
     if(this.video !== undefined && this.video !== null)
-      this.video.videoFeeder.mute(!this.video.videoFeeder.isMuted);
+      this.video.mediaFeeder.mute(!this.video.mediaFeeder.isMuted);
   }
 
   isMuted() : boolean {
     let retVal = false;
     if(this.video !== undefined && this.video !== null)
-      retVal = this.video.videoFeeder.isMuted;
+      retVal = this.video.mediaFeeder.isMuted;
     return retVal;
   }
 }

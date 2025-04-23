@@ -7,7 +7,7 @@ declare let MediaStreamTrackGenerator: any
 initMSTG();  // Set up MediaStreamTrackGenerator for platforms which don't support it
 
 export class MediaFeeder {
-  isfmp4!: boolean;
+  isLive!: boolean;
   cam!: Camera;
   stream!: Stream;
   media!: HTMLMediaElement;
@@ -24,7 +24,7 @@ export class MediaFeeder {
   }
 
   init(isfmp4: boolean, media: HTMLMediaElement) {
-    this.isfmp4 = isfmp4;
+    this.isLive = isfmp4;
     this.media = media;
     this.media.autoplay = true;
     this.media.muted = false;
@@ -38,7 +38,7 @@ export class MediaFeeder {
    * @param manifest
    */
   setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
-    this.stop();
+   // this.stop();
     this.cam = cam;
     this.stream = stream;
     this.recording = manifest !== '';
@@ -58,7 +58,7 @@ export class MediaFeeder {
    * @private
    */
   public startVideo(): void {
-    if (!this.isfmp4) {
+    if (!this.isLive) {
       if (this.cam !== undefined) {
         if (Hls.isSupported()) {
           this.hls = new Hls();
@@ -138,15 +138,17 @@ export class MediaFeeder {
   stop(): void {
     this.streamTestInterval?.unsubscribe();  // Stop the stream test interval, or it will be restarted after
     // we exit the video component
-    if (!this.isfmp4 && this.hls !== null) {
+    if (!this.isLive && this.hls !== null) {
       this.media.pause();
       this.hls.stopLoad();
       this.hls.detachMedia();
       this.hls.destroy();
       this.hls = null;
-    } else if (this.isfmp4) {
-      this.audioWorker?.terminate();
+    } else if (this.isLive) {
+      this.videoWorker?.postMessage({close: true})
       this.videoWorker?.terminate();
+      this.audioWorker?.postMessage({close: true})
+      this.audioWorker?.terminate();
       this.media.pause();
     }
   }

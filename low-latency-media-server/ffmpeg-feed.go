@@ -1,13 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/url"
@@ -79,12 +79,7 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 						audio = ""
 					} else {
 						audio = fmt.Sprintf("-f alaw -vn -c:a pcm_alaw -b:a 64K -ar 48000 -af atempo=1.03 -preset ultrafast -tune zero_latency %sa", stream.MediaServerInputUri)
-						if strings.ToLower(stream.AudioEncoding) != "aac" {
-							audioMode = "-c:a aac"
-
-						} else {
-							audioMode = "-c:a copy"
-						}
+						audioMode = "-c:a aac"
 					}
 
 					recording := ""
@@ -99,7 +94,6 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 						idx := len("rtsp://")
 						netcamUri = uri[:idx] + url.QueryEscape(creds.UserName) + ":" + url.QueryEscape(creds.Password) + "@" + uri[idx:]
 					}
-					//	logging :=  "2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> ${log_dir}ffmpeg_${cam.name.replace(' ', '_') + "_" + stream.descr.replace(' ', '_').replace('.', '_')}_\$(date +%Y%m%d).log"
 					suuid, err := codecs.suuidFromUrl(stream.MediaServerInputUri)
 					if err != nil {
 						log.Error(err.Error())
@@ -111,23 +105,23 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 
 					codec, err := codecs.getCodecString(suuid)
 					log.Info("Codec string = " + codec)
-					log.Info("Recording src url = " + stream.Recording.RecordingInputUrl)
-					cmdStr := fmt.Sprintf("/usr/bin/ffmpeg -loglevel warning -hide_banner -timeout 1000000 -fflags nobuffer -rtsp_transport %s -i %s -f %s -c:v copy -an  -preset ultrafast -tune zero_latency %s %s %s", rtspTransport, netcamUri, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording)
-					log.Info(cmdStr)
-					cmdStr += " 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log"
+					var sb strings.Builder
+					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 1000000 -fflags nobuffer -rtsp_transport %s -i %s -f %s -c:v copy -an  -preset ultrafast -tune zero_latency %s %s %s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					log.Info(sb.String())
+					if config.FfmpegLogLevelStr != "quiet" {
+						sb.WriteString(" 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log")
+					}
+					cmdStr := sb.String()
 					cmd := exec.Command("bash", "-c", cmdStr)
-					stdout, err := cmd.Output()
-					log.Info(cmdStr)
+					var out bytes.Buffer
+					var stderr bytes.Buffer
+					cmd.Stdout = &out
+					cmd.Stderr = &stderr
+					err = cmd.Run()
 					if err != nil {
-						var ee *exec.ExitError
-						errors.As(err, &ee)
-						if ee != nil {
-							log.Errorf("ffmpeg (%s:%s):- %s, %s", camera.Name, stream.Descr, string(ee.Stderr), ee.Error())
-						} else {
-							log.Errorf("ffmpeg (%s:%s):- :- %s", camera.Name, stream.Descr, err.Error())
-						}
-					} else if stdout != nil {
-						log.Infof("ffmpeg output (%s:%s):- %s ", camera.Name, stream.Descr, string(stdout))
+						log.Errorf("%s:%s -- %s: %s", camera.Name, stream.Descr, fmt.Sprint(err), stderr.String())
+					} else if cmd.Stdout != nil {
+						log.Info(out.String())
 					}
 				}
 			}(camera, &stream)
