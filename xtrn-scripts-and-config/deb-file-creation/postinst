@@ -55,7 +55,6 @@ chown root:tomcat /var/lib/tomcat10/conf/tomcat-users.xml
 chmod 640 /var/lib/tomcat10/conf/server.xml
 chown root:tomcat /var/lib/tomcat10/conf/server.xml
 chown root:root /etc/security-cam/wifi-setup-service/*.py
-chown tomcat:tomcat -R /etc/low-latency-media-server
 
 # Give directories only permission 775
 find /etc/security-cam -type d -print0 | xargs -0 chmod 775
@@ -66,7 +65,7 @@ chgrp -R security-cam /etc/security-cam/
 chown -R tomcat:security-cam /var/log/motion
 chown -R tomcat:security-cam /var/log/security-cam
 chown -R tomcat:security-cam /var/log/camera-recordings-service
-chown -R tomcat:security-cam /var/log/low-latency-media-service
+chown -R tomcat:security-cam /var/log/low-latency-media-server
 chown -R tomcat:tomcat /var/log/tomcat10
 # Make the following scripts executable
 chmod +x /etc/security-cam/install-cert.sh
