@@ -202,7 +202,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	nBytes, err := w.Write(data.pckt)
-	log.Infof("ftyp = %s", string(data.pckt))
+	log.Tracef("ftyp = %s", string(data.pckt))
 	if err != nil {
 		log.Errorf("Error writing ftyp: %s", err.Error())
 		return
@@ -215,7 +215,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	nBytes, err = w.Write(data.pckt)
-	log.Infof("moov = %s", string(data.pckt))
+	log.Tracef("moov = %s", string(data.pckt))
 	if err != nil {
 		log.Errorf("Error writing moov: %s", err.Error())
 		return
