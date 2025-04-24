@@ -75,9 +75,6 @@ func serveHTTP() {
 			}
 			d = NewPacket(data[:numOfByte])
 
-			if err != nil {
-				log.Error(err)
-			}
 			err = streams.put(suuid, d)
 			if err != nil {
 				log.Errorf("Error putting the packet into stream %s:- %s", suuid, err.Error())
