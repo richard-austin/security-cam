@@ -78,8 +78,12 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 						audioMode = "-an"
 						audio = ""
 					} else {
-						audio = fmt.Sprintf("-f alaw -vn -c:a pcm_alaw -b:a 64K -ar 48000 -af atempo=1.03 -preset ultrafast -tune zero_latency %sa", stream.MediaServerInputUri)
-						audioMode = "-c:a aac"
+						audio = fmt.Sprintf("-f alaw -vn -c:a pcm_alaw -b:a 64K -ar 48000 -af atempo=1.03 %sa", stream.MediaServerInputUri)
+						if stream.AudioEncoding != "AAC" {
+							audioMode = "-c:a aac"
+						} else {
+							audioMode = "-c:a copy"
+						}
 					}
 
 					recording := ""
