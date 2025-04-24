@@ -44,19 +44,29 @@ class VideoFeeder {
             },
         });
     }
-
+    configSupported!: VideoDecoderSupport;
     processMessage = async (data: Uint8Array): Promise<void> => {
         // let processStart = performance.now();
         if (this.decoder.state !== "configured") {
             const config = {codec: this.codec, optimizeForLatency: true};
-            this.decoder.configure(config);
+            this.configSupported = await VideoDecoder.isConfigSupported(config)
+            if(this.configSupported.supported) {
+                this.decoder.configure(config);
+            }
+            else {
+                this.ws.close(4000, "Codec not supported")
+            //    console.warn("The "+this.codec+" codec is not supported by this browser");
+                postMessage({codecNotSupported: true, codec: this.codec});
+            }
         }
-        const chunk = new EncodedVideoChunk({
-            timestamp: (performance.now()) * 1000,
-            type: (this.isHEVC ? (data[3] === 0x40) : ((data[4] & 0x0f) === 7)) ? "key" : "delta",
-            data: data,
-        });
-        this.decoder.decode(chunk);
+        if( this.configSupported.supported) {
+            const chunk = new EncodedVideoChunk({
+                timestamp: (performance.now()) * 1000,
+                type: (this.isHEVC ? (data[3] === 0x40) : ((data[4] & 0x0f) === 7)) ? "key" : "delta",
+                data: data,
+            });
+            this.decoder.decode(chunk);
+        }
         // console.log("process time: "+(performance.now()-processStart))
     }
 
@@ -106,12 +116,14 @@ class VideoFeeder {
     }
 
     timeoutRestart() {
-        console.error("Video feed from websocket has stopped, restarting ...");
-        if(this.ws)
-            this.ws.close();
-        setTimeout(() => {
-            this.setUpWebsocketConnection();
-        }, 1000)
+        if(this.configSupported.supported) {
+            console.error("Video feed from websocket has stopped, restarting ...");
+            if (this.ws)
+                this.ws.close();
+            setTimeout(() => {
+                this.setUpWebsocketConnection();
+            }, 1000)
+        }
     }
 
     async putLargeFrames(): Promise<void> {

@@ -104,7 +104,12 @@ export class MediaFeeder {
           if (data.closed) {
             console.log("Terminating the video worker");
             this.videoWorker.terminate();
-          } else { // if (!this.video.paused) {
+          } else if (data.codecNotSupported) {
+            console.log("Codec " + data.codec + " not supported by browser");
+            this.videoWorker.terminate();
+            this.audioWorker?.postMessage({close: true})
+            this.audioWorker?.terminate();
+          } else {
             await videoWriter.write(data);
             await videoWriter.ready;
           }
