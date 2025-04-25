@@ -455,7 +455,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
       <wsdl:documentation>Create a new pane configuration describing the streaming and coding
         settings for a display area.
         <br/>
-        This optional method is only supported by devices that msgQueue support of dynamic pane
+        This optional method is only supported by devices that signal support of dynamic pane
         creation via their capabilities.
         <br/>
         The content of the Token field may be ignored by the device.
@@ -468,7 +468,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
         pane configuration
         is in use by the current layout.
         <br/>
-        This optional method is only supported by devices that msgQueue support of dynamic pane
+        This optional method is only supported by devices that signal support of dynamic pane
         creation via their capabilities.
       </wsdl:documentation>
       <wsdl:input message="tls:DeletePaneConfigurationRequest"/>
