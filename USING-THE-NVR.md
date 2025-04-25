@@ -112,7 +112,7 @@ Events selector in the top left of the page. A warning box will appear if there 
 * **Wifi Admin**
     * **Local Wifi Details**
 
-      Lists the Wi-Fi access points in the area along with signal strength and other information.
+      Lists the Wi-Fi access points in the area along with msgQueue strength and other information.
     * **Wifi Settings**
 
       Setup or enable/disable the NVR Wi-Fi connection.

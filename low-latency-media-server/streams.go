@@ -267,7 +267,7 @@ func (s *Streams) putMoov(suuid string, pckt Packet) (retVal error) {
 	// Check it is actually a moov
 	val := getSubBox(pckt, "moov")
 	if val == nil {
-		retVal = fmt.Errorf("The packet recieved in putMoov was not a moov")
+		retVal = fmt.Errorf("the packet recieved in putMoov was not a moov")
 		return
 	} else {
 		stream, ok := s.StreamMap[suuid]
@@ -275,7 +275,7 @@ func (s *Streams) putMoov(suuid string, pckt Packet) (retVal error) {
 			stream.moov = pckt
 			s.StreamMap[suuid] = stream
 		} else {
-			retVal = fmt.Errorf("Stream %s not found", suuid)
+			retVal = fmt.Errorf("stream %s not found", suuid)
 		}
 	}
 	return

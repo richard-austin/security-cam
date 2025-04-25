@@ -47,7 +47,7 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 		})
 	})
 
-	// For ffmpeg to write to for live streaming (with suuid)
+	// For ffmpeg to write to for live-streaming (with suuid)
 	router.POST("/live/:suuid", func(c *gin.Context) {
 		req := c.Request
 		suuid := req.FormValue("suuid")
@@ -68,7 +68,8 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 
 		data := make([]byte, 33000)
 
-		d := NewPacket(data) //make([]byte, numOfByte)
+		d := NewPacket(data)
+		t := time.NewTimer(5 * time.Second)
 		for {
 			data = data[:33000]
 			numOfByte, err := readCloser.Read(data)
@@ -79,8 +80,19 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 				break
 			}
 			d = NewPacket(data[:numOfByte])
+			select {
+			case <-t.C:
+				killFfmpegProcess(baseSuuid, ffmpegProcessPid, ffmpegProcs)
+				err = fmt.Errorf("(timeout occurred)")
+				break
+			default:
+				t.Reset(2 * time.Second)
+				break
+			}
+			if err == nil {
+				err = streams.put(suuid, d, false)
+			}
 
-			err = streams.put(suuid, d)
 			if err != nil {
 				log.Errorf("Error putting the packet into stream %s:- %s", suuid, err.Error())
 				break
@@ -143,6 +155,8 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 		for len(queue) > 0 {
 			_ = <-queue
 		}
+
+		t := time.NewTimer(5 * time.Second)
 		for {
 			data = data[:33000]
 			numOfByte, err = readCloser.Read(data)
@@ -154,12 +168,22 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 				break
 			}
 			d = NewPacket(data[:numOfByte])
-
-			if err != nil {
-				log.Error(err)
+			select {
+			case <-t.C:
+				killFfmpegProcess(baseSuuid, ffmpegProcessPid, ffmpegProcs)
+				err = fmt.Errorf("(timeout occurred)")
+				break
+			default:
+				t.Reset(2 * time.Second)
+				break
 			}
-
-			err = streams.put(suuid, d, true)
+			if err != nil {
+				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
+				break
+			}
+			if err == nil {
+				err = streams.put(suuid, d, true)
+			}
 
 			if err != nil {
 				log.Errorf("Error putting the packet into stream %s:- %s", suuid, err.Error())
