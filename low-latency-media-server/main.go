@@ -6,12 +6,14 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
 var cameras *Cameras
 var config *Config
 var codecs *MimeCodecs
+var ffmpegProcs map[string]*exec.Cmd
 
 func main() {
 	var customFormatter = log.TextFormatter{}
@@ -22,6 +24,7 @@ func main() {
 
 	config, cameras = loadConfig()
 	codecs = NewMimeCodecs()
+	ffmpegProcs = make(map[string]*exec.Cmd)
 
 	_, level := config.LogLevel()
 	log.SetLevel(level)
@@ -34,6 +37,6 @@ func main() {
 	}
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, lumberjackLogger)
 	log.SetOutput(io.MultiWriter(os.Stdout, lumberjackLogger))
-	ffmpegFeed(config, cameras)
-	serveHTTP()
+	ffmpegFeed(config, cameras, &ffmpegProcs)
+	serveHTTP(&ffmpegProcs)
 }
