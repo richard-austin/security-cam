@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/websocket"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -160,7 +161,6 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 		for {
 			data = data[:33000]
 			numOfByte, err = readCloser.Read(data)
-
 			if err != nil {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
 				// Make sure the ffmpeg process is stopped so it will restart
@@ -216,9 +216,9 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 	}
 }
 func killFfmpegProcess(suuid string, ffmpegProcessPid int, ffmpegProcs *map[string]*exec.Cmd) {
-	if (*ffmpegProcs)[suuid] != nil && (*ffmpegProcs)[suuid].Process.Pid == ffmpegProcessPid {
+	if false && (*ffmpegProcs)[suuid] != nil && (*ffmpegProcs)[suuid].Process.Pid == ffmpegProcessPid {
 		log.Infof("Killing ffmpeg process %d for suuid %s", ffmpegProcessPid, suuid)
-		err := (*ffmpegProcs)[suuid].Process.Kill()
+		err := (*ffmpegProcs)[suuid].Process.Signal(os.Kill) //TODO: Trying this instead of Process.Kill
 		if err != nil {
 			log.Errorf("Error killing ffmpeg process %d: %s", ffmpegProcessPid, err)
 		} else {
@@ -281,7 +281,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ws For live streaming connection
+// ws For live-streaming connection
 func ws(ws *websocket.Conn) {
 	defer func() {
 		err := ws.Close()

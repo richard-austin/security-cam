@@ -73,21 +73,20 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 				for {
 					var audioMode string
 					var audio string
+					var audioMap string
 					if !stream.Audio {
 						audioMode = "-an"
 						audio = ""
+						audioMap = ""
 					} else {
-						audio = fmt.Sprintf("-f alaw -vn -c:a pcm_alaw -b:a 64K -ar 48000 -af atempo=1.03 %sa", stream.MediaServerInputUri)
-						if stream.AudioEncoding != "AAC" {
-							audioMode = "-c:a aac"
-						} else {
-							audioMode = "-c:a copy"
-						}
+						audioMode = "-c:a aac -b:a 8000 -ar 12000"
+						audio = fmt.Sprintf("|[select=a:f=adts:onfail=abort]%sa", stream.MediaServerInputUri)
+						audioMap = "-map 0:a"
 					}
 
 					recording := ""
 					if stream.Recording.Enabled && stream.Recording.RecordingInputUrl != "" {
-						recording = fmt.Sprintf("-f mp4 -c:v copy %s -async 1 -movflags empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof -frag_duration 10 %s", audioMode, stream.Recording.RecordingInputUrl)
+						recording = fmt.Sprintf("|[movflags=empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof:frag_duration=10:f=mp4:onfail=abort]%s", stream.Recording.RecordingInputUrl)
 					}
 					netcamUri := stream.NetcamUri
 					rtspTransport := strings.ToLower(camera.RtspTransport)
@@ -109,7 +108,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 					codec, err := codecs.getCodecString(suuid)
 					log.Info("Codec string = " + codec)
 					var sb strings.Builder
-					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 1000000 -fflags nobuffer -rtsp_transport %s -i %s -f %s  -c:v copy -an  -preset ultrafast -tune zero_latency %s %s %s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 1000000 -fflags nobuffer -rtsp_transport %s -i %s -c:v copy %s -preset ultrafast -tune zero_latency -f tee -map 0:v %s \"[select=v:f=%s:onfail=abort]%s%s%s\"", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
 					log.Info(sb.String())
 					if config.FfmpegLogLevelStr != "quiet" {
 						sb.WriteString(" 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log")
