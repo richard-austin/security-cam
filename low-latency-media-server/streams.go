@@ -37,7 +37,7 @@ func (s *Streams) addStream(suuid string, isAudio bool) {
 	if isAudio {
 		gopCacheUsed = false
 	}
-	stream := &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(gopCacheUsed), bucketBrigade: NewBucketBrigade( /*streamC.PreambleFrames*/ 1)}
+	stream := &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(gopCacheUsed)}
 	s.StreamMap[suuid] = stream
 }
 
@@ -48,7 +48,12 @@ func (s *Streams) addRecordingStream(suuid string) {
 	if err != nil {
 		log.Errorf("Failed to get streamC: %v", err)
 	}
-	s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache), bucketBrigade: NewBucketBrigade(400)}
+	streamC, err := getStreamC(suuid)
+	if err != nil {
+		log.Errorf("Failed to get streamC: %v, Cannot add recording stream", err)
+	} else {
+		s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache), bucketBrigade: NewBucketBrigade(streamC.PreambleTime)}
+	}
 }
 
 /** getStreamC: Get camera stream for the fmp4 http stream suuid

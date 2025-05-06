@@ -3,6 +3,7 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 	"sync"
+	"time"
 )
 
 // BucketBrigade /** A cache used to delay the video so that recordings triggered by camara's FTP upload have some preamble
@@ -12,7 +13,10 @@ type BucketBrigade struct {
 	feeders     []*BucketBrigadeFeeder
 	cacheLength int
 	mutex       sync.Mutex
+	delayTime   int
+	startTime   time.Time
 	inputIndex  int
+	indexLimit  int
 	Cache       []Packet
 	started     bool
 	gopCache    GopCache
@@ -25,13 +29,15 @@ type BucketBrigadeFeeder struct {
 	pktFeed          chan Packet
 }
 
-func NewBucketBrigade(preambleFrames int) (bucketBrigade BucketBrigade) {
-	cacheLength := preambleFrames + 1
+func NewBucketBrigade(preambleTime int) (bucketBrigade BucketBrigade) {
+	const cacheLength = 600
 	bucketBrigade = BucketBrigade{
 		Cache:       make([]Packet, cacheLength),
 		feeders:     make([]*BucketBrigadeFeeder, 0),
 		started:     false,
+		delayTime:   preambleTime + 1,
 		inputIndex:  0,
+		indexLimit:  cacheLength,
 		cacheLength: cacheLength,
 		gopCache:    NewGopCache(true)}
 	return
@@ -55,8 +61,22 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 	defer bb.mutex.Unlock()
 
 	bb.Cache[bb.inputIndex] = p
-	if bb.started {
-		opIdx := (bb.inputIndex + 1) % bb.cacheLength
+	if !bb.started {
+		if bb.startTime.IsZero() {
+			bb.startTime = time.Now()
+		}
+		bb.inputIndex++
+		if bb.inputIndex >= bb.cacheLength || time.Since(bb.startTime) > time.Duration(bb.delayTime)*time.Second {
+			if bb.inputIndex >= bb.cacheLength {
+				log.Warnf("Input index %d >= cache length %d: Using bucket brigade cachLength as indexLimit", bb.inputIndex, bb.cacheLength)
+			}
+			bb.started = true
+			bb.indexLimit = bb.inputIndex + 1
+			bb.inputIndex = 0
+		}
+		return
+	} else {
+		opIdx := (bb.inputIndex + 1) % bb.indexLimit
 		err = bb.gopCache.RecordingInput(bb.Cache[opIdx])
 		for _, f := range bb.feeders {
 			select {
@@ -66,7 +86,7 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 			}
 		}
 	}
-	if bb.inputIndex < bb.cacheLength-1 {
+	if bb.inputIndex < bb.indexLimit-1 {
 		bb.inputIndex++
 	} else {
 		bb.inputIndex = 0

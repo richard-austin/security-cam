@@ -125,8 +125,8 @@ export class CameraService {
     {name: "100", value: 100}
   ];
 
-  private _preambleFrameValues: number[] = [
-    0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400
+  private _preambleTimeValues: number[] = [
+    0, 2, 5, 7, 10, 12, 15, 17, 20, 22, 25, 27, 30
   ]
 
     // Number of columns (minus one) on the multi cam screen
@@ -149,8 +149,8 @@ export class CameraService {
   get ftpRetriggerWindows() {
     return this._ftpRetriggerWindows;
   }
-  get preambleFrameValues() {
-    return this._preambleFrameValues;
+  get preambleTimeValues() {
+    return this._preambleTimeValues;
   }
 
   get publicKey() : Uint8Array {

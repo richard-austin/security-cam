@@ -184,11 +184,11 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
         return retVal;
     }
 
-    updatePreambleFrames() {
-        const control = this.getControl('preambleFrames');
+    updatePreambleTime() {
+        const control = this.getControl('preambleTime');
         const stream = this.getTriggeredStream();
         if (stream !== undefined) {
-            stream.preambleFrames = control.value;
+            stream.preambleTime = control.value;
         }
     }
 
@@ -248,7 +248,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                         Object.assign(targetStream.motion, stream.motion);
                         targetStream.video_height = stream.video_height;
                         targetStream.video_width = stream.video_width;
-                        targetStream.preambleFrames = stream.preambleFrames;
+                        targetStream.preambleTime = stream.preambleTime;
                         targetStream.rec_num = stream.rec_num;  // Don't really need to do this one as it's set up in FixUpCameras.
                     }
                 }
@@ -306,7 +306,7 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
             stream.motion.mask_file = ''
     }
 
-    getPreambleFramesDisabledState(): boolean {
+    getPreambleTimeDisabledState(): boolean {
         const cam = this.localCamera;
         const motionDetectStream = cam.streams.get(cam.motion_detection_stream);
         let disabled: boolean = true;
@@ -396,10 +396,10 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
                 recordingType: new UntypedFormControl(cam.recordingType, [Validators.required]),
                 recordingStreamSelect: new UntypedFormControl(cam.recordingStream, [Validators.required, Validators.pattern(this.streamsOrNoneRegex)]),
                 streamForMotionDetection: new UntypedFormControl(cam.motion_detection_stream, [Validators.required, Validators.pattern(this.streamsOrNoneRegex)]),
-                preambleFrames: new UntypedFormControl({
-                    value: triggeredStream ? triggeredStream.preambleFrames : 0,
-                    disabled: this.getPreambleFramesDisabledState(),
-                }, [Validators.min(0), Validators.max(400)]),
+                preambleTime: new UntypedFormControl({
+                    value: triggeredStream ? triggeredStream.preambleTime : 0,
+                    disabled: this.getPreambleTimeDisabledState(),
+                }, [Validators.min(0), Validators.max(30)]),
                 mask_file: new UntypedFormControl({
                     value: motionDetectStream !== undefined ? motionDetectStream.motion.mask_file : '',
                     disabled: cam.motion_detection_stream === 'none'
