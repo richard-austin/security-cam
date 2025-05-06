@@ -80,7 +80,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 						audioMap = ""
 					} else {
 						if stream.AudioEncoding != "AAC" {
-							audioMode = "-c:a aac -b:a 8000 -ar 12000"
+							audioMode = "-c:a aac -ar 16000"
 						} else {
 							audioMode = "-c:a copy"
 						}
@@ -112,7 +112,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 					codec, err := codecs.getCodecString(suuid)
 					log.Info("Codec string = " + codec)
 					var sb strings.Builder
-					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 1000000 -fflags nobuffer -rtsp_transport %s -i %s -c:v copy %s -preset ultrafast -tune zero_latency -f tee -map 0:v %s \"[select=v:f=%s:onfail=abort]%s%s%s\"", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 20000000 -fflags nobuffer -rtsp_transport %s -i %s -c:v copy %s -preset ultrafast -tune zero_latency -f tee -map 0:v %s \"[select=v:f=%s:onfail=abort]%s%s%s\"", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
 					log.Info(sb.String())
 					if config.FfmpegLogLevelStr != "quiet" {
 						sb.WriteString(" 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log")

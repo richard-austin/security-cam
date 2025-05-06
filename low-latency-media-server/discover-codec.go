@@ -44,7 +44,7 @@ func NewMimeCodecs() (mimeCodecs *MimeCodecs) {
 */
 func (codecs *MimeCodecs) setCodecString(rtspUrl string, suuid string) (stream FFProbeStream, err error) {
 	log.Info("rtspurl = " + rtspUrl)
-	ffprobeCmd := "/usr/bin/ffprobe -hide_banner -i " + rtspUrl + " -threads 5 -v info -print_format json -show_streams -show_chapters -show_format -show_data"
+	ffprobeCmd := "/usr/bin/ffprobe -hide_banner -timeout 10000000 -i " + rtspUrl + " -threads 5 -v info -print_format json -show_streams -show_chapters -show_format -show_data"
 	out, err := exec.Command("bash", "-c", ffprobeCmd).Output()
 	result := ""
 	if err == nil {
