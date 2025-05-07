@@ -111,7 +111,6 @@ export class MediaFeeder {
             this.audioWorker?.postMessage({close: true})
             this.audioWorker?.terminate();
           } else {
-            let processStart = performance.now();
             this.resetTimout();
             await videoWriter.write(data);
             await videoWriter.ready;
