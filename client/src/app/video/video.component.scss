@@ -134,9 +134,9 @@ span.duration-time {
   color: #858585;
 }
 
-.latency-chasing {
+.media-feed-stalled {
   > mat-icon {
-    animation: flash 2000ms steps(3, start) forwards;
+    animation: flash 2000ms infinite;
   }
 }
 

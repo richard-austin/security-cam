@@ -41,7 +41,7 @@
                   [value]="device.deviceId">{{ device.label }}
           </option>
         </select>
-        <label [ngClass]="{'latency-chasing': mediaFeeder.isStalled}">
+        <label [ngClass]="{'media-feed-stalled': mediaFeeder.isStalled}">
           <mat-icon>timer</mat-icon>
         </label>
         <label class="video-buttons"

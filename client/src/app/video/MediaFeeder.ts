@@ -69,6 +69,7 @@ export class MediaFeeder {
         }
       }
     } else {
+      this.resetTimout();
       let getUrl = window.location;
       let baseUrl = getUrl.protocol + '//' + getUrl.host + '/' + getUrl.pathname.split('/')[1];
 
@@ -110,6 +111,8 @@ export class MediaFeeder {
             this.audioWorker?.postMessage({close: true})
             this.audioWorker?.terminate();
           } else {
+            let processStart = performance.now();
+            this.resetTimout();
             await videoWriter.write(data);
             await videoWriter.ready;
           }
@@ -136,6 +139,18 @@ export class MediaFeeder {
       }
 
     }
+  }
+
+  timerHandle: any = undefined;
+
+  resetTimout() {
+    this.isStalled = false;
+    if (this.timerHandle !== undefined) {
+      clearTimeout(this.timerHandle);
+    }
+    this.timerHandle = setTimeout(() => {
+      this.isStalled = true;
+    }, 2000)
   }
 
   streamTestInterval!: Subscription;

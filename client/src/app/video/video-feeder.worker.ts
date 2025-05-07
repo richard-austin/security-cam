@@ -94,8 +94,10 @@ class VideoFeeder {
         }
 
         this.ws.onclose = (ev) => {
-            if(this.noRestart)
+            if (this.noRestart) {
                 postMessage({closed: true})
+                this.decoder.close();
+            }
             console.info("The video feed websocket was closed: " + ev.reason)
         }
 
