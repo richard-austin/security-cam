@@ -8,15 +8,13 @@ import (
 	"golang.org/x/net/websocket"
 	"io"
 	"net/http"
-	"os"
-	"os/exec"
 	"strings"
 	"time"
 )
 
 var streams = NewStreams()
 
-func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
+func serveHTTP() {
 	router := gin.Default()
 	gin.SetMode(gin.DebugMode)
 	router.LoadHTMLFiles("web/index.gohtml")
@@ -64,9 +62,6 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 
 		streams.addStream(suuid, isAudio)
 		defer streams.removeStream(suuid)
-		baseSuuid, _ := strings.CutSuffix(suuid, "a")
-		ffmpegProcessPid := (*ffmpegProcs)[baseSuuid].Process.Pid
-
 		data := make([]byte, 33000)
 
 		d := NewPacket(data)
@@ -76,14 +71,11 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 			numOfByte, err := readCloser.Read(data)
 			if err != nil {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
-				// Make sure the ffmpeg process is stopped so it will restart
-				killFfmpegProcess(baseSuuid, ffmpegProcessPid, ffmpegProcs)
 				break
 			}
 			d = NewPacket(data[:numOfByte])
 			select {
 			case <-t.C:
-				killFfmpegProcess(baseSuuid, ffmpegProcessPid, ffmpegProcs)
 				err = fmt.Errorf("(timeout occurred)")
 				break
 			default:
@@ -118,8 +110,6 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 
 		streams.addRecordingStream(suuid)
 		defer streams.removeStream(suuid)
-		baseSuuid, _ := strings.CutSuffix(suuid, "r")
-		ffmpegProcessPid := (*ffmpegProcs)[baseSuuid].Process.Pid
 
 		data := make([]byte, 33000)
 		queue := make(chan Packet, 1)
@@ -163,14 +153,11 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 			numOfByte, err = readCloser.Read(data)
 			if err != nil {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
-				// Make sure the ffmpeg process is stopped so it will restart
-				killFfmpegProcess(baseSuuid, ffmpegProcessPid, ffmpegProcs)
 				break
 			}
 			d = NewPacket(data[:numOfByte])
 			select {
 			case <-t.C:
-				killFfmpegProcess(baseSuuid, ffmpegProcessPid, ffmpegProcs)
 				err = fmt.Errorf("(timeout occurred)")
 				break
 			default:
@@ -213,19 +200,6 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 	err := router.Run(addr)
 	if err != nil {
 		log.Errorln(err)
-	}
-}
-func killFfmpegProcess(suuid string, ffmpegProcessPid int, ffmpegProcs *map[string]*exec.Cmd) {
-	if false && (*ffmpegProcs)[suuid] != nil && (*ffmpegProcs)[suuid].Process.Pid == ffmpegProcessPid {
-		log.Infof("Killing ffmpeg process %d for suuid %s", ffmpegProcessPid, suuid)
-		err := (*ffmpegProcs)[suuid].Process.Signal(os.Kill) //TODO: Trying this instead of Process.Kill
-		if err != nil {
-			log.Errorf("Error killing ffmpeg process %d: %s", ffmpegProcessPid, err)
-		} else {
-			log.Infof("Killed ffmpeg process %d for suuid %s", ffmpegProcessPid, suuid)
-		}
-	} else {
-		log.Errorf("ffmpeg process %d for suuid %s not found", ffmpegProcessPid, suuid)
 	}
 }
 

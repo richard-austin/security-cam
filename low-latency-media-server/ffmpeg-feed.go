@@ -82,7 +82,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 						if stream.AudioEncoding != "AAC" {
 							audioMode = "-c:a aac -ar 16000 -af aresample=async=1000"
 						} else {
-							audioMode = "-c:a aac  -ar 16000 -af aresample=async=1000" //Don't use copy when source is AAC, it caused poor a/v sync in recordings
+							audioMode = "-c:a copy"
 						}
 						audio = fmt.Sprintf("|[select=a:f=adts:onfail=abort]%sa", stream.MediaServerInputUri)
 						audioMap = "-map 0:a"
