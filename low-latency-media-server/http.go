@@ -64,7 +64,6 @@ func serveHTTP() {
 		defer streams.removeStream(suuid)
 		data := make([]byte, 33000)
 
-		d := NewPacket(data)
 		t := time.NewTimer(5 * time.Second)
 		for {
 			data = data[:33000]
@@ -73,7 +72,7 @@ func serveHTTP() {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
 				break
 			}
-			d = NewPacket(data[:numOfByte])
+			d := NewPacket(data[:numOfByte])
 			select {
 			case <-t.C:
 				err = fmt.Errorf("(timeout occurred)")
