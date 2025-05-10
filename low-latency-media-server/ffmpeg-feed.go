@@ -80,9 +80,9 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 						audioMap = ""
 					} else {
 						if stream.AudioEncoding != "AAC" {
-							audioMode = "-c:a aac -ar 16000 -af aresample=async=1"
+							audioMode = "-c:a aac -ar 16000 -af aresample=async=100"
 						} else {
-							audioMode = "-c:a aac -ar 16000 -af aresample=async=1"
+							audioMode = "-c:a aac -ar 16000 -af aresample=async=100"
 						}
 						audio = fmt.Sprintf("|[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:select=a:f=adts:onfail=abort]%sa", stream.MediaServerInputUri)
 						audioMap = "-map 0:a"

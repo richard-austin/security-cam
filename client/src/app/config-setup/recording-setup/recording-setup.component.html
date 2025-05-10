@@ -278,7 +278,7 @@
                     <mat-form-field [style.width.px]="150" appearance="outline"
                                     matTooltip="The number of frames to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value divided by the camera frame rate (seconds). Note that audio packets are also counted as frames, so a higher value may be required if audio is enabled on the stream."
                                     matTooltipClass="tooltip">
-                        <mat-label>Preamble Frames</mat-label>
+                        <mat-label>Preamble Time</mat-label>
                         <mat-select (selectionChange)="updatePreambleTime()"
                                     [disableControl]="getPreambleTimeDisabledState()"
                                     [formControl]="getControl('preambleTime')">

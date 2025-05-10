@@ -62,8 +62,8 @@ class AudioFeeder {
       // @ts-ignore
       const eac = new EncodedAudioChunk({
         type: 'key',
-        timestamp: 100,
-        duration: 1000000,
+        timestamp: 0,
+        duration: 1,
         data: event.data,
       });
       if (framesToMiss > 0)
