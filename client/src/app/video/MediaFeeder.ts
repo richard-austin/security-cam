@@ -136,19 +136,28 @@ export class MediaFeeder {
         // Web workers are not supported in this environment.
         // You should add a fallback so that your program still executes correctly.
       }
-
     }
   }
 
   timerHandle: any = undefined;
+  messageCount = 0;
 
   resetTimout() {
-    this.isStalled = false;
     if (this.timerHandle !== undefined) {
       clearTimeout(this.timerHandle);
     }
+    // Receive 10 messages through websocket before resetting the stalled flag
+    if (this.messageCount > 10)
+      this.isStalled = false;
+    else
+      ++this.messageCount;
     this.timerHandle = setTimeout(() => {
       this.isStalled = true;
+      this.messageCount = 0;
+      this.audioWorker.terminate();
+      this.videoWorker.terminate();
+      this.stop();
+      this.startVideo()
     }, 2000)
   }
 

@@ -32,7 +32,7 @@ class AudioFeeder {
   private readonly url!:string;
   private timeout!:NodeJS.Timeout;
   private ws!: WebSocket;
-  private noRestart: boolean = true;
+  private noRestart: boolean = false;
   constructor(url: string) {
     this.url = url;
   }
@@ -48,14 +48,14 @@ class AudioFeeder {
     }
 
     this.ws.onclose = (ev) => {
-      if(!this.noRestart)
+      if(this.noRestart)
         postMessage({closed: true})
-      console.info("The audio feed websocket was closed: " + ev.reason);
+      console.warn("The audio feed websocket was closed: " + ev.reason);
      // clearTimeout(this.timeout);
     }
 
     this.timeout = setTimeout(() => {
-      this.timeoutRestart();
+      this.timedOut();
     }, 6000);
 
     this.ws.onmessage = async (event: MessageEvent) => {
@@ -77,21 +77,20 @@ class AudioFeeder {
   resetTimeout = () => {
     clearTimeout(this.timeout);
     this.timeout = setTimeout(() => {
-      this.timeoutRestart();
-    }, 6000)
+      this.timedOut();
+    }, 3000)
   }
 
-  timeoutRestart(){
-    console.error("Audio feed from websocket has stopped, restarting ...");
+  timedOut(){
+    console.error("Audio feed from websocket has stopped...");
     if(this.ws)
       this.ws.close();
-    setTimeout(() => {
-      this.setUpWSConnection();
-    }, 1000);
+    if(this.audioDecoder)
+      this.audioDecoder.close();
   }
 
   close() {
-    this.noRestart = false;
+    this.noRestart = true;
     this.ws.close()
   }
 }

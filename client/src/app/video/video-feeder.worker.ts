@@ -98,11 +98,11 @@ class VideoFeeder {
                 postMessage({closed: true})
                 this.decoder.close();
             }
-            console.info("The video feed websocket was closed: " + ev.reason)
+            console.warn("The video feed websocket was closed: " + ev.reason)
         }
 
         this.timeout = setTimeout(() => {
-            this.timeoutRestart();
+            this.timedOut();
         }, 6000)
 
     }
@@ -113,18 +113,17 @@ class VideoFeeder {
     resetTimeout() {
         clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {
-            this.timeoutRestart();
-        }, 6000)
+            this.timedOut();
+        }, 3000)
     }
 
-    timeoutRestart() {
-        if(this.configSupported.supported) {
-            console.error("Video feed from websocket has stopped, restarting ...");
+    timedOut() {
+        if(this.configSupported && this.configSupported.supported) {
+            console.error("Video feed from websocket has stopped ...");
             if (this.ws)
                 this.ws.close();
-            setTimeout(() => {
-                this.setUpWebsocketConnection();
-            }, 1000)
+            if(this.decoder)
+                this.decoder.close()
         }
     }
 
