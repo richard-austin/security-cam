@@ -106,9 +106,13 @@ class VideoFeeder {
         }, 6000)
 
     }
+
     close() {
         this.noRestart = true;
-        this.ws.close()
+        if (this.decoder)
+            this.decoder.close()
+        if (this.ws)
+            this.ws.close()
     }
     resetTimeout() {
         clearTimeout(this.timeout);

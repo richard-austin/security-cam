@@ -91,6 +91,9 @@ class AudioFeeder {
 
   close() {
     this.noRestart = true;
-    this.ws.close()
+    if (this.audioDecoder)
+      this.audioDecoder.close();
+    if (this.ws)
+      this.ws.close();
   }
 }

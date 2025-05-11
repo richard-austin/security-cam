@@ -173,6 +173,9 @@ export class MediaFeeder {
       this.hls.destroy();
       this.hls = null;
     } else if (this.isLive) {
+      if (this.timerHandle !== undefined) {
+        clearTimeout(this.timerHandle);
+      }
       this.videoWorker?.postMessage({close: true})
       this.videoWorker?.terminate();
       this.audioWorker?.postMessage({close: true})
