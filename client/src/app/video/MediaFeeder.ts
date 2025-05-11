@@ -154,8 +154,8 @@ export class MediaFeeder {
     this.timerHandle = setTimeout(() => {
       this.isStalled = true;
       this.messageCount = 0;
-      this.audioWorker.terminate();
-      this.videoWorker.terminate();
+      this.audioWorker?.terminate();
+      this.videoWorker?.terminate();
       this.stop();
       this.startVideo()
     }, 2000)
