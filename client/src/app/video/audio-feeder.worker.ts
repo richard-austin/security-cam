@@ -38,7 +38,7 @@ class AudioFeeder {
   }
   setUpWSConnection() {
     this.audioDecoder.configure(this.config);
-    let framesToMiss = 12;
+    let framesToMiss = 0;
 
     this.ws = new WebSocket(this.url);
     this.ws.binaryType = 'arraybuffer';
