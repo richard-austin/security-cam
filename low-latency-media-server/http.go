@@ -202,6 +202,63 @@ func serveHTTP() {
 	}
 }
 
+//// ServeHTTPStream For recording from
+//// Recording command example which seems to work best. The tempo filter compensates for the tempo filter used to keep libe audio and video in sync:-
+//// ffmpeg -y -use_wallclock_as_timestamps 1 -f hevc -thread_queue_size 2048 -i http://192.168.1.207:8081/h/stream?rsuuid=cam1-stream1 -thread_queue_size 2048 -use_wallclock_as_timestamps 1 -f alaw -i http://192.168.1.207:8081/h/stream?rsuuid=cam1-stream1a -f mp4 -c:v copy -c:a aac vid.mp4
+//func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
+//	log.Info("In ServeHTTPStream")
+//
+//	defer func() { r.Close = true }()
+//	suuid := r.FormValue("suuid")
+//
+//	log.Infof("Request %s", suuid)
+//	_, isAudio := strings.CutSuffix(suuid, "a")
+//
+//	cuuid, ch := streams.addClient(suuid)
+//	if ch == nil {
+//		return
+//	}
+//	log.Infof("number of cuuid's = %d", len(streams.StreamMap[suuid].PcktStreams))
+//	defer streams.deleteClient(suuid, cuuid)
+//
+//	stream := streams.StreamMap[suuid]
+//	var gopCache *GopCacheSnapshot
+//	if !isAudio { // Audio GOP cache not used for live streams, only recordings
+//		gopCache = stream.gopCache.GetSnapshot()
+//	}
+//	gopCacheUsed := stream.gopCache.GopCacheUsed
+//
+//	started := isAudio
+//	for {
+//		var data Packet
+//		if gopCacheUsed && !isAudio {
+//			data = gopCache.Get(ch)
+//			started = true
+//		} else {
+//			data = <-ch
+//			if !started {
+//				if isAudio {
+//					started = true
+//				}
+//				if data.isKeyFrame() {
+//					started = true
+//				} else {
+//					continue
+//				}
+//			}
+//		}
+//		// See https://en.wikipedia.org/wiki/MPEG_transport_stream
+//		//	log.Infof("Length = %d %02x", len(data.pckt), data.pckt)
+//		numbytes, err := w.Write(data.pckt)
+//		if err != nil {
+//			// Warning only as it could be because the client disconnected
+//			log.Warnf("writing to client for %s:= %s", suuid, err.Error())
+//			break
+//		}
+//		log.Tracef("Data sent to http client for %s:- %d bytes", suuid, numbytes)
+//	}
+//}
+
 // ServeHTTPStream For recording from
 // Recording command example which seems to work well.
 // ffmpeg -y -f mp4 -i http://localhost:8085/h/stream?rsuuid=cam1-stream1r -f mp4 test.mp4
