@@ -81,9 +81,9 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 						audioMap = ""
 					} else {
 						if stream.AudioEncoding != "AAC" {
-							audioMode = "-c:a aac -ar 12000 -af asetpts=PTS+0.4/TB"
+							audioMode = "-c:a aac -ar 12000 -af asetpts=PTS+0.22/TB"
 						} else {
-							audioMode = "-c:a aac -ar 12000 -af asetpts=PTS+0.4/TB"
+							audioMode = "-c:a aac -ar 12000 -af asetpts=PTS+0.22/TB"
 						}
 						audio = fmt.Sprintf("|[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:select=a:fflags=igndts:f=adts:onfail=abort]%sa", stream.MediaServerInputUri)
 						audioMap = "-map 0:a"
@@ -114,7 +114,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 					log.Info("Codec string = " + codec)
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
-					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 3000000 -fflags nobuffer -rtsp_transport %s -i %s -c:v copy %s -f tee -fflags nobuffer -map 0:v %s \"[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:select=v:f=%s:onfail=abort]%s%s%s\"", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 3000000 -fflags nobuffer -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s \"[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:select=v:f=%s:onfail=abort]%s%s%s\"", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
 					log.Info(sb.String())
 					if config.FfmpegLogLevelStr != "quiet" {
 						sb.WriteString(" 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log")
