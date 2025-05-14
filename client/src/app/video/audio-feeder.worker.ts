@@ -1,10 +1,20 @@
 /// <reference lib="webworker" />
 
+import {timer} from "rxjs";
+
 let audioFeeder: AudioFeeder;
 addEventListener('message', ({ data }) => {
   if(data.url) {
-    audioFeeder = new AudioFeeder(data.url);
-    audioFeeder.setUpWSConnection();
+    // @ts-ignore
+    if(typeof AudioDecoder !== 'undefined') {
+      audioFeeder = new AudioFeeder(data.url);
+      audioFeeder.setUpWSConnection();
+    } else {
+      let sub = timer(1000).subscribe(() => {
+        sub.unsubscribe();
+        postMessage({media: false, warningMessage: "AudioDecoder is not supported on this browser"})
+      });
+    }
   }
   else if(data.close && audioFeeder)
     audioFeeder.close();
@@ -15,7 +25,7 @@ class AudioFeeder {
   private audioDecoder = new AudioDecoder({
     // @ts-ignore
     output: async (frame: AudioData) => {
-      postMessage(frame);
+      postMessage({media: true, packet: frame});
       frame.close();
     },
     error: (e: DOMException) => {
@@ -44,12 +54,12 @@ class AudioFeeder {
     this.ws.binaryType = 'arraybuffer';
 
     this.ws.onerror = (ev) => {
-      console.error("An error occurred with the audio feeder websocket connection")
+      postMessage({media: false, warningMessage: "An error occurred with the audio feeder websocket connection"})
     }
 
     this.ws.onclose = (ev) => {
       if(this.noRestart)
-        postMessage({closed: true})
+        postMessage({media: false, closed: true})
       console.warn("The audio feed websocket was closed: " + ev.reason);
      // clearTimeout(this.timeout);
     }

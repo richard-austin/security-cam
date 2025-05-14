@@ -1,11 +1,20 @@
 /// <reference lib="webworker" />
 
+import {timer} from "rxjs";
+
 let videoFeeder!:VideoFeeder;
 addEventListener('message', ({data}) => {
     if(data.url) {
-        videoFeeder = new VideoFeeder(data.url)
-        videoFeeder.setUpWebsocketConnection();
-        videoFeeder.setupDecoder();
+        if(typeof VideoDecoder !== 'undefined') {
+            videoFeeder = new VideoFeeder(data.url)
+            videoFeeder.setUpWebsocketConnection();
+            videoFeeder.setupDecoder();
+        } else {
+            let sub = timer(1000).subscribe(() => {
+                sub.unsubscribe();
+                postMessage({media: false, warningMessage: "VideoDecoder is not supported on this browser"})
+            });
+        }
     }
     else if(data.close && videoFeeder) {
         videoFeeder.close()
@@ -35,7 +44,7 @@ class VideoFeeder {
         this.firstKeyFrameReceived = false;
         this.decoder = new VideoDecoder({
             output: async (frame) => {
-                postMessage(frame);
+                postMessage({media: true, packet: frame});
                 frame.close();
             },
             error: (e) => {
@@ -45,7 +54,7 @@ class VideoFeeder {
         });
     }
     configSupported!: VideoDecoderSupport;
-    processMessage = async (data: Uint8Array): Promise<void> => {
+        processMessage = async (data: Uint8Array): Promise<void> => {
         // let processStart = performance.now();
         if (this.decoder.state !== "configured") {
             const config = {codec: this.codec, optimizeForLatency: true};
@@ -55,8 +64,7 @@ class VideoFeeder {
             }
             else {
                 this.ws.close(4000, "Codec not supported")
-            //    console.warn("The "+this.codec+" codec is not supported by this browser");
-                postMessage({codecNotSupported: true, codec: this.codec});
+                postMessage({media: false, warningMessage: "The codec string "+ this.codec + " is not supported on this browser"});
             }
         }
         if( this.configSupported.supported) {
@@ -90,12 +98,12 @@ class VideoFeeder {
         };
 
         this.ws.onerror = (ev) => {
-            console.error("An error occurred with the video feeder websocket connection")
+            postMessage({media: false, warningMessage: "An error occurred with the video feeder websocket connection"});
         }
 
         this.ws.onclose = (ev) => {
             if (this.noRestart) {
-                postMessage({closed: true})
+                postMessage({media: false, closed: true})
                 this.decoder.close();
             }
             console.warn("The video feed websocket was closed: " + ev.reason)

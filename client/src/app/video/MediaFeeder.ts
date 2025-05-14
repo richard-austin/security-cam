@@ -1,6 +1,7 @@
 import Hls from "hls.js";
 import {Camera, Stream} from "../cameras/Camera";
 import {Subscription} from "rxjs";
+import {ReportingComponent} from "../reporting/reporting.component";
 declare function initMSTG(): void;
 // MediaStreamTrackGenerator not in lib.dom.d.ts
 declare let MediaStreamTrackGenerator: any
@@ -11,6 +12,7 @@ export class MediaFeeder {
   cam!: Camera;
   stream!: Stream;
   media!: HTMLMediaElement;
+  reporting!: ReportingComponent;
   hls: any = null;
   recording: boolean = false;
   manifest: string = '';
@@ -23,12 +25,13 @@ export class MediaFeeder {
   constructor() {
   }
 
-  init(isfmp4: boolean, media: HTMLMediaElement) {
+  init(isfmp4: boolean, media: HTMLMediaElement, reporting: ReportingComponent) {
     this.isLive = isfmp4;
     this.media = media;
     this.media.autoplay = true;
     this.media.muted = false;
     this.media.controls = !isfmp4;
+    this.reporting = reporting;
   }
 
   /**
@@ -38,7 +41,6 @@ export class MediaFeeder {
    * @param manifest
    */
   setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
-   // this.stop();
     this.cam = cam;
     this.stream = stream;
     this.recording = manifest !== '';
@@ -102,18 +104,18 @@ export class MediaFeeder {
         // Create a new media feeder web worker
         this.videoWorker = new Worker(new URL('./video-feeder.worker', import.meta.url));
         this.videoWorker.onmessage = async ({data, type}) => {
-          if (data.closed) {
-            console.log("Terminating the video worker");
-            this.videoWorker.terminate();
-          } else if (data.codecNotSupported) {
-            console.log("Codec " + data.codec + " not supported by browser");
-            this.videoWorker.terminate();
-            this.audioWorker?.postMessage({close: true})
-            this.audioWorker?.terminate();
-          } else {
+          if(data.media) {
             this.resetTimout();
-            await videoWriter.write(data);
+            await videoWriter.write(data.packet);
             await videoWriter.ready;
+          } else if (data.closed) {
+            console.log("Websocket was closed, terminating the video worker");
+            this.videoWorker.terminate();
+          } else if (data.warningMessage !== undefined) {
+            this.reporting.warningMessage = data.warningMessage;
+            this.stop();
+           } else {
+            this.reporting.warningMessage = "Received an unknown message from the video worker "+data;
           }
         };
         this.videoWorker.postMessage({url: url})
@@ -121,19 +123,23 @@ export class MediaFeeder {
           this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));
           this.media.onplaying = () => {
             this.audioWorker.onmessage = async ({data, type}) => {
-              if (data.closed) {
+              if(data.media) {
+                if(!this.media.paused) {
+                  await audioWriter.write(data.packet);
+                  await audioWriter.ready;
+                }
+              } else if (data.closed) {
                 console.log("Terminating the audio worker");
                 this.audioWorker.terminate();
-              } else if (!this.media.paused) {
-                await audioWriter.write(data);
-                await audioWriter.ready;
+              } else if(!data.warningMessage) {
+               this.reporting.warningMessage = data.warningMessage;
               }
             }
           }
           this.audioWorker.postMessage({url: url + 'a'})
         }
       } else {
-        // Web workers are not supported in this environment.
+        this.reporting.warningMessage = "Web workers are not supported in this environment";
         // You should add a fallback so that your program still executes correctly.
       }
     }

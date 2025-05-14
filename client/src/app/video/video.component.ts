@@ -37,15 +37,14 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   visible: boolean = false;
   mediaFeeder!: MediaFeeder;
   multi: boolean = false;
-  buffering_sec: number = 1.2;
   audioBackchannel!: AudioBackchannel
   vt!: VideoTransformations;
   currentTime: string = "";
   totalTime: string = "";
-  sizeing!: VideoSizing;
+  sizing!: VideoSizing;
 
   constructor(public utilsService: UtilsService) {
-    this.mediaFeeder = new MediaFeeder()
+    this.mediaFeeder = new MediaFeeder();
   }
 
   /**
@@ -94,10 +93,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setSize(size: number, isRecording: boolean = false): void {
-    this.sizeing.setup(size, isRecording)
+    this.sizing.setup(size, isRecording)
   }
   changeSize(size: number) {
-    this.sizeing.changeSize(size);
+    this.sizing.changeSize(size);
   }
 
   reset($event: MouseEvent) {
@@ -123,7 +122,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.mediaFeeder.init(this.isLive, this.video);
+    this.mediaFeeder.init(this.isLive, this.video, this.reporting);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
     this.video.addEventListener('fullscreenchange', () => {
@@ -136,7 +135,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.totalTime = new Date(this.video.duration * 1000).toISOString().substring(11, 19);
     };
 
-    this.sizeing = new VideoSizing(this.video);
+    this.sizing = new VideoSizing(this.video);
 
     screen.orientation.addEventListener('change', this.orientationChangeHandler)  }
 
@@ -150,6 +149,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       timerSubscription.unsubscribe();
     });
     window.screen.orientation.onchange = null;
-    this.sizeing._destroy();
+    this.sizing._destroy();
   }
 }
