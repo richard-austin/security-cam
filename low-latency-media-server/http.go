@@ -78,7 +78,7 @@ func serveHTTP() {
 				err = fmt.Errorf("(timeout occurred)")
 				break
 			default:
-				t.Reset(2 * time.Second)
+				t.Reset(5 * time.Second)
 				break
 			}
 			if err == nil {
@@ -160,7 +160,7 @@ func serveHTTP() {
 				err = fmt.Errorf("(timeout occurred)")
 				break
 			default:
-				t.Reset(2 * time.Second)
+				t.Reset(5 * time.Second)
 				break
 			}
 			if err != nil {
