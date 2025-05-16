@@ -38,5 +38,5 @@ func main() {
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, lumberjackLogger)
 	log.SetOutput(io.MultiWriter(os.Stdout, lumberjackLogger))
 	ffmpegFeed(config, cameras, &ffmpegProcs)
-	serveHTTP()
+	serveHTTP(&ffmpegProcs)
 }
