@@ -72,26 +72,44 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 			go func(camera Camera, stream *StreamC) {
 				for {
 					//time.Sleep(300 * time.Hour)
-					var audioMode string
-					var audio string
-					var audioMap string
-					if !stream.Audio {
-						audioMode = "-an"
-						audio = ""
-						audioMap = ""
-					} else {
+					audioMode := "-an"
+					audio := ""
+					tee2 := ""
+					if stream.Audio {
 						if stream.AudioEncoding != "AAC" {
-							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
+							audioMode = "-c:a aac -ar 16000 -af atempo=1.03"
 						} else {
-							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
+							audioMode = "-c:a aac -ar 16000 -af atempo=1.03"
 						}
-						audio = fmt.Sprintf("|[select=a:f=adts:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%sa", stream.MediaServerInputUri)
-						audioMap = "-map 0:a"
+						audio = fmt.Sprintf("\"[select=a:f=adts:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%sa", stream.MediaServerInputUri)
+						tee2 = fmt.Sprintf(" %s -f tee -map 0:a ", audioMode)
 					}
 
 					recording := ""
 					if stream.Recording.Enabled && stream.Recording.RecordingInputUrl != "" {
-						recording = fmt.Sprintf("|[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:movflags=empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof:frag_duration=10:f=mp4:onfail=abort]%s", stream.Recording.RecordingInputUrl)
+						if stream.Audio {
+							tee2 = fmt.Sprintf(" %s -c:v copy -f tee -copytb 1 -map 0:v -map 0:a ", audioMode)
+						} else {
+							tee2 = " -c:v copy -f tee -copytb 1 -map 0:v "
+						}
+						recording = fmt.Sprintf("[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:movflags=empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof:frag_duration=10:f=mp4:onfail=abort]%s", stream.Recording.RecordingInputUrl)
+					}
+					if tee2 != "" {
+						var sb strings.Builder
+						sb.WriteString(tee2)
+						if audio != "" {
+							sb.WriteString(audio)
+						}
+						if audio != "" && recording != "" {
+							sb.WriteString("|")
+						} else if recording != "" {
+							sb.WriteString("\"")
+						}
+						if recording != "" {
+							sb.WriteString(recording)
+						}
+						sb.WriteString("\"")
+						tee2 = sb.String()
 					}
 					netcamUri := stream.NetcamUri
 					rtspTransport := strings.ToLower(camera.RtspTransport)
@@ -114,7 +132,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 					log.Info("Codec string = " + codec)
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
-					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s \"[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s\"", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy -an -copytb 1 -f tee -fflags nobuffer -map 0:v \"[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s\"%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, streamInfo.CodecName, stream.MediaServerInputUri, tee2))
 					log.Info(sb.String())
 					if config.FfmpegLogLevelStr != "quiet" {
 						sb.WriteString(" 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log")
