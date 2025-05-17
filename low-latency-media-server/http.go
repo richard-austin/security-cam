@@ -8,15 +8,13 @@ import (
 	"golang.org/x/net/websocket"
 	"io"
 	"net/http"
-	"os"
-	"os/exec"
 	"strings"
 	"time"
 )
 
 var streams = NewStreams()
 
-func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
+func serveHTTP(feedWatchDog *FeedWatchDog) {
 	router := gin.Default()
 	gin.SetMode(gin.DebugMode)
 	router.LoadHTMLFiles("web/index.gohtml")
@@ -52,6 +50,7 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 	router.POST("/live/:suuid", func(c *gin.Context) {
 		req := c.Request
 		suuid := req.FormValue("suuid")
+		feedWatchDog.StartTimer(suuid)
 		isAudio := strings.HasSuffix(suuid, "a")
 		_, hasEntry := streams.StreamMap[suuid]
 		if hasEntry {
@@ -64,31 +63,17 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 
 		streams.addStream(suuid, isAudio)
 		defer streams.removeStream(suuid)
-		baseSuuid, _ := strings.CutSuffix(suuid, "a")
-		ffmpegProcessPid := (*ffmpegProcs)[baseSuuid].Process.Pid
 
 		data := make([]byte, 33000)
-
-		t := time.NewTimer(5 * time.Second)
 		for {
 			data = data[:33000]
 			numOfByte, err := readCloser.Read(data)
 			if err != nil {
-				// Make sure the ffmpeg process is stopped so it will restart
-				killFfmpegProcess(baseSuuid, ffmpegProcessPid, ffmpegProcs)
-
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
 				break
 			}
 			d := NewPacket(data[:numOfByte])
-			select {
-			case <-t.C:
-				err = fmt.Errorf("(timeout occurred)")
-				break
-			default:
-				t.Reset(5 * time.Second)
-				break
-			}
+			feedWatchDog.ResetTimer(suuid)
 			if err == nil {
 				err = streams.put(suuid, d, false)
 			}
@@ -107,6 +92,7 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 	router.POST("/recording/:rsuuid", func(c *gin.Context) {
 		req := c.Request
 		suuid := req.FormValue("rsuuid")
+		feedWatchDog.StartTimer(suuid)
 		_, hasEntry := streams.StreamMap[suuid]
 		if hasEntry {
 			log.Errorf("Cannot add %s, there is already an existing stream with that id", suuid)
@@ -117,8 +103,6 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 
 		streams.addRecordingStream(suuid)
 		defer streams.removeStream(suuid)
-		baseSuuid, _ := strings.CutSuffix(suuid, "r")
-		ffmpegProcessPid := (*ffmpegProcs)[baseSuuid].Process.Pid
 
 		data := make([]byte, 33000)
 		queue := make(chan Packet, 1)
@@ -156,25 +140,15 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 			_ = <-queue
 		}
 
-		t := time.NewTimer(5 * time.Second)
 		for {
 			data = data[:33000]
 			numOfByte, err = readCloser.Read(data)
 			if err != nil {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
-				// Make sure the ffmpeg process is stopped so it will restart
-				killFfmpegProcess(baseSuuid, ffmpegProcessPid, ffmpegProcs)
 				break
 			}
 			d = NewPacket(data[:numOfByte])
-			select {
-			case <-t.C:
-				err = fmt.Errorf("(timeout occurred)")
-				break
-			default:
-				t.Reset(5 * time.Second)
-				break
-			}
+			feedWatchDog.ResetTimer(suuid)
 			if err != nil {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
 				break
@@ -270,20 +244,6 @@ func serveHTTP(ffmpegProcs *map[string]*exec.Cmd) {
 //		log.Tracef("Data sent to http client for %s:- %d bytes", suuid, numbytes)
 //	}
 //}
-
-func killFfmpegProcess(suuid string, ffmpegProcessPid int, ffmpegProcs *map[string]*exec.Cmd) {
-	if (*ffmpegProcs)[suuid] != nil && (*ffmpegProcs)[suuid].Process.Pid == ffmpegProcessPid {
-		log.Infof("Killing ffmpeg process %d for suuid %s", ffmpegProcessPid, suuid)
-		err := (*ffmpegProcs)[suuid].Process.Signal(os.Interrupt)
-		if err != nil {
-			log.Errorf("Error killing ffmpeg process %d: %s", ffmpegProcessPid, err)
-		} else {
-			log.Infof("Killed ffmpeg process %d for suuid %s", ffmpegProcessPid, suuid)
-		}
-	} else {
-		log.Errorf("ffmpeg process %d for suuid %s not found", ffmpegProcessPid, suuid)
-	}
-}
 
 // ServeHTTPStream For recording from
 // Recording command example which seems to work well.
