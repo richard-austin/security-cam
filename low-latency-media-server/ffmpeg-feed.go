@@ -108,9 +108,10 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 						}
 						if audio != "" && recording != "" {
 							sb.WriteString("|")
-						} else if recording != "" {
-							sb.WriteString("\"")
 						}
+						// else if recording != "" {
+						//	sb.WriteString("\"")
+						//}
 						if recording != "" {
 							sb.WriteString(recording)
 						}
