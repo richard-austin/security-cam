@@ -146,12 +146,16 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 					feedWatchDog.AddSuuids(watchdogSuuids)
 					log.Infof("Starting ffmpeg feed for %s %s", camera.Name, stream.Descr)
 					feedWatchDog.StartActiveWatchDog(cmd)
-					file, err := os.Create(path + "ffmpeg_" + camera.Name + "_" + stream.Descr + "_" + time.Now().Format("20060102") + ".log")
+					file, err := os.OpenFile(path+"ffmpeg_"+camera.Name+"_"+stream.Descr+"_"+time.Now().Format("20060102")+".log", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0x644)
 					if err != nil {
 						log.Errorf("Error creating ffmpeg log file: %s", err.Error())
 					}
 					cmd.Stderr = file
 					err = cmd.Run()
+					err = file.Close()
+					if err != nil {
+						log.Errorf("Error closing ffmpeg log file: %s", err.Error())
+					}
 					time.Sleep(3 * time.Second)
 				}
 			}(camera, &stream)
