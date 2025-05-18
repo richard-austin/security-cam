@@ -81,9 +81,9 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 					tee2 := ""
 					if stream.Audio {
 						if stream.AudioEncoding != "AAC" {
-							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
+							audioMode = "-c:a aac"
 						} else {
-							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
+							audioMode = "-c:a aac"
 						}
 						audio = fmt.Sprintf("[select=a:f=adts:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%sa", stream.MediaServerInputUri)
 						tee2 = fmt.Sprintf(" %s -f tee -map 0:a ", audioMode)
@@ -109,13 +109,10 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 						if audio != "" && recording != "" {
 							sb.WriteString("|")
 						}
-						// else if recording != "" {
-						//	sb.WriteString("\"")
-						//}
 						if recording != "" {
 							sb.WriteString(recording)
 						}
-						//	sb.WriteString("\"")
+
 						tee2 = sb.String()
 					}
 					netcamUri := stream.NetcamUri
@@ -143,20 +140,19 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 					cmdStr := sb.String()
 					cmd := exec.Command("/usr/bin/ffmpeg", strings.Split(cmdStr, " ")...)
 					watchdogSuuids.AddSuuid(suuid)
-					feedWatchDog.AddSuuids(watchdogSuuids)
 					log.Infof("Starting ffmpeg feed for %s %s", camera.Name, stream.Descr)
-					feedWatchDog.StartActiveWatchDog(cmd)
+					feedWatchDog.StartActiveWatchDog(cmd, watchdogSuuids)
 					file, err := os.OpenFile(path+"ffmpeg_"+camera.Name+"_"+stream.Descr+"_"+time.Now().Format("20060102")+".log", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0644)
 					if err != nil {
 						log.Errorf("Error creating ffmpeg log file: %s", err.Error())
 					}
-					cmd.Stderr = file
-					err = cmd.Run()
+					cmd.Stderr = file // Normal output on ffmpeg comes out on stderr
+					feedWatchDog.ClearUpOnExit(cmd.Run(), watchdogSuuids)
 					err = file.Close()
 					if err != nil {
 						log.Errorf("Error closing ffmpeg log file: %s", err.Error())
 					}
-					time.Sleep(3 * time.Second)
+					time.Sleep(10 * time.Second)
 				}
 			}(camera, &stream)
 		}

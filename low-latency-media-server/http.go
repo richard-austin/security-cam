@@ -50,7 +50,6 @@ func serveHTTP(feedWatchDog *FeedWatchDog) {
 	router.POST("/live/:suuid", func(c *gin.Context) {
 		req := c.Request
 		suuid := req.FormValue("suuid")
-		feedWatchDog.StartTimer(suuid)
 		isAudio := strings.HasSuffix(suuid, "a")
 		_, hasEntry := streams.StreamMap[suuid]
 		if hasEntry {
@@ -92,7 +91,6 @@ func serveHTTP(feedWatchDog *FeedWatchDog) {
 	router.POST("/recording/:rsuuid", func(c *gin.Context) {
 		req := c.Request
 		suuid := req.FormValue("rsuuid")
-		feedWatchDog.StartTimer(suuid)
 		_, hasEntry := streams.StreamMap[suuid]
 		if hasEntry {
 			log.Errorf("Cannot add %s, there is already an existing stream with that id", suuid)

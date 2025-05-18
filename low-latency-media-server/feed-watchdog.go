@@ -7,28 +7,57 @@ import (
 	"time"
 )
 
+type Signal int
+
+const (
+	ResetTimer Signal = iota
+	StopTimer
+)
+
+var signalNames = map[Signal]string{
+	ResetTimer: "resetTimer",
+	StopTimer:  "stop",
+}
+
 type FFMpegTimer struct {
-	Timer *time.Timer
-	Cmd   *exec.Cmd
+	Timer          *time.Timer
+	Cmd            *exec.Cmd
+	Signal         chan Signal
+	ProcessStopped bool
 }
 
 func NewFFmpegTimer(cmd *exec.Cmd) *FFMpegTimer {
-	t := &FFMpegTimer{Cmd: cmd}
-	return t
-}
-
-func (f *FFMpegTimer) StartTimer() {
-	f.Timer = time.NewTimer(3 * time.Second)
+	f := &FFMpegTimer{Cmd: cmd, Signal: make(chan Signal, 100), ProcessStopped: false}
 	go func() {
-		<-f.Timer.C
-		err := f.Cmd.Process.Signal(os.Interrupt)
-		if err != nil {
-			log.Errorf("Error killing ffmpeg process %d: %s", f.Cmd.Process.Pid, err)
-			return
-		} else {
-			log.Warnf("Killing ffmpeg process %d", f.Cmd.Process.Pid)
+		f.Timer = time.NewTimer(6 * time.Second)
+		for {
+			select {
+			case sig := <-f.Signal:
+				if sig == ResetTimer {
+					f.ResetTimer()
+				} else if sig == StopTimer {
+					f.Timer.Stop()
+					return
+				}
+			case <-f.Timer.C:
+				if f.ProcessStopped {
+					return
+				}
+
+				err := f.Cmd.Process.Signal(os.Interrupt)
+				f.ProcessStopped = true
+				if err != nil {
+					log.Errorf("Error killing ffmpeg process %d: %s", f.Cmd.Process.Pid, err)
+					return
+				} else {
+					log.Infof("Killed ffmpeg process %d for restart", f.Cmd.Process.Pid)
+					return
+				}
+
+			}
 		}
 	}()
+	return f
 }
 
 func (f *FFMpegTimer) ResetTimer() {
@@ -52,42 +81,40 @@ func (w *WatchdogSuuids) AddSuuid(suuid string) {
 
 type FeedWatchDog struct {
 	ActiveWatchDogs map[string]*FFMpegTimer
-	NewSuuids       []string
+	ExecReturn      chan error
 }
 
 func NewFeedWatchDog() *FeedWatchDog {
-	return &FeedWatchDog{ActiveWatchDogs: map[string]*FFMpegTimer{}, NewSuuids: []string{}}
-}
-
-// AddSuuids
-// Add new suuids to the watchdog for a single ffmpeg feed
-func (f *FeedWatchDog) AddSuuids(suuids *WatchdogSuuids) {
-	for _, suuid := range suuids.Suuids {
-		f.NewSuuids = append(f.NewSuuids, suuid)
-	}
+	return &FeedWatchDog{ActiveWatchDogs: map[string]*FFMpegTimer{}, ExecReturn: make(chan error, 1)}
 }
 
 // StartActiveWatchDog
 // Start active watchdogs on the added suuids
-func (f *FeedWatchDog) StartActiveWatchDog(cmd *exec.Cmd) {
-	for _, suuid := range f.NewSuuids {
+func (f *FeedWatchDog) StartActiveWatchDog(cmd *exec.Cmd, suuids *WatchdogSuuids) {
+	for _, suuid := range suuids.Suuids {
 		f.ActiveWatchDogs[suuid] = NewFFmpegTimer(cmd)
 	}
-	f.NewSuuids = []string{}
 }
-func (f *FeedWatchDog) StartTimer(suuid string) {
-	awd, ok := f.ActiveWatchDogs[suuid]
-	if ok {
-		awd.StartTimer()
-	} else {
-		log.Errorf("No active watchdog for suuid %s", suuid)
+
+func (f *FeedWatchDog) ClearUpOnExit(processReturnVal error, suuids *WatchdogSuuids) {
+	execReturn := processReturnVal
+	if execReturn != nil {
+		log.Errorf("ffmpeg process returned %s", processReturnVal)
+	}
+	for _, suuid := range suuids.Suuids {
+		awd, ok := f.ActiveWatchDogs[suuid]
+		if ok {
+			awd.ProcessStopped = true
+			awd.Signal <- StopTimer
+			log.Infof("Watchdog for suuid %s stopped", suuid)
+		}
 	}
 }
 
 func (f *FeedWatchDog) ResetTimer(suuid string) {
 	timer, ok := f.ActiveWatchDogs[suuid]
 	if ok {
-		timer.ResetTimer()
+		timer.Signal <- ResetTimer
 	} else {
 		log.Errorf("No active watchdog for suuid %s", suuid)
 	}
