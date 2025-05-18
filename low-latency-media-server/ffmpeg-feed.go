@@ -81,9 +81,9 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 					tee2 := ""
 					if stream.Audio {
 						if stream.AudioEncoding != "AAC" {
-							audioMode = "-c:a aac"
+							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
 						} else {
-							audioMode = "-c:a aac"
+							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
 						}
 						audio = fmt.Sprintf("[select=a:f=adts:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%sa", stream.MediaServerInputUri)
 						tee2 = fmt.Sprintf(" %s -f tee -map 0:a ", audioMode)
@@ -136,7 +136,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
 					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy -an -copytb 1 -f tee -fflags nobuffer -map 0:v [select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, streamInfo.CodecName, stream.MediaServerInputUri, tee2))
-					log.Info(sb.String())
+					log.Infof("/usr/bin/ffmpeg %s", sb.String())
 					cmdStr := sb.String()
 					cmd := exec.Command("/usr/bin/ffmpeg", strings.Split(cmdStr, " ")...)
 					watchdogSuuids.AddSuuid(suuid)

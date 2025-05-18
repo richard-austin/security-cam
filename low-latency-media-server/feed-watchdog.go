@@ -27,7 +27,7 @@ type FFMpegTimer struct {
 }
 
 func NewFFmpegTimer(cmd *exec.Cmd) *FFMpegTimer {
-	f := &FFMpegTimer{Cmd: cmd, Signal: make(chan Signal, 100), ProcessStopped: false}
+	f := &FFMpegTimer{Cmd: cmd, Signal: make(chan Signal, 20), ProcessStopped: false}
 	go func() {
 		f.Timer = time.NewTimer(6 * time.Second)
 		for {
@@ -53,7 +53,6 @@ func NewFFmpegTimer(cmd *exec.Cmd) *FFMpegTimer {
 					log.Infof("Killed ffmpeg process %d for restart", f.Cmd.Process.Pid)
 					return
 				}
-
 			}
 		}
 	}()
@@ -81,11 +80,10 @@ func (w *WatchdogSuuids) AddSuuid(suuid string) {
 
 type FeedWatchDog struct {
 	ActiveWatchDogs map[string]*FFMpegTimer
-	ExecReturn      chan error
 }
 
 func NewFeedWatchDog() *FeedWatchDog {
-	return &FeedWatchDog{ActiveWatchDogs: map[string]*FFMpegTimer{}, ExecReturn: make(chan error, 1)}
+	return &FeedWatchDog{ActiveWatchDogs: map[string]*FFMpegTimer{}}
 }
 
 // StartActiveWatchDog
@@ -114,7 +112,11 @@ func (f *FeedWatchDog) ClearUpOnExit(processReturnVal error, suuids *WatchdogSuu
 func (f *FeedWatchDog) ResetTimer(suuid string) {
 	timer, ok := f.ActiveWatchDogs[suuid]
 	if ok {
-		timer.Signal <- ResetTimer
+		if len(timer.Signal) < cap(timer.Signal) {
+			timer.Signal <- ResetTimer
+		} else {
+			log.Warnf("Watchdog signal channel for suuid %s is full.", suuid)
+		}
 	} else {
 		log.Errorf("No active watchdog for suuid %s", suuid)
 	}
