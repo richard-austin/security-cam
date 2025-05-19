@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
@@ -63,7 +64,7 @@ func getCredentials(cam Camera) (err error, credentials Credentials) {
 	return
 }
 
-func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
+func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.Cmd) {
 	go cleanLogs()
 	path, _ := filepath.Split(config.LogPath)
 	for _, camera := range cameras.Cameras {
@@ -71,49 +72,26 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 			go func(camera Camera, stream *StreamC) {
 				for {
 					//time.Sleep(300 * time.Hour)
-					suuid, err := codecs.suuidFromUrl(stream.MediaServerInputUri)
-					watchdogSuuids := NewWatchdogSuuids()
-					if err != nil {
-						log.Error(err.Error())
-					}
-					audioMode := "-an"
-					audio := ""
-					tee2 := ""
-					if stream.Audio {
+					var audioMode string
+					var audio string
+					var audioMap string
+					if !stream.Audio {
+						audioMode = "-an"
+						audio = ""
+						audioMap = ""
+					} else {
 						if stream.AudioEncoding != "AAC" {
 							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
 						} else {
 							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
 						}
-						audio = fmt.Sprintf("[select=a:f=adts:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%sa", stream.MediaServerInputUri)
-						tee2 = fmt.Sprintf(" %s -f tee -map 0:a ", audioMode)
-						watchdogSuuids.AddSuuid(suuid + "a")
+						audio = fmt.Sprintf("|[select=a:f=adts:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%sa", stream.MediaServerInputUri)
+						audioMap = "-map 0:a"
 					}
 
 					recording := ""
 					if stream.Recording.Enabled && stream.Recording.RecordingInputUrl != "" {
-						if stream.Audio {
-							tee2 = fmt.Sprintf(" %s -c:v copy -f tee -copytb 1 -map 0:v -map 0:a ", audioMode)
-						} else {
-							tee2 = " -c:v copy -f tee -copytb 1 -map 0:v "
-						}
-						recording = fmt.Sprintf("[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:movflags=empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof:frag_duration=10:f=mp4:onfail=abort]%s", stream.Recording.RecordingInputUrl)
-						watchdogSuuids.AddSuuid(suuid + "r")
-					}
-					if tee2 != "" {
-						var sb strings.Builder
-						sb.WriteString(tee2)
-						if audio != "" {
-							sb.WriteString(audio)
-						}
-						if audio != "" && recording != "" {
-							sb.WriteString("|")
-						}
-						if recording != "" {
-							sb.WriteString(recording)
-						}
-
-						tee2 = sb.String()
+						recording = fmt.Sprintf("|[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:movflags=empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof:frag_duration=10:f=mp4:onfail=abort]%s", stream.Recording.RecordingInputUrl)
 					}
 					netcamUri := stream.NetcamUri
 					rtspTransport := strings.ToLower(camera.RtspTransport)
@@ -123,6 +101,7 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 						idx := len("rtsp://")
 						netcamUri = uri[:idx] + url.QueryEscape(creds.UserName) + ":" + url.QueryEscape(creds.Password) + "@" + uri[idx:]
 					}
+					suuid, err := codecs.suuidFromUrl(stream.MediaServerInputUri)
 					if err != nil {
 						log.Error(err.Error())
 					}
@@ -135,24 +114,25 @@ func ffmpegFeed(config *Config, cameras *Cameras, feedWatchDog *FeedWatchDog) {
 					log.Info("Codec string = " + codec)
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
-					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy -an -copytb 1 -f tee -fflags nobuffer -map 0:v [select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, streamInfo.CodecName, stream.MediaServerInputUri, tee2))
-					log.Infof("/usr/bin/ffmpeg %s", sb.String())
+					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s \"[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s\"", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					log.Info(sb.String())
+					if config.FfmpegLogLevelStr != "quiet" {
+						sb.WriteString(" 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log")
+					}
 					cmdStr := sb.String()
-					cmd := exec.Command("/usr/bin/ffmpeg", strings.Split(cmdStr, " ")...)
-					watchdogSuuids.AddSuuid(suuid)
-					log.Infof("Starting ffmpeg feed for %s %s", camera.Name, stream.Descr)
-					feedWatchDog.StartActiveWatchDog(cmd, watchdogSuuids)
-					file, err := os.OpenFile(path+"ffmpeg_"+camera.Name+"_"+stream.Descr+"_"+time.Now().Format("20060102")+".log", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0644)
+					cmd := exec.Command("bash", "-c", cmdStr)
+					(*ffmpegProcs)[suuid] = cmd
+					var out bytes.Buffer
+					var stderr bytes.Buffer
+					cmd.Stdout = &out
+					cmd.Stderr = &stderr
+					err = cmd.Run()
 					if err != nil {
-						log.Errorf("Error creating ffmpeg log file: %s", err.Error())
+						log.Errorf("%s:%s -- %s: %s", camera.Name, stream.Descr, fmt.Sprint(err), stderr.String())
+					} else if cmd.Stdout != nil {
+						log.Info(out.String())
 					}
-					cmd.Stderr = file // Normal output on ffmpeg comes out on stderr
-					feedWatchDog.ClearUpOnExit(cmd.Run(), watchdogSuuids)
-					err = file.Close()
-					if err != nil {
-						log.Errorf("Error closing ffmpeg log file: %s", err.Error())
-					}
-					time.Sleep(10 * time.Second)
+					time.Sleep(3 * time.Second)
 				}
 			}(camera, &stream)
 		}

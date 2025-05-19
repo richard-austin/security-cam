@@ -14,7 +14,7 @@ import (
 
 var streams = NewStreams()
 
-func serveHTTP(feedWatchDog *FeedWatchDog) {
+func serveHTTP() {
 	router := gin.Default()
 	gin.SetMode(gin.DebugMode)
 	router.LoadHTMLFiles("web/index.gohtml")
@@ -62,8 +62,9 @@ func serveHTTP(feedWatchDog *FeedWatchDog) {
 
 		streams.addStream(suuid, isAudio)
 		defer streams.removeStream(suuid)
-
 		data := make([]byte, 33000)
+
+		t := time.NewTimer(5 * time.Second)
 		for {
 			data = data[:33000]
 			numOfByte, err := readCloser.Read(data)
@@ -72,7 +73,14 @@ func serveHTTP(feedWatchDog *FeedWatchDog) {
 				break
 			}
 			d := NewPacket(data[:numOfByte])
-			feedWatchDog.ResetTimer(suuid)
+			select {
+			case <-t.C:
+				err = fmt.Errorf("(timeout occurred)")
+				break
+			default:
+				t.Reset(5 * time.Second)
+				break
+			}
 			if err == nil {
 				err = streams.put(suuid, d, false)
 			}
@@ -138,6 +146,7 @@ func serveHTTP(feedWatchDog *FeedWatchDog) {
 			_ = <-queue
 		}
 
+		t := time.NewTimer(5 * time.Second)
 		for {
 			data = data[:33000]
 			numOfByte, err = readCloser.Read(data)
@@ -146,7 +155,14 @@ func serveHTTP(feedWatchDog *FeedWatchDog) {
 				break
 			}
 			d = NewPacket(data[:numOfByte])
-			feedWatchDog.ResetTimer(suuid)
+			select {
+			case <-t.C:
+				err = fmt.Errorf("(timeout occurred)")
+				break
+			default:
+				t.Reset(5 * time.Second)
+				break
+			}
 			if err != nil {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
 				break
