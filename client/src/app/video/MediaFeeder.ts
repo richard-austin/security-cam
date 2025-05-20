@@ -11,7 +11,9 @@ export class MediaFeeder {
   isLive!: boolean;
   cam!: Camera;
   stream!: Stream;
-  media!: HTMLMediaElement;
+  video!: HTMLMediaElement;
+  audio!: HTMLAudioElement;
+  sourceBuffer!: SourceBuffer;
   reporting!: ReportingComponent;
   hls: any = null;
   recording: boolean = false;
@@ -25,13 +27,21 @@ export class MediaFeeder {
   constructor() {
   }
 
-  init(isfmp4: boolean, media: HTMLMediaElement, reporting: ReportingComponent) {
+  init(isfmp4: boolean, video: HTMLMediaElement, audio: HTMLAudioElement, reporting: ReportingComponent) {
     this.isLive = isfmp4;
-    this.media = media;
-    this.media.autoplay = true;
-    this.media.muted = false;
-    this.media.controls = !isfmp4;
+    this.video = video;
+    this.audio = audio;
+    this.video.autoplay = true;
+    this.video.muted = false;
+    this.video.controls = !isfmp4;
     this.reporting = reporting;
+
+    let mediaSource = new MediaSource();
+    mediaSource.addEventListener('sourceopen', () => {
+      this.sourceBuffer = mediaSource.addSourceBuffer("audio/aac");
+    });
+    this.audio.src = URL.createObjectURL(mediaSource);
+    this.audio.play().then()
   }
 
   /**
@@ -65,9 +75,9 @@ export class MediaFeeder {
         if (Hls.isSupported()) {
           this.hls = new Hls();
           this.hls.loadSource(this.recording ? this.recordingUri : this.stream.uri);
-          this.hls.attachMedia(this.media);
-        } else if (this.media.canPlayType('application/vnd.apple.mpegurl')) {
-          this.media.src = this.stream.uri;
+          this.hls.attachMedia(this.video);
+        } else if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
+          this.video.src = this.stream.uri;
         }
       }
     } else {
@@ -94,11 +104,11 @@ export class MediaFeeder {
       const videoWriter = videoTrack.writable.getWriter();
       const audioWriter = audioTrack.writable.getWriter();
 
-      this.media.srcObject = new MediaStream([videoTrack, audioTrack])
-      this.media.onloadedmetadata = () => {
-        this.media.play().then();
+      this.video.srcObject = new MediaStream([videoTrack, audioTrack])
+      this.video.onloadedmetadata = () => {
+        this.video.play().then();
       }
-      this.media.preload = "none";
+      this.video.preload = "none";
 
       if (typeof Worker !== 'undefined') {
         // Create a new media feeder web worker
@@ -121,12 +131,15 @@ export class MediaFeeder {
         this.videoWorker.postMessage({url: url})
         if(this.stream.audio) {
           this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));
-          this.media.onplaying = () => {
+          this.video.onplaying = () => {
             this.audioWorker.onmessage = async ({data, type}) => {
               if(data.media) {
-                if(!this.media.paused) {
-                  await audioWriter.write(data.packet);
-                  await audioWriter.ready;
+                if(!this.video.paused) {
+                  if(!this.sourceBuffer.updating) {
+                    this.sourceBuffer.appendBuffer(data.packet);
+                  }
+                  // await audioWriter.write(data.packet);
+                  // await audioWriter.ready;
                 }
               } else if (data.closed) {
                 console.log("Terminating the audio worker");
@@ -173,7 +186,7 @@ export class MediaFeeder {
     this.streamTestInterval?.unsubscribe();  // Stop the stream test interval, or it will be restarted after
     // we exit the video component
     if (!this.isLive && this.hls !== null) {
-      this.media.pause();
+      this.video.pause();
       this.hls.stopLoad();
       this.hls.detachMedia();
       this.hls.destroy();
@@ -186,17 +199,17 @@ export class MediaFeeder {
       this.videoWorker?.terminate();
       this.audioWorker?.postMessage({close: true})
       this.audioWorker?.terminate();
-      this.media.pause();
+      this.video.pause();
     }
   }
 
   mute(muted: boolean = true) {
-    if(this.media !== null && this.media !== undefined)
-      this.media.muted = muted;
+    if(this.audio !== null && this.audio !== undefined)
+      this.audio.muted = muted;
   }
 
   get isMuted() {
-    return this.media !== null && this.media !== undefined && this.media.muted;
+    return this.audio !== null && this.audio !== undefined && this.audio.muted;
   }
 
   get hasCam(): boolean {

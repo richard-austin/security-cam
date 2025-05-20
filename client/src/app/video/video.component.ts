@@ -27,12 +27,14 @@ import {FormsModule} from "@angular/forms";
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
+  @ViewChild('audio') audioEl!: ElementRef<HTMLAudioElement>;
   @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isLive: boolean = false;
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
+  audio!: HTMLAudioElement;
 
   visible: boolean = false;
   mediaFeeder!: MediaFeeder;
@@ -122,7 +124,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.mediaFeeder.init(this.isLive, this.video, this.reporting);
+    this.audio = this.audioEl.nativeElement;
+    this.mediaFeeder.init(this.isLive, this.video, this.audio, this.reporting);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
     this.video.addEventListener('fullscreenchange', () => {

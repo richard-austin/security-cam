@@ -78,8 +78,10 @@ class AudioFeeder {
       });
       if (framesToMiss > 0)
         --framesToMiss;
-      else
-        await this.audioDecoder.decode(eac)
+      else {
+        postMessage({media: true, packet: event.data});
+       // await this.audioDecoder.decode(eac)
+      }
       this.resetTimeout();
     };
   }
