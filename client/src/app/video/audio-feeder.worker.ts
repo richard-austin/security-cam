@@ -5,14 +5,13 @@ import {timer} from "rxjs";
 let audioFeeder: AudioFeeder;
 addEventListener('message', ({ data }) => {
   if(data.url) {
-    // @ts-ignore
-    if(typeof AudioDecoder !== 'undefined') {
+    if(typeof MediaSource !== 'undefined') {
       audioFeeder = new AudioFeeder(data.url);
       audioFeeder.setUpWSConnection();
     } else {
       let sub = timer(1000).subscribe(() => {
         sub.unsubscribe();
-        postMessage({media: false, warningMessage: "AudioDecoder is not supported on this browser"})
+        postMessage({warning: true, warningMessage: "MediaSource is not supported in web workers on this browser. Audio is disabled"})
       });
     }
   }
@@ -21,45 +20,41 @@ addEventListener('message', ({ data }) => {
 });
 
 class AudioFeeder {
-// @ts-ignore
-  private audioDecoder = new AudioDecoder({
-    // @ts-ignore
-    output: async (frame: AudioData) => {
-      postMessage({media: true, packet: frame});
-      frame.close();
-    },
-    error: (e: DOMException) => {
-      console.warn("Audio decoder: " + e.message);
-    },
-  });
-
-  private readonly config = {
-    numberOfChannels: 1,
-    sampleRate: 16000,  // Firefox hard codes to 48000
-    codec: 'mp4a.40.2',
-  };
 
   private readonly url!:string;
   private timeout!:NodeJS.Timeout;
   private ws!: WebSocket;
   private noRestart: boolean = false;
+  private mediaSource!: MediaSource;
+  private sourceBuffer!: SourceBuffer;
   constructor(url: string) {
     this.url = url;
   }
   setUpWSConnection() {
-    this.audioDecoder.configure(this.config);
+    this.mediaSource = new MediaSource();
+     // @ts-ignore
+    postMessage({handle: this.mediaSource.handle}, [this.mediaSource.handle])
+    this.mediaSource.addEventListener('sourceopen', (ev) => {
+      this.sourceBuffer = this.mediaSource.addSourceBuffer('audio/aac');
+      this.mediaSource.duration = 0.3;  // audio start duration for latency monitoring
+    });
     let framesToMiss = 0;
 
     this.ws = new WebSocket(this.url);
     this.ws.binaryType = 'arraybuffer';
 
     this.ws.onerror = (ev) => {
-      postMessage({media: false, warningMessage: "An error occurred with the audio feeder websocket connection"})
+      postMessage({warning: true, warningMessage: "An error occurred with the audio feeder websocket connection"})
+      this.sourceBuffer.abort();
+      this.mediaSource.endOfStream();
     }
 
     this.ws.onclose = (ev) => {
+      this.sourceBuffer.abort();
+      this.mediaSource.endOfStream();
+
       if(this.noRestart)
-        postMessage({media: false, closed: true})
+        postMessage({closed: true})
       console.warn("The audio feed websocket was closed: " + ev.reason);
      // clearTimeout(this.timeout);
     }
@@ -69,18 +64,12 @@ class AudioFeeder {
     }, 6000);
 
     this.ws.onmessage = async (event: MessageEvent) => {
-      // @ts-ignore
-      const eac = new EncodedAudioChunk({
-        type: 'key',
-        timestamp: 0,
-        duration: 1,
-        data: event.data,
-      });
       if (framesToMiss > 0)
         --framesToMiss;
       else {
-        postMessage({media: true, packet: event.data});
-       // await this.audioDecoder.decode(eac)
+        if(this.sourceBuffer && !this.sourceBuffer.updating) {
+          this.sourceBuffer.appendBuffer(event.data);
+        }
       }
       this.resetTimeout();
     };
@@ -97,14 +86,14 @@ class AudioFeeder {
     console.error("Audio feed from websocket has stopped...");
     if(this.ws)
       this.ws.close();
-    if(this.audioDecoder)
-      this.audioDecoder.close();
-  }
+    if (this.sourceBuffer)
+      this.sourceBuffer.abort();
+    if (this.mediaSource)
+      this.mediaSource.endOfStream();
+   }
 
   close() {
     this.noRestart = true;
-    if (this.audioDecoder)
-      this.audioDecoder.close();
     if (this.ws)
       this.ws.close();
   }
