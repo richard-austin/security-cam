@@ -23,6 +23,7 @@ export class MediaFeeder {
   videoWorker!: Worker;
   audioWorker!:Worker;
   isStalled: boolean = false;
+  readonly audioLatencyLimit:number = 1;
 
   constructor() {
   }
@@ -126,9 +127,9 @@ export class MediaFeeder {
                 this.audio.play().then(() => {
                   this.audioLatencyCheckSubscription = interval(1000).subscribe(() => {
                     let df = (this.audio.duration - this.audio.currentTime)
-                    if (df > 0.4) {
+                    if (df > this.audioLatencyLimit) {
                       console.info("Reducing audio latency from " + df + " seconds");
-                      this.audio.currentTime = this.audio.duration - 0.1;
+                      this.audio.currentTime = this.audio.duration - 0.2;
                     }
                   });
                 });
@@ -161,7 +162,6 @@ export class MediaFeeder {
     else
       ++this.messageCount;
     this.timerHandle = setTimeout(() => {
-      this.audioLatencyCheckSubscription?.unsubscribe();
       this.isStalled = true;
       this.messageCount = 0;
       this.stop();
