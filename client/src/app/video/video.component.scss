@@ -140,3 +140,13 @@ span.duration-time {
   }
 }
 
+label.volume-slider {
+  margin: 0;
+  > input {
+    position: relative;
+    top: -5px;
+    width: 50px;
+    left: 0;
+    margin: 0;
+  }
+}
