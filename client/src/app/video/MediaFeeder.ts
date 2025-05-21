@@ -1,6 +1,6 @@
 import Hls from "hls.js";
 import {Camera, Stream} from "../cameras/Camera";
-import {interval, Subscription} from "rxjs";
+import {interval, Subscription, timer} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
 declare function initMSTG(): void;
 // MediaStreamTrackGenerator not in lib.dom.d.ts
@@ -23,7 +23,7 @@ export class MediaFeeder {
   videoWorker!: Worker;
   audioWorker!:Worker;
   isStalled: boolean = false;
-  readonly audioLatencyLimit:number = 1;
+  readonly audioLatencyLimit:number = 0.5;
 
   constructor() {
   }
@@ -93,7 +93,6 @@ export class MediaFeeder {
       const videoTrack = new MediaStreamTrackGenerator({kind: 'video'});
 
       const videoWriter = videoTrack.writable.getWriter();
-
       this.video.srcObject = new MediaStream([videoTrack])
       this.video.onloadedmetadata = () => {
         this.video.play().then();
@@ -149,24 +148,22 @@ export class MediaFeeder {
     }
   }
 
-  timerHandle: any = undefined;
+  timerHandle: Subscription | undefined = undefined;
   messageCount = 0;
 
   resetTimout() {
-    if (this.timerHandle !== undefined) {
-      clearTimeout(this.timerHandle);
-    }
+      this.timerHandle?.unsubscribe();
     // Receive 10 messages through websocket before resetting the stalled flag
     if (this.messageCount > 10)
       this.isStalled = false;
     else
       ++this.messageCount;
-    this.timerHandle = setTimeout(() => {
+    this.timerHandle = timer(2000).subscribe(() =>{
       this.isStalled = true;
       this.messageCount = 0;
       this.stop();
       this.startVideo()
-    }, 2000)
+    });
   }
 
   streamTestInterval!: Subscription;
@@ -181,9 +178,7 @@ export class MediaFeeder {
       this.hls.destroy();
       this.hls = null;
     } else if (this.isLive) {
-      if (this.timerHandle !== undefined) {
-        clearTimeout(this.timerHandle);
-      }
+      this.timerHandle?.unsubscribe();
       this.audioLatencyCheckSubscription?.unsubscribe();
       this.videoWorker?.postMessage({close: true})
       this.videoWorker?.terminate();
