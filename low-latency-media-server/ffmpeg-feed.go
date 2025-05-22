@@ -64,7 +64,7 @@ func getCredentials(cam Camera) (err error, credentials Credentials) {
 	return
 }
 
-func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.Cmd) {
+func ffmpegFeed(config *Config, cameras *Cameras) {
 	go cleanLogs()
 	path, _ := filepath.Split(config.LogPath)
 	for _, camera := range cameras.Cameras {
@@ -114,24 +114,37 @@ func ffmpegFeed(config *Config, cameras *Cameras, ffmpegProcs *map[string]*exec.
 					log.Info("Codec string = " + codec)
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
-					sb.WriteString(fmt.Sprintf("/usr/bin/ffmpeg -loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s \"[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s\"", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s [select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
 					log.Info(sb.String())
-					if config.FfmpegLogLevelStr != "quiet" {
-						sb.WriteString(" 2>&1 >/dev/null | ts '[%Y-%m-%d %H:%M:%S]' >> " + path + "ffmpeg_" + strings.Replace(camera.Name, " ", "_", -1) + "_" + strings.Replace(strings.Replace(stream.Descr, " ", "_", -1), " ", "_", -1) + "_$(date +%Y%m%d).log")
-					}
 					cmdStr := sb.String()
-					cmd := exec.Command("bash", "-c", cmdStr)
-					(*ffmpegProcs)[suuid] = cmd
+					cmd := exec.Command("/usr/bin/ffmpeg", strings.Split(cmdStr, " ")...)
 					var out bytes.Buffer
 					var stderr bytes.Buffer
 					cmd.Stdout = &out
-					cmd.Stderr = &stderr
+					var file *os.File
+					if config.FfmpegLogLevelStr != "quiet" {
+						file, err = os.OpenFile(path+"ffmpeg_"+strings.Replace(camera.Name+"_"+stream.Descr, " ", "_", -1)+"_"+time.Now().Format("20060102")+".log", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0644)
+						if err != nil {
+							log.Errorf("Error creating ffmpeg log file: %s", err.Error())
+						}
+						cmd.Stderr = file // Normal output on ffmpeg comes out on stderr
+					} else {
+						cmd.Stderr = &stderr
+					}
 					err = cmd.Run()
 					if err != nil {
 						log.Errorf("%s:%s -- %s: %s", camera.Name, stream.Descr, fmt.Sprint(err), stderr.String())
 					} else if cmd.Stdout != nil {
 						log.Info(out.String())
 					}
+
+					if config.FfmpegLogLevelStr != "quiet" {
+						err = file.Close()
+						if err != nil {
+							log.Errorf("Error closing ffmpeg log file: %s", err.Error())
+						}
+					}
+
 					time.Sleep(3 * time.Second)
 				}
 			}(camera, &stream)
