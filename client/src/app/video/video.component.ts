@@ -35,7 +35,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   stream!: Stream;
   video!: HTMLVideoElement;
   audio!: HTMLAudioElement;
-  volumeSlider!: HTMLInputElement;
 
   volume: number = 1;
 
@@ -91,7 +90,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.mediaFeeder)
       this.mediaFeeder.mute(!this.mediaFeeder.isMuted);
     this.volume = this.mediaFeeder.isMuted ? 0 : this.audio.volume;
-    this.volumeSlider.disabled = this.mediaFeeder.isMuted;
   }
 
   mute(mute: boolean = true): void {
