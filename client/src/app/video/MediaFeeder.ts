@@ -24,6 +24,7 @@ export class MediaFeeder {
   audioWorker!:Worker;
   isStalled: boolean = false;
   readonly audioLatencyLimit:number = 0.5;
+  protected _noAudio: boolean = false;
 
   constructor() {
   }
@@ -135,7 +136,10 @@ export class MediaFeeder {
               } else if (data.closed) {
                 console.log("Terminating the audio worker");
                 this.stop();
-              } else if(!data.warningMessage) {
+              } else if (data.audioNotSupported) {
+                this.reporting.warningMessage = data.warningMessage;
+                this._noAudio = true;
+              } else if(data.warningMessage) {
                this.reporting.warningMessage = data.warningMessage;
               }
             }
@@ -216,5 +220,9 @@ export class MediaFeeder {
 
   get camera() : Camera {
     return this.cam;
+  }
+
+  get noAudio(): boolean {
+    return this._noAudio;
   }
 }

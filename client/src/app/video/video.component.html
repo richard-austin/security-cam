@@ -21,12 +21,12 @@
     </div>
     <div *ngIf="isLive" class="latency-limit-selector">
       <div>
-        <label *ngIf="stream?.audio" class="video-buttons"
+        <label *ngIf="stream?.audio && !mediaFeeder.noAudio" class="video-buttons"
                [matTooltip]="'Click to ' + (mediaFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
                matTooltipClass="tooltip">
           <mat-icon (click)="toggleMuteAudio()">{{ mediaFeeder.isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
         </label>
-          <label *ngIf="stream?.audio" class="volume-slider"
+          <label *ngIf="stream?.audio && !mediaFeeder.noAudio" class="volume-slider"
                  [matTooltip]="'Click to adjust volume'"
                  matTooltipClass="tooltip">
               <input [disabled]="volumeControlDisabled()" type="range" min="0" max="1" step="0.01" [ngModel]="volume" (change)="setVolume($event)">

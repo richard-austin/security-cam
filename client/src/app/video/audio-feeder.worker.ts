@@ -11,7 +11,7 @@ addEventListener('message', ({ data }) => {
     } else {
       let sub = timer(1000).subscribe(() => {
         sub.unsubscribe();
-        postMessage({warning: true, warningMessage: "MediaSource is not supported in web workers on this browser. Audio is disabled"})
+        postMessage({audioNotSupported: true, warningMessage: "MediaSource is not supported in web workers on this browser. Audio is disabled"})
       });
     }
   }
@@ -27,15 +27,20 @@ class AudioFeeder {
   private noRestart: boolean = false;
   private mediaSource!: MediaSource;
   private sourceBuffer!: SourceBuffer;
+  private readonly audioCodec = "audio/aac";
   constructor(url: string) {
     this.url = url;
   }
   setUpWSConnection() {
     this.mediaSource = new MediaSource();
+    if(!MediaSource.isTypeSupported(this.audioCodec)) {
+      postMessage({audioNotSupported: true, warningMessage: "The "+this.audioCodec+" codec is not supported on this browser"})
+      return;
+    }
      // @ts-ignore
     postMessage({handle: this.mediaSource.handle}, [this.mediaSource.handle])
     this.mediaSource.addEventListener('sourceopen', (ev) => {
-      this.sourceBuffer = this.mediaSource.addSourceBuffer('audio/aac');
+      this.sourceBuffer = this.mediaSource.addSourceBuffer(this.audioCodec);
       this.mediaSource.duration = 0.3;  // audio start duration for latency monitoring
     });
     let framesToMiss = 0;
