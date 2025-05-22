@@ -27,7 +27,7 @@
           <mat-icon (click)="toggleMuteAudio()">{{ mediaFeeder.isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
         </label>
           <label *ngIf="stream?.audio && !mediaFeeder.noAudio" class="volume-slider"
-                 [matTooltip]="'Click to adjust volume'"
+                 [matTooltip]="'Slide to adjust volume'"
                  matTooltipClass="tooltip">
               <input [disabled]="volumeControlDisabled()" type="range" min="0" max="1" step="0.01" [ngModel]="volume" (change)="setVolume($event)">
           </label>
