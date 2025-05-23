@@ -17,7 +17,6 @@
          (touchmove)="vt.touchMoveHandler(($event))"
          (touchend)="vt.touchEndHandler($event)">
       <video #video></video>
-      <audio #audio></audio>
     </div>
     <div *ngIf="isLive" class="latency-limit-selector">
       <div>

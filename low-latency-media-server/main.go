@@ -12,6 +12,7 @@ import (
 var cameras *Cameras
 var config *Config
 var codecs *MimeCodecs
+var audioData *AudioData
 
 func main() {
 	var customFormatter = log.TextFormatter{}
@@ -22,6 +23,7 @@ func main() {
 
 	config, cameras = loadConfig()
 	codecs = NewMimeCodecs()
+	audioData = NewAudioData()
 
 	_, level := config.LogLevel()
 	log.SetLevel(level)

@@ -27,7 +27,6 @@ import {FormsModule} from "@angular/forms";
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
-  @ViewChild('audio') audioEl!: ElementRef<HTMLAudioElement>;
   @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @Input() isLive: boolean = false;
@@ -49,6 +48,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(public utilsService: UtilsService) {
     this.mediaFeeder = new MediaFeeder();
+    this.audio = new Audio();
   }
 
   /**
@@ -136,7 +136,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.audio = this.audioEl.nativeElement;
     this.volume = this.audio.volume;
     this.mediaFeeder.init(this.isLive, this.video, this.audio, this.reporting);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);

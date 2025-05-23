@@ -1,6 +1,6 @@
 import Hls from "hls.js";
 import {Camera, Stream} from "../cameras/Camera";
-import {interval, Subscription, timer} from "rxjs";
+import {Subscription} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
 declare function initMSTG(): void;
 // MediaStreamTrackGenerator not in lib.dom.d.ts
@@ -13,7 +13,6 @@ export class MediaFeeder {
   stream!: Stream;
   video!: HTMLMediaElement;
   audio!: HTMLAudioElement;
-  audioLatencyCheckSubscription!: Subscription;
   reporting!: ReportingComponent;
   hls: any = null;
   recording: boolean = false;
@@ -23,7 +22,6 @@ export class MediaFeeder {
   videoWorker!: Worker;
   audioWorker!:Worker;
   isStalled: boolean = false;
-  readonly audioLatencyLimit:number = 1;
   protected _noAudio: boolean = false;
 
   constructor() {
@@ -93,10 +91,19 @@ export class MediaFeeder {
 
       const videoTrack = new MediaStreamTrackGenerator({kind: 'video'});
 
+      // @ts-ignore
+      const audioTrack = new window.MediaStreamTrackGenerator({kind: 'audio'});
+
       const videoWriter = videoTrack.writable.getWriter();
+      const audioWriter = audioTrack.writable.getWriter();
+
       this.video.srcObject = new MediaStream([videoTrack])
+      this.audio.srcObject = new MediaStream([audioTrack])
       this.video.onloadedmetadata = () => {
         this.video.play().then();
+      }
+      this.audio.onloadedmetadata = () => {
+        this.audio.play().then();
       }
       this.video.preload = "none";
 
@@ -110,7 +117,7 @@ export class MediaFeeder {
             await videoWriter.ready;
           } else if (data.closed) {
             console.log("Websocket was closed, terminating the video worker");
-            this.stop();
+            this.videoWorker.terminate();
           } else if (data.warningMessage !== undefined) {
             this.reporting.warningMessage = data.warningMessage;
             this.stop();
@@ -121,28 +128,21 @@ export class MediaFeeder {
         this.videoWorker.postMessage({url: url})
         if(this.stream.audio) {
           this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));
+          this.video.onplaying = () => {
             this.audioWorker.onmessage = async ({data, type}) => {
-              if (data.handle) {
-                this.audio.srcObject = data.handle;
-                this.audio.play().then(() => {
-                  this.audioLatencyCheckSubscription = interval(1000).subscribe(() => {
-                    let df = (this.audio.duration - this.audio.currentTime)
-                    if (df > this.audioLatencyLimit) {
-                      console.info("Reducing audio latency from " + df + " seconds");
-                      this.audio.currentTime = this.audio.duration - 0.2;
-                    }
-                  });
-                });
+              if (data.media) {
+                if (!this.video.paused) {
+                  await audioWriter.write(data.packet);
+                  await audioWriter.ready;
+                }
               } else if (data.closed) {
                 console.log("Terminating the audio worker");
-                this.stop();
-              } else if (data.audioNotSupported) {
-                this.reporting.warningMessage = data.warningMessage;
-                this._noAudio = true;
-              } else if(data.warningMessage) {
+                this.audioWorker.terminate();
+              } else if (!data.warningMessage) {
                this.reporting.warningMessage = data.warningMessage;
               }
             }
+          }
           this.audioWorker.postMessage({url: url + 'a'})
         }
       } else {
@@ -152,22 +152,26 @@ export class MediaFeeder {
     }
   }
 
-  timerHandle: Subscription | undefined = undefined;
+  timerHandle: any = undefined;
   messageCount = 0;
 
   resetTimout() {
-      this.timerHandle?.unsubscribe();
+    if (this.timerHandle !== undefined) {
+      clearTimeout(this.timerHandle);
+    }
     // Receive 10 messages through websocket before resetting the stalled flag
     if (this.messageCount > 10)
       this.isStalled = false;
     else
       ++this.messageCount;
-    this.timerHandle = timer(2000).subscribe(() =>{
+    this.timerHandle = setTimeout(() => {
       this.isStalled = true;
       this.messageCount = 0;
+      this.audioWorker?.terminate();
+      this.videoWorker?.terminate();
       this.stop();
       this.startVideo()
-    });
+    }, 2000)
   }
 
   streamTestInterval!: Subscription;
@@ -182,8 +186,9 @@ export class MediaFeeder {
       this.hls.destroy();
       this.hls = null;
     } else if (this.isLive) {
-      this.timerHandle?.unsubscribe();
-      this.audioLatencyCheckSubscription?.unsubscribe();
+      if (this.timerHandle !== undefined) {
+        clearTimeout(this.timerHandle);
+      }
       this.videoWorker?.postMessage({close: true})
       this.videoWorker?.terminate();
       this.audioWorker?.postMessage({close: true})
@@ -198,7 +203,7 @@ export class MediaFeeder {
   }
 
   get isMuted() {
-    return this.audio !== null && this.audio !== undefined && this.audio.muted;
+    return this.audio.muted;
   }
 
   get hasCam(): boolean {

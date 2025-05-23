@@ -181,8 +181,12 @@ func (s *Streams) getGOPCache(suuid string) (err error, gopCache *GopCacheSnapsh
 func (s *Streams) getCodec(suuid string) (err error, pckt Packet) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	codec, err := codecs.getCodecString(suuid)
-	pckt.pckt = append([]byte{0x09}, []byte(codec)...)
+	avi, err := codecs.getCodecString(suuid)
+	if avi != nil {
+		pckt.pckt = append([]byte{0x09}, []byte(avi.Codec)...)
+	} else {
+		err = fmt.Errorf("no codec for %s in getCodec", suuid)
+	}
 	return
 }
 

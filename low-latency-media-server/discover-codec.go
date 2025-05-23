@@ -25,16 +25,47 @@ type FFProbeStream struct {
 	CodecLongName string `json:"codec_long_name"`
 }
 
+type FFProbeAudioStream struct {
+	CodecType  string `json:"codec_type"`
+	CodecName  string `json:"codec_name"`
+	SampleFmt  string `json:"sample_fmt"`
+	SampleRate string `json:"sample_rate"`
+	Channels   int    `json:"channels"`
+	BitRate    string `json:"bit_rate"`
+}
+
 type FFProbeStreams struct {
 	Streams []FFProbeStream `json:"streams"`
 }
 
+type FFProbeAudioStreams struct {
+	Streams []FFProbeAudioStream `json:"streams"`
+}
+type AVInfo struct {
+	Codec     string
+	AudioInfo FFProbeAudioStream
+}
+
+func NewAVInfo() (avInfo AVInfo) {
+	avInfo = AVInfo{Codec: ""}
+	return
+}
+
 type MimeCodecs struct {
-	Codecs map[string]string // Map codec by suuid
+	AVInfos map[string]*AVInfo // Map codec by suuid
 }
 
 func NewMimeCodecs() (mimeCodecs *MimeCodecs) {
-	mimeCodecs = &MimeCodecs{Codecs: map[string]string{}}
+	mimeCodecs = &MimeCodecs{AVInfos: map[string]*AVInfo{}}
+	return
+}
+
+type AudioData struct {
+	stream map[string]FFProbeAudioStream
+}
+
+func NewAudioData() (audioData *AudioData) {
+	audioData = &AudioData{stream: map[string]FFProbeAudioStream{}}
 	return
 }
 
@@ -42,7 +73,7 @@ func NewMimeCodecs() (mimeCodecs *MimeCodecs) {
 		 See https://developer.apple.com/documentation/http-live-streaming/hls-authoring-specification-for-apple-devices-appendixes
 	     for codec info.
 */
-func (codecs *MimeCodecs) setCodecString(rtspUrl string, suuid string) (stream FFProbeStream, err error) {
+func (codecs *MimeCodecs) getAVData(rtspUrl string, suuid string) (stream FFProbeStream, audioStream FFProbeAudioStream, err error) {
 	log.Info("rtspurl = " + rtspUrl)
 	ffprobeCmd := "/usr/bin/ffprobe -hide_banner -timeout 10000000 -i " + rtspUrl + " -threads 5 -v info -print_format json -show_streams -show_chapters -show_format -show_data"
 	out, err := exec.Command("bash", "-c", ffprobeCmd).Output()
@@ -61,14 +92,28 @@ func (codecs *MimeCodecs) setCodecString(rtspUrl string, suuid string) (stream F
 				level := fmt.Sprintf("%X", stream.Level)
 				log.Info(stream.CodecName + ": width " + strconv.Itoa(stream.Width) + ": Profile = " + stream.Profile + ": Level = 0x" + level)
 			}
+
+			var audioStreams FFProbeAudioStreams
+			err = json.Unmarshal(out, &audioStreams)
+			idx = slices.IndexFunc(audioStreams.Streams, func(stream FFProbeAudioStream) bool { return stream.CodecType == "audio" })
+			if idx == -1 {
+				log.Info("No audio stream at " + rtspUrl)
+			} else {
+				audioStream = audioStreams.Streams[idx]
+				log.Info(stream.CodecName + ": Sample rate = " + audioStream.SampleRate + ": Channels = " + strconv.Itoa(audioStream.Channels) + ": Bit rate = " + audioStream.BitRate)
+			}
 		}
-		codecs.Codecs[suuid] = result
+		audioData.stream[suuid] = audioStream
+		avi := NewAVInfo()
+		avi.Codec = result
+		avi.AudioInfo = audioStream
+		codecs.AVInfos[suuid] = &avi
 	}
-	return stream, err
+	return stream, audioStream, err
 }
-func (codecs *MimeCodecs) getCodecString(suuid string) (mimeCodec string, err error) {
+func (codecs *MimeCodecs) getCodecString(suuid string) (avInfo *AVInfo, err error) {
 	err = nil
-	mimeCodec, ok := codecs.Codecs[suuid]
+	avInfo, ok := codecs.AVInfos[suuid]
 	if !ok {
 		err = errors.New("No codec found for suuid " + suuid)
 	}

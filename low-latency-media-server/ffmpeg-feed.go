@@ -72,20 +72,20 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 			go func(camera Camera, stream *StreamC) {
 				for {
 					//time.Sleep(300 * time.Hour)
-					var audioMode string
 					var audio string
 					var audioMap string
+					var audioMuxer string
 					if !stream.Audio {
-						audioMode = "-an"
 						audio = ""
 						audioMap = ""
+						audioMuxer = ""
 					} else {
 						if stream.AudioEncoding != "AAC" {
-							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
+							audioMuxer = "alaw"
 						} else {
-							audioMode = "-c:a aac -ar 16000 -af asetpts=PTS+0.12/TB"
+							audioMuxer = "adts"
 						}
-						audio = fmt.Sprintf("|[select=a:f=adts:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%sa", stream.MediaServerInputUri)
+						audio = fmt.Sprintf("|[select=a:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%sa", audioMuxer, stream.MediaServerInputUri)
 						audioMap = "-map 0:a " // The space at the end is important in splitting the command line
 					}
 
@@ -105,16 +105,16 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 					if err != nil {
 						log.Error(err.Error())
 					}
-					streamInfo, err := codecs.setCodecString(netcamUri, suuid)
+					streamInfo, audioStreamInfo, err := codecs.getAVData(netcamUri, suuid)
 					if err != nil {
 						log.Error(err.Error())
 					}
-
-					codec, err := codecs.getCodecString(suuid)
-					log.Info("Codec string = " + codec)
+					log.Info("Audio stream info = " + audioStreamInfo.CodecName)
+					avi, err := codecs.getCodecString(suuid)
+					log.Info("Codec string = " + avi.Codec)
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
-					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c copy -copytb 1 -f tee -fflags nobuffer -map 0:v %s[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
 					log.Info(sb.String())
 					cmdStr := sb.String()
 					cmd := exec.Command("/usr/bin/ffmpeg", strings.Split(cmdStr, " ")...)
