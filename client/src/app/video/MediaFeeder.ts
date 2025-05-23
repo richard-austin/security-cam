@@ -23,7 +23,7 @@ export class MediaFeeder {
   videoWorker!: Worker;
   audioWorker!:Worker;
   isStalled: boolean = false;
-  readonly audioLatencyLimit:number = 0.5;
+  readonly audioLatencyLimit:number = 1;
   protected _noAudio: boolean = false;
 
   constructor() {

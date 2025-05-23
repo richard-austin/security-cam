@@ -41,7 +41,7 @@ class AudioFeeder {
     postMessage({handle: this.mediaSource.handle}, [this.mediaSource.handle])
     this.mediaSource.addEventListener('sourceopen', (ev) => {
       this.sourceBuffer = this.mediaSource.addSourceBuffer(this.audioCodec);
-      this.mediaSource.duration = 0.3;  // audio start duration for latency monitoring
+      this.mediaSource.duration = 0;  // audio start duration for latency monitoring
     });
     let framesToMiss = 0;
 
