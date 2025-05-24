@@ -242,10 +242,20 @@ func ws(ws *websocket.Conn) {
 	// Send the header information (codec)
 	var data Packet
 	if !isAudio {
-		err, data = streams.getCodec(suuid)
+		err, data = streams.getVideoCodec(suuid)
 		if err != nil {
 			log.Errorf("Error getting codecs: %s", err.Error())
 			return
+		}
+		err = websocket.Message.Send(ws, data.pckt)
+		if err != nil {
+			log.Errorf("Error writing codec: %s", err.Error())
+			return
+		}
+	} else {
+		err, data = streams.getAudioCodec(suuid)
+		if err != nil {
+			log.Errorf("Error getting codecs: %s", err.Error())
 		}
 		err = websocket.Message.Send(ws, data.pckt)
 		if err != nil {
@@ -272,7 +282,7 @@ func ws(ws *websocket.Conn) {
 	// Main loop to send data to the browser
 	started := isAudio // Always started for audio as we don't wait for a keyframe
 	for {
-		if gopCacheUsed && !isAudio { // GOP cache not used for audio
+		if gopCacheUsed && !isAudio { // GOP cache is not used for audio
 			data = gopCache.Get(ch)
 			started = true
 		} else {

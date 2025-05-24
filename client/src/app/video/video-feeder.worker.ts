@@ -88,10 +88,10 @@ class VideoFeeder {
                 if (array[0] === 9) {
                     let decoded_arr = array.slice(1);
                     this.codec = this.Utf8ArrayToStr(decoded_arr);
-                    console.log('first packet with codec data: ' + this.codec);
+                    console.log('first video packet with codec data: ' + this.codec);
                     this.started = true;
                 } else
-                    console.error("No codec was found")
+                    console.error("No video codec was found")
             } else {
                 this.processChunk(event.data).then();
             }

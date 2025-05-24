@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -176,14 +177,37 @@ func (s *Streams) getGOPCache(suuid string) (err error, gopCache *GopCacheSnapsh
 	return
 }
 
-func (s *Streams) getCodec(suuid string) (err error, pckt Packet) {
+func (s *Streams) getVideoCodec(suuid string) (err error, pckt Packet) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	avi, err := codecs.getCodecString(suuid)
+	avi, err := codecs.getAVCodecs(suuid)
 	if avi != nil {
 		pckt.pckt = append([]byte{0x09}, []byte(avi.Codec)...)
 	} else {
-		err = fmt.Errorf("no codec for %s in getCodec", suuid)
+		err = fmt.Errorf("no codec for %s in getVideoCodec", suuid)
+	}
+	return
+}
+
+func (s *Streams) getAudioCodec(suuid string) (err error, pckt Packet) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	baseSuuid, done := strings.CutSuffix(suuid, "a")
+	if !done {
+		err = fmt.Errorf("invalid suuid %s", suuid)
+	}
+	avi, err := codecs.getAVCodecs(baseSuuid)
+	if avi != nil {
+		var audioCodec []byte
+		audioCodec, err = json.Marshal(avi.AudioInfo)
+		if err != nil {
+			log.Errorf("Error marshalling audio codec: %s", err.Error())
+			return
+		}
+		log.Tracef("Audio codec: %s", audioCodec)
+		pckt.pckt = append([]byte{0x09}, audioCodec...)
+	} else {
+		err = fmt.Errorf("no codec for %s in getAudioCodec", suuid)
 	}
 	return
 }

@@ -111,7 +111,7 @@ func (codecs *MimeCodecs) getAVData(rtspUrl string, suuid string) (stream FFProb
 	}
 	return stream, audioStream, err
 }
-func (codecs *MimeCodecs) getCodecString(suuid string) (avInfo *AVInfo, err error) {
+func (codecs *MimeCodecs) getAVCodecs(suuid string) (avInfo *AVInfo, err error) {
 	err = nil
 	avInfo, ok := codecs.AVInfos[suuid]
 	if !ok {

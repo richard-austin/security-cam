@@ -110,12 +110,17 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 						log.Error(err.Error())
 					}
 					log.Info("Audio stream info = " + audioStreamInfo.CodecName)
-					avi, err := codecs.getCodecString(suuid)
+					avi, err := codecs.getAVCodecs(suuid)
+					if err != nil {
+						log.Errorf("error getting codec for %s: %s", suuid, err.Error())
+						time.Sleep(3 * time.Second)
+						continue
+					}
 					log.Info("Codec string = " + avi.Codec)
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
 					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c copy -copytb 1 -f tee -fflags nobuffer -map 0:v %s[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
-					log.Info(sb.String())
+					log.Info("/usr/bin/ffmpeg " + sb.String())
 					cmdStr := sb.String()
 					cmd := exec.Command("/usr/bin/ffmpeg", strings.Split(cmdStr, " ")...)
 					var out bytes.Buffer

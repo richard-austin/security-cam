@@ -43,11 +43,11 @@ class AudioFeeder {
   private timeout!:NodeJS.Timeout;
   private ws!: WebSocket;
   private noRestart: boolean = false;
+  private started = false;
   constructor(url: string) {
     this.url = url;
   }
   setUpWSConnection() {
-    this.audioDecoder.configure(this.config);
     let framesToMiss = 0;
 
     this.ws = new WebSocket(this.url);
@@ -69,17 +69,31 @@ class AudioFeeder {
     }, 6000);
 
     this.ws.onmessage = async (event: MessageEvent) => {
-      // @ts-ignore
-      const eac = new EncodedAudioChunk({
-        type: 'key',
-        timestamp: 0,
-        duration: 1,
-        data: event.data,
-      });
-      if (framesToMiss > 0)
-        --framesToMiss;
-      else {
-        await this.audioDecoder.decode(eac)
+      if (!this.started) {
+        let array = new Uint8Array(event.data)
+        if (array[0] === 9) {
+          let decoded_arr = array.slice(1);
+          let audioInfo = JSON.parse(this.Utf8ArrayToStr(decoded_arr));
+          this.config.codec =audioInfo.codec_name == "aac" ? "mp4a.40.2" : "alaw";
+          this.config.sampleRate = parseInt(audioInfo.sample_rate);
+          this.audioDecoder.configure(this.config);
+          console.log('first audio packet with codec data: ' + this.config.codec);
+          this.started = true;
+        } else
+          console.error("No audio codec was found")
+      } else {
+        // @ts-ignore
+        const eac = new EncodedAudioChunk({
+          type: 'key',
+          timestamp: 0,
+          duration: 1,
+          data: event.data,
+        });
+        if (framesToMiss > 0)
+          --framesToMiss;
+        else {
+          await this.audioDecoder.decode(eac)
+        }
       }
       this.resetTimeout();
     };
@@ -106,5 +120,16 @@ class AudioFeeder {
       this.audioDecoder.close();
     if (this.ws)
       this.ws.close();
+  }
+  Utf8ArrayToStr(array: Uint8Array): string {
+    let out, i, len;
+    out = '';
+    len = array.length;
+    i = 0;
+    while (i < len) {
+      out += String.fromCharCode(array[i]);
+      ++i;
+    }
+    return out;
   }
 }
