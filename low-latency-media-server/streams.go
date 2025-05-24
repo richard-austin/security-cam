@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"crypto/rand"
-	"encoding/binary"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -11,8 +10,7 @@ import (
 )
 
 type Stream struct {
-	ftyp          Packet
-	moov          Packet
+	flvHeader     Packet
 	gopCache      GopCache
 	bucketBrigade BucketBrigade
 	PcktStreams   map[string]*PacketStream // One packetStream for each client connected through the suuid
@@ -235,6 +233,52 @@ func (p Packet) isKeyFrame() (retVal bool) {
 	}
 	return
 }
+func (p Packet) isFlvKeyFrame() (retVal bool) {
+	retVal = false
+	tag := p.pckt
+	// Check if it is a keyframe
+	if len(tag) >= 12 && tag[0]&0x1f == 9 && (tag[11]&0x70)>>4 == 1 {
+		retVal = true
+	}
+	return
+}
+
+func (s *Streams) putFlvHeader(suuid string, pckt Packet) (retVal error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	retVal = nil
+	// Check it is actually a flv header
+	if !bytes.Equal(pckt.pckt[:13], []byte{0x46, 0x4c, 0x56, 1, 5, 0, 0, 0, 9, 0, 0, 0, 0}) {
+		retVal = fmt.Errorf("the packet recieved in putFlvHeader was not a flv header")
+		return
+	} else {
+		stream, ok := s.StreamMap[suuid]
+		if ok {
+			stream.flvHeader = pckt
+			s.StreamMap[suuid] = stream
+		} else {
+			retVal = fmt.Errorf("stream %s not found", suuid)
+		}
+	}
+	return
+}
+
+func (s *Streams) getFlvHeader(suuid string) (err error, flvHeader Packet) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	err = nil
+	stream, ok := s.StreamMap[suuid]
+
+	log.Infof("ok = %t", ok)
+	if !ok {
+		err = fmt.Errorf("stream %s not found", suuid)
+	} else if stream.flvHeader.pckt == nil {
+		err = fmt.Errorf("no flv header for stream %s", suuid)
+	} else {
+		flvHeader = stream.flvHeader
+	}
+	return
+}
 
 func pseudoUUID() (uuid string) {
 	const pseudoUUIDLen int = 16
@@ -246,116 +290,4 @@ func pseudoUUID() (uuid string) {
 	}
 	uuid = fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 	return
-}
-
-func (s *Streams) putFtyp(suuid string, pckt Packet) (retVal error) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	retVal = nil
-	// Check it is actually a ftyp
-	val := getSubBox(pckt, "ftyp")
-	if val == nil {
-		retVal = fmt.Errorf("The packet recieved in putFtyp was not a ftyp")
-		return
-	} else {
-		stream, ok := s.StreamMap[suuid]
-		if ok {
-			stream.ftyp = pckt
-			s.StreamMap[suuid] = stream
-		} else {
-			retVal = fmt.Errorf("Stream %s not found", suuid)
-		}
-	}
-	return
-}
-
-func (s *Streams) putMoov(suuid string, pckt Packet) (retVal error) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	retVal = nil
-	// Check it is actually a moov
-	val := getSubBox(pckt, "moov")
-	if val == nil {
-		retVal = fmt.Errorf("the packet recieved in putMoov was not a moov")
-		return
-	} else {
-		stream, ok := s.StreamMap[suuid]
-		if ok {
-			stream.moov = pckt
-			s.StreamMap[suuid] = stream
-		} else {
-			retVal = fmt.Errorf("stream %s not found", suuid)
-		}
-	}
-	return
-}
-
-func (p Packet) isFmp4KeyFrame() (retVal bool) {
-	// [moof [mfhd] [traf [tfhd] [tfdt] [moof]]]
-	retVal = false
-	moof := getSubBox(p, "moof")
-	if moof == nil {
-		log.Warnf("moof was nil in isKeyFrame")
-		return
-	}
-	flags := moof[3:5]
-
-	retVal = flags[0] == 0x68 || flags[0] == 0xb4
-	//	log.Infof("flags = 0x%x%c, %t", flags[0], flags[1], retVal)
-	return
-}
-
-func (p Packet) isMoof() (retVal bool) {
-	retVal = false
-	if len(p.pckt) > 20 {
-		moof := getSubBox(p, "moof")
-		retVal = moof != nil
-	}
-	return
-}
-
-func getSubBox(pckt Packet, boxName string) (sub_box []byte) {
-	searchData := pckt.pckt
-	searchTerm := []byte(boxName)
-	idx := bytes.Index(searchData, searchTerm)
-
-	if idx >= 4 {
-		length := int(binary.BigEndian.Uint32(searchData[idx-4 : idx]))
-		sub_box = searchData[idx-4 : length+idx-4]
-
-	} else {
-		sub_box = nil
-	}
-	return
-}
-
-func (s *Streams) getFtyp(suuid string) (err error, ftyp Packet) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	err = nil
-	stream, ok := s.StreamMap[suuid]
-
-	log.Infof("ok = %t", ok)
-	if !ok {
-		err = fmt.Errorf("stream %s not found", suuid)
-	} else if stream.ftyp.pckt == nil {
-		err = fmt.Errorf("no ftyp for stream %s", suuid)
-	} else {
-		ftyp = stream.ftyp
-	}
-	return
-}
-
-func (s *Streams) getMoov(suuid string) (error, Packet) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	var retVal error = nil
-	stream, ok := s.StreamMap[suuid]
-	if !ok {
-		retVal = fmt.Errorf("stream %s not found", suuid)
-	} else if stream.moov.pckt == nil {
-		retVal = fmt.Errorf("no moov for stream %s", suuid)
-	}
-
-	return retVal, stream.moov
 }

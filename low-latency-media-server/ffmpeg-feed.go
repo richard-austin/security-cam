@@ -91,7 +91,7 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 
 					recording := ""
 					if stream.Recording.Enabled && stream.Recording.RecordingInputUrl != "" {
-						recording = fmt.Sprintf("|[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:movflags=empty_moov+omit_tfhd_offset+frag_keyframe+default_base_moof:frag_duration=10:f=mp4:onfail=abort]%s", stream.Recording.RecordingInputUrl)
+						recording = fmt.Sprintf("|[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:f=flv:onfail=abort]%s", stream.Recording.RecordingInputUrl)
 					}
 					netcamUri := stream.NetcamUri
 					rtspTransport := strings.ToLower(camera.RtspTransport)

@@ -54,7 +54,7 @@ func (g *GopCache) RecordingInput(p Packet) (err error) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
 
-	if (p.isMoof() || g.inputIndex == 0) && p.isFmp4KeyFrame() {
+	if p.isFlvKeyFrame() {
 		g.inputIndex = 0
 	}
 	if g.inputIndex < g.cacheLength {
