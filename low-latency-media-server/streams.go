@@ -272,7 +272,8 @@ func (s *Streams) putFlvHeader(suuid string, pckt Packet) (retVal error) {
 	defer s.mutex.Unlock()
 	retVal = nil
 	// Check it is actually a flv header
-	if !bytes.Equal(pckt.pckt[:13], []byte{0x46, 0x4c, 0x56, 1, 5, 0, 0, 0, 9, 0, 0, 0, 0}) {
+	if !bytes.Equal(pckt.pckt[:13], []byte{0x46, 0x4c, 0x56, 1, 5, 0, 0, 0, 9, 0, 0, 0, 0}) &&
+		!bytes.Equal(pckt.pckt[:13], []byte{0x46, 0x4c, 0x56, 1, 1, 0, 0, 0, 9, 0, 0, 0, 0}) {
 		retVal = fmt.Errorf("the packet recieved in putFlvHeader was not a flv header")
 		return
 	} else {

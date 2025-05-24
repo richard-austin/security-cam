@@ -108,8 +108,9 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 					streamInfo, audioStreamInfo, err := codecs.getAVData(netcamUri, suuid)
 					if err != nil {
 						log.Error(err.Error())
+					} else {
+						log.Info("Audio stream info = " + audioStreamInfo.CodecName)
 					}
-					log.Info("Audio stream info = " + audioStreamInfo.CodecName)
 					avi, err := codecs.getAVCodecs(suuid)
 					if err != nil {
 						log.Errorf("error getting codec for %s: %s", suuid, err.Error())
