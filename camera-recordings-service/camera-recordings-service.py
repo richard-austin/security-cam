@@ -57,12 +57,14 @@ def get_ffmpeg_cmd(camera: any, stream: str):
     ffmpeg_cmd: str = ""
     if camera is not None:
         if stream != "":
-            location = camera['streams'][stream]['recording']['location']
-            audio = camera["streams"][stream]["audio"]
+            the_stream = camera['streams'][stream]
+            audio_encoding = the_stream['audio_encoding'].upper()
+            location = the_stream['recording']['location']
+            audio = the_stream["audio"]
             recording_src_url = camera['streams'][stream]['recording']['recording_src_url']
             epoch_time = int(time.time())
             ffmpeg_cmd: str = (
-                f"/usr/bin/ffmpeg -f flv -i {recording_src_url} -t 01:00:00 {'-c:a copy' if audio else '-an'}"
+                f"/usr/bin/ffmpeg -f flv -i {recording_src_url} -t 01:00:00 {('-c:a copy' if audio_encoding == 'AAC' else '-c:a aac') if audio else '-an'}"
                 f" -c:v copy -level 3.0 -start_number 0 -hls_time 3 -hls_list_size 0 -hls_segment_type"
                 f" fmp4 -hls_fmp4_init_filename {location}-{epoch_time}_.mp4"
                 f" -f hls /var/security-cam/{location}/{location}-{epoch_time}_.m3u8")
