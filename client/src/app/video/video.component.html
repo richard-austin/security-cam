@@ -18,18 +18,23 @@
          (touchend)="vt.touchEndHandler($event)">
       <video #video></video>
     </div>
-    <div *ngIf="isLive" class="latency-limit-selector">
+      <div #videoControls *ngIf="isLive" class="video-controls">
       <div>
+          <div class="audio-controls-dialogue">
+              <div [@detailExpand]="showAudioControls ? 'expanded' : 'collapsed'">
+                  <app-audio-control *ngIf="stream?.audio && !mediaFeeder.noAudio" [mute]="mediaFeeder.isMuted"
+                                     (muteAudio)="toggleMuteAudio($event)" [level]="volume"
+                                     (setLevel)="setVolume($event.valueOf())"></app-audio-control>
+                  <div>
+                  </div>
+              </div>
+          </div>
         <label *ngIf="stream?.audio && !mediaFeeder.noAudio" class="video-buttons"
-               [matTooltip]="'Click to ' + (mediaFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
+               [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls'"
                matTooltipClass="tooltip">
-          <mat-icon (click)="toggleMuteAudio()">{{ mediaFeeder.isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
+            <mat-icon (click)="toggleShowAudioControls()">{{ mediaFeeder.isMuted ? 'volume_off' : 'volume_up' }}
+            </mat-icon>
         </label>
-          <label *ngIf="stream?.audio && !mediaFeeder.noAudio" class="volume-slider"
-                 [matTooltip]="'Slide to adjust volume'"
-                 matTooltipClass="tooltip">
-              <input [disabled]="volumeControlDisabled()" type="range" min="0" max="1" step="0.01" [ngModel]="volume" (change)="setVolume($event)">
-          </label>
         <label *ngIf="mediaFeeder.backchannelAudioSupported"
                class="video-buttons"
                [matTooltip]="audioBackchannel.audioButtonTooltip()"

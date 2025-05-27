@@ -42,7 +42,7 @@ div.multi {
   margin-left: -15px;
 }
 
-div.latency-limit-selector {
+div.video-controls {
   display: flex;
   justify-content: center;
   white-space: nowrap;
@@ -87,20 +87,6 @@ div.latency-limit-selector {
   }
 }
 
-.audio-out-disabled {
-  color: gray !important;
-  cursor: pointer;
-}
-
-.audio-out-inactive {
-  color: white !important;
-  cursor: pointer;
-}
-
-.audio-out-active {
-  animation: pulsing 1300ms infinite;
-}
-
 @keyframes pulsing {
   0% {
     color: #800;
@@ -140,13 +126,28 @@ span.duration-time {
   }
 }
 
-label.volume-slider {
-  margin: 0;
-  > input {
+@mixin top-cursor {
+  > div {
     position: relative;
-    top: -5px;
-    width: 50px;
-    left: 0;
-    margin: 0;
+    left: 10px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+
+    border-top: 10px solid #646363;
+    z-index: 3;
+  }
+  z-index: 2;
+  left: -8px;
+  top: -99px;
+  overflow: hidden;
+  position: absolute;
+}
+
+div.audio-controls-dialogue {
+  > div {
+    @include top-cursor;
   }
 }
+

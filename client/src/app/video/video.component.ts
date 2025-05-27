@@ -18,24 +18,34 @@ import {VideoSizing} from "./VideoSizing";
 import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {FormsModule} from "@angular/forms";
+import {AudioControlComponent} from "./audio-control/audio-control.component";
+import {animate, state, style, transition, trigger} from "@angular/animations";
 
 @Component({
     selector: 'app-video',
     templateUrl: './video.component.html',
     styleUrls: ['./video.component.scss'],
-    imports: [SharedModule, SharedAngularMaterialModule, FormsModule]
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({width: '0px', minWidth: '0'})),
+      state('expanded', style({width: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ])
+    ],
+    imports: [SharedModule, SharedAngularMaterialModule, FormsModule, AudioControlComponent]
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  @ViewChild('videoControls') videoControlsEL!: ElementRef<HTMLDivElement>;
   @Input() isLive: boolean = false;
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
   audio!: HTMLAudioElement;
 
-  volume: number = 1;
+  volume: number = 0.4;
 
   visible: boolean = false;
   mediaFeeder!: MediaFeeder;
@@ -45,6 +55,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   currentTime: string = "";
   totalTime: string = "";
   sizing!: VideoSizing;
+  showAudioControls: boolean = false;
 
   constructor(public utilsService: UtilsService) {
     this.mediaFeeder = new MediaFeeder();
@@ -86,9 +97,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.vt.reset();
   }
 
-  toggleMuteAudio() {
+  toggleMuteAudio(muted: boolean) {
     if (this.mediaFeeder)
-      this.mediaFeeder.mute(!this.mediaFeeder.isMuted);
+      this.mediaFeeder.mute(muted);
     this.volume = this.mediaFeeder.isMuted ? 0 : this.audio.volume;
   }
 
@@ -97,13 +108,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.mediaFeeder.mute(mute);
   }
 
-  setVolume($event: Event) {
-    this.volume = ($event.target as HTMLInputElement).valueAsNumber;
+  setVolume(volume: number) {
+    this.volume = volume;
     this.audio.volume = this.volume;
   }
 
-  volumeControlDisabled() {
-    return this.mediaFeeder.isMuted;
+  toggleShowAudioControls() {
+    this.showAudioControls = !this.showAudioControls;
   }
 
   setSize(size: number, isRecording: boolean = false): void {
@@ -134,9 +145,15 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
   }
 
+  clickHandler =  (ev: Event) => {
+    const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL.nativeElement);
+    if (!inVideoControlDialogue)
+      this.showAudioControls = false;
+  };
   ngAfterViewInit(): void {
+    document.addEventListener('click', this.clickHandler);
     this.video = this.videoEl.nativeElement;
-    this.volume = this.audio.volume;
+    this.volume = this.audio.volume = 0.4;
     this.mediaFeeder.init(this.isLive, this.video, this.audio, this.reporting);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
@@ -156,6 +173,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.mediaFeeder.stop();
+    document.removeEventListener('click', this.clickHandler);
 
     // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
     //  ffmpeg to the backchannel device. The problem does not occur when done like this

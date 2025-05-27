@@ -92,7 +92,9 @@ class AudioFeeder {
         if (framesToMiss > 0)
           --framesToMiss;
         else {
-          await this.audioDecoder.decode(eac)
+
+          if (this.audioDecoder.decodeQueueSize === 0)
+            await this.audioDecoder.decode(eac)
         }
       }
       this.resetTimeout();
