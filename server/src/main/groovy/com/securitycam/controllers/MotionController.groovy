@@ -102,7 +102,7 @@ class Camera {
     Map<String, Stream> streams = new HashMap<String, Stream>()
     String onvifHost=''
     boolean backchannelAudioSupported = false
-    String rtspTransport = "tcp"
+    String rtspTransport = "udp"
     boolean useRtspAuth = false
     int retriggerWindow = 30
     String cred = ""

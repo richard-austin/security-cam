@@ -146,10 +146,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clickHandler =  (ev: Event) => {
-    const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL.nativeElement);
-    if (!inVideoControlDialogue)
-      this.showAudioControls = false;
+    if(this.videoControlsEL) {
+      const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL.nativeElement);
+      if (!inVideoControlDialogue)
+        this.showAudioControls = false;
+    }
   };
+
   ngAfterViewInit(): void {
     document.addEventListener('click', this.clickHandler);
     this.video = this.videoEl.nativeElement;

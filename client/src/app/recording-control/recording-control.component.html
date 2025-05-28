@@ -62,13 +62,23 @@
     </mat-card>
     <div>
       <app-video></app-video>
-      <div class="buttons-flex-container">
+      <div #recordingsButtons class="buttons-flex-container">
         <div class="additional-buttons">
-          <label *ngIf="hasAudio()" class="video-buttons"
-                 [matTooltip]="'Click to ' + (isMuted() ? 'unmute' : 'mute') + ' sound'"
-                 matTooltipClass="tooltip">
-            <mat-icon (click)="toggleMuteAudio()">{{ isMuted() ? 'volume_off' : 'volume_up' }}</mat-icon>
-          </label>
+            <div *ngIf="hasAudio()" class="audio-controls-dialogue">
+                <div [@detailExpand]="showAudioControls ? 'expanded' : 'collapsed'">
+                    <app-audio-control [mute]="isMuted()"
+                                       (muteAudio)="toggleMuteAudio($event)" [level]="volume"
+                                       (setLevel)="setVolume($event.valueOf())"></app-audio-control>
+                    <div>
+                    </div>
+                </div>
+            </div>
+            <label *ngIf="hasAudio()" class="video-buttons"
+                   [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls'"
+                   matTooltipClass="tooltip">
+                <mat-icon (click)="toggleShowAudioControls()">{{ isMuted() ? 'volume_off' : 'volume_up' }}
+                </mat-icon>
+            </label>
           <label class="video-buttons"
                  matTooltip="Set full screen"
                  matTooltipClass="tooltip">

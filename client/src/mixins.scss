@@ -1,3 +1,28 @@
-@mixin global-background {
-  background-color: $background-colour;
+@mixin top-cursor {
+  > div {
+    position: relative;
+    left: 10px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+
+    border-top: 10px solid #646363;
+    z-index: 3;
+  }
+  z-index: 2;
+  left: -8px;
+  top: -99px;
+  overflow: hidden;
+  position: absolute;
 }
+
+@mixin common-characteristics {
+  width: fit-content;
+  border: 0.1rem solid darkblue;
+  border-right-color: #3939f3;
+  border-bottom-color: #3939f3;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+

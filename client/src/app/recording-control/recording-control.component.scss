@@ -1,3 +1,5 @@
+@use "src/mixins.scss" as mixins;
+
 div.flex-container {
   display: flex;
   flex-wrap: wrap;
@@ -102,3 +104,11 @@ div.recording-container {
     margin-left: auto;
   }
 }
+
+div.audio-controls-dialogue {
+  position: relative;
+  > div {
+    @include mixins.top-cursor;
+  }
+}
+
