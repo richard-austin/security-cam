@@ -37,9 +37,14 @@ func NewBucketBrigade(preambleTime int) (bucketBrigade BucketBrigade) {
 		started:     false,
 		delayTime:   preambleTime + 1,
 		inputIndex:  0,
-		indexLimit:  cacheLength,
+		indexLimit:  0,
 		cacheLength: cacheLength,
 		gopCache:    NewGopCache(true)}
+	return
+}
+
+func (bb *BucketBrigade) isReady() (ready bool) {
+	ready = bb.started
 	return
 }
 
@@ -69,9 +74,10 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 		if bb.inputIndex >= bb.cacheLength || time.Since(bb.startTime) > time.Duration(bb.delayTime)*time.Second {
 			if bb.inputIndex >= bb.cacheLength {
 				log.Warnf("Input index %d >= cache length %d: Using bucket brigade cachLength as indexLimit", bb.inputIndex, bb.cacheLength)
+				bb.indexLimit = bb.cacheLength
 			}
 			bb.started = true
-			bb.indexLimit = bb.inputIndex + 1
+			bb.indexLimit = bb.inputIndex
 			bb.inputIndex = 0
 		}
 		return

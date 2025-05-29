@@ -186,9 +186,15 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	suuid := r.FormValue("rsuuid")
 
 	log.Infof("http Request %s", suuid)
+	stream := streams.StreamMap[suuid]
+	if !stream.bucketBrigade.isReady() {
+		log.Errorf("Bucket brigade is not ready for %s", suuid)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	err, data := streams.getFlvHeader(suuid)
 	if err != nil {
-		log.Errorf("Error getting ftyp: %s", err.Error())
+		log.Errorf("Error getting flv header: %s", err.Error())
 		return
 	}
 	_, err = w.Write(data.pckt)
@@ -198,10 +204,9 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	time.Sleep(3 * time.Second)
-	stream := streams.StreamMap[suuid]
 	bb := stream.bucketBrigade.GetFeeder()
 	defer stream.bucketBrigade.DestroyFeeder(bb)
-	log.Infof("Bucket brigade cache size for %s = %d", suuid, stream.bucketBrigade.cacheLength)
+	log.Infof("Bucket brigade cache size for %s = %d", suuid, stream.bucketBrigade.indexLimit)
 	for {
 		data := bb.Get()
 		bytes, err := w.Write(data.pckt)

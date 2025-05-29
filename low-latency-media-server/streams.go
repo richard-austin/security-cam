@@ -239,21 +239,23 @@ var h264KeyFrame3 = []byte{0x61, 0x88}
 
 func (p Packet) isKeyFrame() (retVal bool) {
 	retVal = false
-	if bytes.Equal(p.pckt[:len(h264Start)], h264Start) {
-		// H264 header
-		retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame1)
-		if !retVal {
-			retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame2)
+	if len(p.pckt) > 7 {
+		if bytes.Equal(p.pckt[:len(h264Start)], h264Start) {
+			// H264 header
+			retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame1)
+			if !retVal {
+				retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame2)
+			}
+			if !retVal {
+				retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame3)
+			}
+		} else if bytes.Equal(p.pckt[:len(hevcStart)], hevcStart) {
+			// HEVC header
+			theByte := p.pckt[3]
+			retVal = theByte == 0x40
+			theByte = (theByte >> 1) & 0x3f
+			retVal = theByte == 0x19 || theByte == 0x20
 		}
-		if !retVal {
-			retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame3)
-		}
-	} else if bytes.Equal(p.pckt[:len(hevcStart)], hevcStart) {
-		// HEVC header
-		theByte := p.pckt[3]
-		retVal = theByte == 0x40
-		theByte = (theByte >> 1) & 0x3f
-		retVal = theByte == 0x19 || theByte == 0x20
 	}
 	return
 }
@@ -294,7 +296,6 @@ func (s *Streams) getFlvHeader(suuid string) (err error, flvHeader Packet) {
 	err = nil
 	stream, ok := s.StreamMap[suuid]
 
-	log.Infof("ok = %t", ok)
 	if !ok {
 		err = fmt.Errorf("stream %s not found", suuid)
 	} else if stream.flvHeader.pckt == nil {
