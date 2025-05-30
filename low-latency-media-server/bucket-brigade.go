@@ -92,7 +92,7 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 			}
 		}
 	}
-	if bb.inputIndex < bb.indexLimit-1 {
+	if bb.inputIndex < bb.indexLimit {
 		bb.inputIndex++
 	} else {
 		bb.inputIndex = 0

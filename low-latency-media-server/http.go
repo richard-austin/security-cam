@@ -195,6 +195,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	err, data := streams.getFlvHeader(suuid)
 	if err != nil {
 		log.Errorf("Error getting flv header: %s", err.Error())
+		w.WriteHeader(http.StatusFailedDependency)
 		return
 	}
 	_, err = w.Write(data.pckt)
