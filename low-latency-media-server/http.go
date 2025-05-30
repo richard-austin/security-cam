@@ -104,7 +104,13 @@ func serveHTTP() {
 		}
 		log.Infof("Input connected for %s", suuid)
 		readCloser := req.Body
-
+		defer func() {
+			log.Infof("Closing the readCloser for %s", suuid)
+			err := readCloser.Close()
+			if err != nil {
+				log.Errorf("Error closing the readCloser for %s:- %s", suuid, err.Error())
+			}
+		}()
 		streams.addRecordingStream(suuid)
 		defer streams.removeStream(suuid)
 
@@ -120,7 +126,6 @@ func serveHTTP() {
 		if err != nil {
 			return
 		}
-		t := time.NewTimer(5 * time.Second)
 		for {
 			data = data[:33000]
 			numOfByte, err := readCloser.Read(data)
@@ -129,14 +134,6 @@ func serveHTTP() {
 				break
 			}
 			d := NewPacket(data[:numOfByte])
-			select {
-			case <-t.C:
-				err = fmt.Errorf("(timeout occurred)")
-				break
-			default:
-				t.Reset(5 * time.Second)
-				break
-			}
 			if err != nil {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
 				break
@@ -149,12 +146,12 @@ func serveHTTP() {
 				log.Errorf("Error putting the packet into stream %s:- %s", suuid, err.Error())
 				break
 			} else if numOfByte == 0 {
+				log.Warnf("Empty packet recieved for %s, exiting", suuid)
 				break
 			}
 			log.Tracef("%d bytes received", numOfByte)
 		}
 	})
-
 	router.StaticFS("/web", http.Dir("web"))
 
 	// For http connections from ffmpeg to read from (for recordings)
@@ -205,7 +202,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	time.Sleep(3 * time.Second)
-	bb := stream.bucketBrigade.GetFeeder()
+	bb := stream.bucketBrigade.CreateFeeder()
 	defer stream.bucketBrigade.DestroyFeeder(bb)
 	log.Infof("Bucket brigade cache size for %s = %d", suuid, stream.bucketBrigade.indexLimit)
 	for {

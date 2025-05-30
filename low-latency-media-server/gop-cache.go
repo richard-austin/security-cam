@@ -75,17 +75,18 @@ func (g *GopCache) GetSnapshot() (snapshot *GopCacheSnapshot) {
 	if !g.GopCacheUsed {
 		return
 	}
-	snapshot = newFeeder(g)
+	snapshot = g.newFeeder()
 	return
 }
 
 // newFeeder
 // Create a new GOP cache snapshot from the current GOP cache
 // **
-func newFeeder(g *GopCache) (feeder *GopCacheSnapshot) {
+func (g *GopCache) newFeeder() (feeder *GopCacheSnapshot) {
 	g.mutex.Lock()
-	feeder = &GopCacheSnapshot{pktChan: make(chan Packet, g.inputIndex)}
 	defer g.mutex.Unlock()
+	feeder = &GopCacheSnapshot{pktChan: make(chan Packet, g.inputIndex)}
+
 	for _, pkt := range g.Cache[:g.inputIndex] {
 		feeder.pktChan <- pkt
 	}

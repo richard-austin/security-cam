@@ -48,18 +48,6 @@ func (bb *BucketBrigade) isReady() (ready bool) {
 	return
 }
 
-func (bb *BucketBrigade) newFeeder() (bbFeeder *BucketBrigadeFeeder) {
-	bbFeeder = &BucketBrigadeFeeder{
-		lastBBIdx:        0,
-		gopCacheSnapshot: bb.gopCache.GetSnapshot(),
-		pktFeed:          make(chan Packet, 300),
-	}
-	bb.mutex.Lock()
-	defer bb.mutex.Unlock()
-	bb.feeders = append(bb.feeders, bbFeeder)
-	return
-}
-
 func (bb *BucketBrigade) Input(p Packet) (err error) {
 	err = nil
 	bb.mutex.Lock()
@@ -101,8 +89,15 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 	return
 }
 
-func (bb *BucketBrigade) GetFeeder() (bbFeeder *BucketBrigadeFeeder) {
-	bbFeeder = bb.newFeeder()
+func (bb *BucketBrigade) CreateFeeder() (bbFeeder *BucketBrigadeFeeder) {
+	bb.mutex.Lock()
+	defer bb.mutex.Unlock()
+	bbFeeder = &BucketBrigadeFeeder{
+		gopCacheSnapshot: bb.gopCache.GetSnapshot(),
+		pktFeed:          make(chan Packet, 300),
+	}
+
+	bb.feeders = append(bb.feeders, bbFeeder)
 	return
 }
 
@@ -119,7 +114,8 @@ func (bb *BucketBrigade) DestroyFeeder(bbf *BucketBrigadeFeeder) {
 	for len(bb.feeders[i].pktFeed) > 0 {
 		_ = <-bb.feeders[i].pktFeed
 	}
-	bb.feeders = append(bb.feeders[:i], bb.feeders[i+1:]...)
+	bb.feeders[i] = bb.feeders[len(bb.feeders)-1]
+	bb.feeders = bb.feeders[:len(bb.feeders)-1]
 }
 
 func (bbf *BucketBrigadeFeeder) Get() (packet Packet) {

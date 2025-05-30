@@ -166,17 +166,6 @@ func (s *Streams) put(suuid string, pckt Packet, isRecording ...bool) error {
 	return retVal
 }
 
-func (s *Streams) getGOPCache(suuid string) (err error, gopCache *GopCacheSnapshot) {
-	gopCache = nil
-	stream, ok := s.StreamMap[suuid]
-	if !ok {
-		err = fmt.Errorf("no stream for %s in getGOPCache", suuid)
-		return
-	}
-	gopCache = stream.gopCache.GetSnapshot()
-	return
-}
-
 func (s *Streams) getVideoCodec(suuid string) (err error, pckt Packet) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
