@@ -82,7 +82,7 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 		}
 		return
 	} else {
-		opIdx := (bb.inputIndex + 1) % bb.indexLimit
+		opIdx := (bb.inputIndex + 1) % (bb.indexLimit + 1)
 		err = bb.gopCache.RecordingInput(bb.Cache[opIdx])
 		for _, f := range bb.feeders {
 			select {
@@ -96,7 +96,6 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 		bb.inputIndex++
 	} else {
 		bb.inputIndex = 0
-		bb.started = true
 	}
 
 	return
