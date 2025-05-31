@@ -18,7 +18,8 @@ type GopCacheSnapshot struct {
 }
 
 func NewGopCache(used bool) (cache GopCache) {
-	const cacheLength int = 90
+	const cacheLength int = 2048 // Need LARGE GOP cache for the flv recording stream. The key frame intervals are
+	// larger than with the plain video stream, and the flv stream can also have audio packets
 	cache = GopCache{Cache: make([]Packet, cacheLength), cacheLength: cacheLength - 1, inputIndex: 0, GopCacheUsed: used}
 	return
 }

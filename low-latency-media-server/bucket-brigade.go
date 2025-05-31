@@ -72,6 +72,9 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 	} else {
 		opIdx := (bb.inputIndex + 1) % (bb.indexLimit + 1)
 		err = bb.gopCache.RecordingInput(bb.Cache[opIdx])
+		if err != nil {
+			log.Errorf("Error in gop cache: %s", err.Error())
+		}
 		for _, f := range bb.feeders {
 			select {
 			case f.pktFeed <- bb.Cache[opIdx]:

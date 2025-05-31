@@ -181,7 +181,6 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 
 	defer func() { r.Close = true }()
 	suuid := r.FormValue("rsuuid")
-
 	log.Infof("http Request %s", suuid)
 	stream := streams.StreamMap[suuid]
 	if !stream.bucketBrigade.isReady() {

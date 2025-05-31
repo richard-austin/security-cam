@@ -252,12 +252,11 @@ func (p Packet) isFlvKeyFrame() (retVal bool) {
 	retVal = false
 	tag := p.pckt
 	// Check if it is a keyframe
-	if len(tag) >= 11 && tag[0]&0x1f == 9 && tag[11] != 0xa3 {
-		log.Tracef("tag:[11] %x", tag[11])
-	}
-
-	if len(tag) >= 12 && tag[0]&0x1f == 9 && ((tag[11]&0xF0)>>4 == 1 || (tag[11]&0xf0)>>4 == 9) {
-		retVal = true
+	if len(tag) >= 12 {
+		ft := (tag[11] & 0xf0) >> 4 // ft == 1 for h264 or 9 for hevc keyframes
+		if tag[0]&0x1f == 9 && (ft == 1 || ft == 9) {
+			retVal = true
+		}
 	}
 	return
 }
