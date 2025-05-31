@@ -203,7 +203,7 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(3 * time.Second)
 	bb := stream.bucketBrigade.CreateFeeder()
 	defer stream.bucketBrigade.DestroyFeeder(bb)
-	log.Infof("Bucket brigade cache size for %s = %d", suuid, stream.bucketBrigade.indexLimit)
+	log.Infof("Bucket brigade cache size for %s = %d", suuid, stream.bucketBrigade.cacheInUse)
 	for {
 		data := bb.Get()
 		bytes, err := w.Write(data.pckt)

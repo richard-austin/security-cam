@@ -16,10 +16,11 @@ type BucketBrigade struct {
 	delayTime   int
 	startTime   time.Time
 	inputIndex  int
-	indexLimit  int
+	cacheInUse  int
 	Cache       []Packet
 	started     bool
 	gopCache    GopCache
+	timing      bool
 }
 
 // BucketBrigadeFeeder // Combines a (delayed input) GopCacheSnapshot with the delayed feed from a bucket brigade instance
@@ -30,14 +31,15 @@ type BucketBrigadeFeeder struct {
 }
 
 func NewBucketBrigade(preambleTime int) (bucketBrigade BucketBrigade) {
-	const cacheLength = 600
+	const cacheLength = 1500
 	bucketBrigade = BucketBrigade{
 		Cache:       make([]Packet, cacheLength),
 		feeders:     make([]*BucketBrigadeFeeder, 0),
 		started:     false,
 		delayTime:   preambleTime + 1,
 		inputIndex:  0,
-		indexLimit:  0,
+		cacheInUse:  0,
+		timing:      true,
 		cacheLength: cacheLength,
 		gopCache:    NewGopCache(true)}
 	return
@@ -47,43 +49,51 @@ func (bb *BucketBrigade) isReady() (ready bool) {
 	ready = bb.started
 	return
 }
-
+func mod(a, b int) int {
+	return (a%b + b) % b
+}
 func (bb *BucketBrigade) Input(p Packet) (err error) {
 	err = nil
 	bb.mutex.Lock()
 	defer bb.mutex.Unlock()
 
 	bb.Cache[bb.inputIndex] = p
-	if !bb.started {
-		if bb.startTime.IsZero() {
-			bb.startTime = time.Now()
-		}
-		bb.inputIndex++
-		if bb.inputIndex >= bb.cacheLength || time.Since(bb.startTime) > time.Duration(bb.delayTime)*time.Second {
-			if bb.inputIndex >= bb.cacheLength {
+	if bb.inputIndex == 0 {
+		bb.timing = true
+		bb.startTime = time.Now()
+	}
+	if bb.timing { // Find the cacheInUse size if timing set
+		if bb.inputIndex+1 >= bb.cacheLength || time.Since(bb.startTime) > time.Duration(bb.delayTime)*time.Second+4*time.Second {
+			if bb.inputIndex+1 >= bb.cacheLength {
 				log.Warnf("Input index %d >= cache length %d: Using bucket brigade cachLength as indexLimit", bb.inputIndex, bb.cacheLength)
-				bb.indexLimit = bb.cacheLength
+				bb.cacheInUse = bb.cacheLength - 1
 			}
 			bb.started = true
-			bb.indexLimit = bb.inputIndex
-			bb.inputIndex = 0
-		}
-		return
-	} else {
-		opIdx := (bb.inputIndex + 1) % (bb.indexLimit + 1)
-		err = bb.gopCache.RecordingInput(bb.Cache[opIdx])
-		if err != nil {
-			log.Errorf("Error in gop cache: %s", err.Error())
-		}
-		for _, f := range bb.feeders {
-			select {
-			case f.pktFeed <- bb.Cache[opIdx]:
-			default:
-				log.Errorf("Missed packet in bucket brigade Input: %d items in pktFeed channel\n", len(f.pktFeed))
+			bb.timing = false
+			if len(bb.feeders) == 0 { // Only change the bucket brigade cache length if nothing is reading from it
+				bb.cacheInUse = bb.inputIndex
 			}
 		}
+		if !bb.started {
+			bb.inputIndex++
+			return
+		}
 	}
-	if bb.inputIndex < bb.indexLimit {
+	opIdx := mod(bb.inputIndex-bb.cacheInUse, bb.cacheLength)
+	err = bb.gopCache.RecordingInput(bb.Cache[opIdx])
+	//log.Infof("inputIndex = %d, cacheInUse = %d, opIdx = %d,", bb.inputIndex, bb.cacheInUse, opIdx)
+	if err != nil {
+		log.Errorf("Error in gop cache: %s", err.Error())
+	}
+	for _, f := range bb.feeders {
+		select {
+		case f.pktFeed <- bb.Cache[opIdx]:
+		default:
+			log.Errorf("Missed packet in bucket brigade Input: %d items in pktFeed channel\n", len(f.pktFeed))
+		}
+	}
+
+	if bb.inputIndex < bb.cacheLength-1 {
 		bb.inputIndex++
 	} else {
 		bb.inputIndex = 0
