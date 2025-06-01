@@ -20,7 +20,6 @@ type BucketBrigade struct {
 	Cache       []Packet
 	started     bool
 	gopCache    GopCache
-	timing      bool
 }
 
 // BucketBrigadeFeeder // Combines a (delayed input) GopCacheSnapshot with the delayed feed from a bucket brigade instance
@@ -39,7 +38,6 @@ func NewBucketBrigade(preambleTime int) (bucketBrigade BucketBrigade) {
 		delayTime:   preambleTime + 1,
 		inputIndex:  0,
 		cacheInUse:  0,
-		timing:      true,
 		cacheLength: cacheLength,
 		gopCache:    NewGopCache(true)}
 	return
@@ -52,32 +50,32 @@ func (bb *BucketBrigade) isReady() (ready bool) {
 func mod(a, b int) int {
 	return (a%b + b) % b
 }
+
+func (bb *BucketBrigade) SetCacheSizeFromDelayTime() {
+	if bb.inputIndex+1 >= bb.cacheLength || time.Since(bb.startTime) > time.Duration(bb.delayTime)*time.Second+4*time.Second {
+		if bb.inputIndex+1 >= bb.cacheLength {
+			log.Warnf("Input index %d >= cache length %d: Using bucket brigade cachLength as indexLimit", bb.inputIndex, bb.cacheLength)
+			bb.cacheInUse = bb.cacheLength - 1
+		}
+
+		bb.started = true
+		bb.cacheInUse = bb.inputIndex
+		log.Infof("Bucket brigade cache size set to %d", bb.cacheInUse)
+	}
+}
 func (bb *BucketBrigade) Input(p Packet) (err error) {
 	err = nil
 	bb.mutex.Lock()
 	defer bb.mutex.Unlock()
 
 	bb.Cache[bb.inputIndex] = p
-	if bb.inputIndex == 0 {
-		bb.timing = true
+	if bb.inputIndex == 0 && !bb.started {
 		bb.startTime = time.Now()
 	}
-	if bb.timing { // Find the cacheInUse size if timing set
-		if bb.inputIndex+1 >= bb.cacheLength || time.Since(bb.startTime) > time.Duration(bb.delayTime)*time.Second+4*time.Second {
-			if bb.inputIndex+1 >= bb.cacheLength {
-				log.Warnf("Input index %d >= cache length %d: Using bucket brigade cachLength as indexLimit", bb.inputIndex, bb.cacheLength)
-				bb.cacheInUse = bb.cacheLength - 1
-			}
-			bb.started = true
-			bb.timing = false
-			if len(bb.feeders) == 0 { // Only change the bucket brigade cache length if nothing is reading from it
-				bb.cacheInUse = bb.inputIndex
-			}
-		}
-		if !bb.started {
-			bb.inputIndex++
-			return
-		}
+	if !bb.started { // Find the cacheInUse size if settingUp set
+		bb.SetCacheSizeFromDelayTime()
+		bb.inputIndex++
+		return
 	}
 	opIdx := mod(bb.inputIndex-bb.cacheInUse, bb.cacheLength)
 	err = bb.gopCache.RecordingInput(bb.Cache[opIdx])
