@@ -65,7 +65,6 @@ func (g *GopCache) RecordingInput(p Packet) (err error) {
 		err = fmt.Errorf("GOP Cache is full")
 	}
 
-	//log.Infof("fmp4 gop cache index = %d", g.inputIndex)
 	return
 }
 

@@ -27,13 +27,13 @@ export class MediaFeeder {
   constructor() {
   }
 
-  init(isfmp4: boolean, video: HTMLMediaElement, audio: HTMLAudioElement, reporting: ReportingComponent) {
-    this.isLive = isfmp4;
+  init(isLive: boolean, video: HTMLMediaElement, audio: HTMLAudioElement, reporting: ReportingComponent) {
+    this.isLive = isLive;
     this.video = video;
     this.audio = audio;
     this.video.autoplay = true;
     this.video.muted = false;
-    this.video.controls = !isfmp4;
+    this.video.controls = !isLive;
     this.reporting = reporting;
   }
 

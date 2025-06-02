@@ -55,7 +55,7 @@ func (s *Streams) addRecordingStream(suuid string) {
 	}
 }
 
-/** getStreamC: Get camera stream for the fmp4 http stream suuid
+/** getStreamC: Get camera stream for the flv http stream suuid
  */
 func getStreamC(suuid string) (streamC StreamC, err error) {
 	err = nil

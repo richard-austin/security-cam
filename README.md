@@ -19,7 +19,7 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 #### NVR features
 * Complete system deployment using a single deb file, which is available pre-built for Raspberry pi 4 or 5 in the <a href="https://github.com/richard-austin/security-cam/releases">Releases</a> section.
 * Secure authenticated web access.
-* Low latency (approx 1 second or less) live video and audio.
+* Low latency (approx 0.4 seconds or less) live video and audio (network condition permitting).
 * Supports network cameras with RTSP streams H264/H265/audio (not USB cameras).
 * Onvif support for device and capabilities discovery and PTZ control.
 * View live stream from individual or all cameras.

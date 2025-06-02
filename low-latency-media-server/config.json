@@ -5,7 +5,6 @@
   "log_level": "INFO",
   "ffmpeg_log_level": "error",
   "server_port": 8085,
-  "default_latency_limit": 0.8,
   "gop_cache": true
 }
 

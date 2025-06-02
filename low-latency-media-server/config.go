@@ -7,14 +7,13 @@ import (
 )
 
 type Config struct {
-	LogPath             string  `json:"log_path"`
-	LogLevelStr         string  `json:"log_level"`
-	FfmpegLogLevelStr   string  `json:"ffmpeg_log_level"`
-	CamerasJsonPath     string  `json:"cameras_json_path"`
-	PrivateKeyPath      string  `json:"private_key_path"`
-	ServerPort          int     `json:"server_port"`
-	DefaultLatencyLimit float32 `json:"default_latency_limit"`
-	GopCache            bool    `json:"gop_cache"`
+	LogPath           string `json:"log_path"`
+	LogLevelStr       string `json:"log_level"`
+	FfmpegLogLevelStr string `json:"ffmpeg_log_level"`
+	CamerasJsonPath   string `json:"cameras_json_path"`
+	PrivateKeyPath    string `json:"private_key_path"`
+	ServerPort        int    `json:"server_port"`
+	GopCache          bool   `json:"gop_cache"`
 }
 
 func (c *Config) LogLevel() (err error, level log.Level) {

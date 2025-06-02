@@ -16,10 +16,10 @@ so there can be more than one stream per camera.
 
 > On selecting the live stream, the video will be shown with a
 <img src="README.images/stopwatch-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
-icon and a selector just below it. The selection option is the maximum
-> latency in seconds. You can set this to the lowest setting where the video remains stable.
-> The lowest usable setting is dependent on various factors and won't
-> necessarily be the same for all your cameras.
+icon just below it.
+> 
+> If audio is enabled for the stream, a speaker icon will be shown which, by
+> clicking on it will show volume control an mute button to set the audio as required
 >
 > If two-way audio is enabled, a <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
 > button and a device selector will also be below the video. Select the required audio input
@@ -43,9 +43,11 @@ The Multi Camera View shows the cameras in a grid view which fills the width of 
 viewport. The number of columns is selectable from one to four using radio buttons at the top 
 of the pop-up form. Note that the number of displayed columns are reduced if the 
 viewport width is too narrow, so if you have four columns selected, it will
-actually show four then three then two then one as you reduce the browser width. 
-> Each video on multi camera view will have the latency chasing setter below it. Any
-> cameras with two-way audio enabled will also have the <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button and device selector.
+actually show four, then three, then two, then one as you reduce the browser width. 
+> Each video on multi-camera that has audio will have a speaker button below it, 
+> which can be clicked to show the volume control and mute button.
+> 
+>Any cameras with two-way audio enabled will also have the <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img> button and device selector.
 >
 > Mouse wheel zoom and mouse down drag pan functions, and their mobile counterparts can be done on each of the videos.
 #### Select Recording
