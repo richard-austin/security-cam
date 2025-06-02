@@ -122,6 +122,10 @@ func serveHTTP() {
 		}
 		//// Set up the stream ready for connection from client, put in the flv header
 		d := NewPacket(data[:numOfByte]) //make([]byte, numOfByte)
+		if !d.isFLVHeader() {
+			log.Errorf("The first packet is not a flv header")
+			return
+		}
 		err = streams.putFlvHeader(suuid, d)
 		if err != nil {
 			return

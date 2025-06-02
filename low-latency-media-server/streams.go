@@ -220,6 +220,17 @@ func NewPacket(pckt []byte) Packet {
 	return Packet{pckt: b}
 }
 
+func (p Packet) isFLVHeader() (retVal bool) {
+	retVal = false
+	if len(p.pckt) > 13 {
+		if bytes.Equal(p.pckt[:13], []byte{'F', 'L', 'V', 1, 5, 0, 0, 0, 9, 0, 0, 0, 0}) ||
+			bytes.Equal(p.pckt[:13], []byte{'F', 'L', 'V', 1, 1, 0, 0, 0, 9, 0, 0, 0, 0}) {
+			retVal = true
+		}
+	}
+	return
+}
+
 var hevcStart = []byte{0x00, 0x00, 0x01}
 var h264Start = []byte{0x00, 0x00, 0x00, 0x01}
 var h264KeyFrame1 = []byte{0x67, 0x64}
