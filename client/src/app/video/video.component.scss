@@ -80,6 +80,20 @@ div.video-controls {
   }
 }
 
+.audio-out-disabled {
+  color: gray !important;
+  cursor: pointer;
+}
+
+.audio-out-inactive {
+  color: white !important;
+  cursor: pointer;
+}
+
+.audio-out-active {
+  animation: pulsing 1300ms infinite;
+}
+
 @keyframes pulsing {
   0% {
     color: #800;
