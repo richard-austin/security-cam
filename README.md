@@ -20,6 +20,10 @@ The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on t
 * Complete system deployment using a single deb file, which is available pre-built for Raspberry pi 4 or 5 in the <a href="https://github.com/richard-austin/security-cam/releases">Releases</a> section.
 * Secure authenticated web access.
 * Low latency (approx 0.4 seconds or less) live video and audio (network condition permitting).
+This application uses WebCodecs to achieve low latency, and this reduces the compatibility with FireFox, specifically
+FireFox does not support audio sampling rates below 48K, giving rise to bad audio quality. 
+Also, currently, only FireFox Nightly for Linux supports HEVC in WebCodecs. Chromium based browsers 
+work for all requirements of this application (hardware GPU decoding required for HEVC).
 * Supports network cameras with RTSP streams H264/H265/audio (not USB cameras).
 * Onvif support for device and capabilities discovery and PTZ control.
 * View live stream from individual or all cameras.

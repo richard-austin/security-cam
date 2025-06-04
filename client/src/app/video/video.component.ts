@@ -43,8 +43,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
-  audio!: HTMLAudioElement;
-
   volume: number = 0.4;
 
   visible: boolean = false;
@@ -59,7 +57,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(public utilsService: UtilsService) {
     this.mediaFeeder = new MediaFeeder();
-    this.audio = new Audio();
   }
 
   /**
@@ -100,7 +97,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleMuteAudio(muted: boolean) {
     if (this.mediaFeeder)
       this.mediaFeeder.mute(muted);
-    this.volume = this.mediaFeeder.isMuted ? 0 : this.audio.volume;
+    this.volume = this.mediaFeeder.isMuted ? 0 : this.video.volume;
   }
 
   mute(mute: boolean = true): void {
@@ -110,7 +107,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setVolume(volume: number) {
     this.volume = volume;
-    this.audio.volume = this.volume;
+    this.video.volume = this.volume;
   }
 
   toggleShowAudioControls() {
@@ -156,8 +153,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     document.addEventListener('click', this.clickHandler);
     this.video = this.videoEl.nativeElement;
-    this.volume = this.audio.volume = 0.4;
-    this.mediaFeeder.init(this.isLive, this.video, this.audio, this.reporting);
+    this.volume = this.video.volume = 0.4;
+    this.mediaFeeder.init(this.isLive, this.video, this.reporting);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
     this.video.addEventListener('fullscreenchange', () => {

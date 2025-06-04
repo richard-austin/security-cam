@@ -12,7 +12,6 @@ export class MediaFeeder {
   cam!: Camera;
   stream!: Stream;
   video!: HTMLMediaElement;
-  audio!: HTMLAudioElement;
   reporting!: ReportingComponent;
   hls: any = null;
   recording: boolean = false;
@@ -27,10 +26,9 @@ export class MediaFeeder {
   constructor() {
   }
 
-  init(isLive: boolean, video: HTMLMediaElement, audio: HTMLAudioElement, reporting: ReportingComponent) {
+  init(isLive: boolean, video: HTMLMediaElement, reporting: ReportingComponent) {
     this.isLive = isLive;
     this.video = video;
-    this.audio = audio;
     this.video.autoplay = true;
     this.video.muted = false;
     this.video.controls = !isLive;
@@ -97,13 +95,9 @@ export class MediaFeeder {
       const videoWriter = videoTrack.writable.getWriter();
       const audioWriter = audioTrack.writable.getWriter();
 
-      this.video.srcObject = new MediaStream([videoTrack])
-      this.audio.srcObject = new MediaStream([audioTrack])
+      this.video.srcObject = new MediaStream([videoTrack, audioTrack])
       this.video.onloadedmetadata = () => {
         this.video.play().then();
-      }
-      this.audio.onloadedmetadata = () => {
-        this.audio.play().then();
       }
       this.video.preload = "none";
 
@@ -198,12 +192,12 @@ export class MediaFeeder {
   }
 
   mute(muted: boolean = true) {
-    if(this.audio !== null && this.audio !== undefined)
-      this.audio.muted = muted;
+    if(this.video !== null && this.video !== undefined)
+      this.video.muted = muted;
   }
 
   get isMuted() {
-    return this.audio.muted;
+    return this.video.muted;
   }
 
   get hasCam(): boolean {

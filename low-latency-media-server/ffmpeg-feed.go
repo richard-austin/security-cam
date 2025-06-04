@@ -85,7 +85,7 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 						} else {
 							audioMuxer = "adts"
 						}
-						audio = fmt.Sprintf("|[select=a:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%sa", audioMuxer, stream.MediaServerInputUri)
+						audio = fmt.Sprintf("|[select=a:f=%s:onfail=abort]%sa", audioMuxer, stream.MediaServerInputUri)
 						audioMap = "-map 0:a " // The space at the end is important in splitting the command line
 					}
 

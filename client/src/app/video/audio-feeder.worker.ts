@@ -2,12 +2,12 @@
 
 import {timer} from "rxjs";
 
-let audioFeeder: AudioFeeder;
+let audioFeeder: AudioWorker;
 addEventListener('message', ({ data }) => {
   if(data.url) {
     // @ts-ignore
     if(typeof AudioDecoder !== 'undefined') {
-      audioFeeder = new AudioFeeder(data.url);
+      audioFeeder = new AudioWorker(data.url);
       audioFeeder.setUpWSConnection();
     } else {
       let sub = timer(1000).subscribe(() => {
@@ -20,7 +20,7 @@ addEventListener('message', ({ data }) => {
     audioFeeder.close();
 });
 
-class AudioFeeder {
+class AudioWorker {
 // @ts-ignore
   private audioDecoder = new AudioDecoder({
     // @ts-ignore
@@ -48,8 +48,6 @@ class AudioFeeder {
     this.url = url;
   }
   setUpWSConnection() {
-    let framesToMiss = 0;
-
     this.ws = new WebSocket(this.url);
     this.ws.binaryType = 'arraybuffer';
 
@@ -89,11 +87,7 @@ class AudioFeeder {
           duration: 1,
           data: event.data,
         });
-        if (framesToMiss > 0)
-          --framesToMiss;
-        else {
-           await this.audioDecoder.decode(eac)
-        }
+        await this.audioDecoder.decode(eac)
       }
       this.resetTimeout();
     };

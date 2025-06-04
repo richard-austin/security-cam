@@ -62,31 +62,20 @@ func serveHTTP() {
 		defer streams.removeStream(suuid)
 		data := make([]byte, 33000)
 
-		t := time.NewTimer(5 * time.Second)
 		for {
 			data = data[:33000]
 			numOfByte, err := readCloser.Read(data)
 			if err != nil {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
 				break
+			} else if numOfByte == 0 {
+				log.Warnf("Zero bytes received in stream reader for %s, exiting")
+				break
 			}
 			d := NewPacket(data[:numOfByte])
-			select {
-			case <-t.C:
-				err = fmt.Errorf("(timeout occurred)")
-				break
-			default:
-				t.Reset(5 * time.Second)
-				break
-			}
-			if err == nil {
-				err = streams.put(suuid, d, false)
-			}
-
+			err = streams.put(suuid, d, false)
 			if err != nil {
 				log.Errorf("Error putting the packet into stream %s:- %s", suuid, err.Error())
-				break
-			} else if numOfByte == 0 {
 				break
 			}
 			log.Tracef("%d bytes received", numOfByte)
@@ -136,21 +125,14 @@ func serveHTTP() {
 			if err != nil {
 				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
 				break
-			}
-			d := NewPacket(data[:numOfByte])
-			if err != nil {
-				log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
-				break
-			}
-			if err == nil {
-				err = streams.put(suuid, d, true)
-			}
-
-			if err != nil {
-				log.Errorf("Error putting the packet into stream %s:- %s", suuid, err.Error())
-				break
 			} else if numOfByte == 0 {
 				log.Warnf("Empty packet recieved for %s, exiting", suuid)
+				break
+			}
+			d := NewPacket(data[:numOfByte])
+			err = streams.put(suuid, d, true)
+			if err != nil {
+				log.Errorf("Error putting the packet into stream %s:- %s", suuid, err.Error())
 				break
 			}
 			log.Tracef("%d bytes received", numOfByte)
