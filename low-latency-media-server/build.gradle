@@ -8,23 +8,23 @@ go {
 //    cgoEnabled = true
 //    os = ["linux"]
 //    arch = ["arm64"]
-    goVersion = "1.23.4"
+    goVersion = "1.24.0"
 }
 
 tasks.register('buildarm', GoTask) {
     group='build'
     workingDir "$projectDir"
     goTaskEnv=[GOOS:'linux', GOARCH:'arm64']
-    goTaskArgs = ['build',  '-o', '../xtrn-scripts-and-config/fmp4-ws-media-server/fmp4-ws-media-server_arm64']
+    goTaskArgs = ['build',  '-o', '../xtrn-scripts-and-config/low-latency-media-server/low-latency-media-server_arm64']
 }
 
 tasks.register('deploy', Copy) {
     group = 'build'
 
     dependsOn(buildarm)
-    delete('../xtrn-scripts-and-config/fmp4-ws-media-server/fmp4-ws-media-server_arm64', '../xtrn-scripts-and-config/fmp4-ws-media-server/config.json')
+    delete('../xtrn-scripts-and-config/low-latency-media-server/low-latency-media-server_arm64', '../xtrn-scripts-and-config/low-latency-media-server/config.json')
     from(projectDir)
-    into file('../xtrn-scripts-and-config/fmp4-ws-media-server')
+    into file('../xtrn-scripts-and-config/low-latency-media-server')
     include 'config.json'
 }
 

@@ -317,7 +317,7 @@ class Handler(BaseHTTPRequestHandler):
                 # hence using this module which is otherwise meant for Wi-Fi and network related control
 
                 case 'start_services':
-                    executeOsCommand('systemctl start fmp4-ws-media-server.service', self.systemd_errors)
+                    executeOsCommand('systemctl start low-latency-media-server.service', self.systemd_errors)
                     executeOsCommand('systemctl start motion.service', self.systemd_errors)
                     executeOsCommand('systemctl start camera-recordings.service', self.systemd_errors)
                     self.returnResponse(200, {"result": "Motion service started"})
@@ -326,7 +326,7 @@ class Handler(BaseHTTPRequestHandler):
                 case 'stop_services':
                     executeOsCommand('systemctl stop motion.service', self.systemd_errors)
                     executeOsCommand('systemctl stop camera-recordings.service', self.systemd_errors)
-                    executeOsCommand('systemctl stop fmp4-ws-media-server.service', self.systemd_errors)
+                    executeOsCommand('systemctl stop low-latency-media-server.service', self.systemd_errors)
                     self.returnResponse(200, {"result": "Motion service stopped"})
                     return
 

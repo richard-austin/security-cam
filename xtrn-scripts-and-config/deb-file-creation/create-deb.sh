@@ -18,9 +18,9 @@ cp ../../wifi-setup-service/*.py security-cam_"${VERSION}"_arm64/etc/security-ca
 cp ../../wifi-setup-service/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
 cp ../install-cert.sh security-cam_"${VERSION}"_arm64/etc/security-cam
 
-mkdir -p security-cam_"${VERSION}"_arm64/etc/fmp4-ws-media-server &&
-cp  ../fmp4-ws-media-server/fmp4-ws-media-server_arm64 security-cam_"${VERSION}"_arm64/etc/fmp4-ws-media-server
-cp  ../fmp4-ws-media-server/config.json security-cam_"${VERSION}"_arm64/etc/fmp4-ws-media-server
+mkdir -p security-cam_"${VERSION}"_arm64/etc/low-latency-media-server &&
+cp  ../low-latency-media-server/low-latency-media-server_arm64 security-cam_"${VERSION}"_arm64/etc/low-latency-media-server
+cp  ../low-latency-media-server/config.json security-cam_"${VERSION}"_arm64/etc/low-latency-media-server
 
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service &&
 cp  ../../camera-recordings-service/*.py security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service
@@ -29,7 +29,7 @@ cp  ../../camera-recordings-service/requirements.txt security-cam_"${VERSION}"_a
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../wifimanagement.service  security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../camera-recordings.service security-cam_"${VERSION}"_arm64/lib/systemd/system
-cp ../fmp4-ws-media-server.service security-cam_"${VERSION}"_arm64/lib/systemd/system
+cp ../low-latency-media-server.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
@@ -44,7 +44,7 @@ for ((i = 1 ; i < 51 ; i++ )); do mkdir -p security-cam_"${VERSION}"_arm64/var/s
 
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/security-cam
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/camera-recordings-service
-mkdir -p security-cam_"${VERSION}"_arm64/var/log/fmp4-ws-media-service
+mkdir -p security-cam_"${VERSION}"_arm64/var/log/low-latency-media-server
 
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/motion
 mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr

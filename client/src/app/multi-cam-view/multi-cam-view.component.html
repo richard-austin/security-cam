@@ -90,7 +90,7 @@
 <app-reporting></app-reporting>
 <div class="flex-container-vid">
   <ng-container *ngFor="let cam of cams | keyvalue: cameraSvc.compareFn">
-    <app-video [isFmp4]="true"></app-video>
+    <app-video [isLive]="true"></app-video>
   </ng-container>
 </div>
 

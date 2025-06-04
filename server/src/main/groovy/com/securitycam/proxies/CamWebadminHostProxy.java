@@ -130,7 +130,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                             }
                                         }
 
-                                        logService.getCam().trace("serverPass = " + serverPass);
+                                        logService.getCam().trace("serverPass = {}", serverPass);
                                     }
                                     // String xyz = "\nRequest: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
                                     // logService.getCam().trace(xyz);
@@ -150,7 +150,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             logService.getCam().trace("handleClientRequest: Out of client request loop");
                         } catch (IOException ignore) {
                         } catch (Exception ex) {
-                            logService.getCam().error(ex.getClass().getName() + " in handleClientRequest: " + ex.getMessage());
+                            logService.getCam().error("{} in handleClientRequest: {}", ex.getClass().getName(), ex.getMessage());
                         } finally {
                             recycle(request);
                         }
@@ -178,7 +178,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                         reply = arReply.get();
                                 }
                             }
-                            logService.getCam().trace("server.read pass = " + pass);
+                            logService.getCam().trace("server.read pass = {}", pass);
                             // String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
                             // logService.getCam().trace(x);
                             client.write(reply);
@@ -198,23 +198,23 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             bytesWritten += val;
                         }
 
-                        logService.getCam().error(e.getClass().getName() + " in handleClientRequest 1: " + e.getMessage());
+                        logService.getCam().error("{} in handleClientRequest 1: {}", e.getClass().getName(), e.getMessage());
                     }
                     // The server closed its connection to us, so we close our
                     // connection to our client.
                     client.close();
                 } catch (Exception ex) {
-                    logService.getCam().error(ex.getClass().getName() + " in handleClientRequest (inner) when opening socket channel: " + ex.getMessage());
+                    logService.getCam().error("{} in handleClientRequest (inner) when opening socket channel: {}", ex.getClass().getName(), ex.getMessage());
                 }
                 recycle(reply);
 
             } catch (Exception ex) {
-                logService.getCam().error(ex.getClass().getName() + " in handleClientRequest (outer) when opening socket channel: " + ex.getMessage());
+                logService.getCam().error("{} in handleClientRequest (outer) when opening socket channel: {}", ex.getClass().getName(), ex.getMessage());
             } finally {
                 try {
                     client.close();
                 } catch (IOException e) {
-                    logService.getCam().error("IOException in handleClientRequest finally block: " + e.getMessage());
+                    logService.getCam().error("IOException in handleClientRequest finally block: {}", e.getMessage());
                 }
             }
         });

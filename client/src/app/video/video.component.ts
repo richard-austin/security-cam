@@ -18,34 +18,45 @@ import {VideoSizing} from "./VideoSizing";
 import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {FormsModule} from "@angular/forms";
+import {AudioControlComponent} from "./audio-control/audio-control.component";
+import {animate, state, style, transition, trigger} from "@angular/animations";
 
 @Component({
     selector: 'app-video',
     templateUrl: './video.component.html',
     styleUrls: ['./video.component.scss'],
-    imports: [SharedModule, SharedAngularMaterialModule, FormsModule]
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({width: '0px', minWidth: '0'})),
+      state('expanded', style({width: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ])
+    ],
+    imports: [SharedModule, SharedAngularMaterialModule, FormsModule, AudioControlComponent]
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @Input() isFmp4: boolean = false;
+  @ViewChild('videoControls') videoControlsEL!: ElementRef<HTMLDivElement>;
+  @Input() isLive: boolean = false;
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
+  volume: number = 0.4;
 
   visible: boolean = false;
-  videoFeeder!: MediaFeeder;
+  mediaFeeder!: MediaFeeder;
   multi: boolean = false;
-  buffering_sec: number = 1.2;
   audioBackchannel!: AudioBackchannel
   vt!: VideoTransformations;
   currentTime: string = "";
   totalTime: string = "";
-  sizeing!: VideoSizing;
+  sizing!: VideoSizing;
+  showAudioControls: boolean = false;
 
   constructor(public utilsService: UtilsService) {
-    this.videoFeeder = new MediaFeeder(this.buffering_sec)
+    this.mediaFeeder = new MediaFeeder();
   }
 
   /**
@@ -57,17 +68,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
     if (this.vt !== undefined)
       this.vt.reset();
-    this.audioBackchannel.stopAudioOut(); // Ensure two way audio is off when switching streams
-    this.stop();
+    this.audioBackchannel.stopAudioOut().then(r => {}); // Ensure two way audio is off when switching streams
+    this.mediaFeeder.stop();
     this.stream = stream;
-    this.videoFeeder.setSource(cam, stream, manifest)
+    this.mediaFeeder.setSource(cam, stream, manifest)
     if (cam.backchannelAudioSupported) {
       this.audioBackchannel.getMediaDevices();
     }
-  }
-
-  stop(): void {
-    this.videoFeeder.stop();
   }
 
   setFullScreen() {
@@ -87,21 +94,31 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.vt.reset();
   }
 
-  toggleMuteAudio() {
-    if (this.videoFeeder)
-      this.videoFeeder.mute(!this.videoFeeder.isMuted);
+  toggleMuteAudio(muted: boolean) {
+    if (this.mediaFeeder)
+      this.mediaFeeder.mute(muted);
+    this.volume = this.mediaFeeder.isMuted ? 0 : this.video.volume;
   }
 
   mute(mute: boolean = true): void {
-    if (this.videoFeeder)
-      this.videoFeeder.mute(mute);
+    if (this.mediaFeeder)
+      this.mediaFeeder.mute(mute);
+  }
+
+  setVolume(volume: number) {
+    this.volume = volume;
+    this.video.volume = this.volume;
+  }
+
+  toggleShowAudioControls() {
+    this.showAudioControls = !this.showAudioControls;
   }
 
   setSize(size: number, isRecording: boolean = false): void {
-    this.sizeing.setup(size, isRecording)
+    this.sizing.setup(size, isRecording)
   }
   changeSize(size: number) {
-    this.sizeing.changeSize(size);
+    this.sizing.changeSize(size);
   }
 
   reset($event: MouseEvent) {
@@ -125,34 +142,46 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
   }
 
+  clickHandler =  (ev: Event) => {
+    if(this.videoControlsEL) {
+      const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL.nativeElement);
+      if (!inVideoControlDialogue)
+        this.showAudioControls = false;
+    }
+  };
+
   ngAfterViewInit(): void {
+    document.addEventListener('click', this.clickHandler);
     this.video = this.videoEl.nativeElement;
-    this.videoFeeder.init(this.isFmp4, this.video);
+    this.volume = this.video.volume = 0.4;
+    this.mediaFeeder.init(this.isLive, this.video, this.reporting);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
     this.video.addEventListener('fullscreenchange', () => {
-      this.vt.reset();  // Set to normal scale for if the mouse wheel was turned while full screen showing
+      this.vt.reset();  // Set to a normal scale for if the mouse wheel was turned while full screen showing
     });
     this.video.ontimeupdate = () => {
       if (this.video.currentTime !== null && !isNaN(this.video.currentTime))
         this.currentTime = new Date(this.video.currentTime * 1000).toISOString().substring(11, 19);
-      if (this.video.duration !== null && !isNaN(this.video.duration))
+      if (!this.isLive && this.video.duration !== null && !isNaN(this.video.duration))
         this.totalTime = new Date(this.video.duration * 1000).toISOString().substring(11, 19);
     };
 
-    this.sizeing = new VideoSizing(this.video);
+    this.sizing = new VideoSizing(this.video);
 
     screen.orientation.addEventListener('change', this.orientationChangeHandler)  }
 
   ngOnDestroy(): void {
-    this.videoFeeder.stop();
+    this.mediaFeeder.stop();
+    document.removeEventListener('click', this.clickHandler);
+
     // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
     //  ffmpeg to the backchannel device. The problem does not occur when done like this
     let timerSubscription: Subscription = timer(20).subscribe(() => {
-      this.audioBackchannel.stopAudioOut();
+      this.audioBackchannel.stopAudioOut().then(r => {});
       timerSubscription.unsubscribe();
     });
     window.screen.orientation.onchange = null;
-    this.sizeing._destroy();
+    this.sizing._destroy();
   }
 }

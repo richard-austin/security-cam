@@ -21,20 +21,17 @@ This forms the user interface of the web application.
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
 ### Web Back End
 The Web Back End (server) is a Spring Boot 3.3.4 application (https://spring.io/projects/spring-boot), which provides
-the Restful API for the Angular Web Front End.It provides the services to get and set application data as
+the Restful API for the Angular Web Front End. It provides the services to get and set application data as
 well as configuring the Camera setup.
 
 ### Media Server
-Converts the RTSP video/audio output from the cameras to
-fragmented MP4 streams which are used directly by MSE on the Web Front End.
-ffmpeg is used for camera RTSP connections and multiplexing to fragmented MP4, then feeding this to the media server input.
-The media server supports web socket client connections through which the media streams are read. The media streams are
-also available through http connections which are used for recording.
-The http streams used for recording are delayed by a configurable amount to provide some preamble from before the trigger time.  
+Converts the RTSP video/audio output from the cameras to up three separate HTTP streams. 
+* A video websocket stream consisting of plain H264/HEVC depending on the cameras output. This is used for the live video.
+* An audio websocket stream (if audio is present on the camera and selected in the config). This is used for the live audio content.
+* A delayed flv HTTP stream (if recording is selected for the camera). This stream contains the video and audio (if present), and is used for recording from.
+nginx provides access to this service with a common origin (port 443) to the Web Back End server.
 
-nginx provides access to this service with common origin (port 443) to the Web Back End (https port 443).
-
-The Media Server is written in go (golang) and cross compiled for the ARM 64 architecture of the Raspberry pi. To change to a different architecture, edit the build task in fmp4-ws-media-server/build.gradle
+The Media Server is written in go (golang) and cross-compiled for the ARM 64 architecture of the Raspberry pi. To change to a different architecture, edit the build task in low-latency-media-server/build.gradle
 
 ### ffmpeg
 ffmpeg is used for re-muxing, audio transcoding, camera connectivity and recording.
@@ -50,7 +47,7 @@ It also stops and starts the media server, recording service and the motion serv
 during configuration updates.
 
 ### Camera Recordings Service
-Records a section of video in response to an FTP image upload from a camera.
+This service records a section of video in response to an FTP image upload from a camera.
 The ftp upload is to a specific path which the Camera Recordings Service uses
 to determine which camera to initiate a recording on. The path corresponds to the cameras
 cameraID.

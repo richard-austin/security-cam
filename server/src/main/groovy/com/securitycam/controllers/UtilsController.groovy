@@ -116,28 +116,6 @@ class UtilsController {
         }
     }
 
-//    Sc_processesService sc_processesService
-//    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
-//    def startProcs()
-//    {
-//        ObjectCommandResponse response = sc_processesService.startProcesses()
-//        if(response.status != PassFail.PASS)
-//            render (status: 500, text: response.error)
-//        else
-//            render "success"
-//    }
-//
-//    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
-//    def stopProcs()
-//    {
-//        ObjectCommandResponse response = sc_processesService.stopProcesses()
-//        if(response.status != PassFail.PASS)
-//            render (status: 500, text: response.error)
-//        else
-//            render "success"
-//
-//    }
-
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @RequestMapping("startAudioOut")
     def startAudioOut(@Valid @RequestBody StartAudioOutCommand cmd) {

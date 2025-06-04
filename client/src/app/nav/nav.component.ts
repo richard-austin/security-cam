@@ -62,7 +62,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     let suuid = 'suuid=';
     let uri = stream.recording.recording_src_url;
     let index = uri.indexOf(suuid);
-    let streamName = uri.substring(index + suuid.length);
+    let streamName = uri.substring(index + suuid.length, uri.length-1);
     window.location.href = '#/recording/' + streamName;
   }
 

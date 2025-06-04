@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<!--
+https://stackoverflow.com/questions/54186634/sending-periodic-metadata-in-fragmented-live-mp4-stream/
+
+-->
+
+
+<html lang="eng">
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="Last-Modified" content="0">
+<meta http-equiv="Cache-Control" content="no-cache, mustrevalidate">
+<meta http-equiv="Pragma" content="no-cache">
+
+<link rel="stylesheet" href="web/css/bootstrap.min.css">
+<script src="web/js/bootstrap.min.js"></script>
+<script src="web/js/bootstrap.bundle.js"></script>
+<head>
+    <title>WebSocket MSE demo</title>
+</head>
+
+<body>
+<h2 align=center>
+    Low Latency Media Server
+</h2>
+</body>
+    <div class="container">
+        <ul>
+            <li>
+                Live video streams are at http://localhost:8085/w/stream?suuid=cam<i>n</i>-stream<i>n</i> (websocket)
+            </li>
+            <li>
+                Live audio streams are at http://localhost:8085/w/stream?suuid=cam<i>n</i>-stream<i>n</i>a (websocket)
+            </li>
+            <li>
+                Delayed (by preamble time) AV streams in flv format used for recording, are at http://localhost:8085/h/stream?rsuuid=cam<i>n</i>-stream<i>n</i>r (websocket)
+            </li>
+        </ul>
+    </div>
+</html>
+
+

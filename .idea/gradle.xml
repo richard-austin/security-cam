@@ -14,9 +14,9 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/camera-recordings-service" />
             <option value="$PROJECT_DIR$/client" />
-            <option value="$PROJECT_DIR$/fmp4-ws-media-server" />
             <option value="$PROJECT_DIR$/generateProductKey" />
             <option value="$PROJECT_DIR$/initialAdmin" />
+            <option value="$PROJECT_DIR$/low-latency-media-server" />
             <option value="$PROJECT_DIR$/onvif-java" />
             <option value="$PROJECT_DIR$/onvif-ws-client" />
             <option value="$PROJECT_DIR$/server" />

@@ -43,6 +43,7 @@ enum RecordingType {none, motionService, ftpTriggered, pullPointEventTriggered}
 
 class Recording {
     boolean enabled=false
+    String recording_input_url = ''
     String recording_src_url=''
     String uri=''
     String location=''
@@ -68,7 +69,7 @@ class Stream {
     Integer audio_sample_rate = 0
     String media_server_input_uri=''
     Motion motion=new Motion()
-    Integer preambleFrames = 100
+    Integer preambleTime = 0
     Integer video_width=0
     Integer video_height=0
     Recording recording=new Recording()
@@ -101,7 +102,7 @@ class Camera {
     Map<String, Stream> streams = new HashMap<String, Stream>()
     String onvifHost=''
     boolean backchannelAudioSupported = false
-    String rtspTransport = "tcp"
+    String rtspTransport = "udp"
     boolean useRtspAuth = false
     int retriggerWindow = 30
     String cred = ""

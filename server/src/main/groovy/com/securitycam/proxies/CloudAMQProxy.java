@@ -137,7 +137,7 @@ public class CloudAMQProxy {
                     closeAndClearSockets();
                 }
             } catch (Exception ex) {
-                logger.error(ex.getClass().getName() + " in CloudAMQProxy.stop: " + ex.getMessage());
+                logger.error("{} in CloudAMQProxy.stop: {}", ex.getClass().getName(), ex.getMessage());
             }
         }
     }
@@ -221,7 +221,7 @@ public class CloudAMQProxy {
                 channel.close();
                 channel.socket().close();
             }
-            logger.debug("Removing and closing socket for token " + token);
+            logger.debug("Removing and closing socket for token {}", token);
         } catch (Exception ex) {
             showExceptionDetails(ex, "removeSocket");
         }
@@ -323,7 +323,7 @@ public class CloudAMQProxy {
                 cons.setMessageListener(this);
 
             } catch (JMSException ex) {
-                logger.error("JMS Exception in CloudInputProcess.start(): " + ex.getMessage());
+                logger.error("JMS Exception in CloudInputProcess.start(): {}", ex.getMessage());
             }
         }
 
@@ -336,7 +336,7 @@ public class CloudAMQProxy {
                     producer.close();
                 producer = null;
             } catch (Exception ex) {
-                logger.error(ex.getClass().getName() + " in CloudInputProcess,stop: " + ex.getMessage());
+                logger.error("{} in CloudInputProcess,stop: {}", ex.getClass().getName(), ex.getMessage());
             }
         }
 
@@ -357,11 +357,11 @@ public class CloudAMQProxy {
                 else if (message instanceof BytesMessage)
                     writeRequestToWebserver((BytesMessage) message);
                 else
-                    logger.error("Unhandled message type in CloudInputProcess.onMessage: " + message.getClass().getName());
+                    logger.error("Unhandled message type in CloudInputProcess.onMessage: {}", message.getClass().getName());
             } catch (Exception ex) {
                 cloud = null;
                 producer = null;
-                logger.error(ex.getClass().getName() + " in CloudInputProcess.onMessage: " + ex.getMessage());
+                logger.error("{} in CloudInputProcess.onMessage: {}", ex.getClass().getName(), ex.getMessage());
             }
         }
 
@@ -372,7 +372,7 @@ public class CloudAMQProxy {
             } catch (Exception ex) {
                 cloud = null;
                 producer = null;
-                logger.error(ex.getClass().getName() + " in CloudInputProcess.sendResponseToCloud: " + ex.getMessage());
+                logger.error("{} in CloudInputProcess.sendResponseToCloud: {}", ex.getClass().getName(), ex.getMessage());
             }
         }
     }
@@ -477,7 +477,7 @@ public class CloudAMQProxy {
                 }
             }
         } catch (Exception ex) {
-            logger.error(ex.getClass().getName() + " in productKeyAccepted: " + ex.getMessage());
+            logger.error("{} in productKeyAccepted: {}", ex.getClass().getName(), ex.getMessage());
         }
         return retVal;
     }
@@ -490,10 +490,8 @@ public class CloudAMQProxy {
                         Objects.equals(level, "TRACE") ? Level.TRACE :
                                 Objects.equals(level, "WARN") ? Level.WARN :
                                         Objects.equals(level, "ERROR") ? Level.ERROR :
-                                                Objects.equals(level, "OFF") ? Level.OFF :
-                                                        Objects.equals(level, "ALL") ? Level.ALL : Level.OFF);
+                                                Level.OFF);
     }
-
 
     private void startCloudProxySessionTimer() {
         if (cloudProxySessionTimer != null)
@@ -533,7 +531,7 @@ public class CloudAMQProxy {
     }
 
     void showExceptionDetails(Throwable t, String functionName) {
-        logger.error(t.getClass().getName() + " exception in " + functionName + ": " + t.getMessage());
+        logger.error("{} exception in {}: {}", t.getClass().getName(), functionName, t.getMessage());
 //        for (StackTraceElement stackTraceElement : t.getStackTrace()) {
 //            System.err.println(stackTraceElement.toString());
 //        }

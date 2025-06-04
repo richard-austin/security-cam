@@ -1,0 +1,27 @@
+div.audio-control {
+  width: 275px;
+  margin-top: 30px;
+  > mat-card {
+
+    > div {
+      height: 0;
+
+      > mat-icon {
+        cursor: pointer;
+        margin-right: 0.4rem;
+        margin-left: 0;
+        color: white;
+      }
+
+      > mat-slider {
+        width: 200px;
+        position: relative;
+        top: -10px;
+      }
+
+      margin-bottom: 30px;
+    }
+  }
+
+  overflow: visible;
+}

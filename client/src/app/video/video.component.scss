@@ -1,14 +1,7 @@
-@mixin common-characteristics {
-  width: fit-content;
-  border: 0.1rem solid darkblue;
-  border-right-color: #3939f3;
-  border-bottom-color: #3939f3;
-  overflow: hidden;
-  cursor: zoom-in;
-}
+@use "src/mixins.scss" as mixins;
 
 div.video {
-   @include common-characteristics;
+   @include mixins.common-characteristics;
 }
 
 .video-and-controls {
@@ -25,7 +18,7 @@ div.video {
 }
 
 div.multi {
-  @include common-characteristics;
+  @include mixins.common-characteristics;
 }
 
 .mx-auto {
@@ -42,7 +35,7 @@ div.multi {
   margin-left: -15px;
 }
 
-div.latency-limit-selector {
+div.video-controls {
   display: flex;
   justify-content: center;
   white-space: nowrap;
@@ -134,9 +127,15 @@ span.duration-time {
   color: #858585;
 }
 
-.latency-chasing {
+.media-feed-stalled {
   > mat-icon {
-    animation: flash 2000ms steps(3, start) forwards;
+    animation: flash 2000ms infinite;
+  }
+}
+
+div.audio-controls-dialogue {
+  > div {
+    @include mixins.top-cursor;
   }
 }
 
