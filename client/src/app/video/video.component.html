@@ -18,7 +18,7 @@
              (touchstart)="vt.touchStartHandler($event)"
              (touchmove)="vt.touchMoveHandler(($event))"
              (touchend)="vt.touchEndHandler($event)">
-            <video #video></video>
+            <video #video preload="metadata"></video>
         </div>
         <div #videoControls *ngIf="isLive" class="video-controls">
             <div>

@@ -12,7 +12,7 @@ addEventListener('message', ({ data }) => {
     } else {
       let sub = timer(1000).subscribe(() => {
         sub.unsubscribe();
-        postMessage({media: false, warningMessage: "AudioDecoder is not supported on this browser"})
+        postMessage({warningMessage: "AudioDecoder is not supported on this browser"})
       });
     }
   }
@@ -25,7 +25,7 @@ class AudioWorker {
   private audioDecoder = new AudioDecoder({
     // @ts-ignore
     output: async (frame: AudioData) => {
-      postMessage({media: true, packet: frame});
+      postMessage(frame, [frame]);
       frame.close();
     },
     error: (e: DOMException) => {
@@ -52,12 +52,12 @@ class AudioWorker {
     this.ws.binaryType = 'arraybuffer';
 
     this.ws.onerror = (ev) => {
-      postMessage({media: false, warningMessage: "An error occurred with the audio feeder websocket connection"})
+      postMessage({warningMessage: "An error occurred with the audio feeder websocket connection"})
     }
 
     this.ws.onclose = (ev) => {
       if(this.noRestart)
-        postMessage({media: false, closed: true})
+        postMessage({closed: true})
       console.warn("The audio feed websocket was closed: " + ev.reason);
      // clearTimeout(this.timeout);
     }
@@ -80,15 +80,15 @@ class AudioWorker {
         } else
           console.error("No audio codec was found")
       } else {
-        // @ts-ignore
-        const eac = new EncodedAudioChunk({
-          type: 'key',
-          timestamp: 0,
-          duration: 1,
+             // @ts-ignore
+             const eac = new EncodedAudioChunk({
+               type: 'key',
+               timestamp: 0,
+               duration: 1,
           data: event.data,
-        });
-        await this.audioDecoder.decode(eac)
-      }
+             });
+             await this.audioDecoder.decode(eac)
+           }
       this.resetTimeout();
     };
   }
