@@ -88,31 +88,47 @@ export class MediaFeeder {
           + this.stream.uri;
 
       const videoTrack = new MediaStreamTrackGenerator({kind: 'video'});
-
-      // @ts-ignore
-      const audioTrack = new window.MediaStreamTrackGenerator({kind: 'audio'});
+      const audioTrack = new MediaStreamTrackGenerator({kind: 'audio'});
 
       const videoWriter = videoTrack.writable.getWriter();
       const audioWriter = audioTrack.writable.getWriter();
 
-      this.video.srcObject = new MediaStream([videoTrack, audioTrack])
+      this.video.srcObject = new MediaStream([videoTrack, audioTrack]);
       this.video.onloadedmetadata = () => {
         this.video.play().then();
       }
       this.video.preload = "none";
 
+      // let audioStream = new MediaStream([audioTrack]);
+      // let ctx = new AudioContext()
+      // let source = ctx.createMediaStreamSource(audioStream);
+      // let dn = ctx.createDelay(2);
+      // let gain = ctx.createGain();
+      // gain.connect(ctx.destination);
+      // gain.gain.value = 0;
+      // let g2 = ctx.createGain();
+      // g2.gain.value = .5;
+      // source.connect(dn)
+      // g2.connect(ctx.destination);
+      // dn.connect(g2)
+      // dn.connect(dn);
+      // source.connect(gain);
+      //
+      // dn.delayTime.value = 0.2;
+      //
+
       if (typeof Worker !== 'undefined') {
         // Create a new media feeder web worker
         this.videoWorker = new Worker(new URL('./video-feeder.worker', import.meta.url));
         this.videoWorker.onmessage = async ({data, type}) => {
-          if(data.media) {
+          if(!data.warningMessage && !data.closed) {
             this.resetTimout();
-            await videoWriter.write(data.packet);
+            await videoWriter.write(data);
             await videoWriter.ready;
           } else if (data.closed) {
             console.log("Websocket was closed, terminating the video worker");
             this.videoWorker.terminate();
-          } else if (data.warningMessage !== undefined) {
+          } else if (data.warningMessage) {
             this.reporting.warningMessage = data.warningMessage;
             this.stop();
            } else {
@@ -124,9 +140,9 @@ export class MediaFeeder {
           this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));
           this.video.onplaying = () => {
             this.audioWorker.onmessage = async ({data, type}) => {
-              if (data.media) {
+              if (!data.warningMessage && !data.closed) {
                 if (!this.video.paused) {
-                  await audioWriter.write(data.packet);
+                  await audioWriter.write(data);
                   await audioWriter.ready;
                 }
               } else if (data.closed) {
