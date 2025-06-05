@@ -49,7 +49,7 @@ func serveHTTP() {
 		req := c.Request
 		suuid := req.FormValue("suuid")
 		isAudio := strings.HasSuffix(suuid, "a")
-		_, hasEntry := streams.StreamMap[suuid]
+		hasEntry := streams.hasEntry(suuid)
 		if hasEntry {
 			log.Errorf("Cannot add %s, there is already an existing stream with that id and media type", suuid)
 			return
@@ -86,7 +86,7 @@ func serveHTTP() {
 	router.POST("/recording/:rsuuid", func(c *gin.Context) {
 		req := c.Request
 		suuid := req.FormValue("rsuuid")
-		_, hasEntry := streams.StreamMap[suuid]
+		hasEntry := streams.hasEntry(suuid)
 		if hasEntry {
 			log.Errorf("Cannot add %s, there is already an existing stream with that id", suuid)
 			return
@@ -109,13 +109,16 @@ func serveHTTP() {
 			log.Errorf("Error reading the data feed for stream %s:- %s", suuid, err.Error())
 			return
 		}
+		log.Infof("%d bytes received for FLV header", numOfByte)
 		//// Set up the stream ready for connection from client, put in the flv header
 		d := NewPacket(data[:numOfByte]) //make([]byte, numOfByte)
-		if !d.isFLVHeader() {
+		isFLVHdr, hdrSize := d.isFLVHeader()
+		if !isFLVHdr {
 			log.Errorf("The first packet is not a flv header")
 			return
 		}
-		err = streams.putFlvHeader(suuid, d)
+		//	log.Infof("%d is actual FLV header size", hdrSize)
+		err = streams.putFlvHeader(suuid, NewPacket(d.pckt[:hdrSize]))
 		if err != nil {
 			return
 		}
@@ -168,7 +171,12 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	defer func() { r.Close = true }()
 	suuid := r.FormValue("rsuuid")
 	log.Infof("http Request %s", suuid)
-	stream := streams.StreamMap[suuid]
+	stream, ok := streams.getStream(suuid)
+	if !ok {
+		log.Errorf("Stream %s not found", suuid)
+		http.NotFound(w, r)
+		return
+	}
 	if !stream.bucketBrigade.isReady() {
 		log.Errorf("Bucket brigade is not ready for %s", suuid)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -263,7 +271,11 @@ func ws(ws *websocket.Conn) {
 		}
 	}()
 
-	stream := streams.StreamMap[suuid]
+	stream, ok := streams.getStream(suuid)
+	if !ok {
+		log.Errorf("Stream %s not found", suuid)
+		return
+	}
 	var gopCache *GopCacheSnapshot
 	gopCache = stream.gopCache.GetSnapshot()
 	gopCacheUsed := stream.gopCache.GopCacheUsed
