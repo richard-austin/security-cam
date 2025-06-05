@@ -88,6 +88,13 @@ func getStreamC(suuid string) (streamC StreamC, err error) {
 	return
 }
 
+func (s *Streams) hasEntry(suuid string) (hasEntry bool) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	_, hasEntry = streams.StreamMap[suuid]
+	return
+}
+
 func (s *Streams) removeStream(suuid string) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -220,12 +227,30 @@ func NewPacket(pckt []byte) Packet {
 	return Packet{pckt: b}
 }
 
-func (p Packet) isFLVHeader() (retVal bool) {
+func (p Packet) isFLVHeader() (retVal bool, size int32) {
 	retVal = false
 	if len(p.pckt) > 13 {
-		if bytes.Equal(p.pckt[:13], []byte{'F', 'L', 'V', 1, 5, 0, 0, 0, 9, 0, 0, 0, 0}) ||
-			bytes.Equal(p.pckt[:13], []byte{'F', 'L', 'V', 1, 1, 0, 0, 0, 9, 0, 0, 0, 0}) {
+		if bytes.Equal(p.pckt[:14], []byte{'F', 'L', 'V', 1, 5, 0, 0, 0, 9, 0, 0, 0, 0, 18}) ||
+			bytes.Equal(p.pckt[:14], []byte{'F', 'L', 'V', 1, 1, 0, 0, 0, 9, 0, 0, 0, 0, 18}) {
 			retVal = true
+			// Also return the total size of the FLV header packets
+			size = int32(9)         // Size of the actual header
+			payloadSize := int32(5) // Initial size > 4 to ensure the loop is executed
+			pktTypes := make(map[int32]int32)
+			for size < int32(len(p.pckt)-4) && payloadSize > 4 {
+				packetType := int32(p.pckt[size+4])
+				_, found := pktTypes[packetType]
+				if found {
+					//log.Infof("Packet type = %d already found", packetType)
+					break
+				} else {
+					pktTypes[packetType] = packetType
+				}
+
+				payloadSize = int32(p.pckt[size+5])*65536 + int32(p.pckt[size+6])*256 + int32(p.pckt[size+7]) // Size of next packet payload
+				size += payloadSize + 15
+			}
+			size += 4 // Has int32 size of previous packet at the end
 		}
 	}
 	return
@@ -306,6 +331,13 @@ func (s *Streams) getFlvHeader(suuid string) (err error, flvHeader Packet) {
 	} else {
 		flvHeader = stream.flvHeader
 	}
+	return
+}
+
+func (s *Streams) getStream(suuid string) (stream *Stream, ok bool) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	stream, ok = s.StreamMap[suuid]
 	return
 }
 
