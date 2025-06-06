@@ -62,7 +62,7 @@ func (g *GopCache) RecordingInput(p Packet) (err error) {
 		g.Cache[g.inputIndex] = p
 		g.inputIndex++
 	} else {
-		err = fmt.Errorf("GOP Cache is full")
+		err = fmt.Errorf("recording input GOP Cache is full")
 	}
 
 	return

@@ -128,16 +128,17 @@ func (s *Streams) deleteClient(suuid string, cuuid string) {
 	}
 }
 
-func (s *Streams) put(suuid string, pckt Packet, isRecording ...bool) error {
+func (s *Streams) put(suuid string, pckt Packet, isRecording ...bool) (retVal error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	var retVal error = nil
+	retVal = nil
 	stream, ok := s.StreamMap[suuid]
 	if ok {
 		if len(isRecording) > 0 && isRecording[0] {
 			err := stream.bucketBrigade.Input(pckt)
 			if err != nil {
-				_ = fmt.Errorf(err.Error())
+				retVal = fmt.Errorf(err.Error())
+				return retVal
 			}
 			for _, packetStream := range stream.PcktStreams {
 				length := len(packetStream.ps)
@@ -147,13 +148,15 @@ func (s *Streams) put(suuid string, pckt Packet, isRecording ...bool) error {
 				default:
 					{
 						retVal = fmt.Errorf("client channel for %s has reached capacity (%d)", suuid, length)
+						return retVal
 					}
 				}
 			}
 		} else {
 			err := stream.gopCache.Input(pckt)
 			if err != nil {
-				_ = fmt.Errorf(err.Error())
+				retVal = fmt.Errorf(err.Error())
+				return retVal
 			}
 			for _, packetStream := range stream.PcktStreams {
 				length := len(packetStream.ps)

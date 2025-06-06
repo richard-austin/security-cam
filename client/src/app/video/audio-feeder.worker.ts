@@ -85,7 +85,7 @@ class AudioWorker {
                type: 'key',
                timestamp: 0,
                duration: 1,
-          data: event.data,
+               data: event.data,
              });
              await this.audioDecoder.decode(eac)
            }
