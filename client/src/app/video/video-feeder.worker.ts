@@ -69,7 +69,8 @@ class VideoFeeder {
         }
         if( this.configSupported.supported) {
             const chunk = new EncodedVideoChunk({
-                timestamp: (performance.now()) * 1000,
+                timestamp: 0,
+                duration: 0,
                 type: (this.isHEVC ? (data[3] === 0x40) : ((data[4] & 0x0f) === 7)) ? "key" : "delta",
                 data: data,
             });
