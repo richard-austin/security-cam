@@ -82,6 +82,7 @@ func (bb *BucketBrigade) Input(p Packet) (err error) {
 	//log.Infof("inputIndex = %d, cacheInUse = %d, opIdx = %d,", bb.inputIndex, bb.cacheInUse, opIdx)
 	if err != nil {
 		log.Errorf("Error in gop cache: %s", err.Error())
+		return
 	}
 	for _, f := range bb.feeders {
 		select {
