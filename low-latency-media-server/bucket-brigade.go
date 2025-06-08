@@ -30,7 +30,7 @@ type BucketBrigadeFeeder struct {
 }
 
 func NewBucketBrigade(preambleTime int) (bucketBrigade BucketBrigade) {
-	const cacheLength = 1500
+	const cacheLength = 2500
 	bucketBrigade = BucketBrigade{
 		Cache:       make([]Packet, cacheLength),
 		feeders:     make([]*BucketBrigadeFeeder, 0),
