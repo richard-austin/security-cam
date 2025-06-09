@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <label *ngIf="stream?.audio && !mediaFeeder.noAudio" class="video-buttons"
-                       [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls'"
+                       [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (mediaFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
                        matTooltipClass="tooltip">
                     <mat-icon (click)="toggleShowAudioControls()">{{ mediaFeeder.isMuted ? 'volume_off' : 'volume_up' }}
                     </mat-icon>

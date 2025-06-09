@@ -74,7 +74,7 @@
                 </div>
             </div>
             <label *ngIf="hasAudio()" class="video-buttons"
-                   [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls'"
+                   [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (isMuted() ? 'unmute' : 'mute') + ' sound'"
                    matTooltipClass="tooltip">
                 <mat-icon (click)="toggleShowAudioControls()">{{ isMuted() ? 'volume_off' : 'volume_up' }}
                 </mat-icon>
