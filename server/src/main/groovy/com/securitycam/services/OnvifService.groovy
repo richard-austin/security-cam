@@ -254,22 +254,31 @@ class OnvifService {
                                 stream.video_height = resolution.getHeight()
 
                                 AudioEncoderConfiguration aec = profile.getAudioEncoderConfiguration()
-                                int bitRate = aec.getBitrate()
-                                // bitRate should be in Kbps, though it is in bps from SV3C type cameras.
-                                if (bitRate < 200)
-                                    bitRate *= 1000
-                                stream.audio_bitrate = bitRate
-                                String encoding = aec.getEncoding().value()
-                                if (isSupportedAudioOutputFmt(encoding)) {
-                                    stream.audio_encoding = encoding
-                                    stream.audio = true
+                                if (aec != null) {
+                                    int bitRate = aec.getBitrate()
+                                    // bitRate should be in Kbps, though it is in bps from SV3C type cameras.
+                                    if (bitRate.intValue() < 200)
+                                        bitRate *= 1000
+                                    stream.audio_bitrate = bitRate
+                                    String encoding = aec.getEncoding().value()
+                                    if (isSupportedAudioOutputFmt(encoding) && bitRate.intValue() != 0) {
+                                        stream.audio_encoding = encoding
+                                        stream.audio = true
+                                    } else {
+                                        stream.audio_encoding = "None"
+                                        stream.audio = false
+                                    }
+                                    stream.audio_sample_rate = aec.getSampleRate().intValue()
+                                    // sampleRate should be in Kbps, though it is in bps from SV3C type cameras.
+                                    if (stream.audio_sample_rate < 200)
+                                        stream.audio_sample_rate *= 1000
+
+                                    //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
                                 } else {
                                     stream.audio_encoding = "None"
                                     stream.audio = false
+                                    stream.audio_sample_rate = stream.audio_bitrate = 0
                                 }
-                                stream.audio_sample_rate = aec.getSampleRate()
-
-                                //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
                             })
                         }
                         logService.cam.info("Connected to device "+device.getDeviceInfo().manufacturer +": "+device.getDeviceInfo().model + ": at "+ device.streamUri.toString())
