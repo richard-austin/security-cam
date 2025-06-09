@@ -92,8 +92,11 @@ export class MediaFeeder {
 
       const videoWriter = videoTrack.writable.getWriter();
       const audioWriter = audioTrack.writable.getWriter();
+      const ms = new MediaStream([videoTrack])
+      if(this.stream.audio)
+        ms.addTrack(audioTrack);
 
-      this.video.srcObject = new MediaStream([videoTrack, audioTrack]);
+      this.video.srcObject = ms;
       this.video.onloadedmetadata = () => {
         this.video.play().then();
       }
