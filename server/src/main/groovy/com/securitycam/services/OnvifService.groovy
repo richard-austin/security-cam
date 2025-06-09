@@ -271,15 +271,15 @@ class OnvifService {
                                     stream.audio_sample_rate = aec.getSampleRate().intValue()
                                     // sampleRate should be in Kbps, though it is in bps from SV3C type cameras.
                                     if (stream.audio_sample_rate < 200)
-                                        stream.audio_sample_rate *= 1000;
+                                        stream.audio_sample_rate *= 1000
 
                                     //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
                                 } else {
                                     stream.audio_encoding = "None"
                                     stream.audio = false
-                                    stream.audio_sample_rate = stream.audio_bitrate = 0;
+                                    stream.audio_sample_rate = stream.audio_bitrate = 0
                                 }
-                            });
+                            })
                         }
                         logService.cam.info("Connected to device "+device.getDeviceInfo().manufacturer +": "+device.getDeviceInfo().model + ": at "+ device.streamUri.toString())
                         logService.cam.debug(TestDevice.inspect(device))
