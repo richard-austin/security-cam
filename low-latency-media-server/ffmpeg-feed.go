@@ -72,10 +72,12 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 			go func(camera Camera, stream *StreamC) {
 				for {
 					//time.Sleep(300 * time.Hour)
+					var audioMode string
 					var audio string
 					var audioMap string
 					var audioMuxer string
 					if !stream.Audio {
+						audioMode = "-an"
 						audio = ""
 						audioMap = ""
 						audioMuxer = ""
@@ -85,6 +87,7 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 						} else {
 							audioMuxer = "adts"
 						}
+						audioMode = "-c:a copy"
 						audio = fmt.Sprintf("|[select=a:f=%s:onfail=abort]%sa", audioMuxer, stream.MediaServerInputUri)
 						audioMap = "-map 0:a " // The space at the end is important in splitting the command line
 					}
@@ -120,7 +123,7 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 					log.Info("Codec string = " + avi.Codec)
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
-					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c copy -copytb 1 -f tee -fflags nobuffer -map 0:v %s[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
 					log.Info("/usr/bin/ffmpeg " + sb.String())
 					cmdStr := sb.String()
 					cmd := exec.Command("/usr/bin/ffmpeg", strings.Split(cmdStr, " ")...)
