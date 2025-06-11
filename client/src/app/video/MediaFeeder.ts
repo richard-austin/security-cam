@@ -4,14 +4,12 @@ import {Subscription} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
 
 declare function initMSTG(): void;
-declare function initAudioStream(): void;
 
 // MediaStreamTrackGenerator not in lib.dom.d.ts
 declare let MediaStreamTrackGenerator: any
 declare let AudioStream: any;
 
 initMSTG();  // Set up MediaStreamTrackGenerator for platforms which don't support it
-initAudioStream();
 
 export class MediaFeeder {
   isLive!: boolean;
@@ -25,7 +23,7 @@ export class MediaFeeder {
   recordingUri: string = '';
 
   videoWorker!: Worker;
-  audioWorker!:Worker;
+  audioWorklet: any;
   isStalled: boolean = false;
   protected _noAudio: boolean = false;
 
@@ -94,13 +92,9 @@ export class MediaFeeder {
           + this.stream.uri;
 
       const videoTrack = new MediaStreamTrackGenerator({kind: 'video'});
-      let audio_sample_rate = parseInt(this.stream.audio_sample_rate);
-      if (audio_sample_rate < 1000)
-        audio_sample_rate *= 1000;
-      const audioTrack = this.stream.audio ? new AudioStream(audio_sample_rate) : undefined;
 
       const videoWriter = videoTrack.writable.getWriter();
-      const audioWriter = audioTrack?.writable.getWriter();
+      // const audioWriter = audioTrack?.writable.getWriter();
       // if(this.stream.audio)
       //   ms.addTrack(audioTrack);
 
@@ -130,23 +124,10 @@ export class MediaFeeder {
         };
         this.videoWorker.postMessage({url: url})
         if(this.stream.audio) {
-          this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));
-          this.video.onplaying = () => {
-            this.audioWorker.onmessage = async ({data}) => {
-              if (!data.warningMessage && !data.closed) {
-                if (!this.video.paused) {
-                  await audioWriter.write(data);
-                  await audioWriter.ready;
-                }
-              } else if (data.closed) {
-                console.log("Terminating the audio worker");
-                this.audioWorker.terminate();
-              } else if (!data.warningMessage) {
-               this.reporting.warningMessage = data.warningMessage;
-              }
-            }
-          }
-          this.audioWorker.postMessage({url: url + 'a'})
+          let audio_sample_rate = parseInt(this.stream.audio_sample_rate);
+          if (audio_sample_rate < 1000)
+            audio_sample_rate *= 1000;
+          this.audioWorklet = this.stream.audio ? new AudioStream(audio_sample_rate, url + 'a') : undefined;
         }
       } else {
         this.reporting.warningMessage = "Web workers are not supported in this environment";
@@ -170,7 +151,6 @@ export class MediaFeeder {
     this.timerHandle = setTimeout(() => {
       this.isStalled = true;
       this.messageCount = 0;
-      this.audioWorker?.terminate();
       this.videoWorker?.terminate();
       this.stop();
       this.startVideo()
@@ -194,8 +174,7 @@ export class MediaFeeder {
       }
       this.videoWorker?.postMessage({close: true})
       this.videoWorker?.terminate();
-      this.audioWorker?.postMessage({close: true})
-      this.audioWorker?.terminate();
+      this.audioWorklet?.close();
       this.video.pause();
     }
   }
