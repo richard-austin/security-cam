@@ -35,7 +35,7 @@ class AudioWorker {
 
   private readonly config = {
     numberOfChannels: 1,
-    sampleRate: 8000,  // Firefox hard codes to 48000
+    sampleRate: 48000,  // Firefox hard codes to 48000
     codec: 'alaw',
   };
 

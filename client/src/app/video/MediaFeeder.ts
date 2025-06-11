@@ -2,10 +2,16 @@ import Hls from "hls.js";
 import {Camera, Stream} from "../cameras/Camera";
 import {Subscription} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
+
 declare function initMSTG(): void;
+declare function initAudioStream(): void;
+
 // MediaStreamTrackGenerator not in lib.dom.d.ts
 declare let MediaStreamTrackGenerator: any
+declare let AudioStream: any;
+
 initMSTG();  // Set up MediaStreamTrackGenerator for platforms which don't support it
+initAudioStream();
 
 export class MediaFeeder {
   isLive!: boolean;
@@ -88,37 +94,21 @@ export class MediaFeeder {
           + this.stream.uri;
 
       const videoTrack = new MediaStreamTrackGenerator({kind: 'video'});
-      const audioTrack = new MediaStreamTrackGenerator({kind: 'audio'});
+      let audio_sample_rate = parseInt(this.stream.audio_sample_rate);
+      if (audio_sample_rate < 1000)
+        audio_sample_rate *= 1000;
+      const audioTrack = this.stream.audio ? new AudioStream(audio_sample_rate) : undefined;
 
       const videoWriter = videoTrack.writable.getWriter();
-      const audioWriter = audioTrack.writable.getWriter();
-      const ms = new MediaStream([videoTrack])
-      if(this.stream.audio)
-        ms.addTrack(audioTrack);
+      const audioWriter = audioTrack?.writable.getWriter();
+      // if(this.stream.audio)
+      //   ms.addTrack(audioTrack);
 
-      this.video.srcObject = ms;
+      this.video.srcObject = new MediaStream([videoTrack]);
       this.video.onloadedmetadata = () => {
         this.video.play().then();
       }
       this.video.preload = "none";
-
-      // let audioStream = new MediaStream([audioTrack]);
-      // let ctx = new AudioContext()
-      // let source = ctx.createMediaStreamSource(audioStream);
-      // let dn = ctx.createDelay(2);
-      // let gain = ctx.createGain();
-      // gain.connect(ctx.destination);
-      // gain.gain.value = 0;
-      // let g2 = ctx.createGain();
-      // g2.gain.value = .5;
-      // source.connect(dn)
-      // g2.connect(ctx.destination);
-      // dn.connect(g2)
-      // dn.connect(dn);
-      // source.connect(gain);
-      //
-      // dn.delayTime.value = 0.2;
-      //
 
       if (typeof Worker !== 'undefined') {
         // Create a new media feeder web worker
@@ -142,7 +132,7 @@ export class MediaFeeder {
         if(this.stream.audio) {
           this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));
           this.video.onplaying = () => {
-            this.audioWorker.onmessage = async ({data, type}) => {
+            this.audioWorker.onmessage = async ({data}) => {
               if (!data.warningMessage && !data.closed) {
                 if (!this.video.paused) {
                   await audioWriter.write(data);
