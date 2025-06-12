@@ -43,7 +43,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
-  volume: number = 0.4;
 
   visible: boolean = false;
   mediaFeeder!: MediaFeeder;
@@ -95,10 +94,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.vt.reset();
   }
 
-  toggleMuteAudio(muted: boolean) {
+  toggleMuteAudio() {
     if (this.mediaFeeder)
-      this.mediaFeeder.mute(muted);
-    this.volume = this.mediaFeeder.isMuted ? 0 : this.video.volume;
+      this.mediaFeeder.mute(!this.mediaFeeder.isMuted);
   }
 
   mute(mute: boolean = true): void {
@@ -107,13 +105,12 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setVolume(volume: number) {
-    this.volume = volume;
-    this.video.volume = this.volume;
+    this.mediaFeeder.gain =volume;
   }
 
   toggleShowAudioControls() {
     if(this.ctrlKeyDown) {
-      this.toggleMuteAudio(!this.video.muted)
+      this.toggleMuteAudio();
       this.showAudioControls = false;
     }
     else
@@ -165,7 +162,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.volume = this.video.volume = 0.4;
     this.mediaFeeder.init(this.isLive, this.video, this.reporting);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);

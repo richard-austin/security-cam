@@ -34,7 +34,6 @@ export class MediaFeeder {
     this.isLive = isLive;
     this.video = video;
     this.video.autoplay = true;
-    this.video.muted = false;
     this.video.controls = !isLive;
     this.reporting = reporting;
   }
@@ -179,13 +178,20 @@ export class MediaFeeder {
     }
   }
 
+  set gain(volume: number) {
+    this.audioWorklet.setGain(volume);
+  }
+
+  get gain(): number {
+    return this.audioWorklet.getGain()
+  }
+
   mute(muted: boolean = true) {
-    if(this.video !== null && this.video !== undefined)
-      this.video.muted = muted;
+    this.audioWorklet.setMuting(muted);
   }
 
   get isMuted() {
-    return this.video.muted;
+    return this.audioWorklet.isMuted();
   }
 
   get hasCam(): boolean {

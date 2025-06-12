@@ -1,79 +1,112 @@
 class AudioStream {
-    gainFactor = 1;
+    gainFactor = 0;
     gain = 0.5;
     muted = false;
     gainNode;
 
     constructor(sampleRate, url) {
-                const ac = new AudioContext({sampleRate: sampleRate});
+        const ac = new AudioContext({sampleRate: sampleRate});
         this.gainNode = ac.createGain()
-        let gainFactor = 1;
-        let gain = 0.5;
-        let muted = false;
-
         this.gainNode.connect(ac.destination);
 
-                const dest = ac.createMediaStreamDestination();
-                const [track] = dest.stream.getAudioTracks();
+        // Give access to these variables inside the worklet definition
+        let setGainFactor = (gainFactor) => {
+            this.gainFactor = gainFactor;
+        }
+        let getGainFactor = () => {
+            return this.gainFactor
+        };
+
+        let setGain = (gain) => {
+            this.gain = this.gainNode.gain.value = gain * this.gainFactor;
+        }
+
+        const dest = ac.createMediaStreamDestination();
+        const [track] = dest.stream.getAudioTracks();
         const gainNode = this.gainNode;
-                track.writable = new WritableStream({
-                    async start(controller) {
-                        this.arrays = [];
-                        function worklet() {
-                            registerProcessor("audio-feeder", class Processor extends AudioWorkletProcessor {
+        track.writable = new WritableStream({
+            async start(controller) {
+                this.arrays = [];
 
-                                constructor() {
-                                    super();
-                                    this.arrays = [];
-                                    this.array = [];
-                                    this.arrayOffset = 0;
-                                    this.port.onmessage = ({data}) => this.arrays.push(data);
-                                    this.emptyArray = new Float32Array(0);
-                                }
+                function worklet() {
+                    registerProcessor("audio-feeder", class Processor extends AudioWorkletProcessor {
 
-                                process(inputs, [[output]]) {
-                                    if(this.array.length === 0 && this.arrays.length === 0)
-                                        return true;
-                                 //   console.info("array length = "+this.array.length+": arrays length = "+this.arrays.length+": arrayOffset = "+this.arrayOffset)
-
-                                    for (let i = 0; i < output.length; i++) {
-                                        if (this.arrayOffset >= this.array.length) {
-                                            this.array = this.arrays.shift() || this.emptyArray;
-                                            this.arrayOffset = 0;
-                                        }
-                                        if(this.array.length > 0)
-                                            output[i] = this.array[this.arrayOffset++] || 0;
-                                    }
-                                    return true;
-                                }
-                            });
+                        constructor() {
+                            super();
+                            this.arrays = [];
+                            this.array = [];
+                            this.arrayOffset = 0;
+                            this.port.onmessage = ({data}) => this.arrays.push(data);
+                            this.emptyArray = new Float32Array(0);
                         }
 
-                        await ac.audioWorklet.addModule(`data:text/javascript,(${worklet.toString()})()`);
-                        this.node = new AudioWorkletNode(ac, "audio-feeder");
-                        this.node.connect(gainNode);
-                    },
-                    write(audioData) {
-                        const format = audioData.format;
-                        let array;
+                        process(inputs, [[output]]) {
+                            if (this.array.length === 0 && this.arrays.length === 0)
+                                return true;
+                            //   console.info("array length = "+this.array.length+": arrays length = "+this.arrays.length+": arrayOffset = "+this.arrayOffset)
 
-                        gainFactor = format === 's16' ? 0.00005 : 1; // Who knew?
-                        gainNode.gain.value = gain * gainFactor;
+                            for (let i = 0; i < output.length; i++) {
+                                if (this.arrayOffset >= this.array.length) {
+                                    this.array = this.arrays.shift() || this.emptyArray;
+                                    this.arrayOffset = 0;
+                                }
+                                if (this.array.length > 0)
+                                    output[i] = this.array[this.arrayOffset++] || 0;
+                            }
+                            return true;
+                        }
+                    });
+                }
 
-                        array = format === "s16" ?
-                            new Int16Array(audioData.numberOfFrames * audioData.numberOfChannels)
-                            :
-                            new Float32Array(audioData.numberOfFrames * audioData.numberOfChannels)
-                        this.arrays[audioData.numberOfFrames] = array
+                await ac.audioWorklet.addModule(`data:text/javascript,(${worklet.toString()})()`);
+                this.node = new AudioWorkletNode(ac, "audio-feeder");
+                this.node.connect(gainNode);
+            },
+            write(audioData) {
+                const format = audioData.format;
+                let array;
 
-                        audioData.copyTo(array, {planeIndex: 0});
-                        // console.info("Packet format: "+audioData.format);
-                        this.node.port.postMessage(array, [array.buffer]);
-                        audioData.close();
-                    }
-                });
-        this.audioFeed = new AudioFeeder(url, track)
+                // Set up gain factor, for s16 format decoder output, it has to be attenuated by a huge factor!!
+                if (getGainFactor() === 0) {
+                    setGainFactor(format === 's16' ? 0.00005 : 1);
+                    setGain(0.5);
+                }
+
+                array = format === "s16" ?
+                    new Int16Array(audioData.numberOfFrames * audioData.numberOfChannels)
+                    :
+                    new Float32Array(audioData.numberOfFrames * audioData.numberOfChannels)
+                this.arrays[audioData.numberOfFrames] = array
+
+                audioData.copyTo(array, {planeIndex: 0});
+                // console.info("Packet format: "+audioData.format);
+                this.node.port.postMessage(array, [array.buffer]);
+                audioData.close();
             }
+        });
+        this.audioFeed = new AudioFeeder(url, track)
+    }
+
+    setGain(gain) {
+        this.gain = this.gainNode.gain.value = gain * this.gainFactor;
+    }
+
+    getGain() {
+        return this.gainNode.gain.value / this.gainFactor;
+    }
+
+    setMuting(muted) {
+        if (muted)
+            this.gainNode.gain.value = 0;
+        else {
+            this.gainNode.gain.value = this.gain;
+        }
+        this.muted = muted;
+    }
+
+    isMuted() {
+        return this.muted;
+    }
 
     close() {
         this.audioFeed.close();
@@ -82,7 +115,6 @@ class AudioStream {
 
 
 class AudioFeeder {
-
     config = {
         numberOfChannels: 1,
         sampleRate: 8000,  // Firefox hard codes to 48000

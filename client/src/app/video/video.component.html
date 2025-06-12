@@ -25,8 +25,9 @@
                 <div class="audio-controls-dialogue">
                     <div [@detailExpand]="showAudioControls ? 'expanded' : 'collapsed'">
                         <app-audio-control *ngIf="stream?.audio && !mediaFeeder.noAudio" [mute]="mediaFeeder.isMuted"
-                                           (muteAudio)="toggleMuteAudio($event)" [level]="volume"
-                                           (setLevel)="setVolume($event.valueOf())"></app-audio-control>
+                                           (muteAudio)="toggleMuteAudio()" [level]="mediaFeeder.gain"
+                                           (setLevel)="setVolume($event.valueOf())">
+                        </app-audio-control>
                         <div>
                         </div>
                     </div>
