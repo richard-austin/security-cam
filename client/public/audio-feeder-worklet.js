@@ -74,15 +74,21 @@ class AudioStream {
                     setGain(0.5);
                 }
 
-                array = format === "s16" ?
-                    new Int16Array(audioData.numberOfFrames * audioData.numberOfChannels)
-                    :
-                    new Float32Array(audioData.numberOfFrames * audioData.numberOfChannels)
-                this.arrays[audioData.numberOfFrames] = array
+                if(this.arrays[audioData.numberOfFrames * audioData.numberOfChannels] !== undefined) {
+                    array = this.arrays[audioData.numberOfFrames * audioData.numberOfChannels];
+                } else {
+                    array = format.includes("s16") ?
+                        new Int16Array(audioData.numberOfFrames * audioData.numberOfChannels)
+                        :
+                        new Float32Array(audioData.numberOfFrames * audioData.numberOfChannels);
+                    this.arrays[audioData.numberOfFrames * audioData.numberOfChannels] = array
+                    //console.info("New array of "+array.length+" created");
+                }
+
 
                 audioData.copyTo(array, {planeIndex: 0});
                 // console.info("Packet format: "+audioData.format);
-                this.node.port.postMessage(array, [array.buffer]);
+                this.node.port.postMessage(array);
                 audioData.close();
             }
         });
