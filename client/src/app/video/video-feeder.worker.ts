@@ -70,7 +70,7 @@ class VideoFeeder {
         }
         if (this.configSupported.supported) {
             const chunk = new EncodedVideoChunk({
-                timestamp: 0,
+                timestamp: (performance.now()) * 1000,  // Make the video.ontimeupdate and video.currentTime have correct run time
                 duration: 0,
                 type: (this.isHEVC ? (data[3] === 0x40) : ((data[4] & 0x0f) === 7)) ? "key" : "delta",
                 data: data,
