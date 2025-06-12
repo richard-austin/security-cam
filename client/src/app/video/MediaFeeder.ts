@@ -127,6 +127,7 @@ export class MediaFeeder {
           if (audio_sample_rate < 1000)
             audio_sample_rate *= 1000;
           this.audioWorklet = this.stream.audio ? new AudioStream(audio_sample_rate, url + 'a') : undefined;
+          console.info("audio worklet "+url+"a")
         }
       } else {
         this.reporting.warningMessage = "Web workers are not supported in this environment";
@@ -187,7 +188,7 @@ export class MediaFeeder {
   }
 
   mute(muted: boolean = true) {
-    this.audioWorklet.setMuting(muted);
+    this.audioWorklet?.setMuting(muted);
   }
 
   get isMuted() {

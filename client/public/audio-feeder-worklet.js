@@ -19,6 +19,8 @@ class AudioStream {
 
         let setGain = (gain) => {
             this.gain = this.gainNode.gain.value = gain * this.gainFactor;
+            if(this.muted)
+                this.gainNode.gain.value = 0;
         }
 
         const dest = ac.createMediaStreamDestination();
@@ -102,6 +104,8 @@ class AudioStream {
             this.gainNode.gain.value = this.gain;
         }
         this.muted = muted;
+
+        console.info("Muted: "+this.muted+" Gain: "+this.gainNode.gain.value);
     }
 
     isMuted() {
