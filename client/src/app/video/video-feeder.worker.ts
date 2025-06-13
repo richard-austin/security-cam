@@ -2,10 +2,10 @@
 
 import {timer} from "rxjs";
 
-let videoFeeder!:VideoFeeder;
+let videoFeeder!: VideoFeeder;
 addEventListener('message', ({data}) => {
-    if(data.url) {
-        if(typeof VideoDecoder !== 'undefined') {
+    if (data.url) {
+        if (typeof VideoDecoder !== 'undefined') {
             videoFeeder = new VideoFeeder(data.url)
             videoFeeder.setUpWebsocketConnection();
             videoFeeder.setupDecoder();
@@ -15,8 +15,7 @@ addEventListener('message', ({data}) => {
                 postMessage({warningMessage: "VideoDecoder is not supported on this browser"})
             });
         }
-    }
-    else if(data.close && videoFeeder) {
+    } else if (data.close && videoFeeder) {
         videoFeeder.close()
     }
 });
@@ -33,6 +32,7 @@ class VideoFeeder {
     private ws!: WebSocket;
     private noRestart: boolean = false;
     private isHEVC: boolean = false;
+    hardwareAcceleration: HardwareAcceleration = "no-preference";
     private started = false;
     private codec = ""; // https://wiki.whatwg.org/wiki/Video_type_parameters
 
@@ -53,23 +53,24 @@ class VideoFeeder {
             },
         });
     }
+
     configSupported!: VideoDecoderSupport;
-        processMessage = async (data: Uint8Array): Promise<void> => {
+
+    processMessage = async (data: Uint8Array): Promise<void> => {
         // let processStart = performance.now();
         if (this.decoder.state !== "configured") {
-            const config = {codec: this.codec, optimizeForLatency: true};
+            const config = {codec: this.codec, optimizeForLatency: true, hardwareAcceleration: this.hardwareAcceleration};
             this.configSupported = await VideoDecoder.isConfigSupported(config)
-            if(this.configSupported.supported) {
+            if (this.configSupported.supported) {
                 this.decoder.configure(config);
-            }
-            else {
+            } else {
                 this.ws.close(4000, "Codec not supported")
-                postMessage({warningMessage: "The codec string "+ this.codec + " is not supported on this browser"});
+                postMessage({warningMessage: "The codec string " + this.codec + " is not supported on this browser"});
             }
         }
-        if( this.configSupported.supported) {
+        if (this.configSupported.supported) {
             const chunk = new EncodedVideoChunk({
-                timestamp: 0,
+                timestamp: (performance.now()) * 1000,  // Make the video.ontimeupdate and video.currentTime have correct run time
                 duration: 0,
                 type: (this.isHEVC ? (data[3] === 0x40) : ((data[4] & 0x0f) === 7)) ? "key" : "delta",
                 data: data,
@@ -123,6 +124,7 @@ class VideoFeeder {
         if (this.ws)
             this.ws.close()
     }
+
     resetTimeout() {
         clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {
@@ -131,11 +133,11 @@ class VideoFeeder {
     }
 
     timedOut() {
-        if(this.configSupported && this.configSupported.supported) {
+        if (this.configSupported && this.configSupported.supported) {
             console.error("Video feed from websocket has stopped ...");
             if (this.ws)
                 this.ws.close();
-            if(this.decoder)
+            if (this.decoder)
                 this.decoder.close()
         }
     }
@@ -157,17 +159,19 @@ class VideoFeeder {
         }
     }
 
-    readonly hevcStart:Uint8Array = new Uint8Array([0x00,0x00,0x01]);
-    readonly h264Start:Uint8Array = new Uint8Array([0x00,0x00,0x00,0x01]);
-    readonly h264KeyFrame1:Uint8Array = new Uint8Array([0x67,0x64]);
-    readonly h264KeyFrame2:Uint8Array = new Uint8Array([0x27,0x64]);
-    readonly h264KeyFrame3:Uint8Array = new Uint8Array([0x61,0x88]);
+    readonly hevcStart: Uint8Array = new Uint8Array([0x00, 0x00, 0x01]);
+    readonly h264Start: Uint8Array = new Uint8Array([0x00, 0x00, 0x00, 0x01]);
+    readonly h264KeyFrame1: Uint8Array = new Uint8Array([0x67, 0x64]);
+    readonly h264KeyFrame2: Uint8Array = new Uint8Array([0x27, 0x64]);
+    readonly h264KeyFrame3: Uint8Array = new Uint8Array([0x61, 0x88]);
 
-    isStartFrame(buffer:Uint8Array):boolean {
+    isStartFrame(buffer: Uint8Array): boolean {
         let startFrame: boolean = this.h264Start.every((value, index) => value === buffer[index]);
-        if(!startFrame) {// Not h264, try hevc
+        if (!startFrame) {// Not h264, try hevc
             startFrame = this.hevcStart.every((value, index) => value === buffer[index]);
             this.isHEVC = startFrame;
+            // Use software decoding for H264 as hardware decoding in Windows and VAAPI on Linux add noticeable latency
+            this.hardwareAcceleration = this.isHEVC ? "no-preference" : "prefer-software";
         }
         return startFrame;
     }
@@ -176,16 +180,16 @@ class VideoFeeder {
      * isKeyFrame: Detects h264 and hevc keyframes. isStartFrame must be called before the first use of this.
      * @param buffer Encoded h264 or hevc video block.
      */
-    isKeyFrame(buffer:Uint8Array):boolean {
-        if(this.isHEVC) {
+    isKeyFrame(buffer: Uint8Array): boolean {
+        if (this.isHEVC) {
             const byte = (buffer[3] >> 1) & 0x3f;
             return byte === 0x19 || byte === 0x20;
         } else {
-            let isKeyFrame = this.h264KeyFrame1.every((value, index) => value === buffer[index+4]);
-            if(!isKeyFrame)
-                isKeyFrame = this.h264KeyFrame2.every((value, index) => value === buffer[index+4]);
-            if(!isKeyFrame)
-                isKeyFrame = this.h264KeyFrame3.every((value, index) => value === buffer[index+4]);
+            let isKeyFrame = this.h264KeyFrame1.every((value, index) => value === buffer[index + 4]);
+            if (!isKeyFrame)
+                isKeyFrame = this.h264KeyFrame2.every((value, index) => value === buffer[index + 4]);
+            if (!isKeyFrame)
+                isKeyFrame = this.h264KeyFrame3.every((value, index) => value === buffer[index + 4]);
             return isKeyFrame;
         }
     }
@@ -209,8 +213,8 @@ class VideoFeeder {
             //  together for processing by the decoder
             if (value.byteLength >= 32767)
                 /**
-                    TODO: Need to find the actual packet length as this will fail if a camera has a
-                       shorter max packet length than 32K, or if multiple packets are conjoined.
+                 TODO: Need to find the actual packet length as this will fail if a camera has a
+                 shorter max packet length than 32K, or if multiple packets are conjoined.
                  **/
                 this.bufferInUse = true;
             if (this.bufferInUse) {

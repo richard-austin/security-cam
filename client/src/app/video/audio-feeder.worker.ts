@@ -35,7 +35,7 @@ class AudioWorker {
 
   private readonly config = {
     numberOfChannels: 1,
-    sampleRate: 8000,  // Firefox hard codes to 48000
+    sampleRate: 48000,  // Firefox hard codes to 48000
     codec: 'alaw',
   };
 
@@ -83,7 +83,7 @@ class AudioWorker {
              // @ts-ignore
              const eac = new EncodedAudioChunk({
                type: 'key',
-               timestamp: 0,
+               timestamp: (performance.now()) * 1000,
                duration: 1,
                data: event.data,
              });

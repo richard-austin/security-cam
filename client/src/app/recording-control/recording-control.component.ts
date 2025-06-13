@@ -68,6 +68,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     _maxDate!: Date;
     initialised: boolean;
     showAudioControls: boolean = false;
+    ctrlKeyDown = false;
     volume: number = 0.4;
 
     constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService, private utilsService: UtilsService, private cd: ChangeDetectorRef) {
@@ -354,31 +355,11 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         }
     }
 
-    ngOnInit(): void {
-    }
-
     clickHandler = (ev: Event) => {
         const inVideoControlDialogue = ev.composedPath().includes(this.recordingsButtonsEl.nativeElement);
         if (!inVideoControlDialogue)
             this.showAudioControls = false;
     };
-
-    ngAfterViewInit(): void {
-        document.addEventListener('click', this.clickHandler);
-        this.isGuest = this.utilsService.isGuestAccount;
-        this.initialised = true;
-        this.setupRecording();
-        this.cd.detectChanges();
-        this.video.video.controls = false;  // Turn off controls to prevent full screen on reorientation to landscape
-                                            // Also in some browsers (Firefox on Android), having the controls enabled
-                                            // prevents pan and pinch zoom from working.
-        this.video.setSize(100, true);
-    }
-
-    ngOnDestroy(): void {
-        document.removeEventListener('click', this.clickHandler);
-        this.video.video.controls = true; // Enable controls again
-    }
 
     toggleMuteAudio(muted: boolean) {
         if (this.video.video)
@@ -399,6 +380,39 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     }
 
     toggleShowAudioControls() {
-        this.showAudioControls = !this.showAudioControls;
+        if(this.ctrlKeyDown) {
+            this.toggleMuteAudio(!this.video?.video?.muted)
+            this.showAudioControls = false;
+        }
+        else
+            this.showAudioControls = !this.showAudioControls;
+    }
+
+    keyHandler = (ev: KeyboardEvent): void => {
+        this.ctrlKeyDown = ev.ctrlKey;
+    }
+
+    ngOnInit(): void {
+        document.addEventListener('click', this.clickHandler);
+        window.addEventListener("keydown", this.keyHandler);
+        window.addEventListener("keyup", this.keyHandler);
+    }
+
+    ngAfterViewInit(): void {
+        this.isGuest = this.utilsService.isGuestAccount;
+        this.initialised = true;
+        this.setupRecording();
+        this.cd.detectChanges();
+        this.video.video.controls = false;  // Turn off controls to prevent full screen on reorientation to landscape
+                                            // Also in some browsers (Firefox on Android), having the controls enabled
+                                            // prevents pan and pinch zoom from working.
+        this.video.setSize(100, true);
+    }
+
+    ngOnDestroy(): void {
+        document.removeEventListener('click', this.clickHandler);
+        window.removeEventListener("keydown", this.keyHandler)
+        window.removeEventListener("keyup", this.keyHandler)
+        this.video.video.controls = true; // Enable controls again
     }
 }

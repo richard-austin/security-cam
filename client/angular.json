@@ -45,7 +45,8 @@
                          "./node_modules/moment/min/moment.min.js",
               "./node_modules/file-saver/dist/FileSaver.min.js",
               "./node_modules/object-hash/dist/object_hash.js",
-              "./public/mediastreamtrackgenerator.js"
+              "./public/mediastreamtrackgenerator.js",
+              "./public/audio-feeder-worklet.js"
             ],
             "extractLicenses": false,
             "sourceMap": true,
@@ -116,7 +117,8 @@
             ],
             "scripts": ["./node_modules/hls.js/dist/hls.light.min.js",
               "./node_modules/moment/min/moment.min.js",
-              "./public/mediastreamtrackgenerator.js"
+              "./public/mediastreamtrackgenerator.js",
+              "./public/audio-feeder-worklet.js"
             ]
           }
         },

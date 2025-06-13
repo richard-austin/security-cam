@@ -43,8 +43,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
-  volume: number = 0.4;
-
   visible: boolean = false;
   mediaFeeder!: MediaFeeder;
   multi: boolean = false;
@@ -54,6 +52,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   totalTime: string = "";
   sizing!: VideoSizing;
   showAudioControls: boolean = false;
+  ctrlKeyDown = false;
 
   constructor(public utilsService: UtilsService) {
     this.mediaFeeder = new MediaFeeder();
@@ -94,10 +93,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.vt.reset();
   }
 
-  toggleMuteAudio(muted: boolean) {
+  toggleMuteAudio() {
     if (this.mediaFeeder)
-      this.mediaFeeder.mute(muted);
-    this.volume = this.mediaFeeder.isMuted ? 0 : this.video.volume;
+      this.mediaFeeder.mute(!this.mediaFeeder.isMuted);
   }
 
   mute(mute: boolean = true): void {
@@ -106,12 +104,16 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setVolume(volume: number) {
-    this.volume = volume;
-    this.video.volume = this.volume;
+    this.mediaFeeder.gain =volume;
   }
 
   toggleShowAudioControls() {
-    this.showAudioControls = !this.showAudioControls;
+    if(this.ctrlKeyDown) {
+      this.toggleMuteAudio();
+      this.showAudioControls = false;
+    }
+    else
+      this.showAudioControls = !this.showAudioControls;
   }
 
   setSize(size: number, isRecording: boolean = false): void {
@@ -139,9 +141,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnInit(): void {
-  }
-
   clickHandler =  (ev: Event) => {
     if(this.videoControlsEL) {
       const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL.nativeElement);
@@ -150,10 +149,18 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   };
 
-  ngAfterViewInit(): void {
+  keyHandler = (ev: KeyboardEvent): void => {
+    this.ctrlKeyDown = ev.ctrlKey;
+  }
+
+  ngOnInit(): void {
     document.addEventListener('click', this.clickHandler);
+    window.addEventListener("keydown", this.keyHandler);
+    window.addEventListener("keyup", this.keyHandler);
+  }
+
+  ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.volume = this.video.volume = 0.4;
     this.mediaFeeder.init(this.isLive, this.video, this.reporting);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
@@ -169,12 +176,14 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sizing = new VideoSizing(this.video);
 
-    screen.orientation.addEventListener('change', this.orientationChangeHandler)  }
+    screen.orientation.addEventListener('change', this.orientationChangeHandler)
+  }
 
   ngOnDestroy(): void {
     this.mediaFeeder.stop();
     document.removeEventListener('click', this.clickHandler);
-
+    window.removeEventListener("keydown", this.keyHandler)
+    window.removeEventListener("keyup", this.keyHandler)
     // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
     //  ffmpeg to the backchannel device. The problem does not occur when done like this
     let timerSubscription: Subscription = timer(20).subscribe(() => {
@@ -184,4 +193,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     window.screen.orientation.onchange = null;
     this.sizing._destroy();
   }
+
+  protected readonly MediaFeeder = MediaFeeder;
 }
