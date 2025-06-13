@@ -19,9 +19,14 @@ class AudioStream {
         };
 
         let setGain = (gain) => {
-            this.gain = this.gainNode.gain.value = gain * this.gainFactor;
+            this.gainNode.gain.value = gain * this.gainFactor;
             if(this.muted)
                 this.gainNode.gain.value = 0;
+            this.gain = gain;
+        }
+
+        let getGain = () => {
+            return this.gain;
         }
 
         const dest = ac.createMediaStreamDestination();
@@ -72,7 +77,7 @@ class AudioStream {
                 // Set up gain factor, for s16 format decoder output, it has to be attenuated by a huge factor!!
                 if (getGainFactor() === 0) {
                     setGainFactor(format === 's16' ? 0.00005 : 1);
-                    setGain(0.5);
+                    setGain(getGain());  // Set to the previously saved gain
                 }
 
                 if(this.arrays[audioData.numberOfFrames * audioData.numberOfChannels] !== undefined) {
@@ -101,18 +106,19 @@ class AudioStream {
         return this.track;
     }
     setGain(gain) {
-        this.gain = this.gainNode.gain.value = gain * this.gainFactor;
+        this.gainNode.gain.value = gain * this.gainFactor;
+        this.gain = gain;
     }
 
     getGain() {
-        return this.gainNode.gain.value / this.gainFactor;
+        return !this.muted ? this.gain : 0;
     }
 
     setMuting(muted) {
         if (muted)
             this.gainNode.gain.value = 0;
         else {
-            this.gainNode.gain.value = this.gain;
+            this.gainNode.gain.value = this.gain * this.gainFactor;
         }
         this.muted = muted;
 

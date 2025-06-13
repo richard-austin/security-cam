@@ -21,10 +21,12 @@ export class MediaFeeder {
   recording: boolean = false;
   manifest: string = '';
   recordingUri: string = '';
-
   videoWorker!: Worker;
   audioWorker!:Worker;
-  audioWorklet: any;
+  // @ts-ignore
+  audioWorklet: AudioStream;
+  muted: boolean = false;
+  volume: number = 0.4;
   isStalled: boolean = false;
   protected _noAudio: boolean = false;
 
@@ -54,6 +56,13 @@ export class MediaFeeder {
     if (this.recordingUri[this.recordingUri.length - 1] !== '/') {
       this.recordingUri += '/';
     }
+    let audio_sample_rate = parseInt(this.stream.audio_sample_rate);
+    if (audio_sample_rate < 1000)
+      audio_sample_rate *= 1000;
+    this.audioWorklet = this.stream.audio ? new AudioStream(audio_sample_rate) : undefined;
+    // If selecting a cam immediately after another, keep the gian and muting status from beforer
+    this.audioWorklet?.setMuting(this.muted);
+    this.audioWorklet?.setGain(this.volume);
 
     this.recordingUri += manifest;
     this.manifest = manifest;   // Save the manifest file name so it can be returned by getManifest
@@ -92,16 +101,10 @@ export class MediaFeeder {
           + this.stream.uri;
 
       const videoTrack = new MediaStreamTrackGenerator({kind: 'video'});
-      let audio_sample_rate = parseInt(this.stream.audio_sample_rate);
-      if (audio_sample_rate < 1000)
-        audio_sample_rate *= 1000;
-      this.audioWorklet = this.stream.audio ? new AudioStream(audio_sample_rate) : undefined;
-      const audioTrack = this.audioWorklet.getTrack();
+      const audioTrack = this.audioWorklet?.getTrack();
 
       const videoWriter = videoTrack.writable.getWriter();
       const audioWriter = audioTrack?.writable.getWriter();
-      // if(this.stream.audio)
-      //   ms.addTrack(audioTrack);
 
       this.video.srcObject = new MediaStream([videoTrack]);
       this.video.onloadedmetadata = () => {
@@ -110,7 +113,7 @@ export class MediaFeeder {
       this.video.preload = "none";
 
       if (typeof Worker !== 'undefined') {
-        // Create a new media feeder web worker
+        // Create a new video feeder web worker
         this.videoWorker = new Worker(new URL('./video-feeder.worker', import.meta.url));
         this.videoWorker.onmessage = async ({data}) => {
           if(!data.warningMessage && !data.closed) {
@@ -129,12 +132,13 @@ export class MediaFeeder {
         };
         this.videoWorker.postMessage({url: url})
         if(this.stream.audio) {
+          // Create a new audio feeder web worker
           this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));
           this.video.onplaying = () => {
             this.audioWorker.onmessage = async ({data}) => {
               if (!data.warningMessage && !data.closed) {
                 if (!this.video.paused) {
-                  await audioWriter.write(data);
+                  await audioWriter.write(data);  // Write the decoded audio data to the audio worklet
                   await audioWriter.ready;
                 }
               } else if (data.closed) {
@@ -200,19 +204,21 @@ export class MediaFeeder {
   }
 
   set gain(volume: number) {
-    this.audioWorklet.setGain(volume);
+    this.audioWorklet?.setGain(volume);
+    this.volume = volume;
   }
 
   get gain(): number {
-    return this.audioWorklet.getGain()
+    return this.audioWorklet?.getGain()
   }
 
   mute(muted: boolean = true) {
     this.audioWorklet?.setMuting(muted);
+    this.muted = muted;
   }
 
   get isMuted() {
-    return this.audioWorklet.isMuted();
+    return this.audioWorklet?.isMuted();
   }
 
   get hasCam(): boolean {

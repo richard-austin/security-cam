@@ -43,7 +43,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
-
   visible: boolean = false;
   mediaFeeder!: MediaFeeder;
   multi: boolean = false;
@@ -177,7 +176,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sizing = new VideoSizing(this.video);
 
-    screen.orientation.addEventListener('change', this.orientationChangeHandler)  }
+    screen.orientation.addEventListener('change', this.orientationChangeHandler)
+  }
 
   ngOnDestroy(): void {
     this.mediaFeeder.stop();
