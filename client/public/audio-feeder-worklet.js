@@ -3,8 +3,9 @@ class AudioStream {
     gain = 0.5;
     muted = false;
     gainNode;
+    track;
 
-    constructor(sampleRate, url) {
+    constructor(sampleRate) {
         const ac = new AudioContext({sampleRate: sampleRate});
         this.gainNode = ac.createGain()
         this.gainNode.connect(ac.destination);
@@ -45,7 +46,7 @@ class AudioStream {
                         process(inputs, [[output]]) {
                             if (this.array.length === 0 && this.arrays.length === 0)
                                 return true;
-                            //   console.info("array length = "+this.array.length+": arrays length = "+this.arrays.length+": arrayOffset = "+this.arrayOffset)
+                            //console.info("array length = "+this.array.length+": arrays length = "+this.arrays.length+": arrayOffset = "+this.arrayOffset)
 
                             for (let i = 0; i < output.length; i++) {
                                 if (this.arrayOffset >= this.array.length) {
@@ -82,7 +83,7 @@ class AudioStream {
                         :
                         new Float32Array(audioData.numberOfFrames * audioData.numberOfChannels);
                     this.arrays[audioData.numberOfFrames * audioData.numberOfChannels] = array
-                    //console.info("New array of "+array.length+" created");
+                    console.info("New array of "+array.length+" created");
                 }
 
 
@@ -92,9 +93,13 @@ class AudioStream {
                 audioData.close();
             }
         });
-        this.audioFeed = new AudioFeeder(url, track)
+        this.track = track;
+       // this.audioFeed = new AudioFeeder(url, track)
     }
 
+    getTrack() {
+        return this.track;
+    }
     setGain(gain) {
         this.gain = this.gainNode.gain.value = gain * this.gainFactor;
     }
@@ -117,131 +122,4 @@ class AudioStream {
     isMuted() {
         return this.muted;
     }
-
-    close() {
-        this.audioFeed.close();
-    }
 }
-
-
-class AudioFeeder {
-    config = {
-        numberOfChannels: 1,
-        sampleRate: 8000,  // Firefox hard codes to 48000
-        codec: 'alaw',
-    };
-
-    timeout;
-    ws;
-    noRestart = false;
-    started = false;
-    url = ""
-    writer;
-
-    constructor(url, track) {
-        console.info("In AudioFeeder constructor, track = " + track)
-        this.url = url;
-        console.info("writable = " + track.writable);
-        this.writer = track.writable.getWriter();
-        console.info("writer = " + this.writer);
-        this.setUpWSConnection();
-    }
-
-    audioDecoder = new AudioDecoder({
-        output: async (frame) => {
-            this.writer.write(frame);
-            //frame.close();
-        },
-        error: (e) => {
-            console.warn("Audio decoder: " + e.message);
-        },
-    });
-
-    setUpWSConnection() {
-        console.info("In setUpWSConnection")
-        this.ws = new WebSocket(this.url);
-        this.ws.binaryType = 'arraybuffer';
-
-        this.ws.onerror = (ev) => {
-            postMessage({warningMessage: "An error occurred with the audio feeder websocket connection"})
-        }
-
-        this.ws.onclose = (ev) => {
-            if (this.noRestart)
-                postMessage({closed: true})
-            console.warn("The audio feed websocket was closed: " + ev.reason);
-            // clearTimeout(this.timeout);
-        }
-
-        this.timeout = setTimeout(() => {
-            this.timedOut();
-        }, 6000);
-
-        this.ws.onmessage = async (event) => {
-            if (!this.started) {
-                let array = new Uint8Array(event.data)
-                if (array[0] === 9) {
-                    let decoded_arr = array.slice(1);
-                    let audioInfo = JSON.parse(this.Utf8ArrayToStr(decoded_arr));
-                    this.config.codec = audioInfo.codec_name === "aac" ? "mp4a.40.2" : "alaw";
-                    this.config.sampleRate = parseInt(audioInfo.sample_rate);
-                    this.audioDecoder.configure(this.config);
-                    console.log('first audio packet with codec data: ' + this.config.codec);
-                    this.started = true;
-                } else
-                    console.error("No audio codec was found")
-            } else {
-                // @ts-ignore
-                const eac = new EncodedAudioChunk({
-                    type: 'key',
-                    timestamp: 0,
-                    duration: 1,
-                    data: event.data,
-                });
-                await this.audioDecoder.decode(eac)
-            }
-            this.resetTimeout();
-        };
-    }
-
-    resetTimeout = () => {
-        clearTimeout(this.timeout);
-        this.timeout = setTimeout(() => {
-            this.timedOut();
-        }, 3000)
-    }
-
-    timedOut() {
-        if (!this.closed) {
-            console.error("Audio feed from websocket has stopped...");
-            if (this.ws)
-                this.ws.close();
-            if (this.audioDecoder)
-                this.audioDecoder.close();
-        }
-    }
-
-    close() {
-        this.closed = true;
-        this.noRestart = true;
-        if (this.audioDecoder) {
-            this.audioDecoder.close();
-            this.audioDecoder = undefined;
-        }
-        if (this.ws)
-            this.ws.close();
-    }
-
-    Utf8ArrayToStr(array) {
-        let out, i, len;
-        out = '';
-        len = array.length;
-        i = 0;
-        while (i < len) {
-            out += String.fromCharCode(array[i]);
-            ++i;
-        }
-        return out;
-    }
-}
-
