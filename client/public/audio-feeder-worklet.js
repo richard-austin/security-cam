@@ -121,8 +121,6 @@ class AudioStream {
             this.gainNode.gain.value = this.gain * this.gainFactor;
         }
         this.muted = muted;
-
-        console.info("Muted: "+this.muted+" Gain: "+this.gainNode.gain.value);
     }
 
     isMuted() {

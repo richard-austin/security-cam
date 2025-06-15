@@ -5,8 +5,12 @@ import {timer} from "rxjs";
 let videoFeeder!: VideoFeeder;
 addEventListener('message', ({data}) => {
     if (data.url) {
+        let h264HardwareDecoding = "false";
+        if (data.h264HardwareDecoding)
+            h264HardwareDecoding = data.h264HardwareDecoding;
+
         if (typeof VideoDecoder !== 'undefined') {
-            videoFeeder = new VideoFeeder(data.url)
+            videoFeeder = new VideoFeeder(data.url, h264HardwareDecoding)
             videoFeeder.setUpWebsocketConnection();
             videoFeeder.setupDecoder();
         } else {
@@ -29,6 +33,7 @@ class VideoFeeder {
     private bufferInUse = false;
     private timeout!: NodeJS.Timeout;
     private readonly url!: string;
+    private readonly h264HardwareDecoding!: boolean;
     private ws!: WebSocket;
     private noRestart: boolean = false;
     private isHEVC: boolean = false;
@@ -36,7 +41,8 @@ class VideoFeeder {
     private started = false;
     private codec = ""; // https://wiki.whatwg.org/wiki/Video_type_parameters
 
-    constructor(url: string) {
+    constructor(url: string, h264HardwareDecoding: string) {
+        this.h264HardwareDecoding = h264HardwareDecoding === "true";
         this.url = url;
     }
 
@@ -170,9 +176,10 @@ class VideoFeeder {
         if (!startFrame) {// Not h264, try hevc
             startFrame = this.hevcStart.every((value, index) => value === buffer[index]);
             this.isHEVC = startFrame;
-            // Use software decoding for H264 as hardware decoding in Windows and VAAPI on Linux add noticeable latency
-            this.hardwareAcceleration = this.isHEVC ? "no-preference" : "prefer-software";
-        }
+         }
+        const h264Decoding = this.h264HardwareDecoding ? "no-preference" : "prefer-software";
+        // Use software decoding for H264 as hardware decoding in Windows and VAAPI on Linux add noticeable latency
+        this.hardwareAcceleration = this.isHEVC ? "no-preference" : h264Decoding;
         return startFrame;
     }
 
