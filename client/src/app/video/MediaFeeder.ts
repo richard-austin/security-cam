@@ -2,6 +2,7 @@ import Hls from "hls.js";
 import {Camera, Stream} from "../cameras/Camera";
 import {Subscription} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
+import {NavComponent} from "../nav/nav.component";
 
 declare function initMSTG(): void;
 
@@ -134,7 +135,8 @@ export class MediaFeeder {
             this.reporting.warningMessage = "Received an unknown message from the video worker "+data;
           }
         };
-        this.videoWorker.postMessage({url: url})
+        const h264HwDecode = NavComponent.getCookie("hardwareDecoding");  // Get H264 hardware decoding user preference
+        this.videoWorker.postMessage({url: url, h264HardwareDecoding: h264HwDecode})
         if(this.stream.audio) {
           // Create a new audio feeder web worker
           this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));

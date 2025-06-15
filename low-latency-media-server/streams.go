@@ -280,7 +280,6 @@ func (p Packet) isKeyFrame() (retVal bool) {
 		} else if bytes.Equal(p.pckt[:len(hevcStart)], hevcStart) {
 			// HEVC header
 			theByte := p.pckt[3]
-			retVal = theByte == 0x40
 			theByte = (theByte >> 1) & 0x3f
 			retVal = theByte == 0x19 || theByte == 0x20
 		}
@@ -291,10 +290,20 @@ func (p Packet) isFlvKeyFrame() (retVal bool) {
 	retVal = false
 	tag := p.pckt
 	// Check if it is a keyframe
-	if len(tag) >= 12 {
+	if len(tag) >= 300 {
 		ft := (tag[11] & 0xf0) >> 4 // ft == 1 for h264 or 9 for hevc keyframes
-		if tag[0]&0x1f == 9 && (ft == 1 || ft == 9) {
-			retVal = true
+		if tag[0] /*&0x1f*/ == 9 {
+			testBytes := tag[20:22]
+			if ft == 1 && // h254 keyframe ?
+				(bytes.Equal(testBytes, h264KeyFrame1) ||
+					bytes.Equal(testBytes, h264KeyFrame2) ||
+					bytes.Equal(testBytes, h264KeyFrame3)) {
+				retVal = true
+			} else if ft == 9 { // hevc keyframe?
+				theByte := tag[20]
+				theByte = (theByte >> 1) & 0x3f
+				retVal = theByte == 0x19 || theByte == 0x20
+			}
 		}
 	}
 	return
