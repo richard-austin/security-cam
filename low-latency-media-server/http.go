@@ -197,19 +197,9 @@ func ServeHTTPStream(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(3 * time.Second)
 	bb := stream.bucketBrigade.CreateFeeder()
 	defer stream.bucketBrigade.DestroyFeeder(bb)
-	first := true
 	log.Infof("Bucket brigade cache size for %s = %d", suuid, stream.bucketBrigade.cacheInUse)
 	for {
 		data := bb.Get()
-
-		if first {
-			first = false
-			arr := data.pckt[:49]
-			for _, val := range arr {
-				fmt.Printf("%x, ", val)
-			}
-			fmt.Printf("\nLength = %d\n", len(data.pckt))
-		}
 		bytes, err := w.Write(data.pckt)
 		if err != nil {
 			// Warning only as it could be because the client disconnected
