@@ -382,7 +382,6 @@
                                     <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="50">
                                         <mat-checkbox (change)="setAudioInEnabledStatus($event, stream.value)"
                                                       [checked]="stream.value.audio" [color]="'primary'"
-                                                      [disabled]="stream.value.audio_encoding == 'None'"
                                                       matTooltip="If checked, audio will be enabled on {{stream.key}} for {{cam.key}}."
                                                       matTooltipClass="tooltip">
                                         </mat-checkbox>
@@ -400,6 +399,7 @@
                                                         matTooltipClass="tooltip">
                                             <mat-label>Audio enc.</mat-label>
                                             <mat-select (selectionChange)="updateAudioEncoding($event, stream.value)"
+                                                        [disableControl]="!stream.value.audio"
                                                         [formControl]="getStreamControl(camIndex, streamIndex, 'audio_encoding')">
                                                 <mat-option *ngFor="let enc of cameraSvc.audioEncodings"
                                                             [value]="enc.value">
@@ -419,7 +419,27 @@
                                         </mat-form-field>
                                     </td>
                                 </ng-container>
-                                <ng-container matColumnDef="netcam_uri">
+                              <ng-container matColumnDef="audio_sample_rate">
+                                <th *matHeaderCellDef mat-header-cell>Sample Rate</th>
+                                <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="125">
+                                  <mat-form-field [style.width.px]="100" appearance="outline">
+                                    <mat-label>Audio SR.</mat-label>
+                                    <input (blur)="updateStreamField(camIndex, streamIndex, 'audio_sample_rate')"
+                                           [formControl]="getStreamControl(camIndex, streamIndex, 'audio_sample_rate')"
+                                           [disableControl]="!stream.value.audio || stream.value.audio_encoding==='none'"
+                                           autocomplete="off" matInput
+                                           matTooltip="Set the audio sample rate delivered from the camera for {{stream.key}}."
+                                           matTooltipClass="tooltip" maxlength="5" placeholder="Sample Rate"
+                                           type="number">
+                                    @if (getStreamControl(camIndex, streamIndex, 'audio_sample_rate').hasError('limits')) {
+                                      <mat-error>
+                                        Audio Sample Rate should have valid value when audio is checked
+                                      </mat-error>
+                                    }
+                                  </mat-form-field>
+                                </td>
+                              </ng-container>
+                              <ng-container matColumnDef="netcam_uri">
                                     <th *matHeaderCellDef mat-header-cell> Netcam URL.</th>
                                     <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="220">
                                         <mat-form-field appearance="outline">

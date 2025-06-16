@@ -111,7 +111,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     cameraFooterColumns = ['buttons'];
 
     expandedElement!: Camera | null;
-    streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'netcam_uri', 'defaultOnMultiDisplay'];
+    streamColumns = ['stream_id', 'delete', 'descr', 'audio', 'audio_encoding', 'audio_sample_rate', 'netcam_uri', 'defaultOnMultiDisplay'];
     streamFooterColumns = ['buttons']
     camControls!: UntypedFormArray;
     streamControls: UntypedFormArray[] = [];
@@ -140,7 +140,16 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
     }
 
-    getCamControl(index: number, fieldName: string): UntypedFormControl {
+  validateSampleRate(audioEnabled: boolean): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const sampleRate = control.value;
+      const invalid = audioEnabled && (sampleRate < 3000 || sampleRate > 64000);
+      let error: any = {limits: {value: control.value}};
+      return invalid ? error : null;
+    }
+  }
+
+  getCamControl(index: number, fieldName: string): UntypedFormControl {
         return this.camControls.at(index).get(fieldName) as UntypedFormControl;
     }
 
@@ -192,7 +201,6 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     updateAudioEncoding($event: MatSelectChange, stream: Stream) {
         stream.audio_encoding = $event.value;
         stream.audio = $event.value !== "None";
-
     }
 
     /**
@@ -274,6 +282,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                     }, [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9\\ ]{2,20}$/)]),
                     audio: new UntypedFormControl(stream.audio, [Validators.required]),
                     audio_encoding: new UntypedFormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|G726|None|Not Listed)$/)]),
+                    audio_sample_rate: new UntypedFormControl(stream.audio_sample_rate, [this.validateSampleRate(stream.audio)]),
                     netcam_uri: new UntypedFormControl(stream.netcam_uri, [Validators.required, Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
                 }, {updateOn: "change"});
             });
@@ -535,7 +544,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
     setAudioInEnabledStatus($event: MatCheckboxChange, stream: Stream) {
         stream.audio = $event.checked;
-        this.FixUpCamerasData();
+       // this.FixUpCamerasData();
     }
 
     async addCamera() {
@@ -583,7 +592,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     commitConfig() {
         this.updating = true;
         this.reporting.dismiss();
-        this.FixUpCamerasData();
+       // this.FixUpCamerasData();
         let cams: Map<string, Camera> = new Map(this.cameras);
         // First convert the map to JSON
         let jsonObj: {} = {};

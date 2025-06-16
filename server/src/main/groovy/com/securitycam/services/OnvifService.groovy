@@ -270,8 +270,9 @@ class OnvifService {
                                     }
                                     stream.audio_sample_rate = aec.getSampleRate().intValue()
                                     // sampleRate should be in Kbps, though it is in bps from SV3C type cameras.
-                                    if (stream.audio_sample_rate < 200)
-                                        stream.audio_sample_rate *= 1000
+                                    if (stream.audio_sample_rate < 200) {
+                                        stream.audio_sample_rate = stream.audio_sample_rate.intValue() * 1000
+                                    }
 
                                     //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
                                 } else {

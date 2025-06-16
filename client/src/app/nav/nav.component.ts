@@ -24,7 +24,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef<HTMLDivElement>;
- @ViewChild('hardwareDecodingCheckBox') hardwareDecodingCheckBox!: MatCheckbox
+  @ViewChild('hardwareDecodingCheckBox') hardwareDecodingCheckBox!: MatCheckbox
 //  cameras: Map<string, Camera> = new Map<string, Camera>();
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
