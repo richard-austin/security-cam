@@ -282,8 +282,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                         disabled: false
                     }, [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9\\ ]{2,20}$/)]),
                     audio: new UntypedFormControl(stream.audio, [Validators.required]),
-                    audio_encoding: new UntypedFormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|)$/)]),
-                    audio_sample_rate: new UntypedFormControl(stream.audio_sample_rate, [this.validateSampleRate()]),
+                    audio_encoding: new UntypedFormControl({value:stream.audio_encoding, disabled: !stream.audio}, [Validators.required, Validators.pattern(/^(AAC|G711|)$/)]),
+                    audio_sample_rate: new UntypedFormControl({value: stream.audio_sample_rate, disabled: !stream.audio || stream.audio_encoding === 'None'}, [this.validateSampleRate()]),
                     netcam_uri: new UntypedFormControl(stream.netcam_uri, [Validators.required, Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
                 }, {updateOn: "change"});
             });
@@ -480,7 +480,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
         this.cameras = retVal;
         this.setUpTableFormControls();
-        //   this.cd.detectChanges();  // Fixes bug where the doorbell would come up with the wrong stream selected for motion after onvif discovery
+        //this.cd.detectChanges();  // Fixes bug where the doorbell would come up with the wrong stream selected for motion after onvif discovery
     }
 
     toggle(el: { key: string, value: Camera }) {

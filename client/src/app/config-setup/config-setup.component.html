@@ -426,7 +426,7 @@
                                     <mat-label>Audio SR.</mat-label>
                                     <input (blur)="updateStreamField(camIndex, streamIndex, 'audio_sample_rate')"
                                            [formControl]="getStreamControl(camIndex, streamIndex, 'audio_sample_rate')"
-                                           [disableControl]="!stream.value.audio || stream.value.audio_encoding==='None'"
+                                           [disableControl]="!stream.value.audio || stream.value.audio_encoding === 'None'"
                                            autocomplete="off" matInput
                                            matTooltip="Set the audio sample rate delivered from the camera for {{stream.key}}."
                                            matTooltipClass="tooltip" maxlength="5" placeholder="Sample Rate"

@@ -5,7 +5,7 @@ import {timer} from "rxjs";
 @Directive({
   selector: '[disableControl]'
 })
-export class DisableControlDirective {
+export class DisableControlDirective{
   @Input() set disableControl(condition: boolean) {
     const action = condition ? 'disable' : 'enable';
     // Deferred execution of the control action otherwise it on sets the initial form state,
@@ -19,4 +19,5 @@ export class DisableControlDirective {
 
   constructor(private ngControl: NgControl) {
   }
+
 }
