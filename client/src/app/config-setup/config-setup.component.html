@@ -49,7 +49,7 @@
         <mat-card-content #scrollable_content
                           [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement)"
                           class="scrollable-content">
-            <app-onvif-failures (fixUpCamerasData)="FixUpCamerasData()" *ngIf="failed.size > 0" [cameras]="cameras"
+            <app-onvif-failures (fixUpCamerasData)="FixUpCameraData()" *ngIf="failed.size > 0" [cameras]="cameras"
                                 [failures]="failed" [reporting]="reporting">
             </app-onvif-failures>
             <table [dataSource]="cameras | keyvalue: cameraSvc.compareFn" class="mat-elevation-z8" mat-table
@@ -175,7 +175,7 @@
                             <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
                                     enabled state is updated.-->
                             <mat-select
-                                    (selectionChange)="updateCamField(i, 'cameraParamSpecs'); setUpTableFormControls()"
+                                    (selectionChange)="updateCamField(i, 'cameraParamSpecs')"
                                     [formControl]="getCamControl(i, 'cameraParamSpecs')">
                                 @for (spec of cameraSvc.cameraParamSpecs; track spec) {
                                     <mat-option [value]="spec">
@@ -260,7 +260,7 @@
                                         matTooltipClass="tooltip">
                             <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
                                     enabled state is updated.-->
-                            <mat-select (selectionChange)="updateCamField(i, 'rtspTransport'); setUpTableFormControls()"
+                            <mat-select (selectionChange)="updateCamField(i, 'rtspTransport')"
                                         [formControl]="getCamControl(i, 'rtspTransport')">
                                 <mat-option value="tcp">
                                     TCP
@@ -426,7 +426,7 @@
                                     <mat-label>Audio SR.</mat-label>
                                     <input (blur)="updateStreamField(camIndex, streamIndex, 'audio_sample_rate')"
                                            [formControl]="getStreamControl(camIndex, streamIndex, 'audio_sample_rate')"
-                                           [disableControl]="!stream.value.audio || stream.value.audio_encoding==='none'"
+                                           [disableControl]="!stream.value.audio || stream.value.audio_encoding==='None'"
                                            autocomplete="off" matInput
                                            matTooltip="Set the audio sample rate delivered from the camera for {{stream.key}}."
                                            matTooltipClass="tooltip" maxlength="5" placeholder="Sample Rate"

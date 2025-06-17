@@ -282,7 +282,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                         disabled: false
                     }, [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9\\ ]{2,20}$/)]),
                     audio: new UntypedFormControl(stream.audio, [Validators.required]),
-                    audio_encoding: new UntypedFormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|G726|None)$/)]),
+                    audio_encoding: new UntypedFormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|)$/)]),
                     audio_sample_rate: new UntypedFormControl(stream.audio_sample_rate, [this.validateSampleRate()]),
                     netcam_uri: new UntypedFormControl(stream.netcam_uri, [Validators.required, Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
                 }, {updateOn: "change"});
@@ -344,7 +344,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     deleteCamera(key: string): boolean {
         let retVal: boolean = Array.from(this.cameras.keys()).find(k => k === key) !== undefined;
         this.cameras.delete(key);
-        this.FixUpCamerasData();
+        this.FixUpCameraData();
         return retVal;
     }
 
@@ -371,7 +371,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                         stream.motion.trigger_recording_on = 'none';  // Set all recording triggers to 'None' as the stream keys may be renumbered
                 })
             }
-            this.FixUpCamerasData();
+            this.FixUpCameraData();
         }
         return retVal;
     }
@@ -381,7 +381,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
      *                   camera1, camera2 or stream1, stream 2 etc. This is run after deleting an item
      *                   from the map. Also number the live streams and recording uri's logically
      */
-    FixUpCamerasData(): void {
+    FixUpCameraData(): void {
         let camNum: number = 1;
         let streamNum: number = 1;  // Stream number on camera
         let recNo: number = 1;  // Recording number to be set in the stream object
@@ -508,7 +508,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
             this.cameras.set(prevKey, cam.value);
             this.cameras.set(cam.key, temp);
         }
-        this.FixUpCamerasData();
+        this.FixUpCameraData();
     }
 
     moveDown(cam: KeyValue<string, Camera>) {
@@ -527,7 +527,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
             this.cameras.set(nextKey, cam.value);
             this.cameras.set(cam.key, temp);
         }
-        this.FixUpCamerasData();
+        this.FixUpCameraData();
     }
 
     setDefaultOnMultiDisplayStatus($event: MatCheckboxChange, stream: Stream, cam: Camera) {
@@ -555,12 +555,12 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                                                 // the multi cam display default
         newCamera.streams.set('stream1', newStream);
         this.cameras.set('camera' + (this.cameras.size + 1), newCamera);
-        this.FixUpCamerasData();
+        this.FixUpCameraData();
     }
 
     addStream(cam: Camera) {
         cam.streams.set('stream' + (cam.streams.size + 1), new Stream())
-        this.FixUpCamerasData();
+        this.FixUpCameraData();
     }
 
     anyInvalid(): boolean {
@@ -593,7 +593,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     commitConfig() {
         this.updating = true;
         this.reporting.dismiss();
-       // this.FixUpCamerasData();
+        this.FixUpCameraData();
         let cams: Map<string, Camera> = new Map(this.cameras);
         // First convert the map to JSON
         let jsonObj: {} = {};
@@ -639,7 +639,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         let stream1: Stream = new Stream();
         stream1.defaultOnMultiDisplay = true;  // There must always be just one default on multi display so set it on the only stream.
         this.cameras.get('camera1')?.streams.set('stream1', stream1);
-        this.FixUpCamerasData();
+        this.FixUpCameraData();
     }
 
     startOnvifSearch() {
@@ -649,7 +649,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         this.cameraSvc.discover().subscribe((result: { cams: Map<string, Camera>, failed: Map<string, string> }) => {
                 this.cameras = result.cams;
                 this.discovering = false;
-                this.FixUpCamerasData();
+                this.FixUpCameraData();
                 this.failed = result.failed;
                 if (this.cameras.size == 0)
                     this.reporting.warningMessage = "No cameras were found on this network"
@@ -784,7 +784,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                 }
                 if (result.cam !== undefined) {
                     this.cameras.set('camera' + (this.cameras.size + 1), result.cam);
-                    this.FixUpCamerasData();
+                    this.FixUpCameraData();
                 }
                 this.gettingCameraDetails = false;
             },
@@ -834,7 +834,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                 this.cameras = cameras;
 
                 this.downloading = false;
-                this.FixUpCamerasData()
+                this.FixUpCameraData()
                 this.savedDataHash = objectHash(this.cameras);
             },
             () => {
