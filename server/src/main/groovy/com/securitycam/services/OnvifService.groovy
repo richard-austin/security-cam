@@ -329,7 +329,7 @@ class OnvifService {
     }
 
     private static boolean isSupportedAudioOutputFmt(String format) {
-        final String supportedFmtsRegex = /^(AAC|G711|G726)$/
+        final String supportedFmtsRegex = /^(AAC|G711)$/  /* G726 */
         return format.matches(supportedFmtsRegex)
     }
 

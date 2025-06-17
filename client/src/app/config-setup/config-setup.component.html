@@ -6,7 +6,7 @@
     <app-confirm-can-deactivate (signalConfirmExit)="confirmDeactivate($event)"></app-confirm-can-deactivate>
 }
 <mat-card [ngClass]="{'grey-out': checkDeactivate}">
-    <mat-card-title>Cameras Configuration
+    <mat-card-title>Configuration
         <span [matTooltip]="!haveOnvifCredentials ? 'Onvif credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used For Onvif authentication. This is used for overall Onvif discovery.'"
               matTooltipClass="tooltip">
             <button (click)="toggleOnvifPasswordDialogue()" [disabled]="isGuest" class="change-password-button"
@@ -233,7 +233,7 @@
                             <mat-label>URL for snapshot from {{ cam.key }}</mat-label>
                             <input (change)="updateCamField(i, 'snapshotUri')"
                                    [formControl]="getCamControl(i, 'snapshotUri')" autocomplete="off" matInput
-                                   matTooltip="The URI for snapshots for {{cam.key}}. This is used to view the image from the camera by clicking on the camera ID in the Cameras Configuration editor."
+                                   matTooltip="The URI for snapshots for {{cam.key}}. This is used to view the image from the camera by clicking on the camera ID in the Configuration editor."
                                    matTooltipClass="tooltip" maxlength="150" placeholder="Snapshot URL" type="text">
                             <mat-error *ngIf="getCamControl(i, 'snapshotUri').invalid">Enter the URI</mat-error>
                         </mat-form-field>
@@ -245,7 +245,7 @@
                     <td *matCellDef="let cam; let i = dataIndex" mat-cell>
                         <mat-checkbox (change)="updateCamField(i, 'useRtspAuth')"
                                       [formControl]="getCamControl(i, 'useRtspAuth')"
-                                      matTooltip="{{'Use authentication on the RTSP streams on '+ cam.key + ' If checked. The username and password for all cameras are entered on the cameras configuration page by clicking the button to the right of the page title.'}}"
+                                      matTooltip="{{'Use authentication on the RTSP streams on '+ cam.key + ' If checked. The username and password for all cameras are entered on the NVR configuration page by clicking the button to the right of the page title.'}}"
                                       matTooltipClass="tooltip">
                         </mat-checkbox>
                         <mat-error *ngIf="getCamControl(i, 'useRtspAuth').invalid">Set the RTSP auth status</mat-error>
@@ -395,7 +395,7 @@
                                     <th *matHeaderCellDef mat-header-cell>Audio Encoding</th>
                                     <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="125">
                                         <mat-form-field [style.width.px]="120" appearance="outline"
-                                                        matTooltip="Set the audio encoding (G711 or AAC) delivered from the camera for {{stream.key}}. If you are unsure, select 'Not Listed'"
+                                                        matTooltip="Set the audio encoding (G711 or AAC) delivered from the camera for {{stream.key}}.'"
                                                         matTooltipClass="tooltip">
                                             <mat-label>Audio enc.</mat-label>
                                             <mat-select (selectionChange)="updateAudioEncoding($event, stream.value)"

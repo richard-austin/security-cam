@@ -60,7 +60,7 @@ On this NVR, Motion can detect and record motion on one stream of each camera, (
 start a recording on another (usually the higher resolution) stream so that recordings
 in both resolutions are made.
 
-###### Configurable from the cameras configuration page. You can select either FTP or Motion Service triggered recording or none for any camera, but not both together.
+###### Configurable from the configuration page. You can select either FTP or Motion Service triggered recording or none for any camera, but not both together.
 ### nginx
 nginx (https://nginx.org/en/linux_packages.html) is a reverse proxy through which client access to all the NVR services are accessed.
 Access is through a single port (443), giving them a common origin from the browser point of view.

@@ -104,11 +104,10 @@ export class CameraService {
         "ZTech MCW5B10X")]
 
   private readonly _audioEncodings: AudioEncoding[] = [
-    new AudioEncoding('None', 'None'),  // No audio in stream
-    new AudioEncoding('Not Listed', 'Not Listed'),  // Audio type not listed, transcode to AAC
-    new AudioEncoding('G711', 'G711'),  // Transcode to AAC
-    new AudioEncoding('G726', 'G726'),  // Transcode to AAC
-    new AudioEncoding('AAC', 'AAC'),    // No transcoding required
+    new AudioEncoding('None', 'None'),
+    new AudioEncoding('G711', 'G711'),
+//    new AudioEncoding('G726', 'G726'),
+    new AudioEncoding('AAC', 'AAC'),
 
   ];
 

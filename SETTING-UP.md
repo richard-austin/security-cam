@@ -62,13 +62,13 @@ Get Active Local IP Address(es) option.
 ## Set Up Cameras
 The NVR must be configured to use your cameras.
 The configuration editor can be found at General ->
-Cameras Configuration.
+Configuration.
 
-If camera configuration has not yet been done, the Cameras Configuration Editor will
+If camera configuration has not yet been done, the Configuration Editor will
 be empty apart from a single unpopulated camera entry.
 
 ![config editor](README.images/config-editor3.png)
-*Cameras Configuration Editor*
+Configuration Editor*
 
 #### Config page button functions
 <img src="README.images/security-svgrepo-com.svg" title="Image of camera configuration page" width="20"/></img> **(At top of page to the left of the
@@ -145,15 +145,16 @@ All these parameters can be set manually, though some are auto-populated by Onvi
 | Onvif Base Address  | IP address and port of the camera Onvif SOAP web service.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Yes                    |
 
 #### Stream Parameters
-| Parameter/Control        | Function                                                                                                                                                                                                                                                                                                                                                                                                                       | Set by Onvif Discovery |
-|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
-| Stream ID                | Map key of the stream                                                                                                                                                                                                                                                                                                                                                                                                          | N/A                    |
-| Delete                   | Delete this stream from the camera.                                                                                                                                                                                                                                                                                                                                                                                            | N/A                    |
-| Descr.                   | Description of the stream (typically HD/SD). This is appended to the camera name on the menus.                                                                                                                                                                                                                                                                                                                                 | No                     |
-| Audio                    | Check to include the cameras audio with the video (if present).                                                                                                                                                                                                                                                                                                                                                                | No                     |
-| Audio Encoding           | Set to the audio encoding on the cameras RTSP stream. If the audio format is AAC, it will be passed through as is, otherwise it will be encoded to AAC.                                                                                                                                                                                                                                                                        | Yes                    |
-| Netcam URI               | The cameras RTSP video/audio url.                                                                                                                                                                                                                                                                                                                                                                                              | Yes                    |
-| Default On Multi Display | Sets the stream as this cameras default on the Multi Camera View. The multi camera view allows switching to other streams than the default.                                                                                                                                                                                                                                                                                    | N/A                    |
+| Parameter/Control        | Function                                                                                                                                    | Set by Onvif Discovery |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| Stream ID                | Map key of the stream                                                                                                                       | N/A                    |
+| Delete                   | Delete this stream from the camera.                                                                                                         | N/A                    |
+| Descr.                   | Description of the stream (typically HD/SD). This is appended to the camera name on the menus.                                              | No                     |
+| Audio                    | Check to include the cameras audio with the video (if present). Onvif discovery will check this if an audio stream is detected.             | Yes                    |
+| Audio Encoding           | Set to the audio encoding used on the cameras RTSP stream.                                                                                  | Yes                    |
+| Sample Rate              | The streams audio sample rate.                                                                                                              | Yes                    |
+| Netcam URI               | The cameras RTSP video/audio url.                                                                                                           | Yes                    |
+| Default On Multi Display | Sets the stream as this cameras default on the Multi Camera View. The multi camera view allows switching to other streams than the default. | N/A                    |
 
 <a id="wrong-onvif-creds"></a> ![config editor](README.images/config-editor2.png "Camera configuration page following Onvif discovery, showing a camera whose credentials are different from the global Onvif credentials")
 *Camera Configuration Editor Showing A Camera Whose Onvif Credentials Differ From The Global Onvif Credentials*

@@ -140,10 +140,10 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
     }
 
-  validateSampleRate(audioEnabled: boolean): ValidatorFn {
+  validateSampleRate(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const sampleRate = control.value;
-      const invalid = audioEnabled && (sampleRate < 3000 || sampleRate > 64000);
+      const invalid = sampleRate < 3000 || sampleRate > 64000;
       let error: any = {limits: {value: control.value}};
       return invalid ? error : null;
     }
@@ -271,7 +271,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     setUpTableFormControls(): void {
         this.streamControls = [];
         this.list$ = new BehaviorSubject<Camera[]>(Array.from(this.cameras.values()));
-        const toCameraGroups = this.list$.value.map(camera => {
+
+        const toCameraGroups = this.list$.value.map((camera) => {
             let streamList$: BehaviorSubject<Stream[]> = new BehaviorSubject<Stream[]>(Array.from(camera.streams.values()));
 
             const toStreamGroups = streamList$.value.map((stream: Stream) => {
@@ -281,8 +282,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                         disabled: false
                     }, [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9\\ ]{2,20}$/)]),
                     audio: new UntypedFormControl(stream.audio, [Validators.required]),
-                    audio_encoding: new UntypedFormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|G726|None|Not Listed)$/)]),
-                    audio_sample_rate: new UntypedFormControl(stream.audio_sample_rate, [this.validateSampleRate(stream.audio)]),
+                    audio_encoding: new UntypedFormControl(stream.audio_encoding, [Validators.required, Validators.pattern(/^(AAC|G711|G726|None)$/)]),
+                    audio_sample_rate: new UntypedFormControl(stream.audio_sample_rate, [this.validateSampleRate()]),
                     netcam_uri: new UntypedFormControl(stream.netcam_uri, [Validators.required, Validators.pattern(/\b((rtsp):\/\/[-\w]+(\.\w[-\w]*)+|(?:[a-z0-9](?:[-a-z0-9]*[a-z0-9])?\.)+(?: com\b|edu\b|biz\b|gov\b|in(?:t|fo)\b|mil\b|net\b|org\b|[a-z][a-z]\b))(\\:\d+)?(\/[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]*(?:[.!,?]+[^.!,?;"'<>()\[\]{}\s\x7F-\xFF]+)*)?/)]),
                 }, {updateOn: "change"});
             });
