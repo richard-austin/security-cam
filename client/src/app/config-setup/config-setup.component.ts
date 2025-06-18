@@ -289,6 +289,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
             });
 
             this.streamControls.push(new UntypedFormArray(toStreamGroups));
+            const onvifHostRegex = /^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/;
             return new UntypedFormGroup({
                 name: new UntypedFormControl(camera.name, [Validators.required, Validators.maxLength(25)]),
                 address: new UntypedFormControl({
@@ -305,13 +306,13 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                 }, [Validators.maxLength(150)]),
                 ptzControls: new UntypedFormControl({
                     value: camera.ptzControls,
-                    disabled: false
+                    disabled: camera.onvifHost.length === 0 || !onvifHostRegex.test(camera.onvifHost),
                 }, [validateTrueOrFalse({ptzControls: true})]),
                 onvifHost: new UntypedFormControl({
                     value: camera.onvifHost,
                     disabled: false,
-                }, [Validators.maxLength(22),
-                    Validators.pattern(/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))($|:([0-9]{1,4}|6[0-5][0-5][0-3][0-5])$)/)]),
+                }, [Validators.maxLength(25),
+                    Validators.pattern(onvifHostRegex)]),
                 useRtspAuth: new UntypedFormControl({
                     value: camera.useRtspAuth == undefined ? false : camera.useRtspAuth,
                     disabled: false,
