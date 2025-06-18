@@ -76,7 +76,7 @@ class AudioStream {
 
                 // Set up gain factor, for s16 format decoder output, it has to be attenuated by a huge factor!!
                 if (getGainFactor() === 0) {
-                    setGainFactor(format === 's16' ? 0.00005 : 1);
+                    setGainFactor(format.includes('s16') ? 0.00005 : 1);
                     setGain(getGain());  // Set to the previously saved gain
                 }
 
@@ -121,8 +121,6 @@ class AudioStream {
             this.gainNode.gain.value = this.gain * this.gainFactor;
         }
         this.muted = muted;
-
-        console.info("Muted: "+this.muted+" Gain: "+this.gainNode.gain.value);
     }
 
     isMuted() {

@@ -35,7 +35,7 @@ func NewBucketBrigade(preambleTime int) (bucketBrigade BucketBrigade) {
 		Cache:       make([]Packet, cacheLength),
 		feeders:     make([]*BucketBrigadeFeeder, 0),
 		started:     false,
-		delayTime:   preambleTime + 1,
+		delayTime:   preambleTime,
 		inputIndex:  0,
 		cacheInUse:  0,
 		cacheLength: cacheLength,
@@ -52,7 +52,7 @@ func mod(a, b int) int {
 }
 
 func (bb *BucketBrigade) SetCacheSizeFromDelayTime() {
-	if bb.inputIndex+1 >= bb.cacheLength || time.Since(bb.startTime) > time.Duration(bb.delayTime)*time.Second+4*time.Second {
+	if bb.inputIndex+1 >= bb.cacheLength || time.Since(bb.startTime) > time.Duration(bb.delayTime)*time.Second {
 		if bb.inputIndex+1 >= bb.cacheLength {
 			log.Warnf("Input index %d >= cache length %d: Using bucket brigade cachLength as indexLimit", bb.inputIndex, bb.cacheLength)
 			bb.cacheInUse = bb.cacheLength - 1

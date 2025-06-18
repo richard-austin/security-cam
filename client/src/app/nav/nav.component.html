@@ -76,9 +76,21 @@
         <button mat-menu-item (click)="configSetup();menuClosed()"
                 matTooltip="Discover and configure the cameras for live view, recording, audio back channel and various other features."
                 matTooltipClass="tooltip">
-        Cameras Configuration
+        Configuration
         </button>
-        <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
+          <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
+          <div mat-menu-item
+               matTooltip="Enable or disable H264 hardware decoding. In some cases hardware decoding adds latency on H264, in other cases hardware decoding is required to decode it at all. Set this for the best performance on the platform/browser you are using."
+               matTooltipClass="tooltip"
+               (click)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()"
+               (keydown.enter)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()">
+              <mat-checkbox class="mat-menu__checkbox"
+                            labelPosition="before"
+                            (click)="hardwareDecoding(hardwareDecodingCheckBox.checked);$event.stopPropagation()"
+                            #hardwareDecodingCheckBox>
+                  H264 Hardware Decoding
+              </mat-checkbox>
+          </div>
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="changePassword();menuClosed()">Change Password</button>
         </span>

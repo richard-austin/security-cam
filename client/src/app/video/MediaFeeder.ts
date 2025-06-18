@@ -2,6 +2,7 @@ import Hls from "hls.js";
 import {Camera, Stream} from "../cameras/Camera";
 import {Subscription} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
+import {NavComponent} from "../nav/nav.component";
 
 declare function initMSTG(): void;
 
@@ -56,13 +57,6 @@ export class MediaFeeder {
     if (this.recordingUri[this.recordingUri.length - 1] !== '/') {
       this.recordingUri += '/';
     }
-    let audio_sample_rate = parseInt(this.stream.audio_sample_rate);
-    if (audio_sample_rate < 1000)
-      audio_sample_rate *= 1000;
-    this.audioWorklet = this.stream.audio ? new AudioStream(audio_sample_rate) : undefined;
-    // If selecting a cam immediately after another, keep the gian and muting status from beforer
-    this.audioWorklet?.setMuting(this.muted);
-    this.audioWorklet?.setGain(this.volume);
 
     this.recordingUri += manifest;
     this.manifest = manifest;   // Save the manifest file name so it can be returned by getManifest
@@ -101,10 +95,21 @@ export class MediaFeeder {
           + this.stream.uri;
 
       const videoTrack = new MediaStreamTrackGenerator({kind: 'video'});
+      const videoWriter = videoTrack.writable.getWriter();
+
+      let audio_sample_rate = parseInt(this.stream.audio_sample_rate);
+      if (audio_sample_rate < 1000)
+        audio_sample_rate *= 1000;
+      this.audioWorklet = this.stream.audio ? new AudioStream(audio_sample_rate) : undefined;
+
+      if(this.audioWorklet) {
+        // If selecting a cam immediately after another, keep the gian and muting status from beforer
+        this.audioWorklet.setMuting(this.muted);
+        this.audioWorklet.setGain(this.volume);
+      }
       const audioTrack = this.audioWorklet?.getTrack();
 
-      const videoWriter = videoTrack.writable.getWriter();
-      const audioWriter = audioTrack?.writable.getWriter();
+      const audioWriter = audioTrack?.writable?.getWriter();
 
       this.video.srcObject = new MediaStream([videoTrack]);
       this.video.onloadedmetadata = () => {
@@ -130,7 +135,8 @@ export class MediaFeeder {
             this.reporting.warningMessage = "Received an unknown message from the video worker "+data;
           }
         };
-        this.videoWorker.postMessage({url: url})
+        const h264HwDecode = NavComponent.getCookie("hardwareDecoding");  // Get H264 hardware decoding user preference
+        this.videoWorker.postMessage({url: url, h264HardwareDecoding: h264HwDecode})
         if(this.stream.audio) {
           // Create a new audio feeder web worker
           this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));

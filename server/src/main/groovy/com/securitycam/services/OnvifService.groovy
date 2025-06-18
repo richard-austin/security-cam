@@ -270,8 +270,9 @@ class OnvifService {
                                     }
                                     stream.audio_sample_rate = aec.getSampleRate().intValue()
                                     // sampleRate should be in Kbps, though it is in bps from SV3C type cameras.
-                                    if (stream.audio_sample_rate < 200)
-                                        stream.audio_sample_rate *= 1000
+                                    if (stream.audio_sample_rate < 200) {
+                                        stream.audio_sample_rate = stream.audio_sample_rate.intValue() * 1000
+                                    }
 
                                     //  AudioSourceConfiguration asc = profile.getAudioSourceConfiguration()
                                 } else {
@@ -328,7 +329,7 @@ class OnvifService {
     }
 
     private static boolean isSupportedAudioOutputFmt(String format) {
-        final String supportedFmtsRegex = /^(AAC|G711|G726)$/
+        final String supportedFmtsRegex = /^(AAC|G711)$/  /* G726 */
         return format.matches(supportedFmtsRegex)
     }
 

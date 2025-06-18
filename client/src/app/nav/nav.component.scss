@@ -128,5 +128,16 @@ div.no-transport-warning {
       color: red;
     }
   }
+}
 
+.mat-menu__checkbox {
+  height: 100%;
+  &::ng-deep .mat-checkbox-layout {
+    height: 100%;
+    &::ng-deep .mat-checkbox-label {
+      margin: auto;
+      vertical-align: middle;
+      position: relative;
+    }
+  }
 }
