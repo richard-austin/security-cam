@@ -75,7 +75,7 @@ There could possibly be compatibility issues with some other camera types.
 * ssh to the Raspberry pi.
 * ```bash
   # Install with
-  sudo apt install ./security-cam_10.0.0_arm64.deb # (or whichever version you have built or downloaded from the release area)
+  sudo apt install ./security-cam_11.0.0_arm64.deb # (or whichever version you have built or downloaded from the release area)
   ```
 * See [SETTING-UP.md](SETTING-UP.md) for how to set up user account, wifi, cameras etc.
 
