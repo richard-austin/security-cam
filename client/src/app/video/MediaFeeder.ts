@@ -107,11 +107,11 @@ export class MediaFeeder {
         this.audioWorklet.setMuting(this.muted);
         this.audioWorklet.setGain(this.volume);
       }
-      const audioTrack = new MediaStreamTrackGenerator({kind: 'audio', sampleRate: 8000});
+      const audioTrack = this.audioWorklet?.getTrack();
 
       const audioWriter = audioTrack?.writable?.getWriter();
 
-      this.video.srcObject = new MediaStream([videoTrack, audioTrack]);
+      this.video.srcObject = new MediaStream([videoTrack]);
       this.video.onloadedmetadata = () => {
         this.video.play().then();
       }
