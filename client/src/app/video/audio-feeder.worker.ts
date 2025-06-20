@@ -2,6 +2,14 @@
 
 import {timer} from "rxjs";
 
+//
+// Notes:-
+//  Audio latency is increased in ffmpeg when video is present (even if the video and audio output streams are separate but
+//  under the same tee pseudo muxer) because ffmpeg is keeping the AV timestamps in line.
+//  I tested with only an audio stream, and the audio latency was then the same as with the RTSPToWebRTC demo, otherwise
+//  with video too, there is an increase in this latency by a fraction of a second.
+// See also notes in audio-feeder-worklet.js
+//
 let audioFeeder: AudioWorker;
 addEventListener('message', ({ data }) => {
   if(data.url) {

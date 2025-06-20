@@ -1,3 +1,14 @@
+//
+// Notes:-
+// This is derived from the MediaStreamTrackGenerator polyfill used for browsers not supporting MediaStreamTrackGenerator.
+// The polyfill as originally obtained doesn't work properly with audio as the AudioContext seems to default to sample rate
+// 48000. This is fixed here by passing the correct sample rate to the AudioContext constructor. There is some audio latency drift
+// when the media stream track is passed to MediaStream for output to a media element. This is fixed here by passing the
+// audio worklet node output to the audio context destination via a gain node. As this is used on Chrome browsers now,
+// the audioData format in the write function (from the decoder) must be checked as it is Int16 with G711 audio, and
+// Float32 with AAC, and the correct array type must be set up. Additionally a very large amount of attenuation is
+// required (by setting the gain value) for Int16.
+//
 class AudioStream {
     gainFactor = 0;
     gain = 0.5;
