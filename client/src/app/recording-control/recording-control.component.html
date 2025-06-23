@@ -75,13 +75,13 @@
             </div>
             <label *ngIf="hasAudio()" class="video-buttons"
                    [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (isMuted() ? 'unmute' : 'mute') + ' sound'"
-                   matTooltipClass="tooltip">
+                   matTooltipClass="video-buttons-tooltip">
                 <mat-icon (click)="toggleShowAudioControls()">{{ isMuted() ? 'volume_off' : 'volume_up' }}
                 </mat-icon>
             </label>
           <label class="video-buttons"
                  matTooltip="Set full screen"
-                 matTooltipClass="tooltip">
+                 matTooltipClass="video-buttons-tooltip">
             <mat-icon (click)="video.setFullScreen()">fullscreen</mat-icon>
           </label>
         </div>

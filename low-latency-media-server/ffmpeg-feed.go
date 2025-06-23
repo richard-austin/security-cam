@@ -88,13 +88,13 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 							audioMuxer = "adts"
 						}
 						audioMode = "-c:a copy"
-						audio = fmt.Sprintf("|[select=a:f=%s:onfail=abort]%sa", audioMuxer, stream.MediaServerInputUri)
+						audio = fmt.Sprintf("|[select=a:use_fifo=1:fifo_options=fifo_format=%s\\\\:drop_pkts_on_overflow=1:onfail=abort]%sa", audioMuxer, stream.MediaServerInputUri)
 						audioMap = "-map 0:a " // The space at the end is important in splitting the command line
 					}
 
 					recording := ""
 					if stream.Recording.Enabled && stream.Recording.RecordingInputUrl != "" {
-						recording = fmt.Sprintf("|[use_fifo=1:fifo_options=drop_pkts_on_overflow=1:f=flv:onfail=abort]%s", stream.Recording.RecordingInputUrl)
+						recording = fmt.Sprintf("|[use_fifo=1:fifo_options=fifo_format=flv\\\\:drop_pkts_on_overflow=1:onfail=abort]%s", stream.Recording.RecordingInputUrl)
 					}
 					netcamUri := stream.NetcamUri
 					rtspTransport := strings.ToLower(camera.RtspTransport)
@@ -123,7 +123,7 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 					log.Info("Codec string = " + avi.Codec)
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
-					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s[select=v:f=%s:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
+					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s[select=v:use_fifo=1:fifo_options=fifo_format=%s\\\\:drop_pkts_on_overflow=1:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
 					log.Info("/usr/bin/ffmpeg " + sb.String())
 					cmdStr := sb.String()
 					cmd := exec.Command("/usr/bin/ffmpeg", strings.Split(cmdStr, " ")...)

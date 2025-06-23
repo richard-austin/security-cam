@@ -405,6 +405,15 @@ mat-card.hide-background {
   --mdc-plain-tooltip-container-shape: 5px;
 }
 
+.video-buttons-tooltip {
+  position: relative;
+  top: -10px;
+  --mdc-plain-tooltip-container-color: #e3ba4f;
+  --mdc-plain-tooltip-supporting-text-color: black;
+  --mdc-plain-tooltip-supporting-text-size: 12px;
+  --mdc-plain-tooltip-container-shape: 5px;
+}
+
 .confirm-group {
   position: relative;
   top: -8px;
