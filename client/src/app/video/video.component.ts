@@ -20,6 +20,8 @@ import {SharedAngularMaterialModule} from "../shared/shared-angular-material/sha
 import {FormsModule} from "@angular/forms";
 import {AudioControlComponent} from "./audio-control/audio-control.component";
 import {animate, state, style, transition, trigger} from "@angular/animations";
+import {NavComponent} from "../nav/nav.component";
+import {AudioLevel} from "./AudioLevel";
 
 @Component({
     selector: 'app-video',
@@ -53,6 +55,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   sizing!: VideoSizing;
   showAudioControls: boolean = false;
   ctrlKeyDown = false;
+  camKey: string = "";
 
   constructor(public utilsService: UtilsService) {
     this.mediaFeeder = new MediaFeeder();
@@ -94,17 +97,27 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleMuteAudio() {
-    if (this.mediaFeeder)
+    if (this.mediaFeeder) {
       this.mediaFeeder.mute(!this.mediaFeeder.isMuted);
+      const level = new AudioLevel(this.mediaFeeder.volume, this.mediaFeeder.isMuted);
+      NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
+    }
   }
 
   mute(mute: boolean = true): void {
-    if (this.mediaFeeder)
+    if (this.mediaFeeder) {
       this.mediaFeeder.mute(mute);
+      const level = new AudioLevel(this.mediaFeeder.volume, mute);
+      NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
+    }
   }
 
   setVolume(volume: number) {
-    this.mediaFeeder.gain =volume;
+    if(this.mediaFeeder) {
+      this.mediaFeeder.gain =volume;
+      const level = new AudioLevel(volume, this.mediaFeeder.isMuted);
+      NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
+    }
   }
 
   toggleShowAudioControls() {
@@ -114,6 +127,36 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     else
       this.showAudioControls = !this.showAudioControls;
+  }
+
+  /**
+   * getCamKey: Get key for level setting cookie name
+   * @param isMulti True if multi-cam, otherwise false for single
+   */
+  getCamKey(isMulti: boolean): void {
+    let camKey = '';
+    const searchTerm = "?suuid=";
+    const camIdx = this.stream.media_server_input_uri.indexOf(searchTerm);
+    if (camIdx > -1) {
+      const dashIdx = this.stream.media_server_input_uri.indexOf('-',camIdx);
+      if (dashIdx > -1) {
+        camKey = this.stream.media_server_input_uri.substring(camIdx+searchTerm.length, dashIdx);
+      }
+    }
+    this.camKey = (isMulti ? 'multi-' : '') + camKey;
+  }
+
+  setInitialLevel(isMulti: boolean, level: number, muted: boolean) {
+    this.getCamKey(isMulti);
+    let audioLevel: AudioLevel = new AudioLevel(level, muted);
+    if(this.camKey !== "") {
+      const strLevel = NavComponent.getCookie(this.camKey)
+      if(strLevel !== "") {
+        audioLevel = JSON.parse(strLevel);
+      }
+    }
+    this.setVolume(audioLevel.level);
+    this.mute(audioLevel.mute);
   }
 
   setSize(size: number, isRecording: boolean = false): void {

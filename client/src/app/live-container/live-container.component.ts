@@ -57,6 +57,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.camera !== undefined && this.stream !== undefined) {
       if (this.video !== undefined) {
         this.video.setSource(this.camera, this.stream);
+        this.video.setInitialLevel(false,0.4, false);
         this.video.visible = true;
       }
     } else

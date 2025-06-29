@@ -92,10 +92,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   hardwareDecoding(checked: boolean) {
-      this.setCookie("hardwareDecoding", checked ? "true" : "false", 600);
+      NavComponent.setCookie("hardwareDecoding", checked ? "true" : "false", 600);
   }
 
-  setCookie(cname:string, cvalue:string, exdays:number) {
+  static setCookie(cname:string, cvalue:string, exdays:number) {
     const d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     let expires = "expires="+d.toUTCString();
@@ -325,7 +325,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     let hwdc = NavComponent.getCookie("hardwareDecoding");
     if (hwdc === "") {
-        this.setCookie("hardwareDecoding", "true", 600);
+        NavComponent.setCookie("hardwareDecoding", "true", 600);
         hwdc = "true";
     }
     const sub = timer(30).subscribe(() => {
