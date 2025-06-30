@@ -6,7 +6,7 @@
       </button>
       <span></span>
       <mat-slider min="0" max="1" step="0.02" ngDefaultControl showTickMarks discrete [displayWith]="zeroTo100"
-                  [disabled]="mute" (change)="setVolume()">
+                  [disabled]="mute" (change)="setVolume()" (click)="setVolume()">
         <input matSliderThumb [(ngModel)]="level">
       </mat-slider>
     </div>
