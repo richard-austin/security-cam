@@ -35,8 +35,7 @@ export class AudioControlComponent implements AfterViewInit {
     this.muteAudio.emit(this.mute);
   }
 
-  setVolume($event: Event) {
-    this.level = ($event.target as HTMLInputElement).valueAsNumber;
+  setVolume() {
     this.setLevel.emit(this.level);
   }
 

@@ -106,6 +106,7 @@ div.recording-container {
 }
 
 div.audio-controls-dialogue {
+  top: -5px;
   position: relative;
   > div {
     @include mixins.top-cursor;
