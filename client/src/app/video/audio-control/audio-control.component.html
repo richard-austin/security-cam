@@ -1,8 +1,11 @@
 <div class="audio-control">
     <mat-card>
         <div>
-            <mat-icon (click)="toggleMuteAudio()">{{ mute ? 'volume_off' : 'volume_up' }}</mat-icon>
-            <mat-slider min="0" max="1" step="0.02" ngDefaultControl showTickMarks discrete [displayWith]="zeroTo100" [disabled]="mute" (change)="setVolume($event)">
+          <button mat-icon-button (click)="toggleMuteAudio()">
+            <mat-icon>{{ mute ? 'volume_off' : 'volume_up' }}</mat-icon>
+          </button>
+          <span></span>
+            <mat-slider min="0" max="1" step="0.02" ngDefaultControl showTickMarks discrete [displayWith]="zeroTo100" [disabled]="mute" (click)="setVolume($event)" (change)="setVolume($event)">
                 <input matSliderThumb [value]="level">
             </mat-slider>
         </div>

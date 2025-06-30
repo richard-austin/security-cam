@@ -3,6 +3,7 @@ import {MatCard} from "@angular/material/card";
 import {MatSlider, MatSliderThumb} from "@angular/material/slider";
 import {FormsModule} from "@angular/forms";
 import {MatIcon} from "@angular/material/icon";
+import {MatIconButton} from "@angular/material/button";
 
 @Component({
   selector: 'app-audio-control',
@@ -11,14 +12,15 @@ import {MatIcon} from "@angular/material/icon";
     MatIcon,
     MatSlider,
     FormsModule,
-    MatSliderThumb
+    MatSliderThumb,
+    MatIconButton
   ],
   templateUrl: './audio-control.component.html',
   styleUrl: './audio-control.component.scss'
 })
 export class AudioControlComponent implements AfterViewInit {
   @Output() muteAudio = new EventEmitter<boolean>();
-  @Output() setLevel= new EventEmitter<number>();
+  @Output() setLevel = new EventEmitter<number>();
   @Input() mute: boolean = false;
   @Input() level!: number;
   lastLevel!: number;
@@ -28,8 +30,7 @@ export class AudioControlComponent implements AfterViewInit {
     if (this.mute) {
       this.lastLevel = this.level;
       this.level = 0;
-    }
-    else
+    } else
       this.level = this.lastLevel;
     this.muteAudio.emit(this.mute);
   }

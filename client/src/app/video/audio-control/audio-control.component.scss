@@ -1,22 +1,29 @@
 div.audio-control {
-  width: 275px;
+  width: 285px;
   margin-top: 30px;
+
   > mat-card {
 
     > div {
       height: 0;
 
-      > mat-icon {
-        cursor: pointer;
-        margin-right: 0.4rem;
-        margin-left: 0;
-        color: white;
+      > button {
+        > mat-icon {
+          cursor: pointer;
+          margin-left: 0;
+          color: white;
+        }
+        margin-right: 20px;
       }
 
       > mat-slider {
         width: 200px;
-        position: relative;
         top: -10px;
+
+        > input {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+        }
       }
 
       margin-bottom: 30px;
