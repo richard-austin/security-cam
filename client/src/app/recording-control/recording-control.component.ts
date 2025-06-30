@@ -424,6 +424,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     if (this.ctrlKeyDown) {
       this.mute(!this.video?.video?.muted)
       this.showAudioControls = false;
+      this.volume = this.video?.video?.muted ? 0 : this.video.video.volume;
     } else
       this.showAudioControls = !this.showAudioControls;
   }

@@ -68,7 +68,8 @@
                 <div [@detailExpand]="showAudioControls ? 'expanded' : 'collapsed'">
                     <app-audio-control [mute]="isMuted()"
                                        (muteAudio)="mute($event)" [level]="volume"
-                                       (setLevel)="setVolume($event.valueOf())"></app-audio-control>
+                                       (setLevel)="setVolume($event.valueOf())">
+                    </app-audio-control>
                     <div>
                     </div>
                 </div>
