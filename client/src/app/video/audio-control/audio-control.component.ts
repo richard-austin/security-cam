@@ -20,7 +20,7 @@ import {MatIconButton} from "@angular/material/button";
 })
 export class AudioControlComponent implements AfterViewInit {
   @Output() muteAudio = new EventEmitter<boolean>();
-  @Output() setLevel= new EventEmitter<number>();
+  @Output() setLevel = new EventEmitter<number>();
   @Input() mute: boolean = false;
   @Input() level!: number;
   lastLevel!: number;
@@ -30,19 +30,14 @@ export class AudioControlComponent implements AfterViewInit {
     if (this.mute) {
       this.lastLevel = this.level;
       this.level = 0;
-    }
-    else
+    } else
       this.level = this.lastLevel;
     this.muteAudio.emit(this.mute);
   }
 
   setVolume($event: Event) {
-    if($event.type !== "change")
-      ($event.target as HTMLInputElement).valueAsNumber = this.level;
-    else {
-      this.level = ($event.target as HTMLInputElement).valueAsNumber;
-      this.setLevel.emit(this.level);
-    }
+    this.level = ($event.target as HTMLInputElement).valueAsNumber;
+    this.setLevel.emit(this.level);
   }
 
   ngAfterViewInit() {
