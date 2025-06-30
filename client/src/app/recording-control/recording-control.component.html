@@ -65,7 +65,7 @@
       <div #recordingsButtons class="buttons-flex-container">
         <div class="additional-buttons">
             <div *ngIf="hasAudio()" class="audio-controls-dialogue">
-                <div>
+                <div [@detailExpand]="showAudioControls ? 'expanded' : 'collapsed'">
                     <app-audio-control [mute]="isMuted()"
                                        (muteAudio)="mute($event)" [level]="volume"
                                        (setLevel)="setVolume($event.valueOf())"></app-audio-control>
