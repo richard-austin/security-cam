@@ -17,7 +17,7 @@ class AudioStream {
     track;
 
     constructor(sampleRate) {
-        const ac = new AudioContext({sampleRate: sampleRate});
+        const ac = new AudioContext({sampleRate: sampleRate, latencyHint: "interactive"});
         this.gainNode = ac.createGain()
         this.gainNode.connect(ac.destination);
 
