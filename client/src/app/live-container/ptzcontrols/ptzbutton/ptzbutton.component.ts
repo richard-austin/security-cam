@@ -27,29 +27,43 @@ export class PTZButtonComponent implements OnInit {
   @Input() reporting!: ReportingComponent;
   @Input() scale: number = 2;
   isGuest: boolean = true;
-
+  mouseDown: boolean = false;
   constructor(private ptz: PTZService, private utils: UtilsService) {
   }
 
-  move() {
-    let ptz: PTZMove = new PTZMove(this.moveDirection, this.camera);
-    this.ptz.move(ptz).subscribe(() => {
-      },
-      reason => {
-        this.reporting.errorMessage = reason;
-      });
+  move($event: MouseEvent | TouchEvent) {
+    if(($event.type === "mousedown" && (($event as MouseEvent).buttons & 1) === 1) || $event.type === "touchstart") {
+      let ptz: PTZMove = new PTZMove(this.moveDirection, this.camera);
+      this.mouseDown = true;
+      this.ptz.move(ptz).subscribe(() => {
+        },
+        reason => {
+          this.reporting.errorMessage = reason;
+        });
+    }
   }
 
-  stop() {
-    let ptz: PTZStop = new PTZStop(this.camera)
-    this.ptz.stop(ptz).subscribe(() => {
-      },
-      reason => {
-        this.reporting.errorMessage = reason;
-      })
+  stop($event?: MouseEvent | TouchEvent) {
+    if($event === undefined || ($event.type === "mouseup" && (($event as MouseEvent).buttons & 1) === 0) || $event.type === "touchend") {
+      this.mouseDown = false;
+      let ptz: PTZStop = new PTZStop(this.camera)
+      this.ptz.stop(ptz).subscribe(() => {
+        },
+        reason => {
+          this.reporting.errorMessage = reason;
+        })
+    }
+  }
+
+  // Stop the movement if the mouse is slid outside the button with the mouse button still down
+  stopIfMouseDown() {
+    if(this.mouseDown) {
+      this.stop();
+    }
   }
 
   ngOnInit(): void {
     this.isGuest = this.utils.isGuestAccount;
   }
+
 }
