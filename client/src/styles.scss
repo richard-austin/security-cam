@@ -115,9 +115,9 @@ body {
   --mat-menu-item-label-text-font: Roboto, "Helvetica Neue", sans-serif;
   --mat-menu-item-label-text-weight: 400;
   --mat-select-trigger-text-size: small;
-  //--mdc-text-button-container-height: 15px;
+  //--mat-button-text-container-height: 15px;
   --mat-menu-item-label-text-line-height: 15px;
-  //--mdc-plain-tooltip-container-shape: 2rem;
+  //--mat-tooltip-container-shape: 2rem;
   --mat-table-header-headline-size: 12px;
   --mat-table-header-headline-weight: 400;
   --mat-table-row-item-container-height: 60px;
@@ -235,13 +235,13 @@ mat-label {
 button[mat-button] {
   padding: 8px;
   min-height: 36px;
-  --mdc-text-button-label-text-size:14px;
-  --mdc-text-button-label-text-tracking: normal;
+  --mat-button-text-label-text-size:14px;
+  --mat-button-text-label-text-tracking: normal;
 }
 
 button[mat-menu-item] {
   //min-height: 30px !important;
-  --mdc-text-button-label-text-size: 14px;
+  --mat-button-text-label-text-size: 14px;
   --mat-menu-item-label-text-weight: 400;
 
   //--mat-menu-item-label-text-weight: 400;
@@ -399,19 +399,19 @@ mat-card.hide-background {
 }
 
 .tooltip {
-  --mdc-plain-tooltip-container-color: #e3ba4f;
-  --mdc-plain-tooltip-supporting-text-color: black;
-  --mdc-plain-tooltip-supporting-text-size: 12px;
-  --mdc-plain-tooltip-container-shape: 5px;
+  --mat-tooltip-container-color: #e3ba4f;
+  --mat-tooltip-supporting-text-color: black;
+  --mat-tooltip-supporting-text-size: 12px;
+  --mat-tooltip-container-shape: 5px;
 }
 
 .video-buttons-tooltip {
   position: relative;
   top: -10px;
-  --mdc-plain-tooltip-container-color: #e3ba4f;
-  --mdc-plain-tooltip-supporting-text-color: black;
-  --mdc-plain-tooltip-supporting-text-size: 12px;
-  --mdc-plain-tooltip-container-shape: 5px;
+  --mat-tooltip-container-color: #e3ba4f;
+  --mat-tooltip-supporting-text-color: black;
+  --mat-tooltip-supporting-text-size: 12px;
+  --mat-tooltip-container-shape: 5px;
 }
 
 .confirm-group {

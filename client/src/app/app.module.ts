@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import {BrowserModule} from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HttpClient, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HttpClient, provideHttpClient, withInterceptorsFromDi, withFetch } from "@angular/common/http";
 import {BaseUrl} from "./shared/BaseUrl/BaseUrl";
 import { NavComponent } from './nav/nav.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -80,6 +80,7 @@ import {MatDialogActions, MatDialogContent, MatDialogTitle} from "@angular/mater
     exports: [
     ],
     providers: [
+        provideHttpClient(withFetch()),
         {
             provide: DateAdapter,
             useClass: CustomDateAdapter,

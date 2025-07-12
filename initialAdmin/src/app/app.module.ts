@@ -20,7 +20,7 @@ import {MatMenuModule as MatMenuModule} from '@angular/material/menu';
 import {MatTooltipModule as MatTooltipModule} from '@angular/material/tooltip';
 import {AppRoutingModule} from './app-routing.module';
 import {CommonModule} from '@angular/common';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {provideHttpClient, withFetch, withInterceptorsFromDi} from '@angular/common/http';
 import {BaseUrl} from './shared/BaseUrl/BaseUrl';
 import {MatDividerModule} from '@angular/material/divider';
 import {LayoutModule} from '@angular/cdk/layout';
@@ -60,5 +60,5 @@ import {SafeHtmlPipe} from "./reporting/safe-html.pipe";
         FormsModule,
         LayoutModule,
         MatDividerModule,
-        RouterOutlet], providers: [BaseUrl, provideHttpClient(withInterceptorsFromDi())] })
+        RouterOutlet], providers: [BaseUrl, provideHttpClient(withInterceptorsFromDi(), withFetch())] })
 export class AppModule { }
