@@ -29,6 +29,10 @@ chown -R tomcat:security-cam /var/security-cam
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown -R tomcat:tomcat /var/lib/tomcat10
 
+# TODO: Required for Ubuntu 25.04. Check if this still needed for Ubuntu 26.04 (LTS)
+chmod 660 /dev/vcio
+chown root:video /dev/vcio
+
 # Create the client keystore for connection to the Cloud server via ActiveMQ
 MQ_CREDS_FILE=/var/security-cam/cloud-creds.json
 KEYSTORE_FILE=/etc/security-cam/client.ks

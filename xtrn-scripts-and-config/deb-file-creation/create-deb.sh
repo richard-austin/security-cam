@@ -73,7 +73,7 @@ Depends: openjdk-21-jre-headless (>=21.0.0), openjdk-21-jre-headless (<< 21.9.9)
  libraspberrypi-bin, chrony,
  network-manager (>= 1.46.0), network-manager (<< 2.0.0),
  moreutils,
- python3-pip, python3.12-venv
+ python3-pip, python3-venv
 EOF
 
 dpkg-deb --build --root-owner-group security-cam_"${VERSION}"_arm64
