@@ -265,6 +265,7 @@ class Handler(BaseHTTPRequestHandler):
                         if password is None:
                             message, returncode = executeOsCommand2(f"nmcli dev wifi connect {ssid}")
                         else:
+                            executeOsCommand2(f"nmcli connection delete {ssid}")  # TODO: required on Ubuntu 25.04, see if still required on Ubuntu 26.04 (LTS)
                             message, returncode = executeOsCommand2(f"nmcli dev wifi connect {ssid} password {password}")
 
                         if returncode != 0 and returncode != 4:
