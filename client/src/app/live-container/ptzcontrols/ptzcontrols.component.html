@@ -6,48 +6,48 @@
       <div>
         <div>
           <app-ptzbutton matIcon="keyboard_arrow_up"
-                         ptzBtnMatTooltip="Tilt upward"
-                         [reporting]="reporting"
-                         [moveDirection]="eMoveDirections['tiltUp']"
-                         [camera]="camera">
+            ptzBtnMatTooltip="Tilt upward"
+            [reporting]="reporting"
+            [moveDirection]="eMoveDirections['tiltUp']"
+            [camera]="camera">
           </app-ptzbutton>
         </div>
         <div>
           <app-ptzbutton matIcon="keyboard_arrow_left"
-                         ptzBtnMatTooltip="Pan left"
-                         [reporting]="reporting"
-                         [moveDirection]="eMoveDirections['panLeft']"
-                         [camera]="camera">
+            ptzBtnMatTooltip="Pan left"
+            [reporting]="reporting"
+            [moveDirection]="eMoveDirections['panLeft']"
+            [camera]="camera">
           </app-ptzbutton>
           <app-ptzbutton matIcon="keyboard_arrow_right"
-                         ptzBtnMatTooltip="Pan right"
-                         [reporting]="reporting"
-                         [moveDirection]="eMoveDirections['panRight']"
-                         [camera]="camera">
+            ptzBtnMatTooltip="Pan right"
+            [reporting]="reporting"
+            [moveDirection]="eMoveDirections['panRight']"
+            [camera]="camera">
           </app-ptzbutton>
         </div>
         <div>
           <app-ptzbutton matIcon="keyboard_arrow_down"
-                         ptzBtnMatTooltip="Tilt downward"
-                         [reporting]="reporting"
-                         [moveDirection]="eMoveDirections['tiltDown']"
-                         [camera]="camera">
+            ptzBtnMatTooltip="Tilt downward"
+            [reporting]="reporting"
+            [moveDirection]="eMoveDirections['tiltDown']"
+            [camera]="camera">
           </app-ptzbutton>
         </div>
         <div>
           <app-ptzbutton matIcon="add_circle_outline"
-                         ptzBtnMatTooltip="Zoom in"
-                         [scale]="1"
-                         [reporting]="reporting"
-                         [moveDirection]="eMoveDirections['zoomIn']"
-                         [camera]="camera">
+            ptzBtnMatTooltip="Zoom in"
+            [scale]="1"
+            [reporting]="reporting"
+            [moveDirection]="eMoveDirections['zoomIn']"
+            [camera]="camera">
           </app-ptzbutton>
           <app-ptzbutton matIcon="remove_circle_outline"
-                         ptzBtnMatTooltip="Zoom out"
-                         [scale]="1"
-                         [reporting]="reporting"
-                         [moveDirection]="eMoveDirections['zoomOut']"
-                         [camera]="camera">
+            ptzBtnMatTooltip="Zoom out"
+            [scale]="1"
+            [reporting]="reporting"
+            [moveDirection]="eMoveDirections['zoomOut']"
+            [camera]="camera">
           </app-ptzbutton>
         </div>
       </div>
@@ -55,27 +55,29 @@
       <mat-card-subtitle>Presets</mat-card-subtitle>
       <mat-card-subtitle class="smaller-text">{{presetFunctionDescription()}}</mat-card-subtitle>
       <div>
-        <app-preset-button *ngFor="let l of counter(maxPresets); let i=index"
-                           (click)="presetButtonPressed()"
-                           [reporting]="reporting"
-                           [camera]="camera"
-                           [presetNumber]="(i+1).toString()"
-                           [presetInfo]="presetsInfo.presets[i]"
-                           [operation]="presetOperation()"
-                           [isGuest]="isGuest"
-                           matTooltip="{{isGuest ? 'Disabled for guest' : presetsTooltip(i+1)}}"
-                           matTooltipClass="tooltip">
-        </app-preset-button>
+        @for (l of counter(maxPresets); track l; let i = $index) {
+          <app-preset-button
+            (click)="presetButtonPressed()"
+            [reporting]="reporting"
+            [camera]="camera"
+            [presetNumber]="(i+1).toString()"
+            [presetInfo]="presetsInfo.presets[i]"
+            [operation]="presetOperation()"
+            [isGuest]="isGuest"
+            matTooltip="{{isGuest ? 'Disabled for guest' : presetsTooltip(i+1)}}"
+            matTooltipClass="tooltip">
+          </app-preset-button>
+        }
       </div>
       <div>
         <mat-slide-toggle (change)="presetSaveSwitchChanged($event)"
-                           [disabled]="clearPreset">
+          [disabled]="clearPreset">
           {{!savePreset ? "Save Preset" : "Goto Preset"}}
         </mat-slide-toggle>
-          <mat-slide-toggle (change)="clearPresetSwitchChanged($event)"
-                            [disabled]="savePreset">
-            Clear Preset
-          </mat-slide-toggle>
+        <mat-slide-toggle (change)="clearPresetSwitchChanged($event)"
+          [disabled]="savePreset">
+          Clear Preset
+        </mat-slide-toggle>
       </div>
     </div>
   </mat-card-content>

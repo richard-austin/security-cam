@@ -4,11 +4,13 @@
   </a>
 
   <div>
-    <div *ngIf="!noTemperature" [ngClass]="tempAlertClass">Core Temp: {{temperature}} °C</div>
+    @if (!noTemperature) {
+      <div [ngClass]="tempAlertClass">Core Temp: {{ temperature }} °C</div>
+    }
   </div>
 
   <button mat-button class="navbar-toggler" type="button" (click)="toggleMenu()"
-          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <mat-icon>menu</mat-icon>
   </button>
 
@@ -18,13 +20,13 @@
         Select Camera
       </button>
       <mat-menu #menuSelectCamera>
-        <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
-          <ng-container *ngFor="let streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn">
+        @for (camKV of cameras | keyvalue: cameraSvc.compareFn; track camKV) {
+          @for (streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn; track streamKV) {
             <button mat-menu-item (click)="setVideoStream(camKV.value, streamKV.value);menuClosed()">
               {{camKV.value.name + " (" + streamKV.value.descr + ")"}}
             </button>
-          </ng-container>
-        </ng-container>
+          }
+        }
         <button mat-menu-item (click)="multiCamView();menuClosed()">Multi Camera View</button>
       </mat-menu>
     </div>
@@ -32,13 +34,15 @@
     <div>
       <button mat-button [matMenuTriggerFor]="$any(menuSelectRecording)">Select Recording</button>
       <mat-menu #menuSelectRecording>
-        <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
-          <ng-container *ngFor="let streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn">
-            <button mat-menu-item (click)="showRecording(camKV.value, streamKV.value);menuClosed()" *ngIf="streamKV.value.recording.enabled">
-              {{camKV.value.name + " (" + streamKV.value.descr + ")"}}
-            </button>
-          </ng-container>
-        </ng-container>
+        @for (camKV of cameras | keyvalue: cameraSvc.compareFn; track camKV) {
+          @for (streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn; track streamKV) {
+            @if (streamKV.value.recording.enabled) {
+              <button mat-menu-item (click)="showRecording(camKV.value, streamKV.value);menuClosed()">
+                {{camKV.value.name + " (" + streamKV.value.descr + ")"}}
+              </button>
+            }
+          }
+        }
       </mat-menu>
     </div>
 
@@ -49,23 +53,27 @@
         <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraAdmin)">Camera Admin</button>
       </mat-menu>
       <mat-menu #menuCameraSettings>
-        <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
-          <button *ngIf="camKV.value.address!=''&&camKV.value.cameraParamSpecs.camType !== cameraTypes.none" mat-menu-item
-                  (click)="cameraControl(camKV.value);menuClosed()">
-            {{camKV.value.name}}
-          </button>
-        </ng-container>
-      </mat-menu>
-      <mat-menu #menuCameraAdmin>
-        <ng-container *ngFor="let camKV of cameras | keyvalue: cameraSvc.compareFn">
-          <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
-            <button *ngIf="camKV.value.address!=''" mat-menu-item
-                    [disabled]="isGuest"
-                    (click)="cameraAdmin(camKV.value);menuClosed()">
+        @for (camKV of cameras | keyvalue: cameraSvc.compareFn; track camKV) {
+          @if (camKV.value.address != '' && camKV.value.cameraParamSpecs.camType !== cameraTypes.none) {
+            <button mat-menu-item
+              (click)="cameraControl(camKV.value);menuClosed()">
               {{camKV.value.name}}
             </button>
+          }
+        }
+      </mat-menu>
+      <mat-menu #menuCameraAdmin>
+        @for (camKV of cameras | keyvalue: cameraSvc.compareFn; track camKV) {
+          <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+            @if (camKV.value.address != '') {
+              <button mat-menu-item
+                [disabled]="isGuest"
+                (click)="cameraAdmin(camKV.value);menuClosed()">
+                {{camKV.value.name}}
+              </button>
+            }
           </span>
-        </ng-container>
+        }
       </mat-menu>
 
     </div>
@@ -74,23 +82,23 @@
       <button mat-button [matMenuTriggerFor]="$any(menuGeneral)">General</button>
       <mat-menu #menuGeneral>
         <button mat-menu-item (click)="configSetup();menuClosed()"
-                matTooltip="Discover and configure the cameras for live view, recording, audio back channel and various other features."
-                matTooltipClass="tooltip">
-        Configuration
+          matTooltip="Discover and configure the cameras for live view, recording, audio back channel and various other features."
+          matTooltipClass="tooltip">
+          Configuration
         </button>
-          <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
-          <div mat-menu-item
-               matTooltip="Enable or disable H264 hardware decoding. In some cases hardware decoding adds latency on H264, in other cases hardware decoding is required to decode it at all. Set this for the best performance on the platform/browser you are using."
-               matTooltipClass="tooltip"
-               (click)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()"
-               (keydown.enter)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()">
-              <mat-checkbox class="mat-menu__checkbox"
-                            labelPosition="before"
-                            (click)="hardwareDecoding(hardwareDecodingCheckBox.checked);$event.stopPropagation()"
-                            #hardwareDecodingCheckBox>
-                  H264 Hardware Decoding
-              </mat-checkbox>
-          </div>
+        <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
+        <div mat-menu-item
+          matTooltip="Enable or disable H264 hardware decoding. In some cases hardware decoding adds latency on H264, in other cases hardware decoding is required to decode it at all. Set this for the best performance on the platform/browser you are using."
+          matTooltipClass="tooltip"
+          (click)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()"
+          (keydown.enter)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()">
+          <mat-checkbox class="mat-menu__checkbox"
+            labelPosition="before"
+            (click)="hardwareDecoding(hardwareDecodingCheckBox.checked);$event.stopPropagation()"
+            #hardwareDecodingCheckBox>
+            H264 Hardware Decoding
+          </mat-checkbox>
+        </div>
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="changePassword();menuClosed()">Change Password</button>
         </span>
@@ -98,9 +106,11 @@
           <button mat-menu-item [disabled]="isGuest" (click)="changeEmail(); menuClosed()">Change Account Email</button>
         </span>
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
-          <button mat-menu-item *ngIf="!isGuest"
-                  (click)="setUpGuestAccount(); menuClosed()">Set Up Guest Account
-          </button>
+          @if (!isGuest) {
+            <button mat-menu-item
+              (click)="setUpGuestAccount(); menuClosed()">Set Up Guest Account
+            </button>
+          }
         </span>
         <div class="dropdown-divider"></div>
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
@@ -113,16 +123,16 @@
         </span>
         <button mat-menu-item [matMenuTriggerFor]="$any(wifiAdmin)">Wifi Admin</button>
         <mat-menu #wifiAdmin>
-        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
-          <button mat-menu-item [disabled]="isGuest" (click)="getLocalWifiDetails(); menuClosed()">
-            Local Wifi Details
-          </button>
-        </span>
           <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
-          <button mat-menu-item [disabled]="isGuest" (click)="wifiSettings(); menuClosed()">
-            Wifi Settings
-          </button>
-        </span>
+            <button mat-menu-item [disabled]="isGuest" (click)="getLocalWifiDetails(); menuClosed()">
+              Local Wifi Details
+            </button>
+          </span>
+          <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+            <button mat-menu-item [disabled]="isGuest" (click)="wifiSettings(); menuClosed()">
+              Wifi Settings
+            </button>
+          </span>
         </mat-menu>
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="cloudProxy();menuClosed()">Set CloudProxy Status</button>
@@ -137,19 +147,23 @@
     </div>
   </div>
 </div>
-<mat-card class="mat-elevation-z8 confirm-logout" *ngIf="confirmLogout">
-  <mat-card-subtitle>
-    Logout from Security Cam, Are you sure?
-  </mat-card-subtitle>
-  <mat-card-content>
-    <button mat-raised-button color="warn" (click)="logOff(true)">Confirm</button>
-    <button mat-raised-button color="cancel" (click)="logOff(false)">Cancel</button>
-  </mat-card-content>
-</mat-card>
-<div *ngIf="utilsService.cloudProxyRunning && !utilsService.activeMQTransportActive" class="no-transport-warning">
-  <div>
-    <mat-card-title>Not Connected To Transport</mat-card-title>
+@if (confirmLogout) {
+  <mat-card class="mat-elevation-z8 confirm-logout">
+    <mat-card-subtitle>
+      Logout from Security Cam, Are you sure?
+    </mat-card-subtitle>
+    <mat-card-content>
+      <button mat-raised-button color="warn" (click)="logOff(true)">Confirm</button>
+      <button mat-raised-button color="cancel" (click)="logOff(false)">Cancel</button>
+    </mat-card-content>
+  </mat-card>
+}
+@if (utilsService.cloudProxyRunning && !utilsService.activeMQTransportActive) {
+  <div class="no-transport-warning">
+    <div>
+      <mat-card-title>Not Connected To Transport</mat-card-title>
+    </div>
   </div>
-</div>
+}
 <router-outlet></router-outlet>
 <app-reporting></app-reporting>

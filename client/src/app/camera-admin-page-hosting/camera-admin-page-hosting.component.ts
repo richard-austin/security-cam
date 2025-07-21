@@ -6,15 +6,14 @@ import {ReportingComponent} from '../reporting/reporting.component';
 import {interval, Subscription} from 'rxjs';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {environment} from '../../environments/environment';
-import {NgIf} from "@angular/common";
+
 
 @Component({
   selector: 'app-camera-admin-page-hosting',
   templateUrl: './camera-admin-page-hosting.component.html',
   imports: [
-    ReportingComponent,
-    NgIf
-  ],
+    ReportingComponent
+],
   styleUrls: ['./camera-admin-page-hosting.component.scss']
 })
 export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, OnDestroy {

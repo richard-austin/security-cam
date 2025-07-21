@@ -1,5 +1,7 @@
 <div class="flex-container">
   <app-video [isLive]="true"></app-video>
-  <app-ptzcontrols *ngIf="hasPTZControls()" [camera]="camera" [reporting]="reporting"></app-ptzcontrols>
+  @if (hasPTZControls()) {
+    <app-ptzcontrols [camera]="camera" [reporting]="reporting"></app-ptzcontrols>
+  }
 </div>
 <app-reporting></app-reporting>

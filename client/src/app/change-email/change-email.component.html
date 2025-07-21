@@ -6,38 +6,50 @@
         <div>
           <mat-form-field appearance="outline">
             <input matInput type="password" formControlName="password"
-                   placeholder="Enter password"
-                   matTooltip="Enter the user password"
-                   matTooltipClass="tooltip">
+              placeholder="Enter password"
+              matTooltip="Enter the user password"
+              matTooltipClass="tooltip">
             <mat-label>Password</mat-label>
-            <mat-error *ngIf="hasError('password', 'required')">Password is required</mat-error>
-            <mat-error *ngIf="hasError('password', 'pattern')">Password incorrect</mat-error>
+            @if (hasError('password', 'required')) {
+              <mat-error>Password is required</mat-error>
+            }
+            @if (hasError('password', 'pattern')) {
+              <mat-error>Password incorrect</mat-error>
+            }
             <mat-hint>Enter password</mat-hint>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline" class="email-input">
             <input matInput type="text" formControlName="newEmail" autocomplete="off" maxlength="40"
-                   placeholder="New email address"
-                   matTooltip="Enter the required email address"
-                   matTooltipClass="tooltip">
+              placeholder="New email address"
+              matTooltip="Enter the required email address"
+              matTooltipClass="tooltip">
             <mat-label>New email address</mat-label>
-            <mat-error *ngIf="hasError('newEmail', 'required')">Email address required</mat-error>
-            <mat-error *ngIf="hasError('newEmail', 'pattern') && !hasError('newEmail', 'required')">Email format is incorrect
-            </mat-error>
+            @if (hasError('newEmail', 'required')) {
+              <mat-error>Email address required</mat-error>
+            }
+            @if (hasError('newEmail', 'pattern') && !hasError('newEmail', 'required')) {
+              <mat-error>Email format is incorrect
+              </mat-error>
+            }
             <mat-hint>Enter new email address</mat-hint>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="outline" class="email-input">
             <input matInput type="text" formControlName="confirmNewEmail" height="12" autocomplete="off" maxlength="40"
-                   placeholder="Confirm new email address"
-                   matTooltip="Please confirm the email address"
-                   matTooltipClass="tooltip">
+              placeholder="Confirm new email address"
+              matTooltip="Please confirm the email address"
+              matTooltipClass="tooltip">
             <mat-label>Confirm new email address</mat-label>
-            <mat-error *ngIf="hasError('confirmNewEmail', 'required')">Confirm new email address is required</mat-error>
-            <mat-error *ngIf="hasError('confirmNewEmail', 'confirmNewEmail') ">Confirm new email and new email differ
-            </mat-error>
+            @if (hasError('confirmNewEmail', 'required')) {
+              <mat-error>Confirm new email address is required</mat-error>
+            }
+            @if (hasError('confirmNewEmail', 'confirmNewEmail') ) {
+              <mat-error>Confirm new email and new email differ
+              </mat-error>
+            }
             <mat-hint>Enter new email again</mat-hint>
           </mat-form-field>
         </div>

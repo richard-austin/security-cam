@@ -28,7 +28,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   cam!: Camera;
   initialised: boolean;
 
-  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private utils: UtilsService) {
+  constructor(private route: ActivatedRoute, cameraSvc: CameraService, private utils: UtilsService) {
     this.initialised = false;
     this.route.paramMap.subscribe((paramMap) => {
       let camera: string = paramMap.get('camera') as string;

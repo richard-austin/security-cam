@@ -1,39 +1,63 @@
-<ng-container *ngIf="isHTML">
-    <div class="alert-danger reporting">
-        <div [innerHTML]="e?.error?.text"></div>
-        <button  style="top: -25px; margin-bottom: -24px" *ngIf="!embedded" mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
-</div>
-    </ng-container>
-<div *ngIf="!isHTML && e || message"
-          [ngClass]="{'alert-danger': style==styles.danger, 'alert-success': style==styles.success, 'alert-warning': style==styles.warning}"
-          class="reporting" (click)="embedded ? dismiss() : null">
-  <div *ngIf="message && style==styles.success">
-    Success: {{message}}
+@if (isHTML) {
+  <div class="alert-danger reporting">
+    <div [innerHTML]="e?.error?.text"></div>
+    @if (!embedded) {
+      <button  style="top: -25px; margin-bottom: -24px" mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
+    }
   </div>
-  <div *ngIf="e?.status ==400">
-      <div>Validation Error: {{e?.status}}</div>
-      <ul class="errors-list">
-          <li *ngFor="let validationError of validationErrors">
-          {{validationError}}
-          </li>
-      </ul>
-        </div>
-  <div *ngIf="message && style==styles.warning">
-    {{message}}
+}
+@if (!isHTML && e || message) {
+  <div
+    [ngClass]="{'alert-danger': style==styles.danger, 'alert-success': style==styles.success, 'alert-warning': style==styles.warning}"
+    class="reporting" (click)="embedded ? dismiss() : null">
+    @if (message && style==styles.success) {
+      <div>
+        Success: {{message}}
       </div>
-  <div *ngIf="!message && e?.status != 400">
-    <div *ngIf="e !== undefined && e?.status !== undefined && e?.status != 0">Error
-      status: {{e?.status}} {{e?.statusText}}</div>
-    <ng-container *ngIf="showMessageInError">{{e?.error}}</ng-container>
-    <ng-container *ngIf="!showMessageInError && !showMessageFromMessage">See logs for more information</ng-container>
-      <ng-container *ngIf="showMessageFromMessage">
+    }
+    @if (e?.status ==400) {
+      <div>
+        <div>Validation Error: {{e?.status}}</div>
+        <ul class="errors-list">
+          @for (validationError of validationErrors; track validationError) {
+            <li>
+              {{validationError}}
+            </li>
+          }
+        </ul>
+      </div>
+    }
+    @if (message && style==styles.warning) {
+      <div>
+        {{message}}
+      </div>
+    }
+    @if (!message && e?.status != 400) {
+      <div>
+        @if (e !== undefined && e?.status !== undefined && e?.status != 0) {
+          <div>Error
+          status: {{e?.status}} {{e?.statusText}}</div>
+        }
+        @if (showMessageInError) {
+          {{e?.error}}
+        }
+        @if (!showMessageInError && !showMessageFromMessage) {
+          See logs for more information
+        }
+        @if (showMessageFromMessage) {
           <ul class="errors-list">
-              <li>{{ e?.url}}</li>
-              <li>{{ e?.error?.error}}</li>
-              <li *ngIf="e?.error?.reason != '' && e?.error?.reason != null">{{ e?.error?.reason }}</li>
+            <li>{{ e?.url}}</li>
+            <li>{{ e?.error?.error}}</li>
+            @if (e?.error?.reason != '' && e?.error?.reason != null) {
+              <li>{{ e?.error?.reason }}</li>
+            }
           </ul>
-    </ng-container>
+        }
       </div>
-        <br>
-  <button  *ngIf="!embedded" mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
-      </div>
+    }
+    <br>
+      @if (!embedded) {
+        <button  mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
+      }
+    </div>
+  }

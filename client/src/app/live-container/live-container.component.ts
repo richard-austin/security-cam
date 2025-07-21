@@ -9,7 +9,7 @@ import {ActivatedRoute} from '@angular/router';
 import {SharedModule} from "../shared/shared.module";
 import {PTZControlsComponent} from "./ptzcontrols/ptzcontrols.component";
 import {ReportingComponent} from "../reporting/reporting.component";
-import {NgIf} from "@angular/common";
+
 
 @Component({
   selector: 'app-live-container',
@@ -17,9 +17,8 @@ import {NgIf} from "@angular/common";
   imports: [
     SharedModule,
     PTZControlsComponent,
-    VideoComponent,
-    NgIf
-  ],
+    VideoComponent
+],
   styleUrls: ['./live-container.component.scss']
 })
 export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy {

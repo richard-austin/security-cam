@@ -10,76 +10,78 @@
     </mat-card-subtitle>
     <mat-card-content class="global-colours">
       <ng-container>
-        <table *ngIf="failures.size > 0" mat-table [dataSource]="failures | keyvalue"
-               class="mat-elevation-z8">
-          <!-- Onvif URL column -->
-          <ng-container matColumnDef="onvifUrl">
-            <th mat-header-cell *matHeaderCellDef> Onvif URL.</th>
-            <td mat-cell *matCellDef="let failure"> {{ failure.key }}</td>
-          </ng-container>
-
-          <!-- Error message column -->
-          <ng-container matColumnDef="error">
-            <th mat-header-cell *matHeaderCellDef> Error Reason</th>
-            <td mat-cell *matCellDef="let failure">{{ failure.value }}</td>
-          </ng-container>
-
-          <!-- User name entry column -->
-          <ng-container matColumnDef="onvifUser">
-            <th mat-header-cell *matHeaderCellDef> Onvif User Name</th>
-            <td mat-cell *matCellDef="let failure; let i = index">
-              <mat-form-field appearance="outline">
-                <mat-label>Onvif user name</mat-label>
-                <input matInput type="text" autocomplete="off" maxlength="20"
-                       [formControl]="getControl(i, 'onvifUserName')"
-                       [disableControl]="gettingCameraDetails"
-                       matTooltip="Enter the onvif user name for {{failure.key}}"
-                       matTooltipClass="tooltip"
-                       placeholder="Onvif user name">
-                <!--                <mat-error *ngIf="getControl(i, 'onvifUserName').invalid">User name format is invalid</mat-error>-->
-              </mat-form-field>
-            </td>
-          </ng-container>
-
-          <!-- Password entry column -->
-          <ng-container matColumnDef="onvifPassword">
-            <th mat-header-cell *matHeaderCellDef> Onvif Password</th>
-            <td mat-cell *matCellDef="let failure; let i = index">
-              <mat-form-field appearance="outline">
-                <mat-label>Onvif password</mat-label>
-                <input matInput type="password" autocomplete="new-password" maxlength="25"
-                       [formControl]="getControl(i, 'onvifPassword')"
-                       [disableControl]="gettingCameraDetails"
-                       matTooltip="Enter the onvif password for {{failure.key}}"
-                       matTooltipClass="tooltip"
-                       placeholder="Onvif password">
-                <!--                <mat-error *ngIf="getControl(i, 'onvifUserName').invalid">User name format is invalid</mat-error>-->
-              </mat-form-field>
-            </td>
-          </ng-container>
-
-          <!-- Discover button column -->
-          <ng-container matColumnDef="discover">
-            <th mat-header-cell *matHeaderCellDef>Start Discovery</th>
-            <td mat-cell *matCellDef="let failure; let i = index">
-              <button mat-icon-button [disabled]="gettingCameraDetails || anyInvalid(i)"
-                      (click)="discover(failure.key, getControl(i, 'onvifUserName').value, getControl(i, 'onvifPassword').value)">
-                <mat-icon *ngIf="!gettingCameraDetails || onvifUrl!=failure.key"
-                          matTooltip="Click to start Onvif discovery on this camera using the credentials entered against it."
-                          matTooltipClass="tooltip">
-                  add_circle
-                </mat-icon>
-                <mat-spinner style="position: relative; left: 5px" *ngIf="gettingCameraDetails && onvifUrl==failure.key"
-                             [diameter]="25"
-                             matTooltip="Busy"
-                             matTooltipClass="tooltip">
-                </mat-spinner>
-              </button>
-            </td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr class="table-row" mat-row *matRowDef="let failure; columns: displayedColumns"></tr>
-        </table>
+        @if (failures.size > 0) {
+          <table mat-table [dataSource]="failures | keyvalue"
+            class="mat-elevation-z8">
+            <!-- Onvif URL column -->
+            <ng-container matColumnDef="onvifUrl">
+              <th mat-header-cell *matHeaderCellDef> Onvif URL.</th>
+              <td mat-cell *matCellDef="let failure"> {{ failure.key }}</td>
+            </ng-container>
+            <!-- Error message column -->
+            <ng-container matColumnDef="error">
+              <th mat-header-cell *matHeaderCellDef> Error Reason</th>
+              <td mat-cell *matCellDef="let failure">{{ failure.value }}</td>
+            </ng-container>
+            <!-- User name entry column -->
+            <ng-container matColumnDef="onvifUser">
+              <th mat-header-cell *matHeaderCellDef> Onvif User Name</th>
+              <td mat-cell *matCellDef="let failure; let i = index">
+                <mat-form-field appearance="outline">
+                  <mat-label>Onvif user name</mat-label>
+                  <input matInput type="text" autocomplete="off" maxlength="20"
+                    [formControl]="getControl(i, 'onvifUserName')"
+                    [disableControl]="gettingCameraDetails"
+                    matTooltip="Enter the onvif user name for {{failure.key}}"
+                    matTooltipClass="tooltip"
+                    placeholder="Onvif user name">
+                  <!--                <mat-error *ngIf="getControl(i, 'onvifUserName').invalid">User name format is invalid</mat-error>-->
+                </mat-form-field>
+              </td>
+            </ng-container>
+            <!-- Password entry column -->
+            <ng-container matColumnDef="onvifPassword">
+              <th mat-header-cell *matHeaderCellDef> Onvif Password</th>
+              <td mat-cell *matCellDef="let failure; let i = index">
+                <mat-form-field appearance="outline">
+                  <mat-label>Onvif password</mat-label>
+                  <input matInput type="password" autocomplete="new-password" maxlength="25"
+                    [formControl]="getControl(i, 'onvifPassword')"
+                    [disableControl]="gettingCameraDetails"
+                    matTooltip="Enter the onvif password for {{failure.key}}"
+                    matTooltipClass="tooltip"
+                    placeholder="Onvif password">
+                  <!--                <mat-error *ngIf="getControl(i, 'onvifUserName').invalid">User name format is invalid</mat-error>-->
+                </mat-form-field>
+              </td>
+            </ng-container>
+            <!-- Discover button column -->
+            <ng-container matColumnDef="discover">
+              <th mat-header-cell *matHeaderCellDef>Start Discovery</th>
+              <td mat-cell *matCellDef="let failure; let i = index">
+                <button mat-icon-button [disabled]="gettingCameraDetails || anyInvalid(i)"
+                  (click)="discover(failure.key, getControl(i, 'onvifUserName').value, getControl(i, 'onvifPassword').value)">
+                  @if (!gettingCameraDetails || onvifUrl!=failure.key) {
+                    <mat-icon
+                      matTooltip="Click to start Onvif discovery on this camera using the credentials entered against it."
+                      matTooltipClass="tooltip">
+                      add_circle
+                    </mat-icon>
+                  }
+                  @if (gettingCameraDetails && onvifUrl==failure.key) {
+                    <mat-spinner style="position: relative; left: 5px"
+                      [diameter]="25"
+                      matTooltip="Busy"
+                      matTooltipClass="tooltip">
+                    </mat-spinner>
+                  }
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr class="table-row" mat-row *matRowDef="let failure; columns: displayedColumns"></tr>
+          </table>
+        }
       </ng-container>
     </mat-card-content>
   </mat-card>
