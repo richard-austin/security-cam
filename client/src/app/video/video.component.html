@@ -27,7 +27,7 @@
       <div>
         <div class="audio-controls-dialogue">
           <div [@detailExpand]="showAudioControls ? 'expanded' : 'collapsed'">
-            @if (stream?.audio && !mediaFeeder.noAudio) {
+            @if (stream && stream.audio && !mediaFeeder.noAudio) {
               <app-audio-control [mute]="mediaFeeder.isMuted"
                 (muteAudio)="toggleMuteAudio()" [level]="mediaFeeder.gain"
                 (setLevel)="setVolume($event.valueOf())">
@@ -37,7 +37,7 @@
             </div>
           </div>
         </div>
-        @if (stream?.audio && !mediaFeeder.noAudio) {
+        @if (stream && stream.audio && !mediaFeeder.noAudio) {
           <label class="video-buttons"
             [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (mediaFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
             matTooltipClass="video-buttons-tooltip">

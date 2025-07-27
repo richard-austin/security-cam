@@ -279,6 +279,7 @@ func ws(ws *websocket.Conn) {
 	var gopCache *GopCacheSnapshot
 	gopCache = stream.gopCache.GetSnapshot()
 	gopCacheUsed := stream.gopCache.GopCacheUsed
+	isHevc := !isAudio && codecs.AVInfos[suuid].VideoInfo.CodecType == "hevc"
 	// Main loop to send data to the browser
 	started := isAudio // Always started for audio as we don't wait for a keyframe
 	for {
@@ -288,7 +289,7 @@ func ws(ws *websocket.Conn) {
 		} else {
 			data = <-ch
 			if !started {
-				if data.isKeyFrame() {
+				if data.isKeyFrame(isHevc) {
 					started = true
 				} else {
 					continue
