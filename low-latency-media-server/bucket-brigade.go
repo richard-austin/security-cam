@@ -39,7 +39,7 @@ func NewBucketBrigade(preambleTime int) (bucketBrigade BucketBrigade) {
 		inputIndex:  0,
 		cacheInUse:  0,
 		cacheLength: cacheLength,
-		gopCache:    NewGopCache(true)}
+		gopCache:    NewGopCache(true, false)}
 	return
 }
 

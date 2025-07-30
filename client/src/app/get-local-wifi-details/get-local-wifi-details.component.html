@@ -1,6 +1,8 @@
 <div class="wifi-details">
   <mat-card>
-    <mat-card-title>Local Wifi Information<mat-spinner *ngIf="loading" class="spinner" [diameter]="25"></mat-spinner></mat-card-title>
+    <mat-card-title>Local Wifi Information@if (loading) {
+      <mat-spinner class="spinner" [diameter]="25"></mat-spinner>
+    }</mat-card-title>
 
     <mat-card-content #scrollable_content class="scrollable-content" [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement, true)">
       <app-reporting [embedded]="true"></app-reporting>
@@ -9,7 +11,9 @@
         <ng-container matColumnDef="InUse">
           <th mat-header-cell *matHeaderCellDef>In Use</th>
           <td mat-cell *matCellDef="let element">
-            <mat-icon class="in-use-check-mark" *ngIf="element.in_use">check_circle</mat-icon>
+            @if (element.in_use) {
+              <mat-icon class="in-use-check-mark">check_circle</mat-icon>
+            }
           </td>
         </ng-container>
 
@@ -55,9 +59,9 @@
           <td mat-cell *matCellDef="let element"> {{element.security}} </td>       </ng-container>
 
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-    </mat-card-content>
-  </mat-card>
-</div>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  </div>

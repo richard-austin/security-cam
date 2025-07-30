@@ -33,10 +33,13 @@ func (s *Streams) addStream(suuid string, isAudio bool) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	gopCacheUsed := config.GopCache
+	isHevc := false
 	if isAudio {
 		gopCacheUsed = false
+	} else {
+		isHevc = codecs.AVInfos[suuid].VideoInfo.CodecName == "hevc"
 	}
-	stream := &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(gopCacheUsed)}
+	stream := &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(gopCacheUsed, isHevc)}
 	s.StreamMap[suuid] = stream
 }
 
@@ -51,7 +54,7 @@ func (s *Streams) addRecordingStream(suuid string) {
 	if err != nil {
 		log.Errorf("Failed to get streamC: %v, Cannot add recording stream", err)
 	} else {
-		s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache), bucketBrigade: NewBucketBrigade(streamC.PreambleTime)}
+		s.StreamMap[suuid] = &Stream{PcktStreams: map[string]*PacketStream{}, gopCache: NewGopCache(config.GopCache, false), bucketBrigade: NewBucketBrigade(streamC.PreambleTime)}
 	}
 }
 
@@ -260,25 +263,32 @@ func (p Packet) isFLVHeader() (retVal bool, size int32) {
 }
 
 var hevcStart = []byte{0x00, 0x00, 0x01}
-var h264Start = []byte{0x00, 0x00, 0x00, 0x01}
+var generalStart = []byte{0x00, 0x00, 0x00, 0x01}
 var h264KeyFrame1 = []byte{0x67, 0x64}
 var h264KeyFrame2 = []byte{0x27, 0x64}
 var h264KeyFrame3 = []byte{0x61, 0x88}
 
-func (p Packet) isKeyFrame() (retVal bool) {
+func (p Packet) isKeyFrame(isHevc bool) (retVal bool) {
 	retVal = false
 	if len(p.pckt) > 7 {
-		if bytes.Equal(p.pckt[:len(h264Start)], h264Start) {
-			// H264 header
-			retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame1)
-			if !retVal {
-				retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame2)
-			}
-			if !retVal {
-				retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame3)
+		if bytes.Equal(p.pckt[:len(generalStart)], generalStart) {
+			if isHevc {
+				// Test for hevc keyframe
+				theByte := p.pckt[4]
+				theByte = (theByte >> 1) & 0x3f
+				retVal = theByte == 0x19 || theByte == 0x20
+			} else {
+				// Test for H264 keyframe
+				retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame1)
+				if !retVal {
+					retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame2)
+				}
+				if !retVal {
+					retVal = bytes.Equal(p.pckt[4:6], h264KeyFrame3)
+				}
 			}
 		} else if bytes.Equal(p.pckt[:len(hevcStart)], hevcStart) {
-			// HEVC header
+			// HEVC header, test for hevc keyframe
 			theByte := p.pckt[3]
 			theByte = (theByte >> 1) & 0x3f
 			retVal = theByte == 0x19 || theByte == 0x20

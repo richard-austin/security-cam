@@ -44,6 +44,7 @@ type FFProbeAudioStreams struct {
 type AVInfo struct {
 	Codec     string
 	AudioInfo FFProbeAudioStream
+	VideoInfo FFProbeStream
 }
 
 func NewAVInfo() (avInfo AVInfo) {
@@ -105,9 +106,14 @@ func (codecs *MimeCodecs) getAVData(rtspUrl string, suuid string) (stream FFProb
 		}
 		audioData.stream[suuid] = audioStream
 		avi := NewAVInfo()
-		avi.Codec = result
-		avi.AudioInfo = audioStream
-		codecs.AVInfos[suuid] = &avi
+		if len(streams.Streams) < 1 {
+			log.Errorf("No video stream info available for %s", suuid)
+		} else {
+			avi.Codec = result
+			avi.VideoInfo = streams.Streams[0]
+			avi.AudioInfo = audioStream
+			codecs.AVInfos[suuid] = &avi
+		}
 	}
 	return stream, audioStream, err
 }

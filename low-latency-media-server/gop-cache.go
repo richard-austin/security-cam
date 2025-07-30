@@ -11,16 +11,18 @@ type GopCache struct {
 	mutex        sync.Mutex
 	inputIndex   int
 	Cache        []Packet
+	isHevc       bool
 }
 
 type GopCacheSnapshot struct {
 	pktChan chan Packet
+	isHevc  bool
 }
 
-func NewGopCache(used bool) (cache GopCache) {
+func NewGopCache(used bool, isHevc bool) (cache GopCache) {
 	const cacheLength int = 850 // Need LARGE GOP cache for the flv recording stream. The key frame intervals are
 	// larger than with the plain video stream, and the flv stream can also have audio packets
-	cache = GopCache{Cache: make([]Packet, cacheLength), cacheLength: cacheLength - 1, inputIndex: 0, GopCacheUsed: used}
+	cache = GopCache{Cache: make([]Packet, cacheLength), cacheLength: cacheLength - 1, inputIndex: 0, GopCacheUsed: used, isHevc: isHevc}
 	return
 }
 
@@ -34,7 +36,7 @@ func (g *GopCache) Input(p Packet) (err error) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
 
-	if p.isKeyFrame() {
+	if p.isKeyFrame(g.isHevc) {
 		g.inputIndex = 0
 	}
 	if g.inputIndex < g.cacheLength {

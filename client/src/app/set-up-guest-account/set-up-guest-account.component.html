@@ -5,9 +5,9 @@
       <form (ngSubmit)="$event.preventDefault(); formSubmitted()" [formGroup]="setupGuestAccountForm">
         <div>
           <mat-checkbox [color]="'primary'" [checked]="setupGuestAccountForm.controls['enabled'].value"
-                        (change)="setEnabled($event)"
-                        matTooltip="If checked, the guest account will be enabled. When enabled for the first time, a password must be entered and confirmed."
-                        matTooltipClass="tooltip">
+            (change)="setEnabled($event)"
+            matTooltip="If checked, the guest account will be enabled. When enabled for the first time, a password must be entered and confirmed."
+            matTooltipClass="tooltip">
             {{'Enable/Disable guest account'}}
           </mat-checkbox>
         </div>
@@ -15,10 +15,12 @@
           <mat-form-field appearance="outline">
             <mat-label>Password</mat-label>
             <input matTooltip="Enter the password for the guest account. If left blank, the existing password will be retained."
-                   matTooltipClass="tooltip"
-                   matInput type="password" formControlName="password"
-                   placeholder="Enter current password">
-            <mat-error *ngIf="hasError('password', 'pattern')">Password incorrect</mat-error>
+              matTooltipClass="tooltip"
+              matInput type="password" formControlName="password"
+              placeholder="Enter current password">
+            @if (hasError('password', 'pattern')) {
+              <mat-error>Password incorrect</mat-error>
+            }
             <mat-hint>Enter password</mat-hint>
           </mat-form-field>
         </div>
@@ -26,12 +28,16 @@
           <mat-form-field appearance="outline">
             <mat-label>Confirm password</mat-label>
             <input matTooltip="Enter the password again to confirm, leave blank if the password is blank"
-                   matTooltipClass="tooltip"
-                   matInput type="password" formControlName="confirmPassword"
-                   placeholder="Confirm new password">
-            <mat-error *ngIf="hasError('confirmPassword', 'required')">Confirm password is required</mat-error>
-            <mat-error *ngIf="hasError('confirmPassword', 'confirmPassword')">Confirmed new password and New password differ
-            </mat-error>
+              matTooltipClass="tooltip"
+              matInput type="password" formControlName="confirmPassword"
+              placeholder="Confirm new password">
+            @if (hasError('confirmPassword', 'required')) {
+              <mat-error>Confirm password is required</mat-error>
+            }
+            @if (hasError('confirmPassword', 'confirmPassword')) {
+              <mat-error>Confirmed new password and New password differ
+              </mat-error>
+            }
             <mat-hint>Confirm password</mat-hint>
           </mat-form-field>
         </div>

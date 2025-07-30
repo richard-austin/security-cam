@@ -9,7 +9,7 @@ import { NavComponent } from './nav/nav.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatCheckbox} from "@angular/material/checkbox";
 import {ReactiveFormsModule} from "@angular/forms";
-import {MatButton, MatIconAnchor} from "@angular/material/button";
+import {MatButton, MatIconAnchor, MatIconButton} from "@angular/material/button";
 import {MatCard, MatCardContent, MatCardSubtitle, MatCardTitle} from "@angular/material/card";
 import {MatFormField} from "@angular/material/select";
 import {MatIcon} from "@angular/material/icon";
@@ -76,7 +76,7 @@ import {MatDialogActions, MatDialogContent, MatDialogTitle} from "@angular/mater
         MatInput,
         MatLabel,
         MatHint,
-        MatError, MatDialogTitle, MatDialogContent, MatDialogActions],
+        MatError, MatDialogTitle, MatDialogContent, MatDialogActions, MatIconButton],
     exports: [
     ],
     providers: [

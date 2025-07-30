@@ -2,80 +2,98 @@
   <mat-card>
     <mat-card-title>Wi-Fi Settings</mat-card-title>
     <mat-card-content>
-      <div class="alert-warning-embedded" *ngIf="ethernetConnectionStatus == 'NOT_CONNECTED_VIA_ETHERNET' && isReady">
-        <b>You have an Ethernet connection, but you are connecting to the NVR through a Wi-Fi ip address or localhost.</b>
-        <br><br>
-        To Ensure you are connecting through the Ethernet IP address, select Get Active Local IP address(es) to find
-        the IP address for the Ethernet connection.<br>Enter this address (without the subnet mask)
-        into your browser (which should be on the same subnet as the NVR). You may need to log in again
-        Return to WiFi Admin ->  WiFi Settings and you should now be able to change the wifi configuration.
-       </div>
+      @if (ethernetConnectionStatus == 'NOT_CONNECTED_VIA_ETHERNET' && isReady) {
+        <div class="alert-warning-embedded">
+          <b>You have an Ethernet connection, but you are connecting to the NVR through a Wi-Fi ip address or localhost.</b>
+          <br><br>
+          To Ensure you are connecting through the Ethernet IP address, select Get Active Local IP address(es) to find
+          the IP address for the Ethernet connection.<br>Enter this address (without the subnet mask)
+          into your browser (which should be on the same subnet as the NVR). You may need to log in again
+          Return to WiFi Admin ->  WiFi Settings and you should now be able to change the wifi configuration.
+        </div>
+      }
 
-      <div class="alert-warning-embedded" *ngIf="ethernetConnectionStatus == 'NO_ETHERNET' && isReady">
-        <b>You have no Ethernet connection available.</b>
-        <br><br>
-        To make changes to the Wi-Fi settings, you must connect to the NVR through Ethernet.<br><br>
-        To switch the connection to Ethernet, connect an Ethernet cable between your router and the NVR then
-        select Get Active Local IP address(es) to find the IP address for the Ethernet connection.<br> Enter this address
-        (without the subnet mask) into your browser (which should be on the same subnet as the NVR).
-        You may need to log in again.
-        Return to WiFi Admin ->  WiFi Settings and you should now be able to change the wifi configuration.
-      </div>
+      @if (ethernetConnectionStatus == 'NO_ETHERNET' && isReady) {
+        <div class="alert-warning-embedded">
+          <b>You have no Ethernet connection available.</b>
+          <br><br>
+          To make changes to the Wi-Fi settings, you must connect to the NVR through Ethernet.<br><br>
+          To switch the connection to Ethernet, connect an Ethernet cable between your router and the NVR then
+          select Get Active Local IP address(es) to find the IP address for the Ethernet connection.<br> Enter this address
+          (without the subnet mask) into your browser (which should be on the same subnet as the NVR).
+          You may need to log in again.
+          Return to WiFi Admin ->  WiFi Settings and you should now be able to change the wifi configuration.
+        </div>
+      }
       <app-reporting [embedded]="true"></app-reporting>
       <br>
-      <mat-checkbox [color]="'primary'" [checked]="wifiEnabled"
-                    #wifiStatusCheckbox
-                    matTooltip="Wi-Fi is currently {{wifiEnabled ? 'enabled' : 'disabled'}}, click to {{wifiEnabled ? 'disable' : 'enable'}}"
-                    matTooltipClass="tooltip"
-                    [disabled]="ethernetConnectionStatus != 'CONNECTED_VIA_ETHERNET'"
-                    (change)="setWifiStatus($event)">
-        {{wifiEnabled ? 'Disable' : 'Enable'}} Wi-Fi
-      </mat-checkbox>
-      <div>
-        <mat-form-field appearance="outline" [style.width.px]="315">
-          <mat-label *ngIf="!loading">
-            {{wifiEnabled ? 'Select Wi-Fi Access Point' : 'Wi-Fi Is Off'}}
-          </mat-label>
-          <mat-label *ngIf="loading">
-            <div class="loading-spinner">
-              <mat-spinner [diameter]="20"></mat-spinner>
-              Loading..
-            </div>
-          </mat-label>
-          <mat-select [disabled]="ethernetConnectionStatus != 'CONNECTED_VIA_ETHERNET' || !wifiEnabled"
-                      (selectionChange)="onSelectorChange()"
-                      #selector>
-            <mat-option *ngFor="let wifi of wifiList" [value]="wifi.ssid">
-              {{wifi.ssid}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <div *ngIf="needPassword">
-        <mat-form-field class="password-field" appearance="outline" [style.width.px]="315">
-          <input matInput type="password" [formControl]="getFormControl(enterPasswordForm, 'password')"
-                 matTooltip="Enter password for {{selector.value}}"
-                 matTooltipClass="tooltip"
-                 placeholder="Password for {{selector.value}}">
-          <mat-label>New password for {{selector.value}}</mat-label>
-          <mat-error *ngIf="hasError('password', 'minlength') && !hasError('password', 'required')">Password must be at least 8 characters in length</mat-error>
-          <mat-error *ngIf="hasError('password', 'required')">Password is required</mat-error>
-        </mat-form-field>
-      </div>
-      <div class="connect-cancel">
-        <button [disabled]="!wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting || anyInvalid()"
-                mat-raised-button
-                color="warn"
-                (click)="connect()">Connect
-        </button>
-        <button *ngIf="needPassword" mat-raised-button color="cancel" (click)="cancelPasswordEntry()">Cancel</button>
-        <ng-container *ngIf="connecting">
-          <span class="connecting-spinner">
-            <mat-spinner [diameter]="25"></mat-spinner>
-            Connecting to {{selector.value}}
-          </span>
-        </ng-container>
-      </div>
-    </mat-card-content>
-  </mat-card>
-</div>
+        <mat-checkbox [color]="'primary'" [checked]="wifiEnabled"
+          #wifiStatusCheckbox
+          matTooltip="Wi-Fi is currently {{wifiEnabled ? 'enabled' : 'disabled'}}, click to {{wifiEnabled ? 'disable' : 'enable'}}"
+          matTooltipClass="tooltip"
+          [disabled]="ethernetConnectionStatus != 'CONNECTED_VIA_ETHERNET'"
+          (change)="setWifiStatus($event)">
+          {{wifiEnabled ? 'Disable' : 'Enable'}} Wi-Fi
+        </mat-checkbox>
+        <div>
+          <mat-form-field appearance="outline" [style.width.px]="315">
+            @if (!loading) {
+              <mat-label>
+                {{wifiEnabled ? 'Select Wi-Fi Access Point' : 'Wi-Fi Is Off'}}
+              </mat-label>
+            }
+            @if (loading) {
+              <mat-label>
+                <div class="loading-spinner">
+                  <mat-spinner [diameter]="20"></mat-spinner>
+                  Loading..
+                </div>
+              </mat-label>
+            }
+            <mat-select [disabled]="ethernetConnectionStatus != 'CONNECTED_VIA_ETHERNET' || !wifiEnabled"
+              (selectionChange)="onSelectorChange()"
+              #selector>
+              @for (wifi of wifiList; track wifi) {
+                <mat-option [value]="wifi.ssid">
+                  {{wifi.ssid}}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        @if (needPassword) {
+          <div>
+            <mat-form-field class="password-field" appearance="outline" [style.width.px]="315">
+              <input matInput type="password" [formControl]="getFormControl(enterPasswordForm, 'password')"
+                matTooltip="Enter password for {{selector.value}}"
+                matTooltipClass="tooltip"
+                placeholder="Password for {{selector.value}}">
+              <mat-label>New password for {{selector.value}}</mat-label>
+              @if (hasError('password', 'minlength') && !hasError('password', 'required')) {
+                <mat-error>Password must be at least 8 characters in length</mat-error>
+              }
+              @if (hasError('password', 'required')) {
+                <mat-error>Password is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        }
+        <div class="connect-cancel">
+          <button [disabled]="!wifiEnabled || currentWifiConnection.accessPoint == selector.value || connecting || anyInvalid()"
+            mat-raised-button
+            color="warn"
+            (click)="connect()">Connect
+          </button>
+          @if (needPassword) {
+            <button mat-raised-button color="cancel" (click)="cancelPasswordEntry()">Cancel</button>
+          }
+          @if (connecting) {
+            <span class="connecting-spinner">
+              <mat-spinner [diameter]="25"></mat-spinner>
+              Connecting to {{selector.value}}
+            </span>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>

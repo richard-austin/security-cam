@@ -5,33 +5,41 @@
     <div>
       <mat-form-field appearance="outline" [style.width.px]="400">
         <input matInput type="text" autocomplete="off" maxlength="60"
-               [formControl]="getFormControl('onvifUrl')"
-               matTooltip="Enter the URL for the Onvif device."
-               matTooltipClass="tooltip"
-               placeholder="Onvif URL"
-        (blur)="updateField()">
+          [formControl]="getFormControl('onvifUrl')"
+          matTooltip="Enter the URL for the Onvif device."
+          matTooltipClass="tooltip"
+          placeholder="Onvif URL"
+          (blur)="updateField()">
         <mat-hint>Onvif device URL</mat-hint>
-        <mat-error *ngIf="addCameraForm.controls['onvifUrl'].hasError('pattern')">Must be a valid url starting with http://</mat-error>
-        <mat-error *ngIf="addCameraForm.controls['onvifUrl'].hasError('required')">Onvif URL is required</mat-error>
-        <mat-error *ngIf="addCameraForm.controls['onvifUrl'].hasError('onvifUrl')">Onvif URL is already used</mat-error>
-        <mat-error *ngIf="addCameraForm.controls['onvifUrl'].hasError('badHost')">Invalid host:port</mat-error>
+        @if (addCameraForm.controls['onvifUrl'].hasError('pattern')) {
+          <mat-error>Must be a valid url starting with http://</mat-error>
+        }
+        @if (addCameraForm.controls['onvifUrl'].hasError('required')) {
+          <mat-error>Onvif URL is required</mat-error>
+        }
+        @if (addCameraForm.controls['onvifUrl'].hasError('onvifUrl')) {
+          <mat-error>Onvif URL is already used</mat-error>
+        }
+        @if (addCameraForm.controls['onvifUrl'].hasError('badHost')) {
+          <mat-error>Invalid host:port</mat-error>
+        }
       </mat-form-field>
     </div>
     <br>
-    <span class="add-camera-confirm-group">
-      <button color="cancel" mat-raised-button (click)="hideAddCameraDialogue()"
-              matTooltip="Close this dialogue and don't look up camera details"
-              matTooltipClass="tooltip">
-        Cancel
-      </button>
-      <button color="warn" mat-raised-button
-              [disabled]="anyInvalid()"
-              (click)="startCapabilitiesDiscovery()"
-              matTooltip="Try to find the camera details for the given Onvif URL"
-              matTooltipClass="tooltip">
-        Confirm
-      </button>
-    </span>
-  </mat-card-content>
-</mat-card>
+      <span class="add-camera-confirm-group">
+        <button color="cancel" mat-raised-button (click)="hideAddCameraDialogue()"
+          matTooltip="Close this dialogue and don't look up camera details"
+          matTooltipClass="tooltip">
+          Cancel
+        </button>
+        <button color="warn" mat-raised-button
+          [disabled]="anyInvalid()"
+          (click)="startCapabilitiesDiscovery()"
+          matTooltip="Try to find the camera details for the given Onvif URL"
+          matTooltipClass="tooltip">
+          Confirm
+        </button>
+      </span>
+    </mat-card-content>
+  </mat-card>
 
