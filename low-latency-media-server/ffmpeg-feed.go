@@ -124,9 +124,9 @@ func ffmpegFeed(config *Config, cameras *Cameras) {
 					var sb strings.Builder
 					//	sb.WriteString(fmt.Sprintf("ffmpeg -f v4l2 -i /dev/video0 -f pulse -i default -ac 2 -c:v libx264 -c:a aac -preset ultrafast -tune zerolatency -f tee -map 0:v %s \"[select=v:f=h264:onfail=abort]%s %s %s\"", "-map 1:a", stream.MediaServerInputUri, audio, recording))
 					sb.WriteString(fmt.Sprintf("-loglevel %s -hide_banner -timeout 3000000 -rtsp_transport %s -i %s -c:v copy %s -copytb 1 -f tee -fflags nobuffer -map 0:v %s[select=v:use_fifo=1:fifo_options=fifo_format=%s\\\\:drop_pkts_on_overflow=1:onfail=abort:avioflags=direct:fflags=nobuffer+flush_packets]%s%s%s", config.FfmpegLogLevelStr, rtspTransport, netcamUri, audioMode, audioMap, streamInfo.CodecName, stream.MediaServerInputUri, audio, recording))
-					log.Info("/usr/bin/ffmpeg " + sb.String())
+					log.Info(config.FFMPEGPath + " " + sb.String())
 					cmdStr := sb.String()
-					cmd := exec.Command("/usr/bin/ffmpeg", strings.Split(cmdStr, " ")...)
+					cmd := exec.Command(config.FFMPEGPath, strings.Split(cmdStr, " ")...)
 					var out bytes.Buffer
 					var stderr bytes.Buffer
 					cmd.Stdout = &out

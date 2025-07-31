@@ -14,6 +14,8 @@ type Config struct {
 	PrivateKeyPath    string `json:"private_key_path"`
 	ServerPort        int    `json:"server_port"`
 	GopCache          bool   `json:"gop_cache"`
+	FFMPEGPath        string `json:"ffmpeg_path"`
+	FFProbePath       string `json:"ffprobe_path"`
 }
 
 func (c *Config) LogLevel() (err error, level log.Level) {

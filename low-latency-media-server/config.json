@@ -5,6 +5,8 @@
   "log_level": "INFO",
   "ffmpeg_log_level": "error",
   "server_port": 8085,
-  "gop_cache": true
+  "gop_cache": true,
+  "ffmpeg_path": "/usr/bin/ffmpeg",
+  "ffprobe_path": "/usr/bin/ffprobe"
 }
 
