@@ -104,7 +104,7 @@ My wish is to help other developers willing to contribute to an enterprise-level
 
 If you need to change the list of managed WSDLs (in onvif/onvif-ws-tests/src/main/resources/wsdl) and thus you need to regenerate the WS Java stubs using the [Apache CXF codegen maven plugin](http://cxf.apache.org/docs/maven-cxf-codegen-plugin-wsdl-to-java.html), you need to go through the following steps:
 1. **Download Onvif WSDLs** to onvif/onvif-ws-tests/src/main/resources/wsdl appending the version before the .wsdl suffix.
-   For example, from main dir (onvif) use you can run the following shell commmand:<br>
+   For example, from main dir (onvif) use you can run the following shell command:<br>
    ```wget http://www.onvif.org/onvif/ver10/device/wsdl/devicemgmt.wsdl onvif-ws-client/src/main/resources/wsdl/devicemgmt_2.5.wsdl ```
 1. **Add required url-rewriting rules (if needed)** to onvif/onvif-ws-tests/src/main/resources/wsdl/jax-ws-catalog.xml
 1. **Run the class generation command**: ```./gradlew onvif-java:clean onvif-java:build```
