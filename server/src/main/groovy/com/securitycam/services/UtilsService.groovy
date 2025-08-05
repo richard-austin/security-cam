@@ -361,13 +361,13 @@ class UtilsService {
         try {
             @Language("HTML")
             String response = '''
-        <h3>Angular web framework v19.0.4</h3>
+        <h3>Angular web framework v20.1.0</h3>
         <a href="https://angular.io" target="_blank">Angular</a>
         <hr>
-        <h3>Angular Material v19.0.3</h3>
+        <h3>Angular Material v20.1.0</h3>
         <a href="https://material.angular.io/" target="_blank">Angular Material</a>
         <hr>
-        <h3>Angular Forms v19.0.4</h3>
+        <h3>Angular Forms v20.1.0</h3>
         <a href="https://angular.io/guide/forms-overview/" target="_blank">Angular Forms</a>
         <hr>
         <h3>Stomp.js v7.0.0</h3>
@@ -403,7 +403,7 @@ class UtilsService {
         <h3>typescript v5.4.5</h3>
         <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
         <hr>
-        <h3>Spring Boot v3.3.4</h3>
+        <h3>Spring Boot v3.5.4</h3>
         <a href="https://spring.io/projects/spring-boot" target="_blank">Spring Boot</a>
         <hr>
         <h3>Java OpenJDK v21.0.4</h3>
@@ -421,7 +421,7 @@ class UtilsService {
         <h3>nginx v1.24.0 (Reverse proxy)</h3>
         <a href="https://nginx.org/en/" target="_blank">nginx</a>
         <hr>
-        <h3>Apache Tomcat vTomcat/9.0.93 (Web Server)</h3>
+        <h3>Apache Tomcat/10.1.16 (Ubuntu) (Web Server)</h3>
         <a href="https://tomcat.apache.org/" target="_blank">Apache Tomcat</a>
         <hr>
         <h3>libraspberrypi-bin</h3>
