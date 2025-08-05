@@ -421,7 +421,7 @@ class UtilsService {
         <h3>nginx v1.24.0 (Reverse proxy)</h3>
         <a href="https://nginx.org/en/" target="_blank">nginx</a>
         <hr>
-        <h3>Apache Tomcat vTomcat/9.0.93 (Web Server)</h3>
+        <h3>Apache Tomcat/10.1.16 (Ubuntu) (Web Server)</h3>
         <a href="https://tomcat.apache.org/" target="_blank">Apache Tomcat</a>
         <hr>
         <h3>libraspberrypi-bin</h3>
