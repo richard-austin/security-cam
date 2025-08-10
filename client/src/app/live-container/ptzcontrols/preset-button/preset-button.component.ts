@@ -35,7 +35,10 @@ export class PresetButtonComponent implements OnInit {
       })
   }
 
-  presetPressed() {
+  presetPressed($event: MouseEvent | TouchEvent) {
+    if($event.type === 'touchstart') {
+      $event.preventDefault();
+    }
     this.preset();
   }
 

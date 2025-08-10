@@ -42,7 +42,7 @@ class CamService {
     }
 
     Integer getCameraType(String cameraHost) {
-        Integer camType = null
+        Integer camType = 0
         ObjectCommandResponse getCamerasResult = (ObjectCommandResponse) getCameras()
         if (getCamerasResult.status == PassFail.PASS) {
 

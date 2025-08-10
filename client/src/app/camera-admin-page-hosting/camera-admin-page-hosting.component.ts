@@ -17,7 +17,7 @@ import {environment} from '../../environments/environment';
   styleUrls: ['./camera-admin-page-hosting.component.scss']
 })
 export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, OnDestroy {
-  cam!: Camera;
+  address!: string;
   accessToken!: string;
   intervalSubscription: Subscription | undefined;
   hostServiceUrl!: SafeResourceUrl;
@@ -29,12 +29,12 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
     this.route.paramMap.subscribe((paramMap) => {
       if(this.accessToken !== undefined)
         cameraSvc.closeClients(this.accessToken).subscribe();
-      let camera: string = paramMap.get('camera') as string;
-      camera = atob(camera);
+      let address: string = paramMap.get('camera') as string;
+      address = atob(address);
       let cams = cameraSvc.getCameras();
       cams.forEach((cam) => {
-        if (cam.address == camera) {
-          this.cam = cam;
+        if (true || cam.address == address) {
+          this.address = address;
         }
       });
       if (this.initialised) {
@@ -44,8 +44,8 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
   }
 
   ngOnInit(): void {
-    if (this.cam !== undefined) {
-      this.cameraSvc.getAccessToken(this.cam.address, this.defaultPort).subscribe((result) => {
+    if (this.address !== undefined) {
+      this.cameraSvc.getAccessToken(this.address, this.defaultPort).subscribe((result) => {
           this.accessToken = result.accessToken;
           this.hostServiceUrl = this.domSanitizer.bypassSecurityTrustResourceUrl(window.location.protocol + '//' + window.location.hostname + ':' + environment.camAdminHostPort + '/?accessToken=' + this.accessToken);
           this.intervalSubscription?.unsubscribe();

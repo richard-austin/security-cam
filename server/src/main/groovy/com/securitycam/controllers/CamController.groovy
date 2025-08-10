@@ -69,7 +69,7 @@ class CamController {
         def gv = new GeneralValidator(cmd, new GetAccessTokenCommandValidator())
         def result = gv.validate()
         if (result.hasErrors()) {
-            logService.cam.error "/cam/discoverCameraDetails: Validation error: " + result.toString()
+            logService.cam.error "/cam/getAccessToken: Validation error: " + result.toString()
             BadRequestResult retVal = new BadRequestResult(result)
             return ResponseEntity
                     .badRequest()
