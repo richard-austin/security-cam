@@ -322,6 +322,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
+  adHocHostingConfiguration() {
+    window.location.href = "#/adhochostingconfig"
+  }
+
   ngAfterViewInit(): void {
     let hwdc = NavComponent.getCookie("hardwareDecoding");
     if (hwdc === "") {
@@ -346,4 +350,5 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.client.deactivate({force: false}).then(() => {
     });
   }
+
 }

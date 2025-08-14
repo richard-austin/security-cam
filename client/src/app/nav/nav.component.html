@@ -87,6 +87,10 @@
           Configuration
         </button>
         <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
+        <button mat-menu-item
+        matTooltip="Maintain a list of web admin sites on the local network (intranet) to make available through the NVR on the general internet."
+        matTooltipClass="tooltip"
+        (click)="adHocHostingConfiguration()">Ad Hoc Hosting</button>
         <div mat-menu-item
           matTooltip="Enable or disable H264 hardware decoding. In some cases hardware decoding adds latency on H264, in other cases hardware decoding is required to decode it at all. Set this for the best performance on the platform/browser you are using."
           matTooltipClass="tooltip"

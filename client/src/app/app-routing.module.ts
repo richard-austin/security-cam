@@ -11,6 +11,7 @@ const routes: Routes = [
   {path: 'changepassword', loadComponent: () => import('./change-password/change-password.component').then(m => m.ChangePasswordComponent), canActivate: [OnlyClientUsersService]},
   {path: 'cameraparams/:camera', loadComponent: () => import('./camera-params/camera-params.component').then(m => m.CameraParamsComponent)},
   {path: 'configsetup', canDeactivate: [canDeactivateGuard], loadComponent: () => import('./config-setup/config-setup.component').then(m => m.ConfigSetupComponent)},
+  {path: 'adhochostingconfig', loadComponent: () => import('./ad-hoc-hosting-config/ad-hoc-hosting-config.component').then(m => m.AdHocHostingConfigComponent), canActivate: [OnlyClientUsersService]},
   {path: 'camadmin/:camera', loadComponent: () => import('./camera-admin-page-hosting/camera-admin-page-hosting.component').then(m => m.CameraAdminPageHostingComponent), canActivate: [OnlyClientUsersService]},
   {path: 'getactiveipaddresses', loadComponent: () => import('./get-active-ipaddresses/get-active-ipaddresses.component').then(m => m.GetActiveIPAddressesComponent), canActivate: [OnlyClientUsersService]},
   {path: 'wifisettings', loadComponent: () => import('./wifi-settings/wifi-settings.component').then(m => m.WifiSettingsComponent)},
