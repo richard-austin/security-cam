@@ -2,7 +2,29 @@
   <mat-card>
     <mat-card-title>Ad Hoc Device Admin Hosting</mat-card-title>
     <mat-card-content>
-      <table mat-table [dataSource]="devices">
+      <table mat-table [dataSource]="devices" class="mat-elevation-z8">
+        <ng-container matColumnDef="delete">
+          <th *matHeaderCellDef mat-header-cell>Delete</th>
+          <td *matCellDef="let device; let i = index" mat-cell>
+            <button (click)="toggleDeviceDeleteConfirm(i)"
+                    [disabled]="getDeviceDeleteDisabledState(device)"
+                    mat-icon-button matTooltip="Delete {{device.name}}" matTooltipClass="tooltip">
+              <mat-icon class="trash-can">delete</mat-icon>
+            </button>
+            <div class="popup-dialogue">
+              <div [@detailExpand]="showDeviceDeleteConfirm===i ? 'expanded' : 'collapsed'"
+                   [ngClass]="{'mat-elevation-z15': showDeviceDeleteConfirm===i}">
+                <div>
+                </div>
+                <app-row-delete-confirm [camKey]="i"
+                                        [streamKey]="''"
+                                        (delete)="deleteDevice(i);toggleDeviceDeleteConfirm(i)"
+                                        (hideDialogue)="toggleDeviceDeleteConfirm(i)">
+                </app-row-delete-confirm>
+              </div>
+            </div>
+          </td>
+        </ng-container>
         <ng-container matColumnDef="devicename">
           <th mat-header-cell *matHeaderCellDef>Device Name</th>
           <td mat-cell *matCellDef="let i = index">
@@ -10,7 +32,7 @@
               <mat-label>Device Name</mat-label>
               <input (keyup)="updateField(i, 'name')"
                      [formControl]="getControl(i, 'name')" autocomplete="off" matInput
-                     matTooltip="The name of this device which will appear on the ad hoc device selector menu."
+                     matTooltip="The name for this device which will appear on the ad hoc device selector menu."
                      matTooltipClass="tooltip" maxlength="25" placeholder="Device Name" type="text">
               @if (getControl(i, 'name').invalid) {
                 <mat-error>Enter the device name</mat-error>

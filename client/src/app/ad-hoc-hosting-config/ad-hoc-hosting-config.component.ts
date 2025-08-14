@@ -1,7 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
-import {FormControl, UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
+import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {BehaviorSubject} from "rxjs";
+import {RowDeleteConfirmComponent} from "../config-setup/row-delete-confirm/row-delete-confirm.component";
+import {animate, state, style, transition, trigger} from "@angular/animations";
 
 class Device  {
   name!: string;
@@ -11,15 +13,23 @@ class Device  {
 
 @Component({
   selector: 'app-ad-hoc-hosting-config',
-  imports: [SharedAngularMaterialModule],
+  imports: [SharedAngularMaterialModule, RowDeleteConfirmComponent],
   templateUrl: './ad-hoc-hosting-config.component.html',
-  styleUrl: './ad-hoc-hosting-config.component.scss'
+  styleUrl: './ad-hoc-hosting-config.component.scss',
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ])
+  ],
 })
 export class AdHocHostingConfigComponent implements OnInit {
-  columns: string[] = ['devicename', 'ipaddress', 'ipport'];
-  devices: Device[] = [{name: 'Front Room Switch', ipAddress:'192.168.1.253', ipPort:80}, {name: 'Hall Switch', ipAddress:'192.168.1.232', ipPort:80}];
+  columns: string[] = ['delete', 'devicename', 'ipaddress', 'ipport'];
+  devices!: Device[];
 
   tableForms!: UntypedFormArray
+  showDeviceDeleteConfirm: number = -1;
 
   getControl(index: number, fieldName: string): UntypedFormControl {
     if(this.tableForms) {
@@ -55,7 +65,7 @@ export class AdHocHostingConfigComponent implements OnInit {
         ipPort: new UntypedFormControl({
           value: device.ipPort,
           disabled: false
-        }, [Validators.max(65535), Validators.min(80), Validators.maxLength(5), Validators.required])
+        }, [Validators.max(65535), Validators.min(80), Validators.required])
       });
     });
     this.tableForms = new UntypedFormArray(formGroups);
@@ -63,11 +73,29 @@ export class AdHocHostingConfigComponent implements OnInit {
     for (let i = 0; i < this.tableForms.length; ++i) {
       this.tableForms.at(i).markAllAsTouched();
     }
-
-
   }
 
   ngOnInit(): void {
+    this.devices =  [{name: 'Front Room Switch', ipAddress:'192.168.1.253', ipPort:80}, {name: 'Hall Switch', ipAddress:'192.168.1.232', ipPort:80}];
     this.setUpTableFormControls();
+  }
+
+  deleteDevice(i: number) {
+    if(i >= 0 && i < this.tableForms.length) {
+      this.devices.splice(i, 1);
+      this.devices = [...this.devices];
+      this.setUpTableFormControls();
+    } else {
+      console.log("delete index "+i+" is out of range")
+    }
+  }
+
+  toggleDeviceDeleteConfirm(index: number) {
+    // this.allOff();
+    this.showDeviceDeleteConfirm = this.showDeviceDeleteConfirm !== index ? index : -1;
+  }
+
+   getDeviceDeleteDisabledState(device: Device) {
+    return false;
   }
 }
