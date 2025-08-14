@@ -83,7 +83,7 @@ export class AdHocHostingConfigComponent implements OnInit {
   deleteDevice(i: number) {
     if(i >= 0 && i < this.tableForms.length) {
       this.devices.splice(i, 1);
-      this.devices = [...this.devices];
+      this.devices = [...this.devices];  // Needs to be a new array for the table to reflect the change
       this.setUpTableFormControls();
     } else {
       console.log("delete index "+i+" is out of range")

@@ -3,13 +3,13 @@
     <mat-card-content>
         <span class="row-delete-confirm-group">
           <button color="cancel" mat-raised-button (click)="confirmRowDelete(false)"
-                  matTooltip="Close this dialogue and leave {{camKey}} in place"
+                  matTooltip="Close this dialogue and leave {{name ? name : camKey}} in place"
                   matTooltipClass="tooltip">
             Cancel
           </button>
           <button color="warn" mat-raised-button
                   (click)="confirmRowDelete(true)"
-                  matTooltip="Delete {{camKey}}"
+                  matTooltip="Delete {{name ? name : camKey}}"
                   matTooltipClass="tooltip">
             Confirm
           </button>

@@ -18,6 +18,7 @@
                 </div>
                 <app-row-delete-confirm [camKey]="i"
                                         [streamKey]="''"
+                                        [name]="device.name"
                                         (delete)="deleteDevice(i);toggleDeviceDeleteConfirm(i)"
                                         (hideDialogue)="toggleDeviceDeleteConfirm(i)">
                 </app-row-delete-confirm>
