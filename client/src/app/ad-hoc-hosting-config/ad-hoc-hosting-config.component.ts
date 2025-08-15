@@ -26,6 +26,7 @@ class Device  {
 })
 export class AdHocHostingConfigComponent implements OnInit {
   columns: string[] = ['delete', 'devicename', 'ipaddress', 'ipport'];
+  footerColumns = ['buttons'];
   devices!: Device[];
 
   tableForms!: UntypedFormArray
@@ -53,6 +54,10 @@ export class AdHocHostingConfigComponent implements OnInit {
     });
   }
 
+  anyInvalid(): boolean {
+    return this.tableForms.invalid;
+  }
+
   setUpTableFormControls() {
     let list = new BehaviorSubject<Device[]>(this.devices);
     let formGroups  = list.value.map((device: Device) => {
@@ -61,7 +66,7 @@ export class AdHocHostingConfigComponent implements OnInit {
         ipAddress: new UntypedFormControl({
           value: device.ipAddress,
           disabled: false
-        }, [Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
+        }, [Validators.required, Validators.pattern(/\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/)]),
         ipPort: new UntypedFormControl({
           value: device.ipPort,
           disabled: false
@@ -73,11 +78,6 @@ export class AdHocHostingConfigComponent implements OnInit {
     for (let i = 0; i < this.tableForms.length; ++i) {
       this.tableForms.at(i).markAllAsTouched();
     }
-  }
-
-  ngOnInit(): void {
-    this.devices =  [{name: 'Front Room Switch', ipAddress:'192.168.1.253', ipPort:80}, {name: 'Hall Switch', ipAddress:'192.168.1.232', ipPort:80}];
-    this.setUpTableFormControls();
   }
 
   deleteDevice(i: number) {
@@ -97,5 +97,16 @@ export class AdHocHostingConfigComponent implements OnInit {
 
    getDeviceDeleteDisabledState(device: Device) {
     return false;
+  }
+
+  addDevice() {
+    this.devices.push(new Device());
+    this.devices = [...this.devices];
+    this.setUpTableFormControls();
+  }
+
+  ngOnInit(): void {
+    this.devices =  [{name: 'Front Room Switch', ipAddress:'192.168.1.253', ipPort:80}, {name: 'Hall Switch', ipAddress:'192.168.1.232', ipPort:80}];
+    this.setUpTableFormControls();
   }
 }

@@ -37,3 +37,8 @@ div.popup-dialogue {
     @include top-cursor;
   }
 }
+mat-error {
+  left: 0.10rem;
+  position: absolute;
+  width: 24rem;
+}

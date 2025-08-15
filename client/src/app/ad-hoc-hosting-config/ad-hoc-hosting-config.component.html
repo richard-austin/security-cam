@@ -35,8 +35,11 @@
                      [formControl]="getControl(i, 'name')" autocomplete="off" matInput
                      matTooltip="The name for this device which will appear on the ad hoc device selector menu."
                      matTooltipClass="tooltip" maxlength="25" placeholder="Device Name" type="text">
-              @if (getControl(i, 'name').invalid) {
+              @let nameCtrl = getControl(i, 'name');
+              @if (nameCtrl.hasError('required')) {
                 <mat-error>Enter the device name</mat-error>
+              } @else if (nameCtrl.hasError('maxlength')) {
+                <mat-error>Device name should have 25 characters orr less</mat-error>
               }
             </mat-form-field>
           </td>
@@ -51,8 +54,11 @@
                      [formControl]="getControl(i, 'ipAddress')" autocomplete="off" matInput
                      matTooltip="The IP address of this device for web access"
                      matTooltipClass="tooltip" maxlength="15" placeholder="IP Address" type="text">
-              @if (getControl(i, 'ipAddress').invalid) {
+              @let ipAddrCtl = getControl(i, 'ipAddress');
+              @if (ipAddrCtl.hasError('required')) {
                 <mat-error>Enter the IP address</mat-error>
+              } @else if (ipAddrCtl.hasError('pattern')) {
+                <mat-error>Enter a valid IP address</mat-error>
               }
             </mat-form-field>
           </td>
@@ -62,20 +68,37 @@
           <th mat-header-cell *matHeaderCellDef>IP Port</th>
           <td mat-cell *matCellDef="let i = index">
             <mat-form-field [style.width.px]="90" appearance="outline">
-              <mat-label>IP Address</mat-label>
+              <mat-label>IP Port</mat-label>
               <input (keyup)="updateField(i, 'ipPort')"
                      [formControl]="getControl(i, 'ipPort')" autocomplete="off" matInput
                      matTooltip="The IP port of this device for web access (usually 80)"
                      matTooltipClass="tooltip" maxlength="5" placeholder="IP Port" type="number">
-              @if (getControl(i, 'ipPort').invalid) {
+              @let ipPortCtrl = getControl(i, 'ipPort');
+              @if (ipPortCtrl.hasError('required')) {
                 <mat-error>Enter the IP port</mat-error>
+              } @else if (ipPortCtrl.hasError('max')) {
+                <mat-error>IP port should be <= 65535</mat-error>
+              } @else if(ipPortCtrl.hasError('min')) {
+                <mat-error>IP port should be >= 80</mat-error>
               }
             </mat-form-field>
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="buttons">
+          <td *matFooterCellDef [attr.colspan]="columns.length" mat-footer-cell>
+            <button (click)="addDevice()"
+                    [disabled]="anyInvalid() "
+                    mat-icon-button matTooltip="Add another device, and enter the details."
+                    matTooltipClass="tooltip">
+              <mat-icon>add</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="columns"></tr>
         <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        <tr *matFooterRowDef="footerColumns" mat-footer-row></tr>
       </table>
     </mat-card-content>
   </mat-card>
