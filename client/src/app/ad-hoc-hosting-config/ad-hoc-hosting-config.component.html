@@ -1,6 +1,7 @@
 <div>
   <mat-card>
     <mat-card-title>Ad Hoc Device Admin Hosting</mat-card-title>
+    <app-reporting #errorReporting></app-reporting>
     <mat-card-content>
       <table mat-table [dataSource]="devices" class="mat-elevation-z8">
         <ng-container matColumnDef="delete">
@@ -93,6 +94,29 @@
                     matTooltipClass="tooltip">
               <mat-icon>add</mat-icon>
             </button>
+
+            <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current ad hoc devices configuration in this editor'}}"
+                  matTooltipClass="tooltip">
+              @if (!confirmSave && !confirmRestore ) {
+                <button (click)="confirmSave=true"
+                        [disabled]="!dataHasChanged() || anyInvalid() || confirmNew || isGuest"
+                        mat-icon-button>
+                  <mat-icon>save</mat-icon>
+                </button>
+              }
+            </span>
+            @if (confirmSave) {
+              <span class="confirm-group">
+                <span>Save this as the working configuration, are you sure?</span>
+                <button (click)="confirmSave=false" color="cancel" mat-flat-button>
+                  Cancel
+                </button>
+                <button (click)="commitConfig();confirmSave=false;" [disabled]="isGuest" color="warn"
+                        mat-flat-button>
+                  Save
+                </button>
+              </span>
+            }
           </td>
         </ng-container>
 

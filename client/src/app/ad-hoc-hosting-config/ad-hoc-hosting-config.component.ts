@@ -1,19 +1,18 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {BehaviorSubject} from "rxjs";
 import {RowDeleteConfirmComponent} from "../config-setup/row-delete-confirm/row-delete-confirm.component";
 import {animate, state, style, transition, trigger} from "@angular/animations";
+import {Device, UtilsService} from "../shared/utils.service";
+import {HttpErrorResponse} from "@angular/common/http";
+import {ReportingComponent} from "../reporting/reporting.component";
 
-class Device  {
-  name!: string;
-  ipAddress!: string;
-  ipPort!: number;
-}
+declare let objectHash: (obj: Object) => string;
 
 @Component({
   selector: 'app-ad-hoc-hosting-config',
-  imports: [SharedAngularMaterialModule, RowDeleteConfirmComponent],
+  imports: [SharedAngularMaterialModule, RowDeleteConfirmComponent, ReportingComponent],
   templateUrl: './ad-hoc-hosting-config.component.html',
   styleUrl: './ad-hoc-hosting-config.component.scss',
   animations: [
@@ -28,9 +27,23 @@ export class AdHocHostingConfigComponent implements OnInit {
   columns: string[] = ['delete', 'devicename', 'ipaddress', 'ipport'];
   footerColumns = ['buttons'];
   devices!: Device[];
+  isGuest: boolean = true;
+  updating: boolean = false;
+  confirmSave: boolean = false;
+  confirmRestore: boolean = false;
+  confirmNew: boolean = false;
+  savedDataHash: string = "";
 
   tableForms!: UntypedFormArray
   showDeviceDeleteConfirm: number = -1;
+  @ViewChild('errorReporting') reporting!: ReportingComponent;
+  downloading: boolean = true;
+  constructor(private utils: UtilsService) {
+  }
+
+  dataHasChanged(): boolean {
+    return this.devices && objectHash(this.devices) !== this.savedDataHash;
+  }
 
   getControl(index: number, fieldName: string): UntypedFormControl {
     if(this.tableForms) {
@@ -55,7 +68,7 @@ export class AdHocHostingConfigComponent implements OnInit {
   }
 
   anyInvalid(): boolean {
-    return this.tableForms.invalid;
+    return !this.tableForms || this.tableForms.invalid;
   }
 
   setUpTableFormControls() {
@@ -104,9 +117,35 @@ export class AdHocHostingConfigComponent implements OnInit {
     this.devices = [...this.devices];
     this.setUpTableFormControls();
   }
+  commitConfig() {
+    this.utils.updateAdhocDeviceList(JSON.stringify(this.devices)).subscribe(() => {
+        this.reporting.successMessage = "Update ad hoc device list Successful!";
+        this.updating = false;
+        // Update the saved data hash
+        this.savedDataHash = objectHash(this.devices);
+      },
+      reason => {
+        this.reporting.errorMessage = reason
+        this.updating = false;
+      }
+    )
+
+  }
 
   ngOnInit(): void {
-    this.devices =  [{name: 'Front Room Switch', ipAddress:'192.168.1.253', ipPort:80}, {name: 'Hall Switch', ipAddress:'192.168.1.232', ipPort:80}];
-    this.setUpTableFormControls();
+    this.isGuest = this.utils.isGuestAccount;
+    this.utils.loadAdHocDevices().subscribe((devices: Device[]) => {
+        this.devices = devices;
+        this.setUpTableFormControls();
+        this.downloading = false;
+        this.savedDataHash = objectHash(this.devices);
+      },
+      () => {
+        //this.createNew();
+        this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your ad hoc devices and save it.'});
+        this.downloading = false;
+      });
+
+//    this.devices =  [{name: 'Front Room Switch', ipAddress:'192.168.1.253', ipPort:80}, {name: 'Hall Switch', ipAddress:'192.168.1.232', ipPort:80}];
   }
 }

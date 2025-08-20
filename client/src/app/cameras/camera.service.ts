@@ -228,9 +228,9 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  updateCameras(camerasJON: string):
+  updateCameras(camerasJSON: string):
     Observable<Map<string, Camera>> {
-    let cameras = {camerasJSON: camerasJON};
+    let cameras = {camerasJSON: camerasJSON};
     return this.http.post<any>(this._baseUrl.getLink("onvif", "updateCameras"), JSON.stringify(cameras), this.httpJSONOptions).pipe(
       tap((cams) => {
         this.cameras = new Map();
@@ -278,9 +278,6 @@ export class CameraService {
     let params: {} = {url: cam.snapshotUri, cred: cam.cred}
     return this.http.post(this._baseUrl.getLink("onvif", "getSnapshot"), params, {observe: "response", responseType: "blob"}).pipe(
       tap(
-          content => {
-              let y = content;
-          }
       ),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

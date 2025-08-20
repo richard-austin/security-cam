@@ -16,29 +16,15 @@ class CamService {
 
     @Autowired
     Config config
+    @Autowired
+    UtilsService utilsService
+
     /**
      * getCameras: Get all cameras defined in the application.yml file
      * @return
      */
     def getCameras() {
-        ObjectCommandResponse result = new ObjectCommandResponse()
-
-        try {
-            FileInputStream fis
-
-            fis = new FileInputStream("${config.camerasHomeDirectory}/cameras.json")
-            String data = IOUtils.toString(fis, "UTF-8")
-            Gson gson2 = new Gson()
-            Object obj = gson2.fromJson(data, Object.class)
-            result.setResponseObject(obj)
-        }
-        catch (Throwable ex) {
-            logService.cam.error "Exception in getCameras -> parse: " + ex.getMessage()
-            result.status = PassFail.FAIL
-            result.error = "The config file is corrupt, empty or does not exist. You can create a new config file using the Configuration option under the General menu.   ....   " + ex.getMessage()
-        }
-
-        return result
+        return utilsService.objectFromFile("${config.camerasHomeDirectory}/cameras.json", "getCameras")
     }
 
     Integer getCameraType(String cameraHost) {

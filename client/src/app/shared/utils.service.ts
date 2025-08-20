@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
 import {BaseUrl} from "./BaseUrl/BaseUrl";
 import {Observable, Subject, throwError} from "rxjs";
-import {catchError, tap} from "rxjs/operators";
+import {catchError, map, tap} from "rxjs/operators";
 import {CameraParams, Camera} from "../cameras/Camera";
 import {environment} from "../../environments/environment";
 import {cameraType} from '../cameras/camera.service';
@@ -81,6 +81,12 @@ export class SetCameraParams {
   reboot: boolean;
 }
 
+export class Device {
+  name!: string;
+  ipAddress!: string;
+  ipPort!: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -104,7 +110,6 @@ export class UtilsService {
   speakActive: boolean = true;
   private _activeMQTransportActive: boolean = false;
   private _cloudProxyRunning: boolean = false;
-
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     // Initialise the speakActive state
     this.audioInUse().subscribe();
@@ -312,6 +317,22 @@ export class UtilsService {
   getUserAuthorities(): Observable<{ authority: string }[]> {
     return this.http.post<{ authority: string }[]>(this._baseUrl.getLink('utils', 'getUserAuthorities'), '', this.httpJSONOptions).pipe(
         catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  loadAdHocDevices() {
+    return this.http.post<Array<Device>>(this._baseUrl.getLink("utils", "loadAdHocDevices"), '', this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  updateAdhocDeviceList(adHocDeviceListJSON: string):
+    Observable<Array<Device>> {
+    let devices = {adHocDeviceListJSON: adHocDeviceListJSON};
+    return this.http.post<any>(this._baseUrl.getLink("utils", "updateAdHocDeviceList"), JSON.stringify(devices), this.httpJSONOptions).pipe(
+      map(devices => {
+        return devices;
+      })
     );
   }
 }
