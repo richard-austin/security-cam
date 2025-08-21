@@ -25,7 +25,6 @@ export enum messageType {idleTimeoutStatus, logoff}
 
 export abstract class Message {
   protected constructor(messageType: messageType) {
-
     this.messageType = messageType;
   }
 
@@ -81,6 +80,12 @@ export class SetCameraParams {
   reboot: boolean;
 }
 
+export class Device {
+  name!: string;
+  ipAddress!: string;
+  ipPort!: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -104,10 +109,11 @@ export class UtilsService {
   speakActive: boolean = true;
   private _activeMQTransportActive: boolean = false;
   private _cloudProxyRunning: boolean = false;
-
+  adHocDevices!: Array<Device>;
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     // Initialise the speakActive state
     this.audioInUse().subscribe();
+    this.loadAdHocDevices().subscribe();
   }
 
   getTemperature(): Observable<Temperature> {
@@ -312,6 +318,25 @@ export class UtilsService {
   getUserAuthorities(): Observable<{ authority: string }[]> {
     return this.http.post<{ authority: string }[]>(this._baseUrl.getLink('utils', 'getUserAuthorities'), '', this.httpJSONOptions).pipe(
         catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  loadAdHocDevices() {
+    return this.http.post<Array<Device>>(this._baseUrl.getLink("utils", "loadAdHocDevices"), '', this.httpJSONOptions).pipe(
+      tap(devices => {
+        this.adHocDevices = devices;
+      }),
+      catchError((err: HttpErrorResponse) => throwError(err))
+    );
+  }
+
+  updateAdhocDeviceList(adHocDeviceListJSON: string):
+    Observable<Array<Device>> {
+    let devices = {adHocDeviceListJSON: adHocDeviceListJSON};
+    return this.http.post<any>(this._baseUrl.getLink("utils", "updateAdHocDeviceList"), JSON.stringify(devices), this.httpJSONOptions).pipe(
+      tap(devices => {
+        this.adHocDevices = devices;
+      })
     );
   }
 }

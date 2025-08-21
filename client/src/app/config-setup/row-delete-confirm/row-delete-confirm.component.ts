@@ -14,6 +14,7 @@ export class RowDeleteConfirmComponent {
     @Output() delete: EventEmitter<{cam: string, stream: string}> = new EventEmitter<{cam: string, stream: string}>();
     @Input() camKey!: string;
     @Input() streamKey!: string;
+    @Input() name!: string;
 
     confirmRowDelete(deleteRow: boolean) {
         if(deleteRow)

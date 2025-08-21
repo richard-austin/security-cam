@@ -1,0 +1,129 @@
+<div>
+  <mat-card>
+    <mat-card-title>Ad Hoc Device Admin Hosting</mat-card-title>
+    <app-reporting #errorReporting></app-reporting>
+    <mat-card-content>
+      <table mat-table [dataSource]="devices" class="mat-elevation-z8">
+        <ng-container matColumnDef="delete">
+          <th *matHeaderCellDef mat-header-cell>Delete</th>
+          <td *matCellDef="let device; let i = index" mat-cell>
+            <button (click)="toggleDeviceDeleteConfirm(i)"
+                    [disabled]="getDeviceDeleteDisabledState(device)"
+                    mat-icon-button matTooltip="Delete {{device.name}}" matTooltipClass="tooltip">
+              <mat-icon class="trash-can">delete</mat-icon>
+            </button>
+            <div class="popup-dialogue">
+              <div [@detailExpand]="showDeviceDeleteConfirm===i ? 'expanded' : 'collapsed'"
+                   [ngClass]="{'mat-elevation-z15': showDeviceDeleteConfirm===i}">
+                <div>
+                </div>
+                <app-row-delete-confirm [camKey]="i"
+                                        [streamKey]="''"
+                                        [name]="device.name"
+                                        (delete)="deleteDevice(i);toggleDeviceDeleteConfirm(i)"
+                                        (hideDialogue)="toggleDeviceDeleteConfirm(i)">
+                </app-row-delete-confirm>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="devicename">
+          <th mat-header-cell *matHeaderCellDef>Device Name</th>
+          <td mat-cell *matCellDef="let i = index">
+            <mat-form-field [style.width.px]="210" appearance="outline">
+              <mat-label>Device Name</mat-label>
+              <input (keyup)="updateField(i, 'name')"
+                     [formControl]="getControl(i, 'name')" autocomplete="off" matInput
+                     matTooltip="The name for this device which will appear on the ad hoc device selector menu."
+                     matTooltipClass="tooltip" maxlength="25" placeholder="Device Name" type="text">
+              @let nameCtrl = getControl(i, 'name');
+              @if (nameCtrl.hasError('required')) {
+                <mat-error>Enter the device name</mat-error>
+              } @else if (nameCtrl.hasError('maxlength')) {
+                <mat-error>Device name should have 25 characters orr less</mat-error>
+              }
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ipaddress">
+          <th mat-header-cell *matHeaderCellDef>IP Address</th>
+          <td mat-cell *matCellDef="let i = index">
+            <mat-form-field [style.width.px]="140" appearance="outline">
+              <mat-label>IP Address</mat-label>
+              <input (keyup)="updateField(i, 'ipAddress')"
+                     [formControl]="getControl(i, 'ipAddress')" autocomplete="off" matInput
+                     matTooltip="The IP address of this device for web access"
+                     matTooltipClass="tooltip" maxlength="15" placeholder="IP Address" type="text">
+              @let ipAddrCtl = getControl(i, 'ipAddress');
+              @if (ipAddrCtl.hasError('required')) {
+                <mat-error>Enter the IP address</mat-error>
+              } @else if (ipAddrCtl.hasError('pattern')) {
+                <mat-error>Enter a valid IP address</mat-error>
+              }
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ipport">
+          <th mat-header-cell *matHeaderCellDef>IP Port</th>
+          <td mat-cell *matCellDef="let i = index">
+            <mat-form-field [style.width.px]="90" appearance="outline">
+              <mat-label>IP Port</mat-label>
+              <input (keyup)="updateField(i, 'ipPort')"
+                     [formControl]="getControl(i, 'ipPort')" autocomplete="off" matInput
+                     matTooltip="The IP port of this device for web access (usually 80)"
+                     matTooltipClass="tooltip" maxlength="5" placeholder="IP Port" type="number">
+              @let ipPortCtrl = getControl(i, 'ipPort');
+              @if (ipPortCtrl.hasError('required')) {
+                <mat-error>Enter the IP port</mat-error>
+              } @else if (ipPortCtrl.hasError('max')) {
+                <mat-error>IP port should be <= 65535</mat-error>
+              } @else if(ipPortCtrl.hasError('min')) {
+                <mat-error>IP port should be >= 80</mat-error>
+              }
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="buttons">
+          <td *matFooterCellDef [attr.colspan]="columns.length" mat-footer-cell>
+            <button (click)="addDevice()"
+                    [disabled]="anyInvalid() "
+                    mat-icon-button matTooltip="Add another device, and enter the details."
+                    matTooltipClass="tooltip">
+              <mat-icon>add</mat-icon>
+            </button>
+
+            <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current ad hoc devices configuration in this editor'}}"
+                  matTooltipClass="tooltip">
+              @if (!confirmSave && !confirmRestore ) {
+                <button (click)="confirmSave=true"
+                        [disabled]="!dataHasChanged() || anyInvalid() || confirmNew || isGuest"
+                        mat-icon-button>
+                  <mat-icon>save</mat-icon>
+                </button>
+              }
+            </span>
+            @if (confirmSave) {
+              <span class="confirm-group">
+                <span>Save this as the working configuration, are you sure?</span>
+                <button (click)="confirmSave=false" color="cancel" mat-flat-button>
+                  Cancel
+                </button>
+                <button (click)="commitConfig();confirmSave=false;" [disabled]="isGuest" color="warn"
+                        mat-flat-button>
+                  Save
+                </button>
+              </span>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        <tr *matFooterRowDef="footerColumns" mat-footer-row></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

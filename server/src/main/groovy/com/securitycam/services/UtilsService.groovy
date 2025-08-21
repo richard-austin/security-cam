@@ -1,26 +1,27 @@
 package com.securitycam.services
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
+import com.google.gson.internal.LinkedTreeMap
 import com.securitycam.audiobackchannel.RtspClient
 import com.securitycam.commands.SMTPData
 import com.securitycam.commands.SetupSMTPAccountCommand
 import com.securitycam.commands.StartAudioOutCommand
+import com.securitycam.commands.UpdateAdHocDeviceListCommand
 import com.securitycam.configuration.Config
+import com.securitycam.controllers.Camera
 import com.securitycam.controllers.CameraAdminCredentials
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
-import com.securitycam.model.User
-import jakarta.mail.Authenticator
-import jakarta.mail.Message
-import jakarta.mail.Multipart
-import jakarta.mail.PasswordAuthentication
-import jakarta.mail.Session
-import jakarta.mail.Transport
+import jakarta.mail.*
 import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeBodyPart
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
 import jakarta.validation.Valid
+import org.apache.cxf.helpers.IOUtils
 import org.intellij.lang.annotations.Language
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.configurationprocessor.json.JSONObject
@@ -30,16 +31,10 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.ResourceUtils
 import org.springframework.web.bind.annotation.RequestBody
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.LinkOption
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 import java.nio.file.attribute.GroupPrincipal
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.UserPrincipalLookupService
@@ -67,6 +62,11 @@ class MyIP {
     }
 
     String myIp
+}
+class Device  {
+    String name
+    String ipAddress
+    int ipPort
 }
 
 @Service
@@ -329,6 +329,66 @@ class UtilsService {
         }
         catch (Exception ex) {
             logService.cam.error("${ex.getClass().getName()} in getUserAuthorities: ${ex.getCause()} ${ex.getMessage()}")
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+    }
+
+    def objectFromFile(String path, String methodName) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            FileInputStream fis
+            fis = new FileInputStream(path)
+            String data = IOUtils.toString(fis, "UTF-8")
+            Gson gson2 = new Gson()
+            Object obj = gson2.fromJson(data, Object.class)
+            result.setResponseObject(obj)
+        }
+        catch(Exception ex) {
+            logService.cam.error "Exception in ${methodName}: " + ex.getMessage()
+            result.status = PassFail.FAIL
+            result.error = ex.getMessage()
+        }
+        return result
+
+    }
+    def loadAdHocDevices() {
+        return objectFromFile("${config.camerasHomeDirectory}/adhocdevices.json", "loadAdHocDevices")
+    }
+
+    /**
+     * updateAdHocDeviceList: Update the list of devices for whose web admin page will be viewable on the NVR. This hosting
+     *                        is similar to that provided automatically for configured cameras, but it can be any device
+     *                        with web admin on the same intranet as the NVR.     *
+     * @param cmd: Contains the JSON representing the ad hoc devicxxe list
+     * @return
+     */
+    def updateAdHocDeviceList(UpdateAdHocDeviceListCommand cmd) {
+        ObjectCommandResponse result = new ObjectCommandResponse()
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create()
+            JsonElement je = JsonParser.parseString(cmd.adHocDeviceListJSON)
+            String prettyJsonString = gson.toJson(je)
+
+            String fileName
+            fileName = "${config.camerasHomeDirectory}/adhocdevices.json"
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))
+            writer.write(prettyJsonString)
+
+            writer.close()
+
+             if (result.status !== PassFail.PASS)
+                throw new Exception(result.error)
+
+            Gson gson2 = new Gson()
+            ArrayList<Device> obj = gson2.fromJson(prettyJsonString, Object.class) as ArrayList<Device>
+
+            result.setResponseObject(obj)
+        }
+        catch (Exception ex) {
+            logService.cam.error "Exception in updateAdHocDeviceList: " + ex.getMessage()
             result.status = PassFail.FAIL
             result.error = ex.getMessage()
         }

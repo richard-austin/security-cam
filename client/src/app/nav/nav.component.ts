@@ -4,7 +4,7 @@ import {Camera, Stream} from '../cameras/Camera';
 import {ReportingComponent} from '../reporting/reporting.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import {Subscription, timer} from 'rxjs';
-import {IdleTimeoutStatusMessage, Message, messageType, UtilsService} from '../shared/utils.service';
+import {Device, IdleTimeoutStatusMessage, Message, messageType, UtilsService} from '../shared/utils.service';
 import {MatDialog} from '@angular/material/dialog';
 import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-modal.component';
 import {MatDialogRef} from '@angular/material/dialog';
@@ -25,7 +25,6 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef<HTMLDivElement>;
   @ViewChild('hardwareDecodingCheckBox') hardwareDecodingCheckBox!: MatCheckbox
-//  cameras: Map<string, Camera> = new Map<string, Camera>();
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
   timerHandle!: Subscription;
@@ -73,6 +72,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   cameraAdmin(cam: Camera) {
     window.location.href = '#/camadmin/' + btoa(cam.address);
+  }
+
+  adHocDeviceAdmin(device: Device) {
+    window.location.href = '#/camadmin/' +btoa(device.ipAddress);
   }
 
   changePassword() {
@@ -261,6 +264,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.cameraSvc.getCameras();
   }
 
+  get adHocDevices() : Array<Device> {
+    return this.utilsService.adHocDevices;
+  }
+
   async ngOnInit(): Promise<void> {
     // Get the initial core temperature
     this.getTemperature();
@@ -322,6 +329,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
+  adHocHostingConfiguration() {
+    window.location.href = "#/adhochostingconfig"
+  }
+
   ngAfterViewInit(): void {
     let hwdc = NavComponent.getCookie("hardwareDecoding");
     if (hwdc === "") {
@@ -346,4 +357,5 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.client.deactivate({force: false}).then(() => {
     });
   }
+
 }

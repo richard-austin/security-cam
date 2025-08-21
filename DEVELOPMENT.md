@@ -9,8 +9,8 @@ The requirements to build the project yourself are detailed below: -
 #### The project uses the following SDK's/package managers:-
 * go version go1.20.1
 * Angular CLI: 18.2.3 or greater
-* Node: 18.20.4
-* Package Manager: npm 10.7.0
+* Node: 22.18.0
+* Package Manager: npm 10.9.3
 * openjdk version "21.0.5" 2024-01-16
 * Gradle 8.11.1 
 * Python 3.12.3

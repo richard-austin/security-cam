@@ -32,6 +32,9 @@ export class PTZButtonComponent implements OnInit {
   }
 
   move($event: MouseEvent | TouchEvent) {
+    if($event.type === 'touchstart') {
+      $event.preventDefault();
+    }
     if(($event.type === "mousedown" && (($event as MouseEvent).buttons & 1) === 1) || $event.type === "touchstart") {
       let ptz: PTZMove = new PTZMove(this.moveDirection, this.camera);
       this.mouseDown = true;

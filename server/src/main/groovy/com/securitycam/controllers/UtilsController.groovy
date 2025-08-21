@@ -5,6 +5,8 @@ import com.securitycam.commands.CheckNotGuestCommand
 import com.securitycam.commands.SetCameraParamsCommand
 import com.securitycam.commands.SetupSMTPAccountCommand
 import com.securitycam.commands.StartAudioOutCommand
+import com.securitycam.commands.UpdateAdHocDeviceListCommand
+import com.securitycam.commands.UpdateCamerasCommand
 import com.securitycam.enums.PassFail
 import com.securitycam.enums.RestfulResponseStatusEnum
 import com.securitycam.error.NVRRestMethodException
@@ -20,6 +22,8 @@ import com.securitycam.validators.CheckNotGuestCommandValidator
 import com.securitycam.validators.GeneralValidator
 import com.securitycam.validators.SetCameraParamsCommandValidator
 import com.securitycam.validators.SetupSMTPAccountCommandValidator
+import com.securitycam.validators.UpdateAdHocDeviceListCommandValidator
+import com.securitycam.validators.UpdateCamerasCommandValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -238,5 +242,38 @@ class UtilsController {
             throw new NVRRestMethodException(response.error, "utils/getOpenSourceInfo")
         else
             return response.response
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @RequestMapping('/loadAdHocDevices')
+    def loadAdHocDevices() {
+        ObjectCommandResponse devices = utilsService.loadAdHocDevices()
+        if (devices.status != PassFail.PASS)
+            throw new NVRRestMethodException(devices.error, "utils/loadAdHocDevices") //render(status: 500, text: cameras.error)
+        else {
+            logService.cam.info("loadAdHocDevices: success")
+            return devices.responseObject
+        }
+    }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @PostMapping("/updateAdHocDeviceList")
+    def updateAdHocDeviceList(@RequestBody UpdateAdHocDeviceListCommand cmd) {
+        ObjectCommandResponse result
+        def gv = new GeneralValidator(cmd, new UpdateAdHocDeviceListCommandValidator())
+        BindingResult results = gv.validate()
+        if (results.hasErrors()) {
+            logService.cam.error "/utils/updateAdHocDeviceList: Validation error: " + results.toString()
+            BadRequestResult retVal = new BadRequestResult(results)
+            return ResponseEntity
+                    .badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(retVal)
+        } else {
+            result = utilsService.updateAdHocDeviceList(cmd)
+            if (result.status != PassFail.PASS)
+                return new ResponseEntity<Object>(result.error, HttpStatus.INTERNAL_SERVER_ERROR)
+            return result.responseObject
+        }
     }
 }

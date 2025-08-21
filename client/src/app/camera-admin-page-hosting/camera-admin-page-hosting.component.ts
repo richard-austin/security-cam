@@ -6,6 +6,7 @@ import {ReportingComponent} from '../reporting/reporting.component';
 import {interval, Subscription} from 'rxjs';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {environment} from '../../environments/environment';
+import {UtilsService} from "../shared/utils.service";
 
 
 @Component({
@@ -17,7 +18,7 @@ import {environment} from '../../environments/environment';
   styleUrls: ['./camera-admin-page-hosting.component.scss']
 })
 export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, OnDestroy {
-  cam!: Camera;
+  address!: string;
   accessToken!: string;
   intervalSubscription: Subscription | undefined;
   hostServiceUrl!: SafeResourceUrl;
@@ -25,18 +26,27 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
   private readonly defaultPort: number = 80; // TODO: Probably need to set the port in the camera info as it may not always be 80
   private initialised: boolean = false;
 
-  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private domSanitizer: DomSanitizer) {
+  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, utils: UtilsService, private domSanitizer: DomSanitizer) {
     this.route.paramMap.subscribe((paramMap) => {
       if(this.accessToken !== undefined)
         cameraSvc.closeClients(this.accessToken).subscribe();
-      let camera: string = paramMap.get('camera') as string;
-      camera = atob(camera);
+      let address: string = paramMap.get('camera') as string;
+      address = atob(address);
+      // Verify that the address is either for one of the cameras or ad hoc devices
       let cams = cameraSvc.getCameras();
       cams.forEach((cam) => {
-        if (cam.address == camera) {
-          this.cam = cam;
+        if (cam.address == address) {
+          this.address = address;
         }
       });
+      if(this.address === undefined || this.address !== address) {
+        let devices = utils.adHocDevices;
+        devices.forEach((device) => {
+          if(device.ipAddress == address) {
+            this.address = address;
+          }
+        })
+      }
       if (this.initialised) {
         this.ngOnInit();
       }
@@ -44,8 +54,8 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
   }
 
   ngOnInit(): void {
-    if (this.cam !== undefined) {
-      this.cameraSvc.getAccessToken(this.cam.address, this.defaultPort).subscribe((result) => {
+    if (this.address !== undefined) {
+      this.cameraSvc.getAccessToken(this.address, this.defaultPort).subscribe((result) => {
           this.accessToken = result.accessToken;
           this.hostServiceUrl = this.domSanitizer.bypassSecurityTrustResourceUrl(window.location.protocol + '//' + window.location.hostname + ':' + environment.camAdminHostPort + '/?accessToken=' + this.accessToken);
           this.intervalSubscription?.unsubscribe();

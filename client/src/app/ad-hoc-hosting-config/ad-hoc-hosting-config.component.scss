@@ -1,0 +1,44 @@
+div {
+  width: 100%;
+  > mat-card {
+    width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@mixin top-cursor {
+  > div {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+
+    border-bottom: 10px solid #646363;
+    z-index: 3;
+  }
+  z-index: 2;
+  left: -24px;
+  top: 13px;
+  overflow: hidden;
+  position: absolute;
+}
+
+.mdc-data-table__cell {
+  overflow: visible !important;
+}
+div.popup-dialogue {
+  display: inline;
+  position: relative;
+
+  > div {
+    width: 17rem;
+
+    @include top-cursor;
+  }
+}
+mat-error {
+  left: 0.10rem;
+  position: absolute;
+  width: 24rem;
+}
