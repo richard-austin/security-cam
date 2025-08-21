@@ -163,7 +163,7 @@ export class CameraService {
   }
 
   /**
-   * getCameras: Returns an array of cameras
+   * getCameras: Returns a map of cameras keyed by their id (camera1, camera2 etc)
    */
   public getCameras(): Map<string, Camera> {
     return this.cameras;

@@ -51,6 +51,9 @@
       <mat-menu #cameraSettings>
         <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraSettings)">Quick Camera Setup</button>
         <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraAdmin)">Camera Admin</button>
+        @if(utilsService.adHocDevices && utilsService.adHocDevices.length > 0) {
+          <button mat-menu-item [matMenuTriggerFor]="$any(menuAdHocDevices)">Ad Hoc Device Admin</button>
+        }
       </mat-menu>
       <mat-menu #menuCameraSettings>
         @for (camKV of cameras | keyvalue: cameraSvc.compareFn; track camKV) {
@@ -73,6 +76,15 @@
               </button>
             }
           </span>
+        }
+      </mat-menu>
+      <mat-menu #menuAdHocDevices>
+        @for(device of utilsService.adHocDevices; track device) {
+          <button mat-menu-item
+                  [disabled]="isGuest"
+                  (click)="adHocDeviceAdmin(device);menuClosed()">
+            {{device.name}}
+          </button>
         }
       </mat-menu>
 
