@@ -3,7 +3,6 @@ package com.securitycam.controllers
 import com.securitycam.commands.CloseClientsCommand
 import com.securitycam.commands.GetAccessTokenCommand
 import com.securitycam.commands.ResetTimerCommand
-import com.securitycam.controlleradvice.ErrorResponse
 import com.securitycam.enums.PassFail
 import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.ObjectCommandResponse

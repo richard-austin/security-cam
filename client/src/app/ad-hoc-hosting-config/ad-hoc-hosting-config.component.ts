@@ -141,7 +141,9 @@ export class AdHocHostingConfigComponent implements OnInit {
         this.savedDataHash = objectHash(this.devices);
       },
       () => {
-        //this.createNew();
+        this.devices = new Array<Device>();
+        this.devices.push(new Device());
+        this.setUpTableFormControls();
         this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your ad hoc devices and save it.'});
         this.downloading = false;
       });
