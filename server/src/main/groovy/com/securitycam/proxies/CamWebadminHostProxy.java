@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,6 +92,9 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             client.configureBlocking(true);
                             logService.getCam().trace("handleClientRequest: Ready to read client request");
                             while (client.read(request) != -1) {
+                                request.flip();
+                                String s = StandardCharsets.UTF_8.decode(request).toString();
+                                logService.getCam().info("request = {}", s);
                                 request.flip();
                                 AccessDetails ad = null;
                                 if (++pass == 1) {
