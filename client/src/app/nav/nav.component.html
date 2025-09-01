@@ -10,7 +10,7 @@
   </div>
 
   <button mat-button class="navbar-toggler" type="button" (click)="toggleMenu()"
-    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <mat-icon>menu</mat-icon>
   </button>
 
@@ -23,7 +23,7 @@
         @for (camKV of cameras | keyvalue: cameraSvc.compareFn; track camKV) {
           @for (streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn; track streamKV) {
             <button mat-menu-item (click)="setVideoStream(camKV.value, streamKV.value);menuClosed()">
-              {{camKV.value.name + " (" + streamKV.value.descr + ")"}}
+              {{ camKV.value.name + " (" + streamKV.value.descr + ")" }}
             </button>
           }
         }
@@ -38,7 +38,7 @@
           @for (streamKV of camKV.value.streams | keyvalue: cameraSvc.compareFn; track streamKV) {
             @if (streamKV.value.recording.enabled) {
               <button mat-menu-item (click)="showRecording(camKV.value, streamKV.value);menuClosed()">
-                {{camKV.value.name + " (" + streamKV.value.descr + ")"}}
+                {{ camKV.value.name + " (" + streamKV.value.descr + ")" }}
               </button>
             }
           }
@@ -51,7 +51,7 @@
       <mat-menu #cameraSettings>
         <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraSettings)">Quick Camera Setup</button>
         <button mat-menu-item [matMenuTriggerFor]="$any(menuCameraAdmin)">Camera Admin</button>
-        @if(utilsService.adHocDevices && utilsService.adHocDevices.length > 0) {
+        @if (enableAdHocDeviceHosting && utilsService.adHocDevices && utilsService.adHocDevices.length > 0) {
           <button mat-menu-item [matMenuTriggerFor]="$any(menuAdHocDevices)">Ad Hoc Device Admin</button>
         }
       </mat-menu>
@@ -59,8 +59,8 @@
         @for (camKV of cameras | keyvalue: cameraSvc.compareFn; track camKV) {
           @if (camKV.value.address != '' && camKV.value.cameraParamSpecs.camType !== cameraTypes.none) {
             <button mat-menu-item
-              (click)="cameraControl(camKV.value);menuClosed()">
-              {{camKV.value.name}}
+                    (click)="cameraControl(camKV.value);menuClosed()">
+              {{ camKV.value.name }}
             </button>
           }
         }
@@ -70,48 +70,50 @@
           <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
             @if (camKV.value.address != '') {
               <button mat-menu-item
-                [disabled]="isGuest"
-                (click)="cameraAdmin(camKV.value);menuClosed()">
-                {{camKV.value.name}}
+                      [disabled]="isGuest"
+                      (click)="cameraAdmin(camKV.value);menuClosed()">
+                {{ camKV.value.name }}
               </button>
             }
           </span>
         }
       </mat-menu>
       <mat-menu #menuAdHocDevices>
-        @for(device of utilsService.adHocDevices; track device) {
+        @for (device of utilsService.adHocDevices; track device) {
           <button mat-menu-item
                   [disabled]="isGuest"
                   (click)="adHocDeviceAdmin(device);menuClosed()">
-            {{device.name}}
+            {{ device.name }}
           </button>
         }
       </mat-menu>
-
     </div>
 
     <div>
       <button mat-button [matMenuTriggerFor]="$any(menuGeneral)">General</button>
       <mat-menu #menuGeneral>
         <button mat-menu-item (click)="configSetup();menuClosed()"
-          matTooltip="Discover and configure the cameras for live view, recording, audio back channel and various other features."
-          matTooltipClass="tooltip">
+                matTooltip="Discover and configure the cameras for live view, recording, audio back channel and various other features."
+                matTooltipClass="tooltip">
           Configuration
         </button>
         <button mat-menu-item (click)="confirmLogoff();menuClosed()">Log Off</button>
-        <button mat-menu-item
-        matTooltip="Maintain a list of web admin sites on the local network (intranet) to make available through the NVR on the general internet."
-        matTooltipClass="tooltip"
-        (click)="adHocHostingConfiguration()">Ad Hoc Hosting</button>
+        @if (enableAdHocDeviceHosting) {
+          <button mat-menu-item
+                  matTooltip="Maintain a list of web admin sites on the local network (intranet) to make available through the NVR on the general internet."
+                  matTooltipClass="tooltip"
+                  (click)="adHocHostingConfiguration()">Ad Hoc Hosting
+          </button>
+        }
         <div mat-menu-item
-          matTooltip="Enable or disable H264 hardware decoding. In some cases hardware decoding adds latency on H264, in other cases hardware decoding is required to decode it at all. Set this for the best performance on the platform/browser you are using."
-          matTooltipClass="tooltip"
-          (click)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()"
-          (keydown.enter)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()">
+             matTooltip="Enable or disable H264 hardware decoding. In some cases hardware decoding adds latency on H264, in other cases hardware decoding is required to decode it at all. Set this for the best performance on the platform/browser you are using."
+             matTooltipClass="tooltip"
+             (click)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()"
+             (keydown.enter)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()">
           <mat-checkbox class="mat-menu__checkbox"
-            labelPosition="before"
-            (click)="hardwareDecoding(hardwareDecodingCheckBox.checked);$event.stopPropagation()"
-            #hardwareDecodingCheckBox>
+                        labelPosition="before"
+                        (click)="hardwareDecoding(hardwareDecodingCheckBox.checked);$event.stopPropagation()"
+                        #hardwareDecodingCheckBox>
             H264 Hardware Decoding
           </mat-checkbox>
         </div>
@@ -124,7 +126,7 @@
         <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           @if (!isGuest) {
             <button mat-menu-item
-              (click)="setUpGuestAccount(); menuClosed()">Set Up Guest Account
+                    (click)="setUpGuestAccount(); menuClosed()">Set Up Guest Account
             </button>
           }
         </span>
