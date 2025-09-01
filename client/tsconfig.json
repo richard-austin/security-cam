@@ -20,7 +20,8 @@
       "es2018",
       "dom"
     ],
-    "useDefineForClassFields": false
+    "useDefineForClassFields": true,
+    "isolatedModules": true
   },
   "angularCompilerOptions": {
     "enableIvy": true,
