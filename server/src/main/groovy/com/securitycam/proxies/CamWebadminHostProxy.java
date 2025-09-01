@@ -93,9 +93,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             logService.getCam().trace("handleClientRequest: Ready to read client request");
                             while (client.read(request) != -1) {
                                 request.flip();
-                                String s = StandardCharsets.UTF_8.decode(request).toString();
-                                logService.getCam().info("request = {}", s);
-                                request.flip();
                                 AccessDetails ad = null;
                                 if (++pass == 1) {
                                     accessDetails.set(getAccessDetails(request));

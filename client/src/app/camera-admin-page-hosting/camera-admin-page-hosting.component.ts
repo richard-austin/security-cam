@@ -1,7 +1,6 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {ActivatedRoute} from '@angular/router';
-import {Camera} from '../cameras/Camera';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {interval, Subscription} from 'rxjs';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
