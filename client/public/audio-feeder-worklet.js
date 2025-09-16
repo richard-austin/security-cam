@@ -58,6 +58,7 @@ class AudioStream {
               this.arrayOffset = 0;
               this.port.onmessage = ({data}) => {
                 this.arrays.push(data);
+                // Prevent audio latency build up due to delayed packets etc.
                 if (this.arrays.length > 8) {
                   console.debug("Reducing audio packets queue from " + this.arrays.length+" to 1");
                   this.arrays = this.arrays.slice(this.arrays.length - 1);
