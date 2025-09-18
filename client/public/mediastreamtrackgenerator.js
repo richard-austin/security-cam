@@ -49,7 +49,7 @@ initMSTG = function () {
                     track.writable = new WritableStream({
                         async start(controller) {
                             this.arrays = [];
-                            this.array = [];
+                            this.statsArray = [];
 
                             function worklet() {
 
@@ -57,7 +57,7 @@ initMSTG = function () {
                                     constructor() {
                                         super();
                                         this.arrays = [];
-                                        this.array = [];
+                                        this.statsArray = [];
                                         this.arrayOffset = 0;
                                         this.port.onmessage = ({data}) => this.arrays.push(data);
                                         this.emptyArray = new Float32Array(0);

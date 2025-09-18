@@ -45,28 +45,110 @@ class AudioStream {
     const gainNode = this.gainNode;
     track.writable = new WritableStream({
       async start(controller) {
-        this.arrays = [];
         this.emptyArrayMap = new Map();
 
         function worklet() {
           registerProcessor("audio-feeder", class Processor extends AudioWorkletProcessor {
-
             constructor() {
               super();
+              // BufferStats class must be declared here as it is instantiated in the AudioContext
+              this.bs = new class BufferStats {
+                arraySize = 20;
+                statsArray = new ArrayBuffer(this.arraySize);
+                arrayIndex = 0;
+                fullArray = false;
+                updated = false;
+                lastAverage = 0;
+                sdUpdated = false;
+                lastSd = 0;
+                startTime = currentTime;
+                measurementWindowSecs = 20;
+                measuring = true;
+                maxBufferSize = 20;
+
+                update(val) {
+                  if (this.measuring) {
+                    this.updated = this.sdUpdated = true;
+                    this.statsArray[this.arrayIndex++] = val;
+                    if (!this.fullArray && this.arrayIndex === this.arraySize)
+                      this.fullArray = true;
+                    if (this.arrayIndex >= this.arraySize)
+                      this.arrayIndex = 0;
+                    const timeNow = currentTime;
+                    if (timeNow - this.startTime > this.measurementWindowSecs) {
+                      if (this.fullArray) {
+                        this.maxBufferSize = Math.round(this.average() + 2 + this.standardDeviation());
+                        this.startTime = timeNow;
+                        this.measuring = false;
+                        console.debug("maxBufferSize set to ", this.maxBufferSize);
+                      } else {
+                        console.error("Moving average array not full, cannot calculate bufferSize");
+                      }
+                    }
+                  }
+                }
+
+                average() {
+                  if (this.updated) {
+                    let sum = 0;
+                    for (let i = 0; i < this.arraySize; i++) {
+                      sum += this.statsArray[i];
+                    }
+                    this.lastAverage = sum / this.arraySize;
+                    this.updated = false;
+                  }
+                  return this.lastAverage;
+                }
+
+                standardDeviation() {
+                  if (this.sdUpdated) {
+                    const average = this.average();
+                    let variance = 0;
+                    for (let i = 0; i < this.arraySize; i++) {
+                      variance += (this.statsArray[i] - average) ** 2;
+                    }
+                    variance /= this.arraySize;
+                    this.lastSd = Math.sqrt(variance);
+                    this.sdUpdated = false;
+                  }
+                  return this.lastSd;
+                }
+
+                reset() {
+                  this.arrayIndex = 0;
+                  this.fullArray = false;
+                  this.updated = false;
+                  this.lastAverage = 0;
+                  this.sdUpdated = false;
+                  this.lastSd = 0;
+                  this.startTime = currentTime;
+                  this.measuring = true;
+                }
+
+                bufferTooLarge(bufferSize) {
+                  const bufferTooLarge = !this.measuring && bufferSize > this.maxBufferSize;
+                  if (bufferTooLarge)
+                    this.reset();
+                  return bufferTooLarge;
+                }
+              };
+
               this.arrays = [];
               this.array = [];
               this.arrayOffset = 0;
               this.port.onmessage = ({data}) => {
                 this.arrays.push(data);
-                // Prevent audio latency build up due to delayed packets etc.
-                if (this.arrays.length > 8) {
-                  console.debug("Reducing audio packets queue from " + this.arrays.length+" to 1");
+                this.bs.update(this.arrays.length);
+                // // Prevent audio latency build up due to delayed packets etc.
+                if (this.bs.bufferTooLarge(this.arrays.length)) {
+                  console.debug("Reducing audio packets queue from " + this.arrays.length + " to 1");
                   this.arrays = this.arrays.slice(this.arrays.length - 1);
                 }
               }
               this.emptyArray = new Float32Array(0);
             }
 
+            // Audio worklet processor function
             process(inputs, [[output]]) {
               if (this.array.length === 0 && this.arrays.length === 0)
                 return true;
