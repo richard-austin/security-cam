@@ -15,6 +15,7 @@ class AudioStream {
   muted = false;
   gainNode;
   track;
+  underlyingSink = {};
 
   constructor(sampleRate) {
     const ac = new AudioContext({sampleRate: sampleRate, latencyHint: "interactive"});
@@ -39,16 +40,25 @@ class AudioStream {
     let getGain = () => {
       return this.gain;
     }
-
     const dest = ac.createMediaStreamDestination();
     const [track] = dest.stream.getAudioTracks();
     const gainNode = this.gainNode;
-    track.writable = new WritableStream({
+    track.writable = new WritableStream(this.underlyingSink = {
       async start(controller) {
         this.emptyArrayMap = new Map();
 
         function worklet() {
           registerProcessor("audio-feeder", class Processor extends AudioWorkletProcessor {
+            static get parameterDescriptors() {
+              return [
+                {
+                  name: "autoLatencyControl",
+                  defaultValue: true,
+                  automationRate: "a-rate",
+                },
+              ];
+            }
+
             constructor() {
               super();
               // BufferStats class must be declared here as it is instantiated in the AudioContext
@@ -136,20 +146,24 @@ class AudioStream {
               this.arrays = [];
               this.array = [];
               this.arrayOffset = 0;
+              this.autoLatencyControl = true;
               this.port.onmessage = ({data}) => {
                 this.arrays.push(data);
-                this.bs.update(this.arrays.length);
-                // // Prevent audio latency build up due to delayed packets etc.
-                if (this.bs.bufferTooLarge(this.arrays.length)) {
-                  console.debug("Reducing audio packets queue from " + this.arrays.length + " to 1");
-                  this.arrays = this.arrays.slice(this.arrays.length - 1);
+                if (this.autoLatencyControl) {
+                  this.bs.update(this.arrays.length);
+                  // // Prevent audio latency build up due to delayed packets etc.
+                  if (this.bs.bufferTooLarge(this.arrays.length)) {
+                    console.debug("Reducing audio packets queue from " + this.arrays.length + " to 1");
+                    this.arrays = this.arrays.slice(this.arrays.length - 1);
+                  }
                 }
               }
               this.emptyArray = new Float32Array(0);
             }
 
             // Audio worklet processor function
-            process(inputs, [[output]]) {
+            process(inputs, [[output]], parameters) {
+              this.autoLatencyControl = parameters["autoLatencyControl"][0];
               if (this.array.length === 0 && this.arrays.length === 0)
                 return true;
               for (let i = 0; i < output.length; i++) {
@@ -224,5 +238,13 @@ class AudioStream {
 
   isMuted() {
     return this.muted;
+  }
+
+  setAutoLatencyControl(autoLatencyControl) {
+    const node = this.underlyingSink?.node;
+    const context = node.context;
+    if(node && context) {
+      node.parameters.get("autoLatencyControl").setValueAtTime(autoLatencyControl, context.currentTime);
+    }
   }
 }
