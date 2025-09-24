@@ -1,8 +1,10 @@
-<div class="audio-control">
+<div class="audio-control" [ngStyle]="audioLatencyLimiting === undefined ? {'margin-top': '30px'} : {}">
   <mat-card>
-    <div>
+    @if(audioLatencyLimiting !== undefined) {
+      <div>
         <mat-checkbox (change)="setLatencyLimiting($event)" [ngModel]="audioLatencyLimiting" labelPosition="after">Audio latency limiting</mat-checkbox>
-    </div>
+      </div>
+    }
     <div>
       <button mat-icon-button (click)="toggleMuteAudio()">
         <mat-icon>{{ mute ? 'volume_off' : 'volume_up' }}</mat-icon>

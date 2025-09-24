@@ -5,6 +5,7 @@ import {FormsModule} from "@angular/forms";
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
 import {MatCheckbox, MatCheckboxChange} from "@angular/material/checkbox";
+import {NgStyle} from "@angular/common";
 
 @Component({
   selector: 'app-audio-control',
@@ -15,7 +16,8 @@ import {MatCheckbox, MatCheckboxChange} from "@angular/material/checkbox";
     FormsModule,
     MatSliderThumb,
     MatIconButton,
-    MatCheckbox
+    MatCheckbox,
+    NgStyle
   ],
   templateUrl: './audio-control.component.html',
   styleUrl: './audio-control.component.scss'
@@ -26,7 +28,7 @@ class AudioControlComponent implements AfterViewInit {
   @Output() setAudioLatencyLimiting = new EventEmitter<boolean>();
   @Input() mute: boolean = false;
   @Input() level!: number;
-  @Input() audioLatencyLimiting: boolean = true;
+  @Input() audioLatencyLimiting!: boolean;
   lastLevel!: number;
 
   toggleMuteAudio() {
