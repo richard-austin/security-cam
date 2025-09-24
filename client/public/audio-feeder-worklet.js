@@ -27,7 +27,7 @@ class AudioStream {
       this.gainFactor = gainFactor;
     }
     let getGainFactor = () => {
-      return this.gainFactor
+      return this.gainFactor;
     };
 
     let setGain = (gain) => {
@@ -61,7 +61,7 @@ class AudioStream {
 
             constructor() {
               super();
-              // BufferStats class must be declared here as it is instantiated in the AudioContext
+              /* BufferStats class must be declared here as it is instantiated in the AudioContext */
               this.bs = new class BufferStats {
                 arraySize = 20;
                 statsArray = new ArrayBuffer(this.arraySize);
@@ -147,13 +147,20 @@ class AudioStream {
               this.array = [];
               this.arrayOffset = 0;
               this.autoLatencyControl = true;
+              let lastAutoLatencyControl = this.autoLatencyControl;
               this.port.onmessage = ({data}) => {
                 this.arrays.push(data);
+                if (this.autoLatencyControl && !lastAutoLatencyControl) {
+                  this.port.postMessage("Auto latency control enabled");
+                  this.bs.reset();
+                  this.arrays = this.arrays.slice(this.arrays.length - 1);
+                }
+                lastAutoLatencyControl = this.autoLatencyControl;
                 if (this.autoLatencyControl) {
                   this.bs.update(this.arrays.length);
-                  // // Prevent audio latency build up due to delayed packets etc.
+                  /* Prevent audio latency build up due to delayed packets etc. */
                   if (this.bs.bufferTooLarge(this.arrays.length)) {
-                    console.debug("Reducing audio packets queue from " + this.arrays.length + " to 1");
+                    this.port.postMessage("Reducing audio packets queue from " + this.arrays.length + " to 1");
                     this.arrays = this.arrays.slice(this.arrays.length - 1);
                   }
                 }
@@ -161,7 +168,7 @@ class AudioStream {
               this.emptyArray = new Float32Array(0);
             }
 
-            // Audio worklet processor function
+            /* Audio worklet processor function */
             process(inputs, [[output]], parameters) {
               this.autoLatencyControl = parameters["autoLatencyControl"][0];
               if (this.array.length === 0 && this.arrays.length === 0)
@@ -187,10 +194,10 @@ class AudioStream {
         const format = audioData.format;
         let array;
 
-        // Set up gain factor, for s16 format decoder output, it has to be attenuated by a huge factor!!
+        /* Set up gain factor, for s16 format decoder output, it has to be attenuated by a huge factor!! */
         if (getGainFactor() === 0) {
           setGainFactor(format.includes('s16') ? 0.00005 : 1);
-          setGain(getGain());  // Set to the previously saved gain
+          setGain(getGain());  /* Set to the previously saved gain */
         }
 
         if (this.emptyArrayMap[audioData.numberOfFrames * audioData.numberOfChannels] !== undefined) {
@@ -211,7 +218,7 @@ class AudioStream {
       }
     });
     this.track = track;
-    // this.audioFeed = new AudioFeeder(url, track)
+    /* this.audioFeed = new AudioFeeder(url, track) */
   }
 
   getTrack() {
@@ -242,9 +249,16 @@ class AudioStream {
 
   setAutoLatencyControl(autoLatencyControl) {
     const node = this.underlyingSink?.node;
-    const context = node.context;
-    if(node && context) {
+    const context = node?.context;
+    if (node && context) {
       node.parameters.get("autoLatencyControl").setValueAtTime(autoLatencyControl, context.currentTime);
+    }
+  }
+
+  getAudioLatencyControl() {
+    const node = this.underlyingSink?.node;
+    if (node) {
+      return node.parameters.get("autoLatencyControl").value === 1;
     }
   }
 }

@@ -11,17 +11,17 @@ import {Camera, Stream} from '../cameras/Camera';
 import {UtilsService} from '../shared/utils.service';
 import {ReportingComponent} from "../reporting/reporting.component";
 import {Subscription, timer} from "rxjs";
-import {MediaFeeder} from './MediaFeeder';
+import MediaFeeder from './MediaFeeder';
 import {AudioBackchannel} from './AudioBackchannel';
 import {VideoTransformations} from "./VideoTransformations";
 import {VideoSizing} from "./VideoSizing";
 import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {FormsModule} from "@angular/forms";
-import {AudioControlComponent} from "./audio-control/audio-control.component";
+import AudioControlComponent from "./audio-control/audio-control.component";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {NavComponent} from "../nav/nav.component";
-import {AudioLevel} from "./AudioLevel";
+import {AudioSettings} from "./AudioSettings";
 
 @Component({
     selector: 'app-video',
@@ -34,7 +34,7 @@ import {AudioLevel} from "./AudioLevel";
       transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
     ])
     ],
-    imports: [SharedModule, SharedAngularMaterialModule, FormsModule, AudioControlComponent]
+  imports: [SharedModule, SharedAngularMaterialModule, FormsModule, AudioControlComponent, AudioControlComponent]
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
@@ -99,24 +99,31 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleMuteAudio() {
     if (this.mediaFeeder) {
       this.mediaFeeder.mute(!this.mediaFeeder.isMuted);
-      const level = new AudioLevel(this.mediaFeeder.volume, this.mediaFeeder.isMuted);
-      NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
+      const settings = new AudioSettings(this.mediaFeeder.volume, this.mediaFeeder.isMuted, this.mediaFeeder.getAudioLatencyControl());
+      NavComponent.setCookie(this.camKey, JSON.stringify(settings), 600);
     }
   }
 
   mute(mute: boolean = true): void {
     if (this.mediaFeeder) {
       this.mediaFeeder.mute(mute);
-      const level = new AudioLevel(this.mediaFeeder.volume, mute);
-      NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
+      const settings = new AudioSettings(this.mediaFeeder.volume, mute, this.mediaFeeder.getAudioLatencyControl());
+      NavComponent.setCookie(this.camKey, JSON.stringify(settings), 600);
     }
   }
 
   setVolume(volume: number) {
     if(this.mediaFeeder) {
       this.mediaFeeder.gain =volume;
-      const level = new AudioLevel(volume, this.mediaFeeder.isMuted);
-      NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
+      const settings = new AudioSettings(volume, this.mediaFeeder.isMuted, this.mediaFeeder.getAudioLatencyControl());
+      NavComponent.setCookie(this.camKey, JSON.stringify(settings), 600);
+    }
+  }
+  audioLatencyLimiting(audioLatencyLimiting: boolean) {
+    if(this.mediaFeeder) {
+     this.mediaFeeder.setAutoLatencyControl(audioLatencyLimiting);
+     const settings = new AudioSettings(this.mediaFeeder.volume, this.mediaFeeder.isMuted, audioLatencyLimiting);
+     NavComponent.setCookie(this.camKey, JSON.stringify(settings), 600);
     }
   }
 
@@ -146,17 +153,18 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.camKey = (isMulti ? 'multi-' : '') + camKey;
   }
 
-  setInitialLevel(isMulti: boolean, level: number, muted: boolean) {
+  setInitialAudioSettings(isMulti: boolean, level: number, muted: boolean, audioLatencyLimiting: boolean) {
     this.getCamKey(isMulti);
-    let audioLevel: AudioLevel = new AudioLevel(level, muted);
+    let audioSettings: AudioSettings = new AudioSettings(level, muted, audioLatencyLimiting);
     if(this.camKey !== "") {
-      const strLevel = NavComponent.getCookie(this.camKey)
-      if(strLevel !== "") {
-        audioLevel = JSON.parse(strLevel);
+      const strSettings = NavComponent.getCookie(this.camKey)
+      if(strSettings !== "") {
+        audioSettings = JSON.parse(strSettings);
       }
     }
-    this.setVolume(audioLevel.level);
-    this.mute(audioLevel.mute);
+    this.setVolume(audioSettings.level !== undefined ? audioSettings.level : 0.4);
+    this.mute(audioSettings.mute !== undefined ? audioSettings.mute : false);
+    this.audioLatencyLimiting(audioSettings.audioLatencyLimiting !== undefined ? audioSettings.audioLatencyLimiting : true);
   }
 
   setSize(size: number, isRecording: boolean = false): void {

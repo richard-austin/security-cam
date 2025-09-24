@@ -127,7 +127,7 @@ span.duration-time {
   color: #858585;
 }
 
-.media-feed-stalled {
+.media-feed-stalled, .audio-latency-correction {
   > mat-icon {
     animation: flash 2000ms infinite;
   }
