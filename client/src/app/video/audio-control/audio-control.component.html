@@ -2,15 +2,22 @@
   <mat-card>
     @if(audioLatencyLimiting !== undefined) {
       <div>
-        <mat-checkbox (change)="setLatencyLimiting($event)" [ngModel]="audioLatencyLimiting" labelPosition="after">Audio latency limiting</mat-checkbox>
+        <mat-checkbox
+          matTooltip="{{!audioLatencyLimiting ? 'Check' : 'Uncheck'}} to {{!audioLatencyLimiting ? 'enable' : 'disable'}} audio latency limiting"
+          matTooltipClass="tooltip"
+          (change)="setLatencyLimiting($event)" [ngModel]="audioLatencyLimiting" labelPosition="after">Audio latency limiting</mat-checkbox>
       </div>
     }
     <div>
-      <button mat-icon-button (click)="toggleMuteAudio()">
+      <button mat-icon-button (click)="toggleMuteAudio()"
+               matTooltip="Click to {{mute ? 'unmute' : 'mute'}} audio"
+               matTooltipClass="tooltip">
         <mat-icon>{{ mute ? 'volume_off' : 'volume_up' }}</mat-icon>
       </button>
       <span></span>
       <mat-slider min="0" max="1" step="0.02" ngDefaultControl showTickMarks discrete [displayWith]="zeroTo100"
+                  matTooltip="{{!mute ? 'Set audio volume' : ''}}"
+                  matTooltipClass="tooltip"
                   [disabled]="mute" (change)="setVolume()" (click)="setVolume()">
         <input matSliderThumb [(ngModel)]="level">
       </mat-slider>

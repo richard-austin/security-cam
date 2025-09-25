@@ -75,6 +75,7 @@ class AudioStream {
                 measurementWindowSecs = 20;
                 measuring = true;
                 maxBufferSize = 20;
+                maxBufferSizeHardLimit = 15;
 
                 update(val) {
                   if (this.measuring) {
@@ -88,6 +89,12 @@ class AudioStream {
                     if (timeNow - this.startTime > this.measurementWindowSecs) {
                       if (this.fullArray) {
                         this.maxBufferSize = Math.round(this.average() + 2 + this.standardDeviation());
+                        /* Clamp maxBufferSize to maxBufferSizeHardLimit if greater than that value */
+                        this.maxBufferSize =
+                          this.maxBufferSize > this.maxBufferSizeHardLimit ?
+                          this.maxBufferSizeHardLimit :
+                          this.maxBufferSize;
+
                         this.startTime = timeNow;
                         this.measuring = false;
                         console.debug("maxBufferSize set to ", this.maxBufferSize);

@@ -6,6 +6,7 @@ import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
 import {MatCheckbox, MatCheckboxChange} from "@angular/material/checkbox";
 import {NgStyle} from "@angular/common";
+import {MatTooltip} from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-audio-control',
@@ -17,7 +18,8 @@ import {NgStyle} from "@angular/common";
     MatSliderThumb,
     MatIconButton,
     MatCheckbox,
-    NgStyle
+    NgStyle,
+    MatTooltip
   ],
   templateUrl: './audio-control.component.html',
   styleUrl: './audio-control.component.scss'
