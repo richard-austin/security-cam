@@ -30,7 +30,9 @@
             @if (stream && stream.audio && !mediaFeeder.noAudio) {
               <app-audio-control [mute]="mediaFeeder.isMuted"
                 (muteAudio)="toggleMuteAudio()" [level]="mediaFeeder.gain"
-                (setLevel)="setVolume($event.valueOf())">
+                (setLevel)="setVolume($event.valueOf())"
+                (setAudioLatencyLimiting)="audioLatencyLimiting($event.valueOf())"
+                [audioLatencyLimiting]="mediaFeeder.getAudioLatencyControl()">
               </app-audio-control>
             }
             <div>
@@ -39,6 +41,7 @@
         </div>
         @if (stream && stream.audio && !mediaFeeder.noAudio) {
           <label class="video-buttons"
+            [ngClass]="{'audio-latency-correction': mediaFeeder.audioLatencyOverrun}"
             [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (mediaFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
             matTooltipClass="video-buttons-tooltip">
             <mat-icon (click)="toggleShowAudioControls()">{{ mediaFeeder.isMuted ? 'volume_off' : 'volume_up' }}
@@ -55,8 +58,6 @@
               (click)="audioBackchannel.toggleAudioOut(mediaFeeder.camera, stream)">{{ audioBackchannel.audioToggle ? 'mic' : 'mic_off' }}
             </mat-icon>
           </label>
-        }
-        @if (mediaFeeder.backchannelAudioSupported) {
           <select [disabled]="utilsService.speakActive"
             [matTooltip]="audioBackchannel.audioInputSelectorTooltip()" matTooltipClass="video-buttons-tooltip"
             [(ngModel)]="audioBackchannel.selectedDeviceId" (change)="audioBackchannel.setAudioInput()">

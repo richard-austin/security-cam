@@ -19,7 +19,22 @@ so there can be more than one stream per camera.
 icon just below it.
 > 
 > If audio is enabled for the stream, a speaker icon will be shown which, by
-> clicking on it will show volume control an mute button to set the audio as required
+> clicking on it will show volume control, a mute button and latency chasing enable/disable checkbox to set the audio as required.
+>
+><img alt="Audio controls" src=README.images/audio-controls.png>
+>
+>* Click on the speaker button to mute/unmute the audio.
+>* Move the slider to set the volume level.
+>* Audio latency limiting is used to prevent the build up of latency in the audio stream
+>over a period of time. Check the checkbox to enable audio latency limiting, or if that 
+>causes any instability in the audio, uncheck it.
+>
+> Audio latency can build up because of network delay of audio packets. As the
+> audio packets have a finite duration, delayed packets can cause a queue
+> build up which will cause greater audio latency. The latency limiting works by calculating a suitable limit for the queue
+> length above which the queue will be cleared down to just the latest audio packet. This
+> process will result in the loss of a short part of the audio, as well as minimising
+> the audio latency.
 >
 > If two-way audio is enabled, a <img src="README.images/microphone-off-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
 > button and a device selector will also be below the video. Select the required audio input

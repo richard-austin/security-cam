@@ -6,6 +6,7 @@ import {catchError, map, tap} from "rxjs/operators";
 import {AudioEncoding, Camera, CameraParamSpec, Stream} from "./Camera";
 import {NativeDateAdapter} from '@angular/material/core';
 import {KeyValue} from "@angular/common";
+import {NavComponent} from "../nav/nav.component";
 
 
 /**
@@ -47,10 +48,9 @@ export class CustomDateAdapter extends NativeDateAdapter {
   }
 }
 
-export class OnvifCredentials
-{
-  userName: string='';
-  password: string='';
+export class OnvifCredentials {
+  userName: string = '';
+  password: string = '';
 }
 
 
@@ -68,11 +68,11 @@ export class CameraService {
   };
 
   readonly httpConsumeBlobOptions = {
-      headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-          'Authorization': 'my-auth-token',
-          'ResponseType': 'blob'
-      })
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'my-auth-token',
+      'ResponseType': 'blob'
+    })
   };
 
   readonly httpUploadOptions = {
@@ -84,8 +84,8 @@ export class CameraService {
   private cameras: Map<string, Camera> = new Map();
 
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
- private _publicKey!: Uint8Array;
-    private _numColumns: number = 2;
+  private _publicKey!: Uint8Array;
+  private _numColumns: number = 2;
 
   public readonly _cameraParamSpecs: CameraParamSpec[] =
     [new CameraParamSpec(
@@ -128,18 +128,23 @@ export class CameraService {
     0, 2, 5, 7, 10, 12, 15, 17, 20, 22, 25, 27, 30
   ]
 
-    // Number of columns (minus one) on the multi cam screen
-    get numColumns(): number {
-        return this._numColumns;
+  // Number of columns (minus one) on the multi cam screen
+  get numColumns(): number {
+    const numColumns = NavComponent.getCookie("multiCamColumns")
+    if (numColumns !== "") {
+      this._numColumns = Number(numColumns);
     }
+    return this._numColumns;
+  }
 
-    set numColumns(column: number) {
-        this._numColumns = column;
-    }
+  set numColumns(column: number) {
+    this._numColumns = column;
+    NavComponent.setCookie("multiCamColumns", column.toString(), 600);
+  }
 
-    get cameraParamSpecs() {
-        return this._cameraParamSpecs;
-    };
+  get cameraParamSpecs() {
+    return this._cameraParamSpecs;
+  };
 
   get audioEncodings() {
     return this._audioEncodings;
@@ -148,13 +153,15 @@ export class CameraService {
   get ftpRetriggerWindows() {
     return this._ftpRetriggerWindows;
   }
+
   get preambleTimeValues() {
     return this._preambleTimeValues;
   }
 
-  get publicKey() : Uint8Array {
+  get publicKey(): Uint8Array {
     return this._publicKey;
   }
+
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     this.loadCameras().subscribe((cams) => {
       this.cameras = cams;
@@ -190,13 +197,14 @@ export class CameraService {
 
   private static convertFailureReasonsToMap(failed: Object): Map<string, string> {
     const failures: Map<string, string> = new Map<string, string>();
-    for(let address in failed) {
+    for (let address in failed) {
       // @ts-ignore
       const failure = failed[address]
       failures.set(address, failure)
     }
     return failures;
   }
+
   /**
    * compareFn: Compare function for use with the keyvalue pipe. This compares string with numbers (such as stream9, stream10)
    *            and sorts the numeric parts numerically rather than alphabetically. This was added to fix a bug which
@@ -210,6 +218,7 @@ export class CameraService {
       sensitivity: 'base'
     });
   }
+
   /**
    * loadCameras: Get camera set up details from the server
    * @private
@@ -244,22 +253,28 @@ export class CameraService {
     );
   }
 
-  discover(): Observable<{cams: Map<string, Camera>, failed: Map<string, string>}> {
+  discover(): Observable<{ cams: Map<string, Camera>, failed: Map<string, string> }> {
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discover"), '', this.httpJSONOptions).pipe(
       map(result => {
-        return {cams: CameraService.convertCamsObjectToMap(result.cams), failed: CameraService.convertFailureReasonsToMap(result.failed)};
+        return {
+          cams: CameraService.convertCamsObjectToMap(result.cams),
+          failed: CameraService.convertFailureReasonsToMap(result.failed)
+        };
       })
     );
   }
 
-  discoverCameraDetails(onvifUrl: string, onvifUserName: string = "", onvifPassword: string = ""): Observable<{cam: Camera, failed: Map<string, string>}> {
+  discoverCameraDetails(onvifUrl: string, onvifUserName: string = "", onvifPassword: string = ""): Observable<{
+    cam: Camera,
+    failed: Map<string, string>
+  }> {
     let params: {} = {onvifUrl: onvifUrl, onvifUserName: onvifUserName, onvifPassword: onvifPassword}
     return this.http.post<any>(this._baseUrl.getLink("onvif", "discoverCameraDetails"), params, this.httpJSONOptions).pipe(
       map(result => {
         let map: Map<string, Camera> = CameraService.convertCamsObjectToMap(result.cams);
         let next = map.entries().next();
         if (map.size == 1 && next !== undefined && next.value !== undefined)
-          return {cam: next.value[1],  failed: CameraService.convertFailureReasonsToMap(result.failed)};
+          return {cam: next.value[1], failed: CameraService.convertFailureReasonsToMap(result.failed)};
         else
           return {cam: result.cam, failed: CameraService.convertFailureReasonsToMap(result.failed)}
       })
@@ -276,14 +291,17 @@ export class CameraService {
 
   getSnapshot(cam: Camera): Observable<HttpResponse<Blob>> {
     let params: {} = {url: cam.snapshotUri, cred: cam.cred}
-    return this.http.post(this._baseUrl.getLink("onvif", "getSnapshot"), params, {observe: "response", responseType: "blob"}).pipe(
+    return this.http.post(this._baseUrl.getLink("onvif", "getSnapshot"), params, {
+      observe: "response",
+      responseType: "blob"
+    }).pipe(
       tap(
       ),
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getPublicKey():void {
-    if(this._publicKey === undefined) {
+  getPublicKey(): void {
+    if (this._publicKey === undefined) {
       this.http.post<Uint8Array>(this._baseUrl.getLink("cam", "getPublicKey"), "", this.httpUploadOptions).pipe(
         tap((pk) => {
           this._publicKey = new Uint8Array(pk);
@@ -292,6 +310,7 @@ export class CameraService {
         .subscribe();
     }
   }
+
   setOnvifCredentials(creds: OnvifCredentials): Observable<any> {
     const msg = {onvifUserName: creds.userName, onvifPassword: creds.password};
     return this.http.post<any>(this._baseUrl.getLink("onvif", "setOnvifCredentials"), JSON.stringify(msg), this.httpJSONOptions).pipe(

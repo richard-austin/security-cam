@@ -17,10 +17,12 @@
     "target": "ES2022",
     "module": "es2020",
     "lib": [
+      "ES2020",
       "es2018",
       "dom"
     ],
-    "useDefineForClassFields": false
+    "useDefineForClassFields": true,
+    "isolatedModules": true
   },
   "angularCompilerOptions": {
     "enableIvy": true,

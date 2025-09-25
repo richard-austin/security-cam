@@ -40,6 +40,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   logoffSubscription!: StompSubscription;
   talkOffSubscription!: StompSubscription;
   transportWarningSubscription!: StompSubscription;
+  readonly enableAdHocDeviceHosting = false;
 
   constructor(public cameraSvc: CameraService, public utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog, private cpService: CloudProxyService) {
     this.cpService.getStatus().subscribe((status: boolean) => {

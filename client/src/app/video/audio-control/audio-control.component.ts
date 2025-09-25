@@ -4,6 +4,9 @@ import {MatSlider, MatSliderThumb} from "@angular/material/slider";
 import {FormsModule} from "@angular/forms";
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
+import {MatCheckbox, MatCheckboxChange} from "@angular/material/checkbox";
+import {NgStyle} from "@angular/common";
+import {MatTooltip} from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-audio-control',
@@ -13,16 +16,21 @@ import {MatIconButton} from "@angular/material/button";
     MatSlider,
     FormsModule,
     MatSliderThumb,
-    MatIconButton
+    MatIconButton,
+    MatCheckbox,
+    NgStyle,
+    MatTooltip
   ],
   templateUrl: './audio-control.component.html',
   styleUrl: './audio-control.component.scss'
 })
-export class AudioControlComponent implements AfterViewInit {
+class AudioControlComponent implements AfterViewInit {
   @Output() muteAudio = new EventEmitter<boolean>();
   @Output() setLevel = new EventEmitter<number>();
+  @Output() setAudioLatencyLimiting = new EventEmitter<boolean>();
   @Input() mute: boolean = false;
   @Input() level!: number;
+  @Input() audioLatencyLimiting!: boolean;
   lastLevel!: number;
 
   toggleMuteAudio() {
@@ -46,4 +54,11 @@ export class AudioControlComponent implements AfterViewInit {
   zeroTo100(value: number) {
     return `${Math.round(value * 100)}`;
   }
+
+  setLatencyLimiting($event: MatCheckboxChange) {
+    this.audioLatencyLimiting = $event.checked;
+    this.setAudioLatencyLimiting.emit($event.checked);
+  }
 }
+
+export default AudioControlComponent

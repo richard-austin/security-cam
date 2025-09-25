@@ -13,7 +13,39 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam:server [bootRun]" uuid="d6bddf0d-f2d6-4c51-98a3-82b3281e1756">
+    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam:server [bootRun]" uuid="df362804-e367-4feb-a050-f7915a860903">
+      <driver-ref>h2.unified</driver-ref>
+      <synchronize>true</synchronize>
+      <imported>true</imported>
+      <jdbc-driver>org.h2.Driver</jdbc-driver>
+      <jdbc-url>jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam:server [bootRun]" uuid="110c16f5-e1b9-4958-9957-8644a2d7d389">
+      <driver-ref>h2.unified</driver-ref>
+      <synchronize>true</synchronize>
+      <imported>true</imported>
+      <jdbc-driver>org.h2.Driver</jdbc-driver>
+      <jdbc-url>jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam:server [bootRun]" uuid="f9aaa8dc-9050-4a0e-a676-680a7097acac">
+      <driver-ref>h2.unified</driver-ref>
+      <synchronize>true</synchronize>
+      <imported>true</imported>
+      <jdbc-driver>org.h2.Driver</jdbc-driver>
+      <jdbc-url>jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam:server [bootRun]" uuid="3aeb0dc5-aeae-4cf4-9891-5f3903423ff6">
+      <driver-ref>h2.unified</driver-ref>
+      <synchronize>true</synchronize>
+      <imported>true</imported>
+      <jdbc-driver>org.h2.Driver</jdbc-driver>
+      <jdbc-url>jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam:server [bootRun]" uuid="34447d9a-167f-456e-bfb0-32fc88208612">
       <driver-ref>h2.unified</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>

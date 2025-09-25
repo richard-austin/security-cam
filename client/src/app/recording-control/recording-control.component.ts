@@ -15,9 +15,9 @@ import {
 } from '@angular/material/datepicker';
 import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
-import {AudioControlComponent} from "../video/audio-control/audio-control.component";
+import AudioControlComponent from "../video/audio-control/audio-control.component";
 import {animate, state, style, transition, trigger} from "@angular/animations";
-import {AudioLevel} from "../video/AudioLevel";
+import {AudioSettings} from "../video/AudioSettings";
 import {NavComponent} from "../nav/nav.component";
 
 declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
@@ -184,7 +184,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
           (error) => {
             this.reporting.errorMessage = error;
           });
-        this.setInitialLevel(0.4, false)
+        this.setInitialLevel(0.4, false, true)
       }
     } else {
       this.showInvalidInput(false);
@@ -369,7 +369,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     if (this.video.video) {
       this.video.video.muted = muted;
       this.volume = this.video.mediaFeeder.isMuted ? 0 : this.video.video.volume;
-      const level = new AudioLevel(this.video.video.volume, muted);
+      const audioLatencyControl = this.video?.mediaFeeder?.audioStream?.getAudioLatencyControl();
+      const level = new AudioSettings(this.video.video.volume, muted, audioLatencyControl);
       NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
     }
   }
@@ -385,7 +386,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     if (this?.video?.video) {
       this.volume = volume;
       this.video.video.volume = this.volume;
-      const level = new AudioLevel(volume, this.isMuted());
+      const audioLatencyControl = this.video?.mediaFeeder?.audioStream?.getAudioLatencyControl();
+      const level = new AudioSettings(volume, this.isMuted(), audioLatencyControl);
       NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
     }
   }
@@ -406,9 +408,9 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.camKey = "rec-" + camKey;
   }
 
-  setInitialLevel(level: number, muted: boolean) {
+  setInitialLevel(level: number, muted: boolean, audioLatencyControl: boolean) {
     this.getCamKey();
-    let audioLevel: AudioLevel = new AudioLevel(level, muted);
+    let audioLevel: AudioSettings = new AudioSettings(level, muted, audioLatencyControl);
     if (this.camKey !== "") {
       const strLevel = NavComponent.getCookie(this.camKey)
       if (strLevel !== "") {
