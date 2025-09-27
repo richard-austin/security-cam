@@ -75,7 +75,9 @@ class AudioStream {
                 measurementWindowSecs = 20;
                 measuring = true;
                 maxBufferSize = 20;
+                workingBufferSize = 5;
                 maxBufferSizeHardLimit = 15;
+                workingBufferSizeHardLimit = 8;
 
                 update(val) {
                   if (this.measuring) {
@@ -88,16 +90,22 @@ class AudioStream {
                     const timeNow = currentTime;
                     if (timeNow - this.startTime > this.measurementWindowSecs) {
                       if (this.fullArray) {
-                        this.maxBufferSize = Math.round(this.average() + 2 + this.standardDeviation());
+                        this.maxBufferSize = Math.round(this.average() + 3 + this.standardDeviation());
+                        this.workingBufferSize = Math.round(this.average() - this.standardDeviation());
+                        if (this.workingBufferSize < 1)
+                          this.workingBufferSize = 1;
+                        else if (this.workingBufferSize > this.workingBufferSizeHardLimit)
+                          this.workingBufferSize = this.workingBufferSizeHardLimit;
+
                         /* Clamp maxBufferSize to maxBufferSizeHardLimit if greater than that value */
                         this.maxBufferSize =
                           this.maxBufferSize > this.maxBufferSizeHardLimit ?
-                          this.maxBufferSizeHardLimit :
-                          this.maxBufferSize;
+                            this.maxBufferSizeHardLimit :
+                            this.maxBufferSize;
 
                         this.startTime = timeNow;
                         this.measuring = false;
-                        console.debug("maxBufferSize set to ", this.maxBufferSize);
+                        console.debug("maxBufferSize set to ", this.maxBufferSize + " workingBufferSize set to " + this.workingBufferSize);
                       } else {
                         console.error("Moving average array not full, cannot calculate bufferSize");
                       }
@@ -167,8 +175,9 @@ class AudioStream {
                   this.bs.update(this.arrays.length);
                   /* Prevent audio latency build up due to delayed packets etc. */
                   if (this.bs.bufferTooLarge(this.arrays.length)) {
-                    this.port.postMessage("Reducing audio packets queue from " + this.arrays.length + " to 1");
-                    this.arrays = this.arrays.slice(this.arrays.length - 1);
+                    this.port.postMessage("Reducing audio packets queue from " + this.arrays.length + " to " + this.bs.workingBufferSize);
+                    while (this.arrays.length > this.bs.workingBufferSize)
+                      this.arrays.shift();
                   }
                 }
               }
