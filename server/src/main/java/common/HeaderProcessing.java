@@ -34,19 +34,19 @@ public class HeaderProcessing {
             // Check that the double CRLF is present
             List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf, 0, byteBuffer.limit());
             if (!indexList.isEmpty()) {
-                final int endOfHeadersIdx = indexList.get(0) + crlfcrlf.length - 1;
+                final int endOfHeadersIdx = indexList.getFirst() + crlfcrlf.length - 1;
                 // OK so look for the header key
                 indexList = bs.searchBytes(byteBuffer.array(), key.getBytes(StandardCharsets.UTF_8), 0, endOfHeadersIdx);
                 if (!indexList.isEmpty()) {
-                    final int idx1 = indexList.get(0);
+                    final int idx1 = indexList.getFirst();
                     // Find the CRLF at the end of this header
                     indexList = bs.searchBytes(byteBuffer.array(), crlf, idx1, endOfHeadersIdx);
                     if (!indexList.isEmpty()) {
-                        final int endIdx = indexList.get(0);
+                        final int endIdx = indexList.getFirst();
                         //Find the start of the header value
                         indexList = bs.searchBytes(byteBuffer.array(), colonSpace, idx1, endIdx);
                         if (indexList.size() == 1) {
-                            final int startIdx = indexList.get(0) + colonSpace.length;
+                            final int startIdx = indexList.getFirst() + colonSpace.length;
                             retVal = new String(byteBuffer.array(), startIdx, endIdx - startIdx);
                         }
                     }
@@ -70,7 +70,7 @@ public class HeaderProcessing {
             // Find the first CRLF in the source buffer
             List<Integer> indexList = bs.searchBytes(srcClone.array(), crlf, 0, srcClone.limit());
             if (!indexList.isEmpty()) {
-                final int idx1 = indexList.get(0) + crlf.length;
+                final int idx1 = indexList.getFirst() + crlf.length;
                 // Copy up to just after the first crlf to the dest buffer
                 dest.put(srcClone.array(), 0, idx1);
                 // Append the new header to follow this
@@ -99,10 +99,10 @@ public class HeaderProcessing {
         // Find the first CRLF in the source buffer
         List<Integer> indexList = bs.searchBytes(src.array(), key.getBytes(), 0, src.limit());
         if (!indexList.isEmpty()) {
-            final int startIdx = indexList.get(0);
+            final int startIdx = indexList.getFirst();
             indexList = bs.searchBytes(src.array(), crlf, startIdx, src.limit());
             if (!indexList.isEmpty()) {
-                final int endIdx = indexList.get(0) + crlf.length;
+                final int endIdx = indexList.getFirst() + crlf.length;
                 final ByteBuffer dest = getBuffer(false);
                 dest.put(src.array(), 0, startIdx);
                 dest.put(src.array(), endIdx, src.limit() - endIdx);
@@ -140,7 +140,7 @@ public class HeaderProcessing {
         BinarySearcher bs = new BinarySearcher();
         List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf, 0, byteBuffer.limit());
         if (!indexList.isEmpty()) {
-            final int endOfHeadersIdx = indexList.get(0) + crlfcrlf.length - 1;
+            final int endOfHeadersIdx = indexList.getFirst() + crlfcrlf.length - 1;
             // Find the first crlf
             indexList = bs.searchBytes(byteBuffer.array(), crlf, 0, endOfHeadersIdx);
             if (!indexList.isEmpty()) {
@@ -160,11 +160,11 @@ public class HeaderProcessing {
         BinarySearcher bs = new BinarySearcher();
         List<Integer> indexList = bs.searchBytes(byteBuffer.array(), crlfcrlf, 0, byteBuffer.limit());
         if (!indexList.isEmpty()) {
-            final int endOfHeadersIdx = indexList.get(0) + crlfcrlf.length - 1;
+            final int endOfHeadersIdx = indexList.getFirst() + crlfcrlf.length - 1;
             // Find the first crlf
             indexList = bs.searchBytes(byteBuffer.array(), crlf, 0, endOfHeadersIdx);
             if (!indexList.isEmpty()) {
-                String firstLine = new String(byteBuffer.array(), 0, indexList.get(0));
+                String firstLine = new String(byteBuffer.array(), 0, indexList.getFirst());
                 if (firstLine.contains("RTSP/"))
                     rtspHeader = firstLine;
             }
