@@ -3,23 +3,28 @@ import {CameraService} from '../cameras/camera.service';
 import {ActivatedRoute} from '@angular/router';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {interval, Subscription} from 'rxjs';
-import {SafeResourceUrl} from '@angular/platform-browser';
 import {environment} from '../../environments/environment';
 import {UtilsService} from "../shared/utils.service";
+import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
+import {MatButton} from "@angular/material/button";
 
 
 @Component({
   selector: 'app-camera-admin-page-hosting',
   templateUrl: './camera-admin-page-hosting.component.html',
   imports: [
-    ReportingComponent
+    ReportingComponent,
+    MatCard,
+    MatCardTitle,
+    MatCardContent,
+    MatButton
   ],
   styleUrls: ['./camera-admin-page-hosting.component.scss']
 })
 export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, OnDestroy {
   address!: string;
+  cameraName!: string;
   intervalSubscription: Subscription | undefined;
-  hostServiceUrl!: SafeResourceUrl;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   private webAdminPort: number = 80;
   private initialised: boolean = false;
@@ -34,6 +39,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
       let cams = cameraSvc.getCameras();
       cams.forEach((cam) => {
         if (cam.address === address) {
+          this.cameraName = cam.name;
           this.address = address;
           this.webAdminPort = 80;   // TODO: Probably need to set the port in the camera info
         }
@@ -51,6 +57,10 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
         this.ngOnInit();
       }
     });
+  }
+
+  closeAdminPage() {
+    window.location.href = '#';
   }
 
   makeId(length: number) {
@@ -96,4 +106,5 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
     if (this.tabHandle)
       this.tabHandle.close();
   }
+
 }

@@ -53,7 +53,7 @@
       <jdbc-url>jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam:server [bootRun]" uuid="e0e49aa9-109b-4053-9a34-4a97aa13aa35">
+    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam:server [bootRun]" uuid="8eafd419-f23f-4686-b30e-bd7266086953">
       <driver-ref>h2.unified</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>

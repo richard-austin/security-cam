@@ -1,0 +1,20 @@
+.admin-hosting-container {
+  margin-top: 200px;
+  display: inline-flex;
+  width: 100%;
+  > mat-card {
+    margin-left: auto;
+    margin-right: auto;
+    > mat-card-content {
+      margin-top: 20px;
+      width: fit-content;
+      color: white;
+   }
+    > button {
+      margin-left: auto;
+      margin-right: auto;
+      width: fit-content;
+      margin-top: 20px;
+    }
+  }
+}

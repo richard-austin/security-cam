@@ -70,7 +70,8 @@ class RemoveAccessTokenTask extends TimerTask {
     @Override
     public void run() {
         synchronized (this) {
-            accessDetails.timer.purge();
+            if(accessDetails.timer != null)
+                accessDetails.timer.purge();
             accessDetails.closeClients();
             accessDetails.activeClients.clear();
             accessDetails.cameraHost = null;

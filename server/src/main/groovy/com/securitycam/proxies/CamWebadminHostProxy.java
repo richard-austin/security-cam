@@ -54,12 +54,12 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                         client = s.accept();
                         handleClientRequest(client);
                     } catch (Exception ex) {
-                        logService.getCam().error(ex.getClass().getName() + " in runServer: " + ex.getMessage());
+                        logService.getCam().error("{} in runServer: {}", ex.getClass().getName(), ex.getMessage());
                         break;
                     }
                 }
             } catch (Exception ex) {
-                logService.getCam().error(ex.getClass().getName() + " in runServer (exiting thread): " + ex.getMessage());
+                logService.getCam().error("{} in runServer (exiting thread): {}", ex.getClass().getName(), ex.getMessage());
             }
         });
     }
@@ -91,11 +91,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             AccessDetails ad = null;
                             while (client.read(request) != -1) {
                                 request.flip();
-
-                                String x = getHTTPHeader(request);
-                                logService.getCam().info(x);
-
-
                                 if (++pass == 1) {
                                     accessDetails.set(getAccessDetails());
                                     ad = accessDetails.get();
@@ -114,7 +109,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                     } else
                                         logService.getCam().error("No accessToken found for request");
                                 }
-                                logService.getCam().trace("pass = " + pass);
+                                logService.getCam().trace("pass = {}", pass);
                                 int bytesWritten = 0;
                                 long serverPass = 0;
 
@@ -143,7 +138,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                     if (serverPass == 1) {
                                         synchronized (lock) {
                                             lock.notify();
-                                            logService.getCam().info("notified!!!");
                                         }
                                     }
                                     if (val == -1)
@@ -166,7 +160,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                     try {
                         synchronized (lock) {
                             lock.wait();
-                            logService.getCam().info("Request written to server");
                         }
                     } catch (Exception ignore) {
                     }
@@ -174,13 +167,9 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                     // Read the server's responses
                     // and pass them back to the client.
                     try {
-                        logService.getCam().info("handleClientRequest: Ready to read device response");
-                        var pass = 0;
+                        logService.getCam().trace("handleClientRequest: Ready to read device response");
                         while (server.isOpen() && server.read(reply) != -1) {
-                            logService.getCam().info("Server response: {}", ++pass);
                             reply.flip();
-                            // String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
-                            // logService.getCam().trace(x);
                             if (!client.isOpen() || reply.limit() <= 0)
                                 break;
                             client.write(reply);
@@ -188,7 +177,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                         }
                         server.close();
                         client.close();
-                        logService.getCam().info("\"handleClientRequest: Out of device response loop");
+                        logService.getCam().trace("\"handleClientRequest: Out of device response loop");
                     } catch (ClosedChannelException ignore) {
                         server.close();
                         client.close();
