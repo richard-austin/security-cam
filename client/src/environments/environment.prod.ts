@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   baseUrl: '/',
-  camAdminHostPort: 446
+  camAdminHostPort: 83
 };

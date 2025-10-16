@@ -1,8 +1,8 @@
 package com.securitycam.services
 
-import com.securitycam.commands.CloseClientsCommand
-import com.securitycam.commands.GetAccessTokenCommand
-import com.securitycam.commands.ResetTimerCommand
+
+import com.securitycam.commands.GetHostingAccessCommand
+
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.proxies.CamWebadminHostProxy
@@ -27,31 +27,27 @@ class CameraAdminPageHostingService {
         proxy.runServer(port)
     }
 
-    def getAccessToken(GetAccessTokenCommand cmd) {
+    def getHostingAccess(GetHostingAccessCommand cmd) {
         final ObjectCommandResponse response = new ObjectCommandResponse()
 
         try {
-            UUID uuid = UUID.randomUUID()
-            proxy.addAccessToken(cmd, uuid.toString())
-            Map<String, String> map = new HashMap<>()
-            map.put('accessToken', uuid.toString())
-            response.responseObject = map
-        }
+            proxy.enableAccess(cmd)
+         }
         catch(Exception ex)
         {
             response.status= PassFail.FAIL
-            response.error = ex.getClass().getName()+" in getAccessToken: "+ex.getMessage()
+            response.error = ex.getClass().getName()+" in getHostingAccess: "+ex.getMessage()
             logService.cam.error(response.error)
         }
         return response
     }
 
-    def resetTimer(ResetTimerCommand cmd) {
+    def resetTimer() {
         final ObjectCommandResponse response = new ObjectCommandResponse()
 
         try {
-            if(!proxy.resetTimer(cmd))
-                throw new Exception("No such accessToken "+cmd.accessToken)
+            if(!proxy.resetTimer())
+                throw new Exception("Error in ResetTimer")
         }
         catch(Exception ex)
         {
@@ -62,17 +58,17 @@ class CameraAdminPageHostingService {
         return response
     }
 
-    def closeClients(CloseClientsCommand cmd) {
+    def closeClient() {
         final ObjectCommandResponse response = new ObjectCommandResponse()
 
         try {
-            if(!proxy.closeClientConnections(cmd.accessToken))
-                throw new Exception("No such accessToken "+cmd.accessToken)
+            if(!proxy.closeClientConnection())
+                throw new Exception("Error closing client connection")
         }
         catch(Exception ex)
         {
             response.status= PassFail.FAIL
-            response.error = ex.getClass().getName()+" in closeClients: "+ex.getMessage()
+            response.error = ex.getClass().getName()+" in closeClient: "+ex.getMessage()
             logService.cam.error(response.error)
         }
         return response

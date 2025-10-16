@@ -18,17 +18,15 @@ import {UtilsService} from "../shared/utils.service";
 })
 export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, OnDestroy {
   address!: string;
-  accessToken!: string;
   intervalSubscription: Subscription | undefined;
   hostServiceUrl!: SafeResourceUrl;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   private webAdminPort: number = 80;
   private initialised: boolean = false;
 
-  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, utils: UtilsService, private domSanitizer: DomSanitizer) {
+  constructor(private route: ActivatedRoute, private cameraSvc: CameraService, utils: UtilsService) {
     this.route.paramMap.subscribe((paramMap) => {
-      if(this.accessToken !== undefined)
-        cameraSvc.closeClients(this.accessToken).subscribe();
+      cameraSvc.closeClient().subscribe();
       let address: string = paramMap.get('camera') as string;
       address = atob(address);
       // Verify that the address is either for one of the cameras or ad hoc devices
@@ -53,15 +51,25 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
       }
     });
   }
+  makeId(length: number) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
 
   ngOnInit(): void {
     if (this.address !== undefined) {
-      this.cameraSvc.getAccessToken(this.address, this.webAdminPort).subscribe((result) => {
-          this.accessToken = result.accessToken;
-          this.hostServiceUrl = this.domSanitizer.bypassSecurityTrustResourceUrl(window.location.protocol + '//' + window.location.hostname + ':' + environment.camAdminHostPort + '/?accessToken=' + this.accessToken);
+      this.cameraSvc.getHostingAccess(this.address, this.webAdminPort).subscribe(() => {
+         // this.hostServiceUrl = this.domSanitizer.bypassSecurityTrustResourceUrl('http://' + window.location.hostname + ':' + environment.camAdminHostPort + '/?randomId=' + this.makeId(12));
+          window.open('http://' + window.location.hostname + ':' + environment.camAdminHostPort + '/?randomId=' + this.makeId(12), '_blank')?.focus();
           this.intervalSubscription?.unsubscribe();
           this.intervalSubscription = interval(10000).subscribe(() => {
-            this.cameraSvc.resetTimer(this.accessToken).subscribe(() => {
+            this.cameraSvc.resetTimer().subscribe(() => {
               },
               error => {
                 this.reporting.errorMessage = error;
@@ -80,7 +88,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
   }
 
   ngOnDestroy(): void {
-    this.cameraSvc.closeClients(this.accessToken).subscribe();
+    this.cameraSvc.closeClient().subscribe();
     this.intervalSubscription?.unsubscribe();
   }
 }
