@@ -181,9 +181,9 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             reply.flip();
                             // String x = "\nReply: " + new String(reply.array(), 0, reply.limit(), StandardCharsets.UTF_8);
                             // logService.getCam().trace(x);
-                            if (client.isOpen() && reply.limit() > 0) {
-                                client.write(reply);
-                            }
+                            if (!client.isOpen() || reply.limit() <= 0)
+                                break;
+                            client.write(reply);
                             reply.clear();
                         }
                         server.close();
