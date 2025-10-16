@@ -77,7 +77,7 @@ class CamController {
         } else {
             ObjectCommandResponse response = cameraAdminPageHostingService.getHostingAccess(cmd)
             if (response.status != PassFail.PASS)
-                throw new NVRRestMethodException(response.error, "cam/getAccessToken")
+                throw new NVRRestMethodException(response.error, "cam/getHostingAccess")
             else
                 return response.responseObject
         }

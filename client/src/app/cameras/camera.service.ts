@@ -318,10 +318,10 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  getHostingAccess(cameraHost: string, port: number): Observable<{ accessToken: string }> {
-    let params: {} = {host: cameraHost, port: port}
+  getHostingAccess(cameraHost: string, port: number): Observable<{ nvrIPAddress: string }> {
+    let params: {} = {host: cameraHost, port: port};
     return this.http.post<{
-      accessToken: string
+      nvrIPAddress: string
     }>(this._baseUrl.getLink("cam", "getHostingAccess"), params, this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }

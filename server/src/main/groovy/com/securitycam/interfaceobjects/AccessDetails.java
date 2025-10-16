@@ -52,6 +52,11 @@ public class AccessDetails {
         timer = new Timer();
         timer.schedule(new RemoveAccessTokenTask(this), maxTime);
     }
+
+    public void purgeTimer() {
+        timer.purge();
+        timer = null;
+    }
 }
 
 

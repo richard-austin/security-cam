@@ -227,10 +227,15 @@ public class CamWebadminHostProxy extends HeaderProcessing {
         return accessDetails;
     }
 
-    public void enableAccess(IGetHostingAccessCommand cmd) {
-        AccessDetails ad = new AccessDetails(cmd.getHost(), cmd.getPort(), AccessDetails.eAuthType.basic);
-        accessDetails = ad;
-        ad.setTimer();
+    public boolean enableAccess(IGetHostingAccessCommand cmd) {
+        var retVal = false;
+        if(accessDetails == null || accessDetails.cameraHost == null) {
+            AccessDetails ad = new AccessDetails(cmd.getHost(), cmd.getPort(), AccessDetails.eAuthType.basic);
+            accessDetails = ad;
+            ad.setTimer();
+            retVal = true;
+        }
+        return retVal;
     }
 
     /**
@@ -249,8 +254,11 @@ public class CamWebadminHostProxy extends HeaderProcessing {
 
     public boolean closeClientConnection() {
         boolean retVal = true;
-        if (accessDetails != null)
+        if (accessDetails != null) {
             accessDetails.closeClients();
+            accessDetails.purgeTimer();
+            accessDetails = null;
+        }
         else
             retVal = false;
 

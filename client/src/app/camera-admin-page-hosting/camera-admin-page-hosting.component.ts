@@ -57,21 +57,19 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
+    for (let i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
   }
 
-
   ngOnInit(): void {
     if (this.address !== undefined) {
-      this.cameraSvc.getHostingAccess(this.address, this.webAdminPort).subscribe(() => {
-          // this.hostServiceUrl = this.domSanitizer.bypassSecurityTrustResourceUrl('http://' + window.location.hostname + ':' + environment.camAdminHostPort + '/?randomId=' + this.makeId(12));
+      this.cameraSvc.getHostingAccess(this.address, this.webAdminPort).subscribe((response: {nvrIPAddress: string}) => {
           if (this.tabHandle)
             this.tabHandle.close();
-
-          this.tabHandle = window.open('http://' + window.location.hostname + ':' + environment.camAdminHostPort + '/?randomId=' + this.makeId(12), '_blank');
+          // Add the randomID to prevennt caching of the first page which causes problems when switching between devices
+          this.tabHandle = window.open('http://' + response.nvrIPAddress + ':' + environment.camAdminHostPort + '/?randomId=' + this.makeId(12), '_blank');
           this.intervalSubscription?.unsubscribe();
           this.intervalSubscription = interval(10000).subscribe(() => {
             this.cameraSvc.resetTimer().subscribe(() => {

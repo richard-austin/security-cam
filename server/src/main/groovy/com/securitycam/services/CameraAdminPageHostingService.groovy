@@ -17,6 +17,7 @@ class CameraAdminPageHostingService {
     LogService logService
     @Autowired
     CamService camService
+
   //  SocketConfig config
     int port = 8446
     CamWebadminHostProxy proxy
@@ -28,10 +29,21 @@ class CameraAdminPageHostingService {
     }
 
     def getHostingAccess(GetHostingAccessCommand cmd) {
-        final ObjectCommandResponse response = new ObjectCommandResponse()
+        ObjectCommandResponse response = new ObjectCommandResponse()
 
         try {
-            proxy.enableAccess(cmd)
+            if(!proxy.enableAccess(cmd))
+                throw new Exception("Web admin hosting is already in use")
+            // Get the NVR LAN address to connect to for admin hosting (through the VPN if accessing remotely)
+            String addresses = UtilsService.executeLinuxCommand("hostname", "-I")
+            String[] addressArray = addresses.split(" ")
+            for(a in addressArray)
+                if(a.contains(".")) {// Ignore ipv6 addresses
+                    response.responseObject = ["nvrIPAddress": a]
+                    break
+                }
+            if(response.responseObject == null)
+                throw new Exception("Could not find a valid IP V4 address for the NVR")
          }
         catch(Exception ex)
         {
