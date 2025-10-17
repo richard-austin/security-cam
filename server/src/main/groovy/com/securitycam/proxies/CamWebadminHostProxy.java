@@ -14,8 +14,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Base64;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,7 +28,8 @@ public class CamWebadminHostProxy extends HeaderProcessing {
     ILogService logService;
     CamService camService;
     AccessDetails accessDetails;
-    final ExecutorService processRequestThread = Executors.newCachedThreadPool();
+    //private transient final ExecutorService processRequestThread= new ThreadPoolExecutor(3, 10,10, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+    final ExecutorService processRequestThread = Executors.newFixedThreadPool(40);
 
     public CamWebadminHostProxy(ILogService logService, CamService camService) {
         super(logService);
@@ -63,7 +63,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
             }
         });
     }
-
     private void handleClientRequest(SocketChannel client) {
         processRequestThread.submit(() -> {
             try {
@@ -146,8 +145,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                 }
                                 request.clear();
                             }
-                            server.close();
-                            //client.close();
                             logService.getCam().trace("handleClientRequest: Out of client request loop");
                         } catch (IOException ignore) {
                         } catch (Exception ex) {
