@@ -18,7 +18,7 @@ class CameraAdminPageHostingService {
     @Autowired
     CamService camService
 
-  //  SocketConfig config
+    //  SocketConfig config
     int port = 8446
     CamWebadminHostProxy proxy
 
@@ -32,23 +32,22 @@ class CameraAdminPageHostingService {
         ObjectCommandResponse response = new ObjectCommandResponse()
 
         try {
-            if(!proxy.enableAccess(cmd))
+            if (!proxy.enableAccess(cmd))
                 throw new Exception("Web admin hosting is already in use")
             // Get the NVR LAN address to connect to for admin hosting (through the VPN if accessing remotely)
             String addresses = UtilsService.executeLinuxCommand("hostname", "-I")
             String[] addressArray = addresses.split(" ")
-            for(a in addressArray)
-                if(a.contains(".")) {// Ignore ipv6 addresses
+            for (a in addressArray)
+                if (a.contains(".")) {// Ignore ipv6 addresses
                     response.responseObject = ["nvrIPAddress": a]
                     break
                 }
-            if(response.responseObject == null)
+            if (response.responseObject == null)
                 throw new Exception("Could not find a valid IP V4 address for the NVR")
-         }
-        catch(Exception ex)
-        {
-            response.status= PassFail.FAIL
-            response.error = ex.getClass().getName()+" in getHostingAccess: "+ex.getMessage()
+        }
+        catch (Exception ex) {
+            response.status = PassFail.FAIL
+            response.error = ex.getClass().getName() + " in getHostingAccess: " + ex.getMessage()
             logService.cam.error(response.error)
         }
         return response
@@ -58,13 +57,12 @@ class CameraAdminPageHostingService {
         final ObjectCommandResponse response = new ObjectCommandResponse()
 
         try {
-            if(!proxy.resetTimer())
+            if (!proxy.resetTimer())
                 throw new Exception("Error in ResetTimer")
         }
-        catch(Exception ex)
-        {
-            response.status= PassFail.FAIL
-            response.error = ex.getClass().getName()+" in resetTimer: "+ex.getMessage()
+        catch (Exception ex) {
+            response.status = PassFail.FAIL
+            response.error = ex.getClass().getName() + " in resetTimer: " + ex.getMessage()
             logService.cam.error(response.error)
         }
         return response
@@ -74,13 +72,11 @@ class CameraAdminPageHostingService {
         final ObjectCommandResponse response = new ObjectCommandResponse()
 
         try {
-            if(!proxy.closeClientConnection())
-                throw new Exception("Error closing client connection")
+            proxy.closeClientConnection()
         }
-        catch(Exception ex)
-        {
-            response.status= PassFail.FAIL
-            response.error = ex.getClass().getName()+" in closeClient: "+ex.getMessage()
+        catch (Exception ex) {
+            response.status = PassFail.FAIL
+            response.error = ex.getClass().getName() + " in closeClient: " + ex.getMessage()
             logService.cam.error(response.error)
         }
         return response

@@ -173,20 +173,17 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             client.write(reply);
                             reply.clear();
                         }
-                        server.close();
-                        client.close();
+                        close(client, server);
                         logService.getCam().trace("\"handleClientRequest: Out of device response loop");
                     } catch (ClosedChannelException ignore) {
-                        server.close();
-                        client.close();
+                        close(client, server);
                     } catch (IOException e) {
-                        server.close();
-                        client.close();
+                        close(client, server);
                         logService.getCam().error("{} in handleClientRequest 1: {}", e.getClass().getName(), e.getMessage());
                     }
                     // The server closed its connection to us, so we close our
                     // connection to our client.
-                    client.close();
+                    close(client, null);
                 } catch (Exception ex) {
                     logService.getCam().error("{} in handleClientRequest (inner) when opening socket channel: {}", ex.getClass().getName(), ex.getMessage());
                 }
@@ -197,6 +194,19 @@ public class CamWebadminHostProxy extends HeaderProcessing {
             }
         } catch (IOException e) {
             logService.getCam().error("IOException in handleClientRequest finally block: {}", e.getMessage());
+        }
+    }
+
+    private void close(SocketChannel client, SocketChannel server) {
+        try {
+            if (server != null && server.isOpen()) {
+                server.close();
+            }
+            if (client != null && client.isOpen()) {
+                client.close();
+            }
+        } catch (IOException e) {
+            logService.getCam().error("{} in close: {}", e.getClass().getName(), e.getMessage());
         }
     }
 
@@ -235,15 +245,11 @@ public class CamWebadminHostProxy extends HeaderProcessing {
         return retVal;
     }
 
-    public boolean closeClientConnection() {
-        boolean retVal = true;
+    public void closeClientConnection() {
         if (accessDetails != null) {
             accessDetails.closeClients();
             accessDetails.purgeTimer();
             accessDetails = null;
-        } else
-            retVal = false;
-
-        return retVal;
+        }
     }
 }
