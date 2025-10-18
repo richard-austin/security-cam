@@ -108,7 +108,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                     } else
                                         logService.getCam().error("No accessToken found for request");
                                 }
-                                logService.getCam().trace("pass = {}", pass);
+                                logService.getCam().trace("Client read pass = {} read size = {}", pass, request.limit());
                                 int bytesWritten = 0;
                                 long serverPass = 0;
 
@@ -130,7 +130,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                             }
                                         }
                                     }
-                                    logService.getCam().trace("serverPass = {}", serverPass);
+                                    logService.getCam().trace("serverPass = {} bytes to write = {}", serverPass, request.limit());
                                     // String xyz = "\nRequest: " + new String(request.array(), 0, request.limit(), StandardCharsets.UTF_8);
                                     // logService.getCam().trace(xyz);
                                     int val = server.write(request);
