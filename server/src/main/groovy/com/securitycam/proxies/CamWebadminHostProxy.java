@@ -28,8 +28,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
     ILogService logService;
     CamService camService;
     AccessDetails accessDetails;
-    //private transient final ExecutorService processRequestThread= new ThreadPoolExecutor(3, 10,10, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
-    final ExecutorService processRequestThread = Executors.newFixedThreadPool(40);
 
     public CamWebadminHostProxy(ILogService logService, CamService camService) {
         super(logService);
@@ -52,7 +50,8 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                     try {
                         // Wait for a connection on the local port
                         client = s.accept();
-                        handleClientRequest(client);
+                        Thread thread = new Thread(() -> handleClientRequest(client));
+                        thread.start();
                     } catch (Exception ex) {
                         logService.getCam().error("{} in runServer: {}", ex.getClass().getName(), ex.getMessage());
                         break;
@@ -63,8 +62,9 @@ public class CamWebadminHostProxy extends HeaderProcessing {
             }
         });
     }
+
     private void handleClientRequest(SocketChannel client) {
-        processRequestThread.submit(() -> {
+        try (client) {
             try {
                 ByteBuffer reply = getBuffer(false);
                 final Object lock = new Object();
@@ -74,13 +74,13 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                 try {
                     SocketChannel server = SocketChannel.open();
                     server.socket().setReceiveBufferSize(BUFFER_SIZE);
-                    //server.configureBlocking(true);
+                    server.configureBlocking(true);
                     final AtomicReference<AccessDetails> accessDetails = new AtomicReference<>();
                     final AtomicReference<ByteBuffer> updatedReq = new AtomicReference<>();
                     final AtomicInteger camType = new AtomicInteger();
                     // a thread to read the client's requests and pass them
                     // to the server. A separate thread for asynchronous.
-                    processRequestThread.submit(() -> {
+                    Thread thread = new Thread(() -> {
                         ByteBuffer request = getBuffer(false);
                         try {
                             long pass = 0;
@@ -153,6 +153,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                             recycle(request);
                         }
                     });
+                    thread.start();
 
                     try {
                         synchronized (lock) {
@@ -193,14 +194,10 @@ public class CamWebadminHostProxy extends HeaderProcessing {
 
             } catch (Exception ex) {
                 logService.getCam().error("{} in handleClientRequest (outer) when opening socket channel: {}", ex.getClass().getName(), ex.getMessage());
-            } finally {
-                try {
-                    client.close();
-                } catch (IOException e) {
-                    logService.getCam().error("IOException in handleClientRequest finally block: {}", e.getMessage());
-                }
             }
-        });
+        } catch (IOException e) {
+            logService.getCam().error("IOException in handleClientRequest finally block: {}", e.getMessage());
+        }
     }
 
     /**
@@ -215,7 +212,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
 
     public boolean enableAccess(IGetHostingAccessCommand cmd) {
         var retVal = false;
-        if(accessDetails == null || accessDetails.cameraHost == null) {
+        if (accessDetails == null || accessDetails.cameraHost == null) {
             AccessDetails ad = new AccessDetails(cmd.getHost(), cmd.getPort(), AccessDetails.eAuthType.basic);
             accessDetails = ad;
             ad.setTimer();
@@ -244,8 +241,7 @@ public class CamWebadminHostProxy extends HeaderProcessing {
             accessDetails.closeClients();
             accessDetails.purgeTimer();
             accessDetails = null;
-        }
-        else
+        } else
             retVal = false;
 
         return retVal;
