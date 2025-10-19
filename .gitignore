@@ -4,3 +4,4 @@
 /onvif-ws-client/build/
 /onvif-java/build/
 
+/.idea/dataSources.xml

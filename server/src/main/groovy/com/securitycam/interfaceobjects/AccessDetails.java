@@ -14,24 +14,24 @@ public class AccessDetails {
     public void closeClients() {
         activeClients.forEach((client) -> {
             try {
-                if(client.isConnected()) {
+                if (client.isConnected()) {
                     client.shutdownInput();
                     client.shutdownOutput();
                     if (client.isOpen())
                         client.close();
                 }
-           }
-            catch(Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         });
         activeClients.clear();
     }
 
     public enum eAuthType {basic, other}
+
     public String cameraHost;
     public int cameraPort;
     eAuthType authType;
     final long maxTime = 36000;
-    boolean hasCookie;
 
     List<SocketChannel> activeClients;
 
@@ -40,54 +40,43 @@ public class AccessDetails {
         this.cameraPort = cameraPort;
         this.authType = authType;
         timer = new Timer();
-        hasCookie = false;
         activeClients = new ArrayList<>();
     }
 
-    private String accessToken;
-    Map<String, AccessDetails> map;
-
-    public void setTimer(String accessToken, Map<String, AccessDetails> map) {
-        this.accessToken = accessToken;
-        this.map = map;
-        timer.schedule(new RemoveAccessTokenTask(accessToken, map), maxTime);
+    public void setTimer() {
+        timer.schedule(new RemoveAccessTokenTask(this), maxTime);
     }
 
     public void resetTimer() {
         timer.cancel();
         timer = new Timer();
-        timer.schedule(new RemoveAccessTokenTask(accessToken, map), maxTime);
+        timer.schedule(new RemoveAccessTokenTask(this), maxTime);
     }
 
-    public void setHasCookie() {
-        hasCookie = true;
-    }
-
-    public boolean getHasCookie() {
-        return hasCookie;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
+    public void purgeTimer() {
+        timer.purge();
+        timer = null;
     }
 }
 
 
 class RemoveAccessTokenTask extends TimerTask {
-    final String accessToken;
-    final Map<String, AccessDetails> map;
-    RemoveAccessTokenTask(String accessToken, Map<String, AccessDetails> map) {
-        this.accessToken = accessToken;
-        this.map = map;
+    AccessDetails accessDetails;
+
+    RemoveAccessTokenTask(final AccessDetails accessDetails) {
+        this.accessDetails = accessDetails;
     }
+
     @Override
     public void run() {
-        synchronized (map) {
-
-            AccessDetails ad = map.get(accessToken);
-            ad.timer.purge();
-
-            map.remove(accessToken);
+        synchronized (this) {
+            if(accessDetails.timer != null)
+                accessDetails.timer.purge();
+            accessDetails.closeClients();
+            accessDetails.activeClients.clear();
+            accessDetails.cameraHost = null;
+            accessDetails.cameraPort = 0;
+            accessDetails.authType = AccessDetails.eAuthType.other;
         }
     }
 }

@@ -1,8 +1,8 @@
 package com.securitycam.controllers
 
 import com.securitycam.commands.CloseClientsCommand
-import com.securitycam.commands.GetAccessTokenCommand
-import com.securitycam.commands.ResetTimerCommand
+import com.securitycam.commands.GetHostingAccessCommand
+
 import com.securitycam.enums.PassFail
 import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.ObjectCommandResponse
@@ -11,7 +11,7 @@ import com.securitycam.services.CameraAdminPageHostingService
 import com.securitycam.services.LogService
 import com.securitycam.validators.BadRequestResult
 import com.securitycam.validators.GeneralValidator
-import com.securitycam.validators.GetAccessTokenCommandValidator
+import com.securitycam.validators.GetHostingAccessCommandValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -57,27 +57,27 @@ class CamController {
     }
 
     /**
-     * getAccessToken: Get an access token for a camera web admin page via the camera admin page hosting server.
+     * getHostingAccess: Get an access token for a camera web admin page via the camera admin page hosting server.
      * @param cmd : Command object containing the camera host address and port.
      * @return The access token to use as the accessToken parameter in the initial get request to the hosting server,
      *          or error code.
      */
     @Secured(['ROLE_CLIENT'])
-    @PostMapping("/getAccessToken")
-    def getAccessToken(@RequestBody GetAccessTokenCommand cmd) {
-        def gv = new GeneralValidator(cmd, new GetAccessTokenCommandValidator())
+    @PostMapping("/getHostingAccess")
+    def getHostingAccess(@RequestBody GetHostingAccessCommand cmd) {
+        def gv = new GeneralValidator(cmd, new GetHostingAccessCommandValidator())
         def result = gv.validate()
         if (result.hasErrors()) {
-            logService.cam.error "/cam/getAccessToken: Validation error: " + result.toString()
+            logService.cam.error "/cam/getHostingAccess: Validation error: " + result.toString()
             BadRequestResult retVal = new BadRequestResult(result)
             return ResponseEntity
                     .badRequest()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(retVal)
         } else {
-            ObjectCommandResponse response = cameraAdminPageHostingService.getAccessToken(cmd)
+            ObjectCommandResponse response = cameraAdminPageHostingService.getHostingAccess(cmd)
             if (response.status != PassFail.PASS)
-                throw new NVRRestMethodException(response.error, "cam/getAccessToken")
+                throw new NVRRestMethodException(response.error, "cam/getHostingAccess")
             else
                 return response.responseObject
         }
@@ -85,8 +85,8 @@ class CamController {
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @PostMapping("/resetTimer")
-    def resetTimer(@Valid @RequestBody ResetTimerCommand cmd) {
-            ObjectCommandResponse response = cameraAdminPageHostingService.resetTimer(cmd)
+    def resetTimer() {
+            ObjectCommandResponse response = cameraAdminPageHostingService.resetTimer()
             if (response.status != PassFail.PASS)
                 throw new NVRRestMethodException(response.error, "cam/resetTimer")
             else
@@ -94,9 +94,9 @@ class CamController {
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
-    @PostMapping("/closeClients")
-    def closeClients(@Valid @RequestBody CloseClientsCommand cmd) {
-            ObjectCommandResponse response = cameraAdminPageHostingService.closeClients(cmd)
+    @PostMapping("/closeClient")
+    def closeClient() {
+            ObjectCommandResponse response = cameraAdminPageHostingService.closeClient()
             if (response.status != PassFail.PASS)
                 throw new NVRRestMethodException(response.error, "cam/closeClients")
             else

@@ -1,19 +1,19 @@
 package com.securitycam.validators
 
-import com.securitycam.commands.CameraParamsCommand
-import com.securitycam.commands.GetAccessTokenCommand
+
+import com.securitycam.commands.GetHostingAccessCommand
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 
-class GetAccessTokenCommandValidator implements Validator {
+class GetHostingAccessCommandValidator implements Validator {
     @Override
     boolean supports(Class<?> clazz) {
-        return GetAccessTokenCommand.class == clazz
+        return GetHostingAccessCommand.class == clazz
     }
 
     @Override
     void validate(Object target, Errors errors) {
-        if (target instanceof GetAccessTokenCommand) {
+        if (target instanceof GetHostingAccessCommand) {
 
             if (target.host == null)
                 errors.rejectValue("host", "=host must not be null")

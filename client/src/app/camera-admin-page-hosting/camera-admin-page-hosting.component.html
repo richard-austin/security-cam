@@ -1,4 +1,10 @@
 <app-reporting></app-reporting>
-@if (hostServiceUrl != undefined) {
-  <iframe width="99.8%" height="95%" [src]="hostServiceUrl"></iframe>
-}
+<div class="admin-hosting-container">
+  <mat-card>
+    <mat-card-title>Hosting {{cameraName}} web admin in a separate tab</mat-card-title>
+    <mat-card-content>
+      Keep this page open while using the admin page and close it when done
+    </mat-card-content>
+    <button mat-button color="cancel" (click)="closeAdminPage()">Close</button>
+  </mat-card>
+</div>
