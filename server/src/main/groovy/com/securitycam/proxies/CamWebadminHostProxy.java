@@ -220,15 +220,19 @@ public class CamWebadminHostProxy extends HeaderProcessing {
         return accessDetails;
     }
 
+    final Object accessDetailsLock = new Object();
+
     public boolean enableAccess(IGetHostingAccessCommand cmd) {
-        var retVal = false;
-        if (accessDetails == null || accessDetails.cameraHost == null) {
-            AccessDetails ad = new AccessDetails(cmd.getHost(), cmd.getPort(), AccessDetails.eAuthType.basic);
-            accessDetails = ad;
-            ad.setTimer();
-            retVal = true;
+        synchronized (accessDetailsLock) {
+            var retVal = false;
+            if (accessDetails == null || accessDetails.cameraHost == null) {
+                AccessDetails ad = new AccessDetails(cmd.getHost(), cmd.getPort(), AccessDetails.eAuthType.basic);
+                accessDetails = ad;
+                ad.setTimer();
+                retVal = true;
+            }
+            return retVal;
         }
-        return retVal;
     }
 
     /**
@@ -237,19 +241,23 @@ public class CamWebadminHostProxy extends HeaderProcessing {
      *
      */
     public boolean resetTimer() {
-        boolean retVal = true;
-        if (accessDetails != null) {
-            accessDetails.resetTimer();
-        } else
-            retVal = false;
-        return retVal;
+        synchronized (accessDetailsLock) {
+            boolean retVal = true;
+            if (accessDetails != null) {
+                accessDetails.resetTimer();
+            } else
+                retVal = false;
+            return retVal;
+        }
     }
 
     public void closeClientConnection() {
-        if (accessDetails != null) {
-            accessDetails.closeClients();
-            accessDetails.purgeTimer();
-            accessDetails = null;
+        synchronized (accessDetailsLock) {
+            if (accessDetails != null) {
+                accessDetails.closeClients();
+                accessDetails.purgeTimer();
+                accessDetails = null;
+            }
         }
     }
 }

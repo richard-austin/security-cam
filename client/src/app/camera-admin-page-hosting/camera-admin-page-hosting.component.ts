@@ -100,11 +100,10 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
   ngAfterViewInit(): void {
   }
 
-  ngOnDestroy(): void {
-    this.cameraSvc.closeClient().subscribe();
+  async ngOnDestroy(): Promise<void> {
+    await this.cameraSvc.closeClient().toPromise();
     this.intervalSubscription?.unsubscribe();
     if (this.tabHandle)
       this.tabHandle.close();
   }
-
 }
