@@ -226,27 +226,9 @@ public class CamWebadminHostProxy extends HeaderProcessing {
         synchronized (accessDetailsLock) {
             var retVal = false;
             if (accessDetails == null || accessDetails.cameraHost == null) {
-                AccessDetails ad = new AccessDetails(cmd.getHost(), cmd.getPort(), AccessDetails.eAuthType.basic);
-                accessDetails = ad;
-                ad.setTimer();
+                accessDetails = new AccessDetails(cmd.getHost(), cmd.getPort(), AccessDetails.eAuthType.basic);
                 retVal = true;
             }
-            return retVal;
-        }
-    }
-
-    /**
-     * restTimer: Is called periodically by the client to prevent the access token from timing out. When the client navigates
-     * away or is closed, the access token will be removed by the timer.
-     *
-     */
-    public boolean resetTimer() {
-        synchronized (accessDetailsLock) {
-            boolean retVal = true;
-            if (accessDetails != null) {
-                accessDetails.resetTimer();
-            } else
-                retVal = false;
             return retVal;
         }
     }
@@ -255,7 +237,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
         synchronized (accessDetailsLock) {
             if (accessDetails != null) {
                 accessDetails.closeClients();
-                accessDetails.purgeTimer();
                 accessDetails = null;
             }
         }

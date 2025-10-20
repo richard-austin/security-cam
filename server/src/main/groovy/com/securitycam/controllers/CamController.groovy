@@ -1,6 +1,5 @@
 package com.securitycam.controllers
 
-import com.securitycam.commands.CloseClientsCommand
 import com.securitycam.commands.GetHostingAccessCommand
 
 import com.securitycam.enums.PassFail
@@ -81,16 +80,6 @@ class CamController {
             else
                 return response.responseObject
         }
-    }
-
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
-    @PostMapping("/resetTimer")
-    def resetTimer() {
-            ObjectCommandResponse response = cameraAdminPageHostingService.resetTimer()
-            if (response.status != PassFail.PASS)
-                throw new NVRRestMethodException(response.error, "cam/resetTimer")
-            else
-                return response.responseObject
     }
 
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])

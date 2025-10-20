@@ -326,11 +326,6 @@ export class CameraService {
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
 
-  resetTimer(): Observable<void> {
-    return this.http.post<void>(this._baseUrl.getLink("cam", "resetTimer"), "", this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err)));
-  }
-
   closeClient(): Observable<void> {
     return this.http.post<void>(this._baseUrl.getLink("cam", "closeClient"), "", this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));

@@ -2,7 +2,6 @@ import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/c
 import {CameraService} from '../cameras/camera.service';
 import {ActivatedRoute} from '@angular/router';
 import {ReportingComponent} from '../reporting/reporting.component';
-import {interval, Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {UtilsService} from "../shared/utils.service";
 import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
@@ -24,7 +23,6 @@ import {MatButton} from "@angular/material/button";
 export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, OnDestroy {
   address!: string;
   cameraName!: string;
-  intervalSubscription: Subscription | undefined;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   private webAdminPort: number = 80;
   private initialised: boolean = false;
@@ -57,7 +55,12 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
         this.ngOnInit();
       }
     });
-  }
+
+    window.onbeforeunload = () => {
+      cameraSvc.closeClient().subscribe();
+      this.tabHandle?.close();
+    };
+   }
 
   closeAdminPage() {
     window.location.href = '#';
@@ -80,15 +83,6 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
             this.tabHandle.close();
           // Add the randomID to prevennt caching of the first page which causes problems when switching between devices
           this.tabHandle = window.open('http://' + response.nvrIPAddress + ':' + environment.camAdminHostPort + '/?randomId=' + this.makeId(12), '_blank');
-          this.intervalSubscription?.unsubscribe();
-          this.intervalSubscription = interval(10000).subscribe(() => {
-            this.cameraSvc.resetTimer().subscribe(() => {
-              },
-              error => {
-                this.reporting.errorMessage = error;
-                this.intervalSubscription?.unsubscribe();
-              });
-          });
         },
         reason => {
           this.reporting.errorMessage = reason;
@@ -100,9 +94,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
   ngAfterViewInit(): void {
   }
 
-  async ngOnDestroy(): Promise<void> {
-    await this.cameraSvc.closeClient().toPromise();
-    this.intervalSubscription?.unsubscribe();
+  ngOnDestroy(): void {
     if (this.tabHandle)
       this.tabHandle.close();
   }
