@@ -9,7 +9,7 @@
           <td *matCellDef="let device; let i = index" mat-cell>
             <button (click)="toggleDeviceDeleteConfirm(i)"
                     [disabled]="getDeviceDeleteDisabledState(device)"
-                    mat-icon-button matTooltip="Delete {{device.name}}" matTooltipClass="tooltip">
+                    mat-icon-button matTooltip="Delete {{device.name}}" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip">
               <mat-icon class="trash-can">delete</mat-icon>
             </button>
             <div class="popup-dialogue">
@@ -35,6 +35,7 @@
               <input (keyup)="updateField(i, 'name')"
                      [formControl]="getControl(i, 'name')" autocomplete="off" matInput
                      matTooltip="The name for this device which will appear on the ad hoc device selector menu."
+                     [matTooltipShowDelay]="UtilsService.toolTipDelay"
                      matTooltipClass="tooltip" maxlength="25" placeholder="Device Name" type="text">
               @let nameCtrl = getControl(i, 'name');
               @if (nameCtrl.hasError('required')) {
@@ -54,6 +55,7 @@
               <input (keyup)="updateField(i, 'ipAddress')"
                      [formControl]="getControl(i, 'ipAddress')" autocomplete="off" matInput
                      matTooltip="The IP address of this device for web access"
+                     [matTooltipShowDelay]="UtilsService.toolTipDelay"
                      matTooltipClass="tooltip" maxlength="15" placeholder="IP Address" type="text">
               @let ipAddrCtl = getControl(i, 'ipAddress');
               @if (ipAddrCtl.hasError('required')) {
@@ -73,6 +75,7 @@
               <input (keyup)="updateField(i, 'ipPort')"
                      [formControl]="getControl(i, 'ipPort')" autocomplete="off" matInput
                      matTooltip="The IP port of this device for web access (usually 80)"
+                     [matTooltipShowDelay]="UtilsService.toolTipDelay"
                      matTooltipClass="tooltip" maxlength="5" placeholder="IP Port" type="number">
               @let ipPortCtrl = getControl(i, 'ipPort');
               @if (ipPortCtrl.hasError('required')) {
@@ -91,11 +94,13 @@
             <button (click)="addDevice()"
                     [disabled]="anyInvalid() "
                     mat-icon-button matTooltip="Add another device, and enter the details."
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip">
               <mat-icon>add</mat-icon>
             </button>
 
             <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current ad hoc devices configuration in this editor'}}"
+                  [matTooltipShowDelay]="UtilsService.toolTipDelay"
                   matTooltipClass="tooltip">
               @if (!confirmSave && !confirmRestore ) {
                 <button (click)="confirmSave=true"

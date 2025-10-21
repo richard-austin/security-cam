@@ -8,7 +8,8 @@ can be found in the LICENSE file at http://angular.io/license -->
 <mat-card [ngClass]="{'grey-out': checkDeactivate}">
   <mat-card-title>Configuration
     <span [matTooltip]="!haveOnvifCredentials ? 'Onvif credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used For Onvif authentication. This is used for overall Onvif discovery.'"
-      matTooltipClass="tooltip">
+      matTooltipClass="tooltip"
+      [matTooltipShowDelay]="UtilsService.toolTipDelay">
       <button (click)="toggleOnvifPasswordDialogue()" [disabled]="isGuest" class="change-password-button"
         mat-icon-button>
         <mat-icon [ngClass]="{'no-credentials': !haveOnvifCredentials}">security</mat-icon>
@@ -69,12 +70,14 @@ can be found in the LICENSE file at http://angular.io/license -->
               <button (click)="moveDown(cam)"
                 [disabled]="lastElement(cam) || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
                 [matTooltip]="lastElement(cam) ? '' : 'Click to move '+cam.value.name+' down 1 step'"
+                [matTooltipShowDelay]="UtilsService.toolTipDelay"
                 class="sort-button-icon" mat-icon-button matTooltipClass="tooltip">
                 <mat-icon class="sort-button-icon">arrow_downward</mat-icon>
               </button>
               <button (click)="moveUp(cam)"
                 [disabled]="cam.key=='camera1' || anyInvalid() || confirmNew || confirmNewLookup || isGuest"
                 [matTooltip]="cam.key=='camera1' ? '' : 'Click to move '+cam.value.name+' up 1 step'"
+                [matTooltipShowDelay]="UtilsService.toolTipDelay"
                 class="sort-button-icon" mat-icon-button matTooltipClass="tooltip">
                 <mat-icon class="sort-button-icon">arrow_upward</mat-icon>
               </button>
@@ -87,6 +90,7 @@ can be found in the LICENSE file at http://angular.io/license -->
           <td (mousedown)="getSnapshot(cam)" *matCellDef="let cam"
             [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''" class="snapshot" mat-cell
             matTooltip="The logical id of the camera (sequential numbering).{{cam.value.snapshotUri != '' ? ' Click to show a snapshot from this camera.' : ''}}"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             {{ cam.key }}
             @if (snapShotKey==cam.key && cam.value.snapshotUri !== '') {
@@ -110,6 +114,7 @@ can be found in the LICENSE file at http://angular.io/license -->
           <td *matCellDef="let cam" [style]="cam.value.snapshotUri != '' ? '  cursor: pointer;' : ''"
             class="snapshot" mat-cell>
             <span [matTooltip]="cam.value.cred == '' ? 'Camera credentials are not set, please enter a username and password. If your cameras do not use authentication for web admin or snapshots, this will not be required' : isGuest ? 'Disabled for guest' : 'Set or change the user name and password used to access the cameras. All cameras should have the same user name and password.'"
+                  [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               <button (click)="togglePasswordDialogue(cam.key)" [disabled]="isGuest"
                 class="change-password-button2" mat-icon-button>
@@ -134,7 +139,7 @@ can be found in the LICENSE file at http://angular.io/license -->
           <td *matCellDef="let cam" mat-cell>
             <button (click)="toggleCameraDeleteConfirm(cam.key)"
               [disabled]="getCameraDeleteDisabledState(cam)"
-              mat-icon-button matTooltip="Delete {{cam.key}}" matTooltipClass="tooltip">
+              mat-icon-button matTooltip="Delete {{cam.key}}" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip">
               <mat-icon class="trash-can">delete</mat-icon>
             </button>
             <div class="popup-dialogue">
@@ -157,6 +162,7 @@ can be found in the LICENSE file at http://angular.io/license -->
           <td (click)="toggle(cam)" *matCellDef="let cam" mat-cell>
             <button mat-icon-button
               matTooltip="{{expandedElement == cam.value ? 'Hide' : 'Show'}} the streams for {{cam.key}}"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               <mat-icon [@openClose]="expandedElement == cam.value ? 'open' : 'closed'" class="expand">
                 arrow_right
@@ -173,6 +179,7 @@ can be found in the LICENSE file at http://angular.io/license -->
               <input (change)="updateCamField(i, 'name')" [formControl]="getCamControl(i, 'name')"
                 autocomplete="off" matInput
                 matTooltip="Enter the name to identify {{cam.key}} in the menus"
+                [matTooltipShowDelay]="UtilsService.toolTipDelay"
                 matTooltipClass="tooltip" maxlength="25" placeholder="Camera Name" type="text">
               @if (getCamControl(i, 'name').invalid) {
                 <mat-error>Camera name is required</mat-error>
@@ -186,6 +193,7 @@ can be found in the LICENSE file at http://angular.io/license -->
           <td *matCellDef="let cam; let i = dataIndex" mat-cell>
             <mat-form-field [style.width.px]="185" appearance="outline"
               matTooltip="Select the camera type to enable control of image text and infra red status from the web application. Set to 'Not Listed' to disable this feature, or if the camera type is not listed."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               <mat-label>Camera type (if listed)</mat-label>
               <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
@@ -208,6 +216,7 @@ can be found in the LICENSE file at http://angular.io/license -->
             <button mat-icon-button color="red"
               (click)="toggleRecordingSetupDialogue(cam.key)"
               matTooltip="Set up recording trigger for {{cam.key}}"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               <mat-icon class="voicemail">voicemail</mat-icon>
             </button>
@@ -236,6 +245,7 @@ can be found in the LICENSE file at http://angular.io/license -->
             <input (change)="updateCamField(i, 'address')" [formControl]="getCamControl(i, 'address')"
               autocomplete="off" matInput
               matTooltip="The IP address of {{cam.key}}. This is required if the ControlURI is set to anything other than 'None'."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip" maxlength="15" placeholder="Camera IP Address" type="text">
             @if (getCamControl(i, 'address').invalid) {
               <mat-error>Enter a valid IP address</mat-error>
@@ -252,6 +262,7 @@ can be found in the LICENSE file at http://angular.io/license -->
             <input (change)="updateCamField(i, 'snapshotUri')"
               [formControl]="getCamControl(i, 'snapshotUri')" autocomplete="off" matInput
               matTooltip="The URI for snapshots for {{cam.key}}. This is used to view the image from the camera by clicking on the camera ID in the Configuration editor."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip" maxlength="150" placeholder="Snapshot URL" type="text">
             @if (getCamControl(i, 'snapshotUri').invalid) {
               <mat-error>Enter the URI</mat-error>
@@ -266,6 +277,7 @@ can be found in the LICENSE file at http://angular.io/license -->
           <mat-checkbox (change)="updateCamField(i, 'useRtspAuth')"
             [formControl]="getCamControl(i, 'useRtspAuth')"
             matTooltip="{{'Use authentication on the RTSP streams on '+ cam.key + ' If checked. The username and password for all cameras are entered on the NVR configuration page by clicking the button to the right of the page title.'}}"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
           </mat-checkbox>
           @if (getCamControl(i, 'useRtspAuth').invalid) {
@@ -279,6 +291,7 @@ can be found in the LICENSE file at http://angular.io/license -->
         <td *matCellDef="let cam; let i = dataIndex" mat-cell>
           <mat-form-field [style.width.px]="75" appearance="outline"
             matTooltip="Select the transport protocol to be used between {{cam.key}} and the NVR"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             <!--Call setUpTableFormControls after  updateCamField on changed selection to ensure the address field
             enabled state is updated.-->
@@ -300,6 +313,7 @@ can be found in the LICENSE file at http://angular.io/license -->
         <td *matCellDef="let cam; let i = dataIndex" mat-cell>
           <mat-icon (click)="toggleBackChannelAudio(cam.value)"
             [matTooltip]="cam.value.backchannelAudioSupported ? 'Two way audio enabled for this device (please ensure the device supports 2 way audio)' : 'Two way audio is not enabled for this device'"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             [ngClass]="{'backchannel': cam.value.backchannelAudioSupported, 'no-backchannel': !cam.value.backchannelAudioSupported}"
             matTooltipClass="tooltip">
             {{ cam.value.backchannelAudioSupported ? "check_circle" : "cancel" }}
@@ -314,6 +328,7 @@ can be found in the LICENSE file at http://angular.io/license -->
             [disableControl]="setPTZControlsCheckboxDisabledState(i)"
             [formControl]="getCamControl(i, 'ptzControls')"
             matTooltip="The Pan Tilt and Zoom controls for {{cam.key}} will be present on the live stream view if checked."
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
           </mat-checkbox>
         </td>
@@ -328,6 +343,7 @@ can be found in the LICENSE file at http://angular.io/license -->
               [formControl]="getCamControl(i, 'onvifHost')"
               autocomplete="off" matInput
               matTooltip="The IP address and port (if not 80) for {{cam.key}} ONVIF operations. This is required if PTZ control is enabled for {{cam.key}}."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip" maxlength="22" placeholder="ONVIF Host" type="text">
             @if (getCamControl(i, 'onvifHost').invalid) {
               <mat-error>Enter the ONVIF base address
@@ -348,6 +364,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                 <th *matHeaderCellDef mat-header-cell>Stream ID</th>
                 <td *matCellDef="let stream" [width]="60" class="stream-key" mat-cell
                   matTooltip="The logical id of the stream (sequential numbering)"
+                  [matTooltipShowDelay]="UtilsService.toolTipDelay"
                   matTooltipClass="tooltip">
                   {{ stream.key }}
                 </td>
@@ -356,6 +373,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                 <th *matHeaderCellDef mat-header-cell>Delete</th>
                 <td *matCellDef="let stream" [width]="50" mat-cell>
                   <span [matTooltip]="streamDeleteButtonToolTip(cam, stream.key)"
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip">
                     <button (click)="toggleStreamDeleteConfirm({cam: cam.key, stream:stream.key})"
                       [disabled]="getStreamDeleteDisabledState(cam, stream.key)"
@@ -385,6 +403,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                       [formControl]="getStreamControl(camIndex, streamIndex, 'descr')"
                       autocomplete="off" matInput
                       matTooltip="Set the description for {{stream.key}}. This is usually relating to the resolution of the stream."
+                      [matTooltipShowDelay]="UtilsService.toolTipDelay"
                       matTooltipClass="tooltip" maxlength="20"
                       placeholder="Stream Description"
                       type="text">
@@ -411,6 +430,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                   <mat-checkbox (change)="setAudioInEnabledStatus($event, stream.value)"
                     [checked]="stream.value.audio" [color]="'primary'"
                     matTooltip="If checked, audio will be enabled on {{stream.key}} for {{cam.key}}."
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip">
                   </mat-checkbox>
                   @if (getStreamControl(camIndex, streamIndex, 'audio').hasError('required')) {
@@ -425,6 +445,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                 <td *matCellDef="let stream; let streamIndex = index" mat-cell [width]="125">
                   <mat-form-field [style.width.px]="120" appearance="outline"
                     matTooltip="Set the audio encoding (G711 or AAC) delivered from the camera for {{stream.key}}.'"
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip">
                     <mat-label>Audio enc.</mat-label>
                     <mat-select (selectionChange)="updateAudioEncoding($event, stream.value)"
@@ -460,6 +481,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                       [disableControl]="!stream.value.audio || stream.value.audio_encoding === 'None'"
                       autocomplete="off" matInput
                       matTooltip="Set the audio sample rate delivered from the camera for {{stream.key}}."
+                      [matTooltipShowDelay]="UtilsService.toolTipDelay"
                       matTooltipClass="tooltip" maxlength="5" placeholder="Sample Rate"
                       type="number">
                     @if (getStreamControl(camIndex, streamIndex, 'audio_sample_rate').hasError('limits')) {
@@ -479,6 +501,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                       [formControl]="getStreamControl(camIndex, streamIndex, 'netcam_uri')"
                       autocomplete="off" matInput
                       matTooltip="Set the URI for connection to the camera stream. This is in the form 'rtsp://<ip address>/<uri>"
+                      [matTooltipShowDelay]="UtilsService.toolTipDelay"
                       matTooltipClass="tooltip" maxlength="105" placeholder="Netcam URI"
                       type="text">
 
@@ -498,6 +521,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                     (change)="setDefaultOnMultiDisplayStatus($event, stream.value,  cam.value)"
                     [checked]="stream.value.defaultOnMultiDisplay" [color]="'primary'"
                     matTooltip="If checked, {{stream.key}} will be the default stream for {{cam.key}} on the multi camera display."
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip">
                     {{ 'Default On Multi Display' }}
                   </mat-checkbox>
@@ -510,6 +534,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                   <button (click)="addStream(cam.value)"
                     [disabled]="anyInvalid() || confirmSave || confirmNew || totalNumberOfStreams() >= 50"
                     mat-icon-button matTooltip="Add another stream for {{cam.key}}."
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip" style>
                     <mat-icon>add</mat-icon>
                   </button>
@@ -531,12 +556,14 @@ can be found in the LICENSE file at http://angular.io/license -->
             <button (click)="addCamera()"
               [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 50"
               mat-icon-button matTooltip="Add another camera, and enter the details manually."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               <mat-icon>add</mat-icon>
             </button>
             <button (click)="toggleAddCameraOnvifUriDialogue()"
               [disabled]="anyInvalid() || confirmSave || confirmNew || confirmNewLookup || totalNumberOfStreams() >= 50"
               mat-icon-button matTooltip="Add another camera getting details through Onvif."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               <mat-icon>add_circle</mat-icon>
             </button>
@@ -555,18 +582,19 @@ can be found in the LICENSE file at http://angular.io/license -->
             @if (!confirmNew && !confirmNewLookup) {
               <button (click)="confirmNew=true;allOff()"
                 [disabled]="anyInvalid() || confirmSave" mat-icon-button
-                matTooltip="Start a new configuration" matTooltipClass="tooltip">
+                matTooltip="Start a new configuration" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip">
                 <mat-icon>note</mat-icon>
               </button>
             }
             @if (!confirmNewLookup) {
               <button (click)="confirmNewLookup=true;allOff()"
                 [disabled]="confirmSave || confirmNewLookup || confirmNew" mat-icon-button
-                matTooltip="Perform onvif LAN search for cameras" matTooltipClass="tooltip">
+                matTooltip="Perform onvif LAN search for cameras" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip">
                 <mat-icon>explore</mat-icon>
               </button>
             }
             <span matTooltip="Undo ALL changes made in this session. This will restore the camera data to the state it was when you first entered the editor in this session."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               @if (!confirmRestore && !confirmSave && !confirmNewLookup) {
                 <button (click)="confirmRestore=true"
@@ -578,6 +606,7 @@ can be found in the LICENSE file at http://angular.io/license -->
             </span>
 
             <span matTooltip="{{isGuest ? 'Disabled for guest' : 'Commit the current configuration in this editor'}}"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               @if (!confirmSave && !confirmRestore && !confirmNewLookup) {
                 <button (click)="confirmSave=true"

@@ -90,4 +90,6 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
       this.changeEmailForm.controls['newEmail'].setValue(result.email);
     })
   }
+
+  protected readonly UtilsService = UtilsService;
 }

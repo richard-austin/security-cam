@@ -8,6 +8,7 @@
             <input matInput type="password" formControlName="password"
               placeholder="Enter password"
               matTooltip="Enter the user password"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
             <mat-label>Password</mat-label>
             @if (hasError('password', 'required')) {
@@ -24,6 +25,7 @@
             <input matInput type="text" formControlName="newEmail" autocomplete="off" maxlength="40"
               placeholder="New email address"
               matTooltip="Enter the required email address"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
             <mat-label>New email address</mat-label>
             @if (hasError('newEmail', 'required')) {
@@ -41,6 +43,7 @@
             <input matInput type="text" formControlName="confirmNewEmail" height="12" autocomplete="off" maxlength="40"
               placeholder="Confirm new email address"
               matTooltip="Please confirm the email address"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
             <mat-label>Confirm new email address</mat-label>
             @if (hasError('confirmNewEmail', 'required')) {

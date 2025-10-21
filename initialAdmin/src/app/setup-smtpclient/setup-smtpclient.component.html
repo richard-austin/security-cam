@@ -9,6 +9,7 @@
         <mat-checkbox (change)="updateAuthState($event)" [checked]="smtpData.auth"
           [formControl]="getFormControl('auth')"
           matTooltip="{{smtpData.auth?'Disable':'Enable'}} authentication on the SMTP serve. ({{smtpData.auth?'Assumes no user credentials required':'User credentials must be provided below'}})"
+          [matTooltipShowDelay]="UtilsService.toolTipDelay"
           matTooltipClass="tooltip">
           {{smtpData.auth ? 'Authenticated' : 'Unauthenticated'}}
         </mat-checkbox>
@@ -19,6 +20,7 @@
             (beforeinput)="confirmOnReturn($event)"
             title=""
             matTooltip="Enter SMTP account user name (this may be the account email address)"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             placeholder="SMTP User name">
           <mat-hint>User name for the SMTP account</mat-hint>
@@ -37,6 +39,7 @@
             (beforeinput)="confirmOnReturn($event)"
             title=""
             matTooltip="Enter SMTP account password"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             placeholder="SMTP Password">
           <mat-hint>Password for the SMTP account</mat-hint>

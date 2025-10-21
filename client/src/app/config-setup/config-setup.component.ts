@@ -863,4 +863,6 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   streamDeleteButtonToolTip(cam: { value: Camera, key: string }, stream: string) {
     return cam.value.streams.size <= 1 ? 'Cannot delete last stream' : this.getStreamDeleteDisabledState(cam, stream) ? 'Cannot delete a stream used in recording' : 'Delete this stream';
   }
+
+  protected readonly UtilsService = UtilsService;
 }

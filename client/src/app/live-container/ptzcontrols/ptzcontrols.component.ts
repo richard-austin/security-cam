@@ -77,4 +77,6 @@ export class PTZControlsComponent implements OnInit {
         this.reporting.errorMessage = reason;
       })
   }
+
+  protected readonly UtilsService = UtilsService;
 }

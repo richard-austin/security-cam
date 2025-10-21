@@ -6,6 +6,7 @@ import {BehaviorSubject} from "rxjs";
 import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {SharedModule} from "../../shared/shared.module";
 import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
+import {UtilsService} from "../../shared/utils.service";
 @Component({
   selector: 'app-onvif-failures',
   templateUrl: './onvif-failures.component.html',
@@ -123,4 +124,6 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
   }
+
+  protected readonly UtilsService = UtilsService;
 }

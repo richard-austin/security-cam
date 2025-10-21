@@ -54,6 +54,19 @@
         @if (enableAdHocDeviceHosting && utilsService.adHocDevices && utilsService.adHocDevices.length > 0) {
           <button mat-menu-item [matMenuTriggerFor]="$any(menuAdHocDevices)">Ad Hoc Device Admin</button>
         }
+        <div mat-menu-item
+             matTooltip="Enable or disable browser caching for device admin service hosting. In some cases there can be problems when caching is on due to devices with different web admin code sharing the same url via the proxy. If in doubt, turn it off!"
+             [matTooltipShowDelay]="UtilsService.toolTipDelay"
+             matTooltipClass="tooltip"
+             (click)="$event.stopPropagation(); useCachingCheckBox.toggle()"
+             (keydown.enter)="$event.stopPropagation(); useCachingCheckBox.toggle()">
+          <mat-checkbox class="mat-menu__checkbox"
+                        labelPosition="before"
+                        (click)="useCaching(useCachingCheckBox.checked);$event.stopPropagation()"
+                        #useCachingCheckBox>
+            Use Browser Caching
+          </mat-checkbox>
+        </div>
       </mat-menu>
       <mat-menu #menuCameraSettings>
         @for (camKV of cameras | keyvalue: cameraSvc.compareFn; track camKV) {
@@ -67,7 +80,7 @@
       </mat-menu>
       <mat-menu #menuCameraAdmin>
         @for (camKV of cameras | keyvalue: cameraSvc.compareFn; track camKV) {
-          <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+          <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
             @if (camKV.value.address != '') {
               <button mat-menu-item
                       [disabled]="isGuest"
@@ -94,6 +107,7 @@
       <mat-menu #menuGeneral>
         <button mat-menu-item (click)="configSetup();menuClosed()"
                 matTooltip="Discover and configure the cameras for live view, recording, audio back channel and various other features."
+                [matTooltipShowDelay]="UtilsService.toolTipDelay"
                 matTooltipClass="tooltip">
           Configuration
         </button>
@@ -101,12 +115,14 @@
         @if (enableAdHocDeviceHosting) {
           <button mat-menu-item
                   matTooltip="Maintain a list of web admin sites on the local network (intranet) to make available through the NVR on the general internet."
+                  [matTooltipShowDelay]="UtilsService.toolTipDelay"
                   matTooltipClass="tooltip"
                   (click)="adHocHostingConfiguration()">Ad Hoc Hosting
           </button>
         }
         <div mat-menu-item
              matTooltip="Enable or disable H264 hardware decoding. In some cases hardware decoding adds latency on H264, in other cases hardware decoding is required to decode it at all. Set this for the best performance on the platform/browser you are using."
+             [matTooltipShowDelay]="UtilsService.toolTipDelay"
              matTooltipClass="tooltip"
              (click)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()"
              (keydown.enter)="$event.stopPropagation(); hardwareDecodingCheckBox.toggle()">
@@ -117,13 +133,13 @@
             H264 Hardware Decoding
           </mat-checkbox>
         </div>
-        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+        <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="changePassword();menuClosed()">Change Password</button>
         </span>
-        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+        <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="changeEmail(); menuClosed()">Change Account Email</button>
         </span>
-        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+        <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           @if (!isGuest) {
             <button mat-menu-item
                     (click)="setUpGuestAccount(); menuClosed()">Set Up Guest Account
@@ -131,31 +147,31 @@
           }
         </span>
         <div class="dropdown-divider"></div>
-        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+        <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="setIp();menuClosed()">Save Current Public IP</button>
         </span>
-        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+        <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="getActiveIPAddresses(); menuClosed()">
             Get Active Local IP Address(es)
           </button>
         </span>
         <button mat-menu-item [matMenuTriggerFor]="$any(wifiAdmin)">Wifi Admin</button>
         <mat-menu #wifiAdmin>
-          <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+          <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
             <button mat-menu-item [disabled]="isGuest" (click)="getLocalWifiDetails(); menuClosed()">
               Local Wifi Details
             </button>
           </span>
-          <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+          <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
             <button mat-menu-item [disabled]="isGuest" (click)="wifiSettings(); menuClosed()">
               Wifi Settings
             </button>
           </span>
         </mat-menu>
-        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+        <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="cloudProxy();menuClosed()">Set CloudProxy Status</button>
         </span>
-        <span matTooltip="Disabled for guest" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
+        <span matTooltip="Disabled for guest" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip" [matTooltipDisabled]="!isGuest">
           <button mat-menu-item [disabled]="isGuest" (click)="admin();menuClosed()">Admin Functions</button>
         </span>
         <button mat-menu-item (click)="drawdownCalc();menuClosed()">Pension Drawdown Calculator</button>

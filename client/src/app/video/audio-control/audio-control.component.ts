@@ -7,6 +7,7 @@ import {MatIconButton} from "@angular/material/button";
 import {MatCheckbox, MatCheckboxChange} from "@angular/material/checkbox";
 import {NgStyle} from "@angular/common";
 import {MatTooltip} from "@angular/material/tooltip";
+import {UtilsService} from "../../shared/utils.service";
 
 @Component({
   selector: 'app-audio-control',
@@ -59,6 +60,8 @@ class AudioControlComponent implements AfterViewInit {
     this.audioLatencyLimiting = $event.checked;
     this.setAudioLatencyLimiting.emit($event.checked);
   }
+
+  protected readonly UtilsService = UtilsService;
 }
 
 export default AudioControlComponent

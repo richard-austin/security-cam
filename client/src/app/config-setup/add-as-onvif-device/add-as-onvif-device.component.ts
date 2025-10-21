@@ -11,6 +11,7 @@ import {ReportingComponent} from "../../reporting/reporting.component";
 import {Camera} from "../../cameras/Camera";
 import {SharedModule} from "../../shared/shared.module";
 import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
+import {UtilsService} from "../../shared/utils.service";
 
 /**
  * isValidDeviceIP: Custom validator to check that the onvif URL presented for getting camera details does not have
@@ -89,4 +90,6 @@ export class AddAsOnvifDeviceComponent implements OnInit {
     // Ensure camera form controls highlight immediately if invalid
     this.addCameraForm.markAllAsTouched();
   }
+
+  protected readonly UtilsService = UtilsService;
 }

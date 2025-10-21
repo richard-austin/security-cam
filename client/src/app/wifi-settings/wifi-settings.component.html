@@ -30,6 +30,7 @@
         <mat-checkbox [color]="'primary'" [checked]="wifiEnabled"
           #wifiStatusCheckbox
           matTooltip="Wi-Fi is currently {{wifiEnabled ? 'enabled' : 'disabled'}}, click to {{wifiEnabled ? 'disable' : 'enable'}}"
+          [matTooltipShowDelay]="UtilsService.toolTipDelay"
           matTooltipClass="tooltip"
           [disabled]="ethernetConnectionStatus != 'CONNECTED_VIA_ETHERNET'"
           (change)="setWifiStatus($event)">
@@ -66,6 +67,7 @@
             <mat-form-field class="password-field" appearance="outline" [style.width.px]="315">
               <input matInput type="password" [formControl]="getFormControl(enterPasswordForm, 'password')"
                 matTooltip="Enter password for {{selector.value}}"
+                [matTooltipShowDelay]="UtilsService.toolTipDelay"
                 matTooltipClass="tooltip"
                 placeholder="Password for {{selector.value}}">
               <mat-label>New password for {{selector.value}}</mat-label>

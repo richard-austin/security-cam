@@ -43,6 +43,7 @@
           <label class="video-buttons"
             [ngClass]="{'audio-latency-correction': mediaFeeder.audioLatencyOverrun}"
             [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (mediaFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="video-buttons-tooltip">
             <mat-icon (click)="toggleShowAudioControls()">{{ mediaFeeder.isMuted ? 'volume_off' : 'volume_up' }}
             </mat-icon>
@@ -52,6 +53,7 @@
           <label
             class="video-buttons"
             [matTooltip]="audioBackchannel.audioButtonTooltip()"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="video-buttons-tooltip">
             <mat-icon
               [ngClass]="{'audio-out-inactive': !utilsService.speakActive && !audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-active':  utilsService.speakActive && audioBackchannel.audioToggle && !utilsService.isGuestAccount, 'audio-out-disabled': (utilsService.speakActive && !audioBackchannel.audioToggle) || utilsService.isGuestAccount}"
@@ -59,7 +61,7 @@
             </mat-icon>
           </label>
           <select [disabled]="utilsService.speakActive"
-            [matTooltip]="audioBackchannel.audioInputSelectorTooltip()" matTooltipClass="video-buttons-tooltip"
+            [matTooltip]="audioBackchannel.audioInputSelectorTooltip()" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="video-buttons-tooltip"
             [(ngModel)]="audioBackchannel.selectedDeviceId" (change)="audioBackchannel.setAudioInput()">
             @for (device of audioBackchannel.mediaDevices | audioInput; track device) {
               <option [value]="device.deviceId">{{ device.label }}
@@ -72,6 +74,7 @@
         </label>
         <label class="video-buttons"
           matTooltip="Set full screen"
+          [matTooltipShowDelay]="UtilsService.toolTipDelay"
           matTooltipClass="video-buttons-tooltip">
           <mat-icon (click)="setFullScreen()">fullscreen</mat-icon>
         </label>
