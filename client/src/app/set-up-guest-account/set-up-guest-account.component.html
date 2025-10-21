@@ -7,6 +7,7 @@
           <mat-checkbox [color]="'primary'" [checked]="setupGuestAccountForm.controls['enabled'].value"
             (change)="setEnabled($event)"
             matTooltip="If checked, the guest account will be enabled. When enabled for the first time, a password must be entered and confirmed."
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             {{'Enable/Disable guest account'}}
           </mat-checkbox>
@@ -15,6 +16,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Password</mat-label>
             <input matTooltip="Enter the password for the guest account. If left blank, the existing password will be retained."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip"
               matInput type="password" formControlName="password"
               placeholder="Enter current password">
@@ -28,6 +30,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Confirm password</mat-label>
             <input matTooltip="Enter the password again to confirm, leave blank if the password is blank"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip"
               matInput type="password" formControlName="confirmPassword"
               placeholder="Confirm new password">

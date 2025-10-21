@@ -155,4 +155,6 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
     // Set the focus to the username input
     this.usernameInput.nativeElement.focus();
   }
+
+  protected readonly UtilsService = UtilsService;
 }

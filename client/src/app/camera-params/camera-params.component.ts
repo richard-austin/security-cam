@@ -236,4 +236,6 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.cameraName.enable();
   }
+
+  protected readonly UtilsService = UtilsService;
 }

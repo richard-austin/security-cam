@@ -15,6 +15,7 @@ import {MatSelectChange} from "@angular/material/select";
 import {CameraService} from "../../cameras/camera.service";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ConfigSetupComponent} from "../config-setup.component";
+import {UtilsService} from "../../shared/utils.service";
 
 export function isValidMaskFileName(cameras: Map<string, Camera>): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -430,4 +431,6 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit(): void {
     }
+
+  protected readonly UtilsService = UtilsService;
 }

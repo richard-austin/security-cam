@@ -4,6 +4,7 @@
     <ng-container [formGroup]="formGroup">
       <mat-form-field appearance="outline" [style.width.px]="225"
         matTooltip="Select recording type: None for no recording, Motion Service to use the motion service to detect motion on a specified stream, FTP Triggered to trigger recordings when the localCamera sends an image to the NVR by FTP, and Pullpoint Event Triggered to trigger recordings from a specified pullpoint topic ion the camera."
+        [matTooltipShowDelay]="UtilsService.toolTipDelay"
         matTooltipClass="tooltip">
         <mat-label>Recording Type</mat-label>
         <mat-select formControlName="recordingType" (selectionChange)="setRecordingType($event)">
@@ -20,6 +21,7 @@
           <div>
             <mat-form-field [style.width.px]="185" appearance="outline"
               matTooltip="Select the stream to record from. This would normally be the higher resolution stream. If a stream is selected, images sent by FTP from {{camKey}}, on motion being detected will trigger the NVR to make a recording on the selected stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP a .jpg (jpeg) image to folder {{camKey}} on port 2121 on the NVRs IP address. See Camera Recordings Service section of the README.md"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               <mat-label>Stream To Record From</mat-label>
               <mat-select (selectionChange)="setSelectedStream($event)"
@@ -36,6 +38,7 @@
           </div>
           <mat-form-field [style.width.px]="150" appearance="outline"
             matTooltip="The number of seconds to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value in seconds."
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             <mat-label>Preamble Time</mat-label>
             <mat-select (selectionChange)="updatePreambleTime()"
@@ -51,6 +54,7 @@
           </mat-form-field>
           <mat-form-field [style.width.px]="150" appearance="outline"
             matTooltip="Select the maximum time in seconds that can elapse between FTP uploads from the camere for the recording to be extended further by this selected time. The absence of another FTP within this window will result in the recording being completed."
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             <mat-label>Retrigger Window</mat-label>
             <mat-select (selectionChange)="setRetriggerWindow()"
@@ -68,6 +72,7 @@
           <div>
             <mat-form-field [style.width.px]="225" appearance="outline"
               matTooltip="Select the stream to monitor for motion. This would normally be the lower resolution stream,"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               <mat-label>Stream To Monitor For Motion</mat-label>
               <mat-select (selectionChange)="setStreamForMotionDetection($event)"
@@ -89,6 +94,7 @@
               [formControl]="getControl('threshold')"
               autocomplete="off" matInput
               matTooltip="Threshold for declaring motion. The threshold is the number of changed pixels counted after noise filtering, masking, despeckle, and labelling"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip" maxlength="10" placeholder="Threshold"
               type="number">
             @if (getControl('threshold').hasError('max')) {
@@ -109,6 +115,7 @@
           </mat-form-field>
           <mat-form-field [style.width.px]="170" appearance="outline"
             matTooltip="Select another stream on the camera to trigger a recording on when motion is detected on {{localCamera.motion_detection_stream}}. Normally you would select the highest resolution stream on the camera."
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             <mat-label>Trigger Recording On</mat-label>
             <mat-select (selectionChange)="updateRecordingTrigger()"
@@ -138,6 +145,7 @@
                 [disabled]="localCamera.recordingType !== RecordingType.motionService"
                 mat-icon-button
                 matTooltip="Select a mask file to upload. This is a .pgm file where motion detection is disabled where the image is black, shades of grey attenuate motion detection sensitivity, and white areas allow full motion detection sensitivity."
+                [matTooltipShowDelay]="UtilsService.toolTipDelay"
                 matTooltipClass="tooltip" type="button">
 
                 <mat-icon>file_upload</mat-icon>
@@ -149,6 +157,7 @@
                 [disabled]="localCamera.recordingType !== RecordingType.motionService"
                 mat-icon-button
                 matTooltip="Click to clear this field (no mask file)"
+                [matTooltipShowDelay]="UtilsService.toolTipDelay"
                 matTooltipClass="tooltip" type="button">
                 <mat-icon>close</mat-icon>
               </button>
@@ -163,6 +172,7 @@
           <div></div>
           <mat-form-field [style.width.px]="149" appearance="outline"
             matTooltip="The number of seconds to delay the video stream by when recording. The value selected will give a preamble to recordings (time prior to when the recording was triggered) of this value in seconds."
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             <mat-label>Preamble Time</mat-label>
             <mat-select (selectionChange)="updatePreambleTime()"
@@ -182,6 +192,7 @@
               [formControl]="getControl('video_width')"
               autocomplete="off" matInput
               matTooltip="The width in pixels of the video on {{localCamera.motion_detection_stream}}. This is required if motion detection is enabled on {{localCamera.motion_detection_stream}}."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip" maxlength="4" placeholder="Video Width"
               type="number">
             @if (getControl('video_width').invalid) {
@@ -197,6 +208,7 @@
               [formControl]="getControl('video_height')"
               autocomplete="off" matInput
               matTooltip="The height in pixels of the video on {{localCamera.motion_detection_stream}}. This is required if motion detection is enabled on {{localCamera.motion_detection_stream}}."
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip" maxlength="4" placeholder="Video Height"
               type="number">
             @if (getControl('video_height').invalid) {
@@ -209,6 +221,7 @@
         @case (RecordingType.pullPointEventTriggered) {
           <mat-form-field [style.width.px]="400" appearance="outline"
             matTooltip="Select the pull point event which will trigger recording."
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             <mat-label>Pull Point Event</mat-label>
             <mat-select (selectionChange)="setSelectedPullPointRecordingTrigger($event)"
@@ -225,6 +238,7 @@
 
           <mat-form-field [style.width.px]="185" appearance="outline"
             matTooltip="Select the stream to record from. This would normally be the higher resolution stream. If a stream is selected, images sent by FTP from {{camKey}}, on motion being detected will trigger the NVR to make a recording on the selected stream of that camera. These recordings will be available on the Select Recording menu. The camera should be set to FTP a .jpg (jpeg) image to folder {{camKey}} on port 2121 on the NVRs IP address. See Camera Recordings Service section of the README.md"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             <mat-label>Stream To Record From</mat-label>
             <mat-select (selectionChange)="setSelectedStream($event)"
@@ -246,6 +260,7 @@
               [formControl]="getControl('simpleItemName')"
               autocomplete="off" matInput
               matTooltip='The "Name" attribute of the SimpleItem (containing the detection state) in the PullMessagesResponse Data section'
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip" maxlength="40"
               type="text">
             @if (getControl('simpleItemName').invalid) {
@@ -261,6 +276,7 @@
               [formControl]="getControl('simpleItemPositiveValue')"
               autocomplete="off" matInput
               matTooltip='The "Value" attribute of the SimpleItem when an object enters the cameras detection zone. This value should match the value of the SimpleItem Value attribute sent when an object is detected.'
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip" maxlength="40"
               type="text">
             @if (getControl('simpleItemPositiveValue').invalid) {
@@ -276,6 +292,7 @@
               [formControl]="getControl('simpleItemNegativeValue')"
               autocomplete="off" matInput
               matTooltip='The "Value" attribute of the SimpleItem when an object leaves the cameras detection zone. This value should match the value of the SimpleItem Value attribute sent when an object moves out of the detection zone.'
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip" maxlength="40"
               type="text">
             @if (getControl('simpleItemNegativeValue').invalid) {
@@ -308,6 +325,7 @@
   <span class="recording-setup-confirm-group">
     <button color="cancel" mat-raised-button (click)="cancel()"
       matTooltip="Close this dialogue and undo any changes"
+      [matTooltipShowDelay]="UtilsService.toolTipDelay"
       matTooltipClass="tooltip">
       Cancel
     </button>
@@ -315,6 +333,7 @@
       [disabled]="confirmButtonDisabledState()"
       (click)="confirmChanges()"
       matTooltip="Confirm changes and make ready for saving"
+      [matTooltipShowDelay]="UtilsService.toolTipDelay"
       matTooltipClass="tooltip">
       Confirm
     </button>

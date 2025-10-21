@@ -2,7 +2,7 @@ package com.securitycam.services
 
 
 import com.securitycam.commands.GetHostingAccessCommand
-
+import com.securitycam.commands.SetUseCachingCommand
 import com.securitycam.enums.PassFail
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.proxies.CamWebadminHostProxy
@@ -19,7 +19,7 @@ class CameraAdminPageHostingService {
     CamService camService
 
     //  SocketConfig config
-    int port = 8446
+    final int port = 8446
     CamWebadminHostProxy proxy
 
     @PostConstruct
@@ -79,6 +79,13 @@ class CameraAdminPageHostingService {
             response.error = ex.getClass().getName() + " in closeClient: " + ex.getMessage()
             logService.cam.error(response.error)
         }
+        return response
+    }
+
+    def setUseCaching(SetUseCachingCommand cmd) {
+        ObjectCommandResponse response = new ObjectCommandResponse()
+        proxy.setUseCaching(cmd.useCaching)
+        response.responseObject = cmd.useCaching  // Just return the value sent
         return response
     }
 }

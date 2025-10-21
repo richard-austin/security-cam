@@ -1,4 +1,5 @@
 <div [matTooltip]="isGuest ? 'Disabled for guest' : ptzBtnMatTooltip"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
   <button mat-icon-button
           (mousedown)="move($event)"

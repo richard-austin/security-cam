@@ -13,6 +13,7 @@
             (beforeinput)="confirmOnReturn($event)"
             title=""
             matTooltip="Enter user name"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             placeholder="New User name">
           <mat-hint>User name for NVR online access</mat-hint>
@@ -34,6 +35,7 @@
             (beforeinput)="confirmOnReturn($event)"
             title=""
             matTooltip="Enter your password"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             placeholder="Password">
           <mat-hint>Password for NVR online access</mat-hint>
@@ -56,6 +58,7 @@
             (beforeinput)="confirmOnReturn($event)"
             title=""
             matTooltip="Confirm your NVR account password"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             placeholder="Confirm Password">
           <mat-hint>Confirm the password</mat-hint>
@@ -77,6 +80,7 @@
             (beforeinput)="confirmOnReturn($event)"
             title=""
             matTooltip="Enter your email address. This is required to provide a means of resetting forgotten passwords"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             placeholder="email address">
           <mat-hint>Your email address</mat-hint>
@@ -98,6 +102,7 @@
             (beforeinput)="confirmOnReturn($event)"
             title=""
             matTooltip="Confirm your email address"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             placeholder="Confirm email address">
           <mat-hint>Confirm email address</mat-hint>
@@ -116,6 +121,7 @@
       <span class="confirm-group">
         <button color="cancel" mat-raised-button (click)="hideRegisterForm()"
           matTooltip="{{callFailed ? 'Close this dialogue and abandon setting up an account': 'Close this dialogue box'}}"
+          [matTooltipShowDelay]="UtilsService.toolTipDelay"
           matTooltipClass="tooltip">
           {{ callFailed ? 'Cancel' : 'Exit' }}
         </button>
@@ -123,6 +129,7 @@
           [disabled]="error || anyInvalid() || committed"
           (click)="register()"
           matTooltip="Register the new account"
+          [matTooltipShowDelay]="UtilsService.toolTipDelay"
           matTooltipClass="tooltip">
           {{ buttonTitle }}
         </button>

@@ -65,6 +65,7 @@
             [operation]="presetOperation()"
             [isGuest]="isGuest"
             matTooltip="{{isGuest ? 'Disabled for guest' : presetsTooltip(i+1)}}"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
           </app-preset-button>
         }

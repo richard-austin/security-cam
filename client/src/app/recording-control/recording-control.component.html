@@ -15,6 +15,7 @@
         <div>
           <mat-form-field appearance="outline"
             matTooltip="Select a recording by date and time"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip">
             <mat-label>Motion Events</mat-label>
             <mat-select #selector (selectionChange)="showMotionEvent($event)">
@@ -32,9 +33,10 @@
               @case (false) {
                 <div class="delete-button"
                   matTooltip="{{isGuest ? 'Disabled for guest' : 'Delete the currently selected recording'}}"
+                  [matTooltipShowDelay]="UtilsService.toolTipDelay"
                   matTooltipClass="tooltip">
                   <button (click)="confirmDelete=true" [disabled]="isGuest" color="warn" mat-raised-button
-                    matTooltip="Delete the currently displayed recording" matTooltipClass="tooltip">
+                    matTooltip="Delete the currently displayed recording" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip">
                     Delete This Recording
                   </button>
                 </div>
@@ -45,10 +47,12 @@
                   <div>are you sure?</div>
                   <button (click)="confirmDelete=false;deleteRecording()" color="warn" mat-raised-button
                     matTooltip="Delete the currently selected recording"
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip">Confirm
                   </button>
                   <button (click)="confirmDelete=false" color="cancel" mat-raised-button
                     matTooltip="Do not delete the recording"
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip">
                     Cancel
                   </button>
@@ -61,6 +65,7 @@
           <div class="download-button">
             <button (click)="downloadRecording()" color="download" mat-raised-button
               matTooltip="Download this recording to your PC or phone"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
               Download&nbsp;Recording
             </button>
@@ -91,6 +96,7 @@
             </div>
             <label class="video-buttons"
               [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (isMuted() ? 'unmute' : 'mute') + ' sound'"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="video-buttons-tooltip">
               <mat-icon (click)="toggleShowAudioControls()">{{ isMuted() ? 'volume_off' : 'volume_up' }}
               </mat-icon>
@@ -98,6 +104,7 @@
           }
           <label class="video-buttons"
             matTooltip="Set full screen"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="video-buttons-tooltip">
             <mat-icon (click)="video.setFullScreen()">fullscreen</mat-icon>
           </label>
@@ -106,17 +113,18 @@
           <mat-button-toggle-group aria-label="Playback control" name="playbackControl"
             [(ngModel)]="selectedPlaybackMode">
             <button mat-button (click)="returnToStart()"
-              matTooltip="Go back to the start of the recording" matTooltipClass="tooltip">
+              matTooltip="Go back to the start of the recording" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip">
               <mat-icon>fast_rewind</mat-icon>
             </button>
-            <button mat-button (click)="stepBack()" matTooltip="Step backward 10 seconds" matTooltipClass="tooltip">
+            <button mat-button (click)="stepBack()" matTooltip="Step backward 10 seconds" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip">
               <mat-icon>replay_10</mat-icon>
             </button>
-            <button mat-button (click)="stepForward()" matTooltip="Step forward 10 seconds" matTooltipClass="tooltip">
+            <button mat-button (click)="stepForward()" matTooltip="Step forward 10 seconds" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip">
               <mat-icon>forward_10</mat-icon>
             </button>
 
             <mat-button-toggle (click)="paused ? start() : pause()" [matTooltip]="paused ? 'Play' : 'Pause'"
+              [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip"
               value="startPause">
               @if (!paused) {
@@ -125,11 +133,11 @@
                 <mat-icon>play_arrow</mat-icon>
               }
             </mat-button-toggle>
-            <mat-button-toggle (click)="fastForward()" matTooltip="Fast forward" matTooltipClass="tooltip"
+            <mat-button-toggle (click)="fastForward()" matTooltip="Fast forward" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip"
               value="fastForward">
               <mat-icon>fast_forward</mat-icon>
             </mat-button-toggle>
-            <mat-button-toggle (click)="fasterForward()" matTooltip="Faster forward" matTooltipClass="tooltip"
+            <mat-button-toggle (click)="fasterForward()" matTooltip="Faster forward" [matTooltipShowDelay]="UtilsService.toolTipDelay" matTooltipClass="tooltip"
               value="fasterForward">
               <mat-icon class="faster-forward">fast_forward</mat-icon>
             </mat-button-toggle>

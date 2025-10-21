@@ -330,4 +330,10 @@ export class CameraService {
     return this.http.post<void>(this._baseUrl.getLink("cam", "closeClient"), "", this.httpJSONOptions).pipe(
       catchError((err: HttpErrorResponse) => throwError(err)));
   }
+
+  setUseCaching(useCaching: boolean): Observable<boolean> {
+    let params = {useCaching: useCaching};
+    return this.http.post<boolean>(this._baseUrl.getLink("cam", "setUseCaching"), params, this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(err)));
+  }
 }

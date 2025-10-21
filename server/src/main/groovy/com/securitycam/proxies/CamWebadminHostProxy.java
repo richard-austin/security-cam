@@ -6,6 +6,7 @@ import com.securitycam.controllers.CameraAdminCredentials;
 import com.securitycam.interfaceobjects.AccessDetails;
 import com.securitycam.services.CamService;
 import common.HeaderProcessing;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -28,6 +29,9 @@ public class CamWebadminHostProxy extends HeaderProcessing {
     ILogService logService;
     CamService camService;
     AccessDetails accessDetails;
+
+    @Setter
+    boolean useCaching = false;
 
     public CamWebadminHostProxy(ILogService logService, CamService camService) {
         super(logService);
@@ -102,9 +106,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                                         if (modifyHeader(request, newReq, "Host", accessDetails.get().cameraHost)) {
                                             request = newReq.get();
                                         }
-                                        if (addHeader(request, newReq, "Cache-Control", "'no-store, no-cache, must-revalidate")) {
-                                            request = newReq.get();
-                                        }
                                     } else
                                         logService.getCam().error("No accessToken found for request");
                                 }
@@ -166,10 +167,17 @@ public class CamWebadminHostProxy extends HeaderProcessing {
                     // and pass them back to the client.
                     try {
                         logService.getCam().trace("handleClientRequest: Ready to read device response");
+                        AtomicReference<ByteBuffer> newRep = new AtomicReference<>();
+                        int outputPass = 0;
                         while (server.isOpen() && server.read(reply) != -1) {
                             reply.flip();
                             if (!client.isOpen() || reply.limit() <= 0)
                                 break;
+                            if(++outputPass == 1 && !this.useCaching) {
+                                if (addHeader(reply, newRep, "Cache-Control", "no-store, no-cache, must-revalidate")) {
+                                    reply = newRep.get();
+                                }
+                            }
                             client.write(reply);
                             reply.clear();
                         }
@@ -241,4 +249,5 @@ public class CamWebadminHostProxy extends HeaderProcessing {
             }
         }
     }
+
 }

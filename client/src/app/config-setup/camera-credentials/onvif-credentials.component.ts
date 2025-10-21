@@ -6,6 +6,7 @@ import {ReportingComponent} from "../../reporting/reporting.component";
 import {Encryption} from "./encryption";
 import {SharedModule} from "../../shared/shared.module";
 import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
+import {UtilsService} from "../../shared/utils.service";
 
 @Component({
   selector: 'app-camera-credentials',
@@ -82,4 +83,6 @@ export class OnvifCredentialsComponent implements OnInit, AfterViewInit {
       this.passwordTooltip = "Enter the password for Onvif authentication.";
     }
   }
+
+  protected readonly UtilsService = UtilsService;
 }
