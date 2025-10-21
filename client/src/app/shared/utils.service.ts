@@ -110,6 +110,7 @@ export class UtilsService {
   private _activeMQTransportActive: boolean = false;
   private _cloudProxyRunning: boolean = false;
   adHocDevices!: Array<Device>;
+  public static readonly toolTipDelay = 1000;
   constructor(private http: HttpClient, private _baseUrl: BaseUrl) {
     // Initialise the speakActive state
     this.audioInUse().subscribe();

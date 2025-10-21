@@ -106,4 +106,6 @@ export class SetUpGuestAccountComponent implements OnInit {
         this.originalEnabledState = this.currentEnabledState = (await this.utilsService.guestAccountEnabled()).enabled
         this.setupGuestAccountForm.controls['enabled'].setValue(this.originalEnabledState);
     }
+
+  protected readonly UtilsService = UtilsService;
 }

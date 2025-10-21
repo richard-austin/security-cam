@@ -246,4 +246,5 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected readonly MediaFeeder = MediaFeeder;
+  protected readonly UtilsService = UtilsService;
 }

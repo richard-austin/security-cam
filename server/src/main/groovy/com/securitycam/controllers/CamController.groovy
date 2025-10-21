@@ -1,7 +1,7 @@
 package com.securitycam.controllers
 
 import com.securitycam.commands.GetHostingAccessCommand
-
+import com.securitycam.commands.SetUseCachingCommand
 import com.securitycam.enums.PassFail
 import com.securitycam.error.NVRRestMethodException
 import com.securitycam.interfaceobjects.ObjectCommandResponse
@@ -91,4 +91,12 @@ class CamController {
             else
                 return response.responseObject
         }
+
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @PostMapping("/setUseCaching")
+    def setUseCaching(@RequestBody SetUseCachingCommand cmd) {
+        // Not doing validation as its only a simple boolean value in the command object
+        ObjectCommandResponse response = cameraAdminPageHostingService.setUseCaching(cmd)
+        return response.responseObject
+    }
 }

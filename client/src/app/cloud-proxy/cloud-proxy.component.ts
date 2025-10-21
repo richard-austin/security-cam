@@ -105,4 +105,6 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.nvrloginstatusSubscription.unsubscribe();
   }
+
+  protected readonly UtilsService = UtilsService;
 }

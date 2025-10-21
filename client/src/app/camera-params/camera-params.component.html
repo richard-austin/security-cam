@@ -126,6 +126,7 @@
           <button mat-raised-button (click)="updateParams()"
             [disabled]="!anyChanged() || anyInvalid() || isGuest"
             matTooltip="{{isGuest ? 'Disabled for guest' : (!anyChanged() || anyInvalid()) ? 'Ensure all fields are correct and complete before committing' : 'Click to commit the changes'}}"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             color="warn">Update
           </button>
@@ -134,6 +135,7 @@
           <button mat-raised-button (click)="reboot()"
             [disabled]="(!anyChanged() || anyInvalid()) && !_confirmReboot || isGuest"
             matTooltip="Click to proceed with rebooting this camera"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             color="warn">Reboot camera, Are you sure?
           </button>
@@ -142,6 +144,7 @@
           <button mat-raised-button (click)="confirmReboot()"
             [disabled]="anyChanged() || anyInvalid() || isGuest"
             matTooltip="{{isGuest ? 'Disabled for guest' : 'Click to reboot this camera'}}"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             color="warn">Reboot Camera
           </button>
@@ -150,6 +153,7 @@
           <button mat-raised-button (click)="cancelReboot()"
             [disabled]="anyChanged() || anyInvalid() || isGuest"
             matTooltip="Click to cancel reboot of this camera"
+            [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="tooltip"
             color="cancel">Cancel
           </button>

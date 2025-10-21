@@ -150,4 +150,6 @@ export class AdHocHostingConfigComponent implements OnInit {
 
 //    this.devices =  [{name: 'Front Room Switch', ipAddress:'192.168.1.253', ipPort:80}, {name: 'Hall Switch', ipAddress:'192.168.1.232', ipPort:80}];
   }
+
+  protected readonly UtilsService = UtilsService;
 }

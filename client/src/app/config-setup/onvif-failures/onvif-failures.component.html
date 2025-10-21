@@ -33,6 +33,7 @@
                     [formControl]="getControl(i, 'onvifUserName')"
                     [disableControl]="gettingCameraDetails"
                     matTooltip="Enter the onvif user name for {{failure.key}}"
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip"
                     placeholder="Onvif user name">
                   <!--                <mat-error *ngIf="getControl(i, 'onvifUserName').invalid">User name format is invalid</mat-error>-->
@@ -49,6 +50,7 @@
                     [formControl]="getControl(i, 'onvifPassword')"
                     [disableControl]="gettingCameraDetails"
                     matTooltip="Enter the onvif password for {{failure.key}}"
+                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                     matTooltipClass="tooltip"
                     placeholder="Onvif password">
                   <!--                <mat-error *ngIf="getControl(i, 'onvifUserName').invalid">User name format is invalid</mat-error>-->
@@ -64,6 +66,7 @@
                   @if (!gettingCameraDetails || onvifUrl!=failure.key) {
                     <mat-icon
                       matTooltip="Click to start Onvif discovery on this camera using the credentials entered against it."
+                      [matTooltipShowDelay]="UtilsService.toolTipDelay"
                       matTooltipClass="tooltip">
                       add_circle
                     </mat-icon>
@@ -72,6 +75,7 @@
                     <mat-spinner style="position: relative; left: 5px"
                       [diameter]="25"
                       matTooltip="Busy"
+                      [matTooltipShowDelay]="UtilsService.toolTipDelay"
                       matTooltipClass="tooltip">
                     </mat-spinner>
                   }

@@ -458,4 +458,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     window.removeEventListener("keyup", this.keyHandler)
     this.video.video.controls = true; // Enable controls again
   }
+
+  protected readonly UtilsService = UtilsService;
 }

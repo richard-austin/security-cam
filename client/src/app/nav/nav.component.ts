@@ -25,6 +25,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef<HTMLDivElement>;
   @ViewChild('hardwareDecodingCheckBox') hardwareDecodingCheckBox!: MatCheckbox
+  @ViewChild("useCachingCheckBox") useCachingCheckBox!: MatCheckbox
   confirmLogout: boolean = false;
   pingHandle!: Subscription;
   timerHandle!: Subscription;
@@ -97,6 +98,11 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
   hardwareDecoding(checked: boolean) {
       NavComponent.setCookie("hardwareDecoding", checked ? "true" : "false", 600);
+  }
+  useCaching(checked: boolean) {
+    NavComponent.setCookie("useCaching", checked ? "true" : "false", 600);
+    this.cameraSvc.setUseCaching(checked).subscribe((resp) => {
+    });
   }
 
   static setCookie(cname:string, cvalue:string, exdays:number) {
@@ -340,9 +346,20 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
         NavComponent.setCookie("hardwareDecoding", "true", 600);
         hwdc = "true";
     }
-    const sub = timer(30).subscribe(() => {
+     const sub = timer(30).subscribe(() => {
         sub.unsubscribe();
         this.hardwareDecodingCheckBox.checked = hwdc === "true";
+    });
+
+    let useCaching = NavComponent.getCookie("useCaching");
+    if (useCaching === "") {
+      NavComponent.setCookie("useCaching", "true", 600);
+      useCaching = "false";
+    }
+    const sub2 = timer(30).subscribe(() => {
+      sub2.unsubscribe();
+      this.useCachingCheckBox.checked = useCaching === "true";
+      this.useCaching(useCaching === "true");
     });
 
     // If the camera service got any errors while getting the camera setup, then we report it here.
@@ -359,4 +376,5 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  protected readonly UtilsService = UtilsService;
 }

@@ -83,4 +83,6 @@ export class ChangePasswordComponent implements OnInit {
     }, {updateOn: "change"});
     this.changePasswordForm.markAllAsTouched();
   }
+
+  protected readonly UtilsService = UtilsService;
 }
