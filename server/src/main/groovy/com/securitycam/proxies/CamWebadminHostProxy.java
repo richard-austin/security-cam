@@ -6,7 +6,6 @@ import com.securitycam.controllers.CameraAdminCredentials;
 import com.securitycam.interfaceobjects.AccessDetails;
 import com.securitycam.services.CamService;
 import common.HeaderProcessing;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -30,7 +29,6 @@ public class CamWebadminHostProxy extends HeaderProcessing {
     CamService camService;
     AccessDetails accessDetails;
 
-    @Setter
     boolean useCaching = false;
 
     public CamWebadminHostProxy(ILogService logService, CamService camService) {
@@ -250,4 +248,8 @@ public class CamWebadminHostProxy extends HeaderProcessing {
         }
     }
 
+    @SuppressWarnings("")  // Prevent the insistence on using Lombok accessor which doesn't work in this case
+    public void setUseCaching(boolean useCaching) {
+        this.useCaching = useCaching;
+    }
 }
