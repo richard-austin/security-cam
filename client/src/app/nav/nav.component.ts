@@ -354,7 +354,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     let useCaching = NavComponent.getCookie("useCaching");
     if (useCaching === "") {
       NavComponent.setCookie("useCaching", "true", 600);
-      useCaching = "true";
+      useCaching = "false";
     }
     const sub2 = timer(30).subscribe(() => {
       sub2.unsubscribe();
