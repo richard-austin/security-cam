@@ -84,7 +84,8 @@ class UtilsService {
     @Autowired
     Config config
 
-    Queue<byte[]> audioQueue = new ConcurrentLinkedQueue<>()
+    private byte[] firstPacket
+    private int iteration = 0
     public static final passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@\u0024!%*#?&])[A-Za-z\d@\u0024!%*#?&]{8,}\u0024/
     public static final usernameRegex = /^[a-zA-Z0-9](_(?!(.|_))|.(?!(_|.))|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/
     public static final emailRegex = /^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/
@@ -277,7 +278,7 @@ class UtilsService {
             // Re-enable audio out on clients
             brokerMessagingTemplate.convertAndSend("/topic/talkoff", talkOff)
             audioInUse = false
-            audioQueue.clear()
+            iteration = 0
 
             serverSocket?.close()
             clientSocket?.close()
@@ -300,16 +301,21 @@ class UtilsService {
     private long audioInputStreamCheckCount = 0
 
     def audio(byte[] bytes) {
-        audioQueue.add(bytes)
+        if(++iteration== 1) {
+            firstPacket = new byte[bytes.size()]
+            System.arraycopy(bytes, 0, firstPacket, 0, bytes.size())
+        }
+
         // Reset the stream check count to indicate the stream is still active
         audioInputStreamCheckCount = 0
         if (out) {
             try {
-                while (!audioQueue.empty) {
-                    out.write(audioQueue.poll())
-                    Thread.sleep(3)
-                    //   System.out.println("Writing ${audioQueue.poll().length} bytes")
+                if(firstPacket) {
+                    out.write(firstPacket)
+                    firstPacket = null
                 }
+                if(iteration > 3)
+                    out.write(bytes)
             }
             catch (Exception ex) {
                 System.out.println("${ex.getClass().getName()} in audio handler: ${ex.getMessage()}")

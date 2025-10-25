@@ -35,7 +35,7 @@ export class AudioBackchannel {
           intervalSubscription.unsubscribe();
         }, reason => {
           this.reporting.errorMessage = reason
-          this.stopAudioOut();
+          this.stopAudioOut().then();
         });
         this.startAudioOutput();
       } else {
@@ -113,11 +113,11 @@ export class AudioBackchannel {
 
         // This stops the audio out after 5 minutes
         let stopAudioAfterLongTimeSubscription = timer(300000).subscribe(() => {
-          this.stopAudioOut();
+          this.stopAudioOut().then();
           stopAudioAfterLongTimeSubscription.unsubscribe();
         });
       }).catch((error) => {
-        this.stopAudioOut();
+        this.stopAudioOut().then();
         retVal = false;
         this.reporting.errorMessage = error;
         console.log(error);
