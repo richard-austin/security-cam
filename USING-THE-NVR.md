@@ -83,13 +83,31 @@ Events selector in the top left of the page. A warning box will appear if there 
   The camera can also be rebooted if required.
 * **Camera Admin**
 
-  Note that for this function to be accessible outside the LAN, port forwarding must be set up for port 446.
-
-  Provides access to camera web admin page through the NVR. Access is
-  protected by the NVR authentication system (Spring Security) as well as the NVR's access token system. SV3C
+  Provides access to a cameras web admin page through an http proxy on the NVR. SV3C
   and ZXTech camera credentials are provided by the NVR if they
-  were set up in the camera configuration page, otherwise they will need to be entered after selecting the camera.
-  Any other camera types will need their credentials entered after the camera is selected.
+  were set up in the camera configuration page.
+  Any other camera types will need their credentials entered after the camera is selected. Access is made through
+  in http connection on port 8446 on the NVR. As it is insecure, it is only available within the LAN, but
+  can be accessed securely on the open internet using a VPN.
+
+  Note that for this function to be accessible outside the LAN, a VPN server must be installed (on the NVR or other suitable device on the LAN)
+  and a VPN client on the client device outside the LAN.
+  For a quick and easy way to set up a VPN, see https://github.com/hwdsl2/setup-ipsec-vpn.
+
+* **Ad Hoc Device Admin**
+
+  This is the same functionality as Camera Admin above, but for devices whose details are entered as Ad Hoc Devices
+ (see under the General menu). These devices could be smart switches such as those made by Shelley,
+ No built-in authentication is supported for these devices, so any which
+ require credentials will need those entered on access to the device.
+
+* **Use Browser Caching**
+  
+   Applies to Camera Admin and Ad Hoc Device Admin above. The various devices are accessed through a single URL which
+   can, in some cases, cause cached information to be used on web admin pages for a device other than the original one.
+   For this reason it is best for this option to be off (checkbox unchecked), though the option is provided so that caching
+   can be used if desired.
+
 
 #### General
 * **Configure Camera Setup**
@@ -100,6 +118,17 @@ Events selector in the top left of the page. A warning box will appear if there 
 * **Log Off**
 
   Log off from the NVR, a dialogue box allows confirmation or cancelling this operation.
+* **Ad Hoc Hosting**
+
+  From here you can set up the list of ad hoc devices whose web admin pages you want to 
+  access through the NVR's Ad Hoc Device Admin menu. This option presents a form
+  with an editable table with which you can add/edit and remove ad hoc device entries.
+  The devices must present an HTTP web interface at the IP address and port entered here.
+  When the form data is correct, you can save it with the
+  <img src="README.images/floppy-svgrepo-com.svg" width="20"  style="position: relative; top: 5px"></img>
+  button.
+  <img alt="Ad Hoc Hosting" src="README.images/ad-hoc-hosting.png"></img>
+
 * **Change Password**
 
   User must first enter the current password, then enter and confirm a new one.

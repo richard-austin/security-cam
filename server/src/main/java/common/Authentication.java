@@ -36,7 +36,7 @@ public class Authentication {
             }
         }
         catch(Throwable ex) {
-            logService.getCam().error(ex.getClass().getName()+": in getAuthResponse, "+ex.getMessage());
+            logService.getCam().error("{}: in getAuthResponse, {}", ex.getClass().getName(), ex.getMessage());
         }
         return authResponse;
     }

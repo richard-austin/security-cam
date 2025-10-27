@@ -206,6 +206,11 @@ on motion detection. The NVR must be set up to accommodate this.
 | Preamble Time         | This is the (approximate) number of seconds to delay the stream by when making the recording. The recording will then contain a period of activity before the point at which it was triggered.                                                 | N/A                    |
 | Retrigger Window      | The minimum recording duration. During this time, further FTP transfers from the camera will extend the recording by this time. The user should ensure that this time is greater than the preamble time given by the selected preamble frames. | N/A                    |
 
+The camera ftp set up should be to the NVR IP address port 2121, the user should be _user_ and the password _12345_. The ftp path
+should be set to ./camera<i>n</i> where <i>n</i> is the logical camera id number as given on the 
+left hand side of the configuration table (under General menu).
+The FTP servers weak username and password are on the basis of being confined to the LAN (port forwarding not set up for port 2121).
+
 ### Pull Point Event Triggered Recordings
 This option is only available for cameras which support pull point subscription
 (Onvif profile T)*. This has the advantage over FTP triggered recordings in that
