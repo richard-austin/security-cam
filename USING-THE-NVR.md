@@ -88,11 +88,13 @@ Events selector in the top left of the page. A warning box will appear if there 
   were set up in the camera configuration page.
   Any other camera types will need their credentials entered after the camera is selected. Access is made through
   in http connection on port 8446 on the NVR. As it is insecure, it is only available within the LAN, but
-  can be accessed securely on the open internet using a VPN.
+  can be accessed securely on the open internet using a VPN.)
 
   Note that for this function to be accessible outside the LAN, a VPN server must be installed (on the NVR or other suitable device on the LAN)
   and a VPN client on the client device outside the LAN.
   For a quick and easy way to set up a VPN, see https://github.com/hwdsl2/setup-ipsec-vpn.
+  For the VPN to be accessible externally to the LAN, port forwarding must be set up on the router
+ (for the Ubuntu based VPN from the above script, port forwarding is set on UDP ports 500 and 4500.
 
 * **Ad Hoc Device Admin**
 
