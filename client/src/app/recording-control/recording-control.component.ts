@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, signal, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {VideoComponent} from '../video/video.component';
 import {Camera, Stream} from '../cameras/Camera';
 import {CameraService, DateSlot, LocalMotionEvent, LocalMotionEvents} from '../cameras/camera.service';
@@ -13,12 +13,11 @@ import {UtilsService} from '../shared/utils.service';
 import {
   MatDatepickerInputEvent
 } from '@angular/material/datepicker';
-import {SharedModule} from "../shared/shared.module";
-import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
-import AudioControlComponent from "../video/audio-control/audio-control.component";
-import {animate, state, style, transition, trigger} from "@angular/animations";
-import {AudioSettings} from "../video/AudioSettings";
-import {NavComponent} from "../nav/nav.component";
+import {SharedModule} from '../shared/shared.module';
+import {SharedAngularMaterialModule} from '../shared/shared-angular-material/shared-angular-material.module';
+import AudioControlComponent from '../video/audio-control/audio-control.component';
+import {AudioSettings} from '../video/AudioSettings';
+import {NavComponent} from '../nav/nav.component';
 
 declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
 
@@ -39,13 +38,6 @@ Date.prototype.addDays = function (days: number): Date {
   templateUrl: './recording-control.component.html',
   styleUrls: ['./recording-control.component.scss'],
   imports: [SharedModule, SharedAngularMaterialModule, VideoComponent, AudioControlComponent],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({width: '0px', minWidth: '0'})),
-      state('expanded', style({width: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ])
-  ],
 })
 export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(VideoComponent) video!: VideoComponent;
@@ -72,7 +64,9 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   showAudioControls: boolean = false;
   ctrlKeyDown = false;
   volume: number = 0.4;
-  private camKey: string = "";
+  private camKey: string = '';
+  enterClass = signal('enter-animation');
+  farewell = signal('leaving');
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService, private utilsService: UtilsService, private cd: ChangeDetectorRef) {
     // route.url.subscribe((u:UrlSegment[]) => {
@@ -184,7 +178,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
           (error) => {
             this.reporting.errorMessage = error;
           });
-        this.setInitialLevel(0.4, false, true)
+        this.setInitialLevel(0.4, false, true);
       }
     } else {
       this.showInvalidInput(false);
@@ -242,7 +236,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     } catch (error: any) {
       let reader: FileReader = new FileReader();
       reader.onload = () => {
-        let result = JSON.parse(reader.result as string)
+        let result = JSON.parse(reader.result as string);
         this.reporting.errorMessage = new HttpErrorResponse({
           error: result.reason,
           status: 500 /*error.status */

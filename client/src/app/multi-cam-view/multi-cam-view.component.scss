@@ -93,3 +93,14 @@ tr.mat-row {
 mat-icon {
   font-size: 25px !important;
 }
+
+.stream-closed {
+  transform: rotate(0);
+  transition: transform 0.225s;
+}
+
+.stream-open {
+  transform: rotate(90deg);
+  transition: transform 0.225s;
+}
+

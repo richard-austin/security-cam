@@ -148,3 +148,26 @@ mat-icon {
   margin-top: -10px;
   margin-bottom: -10px;
 }
+
+.enter-animation {
+  opacity: 0;
+  animation: fade-in 0.5s;
+}
+
+.leaving-animation  {
+  opacity: 1;
+  animation: fade-out 0.5s;
+}
+
+
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}

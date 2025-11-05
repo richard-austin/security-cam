@@ -85,7 +85,8 @@
         <div class="additional-buttons">
           @if (hasAudio()) {
             <div class="audio-controls-dialogue">
-              <div [@detailExpand]="showAudioControls ? 'expanded' : 'collapsed'">
+              @if (showAudioControls) {
+                <div [animate.enter]="enterClass()" [animate.leave]="farewell()">
                 <app-audio-control [mute]="isMuted()"
                   (muteAudio)="mute($event)" [level]="volume"
                   (setLevel)="setVolume($event.valueOf())">
@@ -93,6 +94,7 @@
                 <div>
                 </div>
               </div>
+              }
             </div>
             <label class="video-buttons"
               [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (isMuted() ? 'unmute' : 'mute') + ' sound'"

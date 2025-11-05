@@ -26,7 +26,8 @@
     <div #videoControls class="video-controls">
       <div>
         <div class="audio-controls-dialogue">
-          <div [@detailExpand]="showAudioControls ? 'expanded' : 'collapsed'">
+            @if (showAudioControls) {
+              <div [animate.enter]="enterClass()" [animate.leave]="farewell()">
             @if (stream && stream.audio && !mediaFeeder.noAudio) {
               <app-audio-control [mute]="mediaFeeder.isMuted"
                 (muteAudio)="toggleMuteAudio()" [level]="mediaFeeder.gain"
@@ -38,6 +39,7 @@
             <div>
             </div>
           </div>
+            }
         </div>
         @if (stream && stream.audio && !mediaFeeder.noAudio) {
           <label class="video-buttons"

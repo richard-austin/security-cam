@@ -6,7 +6,9 @@
     matTooltipClass="tooltip">
     <mat-icon>settings</mat-icon>
   </button>
-  <div class="mat-elevation-z15" [@detailExpand]="showStreamSelector ? 'expanded' : 'collapsed'">
+    <div #streamSelectList
+         [style]="UtilsService.expandableStreamStyle(showStreamSelector, streamSelectList, 200)"
+         class="mat-elevation-z15">
     <div>
       <div>
       </div>
@@ -42,7 +44,9 @@
                   matTooltip="{{expandedElement == cam.value ? 'Hide' : 'Show'}} the streams for {{cam.key}}"
                   [matTooltipShowDelay]="UtilsService.toolTipDelay"
                   matTooltipClass="tooltip">
-                  <mat-icon class="expand" [@openClose]="expandedElement == cam.value ? 'open' : 'closed'">arrow_right
+                    <mat-icon class="expand"
+                              [ngClass]="{'stream-open': expandedElement === cam.value, 'stream-closed': expandedElement !== cam.value}">
+                      arrow_right
                   </mat-icon>
                 </button>
               </td>
@@ -51,7 +55,8 @@
             <ng-container matColumnDef="expandedStreamDetail">
               <td mat-cell *matCellDef="let cam" [attr.colspan]="cameraColumns.length">
                 <div class="element-detail mat-elevation-z10"
-                  [@detailExpand]="cam.value == expandedElement ? 'expanded' : 'collapsed'">
+                       #streamSelector
+                       [style]="UtilsService.expandableStreamStyle(cam.value === expandedElement, streamSelector)">
                   <table mat-table [dataSource]="cam.value.streams | keyvalue: cameraSvc.compareFn"
                     class="streams-info mat-elevation-z10">
                     <ng-container matColumnDef="select">
