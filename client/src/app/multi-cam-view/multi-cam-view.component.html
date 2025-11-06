@@ -6,8 +6,7 @@
     matTooltipClass="tooltip">
     <mat-icon>settings</mat-icon>
   </button>
-    <div #streamSelectList
-         [style]="UtilsService.expandableStreamStyle(showStreamSelector, streamSelectList, 200)"
+    <div #streamSelector [style]="streamSelectorStyle(streamSelector, showStreamSelector)"
          class="mat-elevation-z15">
     <div>
       <div>
