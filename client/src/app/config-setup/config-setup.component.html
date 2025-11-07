@@ -15,7 +15,9 @@ can be found in the LICENSE file at http://angular.io/license -->
         <mat-icon [ngClass]="{'no-credentials': !haveOnvifCredentials}">security</mat-icon>
       </button>
       <div style="top:16px;" class="popup-dialogue">
-        <div [@detailExpand]="showOnvifCredentialsForm ? 'expanded' : 'collapsed'"
+        @if (showOnvifCredentialsForm) {
+          <div [animate.enter]="animationEnter()"
+               [animate.leave]="animationLeave()"
           [ngClass]="{'mat-elevation-z15': showOnvifCredentialsForm}">
           <div>
           </div>
@@ -23,6 +25,7 @@ can be found in the LICENSE file at http://angular.io/license -->
             (hideDialogue)="toggleOnvifPasswordDialogue()" [reporting]="reporting">
           </app-camera-credentials>
         </div>
+        }
       </div>
     </span>
   </mat-card-title>
@@ -121,7 +124,9 @@ can be found in the LICENSE file at http://angular.io/license -->
                 <mat-icon [ngClass]="{'no-credentials': cam.value.cred == ''}">security</mat-icon>
               </button>
               <div class="popup-dialogue">
-                <div [@detailExpand]="camForCredentialsEntry==cam.key ? 'expanded' : 'collapsed'"
+                @if (camForCredentialsEntry === cam.key) {
+                  <div [animate.enter]="animationEnter()"
+                       [animate.leave]="animationLeave()"
                   [ngClass]="{'mat-elevation-z15': camForCredentialsEntry==cam.key}">
                   <div>
                   </div>
@@ -129,6 +134,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                     [reporting]="reporting">
                   </app-camera-credentials>
                 </div>
+                }
               </div>
             </span>
           </td>
@@ -143,7 +149,9 @@ can be found in the LICENSE file at http://angular.io/license -->
               <mat-icon class="trash-can">delete</mat-icon>
             </button>
             <div class="popup-dialogue">
-              <div [@detailExpand]="showCameraDeleteConfirm===cam.key ? 'expanded' : 'collapsed'"
+              @if (showCameraDeleteConfirm === cam.key) {
+                <div [animate.enter]="animationEnter()"
+                     [animate.leave]="animationLeave()"
                 [ngClass]="{'mat-elevation-z15': showCameraDeleteConfirm===cam.key}">
                 <div>
                 </div>
@@ -153,6 +161,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                   (hideDialogue)="toggleCameraDeleteConfirm(cam.key)">
                 </app-row-delete-confirm>
               </div>
+              }
             </div>
           </td>
         </ng-container>
@@ -164,7 +173,8 @@ can be found in the LICENSE file at http://angular.io/license -->
               matTooltip="{{expandedElement == cam.value ? 'Hide' : 'Show'}} the streams for {{cam.key}}"
               [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
-              <mat-icon [@openClose]="expandedElement == cam.value ? 'open' : 'closed'" class="expand">
+              <mat-icon class="expand"
+                        [ngClass]="{'stream-open': expandedElement === cam.value, 'stream-closed': expandedElement !== cam.value}">
                 arrow_right
               </mat-icon>
             </button>
@@ -221,7 +231,9 @@ can be found in the LICENSE file at http://angular.io/license -->
               <mat-icon class="voicemail">voicemail</mat-icon>
             </button>
             <div class="popup-recording-type-dialogue ">
-              <div [@detailExpand]="camForRecordingSetup==cam.key ? 'expanded' : 'collapsed'"
+              @if (camForRecordingSetup === cam.key) {
+                <div [animate.enter]="animationEnter()"
+                     [animate.leave]="animationLeave()"
                 [ngClass]="{ 'mat-elevation-z15': camForRecordingSetup==cam.key}">
                 <div>
                 </div>
@@ -234,6 +246,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                 </app-recording-setup>
               }
             </div>
+              }
           </div>
         </td>
       </ng-container>
@@ -356,7 +369,7 @@ can be found in the LICENSE file at http://angular.io/license -->
       <!-- Expanded Streams rows - The streams row is made up of this one column that spans across all columns -->
       <ng-container matColumnDef="expandedStreamDetail">
         <td *matCellDef="let cam; let camIndex=dataIndex" [attr.colspan]="cameraColumns.length" mat-cell>
-          <div [@detailExpand]="cam.value == expandedElement ? 'expanded' : 'collapsed'"
+            <div #streams [style]="UtilsService.expandableStreamStyle(cam.value === expandedElement, streams)"
             class="element-detail mat-elevation-z10">
             <table [dataSource]="cam.value.streams | keyvalue: cameraSvc.compareFn"
               class="streams-info mat-elevation-z10" mat-table>
@@ -382,7 +395,9 @@ can be found in the LICENSE file at http://angular.io/license -->
                     </button>
                   </span>
                   <div class="popup-stream-delete-confirm-dialogue">
-                    <div [@detailExpand]="showStreamDeleteConfirm===cam.key+stream.key ? 'expanded' : 'collapsed'"
+                      @if (showStreamDeleteConfirm === cam.key + stream.key) {
+                        <div [animate.enter]="animationEnter()"
+                             [animate.leave]="animationLeave()"
                       [ngClass]="{'mat-elevation-z15': showStreamDeleteConfirm===cam.key+stream.key}">
                       <div>
                       </div>
@@ -391,6 +406,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                         (hideDialogue)="toggleStreamDeleteConfirm($event)">
                       </app-row-delete-confirm>
                     </div>
+                      }
                   </div>
                 </td>
               </ng-container>
@@ -568,7 +584,9 @@ can be found in the LICENSE file at http://angular.io/license -->
               <mat-icon>add_circle</mat-icon>
             </button>
             <div class="add-onvif-url-dialogue">
-              <div [@detailExpand]="showAddCameraDialogue ? 'expanded' : 'collapsed'"
+                @if (showAddCameraDialogue) {
+                  <div [animate.enter]="animationEnter()"
+                       [animate.leave]="animationLeave()"
                 class="mat-elevation-z15">
                 <div>
                 </div>
@@ -578,6 +596,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                   [reporting]="reporting">
                 </app-add-as-onvif-device>
               </div>
+                }
             </div>
             @if (!confirmNew && !confirmNewLookup) {
               <button (click)="confirmNew=true;allOff()"

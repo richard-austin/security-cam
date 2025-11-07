@@ -33,7 +33,7 @@ repositories {
 dependencies {
     implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
 
-    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
     implementation "org.apache.cxf.xjc-utils:cxf-xjc-runtime:${project.property('cxfXjcRuntimeVersion')}"
 }
 

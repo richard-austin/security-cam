@@ -14,15 +14,15 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^20.1.0",
-    "@angular/common": "^20.1.0",
-    "@angular/compiler": "^20.1.0",
-    "@angular/core": "^20.1.0",
-    "@angular/forms": "^20.1.0",
-    "@angular/material": "^20.1.0",
-    "@angular/platform-browser": "^20.1.0",
-    "@angular/platform-browser-dynamic": "^20.1.0",
-    "@angular/router": "^20.1.0",
+    "@angular/animations": "^20.3.10",
+    "@angular/common": "^20.3.10",
+    "@angular/compiler": "^20.3.10",
+    "@angular/core": "^20.3.10",
+    "@angular/forms": "^20.3.10",
+    "@angular/material": "^20.2.12",
+    "@angular/platform-browser": "^20.3.10",
+    "@angular/platform-browser-dynamic": "^20.3.10",
+    "@angular/router": "^20.3.10",
     "@material/menu": "^15.0.0-canary.684e33d25.0",
     "@material/tooltip": "^15.0.0-canary.684e33d25.0",
     "material-icons": "^1.13.4",
@@ -31,9 +31,9 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "^20.1.0",
-    "@angular/cli": "~20.1.0",
-    "@angular/compiler-cli": "^20.1.0",
+    "@angular/build": "^20.3.9",
+    "@angular/cli": "~20.3.9",
+    "@angular/compiler-cli": "^20.3.10",
     "@types/jasmine": "~4.3.0",
     "angular-eslint": "19.0.2",
     "eslint": "^9.16.0",
@@ -42,7 +42,7 @@
     "karma-chrome-launcher": "~3.1.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.0.0",
-    "typescript": "5.8.3"
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "typescript": "5.9.3"
   }
 }

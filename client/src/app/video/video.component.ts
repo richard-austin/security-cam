@@ -4,7 +4,7 @@ import {
   ElementRef,
   Input,
   OnDestroy,
-  OnInit,
+  OnInit, signal,
   ViewChild
 } from '@angular/core';
 import {Camera, Stream} from '../cameras/Camera';
@@ -19,22 +19,14 @@ import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {FormsModule} from "@angular/forms";
 import AudioControlComponent from "./audio-control/audio-control.component";
-import {animate, state, style, transition, trigger} from "@angular/animations";
 import {NavComponent} from "../nav/nav.component";
 import {AudioSettings} from "./AudioSettings";
 
 @Component({
-    selector: 'app-video',
-    templateUrl: './video.component.html',
-    styleUrls: ['./video.component.scss'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({width: '0px', minWidth: '0'})),
-      state('expanded', style({width: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ])
-    ],
-  imports: [SharedModule, SharedAngularMaterialModule, FormsModule, AudioControlComponent, AudioControlComponent]
+  selector: 'app-video',
+  templateUrl: './video.component.html',
+  styleUrls: ['./video.component.scss'],
+  imports: [SharedModule, SharedAngularMaterialModule, FormsModule, AudioControlComponent]
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
@@ -56,6 +48,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   showAudioControls: boolean = false;
   ctrlKeyDown = false;
   camKey: string = "";
+  enterClass = signal('enter-animation');
+  farewell = signal('leaving-animation')
 
   constructor(public utilsService: UtilsService) {
     this.mediaFeeder = new MediaFeeder();
@@ -70,7 +64,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   setSource(cam: Camera, stream: Stream, manifest: string = ''): void {
     if (this.vt !== undefined)
       this.vt.reset();
-    this.audioBackchannel.stopAudioOut().then(r => {}); // Ensure two way audio is off when switching streams
+    this.audioBackchannel.stopAudioOut().then(r => {
+    }); // Ensure two way audio is off when switching streams
     this.mediaFeeder.stop();
     this.stream = stream;
     this.mediaFeeder.setSource(cam, stream, manifest)
@@ -113,26 +108,26 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setVolume(volume: number) {
-    if(this.mediaFeeder) {
-      this.mediaFeeder.gain =volume;
+    if (this.mediaFeeder) {
+      this.mediaFeeder.gain = volume;
       const settings = new AudioSettings(volume, this.mediaFeeder.isMuted, this.mediaFeeder.getAudioLatencyControl());
       NavComponent.setCookie(this.camKey, JSON.stringify(settings), 600);
     }
   }
+
   audioLatencyLimiting(audioLatencyLimiting: boolean) {
-    if(this.mediaFeeder) {
-     this.mediaFeeder.setAutoLatencyControl(audioLatencyLimiting);
-     const settings = new AudioSettings(this.mediaFeeder.volume, this.mediaFeeder.isMuted, audioLatencyLimiting);
-     NavComponent.setCookie(this.camKey, JSON.stringify(settings), 600);
+    if (this.mediaFeeder) {
+      this.mediaFeeder.setAutoLatencyControl(audioLatencyLimiting);
+      const settings = new AudioSettings(this.mediaFeeder.volume, this.mediaFeeder.isMuted, audioLatencyLimiting);
+      NavComponent.setCookie(this.camKey, JSON.stringify(settings), 600);
     }
   }
 
   toggleShowAudioControls() {
-    if(this.ctrlKeyDown) {
+    if (this.ctrlKeyDown) {
       this.toggleMuteAudio();
       this.showAudioControls = false;
-    }
-    else
+    } else
       this.showAudioControls = !this.showAudioControls;
   }
 
@@ -145,9 +140,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     const searchTerm = "?suuid=";
     const camIdx = this.stream.media_server_input_uri.indexOf(searchTerm);
     if (camIdx > -1) {
-      const dashIdx = this.stream.media_server_input_uri.indexOf('-',camIdx);
+      const dashIdx = this.stream.media_server_input_uri.indexOf('-', camIdx);
       if (dashIdx > -1) {
-        camKey = this.stream.media_server_input_uri.substring(camIdx+searchTerm.length, dashIdx);
+        camKey = this.stream.media_server_input_uri.substring(camIdx + searchTerm.length, dashIdx);
       }
     }
     this.camKey = (isMulti ? 'multi-' : '') + camKey;
@@ -156,9 +151,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   setInitialAudioSettings(isMulti: boolean, level: number, muted: boolean, audioLatencyLimiting: boolean) {
     this.getCamKey(isMulti);
     let audioSettings: AudioSettings = new AudioSettings(level, muted, audioLatencyLimiting);
-    if(this.camKey !== "") {
+    if (this.camKey !== "") {
       const strSettings = NavComponent.getCookie(this.camKey)
-      if(strSettings !== "") {
+      if (strSettings !== "") {
         audioSettings = JSON.parse(strSettings);
       }
     }
@@ -170,6 +165,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   setSize(size: number, isRecording: boolean = false): void {
     this.sizing.setup(size, isRecording)
   }
+
   changeSize(size: number) {
     this.sizing.changeSize(size);
   }
@@ -192,8 +188,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  clickHandler =  (ev: Event) => {
-    if(this.videoControlsEL) {
+  clickHandler = (ev: Event) => {
+    if (this.videoControlsEL) {
       const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL.nativeElement);
       if (!inVideoControlDialogue)
         this.showAudioControls = false;
@@ -238,7 +234,8 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
     //  ffmpeg to the backchannel device. The problem does not occur when done like this
     let timerSubscription: Subscription = timer(20).subscribe(() => {
-      this.audioBackchannel.stopAudioOut().then(r => {});
+      this.audioBackchannel.stopAudioOut().then(r => {
+      });
       timerSubscription.unsubscribe();
     });
     window.screen.orientation.onchange = null;

@@ -5,13 +5,12 @@ import {
   ElementRef, HostListener,
   isDevMode,
   OnDestroy,
-  OnInit, QueryList,
+  OnInit, QueryList, signal,
   ViewChild, ViewChildren,
 } from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
 import {ReportingComponent} from '../reporting/reporting.component';
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import {
   AbstractControl,
   UntypedFormArray,
@@ -51,28 +50,6 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
   selector: 'app-config-setup',
   templateUrl: './config-setup.component.html',
   styleUrls: ['./config-setup.component.scss'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-    trigger('openClose', [
-      // ...
-      state('open', style({
-        transform: 'rotate(90deg)'
-      })),
-      state('closed', style({
-        transform: 'rotate(0deg)'
-      })),
-      transition('open => closed', [
-        animate('.2s')
-      ]),
-      transition('closed => open', [
-        animate('.2s')
-      ]),
-    ])
-  ],
   imports: [
     SharedModule,
     SharedAngularMaterialModule,
@@ -140,13 +117,16 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
   }
 
+  animationEnter = signal('enter-animation');
+  animationLeave = signal('leaving-animation');
+
   validateSampleRate(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const sampleRate = control.value;
       const invalid = sampleRate < 3000 || sampleRate > 64000;
       let error: any = {limits: {value: control.value}};
       return invalid ? error : null;
-    }
+    };
   }
 
   getCamControl(index: number, fieldName: string): UntypedFormControl {
@@ -341,7 +321,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
       for (let i = 0; i < fa.length; ++i) {
         fa.at(i).markAllAsTouched();
       }
-    })
+    });
   }
 
   /**
@@ -483,7 +463,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
       let newKey = 'camera' + camNum;
       retVal.set(newKey, camera);
       ++camNum;
-    })
+    });
 
     this.cameras = retVal;
     this.setUpTableFormControls();

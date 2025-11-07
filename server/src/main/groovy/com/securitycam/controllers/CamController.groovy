@@ -61,7 +61,7 @@ class CamController {
      * @return The access token to use as the accessToken parameter in the initial get request to the hosting server,
      *          or error code.
      */
-    @Secured(['ROLE_CLIENT'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
     @PostMapping("/getHostingAccess")
     def getHostingAccess(@RequestBody GetHostingAccessCommand cmd) {
         def gv = new GeneralValidator(cmd, new GetHostingAccessCommandValidator())

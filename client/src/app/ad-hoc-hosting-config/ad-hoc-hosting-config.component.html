@@ -13,7 +13,9 @@
               <mat-icon class="trash-can">delete</mat-icon>
             </button>
             <div class="popup-dialogue">
-              <div [@detailExpand]="showDeviceDeleteConfirm===i ? 'expanded' : 'collapsed'"
+              @if (showDeviceDeleteConfirm === i) {
+                <div [animate.enter]="animationEnter()"
+                     [animate.leave]="animationLeave()"
                    [ngClass]="{'mat-elevation-z15': showDeviceDeleteConfirm===i}">
                 <div>
                 </div>
@@ -24,6 +26,7 @@
                                         (hideDialogue)="toggleDeviceDeleteConfirm(i)">
                 </app-row-delete-confirm>
               </div>
+              }
             </div>
           </td>
         </ng-container>
