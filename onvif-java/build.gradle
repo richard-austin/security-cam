@@ -31,7 +31,7 @@ compileJava.dependsOn(":onvif-ws-client:build")
 
 dependencies {
     implementation "org.apache.cxf:cxf-rt-frontend-jaxws:${project.property('cxfVersion')}"
-    implementation group: "org.apache.cxf.services.wsn", name: "cxf-services-wsn-core", version: project.property('cxfVersion')
+    implementation "org.apache.cxf.services.wsn:cxf-services-wsn-core:${project.property('cxfVersion')}"
     compileOnly "org.apache.cxf:cxf-rt-ws-security:${project.property('cxfVersion')}"
     implementation "org.apache.cxf:cxf-rt-transports-http:${project.property('cxfVersion')}"
     implementation "org.apache.cxf:cxf-rt-transports-http-jetty:${project.property('cxfVersion')}"
@@ -50,15 +50,15 @@ dependencies {
 
 
     implementation 'commons-io:commons-io:2.18.0'
-    implementation 'commons-codec:commons-codec:1.10'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
+    implementation 'commons-codec:commons-codec:1.13'
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
 //    compileOnly    'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
     implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
     implementation 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.2'
 
     implementation 'org.glassfish.hk2:osgi-resource-locator:2.4.0'
-    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.26'
-    testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.12'
+    testImplementation 'org.slf4j:slf4j-simple:1.7.26'
+    testImplementation 'ch.qos.logback:logback-classic:1.5.13'
 }
 
 

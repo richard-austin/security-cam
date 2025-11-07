@@ -2,8 +2,8 @@ plugins {
     id 'java'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group='org.example'
+version='1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -23,7 +23,7 @@ tasks.register('copyToDeploymentStaging', Copy) {
 
     from('../xtrn-scripts-and-config/productKeyGen/')
     include 'generateProductKey-1.0-SNAPSHOT-uber.jar'
-    destinationDir file('../xtrn-scripts-and-config/productKeyGen/')
+    destinationDir=file('../xtrn-scripts-and-config/productKeyGen/')
     rename 'generateProductKey-1.0-SNAPSHOT-uber.jar', 'generateProductKey.jar'
 }
 
@@ -56,6 +56,6 @@ sourceSets {
 }
 
 dependencies {
-    compileOnly 'junit:junit:4.12'
+    compileOnly 'junit:junit:4.13.1'
     implementation 'commons-codec:commons-codec:1.15'
 }
