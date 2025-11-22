@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import {NgModule, provideZoneChangeDetection} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -86,6 +86,7 @@ import {MatDialogActions, MatDialogContent, MatDialogTitle} from "@angular/mater
             useClass: CustomDateAdapter,
             deps: [MAT_DATE_LOCALE, Platform]
         },
+        provideZoneChangeDetection(),
 
         HttpClient, BaseUrl, provideHttpClient(withInterceptorsFromDi())]
 })

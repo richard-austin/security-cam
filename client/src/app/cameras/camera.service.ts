@@ -8,7 +8,6 @@ import {NativeDateAdapter} from '@angular/material/core';
 import {KeyValue} from "@angular/common";
 import {NavComponent} from "../nav/nav.component";
 
-
 /**
  * MotionEvents as received from the server
  */
@@ -84,7 +83,7 @@ export class CameraService {
   private cameras: Map<string, Camera> = new Map();
 
   errorEmitter: EventEmitter<HttpErrorResponse> = new EventEmitter<HttpErrorResponse>();
-  private _publicKey!: Uint8Array;
+  private _publicKey!: BufferSource;
   private _numColumns: number = 2;
 
   public readonly _cameraParamSpecs: CameraParamSpec[] =
@@ -158,7 +157,7 @@ export class CameraService {
     return this._preambleTimeValues;
   }
 
-  get publicKey(): Uint8Array {
+  get publicKey(): BufferSource {
     return this._publicKey;
   }
 
@@ -302,7 +301,7 @@ export class CameraService {
 
   getPublicKey(): void {
     if (this._publicKey === undefined) {
-      this.http.post<Uint8Array>(this._baseUrl.getLink("cam", "getPublicKey"), "", this.httpUploadOptions).pipe(
+      this.http.post<Uint8Array<ArrayBuffer>>(this._baseUrl.getLink("cam", "getPublicKey"), "", this.httpUploadOptions).pipe(
         tap((pk) => {
           this._publicKey = new Uint8Array(pk);
         }),

@@ -1,6 +1,6 @@
 export class Encryption {
-  readonly publicKey: Uint8Array;
-  constructor(publicKey: Uint8Array) {
+  readonly publicKey: BufferSource;
+  constructor(publicKey: BufferSource) {
     this.publicKey = publicKey;
   }
   async encrypt(strToEncrypt: string) {
