@@ -427,13 +427,13 @@ class UtilsService {
         try {
             @Language("HTML")
             String response = '''
-        <h3>Angular web framework v20.1.0</h3>
+        <h3>Angular web framework v21.0.0</h3>
         <a href="https://angular.io" target="_blank">Angular</a>
         <hr>
-        <h3>Angular Material v20.1.0</h3>
+        <h3>Angular Material v21.0.0</h3>
         <a href="https://material.angular.io/" target="_blank">Angular Material</a>
         <hr>
-        <h3>Angular Forms v20.1.0</h3>
+        <h3>Angular Forms v21.0.0</h3>
         <a href="https://angular.io/guide/forms-overview/" target="_blank">Angular Forms</a>
         <hr>
         <h3>Stomp.js v7.0.0</h3>
@@ -442,7 +442,7 @@ class UtilsService {
         <h3>File Saver v2.0.5</h3>
         <a href="https://www.npmjs.com/package/@types/file-saver" target="_blank">File Saver</a>
         <hr>
-        <h3>hls.js v1.4.12</h3>
+        <h3>hls.js v1.5.2</h3>
         <a href="https://www.npmjs.com/package/hls.js?utm_source=cdnjs&utm_medium=cdnjs_link&utm_campaign=cdnjs_library" target="_blank">Hls.js</a>
         <hr>
         <h3>moment v2.29.1</h3>
@@ -463,16 +463,16 @@ class UtilsService {
         <h3>tslib v2.0.0</h3>
         <a href="https://www.npmjs.com/package/tslib" target="_blank">tslib</a>
         <hr>
-        <h3>zone.js v0.14.10</h3>
+        <h3>zone.js v0.15.0</h3>
         <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
         <hr>
-        <h3>typescript v5.4.5</h3>
+        <h3>typescript v5.9.3</h3>
         <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
         <hr>
-        <h3>Spring Boot v3.5.4</h3>
+        <h3>Spring Boot v3.5.7</h3>
         <a href="https://spring.io/projects/spring-boot" target="_blank">Spring Boot</a>
         <hr>
-        <h3>Java OpenJDK v21.0.4</h3>
+        <h3>Java OpenJDK v21.0.8</h3>
         <a href="https://openjdk.org/" target="_blank">Java OpenJDK</a>
         <hr>
         <h3>ffmpeg v6.1.1</h3>
