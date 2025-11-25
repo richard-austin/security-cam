@@ -5,7 +5,7 @@
 This is a Network Video Recorder accessed through a web browser making it accessible from anywhere on PC or smart phone. 
 Designed to run on a Raspberry pi, it has low power consumption and runs reliably 24/7.
 It requires network cameras providing RTSP streams with the video encoded as H264 or H265. Audio (G711 or AAC) is supported. 
-The audio and video is remultiplexed to fragmented MP4 (fMP4) for rendering on the browser using Media Source Extensions (MSE).
+The audio and video are split into separate streams for rendering on the client using Web Codecs for low latency.
 
 ![ptz camera](README.images/ptz.png)
 *PTZ camera as viewed with Google Chrome*
