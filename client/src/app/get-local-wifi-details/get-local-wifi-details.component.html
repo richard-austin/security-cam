@@ -50,14 +50,14 @@
         <!-- Signal Column -->
         <ng-container matColumnDef="Signal">
           <th mat-header-cell *matHeaderCellDef>Signal</th>
-          <td mat-cell *matCellDef="let element"> {{element.msgQueue}} </td>
+          <td mat-cell *matCellDef="let element"> {{element.signal}} </td>
         </ng-container>
 
         <!-- Security Column -->
         <ng-container matColumnDef="Security">
           <th mat-header-cell *matHeaderCellDef>Security</th>
-          <td mat-cell *matCellDef="let element"> {{element.security}} </td>       </ng-container>
-
+          <td mat-cell *matCellDef="let element"> {{element.security}} </td>
+        </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

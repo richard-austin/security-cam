@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import {NgModule, provideZoneChangeDetection} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
@@ -24,7 +24,6 @@ import {provideHttpClient, withFetch, withInterceptorsFromDi} from '@angular/com
 import {BaseUrl} from './shared/BaseUrl/BaseUrl';
 import {MatDividerModule} from '@angular/material/divider';
 import {LayoutModule} from '@angular/cdk/layout';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { SetupSMTPClientComponent } from './setup-smtpclient/setup-smtpclient.component';
 import { ActivemqCredentialsComponent } from './activemq-credentials/activemq-credentials.component';
 import {SafeHtmlPipe} from "./reporting/safe-html.pipe";
@@ -43,7 +42,6 @@ import {SafeHtmlPipe} from "./reporting/safe-html.pipe";
     bootstrap: [AppComponent], imports: [CommonModule,
         AppRoutingModule,
         BrowserModule,
-        BrowserAnimationsModule,
         MatCardModule,
         ReactiveFormsModule,
         MatFormFieldModule,
@@ -60,5 +58,5 @@ import {SafeHtmlPipe} from "./reporting/safe-html.pipe";
         FormsModule,
         LayoutModule,
         MatDividerModule,
-        RouterOutlet], providers: [BaseUrl, provideHttpClient(withInterceptorsFromDi(), withFetch())] })
+        RouterOutlet], providers: [BaseUrl, provideZoneChangeDetection(), provideHttpClient(withInterceptorsFromDi(), withFetch())] })
 export class AppModule { }
