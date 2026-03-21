@@ -55,7 +55,7 @@
       <mat-card-subtitle>Presets</mat-card-subtitle>
       <mat-card-subtitle class="smaller-text">{{presetFunctionDescription()}}</mat-card-subtitle>
       <div>
-        @for (l of counter(maxPresets); track l; let i = $index) {
+        @for (l of counter(maxPresets); let i = $index; track i) {
           <app-preset-button
             (click)="presetButtonPressed()"
             [reporting]="reporting"

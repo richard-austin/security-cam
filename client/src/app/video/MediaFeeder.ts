@@ -222,6 +222,7 @@ class MediaFeeder {
       this.videoWorker?.terminate();
       this.audioWorker?.postMessage({close: true})
       this.audioWorker?.terminate();
+      this.audioStream?.terminate();
       this.video.pause();
     }
   }

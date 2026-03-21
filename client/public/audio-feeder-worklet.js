@@ -16,9 +16,10 @@ class AudioStream {
   gainNode;
   track;
   underlyingSink = {};
+  ac = null;
 
   constructor(sampleRate) {
-    const ac = new AudioContext({sampleRate: sampleRate, latencyHint: "interactive"});
+    const ac = this.ac = new AudioContext({sampleRate: sampleRate, latencyHint: "interactive"});
     this.gainNode = ac.createGain()
     this.gainNode.connect(ac.destination);
 
@@ -78,6 +79,7 @@ class AudioStream {
                 workingBufferSize = 5;
                 maxBufferSizeHardLimit = 15;
                 workingBufferSizeHardLimit = 8;
+                running = true;
 
                 update(val) {
                   if (this.measuring) {
@@ -164,6 +166,10 @@ class AudioStream {
               this.autoLatencyControl = true;
               let lastAutoLatencyControl = this.autoLatencyControl;
               this.port.onmessage = ({data}) => {
+                if (data?.type === 'shutdown') {
+                  this.running = false;
+                  console.log("running = false");
+                } else {
                 this.arrays.push(data);
                 if (this.autoLatencyControl && !lastAutoLatencyControl) {
                   this.port.postMessage("Auto latency control enabled");
@@ -181,6 +187,7 @@ class AudioStream {
                   }
                 }
               }
+              }
               this.emptyArray = new Float32Array(0);
             }
 
@@ -197,7 +204,7 @@ class AudioStream {
                 if (this.array.length > 0)
                   output[i] = this.array[this.arrayOffset++] || 0;
               }
-              return true;
+              return this.running;
             }
           });
         }
@@ -275,6 +282,17 @@ class AudioStream {
     const node = this.underlyingSink?.node;
     if (node) {
       return node.parameters.get("autoLatencyControl").value === 1;
+    }
+  }
+
+  terminate() {
+    const node = this.underlyingSink?.node;
+    if (node) {
+      this.gainNode.disconnect();
+      node.port.postMessage({type: "shutdown"});
+      node.disconnect();
+      this.ac.close();
+      console.log("terminating");
     }
   }
 }
