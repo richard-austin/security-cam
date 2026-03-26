@@ -291,6 +291,7 @@ class AudioStream {
       this.gainNode.disconnect();
       node.port.postMessage({type: "shutdown"});
       node.disconnect();
+      node.port.close();
       this.ac.close();
       console.log("terminating");
     }
