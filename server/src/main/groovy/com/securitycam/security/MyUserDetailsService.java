@@ -2,13 +2,13 @@ package com.securitycam.security;
 
 import com.securitycam.dao.UserRepository;
 import com.securitycam.model.User;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class MyUserDetailsService implements UserDetailsService {
 
     // API
     @Override
-    public MyUserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
+    public @NonNull MyUserDetails loadUserByUsername(final @NonNull String username) throws UsernameNotFoundException {
             final User user = userRepository.findByUsername(username);
 
             if (user == null) {

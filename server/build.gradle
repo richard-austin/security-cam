@@ -1,7 +1,7 @@
 plugins {
     id 'groovy'
     id 'war'
-    id "org.springframework.boot" version "3.5.7"
+    id "org.springframework.boot" version "4.0.1"
     id 'io.spring.dependency-management' version '1.1.6'
 //    id("com.github.erdi.webdriver-binaries") version "3.2"
 }
@@ -36,8 +36,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.apache.groovy:groovy'
     implementation 'org.apache.groovy:groovy-json:4.0.23'
-    implementation 'org.springframework.boot:spring-boot-starter-websocket:3.5.7'
-    implementation 'org.springframework.boot:spring-boot-starter-validation:3.5.7'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket:4.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:4.0.1'
+    implementation "org.springframework:spring-core:7.0.7"
     implementation 'org.projectlombok:lombok:1.18.34'
 
     implementation project(':onvif-java')
@@ -46,21 +47,21 @@ dependencies {
     implementation 'com.h2database:h2:2.2.224'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-    implementation 'org.springframework.security:spring-security-core:6.4.4'
-    implementation 'org.springframework.security:spring-security-web:6.4.2'
-    implementation 'org.springframework.security:spring-security-config:6.4.2'
+    implementation 'org.springframework.security:spring-security-core:7.0.5'
+    implementation 'org.springframework.security:spring-security-web:7.0.5'
+    implementation 'org.springframework.security:spring-security-config:7.0.5'
     implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
-    implementation 'org.springframework.security:spring-security-crypto:6.4.4'
+    implementation 'org.springframework.security:spring-security-crypto:7.0.5'
     implementation 'org.jboss.aerogear:aerogear-otp-java:1.0.0'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-configuration-processor:3.5.4'
-    implementation 'io.netty:netty-all:4.1.118.Final'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor:4.0.6'
+    implementation 'io.netty:netty-all:4.2.5.Final'
     implementation 'javax.sdp:nist-sdp:1.0'
     implementation 'com.google.code.gson:gson:2.10'
 
-    implementation 'org.eclipse.angus:angus-mail:2.0.3'
+    implementation 'org.eclipse.angus:angus-mail:2.0.4'
     implementation 'jakarta.mail:jakarta.mail-api:2.1.3'
 
     // Onvif dependencies
@@ -89,6 +90,8 @@ dependencies {
     implementation 'org.apache.wss4j:wss4j-ws-security-common:3.0.4'
     implementation 'org.opensaml:opensaml-xacml-impl:4.3.0'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+
+ //   runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
 }
 
 bootRun {

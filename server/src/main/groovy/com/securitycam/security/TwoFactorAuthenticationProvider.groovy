@@ -15,8 +15,7 @@ class TwoFactorAuthenticationProvider extends DaoAuthenticationProvider{
     LogService logService
 
     TwoFactorAuthenticationProvider(MyUserDetailsService userDetailsService, PasswordEncoder passwordEncoder, LogService logService) {
-        super(passwordEncoder)
-        super.userDetailsService = userDetailsService
+        super(userDetailsService)
         super.passwordEncoder = passwordEncoder
         this.logService = logService
     }
