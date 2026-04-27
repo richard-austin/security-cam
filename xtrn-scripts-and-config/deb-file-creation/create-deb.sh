@@ -63,10 +63,10 @@ Version: $VERSION
 Architecture: arm64
 Maintainer: Richard Austin <richard.david.austin@gmail.com>
 Description: A security camera system accessed through a secure web based interface.
-Depends: openjdk-21-jre-headless (>=21.0.0), openjdk-21-jre-headless (<< 21.9.9),
+Depends: openjdk-25-jre-headless (>=25.0.0), openjdk-25-jre-headless (<< 25.9.9),
  tomcat10 (>=10.0.0), tomcat10 (<= 11.0.0),
  tomcat10-admin (>=10.0.0), tomcat10-admin (<= 10.99.99),
- ffmpeg (>=7:6.1.1), ffmpeg (<<7:7.99.99),
+ ffmpeg (>=8), ffmpeg (<< 9),
  motion (>=4.6), motion(<<5.0.0-0),
  curl (>=8.5.0), curl(<<9.0.0),
  nginx (>=1.24.0), nginx(<=1.27.99),
