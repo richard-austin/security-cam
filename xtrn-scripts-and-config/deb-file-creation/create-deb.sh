@@ -66,7 +66,7 @@ Description: A security camera system accessed through a secure web based interf
 Depends: openjdk-25-jre-headless (>=25.0.0), openjdk-25-jre-headless (<< 25.9.9),
  tomcat10 (>=10.0.0), tomcat10 (<= 11.0.0),
  tomcat10-admin (>=10.0.0), tomcat10-admin (<= 10.99.99),
- ffmpeg (>=8), ffmpeg (<< 9),
+ ffmpeg (>=7:8.0.1-3ubuntu2), ffmpeg (<< 7:8.99.99),
  motion (>=4.6), motion(<<5.0.0-0),
  curl (>=8.5.0), curl(<<9.0.0),
  nginx (>=1.24.0), nginx(<=1.27.99),
