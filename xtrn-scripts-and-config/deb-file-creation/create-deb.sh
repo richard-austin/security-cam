@@ -69,7 +69,7 @@ Depends: openjdk-25-jre-headless (>=25.0.0), openjdk-25-jre-headless (<< 25.9.9)
  ffmpeg (>=7:8.0.1-3ubuntu2), ffmpeg (<< 7:8.99.99),
  motion (>=4.6), motion(<<5.0.0-0),
  curl (>=8.5.0), curl(<<9.0.0),
- nginx (>=1.24.0), nginx(<=1.27.99),
+ nginx (>=1.28.0), nginx(<=1.28.99),
  libraspberrypi-bin, chrony,
  network-manager (>= 1.46.0), network-manager (<< 2.0.0),
  moreutils,
