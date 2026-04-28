@@ -66,7 +66,7 @@ public class SecSecurityConfig  {
                             .requestMatchers("/utils/getSMTPClientParamsLocally").permitAll()
                             .anyRequest().authenticated()
                     )
-                  //  .authenticationProvider(new TwoFactorAuthenticationProvider(myUserDetailsService, passwordEncoder(), logService))
+                    .authenticationProvider(new TwoFactorAuthenticationProvider(myUserDetailsService, passwordEncoder(), logService))
                     .rememberMe(rememberMe -> rememberMe
                             .rememberMeServices(rememberMeServices))
                     .formLogin((form) -> form
