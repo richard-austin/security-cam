@@ -23,8 +23,6 @@ import org.onvif.ver20.imaging.wsdl.ImagingPort;
 import org.onvif.ver20.imaging.wsdl.ImagingService;
 import org.onvif.ver20.ptz.wsdl.PTZ;
 import org.onvif.ver20.ptz.wsdl.PtzService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.*;
 import java.util.Calendar;
@@ -50,7 +48,7 @@ public class OnvifDevice {
   private EventPortType events;
   public final EventService eventService = new EventService();
 
-  private static boolean verbose = true; // enable/disable logging of SOAP messages
+  private static boolean verbose = false; // enable/disable logging of SOAP messages
   final SimpleSecurityHandler securityHandler;
 
   private static URL cleanURL(URL u) throws ConnectException {
