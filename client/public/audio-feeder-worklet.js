@@ -79,7 +79,6 @@ class AudioStream {
                 workingBufferSize = 5;
                 maxBufferSizeHardLimit = 15;
                 workingBufferSizeHardLimit = 8;
-                running = true;
 
                 update(val) {
                   if (this.measuring) {
@@ -164,6 +163,7 @@ class AudioStream {
               this.array = [];
               this.arrayOffset = 0;
               this.autoLatencyControl = true;
+              this.running = true;
               let lastAutoLatencyControl = this.autoLatencyControl;
               this.port.onmessage = ({data}) => {
                 if (data?.type === 'shutdown') {
