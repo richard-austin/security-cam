@@ -7,9 +7,8 @@ import jakarta.xml.ws.Holder;
 import org.apache.cxf.binding.soap.Soap12;
 import org.apache.cxf.binding.soap.SoapBindingConfiguration;
 import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.frontend.ClientProxy;
-import org.apache.cxf.interceptor.LoggingInInterceptor;
-import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
@@ -39,7 +38,7 @@ import java.util.concurrent.TimeUnit;
  * @author Modified by Brad Lowe
  */
 public class OnvifDevice {
-  private static final Logger logger = LoggerFactory.getLogger(OnvifDevice.class);
+ // private static final Logger logger = LoggerFactory.getLogger(OnvifDevice.class);
   private static final String DEVICE_SERVICE = "/onvif/device_service";
 
   private final URL url; // Example http://host:port, https://host, http://host, http://ip_address
@@ -51,7 +50,7 @@ public class OnvifDevice {
   private EventPortType events;
   public final EventService eventService = new EventService();
 
-  private static boolean verbose = false; // enable/disable logging of SOAP messages
+  private static boolean verbose = true; // enable/disable logging of SOAP messages
   final SimpleSecurityHandler securityHandler;
 
   private static URL cleanURL(URL u) throws ConnectException {
@@ -88,7 +87,6 @@ public class OnvifDevice {
    * @param password User's password to login
    * @throws ConnectException Exception gets thrown, if device isn't accessible or invalid and
    *     doesn't answer to SOAP messages
-   * @throws SOAPException
    */
   public OnvifDevice(String deviceIp, String user, String password)
           throws ConnectException, SOAPException, MalformedURLException, URISyntaxException {
@@ -105,7 +103,6 @@ public class OnvifDevice {
    *     http://)
    * @throws ConnectException Exception gets thrown, if device isn't accessible or invalid and
    *     doesn't answer to SOAP messages
-   * @throws SOAPException
    */
   public OnvifDevice(String hostIp) throws ConnectException, SOAPException, MalformedURLException, URISyntaxException {
     this(hostIp, null, null);
@@ -116,7 +113,6 @@ public class OnvifDevice {
    * proxy.
    *
    * @throws ConnectException Get thrown if device doesn't give answers to GetCapabilities()
-   * @throws SOAPException
    */
   protected void init() throws ConnectException, SOAPException {
 
@@ -165,7 +161,13 @@ public class OnvifDevice {
   public JaxWsProxyFactoryBean getServiceProxy(BindingProvider servicePort, String serviceAddr) {
 
     JaxWsProxyFactoryBean proxyFactory = new JaxWsProxyFactoryBean();
-    proxyFactory.getHandlers();
+
+    LoggingFeature loggingFeature = new LoggingFeature();
+    loggingFeature.setPrettyLogging(verbose);
+    loggingFeature.setVerbose(verbose);
+    loggingFeature.setLogMultipart(true);
+    proxyFactory.getFeatures().add(loggingFeature);
+
 
     if (serviceAddr != null) proxyFactory.setAddress(serviceAddr);
     proxyFactory.setServiceClass(servicePort.getClass());
@@ -175,13 +177,6 @@ public class OnvifDevice {
     config.setVersion(Soap12.getInstance());
     proxyFactory.setBindingConfig(config);
     Client deviceClient = ClientProxy.getClient(servicePort);
-
-    if (verbose) {
-      // these logging interceptors are depreciated, but should be fine for debugging/development
-      // use.
-      proxyFactory.getOutInterceptors().add(new LoggingOutInterceptor());
-      proxyFactory.getInInterceptors().add(new LoggingInInterceptor());
-    }
 
     HTTPConduit http = (HTTPConduit) deviceClient.getConduit();
     if (securityHandler != null) proxyFactory.getHandlers().add(securityHandler);
