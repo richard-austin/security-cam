@@ -2,8 +2,8 @@ import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from
 import {CameraService, cameraType} from '../cameras/camera.service';
 import {Camera, Stream} from '../cameras/Camera';
 import {ReportingComponent} from '../reporting/reporting.component';
-import { HttpErrorResponse } from '@angular/common/http';
-import {Subscription, timer} from 'rxjs';
+import {HttpErrorResponse} from '@angular/common/http';
+import {firstValueFrom, Subscription, timer} from 'rxjs';
 import {Device, IdleTimeoutStatusMessage, Message, messageType, UtilsService} from '../shared/utils.service';
 import {MatDialog} from '@angular/material/dialog';
 import {IdleTimeoutModalComponent} from '../idle-timeout-modal/idle-timeout-modal.component';
@@ -15,10 +15,10 @@ import {CloudProxyService, IsMQConnected} from "../cloud-proxy/cloud-proxy.servi
 import {MatCheckbox} from "@angular/material/checkbox";
 
 @Component({
-    selector: 'app-nav',
-    templateUrl: './nav.component.html',
-    styleUrls: ['./nav.component.scss'],
-    standalone: false
+  selector: 'app-nav',
+  templateUrl: './nav.component.html',
+  styleUrls: ['./nav.component.scss'],
+  standalone: false
 })
 export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -44,12 +44,15 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly enableAdHocDeviceHosting = true;
 
   constructor(public cameraSvc: CameraService, public utilsService: UtilsService, private userIdle: UserIdleService, private dialog: MatDialog, private cpService: CloudProxyService) {
-    this.cpService.getStatus().subscribe((status: boolean) => {
+    this.cpService.getStatus().subscribe({
+      next: (status: boolean) => {
         this.utilsService.cloudProxyRunning = status;
       },
-      reason => {
-        this.reporting.errorMessage = reason;
-      });
+      error:
+        reason => {
+          this.reporting.errorMessage = reason;
+        }
+    });
   }
 
   setVideoStream(cam: Camera, stream: Stream): void {
@@ -64,7 +67,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     let suuid = 'suuid=';
     let uri = stream.recording.recording_src_url;
     let index = uri.indexOf(suuid);
-    let streamName = uri.substring(index + suuid.length, uri.length-1);
+    let streamName = uri.substring(index + suuid.length, uri.length - 1);
     window.location.href = '#/recording/' + streamName;
   }
 
@@ -77,7 +80,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   adHocDeviceAdmin(device: Device) {
-    window.location.href = '#/camadmin/' +btoa(device.ipAddress);
+    window.location.href = '#/camadmin/' + btoa(device.ipAddress);
   }
 
   changePassword() {
@@ -97,25 +100,25 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   hardwareDecoding(checked: boolean) {
-      NavComponent.setCookie("hardwareDecoding", checked ? "true" : "false", 600);
-  }
-  useCaching(checked: boolean) {
-    NavComponent.setCookie("useCaching", checked ? "true" : "false", 600);
-    this.cameraSvc.setUseCaching(checked).subscribe((resp) => {
-    });
+    NavComponent.setCookie("hardwareDecoding", checked ? "true" : "false", 600);
   }
 
-  static setCookie(cname:string, cvalue:string, exdays:number) {
+  async useCaching(checked: boolean) {
+    NavComponent.setCookie("useCaching", checked ? "true" : "false", 600);
+    await firstValueFrom(this.cameraSvc.setUseCaching(checked));
+  }
+
+  static setCookie(cname: string, cvalue: string, exdays: number) {
     const d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-    let expires = "expires="+d.toUTCString();
+    let expires = "expires=" + d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
   }
 
-  static getCookie(cname:string) {
+  static getCookie(cname: string) {
     let name = cname + "=";
     let ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
+    for (let i = 0; i < ca.length; i++) {
       let c = ca[i];
       while (c.charAt(0) == ' ') {
         c = c.substring(1);
@@ -141,28 +144,32 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getTemperature(): void {
-    this.utilsService.getTemperature().subscribe((tmp) => {
-        let temperature: string = tmp.temp;
-        let idx1: number = temperature.indexOf('=');
-        let idx2: number = temperature.lastIndexOf('\'');
-        if (idx1 !== -1 && idx2 !== -1) {
-          let strTemp: string = temperature.substr(idx1 + 1, idx2 - idx1);
-          this.temperature = parseFloat(strTemp);
-          this.noTemperature = false;
-          if (this.temperature < 50) {
-            this.tempAlertClass = 'success';
-          } else if (this.temperature < 70) {
-            this.tempAlertClass = 'warning';
+    this.utilsService.getTemperature().subscribe(
+      {
+        next: (tmp) => {
+          let temperature: string = tmp.temp;
+          let idx1: number = temperature.indexOf('=');
+          let idx2: number = temperature.lastIndexOf('\'');
+          if (idx1 !== -1 && idx2 !== -1) {
+            let strTemp: string = temperature.substr(idx1 + 1, idx2 - idx1);
+            this.temperature = parseFloat(strTemp);
+            this.noTemperature = false;
+            if (this.temperature < 50) {
+              this.tempAlertClass = 'success';
+            } else if (this.temperature < 70) {
+              this.tempAlertClass = 'warning';
+            } else {
+              this.tempAlertClass = 'danger';
+            }
           } else {
-            this.tempAlertClass = 'danger';
+            this.noTemperature = false;
           }
-        } else {
-          this.noTemperature = false;
         }
-      },
-      () => {
-        this.noTemperature = true;
-        this.tempAlertClass = 'alert-danger';
+        ,
+        error: () => {
+          this.noTemperature = true;
+          this.tempAlertClass = 'alert-danger';
+        }
       });
   }
 
@@ -271,7 +278,7 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.cameraSvc.getCameras();
   }
 
-  get adHocDevices() : Array<Device> {
+  get adHocDevices(): Array<Device> {
     return this.utilsService.adHocDevices;
   }
 
@@ -321,11 +328,11 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!this.isGuest) {
       this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
-            this.utilsService.activeMQTransportActive = status.transportActive;
-          },
-          reason => {
-            this.reporting.errorMessage = reason;
-          });
+          this.utilsService.activeMQTransportActive = status.transportActive;
+        },
+        reason => {
+          this.reporting.errorMessage = reason;
+        });
     }
 
     window.onstorage = (ev: StorageEvent) => {
@@ -343,12 +350,12 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     let hwdc = NavComponent.getCookie("hardwareDecoding");
     if (hwdc === "") {
-        NavComponent.setCookie("hardwareDecoding", "true", 600);
-        hwdc = "true";
+      NavComponent.setCookie("hardwareDecoding", "true", 600);
+      hwdc = "true";
     }
-     const sub = timer(30).subscribe(() => {
-        sub.unsubscribe();
-        this.hardwareDecodingCheckBox.checked = hwdc === "true";
+    const sub = timer(30).subscribe(() => {
+      sub.unsubscribe();
+      this.hardwareDecodingCheckBox.checked = hwdc === "true";
     });
 
     let useCaching = NavComponent.getCookie("useCaching");
@@ -356,10 +363,10 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
       NavComponent.setCookie("useCaching", "true", 600);
       useCaching = "false";
     }
-    const sub2 = timer(30).subscribe(() => {
+    const sub2 = timer(30).subscribe(async () => {
       sub2.unsubscribe();
       this.useCachingCheckBox.checked = useCaching === "true";
-      this.useCaching(useCaching === "true");
+      await this.useCaching(useCaching === "true");
     });
 
     // If the camera service got any errors while getting the camera setup, then we report it here.
