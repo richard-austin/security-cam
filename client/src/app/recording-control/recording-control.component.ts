@@ -19,7 +19,7 @@ import AudioControlComponent from '../video/audio-control/audio-control.componen
 import {AudioSettings} from '../video/AudioSettings';
 import {NavComponent} from '../nav/nav.component';
 
-declare let saveAs: (blob: Blob, name?: string, type?: string) => {};
+declare let saveAs: (blob: Blob | undefined, name?: string, type?: string) => {};
 
 declare global {
   interface Date {
@@ -231,7 +231,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   async downloadRecording() {
     try {
       this.downloading = true;
-      let blob: Blob = await this.motionService.downloadRecording(this.stream, this.manifest);
+      let blob: Blob | undefined = await this.motionService.downloadRecording(this.stream, this.manifest);
       saveAs(blob, this.manifest.replace('_.m3u8', '.mp4'));
     } catch (error: any) {
       let reader: FileReader = new FileReader();
