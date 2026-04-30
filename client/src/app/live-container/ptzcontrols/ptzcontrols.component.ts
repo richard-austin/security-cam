@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {Component, input, InputSignal, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {Camera} from 'src/app/cameras/Camera';
 import {ReportingComponent} from 'src/app/reporting/reporting.component';
@@ -16,8 +16,8 @@ import {MatDivider} from "@angular/material/divider";
   imports: [SharedAngularMaterialModule, PTZButtonComponent, MatDivider, PresetButtonComponent, MatSlideToggle]
 })
 export class PTZControlsComponent implements OnInit {
-  @Input() camera!: Camera;
-  @Input() reporting!: ReportingComponent;
+  camera: InputSignal<Camera> = input.required<Camera>();
+  reporting: InputSignal<ReportingComponent> = input.required<ReportingComponent>();
   @ViewChildren(MatSlideToggle) slideToggles!: QueryList<MatSlideToggle>;
   eMoveDirections: any = eMoveDirections;
   savePreset: boolean = false;
@@ -69,12 +69,12 @@ export class PTZControlsComponent implements OnInit {
 
   ngOnInit(): void {
     this.isGuest = this.utils.isGuestAccount;
-    this.ptzService.ptzPresetsInfo(new PTZPresetsInfoCommand(this.camera)).subscribe((result) => {
+    this.ptzService.ptzPresetsInfo(new PTZPresetsInfoCommand(this.camera())).subscribe((result) => {
         this.presetsInfo = result;
         this.maxPresets = result.maxPresets > 32 ? 32 : this.presetsInfo.maxPresets;
       },
       reason => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
       })
   }
 
