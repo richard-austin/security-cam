@@ -1,4 +1,11 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {
+  Component,
+  input,
+  InputSignal,
+  OnInit,
+  output,
+  OutputEmitterRef
+} from '@angular/core';
 import {
   AbstractControl,
   UntypedFormControl,
@@ -21,7 +28,7 @@ import {UtilsService} from "../../shared/utils.service";
  */
 export function isValidDeviceIP(componentObject: AddAsOnvifDeviceComponent): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    let cams = componentObject.cameras;
+    let cams = componentObject.cameras();
     let retVal: boolean = false;
     let badHost: boolean;
     try {
@@ -51,10 +58,10 @@ export function isValidDeviceIP(componentObject: AddAsOnvifDeviceComponent): Val
   standalone: true
 })
 export class AddAsOnvifDeviceComponent implements OnInit {
-  @Output() hideDialogue: EventEmitter<void> = new EventEmitter<void>();
-  @Input() reporting!: ReportingComponent
-  @Input() cameras!: Map<string, Camera>;
-  @Output() startFindCameraDetails: EventEmitter<string> = new EventEmitter<string>();
+  hideDialogue: OutputEmitterRef<void> = output<void>();
+  reporting: InputSignal<ReportingComponent> = input.required<ReportingComponent>();
+  cameras: InputSignal<Map<string, Camera>> = input.required<Map<string, Camera>>();
+  startFindCameraDetails: OutputEmitterRef<string> = output<string>();
 
   constructor() { }
   onvifUrl: string = 'http://192.168.1.1:8080/onvif/device_service';
