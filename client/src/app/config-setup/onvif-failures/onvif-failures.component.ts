@@ -1,4 +1,12 @@
-import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  input,
+  InputSignal,
+  OnInit,
+  output,
+  OutputEmitterRef
+} from '@angular/core';
 import {CameraService} from "../../cameras/camera.service";
 import {Camera} from "../../cameras/Camera";
 import {ReportingComponent} from "../../reporting/reporting.component";
@@ -7,6 +15,7 @@ import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from
 import {SharedModule} from "../../shared/shared.module";
 import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
 import {UtilsService} from "../../shared/utils.service";
+
 @Component({
   selector: 'app-onvif-failures',
   templateUrl: './onvif-failures.component.html',
@@ -18,10 +27,10 @@ import {UtilsService} from "../../shared/utils.service";
   standalone: true
 })
 export class OnvifFailuresComponent implements OnInit, AfterViewInit {
-  @Input() failures!: Map<string, string>;
-  @Input() cameras!: Map<string, Camera>;
-  @Input() reporting!: ReportingComponent;
-  @Output() fixUpCamerasData: EventEmitter<void> = new EventEmitter<void>();
+  failures: InputSignal<Map<string, string>> = input.required<Map<string, string>>();
+  cameras: InputSignal<Map<string, Camera>> = input.required<Map<string, Camera>>();
+  reporting: InputSignal<ReportingComponent> = input.required<ReportingComponent>();
+  fixUpCamerasData: OutputEmitterRef<void> = output<void>();
 
   list$!: BehaviorSubject<[string, string][]>;
   failControls!: UntypedFormArray;
@@ -38,42 +47,42 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   discover(onvifUrl: string, onvifUserName: string, onvifPassword: string) {
     this.gettingCameraDetails = true;
     this.onvifUrl = onvifUrl
-    this.cameraSvc.discoverCameraDetails(onvifUrl, onvifUserName, onvifPassword).subscribe((result: {
-        cam: Camera,
-        failed: Map<string, string>
-      }) => {
+    this.cameraSvc.discoverCameraDetails(onvifUrl, onvifUserName, onvifPassword).subscribe({
+      next: (result: { cam: Camera, failed: Map<string, string> }) => {
         if (result.failed.size == 1) {
           const fKey = result.failed.keys().next().value;
-          if (this.failures === undefined)
-            this.failures = result.failed;
-          else if (fKey !== undefined && !this.failures.has(fKey)) {
+          // if (this.failures() === undefined)
+          //   this.failures = result.failed;
+          /*else */if (fKey !== undefined && !this.failures().has(fKey)) {
             const fVal = result.failed.values().next().value;
-            if(fVal !== undefined)
-              this.failures.set(fKey, fVal);
+            if (fVal !== undefined)
+              this.failures().set(fKey, fVal);
           }
         }
         if (result.cam !== undefined) {
-          this.cameras.set('camera' + (this.cameras.size + 1), result.cam);
+          this.cameras().set('camera' + (this.cameras().size + 1), result.cam);
           this.fixUpCamerasData.emit();
-          this.failures.delete(onvifUrl);
+          this.failures().delete(onvifUrl);
           // if(this.failures.size == 0)
           //     this.failures = undefined;
         } else {
           let msg = "Couldn't get camera details: - ";
           if (result.failed !== undefined && result.failed.size > 0)
             msg += result.failed.entries().next().value
-          this.reporting.warningMessage = msg
+          this.reporting().warningMessage = msg
         }
         this.gettingCameraDetails = false;
       },
-      reason => {
-        this.gettingCameraDetails = false;
-        this.reporting.errorMessage = reason;
-      });
+      error:
+        reason => {
+          this.gettingCameraDetails = false;
+          this.reporting().errorMessage = reason;
+        }
+    });
   }
 
   setupTableFormControls() {
-    this.list$ = new BehaviorSubject<[string, string][]>(Array.from(this.failures));
+    this.list$ = new BehaviorSubject<[string, string][]>(Array.from(this.failures()));
     const toFailureGroups = this.list$.value.map(camera => {
       return new UntypedFormGroup(
         {
@@ -99,7 +108,8 @@ export class OnvifFailuresComponent implements OnInit, AfterViewInit {
   getControl(index: number, fieldName: string): UntypedFormControl {
     return this.failControls?.at(index).get(fieldName) as UntypedFormControl;
   }
-  anyInvalid(i: number) : boolean {
+
+  anyInvalid(i: number): boolean {
     return this.failControls?.at(i).invalid;
   }
 

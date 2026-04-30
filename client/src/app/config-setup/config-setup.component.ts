@@ -736,7 +736,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
     if (this.camForRecordingSetup === camId)
       this.recordingSetupComponents.forEach((r) => {
-        if (r.camKey === camId)
+        if (r.camKey() === camId)
           r.setupData();  // Reload recording setup component from main config data
       });
   }
