@@ -1,8 +1,7 @@
 import {
   AfterViewInit,
   Component,
-  ElementRef,
-  Input,
+  ElementRef, input, InputSignal,
   OnDestroy,
   OnInit, signal,
   ViewChild
@@ -33,7 +32,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
   @ViewChild(ReportingComponent) reporting!: ReportingComponent;
   @ViewChild('videoControls') videoControlsEL!: ElementRef<HTMLDivElement>;
-  @Input() isLive: boolean = false;
+  isLive: InputSignal<boolean> = input<boolean>(false);
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
@@ -208,7 +207,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.video = this.videoEl.nativeElement;
-    this.mediaFeeder.init(this.isLive, this.video, this.reporting);
+    this.mediaFeeder.init(this.isLive(), this.video, this.reporting);
     this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
     this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
     this.video.addEventListener('fullscreenchange', () => {
@@ -217,7 +216,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.video.ontimeupdate = () => {
       if (this.video.currentTime !== null && !isNaN(this.video.currentTime))
         this.currentTime = new Date(this.video.currentTime * 1000).toISOString().substring(11, 19);
-      if (!this.isLive && this.video.duration !== null && !isNaN(this.video.duration))
+      if (!this.isLive() && this.video.duration !== null && !isNaN(this.video.duration))
         this.totalTime = new Date(this.video.duration * 1000).toISOString().substring(11, 19);
     };
 

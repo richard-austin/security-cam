@@ -37,7 +37,7 @@ class AudioControlComponent implements AfterViewInit {
   setAudioLatencyLimiting: OutputEmitterRef<boolean> =output<boolean>();
   mute: ModelSignal<boolean> = model<boolean>(false);
   level: ModelSignal<number> = model.required<number>();
-  audioLatencyLimiting: ModelSignal<boolean> = model<boolean>(false);
+  audioLatencyLimiting: ModelSignal<boolean | undefined> = model<boolean | undefined>(undefined);
   lastLevel!: number;
 
   toggleMuteAudio() {
