@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, output, OutputEmitterRef} from '@angular/core';
 import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/shared-angular-material.module";
 
 @Component({
@@ -10,7 +10,7 @@ import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/
   styleUrl: './confirm-can-deactivate.component.scss'
 })
 export class ConfirmCanDeactivateComponent {
-  @Output() signalConfirmExit: EventEmitter<boolean> = new EventEmitter<boolean>();
+  signalConfirmExit: OutputEmitterRef<boolean> = output<boolean>();
 
   confirmExit(exit: boolean) {
     this.signalConfirmExit.emit(exit);

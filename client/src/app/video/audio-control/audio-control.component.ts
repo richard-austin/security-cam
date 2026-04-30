@@ -1,4 +1,10 @@
-import {AfterViewInit, Component, EventEmitter, Input, Output} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  model, ModelSignal,
+  output,
+  OutputEmitterRef
+} from '@angular/core';
 import {MatCard} from "@angular/material/card";
 import {MatSlider, MatSliderThumb} from "@angular/material/slider";
 import {FormsModule} from "@angular/forms";
@@ -26,30 +32,30 @@ import {UtilsService} from "../../shared/utils.service";
   styleUrl: './audio-control.component.scss'
 })
 class AudioControlComponent implements AfterViewInit {
-  @Output() muteAudio = new EventEmitter<boolean>();
-  @Output() setLevel = new EventEmitter<number>();
-  @Output() setAudioLatencyLimiting = new EventEmitter<boolean>();
-  @Input() mute: boolean = false;
-  @Input() level!: number;
-  @Input() audioLatencyLimiting!: boolean;
+  muteAudio: OutputEmitterRef<boolean> = output<boolean>()
+  setLevel = output<number>();
+  setAudioLatencyLimiting: OutputEmitterRef<boolean> =output<boolean>();
+  mute: ModelSignal<boolean> = model<boolean>(false);
+  level: ModelSignal<number> = model.required<number>();
+  audioLatencyLimiting: ModelSignal<boolean> = model<boolean>(false);
   lastLevel!: number;
 
   toggleMuteAudio() {
-    this.mute = !this.mute;
-    if (this.mute) {
-      this.lastLevel = this.level;
-      this.level = 0;
+    this.mute.set(!this.mute());
+    if (this.mute()) {
+      this.lastLevel = this.level();
+      this.level.set(0);
     } else
-      this.level = this.lastLevel;
-    this.muteAudio.emit(this.mute);
+      this.level.set(this.lastLevel);
+    this.muteAudio.emit(this.mute());
   }
 
   setVolume() {
-    this.setLevel.emit(this.level);
+    this.setLevel.emit(this.level());
   }
 
   ngAfterViewInit() {
-    this.lastLevel = this.level;
+    this.lastLevel = this.level();
   }
 
   zeroTo100(value: number) {
@@ -57,7 +63,7 @@ class AudioControlComponent implements AfterViewInit {
   }
 
   setLatencyLimiting($event: MatCheckboxChange) {
-    this.audioLatencyLimiting = $event.checked;
+    this.audioLatencyLimiting.set($event.checked);
     this.setAudioLatencyLimiting.emit($event.checked);
   }
 
