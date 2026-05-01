@@ -252,15 +252,15 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
       camera.simpleItemNegativeValue = cam.simpleItemNegativeValue;
 
       cam.streams.forEach((stream, key) => {
-          const targetStream = camera.streams.get(key);
-          if (targetStream) {
-            Object.assign(targetStream.recording, stream.recording);
-            Object.assign(targetStream.motion, stream.motion);
-            targetStream.video_height = stream.video_height;
-            targetStream.video_width = stream.video_width;
-            targetStream.preambleTime = stream.preambleTime;
-            targetStream.rec_num = stream.rec_num;  // Don't really need to do this one as it's set up in FixUpCameras.
-          }
+        const targetStream = camera.streams.get(key);
+        if (targetStream) {
+          Object.assign(targetStream.recording, stream.recording);
+          Object.assign(targetStream.motion, stream.motion);
+          targetStream.video_height = stream.video_height;
+          targetStream.video_width = stream.video_width;
+          targetStream.preambleTime = stream.preambleTime;
+          targetStream.rec_num = stream.rec_num;  // Don't really need to do this one as it's set up in FixUpCameras.
+        }
       });
 
       this.hideDialogue.emit();
@@ -283,13 +283,14 @@ export class RecordingSetupComponent implements OnInit, AfterViewInit {
             control.setValue(stream.motion.mask_file);
             if (control.valid) {
               // Upload file to server
-              this.cameraSvc.uploadMaskFile(fileUploadInput?.files[0])
-                .subscribe(() => {
+              this.cameraSvc.uploadMaskFile(fileUploadInput?.files[0]).subscribe({
+                  complete: () => {
                     this.reporting().successMessage = stream.motion.mask_file + ' uploaded successfully'
                   },
-                  (reason) => {
+                  error: (reason) => {
                     this.reporting().errorMessage = reason
-                  });
+                  }
+                });
             } else
               this.reporting().errorMessage = new HttpErrorResponse({
                 error: "The file " + stream.motion.mask_file + (control.errors?.mask_file ? " is not a valid mask file"
