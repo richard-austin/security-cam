@@ -10,9 +10,9 @@ import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/
 import {MatDivider} from "@angular/material/divider";
 
 @Component({
-    selector: 'app-ptzcontrols',
-    templateUrl: './ptzcontrols.component.html',
-    styleUrls: ['./ptzcontrols.component.scss'],
+  selector: 'app-ptzcontrols',
+  templateUrl: './ptzcontrols.component.html',
+  styleUrls: ['./ptzcontrols.component.scss'],
   imports: [SharedAngularMaterialModule, PTZButtonComponent, MatDivider, PresetButtonComponent, MatSlideToggle]
 })
 export class PTZControlsComponent implements OnInit {
@@ -69,13 +69,15 @@ export class PTZControlsComponent implements OnInit {
 
   ngOnInit(): void {
     this.isGuest = this.utils.isGuestAccount;
-    this.ptzService.ptzPresetsInfo(new PTZPresetsInfoCommand(this.camera())).subscribe((result) => {
+    this.ptzService.ptzPresetsInfo(new PTZPresetsInfoCommand(this.camera())).subscribe({
+      next: (result) => {
         this.presetsInfo = result;
         this.maxPresets = result.maxPresets > 32 ? 32 : this.presetsInfo.maxPresets;
       },
-      reason => {
+      error: reason => {
         this.reporting().errorMessage = reason;
-      })
+      }
+    });
   }
 
   protected readonly UtilsService = UtilsService;
