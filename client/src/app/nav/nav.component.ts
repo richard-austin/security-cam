@@ -217,9 +217,6 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
         //  width: '450px',
         data: {idle: idle, remainingSecs: remainingSecs}
       });
-
-      // this.idleTimeoutDialogRef.afterClosed().subscribe(res => {
-      // });
     } else {
       data = this.idleTimeoutDialogRef.componentInstance.data;
       data.idle = idle;
@@ -327,12 +324,14 @@ export class NavComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initializeWebSocketConnection();
 
     if (!this.isGuest) {
-      this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
+      this.cpService.isTransportActive().subscribe({
+        next: (status: IsMQConnected) => {
           this.utilsService.activeMQTransportActive = status.transportActive;
         },
-        reason => {
+        error: reason => {
           this.reporting.errorMessage = reason;
-        });
+        }
+      });
     }
 
     window.onstorage = (ev: StorageEvent) => {
