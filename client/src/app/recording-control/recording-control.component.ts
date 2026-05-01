@@ -1,4 +1,13 @@
-import {AfterViewInit, ChangeDetectorRef, Component, signal, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  signal,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {VideoComponent} from '../video/video.component';
 import {Camera, Stream} from '../cameras/Camera';
 import {CameraService, DateSlot, LocalMotionEvent, LocalMotionEvents} from '../cameras/camera.service';
@@ -69,8 +78,6 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   farewell = signal('leaving');
 
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, private motionService: MotionService, private utilsService: UtilsService, private cd: ChangeDetectorRef) {
-    // route.url.subscribe((u:UrlSegment[]) => {
-    // });
     this.initialised = false;
     this.route.paramMap.subscribe((paramMap) => {
       let streamName: string = paramMap.get('streamName') as string;
@@ -164,7 +171,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
         this.selectedPlaybackMode = 'startPause';
 
         // Get the motion events for this camera (by motionName)
-        this.motionService.getMotionEvents(this.cam, this.stream).subscribe((events: LocalMotionEvents) => {
+        this.motionService.getMotionEvents(this.cam, this.stream).subscribe({
+          next: (events: LocalMotionEvents) => {
             this.dateSlots = this.createDateSlots(events);
             // Set to the most recent date
             if (this.dateSlots.length > 0) {
@@ -175,9 +183,10 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
               this.noVideo = true;
             }
           },
-          (error) => {
+          error: (error) => {
             this.reporting.errorMessage = error;
-          });
+          }
+        });
         this.setInitialLevel(0.4, false, true);
       }
     } else {
@@ -218,14 +227,15 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    * deleteRecording: Delete the set of files comprising the current recording
    */
   deleteRecording() {
-    this.motionService.deleteRecording(this.stream, this.manifest).subscribe(() => {
+    this.motionService.deleteRecording(this.stream, this.manifest).subscribe({
+      next: () => {
         this.reporting.successMessage = 'Recording ' + this.selector.value.dateTime + ' deleted';
         timer(2000).subscribe(() => this.setupRecording());  // Show the new latest recording
       },
-      reason => {
+      error: reason => {
         this.reporting.errorMessage = reason;
       }
-    );
+    });
   }
 
   async downloadRecording() {
