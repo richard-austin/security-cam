@@ -1,8 +1,8 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
-import { HttpErrorResponse } from "@angular/common/http";
-import { UtilsService } from '../shared/utils.service';
+import {HttpErrorResponse} from "@angular/common/http";
+import {UtilsService} from '../shared/utils.service';
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {SharedModule} from "../shared/shared.module";
 
@@ -10,49 +10,49 @@ import {SharedModule} from "../shared/shared.module";
   selector: 'app-change-password2',
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss'],
-  imports:[SharedModule, SharedAngularMaterialModule]
+  imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class ChangePasswordComponent implements OnInit {
 
   changePasswordForm!: UntypedFormGroup;
-  @ViewChild(ReportingComponent) reporting!:ReportingComponent;
+  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
 
-  constructor(private utilsService: UtilsService) { }
+  constructor(private utilsService: UtilsService) {
+  }
 
-  changePasswordButtonDisabled():boolean {
+  changePasswordButtonDisabled(): boolean {
     return this.anyInvalid();
   }
 
-  hasError = (controlName: string, errorName: string):boolean =>{
+  hasError = (controlName: string, errorName: string): boolean => {
     return this.changePasswordForm.controls[controlName].hasError(errorName);
   }
 
   formSubmitted() {
-    let oldPassword:AbstractControl = this.changePasswordForm.controls['oldPassword'];
-    let newPassword:AbstractControl = this.changePasswordForm.controls['newPassword'];
+    let oldPassword: AbstractControl = this.changePasswordForm.controls['oldPassword'];
+    let newPassword: AbstractControl = this.changePasswordForm.controls['newPassword'];
     let confirmNewPassword: AbstractControl = this.changePasswordForm.controls['confirmNewPassword'];
 
-    this.utilsService.changePassword(oldPassword.value, newPassword.value, confirmNewPassword.value).subscribe(() => {
-          this.reporting.successMessage="Password changed";
-        },
-        (reason: HttpErrorResponse) => {
-          if(reason.status === 400)
-          {
-            for(const key of Object.keys(reason.error)) {
-              if(key === 'oldPassword')
-                this.invalidPassword();
-            }
-            this.reporting.errorMessage = reason;
+    this.utilsService.changePassword(oldPassword.value, newPassword.value, confirmNewPassword.value).subscribe({
+      next: () => {
+        this.reporting.successMessage = "Password changed";
+      },
+      error: (reason: HttpErrorResponse) => {
+        if (reason.status === 400) {
+          for (const key of Object.keys(reason.error)) {
+            if (key === 'oldPassword')
+              this.invalidPassword();
           }
-          else
-            this.reporting.errorMessage = reason;
-        });
+          this.reporting.errorMessage = reason;
+        } else
+          this.reporting.errorMessage = reason;
+      }
+    });
   }
 
-  invalidPassword()
-  {
+  invalidPassword() {
     let oldPasswordCtl: AbstractControl = this.changePasswordForm.controls['oldPassword'];
-    let errors:{[key: string]: any} = {pattern: {badPassword:"Password Incorrect"}};
+    let errors: { [key: string]: any } = {pattern: {badPassword: "Password Incorrect"}};
     oldPasswordCtl.setErrors(errors);
     oldPasswordCtl.markAsTouched({onlySelf: true}); //updateValueAndValidity({onlySelf: true, emitEvent: true});
   }
@@ -63,15 +63,15 @@ export class ChangePasswordComponent implements OnInit {
    * @param control
    */
   comparePasswords(control: AbstractControl): { [key: string]: boolean } | null {
-    let fg: UntypedFormGroup=control.parent as UntypedFormGroup;
+    let fg: UntypedFormGroup = control.parent as UntypedFormGroup;
     let ac: AbstractControl = fg?.controls['newPassword'];
     if (control.value !== undefined && control.value !== ac?.value) {
-      return { 'confirmNewPassword': true };
+      return {'confirmNewPassword': true};
     }
     return null;
   }
 
-  anyInvalid(): boolean{
+  anyInvalid(): boolean {
     return this.changePasswordForm.invalid;
   }
 
