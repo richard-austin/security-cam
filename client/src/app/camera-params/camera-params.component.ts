@@ -9,9 +9,9 @@ import {SharedAngularMaterialModule} from "../shared/shared-angular-material/sha
 import {SharedModule} from "../shared/shared.module";
 
 @Component({
-    selector: 'app-camera-params',
-    templateUrl: './camera-params.component.html',
-    styleUrls: ['./camera-params.component.scss'],
+  selector: 'app-camera-params',
+  templateUrl: './camera-params.component.html',
+  styleUrls: ['./camera-params.component.scss'],
   imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -34,46 +34,46 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
       let camera: string = paramMap.get('camera') as string;
       camera = atob(camera);
       let cams = cameraSvc.getCameras()
-        cams.forEach((cam) => {
-          if (cam.address == camera) {
-            this.cam = cam;
-            this.camType() === cameraType.sv3c ?
-              this.camControlFormGroup = new UntypedFormGroup({
-                irselector: new UntypedFormControl('', [Validators.required]),
-                cameraName: new UntypedFormControl('', [Validators.required, Validators.maxLength(25)]),
-                dateFormat: new UntypedFormControl('', [Validators.required, Validators.maxLength(30)]),
-                startDate: new UntypedFormControl('', [Validators.required]),
-                softVersion: new UntypedFormControl('', [Validators.required]),
-                model: new UntypedFormControl('', [Validators.required])
-              }) :
-              this.camControlFormGroup = new UntypedFormGroup({
-                lampStatus: new UntypedFormControl('', [Validators.required]),
-                wdrStatus: new UntypedFormControl('', [Validators.required]),
-                cameraName: new UntypedFormControl('', [Validators.required, Validators.maxLength(25)]),
-                dateFormat: new UntypedFormControl('', [Validators.required, Validators.maxLength(30)]),
-                startDate: new UntypedFormControl('', [Validators.required]),
-                softVersion: new UntypedFormControl('', [Validators.required]),
-                model: new UntypedFormControl('', [Validators.required])
-              });
-            if (this.camType() === cameraType.sv3c) {
-              this.irselector = this.camControlFormGroup.controls['irselector'];
-            } else {
-              this.lampStatus = this.camControlFormGroup.controls['lampStatus'];
-              this.wdrStatus = this.camControlFormGroup.controls['wdrStatus'];
-            }
-            this.cameraName = this.camControlFormGroup.controls['cameraName'];
-            this.dateFormat = this.camControlFormGroup.controls['dateFormat'];
-            this.startDate = this.camControlFormGroup.controls['startDate'];
-            this.softVersion = this.camControlFormGroup.controls['softVersion'];
-            this.model = this.camControlFormGroup.controls['model'];
-
-            if (this.initialised) {
-              this.ngAfterViewInit();
-            }
-            return;
+      cams.forEach((cam) => {
+        if (cam.address == camera) {
+          this.cam = cam;
+          this.camType() === cameraType.sv3c ?
+            this.camControlFormGroup = new UntypedFormGroup({
+              irselector: new UntypedFormControl('', [Validators.required]),
+              cameraName: new UntypedFormControl('', [Validators.required, Validators.maxLength(25)]),
+              dateFormat: new UntypedFormControl('', [Validators.required, Validators.maxLength(30)]),
+              startDate: new UntypedFormControl('', [Validators.required]),
+              softVersion: new UntypedFormControl('', [Validators.required]),
+              model: new UntypedFormControl('', [Validators.required])
+            }) :
+            this.camControlFormGroup = new UntypedFormGroup({
+              lampStatus: new UntypedFormControl('', [Validators.required]),
+              wdrStatus: new UntypedFormControl('', [Validators.required]),
+              cameraName: new UntypedFormControl('', [Validators.required, Validators.maxLength(25)]),
+              dateFormat: new UntypedFormControl('', [Validators.required, Validators.maxLength(30)]),
+              startDate: new UntypedFormControl('', [Validators.required]),
+              softVersion: new UntypedFormControl('', [Validators.required]),
+              model: new UntypedFormControl('', [Validators.required])
+            });
+          if (this.camType() === cameraType.sv3c) {
+            this.irselector = this.camControlFormGroup.controls['irselector'];
+          } else {
+            this.lampStatus = this.camControlFormGroup.controls['lampStatus'];
+            this.wdrStatus = this.camControlFormGroup.controls['wdrStatus'];
           }
-        });
+          this.cameraName = this.camControlFormGroup.controls['cameraName'];
+          this.dateFormat = this.camControlFormGroup.controls['dateFormat'];
+          this.startDate = this.camControlFormGroup.controls['startDate'];
+          this.softVersion = this.camControlFormGroup.controls['softVersion'];
+          this.model = this.camControlFormGroup.controls['model'];
+
+          if (this.initialised) {
+            this.ngAfterViewInit();
+          }
+          return;
+        }
       });
+    });
   }
 
   cameraTypes: typeof cameraType = cameraType;
@@ -88,8 +88,8 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.reporting.dismiss();
     this.downloading = true;
     if (this.cam && this.cam.address !== undefined && this.cam.cameraParamSpecs.uri !== undefined) {
-      this.utils.cameraParams(this.cam.address, this.cam.cameraParamSpecs.uri, this.cam.cameraParamSpecs.params).subscribe(
-        result => {
+      this.utils.cameraParams(this.cam.address, this.cam.cameraParamSpecs.uri, this.cam.cameraParamSpecs.params).subscribe({
+        next: result => {
           this.downloading = false;
           this.cameraParams = result;
           // Show the current IR setting
@@ -110,7 +110,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.model.setValue(this.cameraParams.model);
           this.model.disable();
         },
-        reason => {
+        error: reason => {
           if (reason.status == 401) {
             this.reporting.warningMessage = `
              Unauthorised: The credentials for this camera are not correctly set. Please go to General -> Configuration and
@@ -122,7 +122,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           this.downloading = false;
         }
-      );
+      });
     }
   }
 
@@ -145,7 +145,8 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
         this._reboot,
         this.wdrStatus.value,
         this.lampStatus.value);
-    this.utils.setCameraParams(params).subscribe(() => {
+    this.utils.setCameraParams(params).subscribe({
+      next: () => {
         this.downloading = false;
         this._confirmReboot = this._reboot = false;
         this.reporting.successMessage = 'Update Successful';
@@ -160,13 +161,13 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cameraParams.name_1 = this.cameraName.value;
         this._reboot = this._confirmReboot = false;
       },
-      reason => {
+      error: reason => {
         this.downloading = false;
         this._reboot = this._confirmReboot = false;
         this._confirmReboot = this._reboot = false;
         this.reporting.errorMessage = reason;
       }
-    );
+    });
   }
 
   hasError = (controlName: string, errorName: string): boolean => {
