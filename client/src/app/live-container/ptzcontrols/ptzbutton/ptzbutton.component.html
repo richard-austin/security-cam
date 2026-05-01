@@ -1,4 +1,4 @@
-<div [matTooltip]="isGuest ? 'Disabled for guest' : ptzBtnMatTooltip"
+<div [matTooltip]="isGuest ? 'Disabled for guest' : ptzBtnMatTooltip()"
               [matTooltipShowDelay]="UtilsService.toolTipDelay"
               matTooltipClass="tooltip">
   <button mat-icon-button
@@ -8,6 +8,6 @@
           (touchend)="stop($event)"
           (mouseout)="stopIfMouseDown()"
           [disabled]="isGuest">
-    <mat-icon [style.transform]="'scale('+scale+')'">{{matIcon}}</mat-icon>
+    <mat-icon [style.transform]="'scale('+scale()+')'">{{matIcon()}}</mat-icon>
   </button>
 </div>

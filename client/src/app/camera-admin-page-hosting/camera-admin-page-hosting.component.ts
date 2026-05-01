@@ -30,7 +30,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
   constructor(private route: ActivatedRoute, private cameraSvc: CameraService, utils: UtilsService) {
     this.route.paramMap.subscribe((paramMap) => {
       cameraSvc.closeClient().subscribe();
-      let address: string = paramMap.get('camera') as string;
+      let address: string = paramMap.get('camera()') as string;
       address = atob(address);
       // Verify that the address is either for one of the cameras or ad hoc devices
       let cams = cameraSvc.getCameras();
