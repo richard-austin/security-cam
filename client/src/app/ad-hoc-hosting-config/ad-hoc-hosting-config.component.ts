@@ -113,37 +113,37 @@ export class AdHocHostingConfigComponent implements OnInit {
     this.setUpTableFormControls();
   }
   commitConfig() {
-    this.utils.updateAdhocDeviceList(JSON.stringify(this.devices)).subscribe(() => {
-        this.reporting.successMessage = "Update ad hoc device list Successful!";
-        this.updating = false;
-        // Update the saved data hash
-        this.savedDataHash = objectHash(this.devices);
-      },
-      reason => {
-        this.reporting.errorMessage = reason
-        this.updating = false;
-      }
-    )
-
+    this.utils.updateAdhocDeviceList(JSON.stringify(this.devices)).subscribe({
+        next: () => {
+          this.reporting.successMessage = "Update ad hoc device list Successful!";
+          this.updating = false;
+          // Update the saved data hash
+          this.savedDataHash = objectHash(this.devices);
+        },
+        error: reason => {
+          this.reporting.errorMessage = reason
+          this.updating = false;
+        }
+      });
   }
 
   ngOnInit(): void {
     this.isGuest = this.utils.isGuestAccount;
-    this.utils.loadAdHocDevices().subscribe((devices: Device[]) => {
+    this.utils.loadAdHocDevices().subscribe({
+      next: (devices: Device[]) => {
         this.devices = devices;
         this.setUpTableFormControls();
         this.downloading = false;
         this.savedDataHash = objectHash(this.devices);
       },
-      () => {
+      error: () => {
         this.devices = new Array<Device>();
         this.devices.push(new Device());
         this.setUpTableFormControls();
         this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your ad hoc devices and save it.'});
         this.downloading = false;
-      });
-
-//    this.devices =  [{name: 'Front Room Switch', ipAddress:'192.168.1.253', ipPort:80}, {name: 'Hall Switch', ipAddress:'192.168.1.232', ipPort:80}];
+      }
+    });
   }
 
   protected readonly UtilsService = UtilsService;
