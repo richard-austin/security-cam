@@ -7,7 +7,6 @@ import {UtilsService} from "../shared/utils.service";
 import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
 import {MatButton} from "@angular/material/button";
 
-
 @Component({
   selector: 'app-camera-admin-page-hosting',
   templateUrl: './camera-admin-page-hosting.component.html',
@@ -60,7 +59,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
       cameraSvc.closeClient().subscribe();
       this.tabHandle?.close();
     };
-   }
+  }
 
   closeAdminPage() {
     window.location.href = '#';
@@ -78,15 +77,17 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
 
   ngOnInit(): void {
     if (this.address !== undefined) {
-      this.cameraSvc.getHostingAccess(this.address, this.webAdminPort).subscribe((response: {nvrIPAddress: string}) => {
+      this.cameraSvc.getHostingAccess(this.address, this.webAdminPort).subscribe({
+        next: (response: { nvrIPAddress: string }) => {
           if (this.tabHandle)
             this.tabHandle.close();
           // Add the randomID to prevennt caching of the first page which causes problems when switching between devices
           this.tabHandle = window.open('http://' + response.nvrIPAddress + ':' + environment.camAdminHostPort + '/?randomId=' + this.makeId(12), '_blank');
         },
-        reason => {
+        error: reason => {
           this.reporting.errorMessage = reason;
-        });
+        }
+      });
     }
     this.initialised = true;
   }
