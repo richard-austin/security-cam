@@ -23,41 +23,46 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
   private nvrloginstatusSubscription!: StompSubscription;
 
   constructor(private cpService: CloudProxyService, private utils: UtilsService) {
-    cpService.getStatus().subscribe((status: boolean) => {
+    cpService.getStatus().subscribe({
+      next: (status: boolean) => {
         this.cps = status;
         this.utils.cloudProxyRunning = status;
       },
-      reason => {
+      error: reason => {
         this.reporting.errorMessage = reason;
-      });
+      }
+    });
   }
 
   stop(): void {
     this.cbEnabled = false;
-    this.cpService.stop().subscribe(() => {
+    this.cpService.stop().subscribe({
+      complete: () => {
         this.cps = this.utils.cloudProxyRunning = false;
         this.cbEnabled = true;
       },
-      (reason) => {
+      error: (reason) => {
         this.reporting.errorMessage = reason;
         this.cbEnabled = true;
-      });
+      }
+    });
   }
 
   start(): void {
     this.cbEnabled = false;
-    this.cpService.start().subscribe(() => {
-
-        this.cbEnabled = true;
-        this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
-          this.utils.activeMQTransportActive = status.transportActive;
-          this.cps = this.utils.cloudProxyRunning = true;
-        });
-      },
-      (reason) => {
+    this.cpService.start().subscribe({
+      complete: () => {
+          this.cbEnabled = true;
+          this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
+            this.utils.activeMQTransportActive = status.transportActive;
+            this.cps = this.utils.cloudProxyRunning = true;
+          });
+        },
+      error: (reason) => {
         this.reporting.errorMessage = reason;
         this.cbEnabled = true;
-      });
+      }
+    });
   }
 
   ngOnInit(): void {
