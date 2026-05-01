@@ -1,4 +1,4 @@
-import {Component, input, Input, InputSignal, OnInit} from '@angular/core';
+import {Component, input, InputSignal, OnInit} from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
 export enum styles {success, warning, danger}
