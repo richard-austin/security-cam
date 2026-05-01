@@ -603,18 +603,19 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
       jsonObj[key] = newCam;
     })
 
-    this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(() => {
-        this.reporting.successMessage = "Update Cameras Successful!";
-        this.updating = false;
-        // Update the saved data hash
-        this.savedDataHash = objectHash(this.cameras);
-        this.cd.detectChanges();
-      },
-      reason => {
-        this.reporting.errorMessage = reason
-        this.updating = false;
-      }
-    )
+    this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe({
+        complete: () => {
+          this.reporting.successMessage = "Update Cameras Successful!";
+          this.updating = false;
+          // Update the saved data hash
+          this.savedDataHash = objectHash(this.cameras);
+          this.cd.detectChanges();
+        },
+        error: reason => {
+          this.reporting.errorMessage = reason
+          this.updating = false;
+        }
+      });
   }
 
   /**
@@ -633,7 +634,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     this.discovering = true;
     this.failed = new Map<string, string>();
     this.reporting.dismiss();
-    this.cameraSvc.discover().subscribe((result: { cams: Map<string, Camera>, failed: Map<string, string> }) => {
+    this.cameraSvc.discover().subscribe({
+      next: (result: { cams: Map<string, Camera>, failed: Map<string, string> }) => {
         this.cameras = result.cams;
         this.discovering = false;
         this.FixUpCameraData();
@@ -641,10 +643,11 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         if (this.cameras.size == 0)
           this.reporting.warningMessage = "No cameras were found on this network"
       },
-      reason => {
+      error: reason => {
         this.reporting.errorMessage = reason;
         this.discovering = false;
-      });
+      }
+    });
   }
 
   totalNumberOfStreams(): number {
@@ -663,7 +666,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
       this.snapShotKey = '';
     else if (cam.value.snapshotUri !== '') {
       this.snapShotKey = cam.key;
-      this.cameraSvc.getSnapshot(cam.value).subscribe(result => {
+      this.cameraSvc.getSnapshot(cam.value).subscribe({
+        next: result => {
           if (result !== null && result.body !== null) {
             let ab = result.body.arrayBuffer()
             ab.then((body => {
@@ -672,7 +676,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
             }))
           }
         },
-        reason => {
+        error: reason => {
           if (reason.status === 401) {
             this.reporting.warningMessage =
               `Access to camera snapshot at ${cam.value.snapshotUri} is unauthorised. Please ensure the correct credentials for
@@ -682,7 +686,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
           }
           this.snapshotLoading = false;
           this.snapShotKey = '';
-        })
+        }
+      });
     }
   }
 
@@ -697,12 +702,14 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   }
 
   checkIfOnvifCredentialsPresent() {
-    this.cameraSvc.haveOnvifCredentials().subscribe(result => {
+    this.cameraSvc.haveOnvifCredentials().subscribe({
+      next: result => {
         this.haveOnvifCredentials = result == "true";
       },
-      () => {
+      error: () => {
         this.reporting.errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
-      });
+      }
+    });
   }
 
   allOff() {
@@ -756,10 +763,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
   startFindCameraDetails(onvifUrl: string) {
     this.gettingCameraDetails = true;
-    this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe((result: {
-        cam: Camera,
-        failed: Map<string, string>
-      }) => {
+    this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe({
+      next: (result: { cam: Camera, failed: Map<string, string> }) => {
         if (result.failed.size == 1) {
           const fKey = result.failed.keys().next().value;
           if (this.failed === undefined)
@@ -776,10 +781,11 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         }
         this.gettingCameraDetails = false;
       },
-      reason => {
+      error: reason => {
         this.reporting.errorMessage = reason;
         this.gettingCameraDetails = false;
-      });
+      }
+    });
   }
 
   /**
@@ -818,18 +824,20 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the checkboxes
-    this.cameraSvc.loadCameras().subscribe(cameras => {
+    this.cameraSvc.loadCameras().subscribe({
+      next: cameras => {
         this.cameras = cameras;
-
         this.downloading = false;
         this.FixUpCameraData()
         this.savedDataHash = objectHash(this.cameras);
       },
-      () => {
-        this.createNew();
-        this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
-        this.downloading = false;
-      })
+      error:
+        () => {
+          this.createNew();
+          this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
+          this.downloading = false;
+        }
+    });
     this.checkIfOnvifCredentialsPresent();
     this.isGuest = this.utils.isGuestAccount;
   }
