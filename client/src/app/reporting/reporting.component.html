@@ -1,7 +1,7 @@
 @if (isHTML) {
   <div class="alert-danger reporting">
     <div [innerHTML]="e?.error?.text"></div>
-    @if (!embedded) {
+    @if (!embedded()) {
       <button  style="top: -25px; margin-bottom: -24px" mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
     }
   </div>
@@ -9,7 +9,7 @@
 @if (!isHTML && e || message) {
   <div
     [ngClass]="{'alert-danger': style==styles.danger, 'alert-success': style==styles.success, 'alert-warning': style==styles.warning}"
-    class="reporting" (click)="embedded ? dismiss() : null">
+    class="reporting" (click)="embedded() ? dismiss() : null">
     @if (message && style==styles.success) {
       <div>
         Success: {{message}}
@@ -56,7 +56,7 @@
       </div>
     }
     <br>
-      @if (!embedded) {
+      @if (!embedded()) {
         <button  mat-raised-button class="dismiss-button" color="cancel" (click)="dismiss()">Dismiss</button>
       }
     </div>
