@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, viewChild} from '@angular/core';
 import {IPDetails} from '../shared/IPDetails';
 import {WifiUtilsService} from '../shared/wifi-utils.service';
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -13,8 +13,8 @@ import {SharedModule} from "../shared/shared.module";
   imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class GetActiveIPAddressesComponent implements OnInit {
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent
-  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement> | null
+  reporting = viewChild.required(ReportingComponent);
+  scrollableContent = viewChild.required<ElementRef<HTMLElement>>('scrollable_content');
 
   ipDetails!: IPDetails[];
   displayedColumns: string[] = ["IP", "Name", "ConnType", "Device"];
@@ -28,7 +28,7 @@ export class GetActiveIPAddressesComponent implements OnInit {
         this.ipDetails = result;
       },
       error: reason => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
       }
     });
   }

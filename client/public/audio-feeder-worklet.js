@@ -254,7 +254,7 @@ class AudioStream {
   }
 
   getGain() {
-    return !this.muted ? this.gain : 0;
+    return this.gain;
   }
 
   setMuting(muted) {

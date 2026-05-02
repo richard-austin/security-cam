@@ -1,7 +1,6 @@
 import {
   AfterViewInit,
-  Component,
-  model, ModelSignal,
+  Component, input, InputSignal,
   output,
   OutputEmitterRef
 } from '@angular/core';
@@ -35,27 +34,33 @@ class AudioControlComponent implements AfterViewInit {
   muteAudio: OutputEmitterRef<boolean> = output<boolean>()
   setLevel = output<number>();
   setAudioLatencyLimiting: OutputEmitterRef<boolean> =output<boolean>();
-  mute: ModelSignal<boolean> = model<boolean>(false);
-  level: ModelSignal<number> = model.required<number>();
-  audioLatencyLimiting: ModelSignal<boolean | undefined> = model<boolean | undefined>(undefined);
+  initialMuteState: InputSignal<boolean> = input<boolean>(false);
+  initialLevel: InputSignal<number> = input.required<number>();
+  audioLatencyLimiting: InputSignal<boolean | undefined> = input<boolean | undefined>(undefined);
   lastLevel!: number;
 
+  mute!: boolean;
+  level!: number;
+
   toggleMuteAudio() {
-    this.mute.set(!this.mute());
-    if (this.mute()) {
-      this.lastLevel = this.level();
-      this.level.set(0);
+    this.mute = !this.mute;
+    if (this.mute) {
+      this.lastLevel = this.level;
+      this.level = 0;
     } else
-      this.level.set(this.lastLevel);
-    this.muteAudio.emit(this.mute());
+      this.level = this.lastLevel;
+    this.muteAudio.emit(this.mute);
   }
 
   setVolume() {
-    this.setLevel.emit(this.level());
+    this.setLevel.emit(this.level);
   }
 
   ngAfterViewInit() {
-    this.lastLevel = this.level();
+    this.mute = this.initialMuteState();
+    this.lastLevel = this.initialLevel();
+    this.level = this.mute ? 0 : this.lastLevel;
+
   }
 
   zeroTo100(value: number) {
@@ -63,7 +68,6 @@ class AudioControlComponent implements AfterViewInit {
   }
 
   setLatencyLimiting($event: MatCheckboxChange) {
-    this.audioLatencyLimiting.set($event.checked);
     this.setAudioLatencyLimiting.emit($event.checked);
   }
 

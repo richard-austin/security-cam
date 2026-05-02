@@ -1,4 +1,4 @@
-import {Component, input, InputSignal, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {Component, input, InputSignal, OnInit, Signal, viewChildren} from '@angular/core';
 import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {Camera} from 'src/app/cameras/Camera';
 import {ReportingComponent} from 'src/app/reporting/reporting.component';
@@ -18,7 +18,8 @@ import {MatDivider} from "@angular/material/divider";
 export class PTZControlsComponent implements OnInit {
   camera: InputSignal<Camera> = input.required<Camera>();
   reporting: InputSignal<ReportingComponent> = input.required<ReportingComponent>();
-  @ViewChildren(MatSlideToggle) slideToggles!: QueryList<MatSlideToggle>;
+  slideToggles: Signal<readonly MatSlideToggle[]> = viewChildren(MatSlideToggle);
+
   eMoveDirections: any = eMoveDirections;
   savePreset: boolean = false;
   clearPreset: boolean = false;
@@ -49,7 +50,7 @@ export class PTZControlsComponent implements OnInit {
   }
 
   presetButtonPressed() {
-    this.slideToggles.forEach(slideToggle => {
+    this.slideToggles().forEach(slideToggle => {
       slideToggle.checked = false;
     })
     this.clearPreset = this.savePreset = false;

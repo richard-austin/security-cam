@@ -29,8 +29,8 @@
             @if (showAudioControls) {
               <div [animate.enter]="enterClass()" [animate.leave]="farewell()">
                 @if (stream && stream.audio && !mediaFeeder.noAudio) {
-                  <app-audio-control [mute]="mediaFeeder.isMuted"
-                                     (muteAudio)="toggleMuteAudio()" [level]="mediaFeeder.gain"
+                  <app-audio-control [initialMuteState]="mediaFeeder.isMuted"
+                                     (muteAudio)="toggleMuteAudio()" [initialLevel]="mediaFeeder.gain"
                                      (setLevel)="setVolume($event.valueOf())"
                                      (setAudioLatencyLimiting)="audioLatencyLimiting($event.valueOf())"
                                      [audioLatencyLimiting]="mediaFeeder.getAudioLatencyControl()">
