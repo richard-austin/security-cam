@@ -9,7 +9,9 @@
 // Float32 with AAC, and the correct array type must be set up. Additionally a very large amount of attenuation is
 // required (by setting the gain value) for Int16.
 //
-class AudioStream {
+
+// NOT USED !!! See audio-stream.ts
+class AudioStreamXXX {
   gainFactor = 0;
   gain = 0.5;
   muted = false;

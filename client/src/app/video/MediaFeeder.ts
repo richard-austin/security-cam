@@ -3,12 +3,13 @@ import {Camera, Stream} from "../cameras/Camera";
 import {Subscription, timer} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {NavComponent} from "../nav/nav.component";
+import {AudioStream} from "./audio-stream";
 
 declare function initMSTG(): void;
 
 // MediaStreamTrackGenerator not in lib.dom.d.ts
 declare let MediaStreamTrackGenerator: any
-declare let AudioStream: any;
+//declare let AudioStream: any;
 
 initMSTG();  // Set up MediaStreamTrackGenerator for platforms which don't support it
 
@@ -25,7 +26,7 @@ class MediaFeeder {
   videoWorker!: Worker;
   audioWorker!: Worker;
   // @ts-ignore
-  audioStream: AudioStream;
+  audioStream: AudioStream | undefined;
   muted: boolean = false;
   private audioLatencyControl: boolean = true;
   volume: number = 0.4;
@@ -113,6 +114,7 @@ class MediaFeeder {
       }
 
       const audioTrack = this.audioStream?.getTrack();
+      // @ts-ignore
       const audioWriter = audioTrack?.writable?.getWriter();
 
       this.video.srcObject = new MediaStream([videoTrack]);
@@ -237,7 +239,7 @@ class MediaFeeder {
   }
 
   getAudioLatencyControl() {
-    return this.audioStream?.getAudioLatencyControl();
+    return this.audioStream?.getAudioLatencyControl()||false;
   }
 
   set gain(volume: number) {
@@ -246,7 +248,8 @@ class MediaFeeder {
   }
 
   get gain(): number {
-    return this.audioStream?.getGain();
+    const gain= this.audioStream?.getGain();
+    return gain ? gain : 0;
   }
 
   mute(muted: boolean = true) {
@@ -255,7 +258,7 @@ class MediaFeeder {
   }
 
   get isMuted() {
-    return this.audioStream?.isMuted();
+    return this.audioStream?.isMuted()||false;
   }
 
   get hasCam(): boolean {

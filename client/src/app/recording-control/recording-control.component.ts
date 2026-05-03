@@ -373,7 +373,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     if (this.video.video) {
       this.video.video.muted = muted;
       this.volume = this.video.mediaFeeder.isMuted ? 0 : this.video.video.volume;
-      const audioLatencyControl = this.video?.mediaFeeder?.audioStream?.getAudioLatencyControl();
+      const audioLatencyControl = this.video?.mediaFeeder?.audioStream?.getAudioLatencyControl()||false;
       const level = new AudioSettings(this.video.video.volume, muted, audioLatencyControl);
       NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
     }
@@ -391,7 +391,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       this.volume = volume;
       this.video.video.volume = this.volume;
       const audioLatencyControl = this.video?.mediaFeeder?.audioStream?.getAudioLatencyControl();
-      const level = new AudioSettings(volume, this.isMuted(), audioLatencyControl);
+      const level = new AudioSettings(volume, this.isMuted(), audioLatencyControl||false);
       NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
     }
   }

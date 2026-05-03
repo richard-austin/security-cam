@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  Component, input, InputSignal,
+  Component, input, InputSignal, OnInit,
   output,
   OutputEmitterRef
 } from '@angular/core';
@@ -30,7 +30,7 @@ import {UtilsService} from "../../shared/utils.service";
   templateUrl: './audio-control.component.html',
   styleUrl: './audio-control.component.scss'
 })
-class AudioControlComponent implements AfterViewInit {
+class AudioControlComponent implements OnInit, AfterViewInit {
   muteAudio: OutputEmitterRef<boolean> = output<boolean>()
   setLevel = output<number>();
   setAudioLatencyLimiting: OutputEmitterRef<boolean> =output<boolean>();
@@ -56,13 +56,6 @@ class AudioControlComponent implements AfterViewInit {
     this.setLevel.emit(this.level);
   }
 
-  ngAfterViewInit() {
-    this.mute = this.initialMuteState();
-    this.lastLevel = this.initialLevel();
-    this.level = this.mute ? 0 : this.lastLevel;
-
-  }
-
   zeroTo100(value: number) {
     return `${Math.round(value * 100)}`;
   }
@@ -72,6 +65,15 @@ class AudioControlComponent implements AfterViewInit {
   }
 
   protected readonly UtilsService = UtilsService;
+
+  ngOnInit(): void {
+    this.mute = this.initialMuteState();
+    this.lastLevel = this.initialLevel();
+    this.level = this.mute ? 0 : this.lastLevel;
+  }
+
+  ngAfterViewInit() {
+  }
 }
 
 export default AudioControlComponent
