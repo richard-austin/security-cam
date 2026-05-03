@@ -4,12 +4,10 @@ import {Subscription, timer} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {NavComponent} from "../nav/nav.component";
 import {AudioStream} from "./audio-stream";
-
-declare function initMSTG(): void;
+import {initMSTG} from "./media-stream-track-generator";
 
 // MediaStreamTrackGenerator not in lib.dom.d.ts
 declare let MediaStreamTrackGenerator: any
-//declare let AudioStream: any;
 
 initMSTG();  // Set up MediaStreamTrackGenerator for platforms which don't support it
 

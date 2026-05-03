@@ -28,7 +28,7 @@ class MyUnderlyingSink implements UnderlyingSink {
     this.emptyArrayMap = new Map();
 
     function worklet() {
-      // @ts-ignore
+      /* @ts-ignore */
       registerProcessor("audio-feeder", class Processor extends AudioWorkletProcessor {
         static get parameterDescriptors() {
           return [
@@ -60,7 +60,7 @@ class MyUnderlyingSink implements UnderlyingSink {
             lastAverage = 0;
             sdUpdated = false;
             lastSd = 0;
-            // @ts-ignore
+            /* @ts-ignore */
             startTime = currentTime;
             measurementWindowSecs = 20;
             measuring = true;
@@ -77,7 +77,7 @@ class MyUnderlyingSink implements UnderlyingSink {
                   this.fullArray = true;
                 if (this.arrayIndex >= this.arraySize)
                   this.arrayIndex = 0;
-                // @ts-ignore
+                /* @ts-ignore */
                 const timeNow = currentTime;
                 if (timeNow - this.startTime > this.measurementWindowSecs) {
                   if (this.fullArray) {
@@ -137,7 +137,7 @@ class MyUnderlyingSink implements UnderlyingSink {
               this.lastAverage = 0;
               this.sdUpdated = false;
               this.lastSd = 0;
-              // @ts-ignore
+              /* @ts-ignore */
               this.startTime = currentTime;
               this.measuring = true;
             }
@@ -156,16 +156,16 @@ class MyUnderlyingSink implements UnderlyingSink {
           this.autoLatencyControl = true;
           this.running = true;
           let lastAutoLatencyControl = this.autoLatencyControl;
-          // @ts-ignore
+          /* @ts-ignore */
           this.port.onmessage = ({data}) => {
             if (data?.type === 'shutdown') {
               this.running = false;
               console.log("running = false");
             } else {
-              //      console.log("Pushing, data length = "+data?.length);
+              /*      console.log("Pushing, data length = "+data?.length); */
               this.arrays.push(data);
               if (this.autoLatencyControl && !lastAutoLatencyControl) {
-                // @ts-ignore
+                /* @ts-ignore */
                 this.port.postMessage("Auto latency control enabled");
                 this.bs.reset();
                 this.arrays = this.arrays.slice(this.arrays.length - 1);
@@ -175,7 +175,7 @@ class MyUnderlyingSink implements UnderlyingSink {
                 this.bs.update(this.arrays.length);
                 /* Prevent audio latency build up due to delayed packets etc. */
                 if (this.bs.bufferTooLarge(this.arrays.length)) {
-                  // @ts-ignore
+                  /* @ts-ignore */
                   this.port.postMessage("Reducing audio packets queue from " + this.arrays.length + " to " + this.bs.workingBufferSize);
                   while (this.arrays.length > this.bs.workingBufferSize)
                     this.arrays.shift();
@@ -209,7 +209,6 @@ class MyUnderlyingSink implements UnderlyingSink {
         }
       });
     }
-
     await this.ac.audioWorklet.addModule(`data:text/javascript,(${worklet.toString()})()`);
     this.node = new AudioWorkletNode(this.ac, "audio-feeder");
     this.node.connect(this.gainNode);
