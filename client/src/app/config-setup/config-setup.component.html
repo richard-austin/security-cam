@@ -22,7 +22,7 @@ can be found in the LICENSE file at http://angular.io/license -->
           <div>
           </div>
           <app-camera-credentials (haveOnvifCredentials)="checkIfOnvifCredentialsPresent()"
-            (hideDialogue)="toggleOnvifPasswordDialogue()" [reporting]="reporting">
+            (hideDialogue)="toggleOnvifPasswordDialogue()" [reporting]="reporting()">
           </app-camera-credentials>
         </div>
         }
@@ -57,11 +57,11 @@ can be found in the LICENSE file at http://angular.io/license -->
 
   @if (!downloading && !updating && !discovering) {
     <mat-card-content #scrollable_content
-      [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement)"
+      [style]="utils.getScrollableContentStyle(scrollableContent().nativeElement)"
       class="scrollable-content">
       @if (failed.size > 0) {
         <app-onvif-failures (fixUpCamerasData)="FixUpCameraData()" [cameras]="cameras"
-          [failures]="failed" [reporting]="reporting">
+          [failures]="failed" [reporting]="reporting()">
         </app-onvif-failures>
       }
       <table [dataSource]="cameras | keyvalue: cameraSvc.compareFn" class="mat-elevation-z8" mat-table
@@ -131,7 +131,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                   <div>
                   </div>
                   <app-camera-credentials (hideDialogue)="togglePasswordDialogue('')" [camera]="cam.value"
-                    [reporting]="reporting">
+                    [reporting]="reporting()">
                   </app-camera-credentials>
                 </div>
                 }
@@ -241,7 +241,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                 <app-recording-setup (hideDialogue)="toggleRecordingSetupDialogue(cam.key)"
                   [camera]="cam.value"
                   [cameras]="cameras" [camKey]="cam.key"
-                  [reporting]="reporting">
+                  [reporting]="reporting()">
                 </app-recording-setup>
               }
             </div>
@@ -592,7 +592,7 @@ can be found in the LICENSE file at http://angular.io/license -->
                 <app-add-as-onvif-device (hideDialogue)="toggleAddCameraOnvifUriDialogue()"
                   (startFindCameraDetails)="startFindCameraDetails($event)"
                   [cameras]="cameras"
-                  [reporting]="reporting">
+                  [reporting]="reporting()">
                 </app-add-as-onvif-device>
               </div>
                 }

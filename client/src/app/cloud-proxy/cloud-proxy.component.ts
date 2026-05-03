@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, Signal, viewChild} from '@angular/core';
 import {CloudProxyService, IsMQConnected} from './cloud-proxy.service';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {UtilsService} from '../shared/utils.service';
@@ -19,7 +19,7 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
   cbEnabled: boolean = true;
   isGuest: boolean = true;
   client!: Client;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   private nvrloginstatusSubscription!: StompSubscription;
 
   constructor(private cpService: CloudProxyService, private utils: UtilsService) {
@@ -29,7 +29,7 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
         this.utils.cloudProxyRunning = status;
       },
       error: reason => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
       }
     });
   }
@@ -42,7 +42,7 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
         this.cbEnabled = true;
       },
       error: (reason) => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
         this.cbEnabled = true;
       }
     });
@@ -59,7 +59,7 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
           });
         },
       error: (reason) => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
         this.cbEnabled = true;
       }
     });
@@ -79,16 +79,16 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
             let msgObj = JSON.parse(message.body);
             switch (msgObj.status) {
               case "working":
-                this.reporting.warningMessage = msgObj.message;
+                this.reporting().warningMessage = msgObj.message;
                 break;
               case "success":
-                this.reporting.successMessage = msgObj.message;
+                this.reporting().successMessage = msgObj.message;
               break;
               case "fail":
-                this.reporting.errorMessage = new HttpErrorResponse({error: msgObj.message});
+                this.reporting().errorMessage = new HttpErrorResponse({error: msgObj.message});
                 break;
               default:
-                this.reporting.errorMessage = new HttpErrorResponse({error: "Unknown message from server"});
+                this.reporting().errorMessage = new HttpErrorResponse({error: "Unknown message from server"});
             }
             if (msgObj.message === 'logoff' && this.isGuest) {
               window.location.href = 'logout';

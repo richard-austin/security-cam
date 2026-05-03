@@ -5,8 +5,8 @@ import {
   ElementRef, HostListener,
   isDevMode,
   OnDestroy,
-  OnInit, QueryList, signal,
-  ViewChild, ViewChildren,
+  OnInit, Signal, signal, viewChild,
+  viewChildren,
 } from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
@@ -58,16 +58,15 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
     AddAsOnvifDeviceComponent,
     KeyValuePipe,
     RecordingSetupComponent,
-    ConfirmCanDeactivateComponent,
     RowDeleteConfirmComponent,
+    ConfirmCanDeactivateComponent,
   ],
   schemas: [],
 })
 export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('errorReporting') reporting!: ReportingComponent;
-  @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
-  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement> | null
-  @ViewChildren(RecordingSetupComponent) recordingSetupComponents!: QueryList<RecordingSetupComponent>
+  reporting: Signal<ReportingComponent> = viewChild.required<ReportingComponent>('errorReporting');
+  scrollableContent: Signal<ElementRef<HTMLElement>> = viewChild.required<ElementRef<HTMLElement>>('scrollable_content');
+  recordingSetupComponents: Signal<readonly RecordingSetupComponent[]> = viewChildren(RecordingSetupComponent);
 
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: BeforeUnloadEvent) {
@@ -232,11 +231,11 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   checkForMaskFileReUse(): boolean {
     const maskFiles: Set<string> = new Set<string>();
     let retVal = false;
-    this.recordingSetupComponents.forEach((r) => {
+    this.recordingSetupComponents().forEach((r) => {
       const maskFileName = r.getMaskFileName();
       if (maskFileName) {
         if (maskFiles.has(maskFileName)) {
-          this.reporting.errorMessage = new HttpErrorResponse({error: "Mask file " + maskFileName + " is already in use"});
+          this.reporting().errorMessage = new HttpErrorResponse({error: "Mask file " + maskFileName + " is already in use"});
           retVal = true;
         } else
           maskFiles.add(maskFileName)
@@ -579,7 +578,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
   commitConfig() {
     this.updating = true;
-    this.reporting.dismiss();
+    this.reporting().dismiss();
     this.FixUpCameraData();
     let cams: Map<string, Camera> = new Map(this.cameras);
     // First convert the map to JSON
@@ -605,14 +604,14 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
     this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe({
         complete: () => {
-          this.reporting.successMessage = "Update Cameras Successful!";
+          this.reporting().successMessage = "Update Cameras Successful!";
           this.updating = false;
           // Update the saved data hash
           this.savedDataHash = objectHash(this.cameras);
           this.cd.detectChanges();
         },
         error: reason => {
-          this.reporting.errorMessage = reason
+          this.reporting().errorMessage = reason
           this.updating = false;
         }
       });
@@ -633,7 +632,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   startOnvifSearch() {
     this.discovering = true;
     this.failed = new Map<string, string>();
-    this.reporting.dismiss();
+    this.reporting().dismiss();
     this.cameraSvc.discover().subscribe({
       next: (result: { cams: Map<string, Camera>, failed: Map<string, string> }) => {
         this.cameras = result.cams;
@@ -641,10 +640,10 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         this.FixUpCameraData();
         this.failed = result.failed;
         if (this.cameras.size == 0)
-          this.reporting.warningMessage = "No cameras were found on this network"
+          this.reporting().warningMessage = "No cameras were found on this network"
       },
       error: reason => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
         this.discovering = false;
       }
     });
@@ -678,11 +677,11 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         },
         error: reason => {
           if (reason.status === 401) {
-            this.reporting.warningMessage =
+            this.reporting().warningMessage =
               `Access to camera snapshot at ${cam.value.snapshotUri} is unauthorised. Please ensure the correct credentials for
               ${cam.key} is set. (Click on the shield icon on this camera row).`;
           } else {
-            this.reporting.errorMessage = reason;
+            this.reporting().errorMessage = reason;
           }
           this.snapshotLoading = false;
           this.snapShotKey = '';
@@ -707,7 +706,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         this.haveOnvifCredentials = result == "true";
       },
       error: () => {
-        this.reporting.errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
+        this.reporting().errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
       }
     });
   }
@@ -742,7 +741,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     this.camForRecordingSetup = camForRecordingSetup;
 
     if (this.camForRecordingSetup === camId)
-      this.recordingSetupComponents.forEach((r) => {
+      this.recordingSetupComponents().forEach((r) => {
         if (r.camKey() === camId)
           r.setupData();  // Reload recording setup component from main config data
       });
@@ -782,7 +781,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         this.gettingCameraDetails = false;
       },
       error: reason => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
         this.gettingCameraDetails = false;
       }
     });
@@ -834,7 +833,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
       error:
         () => {
           this.createNew();
-          this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
+          this.reporting().errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
           this.downloading = false;
         }
     });
