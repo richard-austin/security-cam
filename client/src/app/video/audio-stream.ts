@@ -8,7 +8,16 @@
 // the audioData format in the write function (from the decoder) must be checked as it is Int16 with G711 audio, and
 // Float32 with AAC, and the correct array type must be set up. Additionally a very large amount of attenuation is
 // required (by setting the gain value) for Int16.
-//
+
+interface iBufferStats {
+  update(val: number): void;
+  average() : number;
+  standardDeviation(): number;
+  reset(): void;
+  bufferTooLarge(bufferSize: number): boolean;
+  getWorkingBufferSize(): number;
+}
+
 class MyUnderlyingSink implements UnderlyingSink {
   ac: AudioContext;
   emptyArrayMap!: Map<number, Int16Array<ArrayBuffer> | Float32Array<ArrayBuffer> | undefined>;
@@ -40,19 +49,19 @@ class MyUnderlyingSink implements UnderlyingSink {
           ];
         }
 
-        arrays: any[] = [];
-        array: any[] = [];
+        arrays: [number][] = [];
+        array: number[] = [];
         arrayOffset = 0;
-        emptyArray!: Float32Array;
-        autoLatencyControl = true;
+        emptyArray!: number[];
+        autoLatencyControl: boolean;
         running = true;
-        bs: any;
+        bs: iBufferStats;
 
         constructor() {
           super();
           /* BufferStats class must be declared here as it is instantiated in the AudioContext */
-          this.bs = new class BufferStats {
-            arraySize = 20;
+          this.bs = new class BufferStats implements iBufferStats {
+            private arraySize = 5;
             statsArray = new Array(this.arraySize);
             arrayIndex = 0;
             fullArray = false;
@@ -69,7 +78,7 @@ class MyUnderlyingSink implements UnderlyingSink {
             maxBufferSizeHardLimit = 15;
             workingBufferSizeHardLimit = 8;
 
-            update(val: any) {
+            update(val: number) {
               if (this.measuring) {
                 this.updated = this.sdUpdated = true;
                 this.statsArray[this.arrayIndex++] = val;
@@ -104,7 +113,7 @@ class MyUnderlyingSink implements UnderlyingSink {
               }
             }
 
-            average() {
+            average() : number {
               if (this.updated) {
                 let sum = 0;
                 for (let i = 0; i < this.arraySize; i++) {
@@ -116,7 +125,7 @@ class MyUnderlyingSink implements UnderlyingSink {
               return this.lastAverage;
             }
 
-            standardDeviation() {
+            standardDeviation() : number {
               if (this.sdUpdated) {
                 const average = this.average();
                 let variance = 0;
@@ -130,7 +139,7 @@ class MyUnderlyingSink implements UnderlyingSink {
               return this.lastSd;
             }
 
-            reset() {
+            reset(): void {
               this.arrayIndex = 0;
               this.fullArray = false;
               this.updated = false;
@@ -142,14 +151,18 @@ class MyUnderlyingSink implements UnderlyingSink {
               this.measuring = true;
             }
 
-            bufferTooLarge(bufferSize: number) {
+            bufferTooLarge(bufferSize: number): boolean {
               const bufferTooLarge = !this.measuring && bufferSize > this.maxBufferSize;
               if (bufferTooLarge)
                 this.reset();
               return bufferTooLarge;
             }
-          };
 
+            getWorkingBufferSize(): number {
+              return this.workingBufferSize;
+            }
+          }
+          ;
           this.arrays = [];
           this.array = [];
           this.arrayOffset = 0;
@@ -176,19 +189,18 @@ class MyUnderlyingSink implements UnderlyingSink {
                 /* Prevent audio latency build up due to delayed packets etc. */
                 if (this.bs.bufferTooLarge(this.arrays.length)) {
                   /* @ts-ignore */
-                  this.port.postMessage("Reducing audio packets queue from " + this.arrays.length + " to " + this.bs.workingBufferSize);
-                  while (this.arrays.length > this.bs.workingBufferSize)
+                  this.port.postMessage("Reducing audio packets queue from " + this.arrays.length + " to " + this.bs.getWorkingBufferSize());
+                  while (this.arrays.length > this.bs.getWorkingBufferSize())
                     this.arrays.shift();
                 }
               }
             }
           }
-          this.emptyArray = new Float32Array(0);
+          this.emptyArray = [];
         }
 
         /* Audio worklet processor function */
-
-        process(inputs: number[][][], outputs: number[][][], parameters: any) {
+        process(inputs: number[][][], outputs: number[][][], parameters: {[key: string]: any[]}) {
           this.autoLatencyControl = parameters["autoLatencyControl"][0];
           if (this.array.length === 0 && this.arrays.length === 0) {
             return true;
@@ -209,6 +221,7 @@ class MyUnderlyingSink implements UnderlyingSink {
         }
       });
     }
+
     await this.ac.audioWorklet.addModule(`data:text/javascript,(${worklet.toString()})()`);
     this.node = new AudioWorkletNode(this.ac, "audio-feeder");
     this.node.connect(this.gainNode);
