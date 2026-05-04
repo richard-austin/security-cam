@@ -3,8 +3,8 @@ import {
   Component,
   ElementRef, input, InputSignal,
   OnDestroy,
-  OnInit, signal,
-  ViewChild
+  OnInit, Signal, signal, viewChild,
+  WritableSignal
 } from '@angular/core';
 import {Camera, Stream} from '../cameras/Camera';
 import {UtilsService} from '../shared/utils.service';
@@ -28,10 +28,10 @@ import {AudioSettings} from "./AudioSettings";
   imports: [SharedModule, SharedAngularMaterialModule, FormsModule, AudioControlComponent]
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
-  @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @ViewChild('videoControls') videoControlsEL!: ElementRef<HTMLDivElement>;
+  videoEl: Signal<ElementRef<HTMLVideoElement>> = viewChild.required<ElementRef<HTMLVideoElement>>('video');
+  vcEL: Signal<ElementRef<HTMLDivElement>> = viewChild.required<ElementRef<HTMLDivElement>>('videoContainer');
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
+  videoControlsEL: Signal<ElementRef<HTMLDivElement>> = viewChild.required<ElementRef<HTMLDivElement>>('videoControls');
   isLive: InputSignal<boolean> = input<boolean>(false);
   cam!: Camera;
   stream!: Stream;
@@ -44,7 +44,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   currentTime: string = "";
   totalTime: string = "";
   sizing!: VideoSizing;
-  showAudioControls: boolean = false;
+  showAudioControls: WritableSignal<boolean>;
   ctrlKeyDown = false;
   camKey: string = "";
   enterClass = signal('enter-animation');
@@ -52,6 +52,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(public utilsService: UtilsService) {
     this.mediaFeeder = new MediaFeeder();
+    this.showAudioControls = signal(false);
   }
 
   /**
@@ -125,9 +126,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleShowAudioControls() {
     if (this.ctrlKeyDown) {
       this.toggleMuteAudio();
-      this.showAudioControls = false;
+      this.showAudioControls.set(false);
     } else
-      this.showAudioControls = !this.showAudioControls;
+      this.showAudioControls.set(!this.showAudioControls());
   }
 
   /**
@@ -181,17 +182,17 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     if (ev.currentTarget instanceof ScreenOrientation) {
       if (!this.multi) {
         // Set up VideoTransformations again to take account of viewport dimension changes
-        this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
+        this.vt = new VideoTransformations(this.video, this.vcEL().nativeElement);
         this.vt.reset();  // Clear any pan/zoom
       }
     }
   }
 
   clickHandler = (ev: Event) => {
-    if (this.videoControlsEL) {
-      const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL.nativeElement);
+    if (this.videoControlsEL()) {
+      const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL().nativeElement);
       if (!inVideoControlDialogue)
-        this.showAudioControls = false;
+        this.showAudioControls.set(false);
     }
   };
 
@@ -203,13 +204,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     document.addEventListener('click', this.clickHandler);
     window.addEventListener("keydown", this.keyHandler);
     window.addEventListener("keyup", this.keyHandler);
+    this.video = this.videoEl().nativeElement;
+    this.vt = new VideoTransformations(this.video, this.vcEL().nativeElement);
   }
 
   ngAfterViewInit(): void {
-    this.video = this.videoEl.nativeElement;
-    this.mediaFeeder.init(this.isLive(), this.video, this.reporting);
-    this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
-    this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
+    this.mediaFeeder.init(this.isLive(), this.video, this.reporting());
+    this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting(), this.video);
     this.video.addEventListener('fullscreenchange', () => {
       this.vt.reset();  // Set to a normal scale for if the mouse wheel was turned while full screen showing
     });

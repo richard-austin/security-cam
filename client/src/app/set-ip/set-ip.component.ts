@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, viewChild, ViewChild} from '@angular/core';
 import {MyIp, UtilsService} from "../shared/utils.service";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {SharedModule} from "../shared/shared.module";
@@ -11,7 +11,7 @@ import {SharedAngularMaterialModule} from "../shared/shared-angular-material/sha
   imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class SetIpComponent implements OnInit {
-  @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
+  errorReporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
 
   myIp: string = "";
 
@@ -24,7 +24,7 @@ export class SetIpComponent implements OnInit {
         this.myIp = ip.myIp;
       },
       error: reason => {
-        this.errorReporting.errorMessage = reason;
+        this.errorReporting().errorMessage = reason;
       }
     });
   }

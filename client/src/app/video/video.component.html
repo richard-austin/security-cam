@@ -26,7 +26,7 @@
       <div #videoControls class="video-controls">
         <div>
           <div class="audio-controls-dialogue">
-            @if (showAudioControls) {
+            @if (showAudioControls()) {
               <div [animate.enter]="enterClass()" [animate.leave]="farewell()">
                 @if (stream && stream.audio && !mediaFeeder.noAudio) {
                   <app-audio-control [initialMuteState]="mediaFeeder.isMuted"
@@ -44,7 +44,7 @@
           @if (stream && stream.audio && !mediaFeeder.noAudio) {
             <label class="video-buttons"
                    [ngClass]="{'audio-latency-correction': mediaFeeder.audioLatencyOverrun}"
-                   [matTooltip]="'Click to '+(!showAudioControls ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (mediaFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
+                   [matTooltip]="'Click to '+(!showAudioControls() ? 'show' : 'hide')+' audio controls, or Ctrl click to ' + (mediaFeeder.isMuted ? 'unmute' : 'mute') + ' sound'"
                    [matTooltipShowDelay]="UtilsService.toolTipDelay"
                    matTooltipClass="video-buttons-tooltip">
               <mat-icon (click)="toggleShowAudioControls()">{{ mediaFeeder.isMuted ? 'volume_off' : 'volume_up' }}
