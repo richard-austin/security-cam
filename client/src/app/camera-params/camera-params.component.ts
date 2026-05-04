@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, Signal, viewChild, ViewChild} from '@angular/core';
 import {SetCameraParams, UtilsService} from '../shared/utils.service';
 import {CameraService, cameraType} from '../cameras/camera.service';
 import {Camera, CameraParams} from '../cameras/Camera';
@@ -24,7 +24,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   wdrStatus!: AbstractControl;
 
   model!: AbstractControl;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   cam!: Camera;
   initialised: boolean;
 
@@ -85,7 +85,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   _confirmReboot: boolean = false;
 
   private getCameraParams() {
-    this.reporting.dismiss();
+    this.reporting().dismiss();
     this.downloading = true;
     if (this.cam && this.cam.address !== undefined && this.cam.cameraParamSpecs.uri !== undefined) {
       this.utils.cameraParams(this.cam.address, this.cam.cameraParamSpecs.uri, this.cam.cameraParamSpecs.params).subscribe({
@@ -112,13 +112,13 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         error: reason => {
           if (reason.status == 401) {
-            this.reporting.warningMessage = `
+            this.reporting().warningMessage = `
              Unauthorised: The credentials for this camera are not correctly set. Please go to General -> Configuration and
              click on the shield icon beside the title (Configuration). You can then set the the user name and
              password which must be set the same on all cameras.
              `;
           } else {
-            this.reporting.errorMessage = reason;
+            this.reporting().errorMessage = reason;
           }
           this.downloading = false;
         }
@@ -127,7 +127,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateParams() {
-    this.reporting.dismiss();
+    this.reporting().dismiss();
     this.downloading = true;
     let params: SetCameraParams = this.camType() === this.cameraTypes.sv3c ?
       new SetCameraParams(this.cam.cameraParamSpecs.camType,
@@ -149,7 +149,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.downloading = false;
         this._confirmReboot = this._reboot = false;
-        this.reporting.successMessage = 'Update Successful';
+        this.reporting().successMessage = 'Update Successful';
 
         // Update the locally stored values
         if (this.camType() === cameraType.sv3c) {
@@ -165,7 +165,7 @@ export class CameraParamsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.downloading = false;
         this._reboot = this._confirmReboot = false;
         this._confirmReboot = this._reboot = false;
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
       }
     });
   }

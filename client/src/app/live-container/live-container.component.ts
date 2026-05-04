@@ -1,4 +1,12 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  Signal,
+  viewChild,
+} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, Stream} from '../cameras/Camera';
 import {Subscription, timer} from 'rxjs';
@@ -22,8 +30,8 @@ import {ReportingComponent} from "../reporting/reporting.component";
   styleUrls: ['./live-container.component.scss']
 })
 export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @ViewChild(VideoComponent) video!: VideoComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
+  video: Signal<VideoComponent> = viewChild.required(VideoComponent);
 
   timerHandle!: Subscription;
   camera!: Camera;
@@ -49,15 +57,14 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   setupVideo() {
-    this.reporting.dismiss();
-
-    this.video.visible = false;
+    this.reporting().dismiss();
+    this.video().visible = false;
     this.timerHandle?.unsubscribe();
     if (this.camera !== undefined && this.stream !== undefined) {
       if (this.video !== undefined) {
-        this.video.setSource(this.camera, this.stream);
-        this.video.setInitialAudioSettings(false,0.4, false, true);
-        this.video.visible = true;
+        this.video().setSource(this.camera, this.stream);
+        this.video().setInitialAudioSettings(false,0.4, false, true);
+        this.video().visible = true;
       }
     } else
       this.showInvalidInput();
@@ -73,7 +80,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
    *                   Show "No camera has been specified" error message.
    */
   showInvalidInput(): void {
-    this.reporting.errorMessage = new HttpErrorResponse({
+    this.reporting().errorMessage = new HttpErrorResponse({
       error: 'No camera has been specified',
       status: 0,
       statusText: '',
@@ -89,7 +96,7 @@ export class LiveContainerComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngAfterViewInit(): void {
       this.cd.detectChanges();
-      this.video.setSize(100);
+      this.video().setSize(100);
   }
 
   ngOnDestroy(): void {

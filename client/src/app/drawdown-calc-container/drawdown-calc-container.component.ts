@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Signal, viewChild} from '@angular/core';
 import {fromEvent, merge, Subscription} from "rxjs";
 
 @Component({
@@ -7,7 +7,7 @@ import {fromEvent, merge, Subscription} from "rxjs";
     styleUrls: ['./drawdown-calc-container.component.scss'],
 })
 export class DrawdownCalcContainerComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('dciframe') dciframeEl!: ElementRef<HTMLIFrameElement>;
+  dciframeEl: Signal<ElementRef<HTMLIFrameElement>> = viewChild.required('dciframe');
   dciframe!: HTMLIFrameElement;
 
   height!: number;
@@ -20,7 +20,7 @@ export class DrawdownCalcContainerComponent implements OnInit, AfterViewInit, On
   }
 
   ngAfterViewInit(): void {
-    this.dciframe = this.dciframeEl.nativeElement;
+    this.dciframe = this.dciframeEl().nativeElement;
     this.height = window.outerHeight - 70;
 
     // Subscribe to mousemove, mousedown and keydown events on the drawdown calculator

@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, Signal, viewChild} from '@angular/core';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {timer} from 'rxjs';
 import {Subscription} from 'rxjs';
@@ -17,8 +17,8 @@ import {SharedAngularMaterialModule} from "../shared/shared-angular-material/sha
   imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement> | null
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
+  scrollableContent: Signal<ElementRef<HTMLElement>> = viewChild.required('scrollable_content');
 
   wifiDetails!: WifiDetails[];
   displayedColumns: string[] = ["InUse", "Ssid", "Rate", "Signal", "Channel", "Security", "Mode", "Bssid"];
@@ -41,7 +41,7 @@ export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDe
       },
       error: reason => {
         this.loading = false;
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
       }
     });
   }
@@ -53,10 +53,10 @@ export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDe
         if (this.wifiEnabled)
           this.subscription = timer(0, 10000).subscribe(() => this.getLocalWifiDetails());
         else
-          this.reporting.warningMessage = "Wi-Fi is disabled. You should go to Wi-Fi Admin->Wi-Fi Settings to enable it."
+          this.reporting().warningMessage = "Wi-Fi is disabled. You should go to Wi-Fi Admin->Wi-Fi Settings to enable it."
       },
       error: reason => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
       }
     });
   }

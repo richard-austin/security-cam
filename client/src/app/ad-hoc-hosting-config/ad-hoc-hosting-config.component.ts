@@ -1,4 +1,4 @@
-import {Component, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, signal, viewChild} from '@angular/core';
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {BehaviorSubject} from "rxjs";
@@ -29,7 +29,7 @@ export class AdHocHostingConfigComponent implements OnInit {
 
   tableForms!: UntypedFormArray
   showDeviceDeleteConfirm: number = -1;
-  @ViewChild('errorReporting') reporting!: ReportingComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required('errorReporting');
   downloading: boolean = true;
   constructor(private utils: UtilsService) {
   }
@@ -115,13 +115,13 @@ export class AdHocHostingConfigComponent implements OnInit {
   commitConfig() {
     this.utils.updateAdhocDeviceList(JSON.stringify(this.devices)).subscribe({
         next: () => {
-          this.reporting.successMessage = "Update ad hoc device list Successful!";
+          this.reporting().successMessage = "Update ad hoc device list Successful!";
           this.updating = false;
           // Update the saved data hash
           this.savedDataHash = objectHash(this.devices);
         },
         error: reason => {
-          this.reporting.errorMessage = reason
+          this.reporting().errorMessage = reason
           this.updating = false;
         }
       });
@@ -140,7 +140,7 @@ export class AdHocHostingConfigComponent implements OnInit {
         this.devices = new Array<Device>();
         this.devices.push(new Device());
         this.setUpTableFormControls();
-        this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your ad hoc devices and save it.'});
+        this.reporting().errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your ad hoc devices and save it.'});
         this.downloading = false;
       }
     });

@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, viewChild} from '@angular/core';
 import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {HttpErrorResponse} from '@angular/common/http';
@@ -16,7 +16,7 @@ import {SharedAngularMaterialModule} from "../shared/shared-angular-material/sha
 export class ChangeEmailComponent implements OnInit, AfterViewInit {
 
   changeEmailForm!: UntypedFormGroup;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
 
   constructor(private utilsService: UtilsService) {
   }
@@ -36,7 +36,7 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
 
     this.utilsService.changeEmail(password.value, newEmail.value, confirmNewEmail.value).subscribe({
       next: () => {
-        this.reporting.successMessage = "Email changed";
+        this.reporting().successMessage = "Email changed";
       },
       error: (reason: HttpErrorResponse) => {
         if (reason.status === 400) {
@@ -44,9 +44,9 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
             if (key === 'password')
               this.invalidPassword();
           }
-          this.reporting.errorMessage = reason;
+          this.reporting().errorMessage = reason;
         } else
-          this.reporting.errorMessage = reason;
+          this.reporting().errorMessage = reason;
       }
     });
   }
@@ -91,7 +91,7 @@ export class ChangeEmailComponent implements OnInit, AfterViewInit {
         this.changeEmailForm.controls['newEmail'].setValue(result.email);
       },
       error: reason => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
       }
     });
   }
