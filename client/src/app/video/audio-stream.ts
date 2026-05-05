@@ -3,8 +3,7 @@
 // This is derived from the MediaStreamTrackGenerator polyfill used for browsers not supporting MediaStreamTrackGenerator.
 // The polyfill as originally obtained doesn't work properly with audio as the AudioContext seems to default to sample rate
 // 48000. This is fixed here by passing the correct sample rate to the AudioContext constructor. There is some audio latency drift
-// when the media stream track is passed to MediaStream for output to a media element. This is fixed here by monitoring the arrays (queue) size
-// using the BufferStats class and shifting out excess packets from the queue. As this is used on Chrome browsers now,
+// which is fixed here by monitoring the arrays (queue) size using the BufferStats class and shifting out excess packets from the queue. As this is used on Chrome browsers now,
 // the audioData format in the write function (from the decoder) must be checked as it is Int16 with G711 audio, and
 // Float32 with AAC, and the correct array type must be set up. Additionally, a very large amount of attenuation is
 // required (by setting the gain value) for Int16.
@@ -284,22 +283,17 @@ class MyUnderlyingSink implements UnderlyingSink {
 }
 
 export class AudioStream {
-  track: MediaStreamTrack[];
+  writableStream
   underlyingSink: MyUnderlyingSink;
-
   ac: AudioContext;
 
   constructor(sampleRate: number) {
-    const ac = this.ac = new AudioContext({sampleRate: sampleRate, latencyHint: "interactive"});
-    const dest = ac.createMediaStreamDestination();
-    const track = dest.stream.getAudioTracks();
-    // @ts-ignore
-    track.writable = new WritableStream(this.underlyingSink = new MyUnderlyingSink(this.ac));
-    this.track = track;
+    this.ac = new AudioContext({sampleRate: sampleRate, latencyHint: "interactive"});
+    this.writableStream = new WritableStream(this.underlyingSink = new MyUnderlyingSink(this.ac));
   }
 
-  getTrack(): MediaStreamTrack[] {
-    return this.track;
+  getWriter(): WritableStreamDefaultWriter {
+    return this.writableStream.getWriter();
   }
 
   setGain(gain: number) {

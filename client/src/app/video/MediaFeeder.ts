@@ -111,9 +111,7 @@ class MediaFeeder {
         this.audioStream.setAutoLatencyControl(this.audioLatencyControl);
       }
 
-      const audioTrack = this.audioStream?.getTrack();
-      // @ts-ignore
-      const audioWriter = audioTrack?.writable?.getWriter();
+      const audioWriter: WritableStreamDefaultWriter | undefined = this.audioStream?.getWriter();
 
       this.video.srcObject = new MediaStream([videoTrack]);
       this.video.onloadedmetadata = () => {
@@ -160,7 +158,7 @@ class MediaFeeder {
           this.video.onplaying = () => {
             this.audioWorker.onmessage = async ({data}) => {
               if (!data.warningMessage && !data.closed) {
-                if (!this.video.paused) {
+                if (!this.video.paused && audioWriter) {
                   await audioWriter.write(data);  // Write the decoded audio data to the audio worklet
                   await audioWriter.ready;
                 }
