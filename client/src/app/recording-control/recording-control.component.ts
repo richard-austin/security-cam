@@ -6,7 +6,7 @@ import {
   ElementRef,
   OnDestroy,
   OnInit,
-  ViewChild
+  viewChild, Signal
 } from '@angular/core';
 import {VideoComponent} from '../video/video.component';
 import {Camera, Stream} from '../cameras/Camera';
@@ -49,10 +49,10 @@ Date.prototype.addDays = function (days: number): Date {
   imports: [SharedModule, SharedAngularMaterialModule, VideoComponent, AudioControlComponent],
 })
 export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild(VideoComponent) video!: VideoComponent;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @ViewChild('selector') selector!: MatSelect;
-  @ViewChild('recordingsButtons') recordingsButtonsEl!: ElementRef<HTMLDivElement>;
+  video: Signal<VideoComponent> = viewChild.required(VideoComponent);
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
+  selector: Signal<MatSelect> = viewChild.required('selector');
+  recordingsButtonsEl: Signal<ElementRef<HTMLDivElement>> = viewChild.required('recordingsButtons');
   motionEvents!: LocalMotionEvent[];
   cam!: Camera;
   stream!: Stream;
@@ -96,32 +96,32 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   returnToStart() {
-    this.video.video.currentTime = 0;
+    this.video().video.currentTime = 0;
   }
 
   /**
    * stepForward: Step forward 10 seconds from the current point in the recording.
    */
   stepForward() {
-    this.video.video.currentTime += 10;
+    this.video().video.currentTime += 10;
   }
 
   /**
    * stepBack: Step back 10 seconds from the current point in the recording.
    */
   stepBack(): void {
-    this.video.video.currentTime -= 10;
+    this.video().video.currentTime -= 10;
   }
 
   /**
    * pause: Pause playback
    */
   pause(): void {
-    this.video.video.pause();
+    this.video().video.pause();
   }
 
   private _start() {
-    this?.video?.video.play();
+    this?.video().video.play();
   }
 
   /**
@@ -129,7 +129,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    */
   start(): void {
     this._start();
-    this.video.video.playbackRate = 1;
+    this.video().video.playbackRate = 1;
   }
 
   /**
@@ -137,7 +137,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    */
   fastForward() {
     this._start();
-    this.video.video.playbackRate = 4;
+    this.video().video.playbackRate = 4;
   }
 
   /**
@@ -145,7 +145,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    */
   fasterForward(): void {
     this._start();
-    this.video.video.playbackRate = 10;
+    this.video().video.playbackRate = 10;
   }
 
   /**
@@ -153,7 +153,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    *                 been selected from the navbar menu.
    */
   setupRecording() {
-    this.reporting.dismiss();
+    this.reporting().dismiss();
     this.visible = this.noVideo = false;
 
     // Check for motionName and epoch time as URL parameters, use them if present and valid
@@ -163,7 +163,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     // Check for selected camera (recording) from the nav bar menu, or URL parameters
     // If camera (recording) available, then load that video to the page
     if (this.cam !== undefined && this.stream !== undefined) {
-      let video: VideoComponent | undefined = this.video;
+      let video: VideoComponent = this.video();
       if (video !== undefined) {
         this.setUpVideoEventHandlers();
 
@@ -184,7 +184,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
             }
           },
           error: (error) => {
-            this.reporting.errorMessage = error;
+            this.reporting().errorMessage = error;
           }
         });
         this.setInitialLevel(0.4, false, true);
@@ -204,7 +204,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
    */
   showInvalidInput(inputValid: boolean): void {
     if (!inputValid) {
-      this.reporting.errorMessage = new HttpErrorResponse({
+      this.reporting().errorMessage = new HttpErrorResponse({
         error: 'No recording has been specified',
         status: 0,
         statusText: '',
@@ -220,7 +220,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   showMotionEvent($event: MatSelectChange) {
     this.manifest = $event.value.manifest;
     this.selectedPlaybackMode = 'startPause';
-    this.video.setSource(this.cam, this.stream, $event.value.manifest);
+    this.video().setSource(this.cam, this.stream, $event.value.manifest);
   }
 
   /**
@@ -229,11 +229,11 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   deleteRecording() {
     this.motionService.deleteRecording(this.stream, this.manifest).subscribe({
       next: () => {
-        this.reporting.successMessage = 'Recording ' + this.selector.value.dateTime + ' deleted';
+        this.reporting().successMessage = 'Recording ' + this.selector().value.dateTime + ' deleted';
         timer(2000).subscribe(() => this.setupRecording());  // Show the new latest recording
       },
       error: reason => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
       }
     });
   }
@@ -247,7 +247,7 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
       let reader: FileReader = new FileReader();
       reader.onload = () => {
         let result = JSON.parse(reader.result as string);
-        this.reporting.errorMessage = new HttpErrorResponse({
+        this.reporting().errorMessage = new HttpErrorResponse({
           error: result.reason,
           status: 500 /*error.status */
         });
@@ -258,8 +258,8 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private setUpVideoEventHandlers() {
-    if (this?.video?.video) {
-      let video: HTMLVideoElement = this.video.video;
+    if (this?.video().video) {
+      let video: HTMLVideoElement = this.video().video;
 
       video.onpause = () => {
         this.paused = true;
@@ -351,11 +351,11 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
     this.manifest = motionEvent ? motionEvent.manifest : '';
     if (motionEvent) {
-      this.selector.writeValue(motionEvent);  // Make the selector show the correct event date/time
+      this.selector().writeValue(motionEvent);  // Make the selector show the correct event date/time
 
       // Give the video object the manifest of the latest recording
       if (this.manifest) {
-        this.video.setSource(this.cam, this.stream, this.manifest);
+        this.video().setSource(this.cam, this.stream, this.manifest);
 
         this.visible = true;
         this.showInvalidInput(true);
@@ -364,33 +364,33 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   clickHandler = (ev: Event) => {
-    const inVideoControlDialogue = ev.composedPath().includes(this.recordingsButtonsEl.nativeElement);
+    const inVideoControlDialogue = ev.composedPath().includes(this.recordingsButtonsEl().nativeElement);
     if (!inVideoControlDialogue)
       this.showAudioControls = false;
   };
 
   mute(muted: boolean) {
-    if (this.video.video) {
-      this.video.video.muted = muted;
-      this.volume = this.video.mediaFeeder.isMuted ? 0 : this.video.video.volume;
-      const audioLatencyControl = this.video?.mediaFeeder?.audioStream?.getAudioLatencyControl()||false;
-      const level = new AudioSettings(this.video.video.volume, muted, audioLatencyControl);
+    if (this.video().video) {
+      this.video().video.muted = muted;
+      this.volume = this.video().mediaFeeder.isMuted ? 0 : this.video().video.volume;
+      const audioLatencyControl = this.video()?.mediaFeeder?.audioStream?.getAudioLatencyControl()||false;
+      const level = new AudioSettings(this.video().video.volume, muted, audioLatencyControl);
       NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
     }
   }
 
   isMuted(): boolean {
     let retVal = false;
-    if (this.video && this.video.video)
-      retVal = this.video.video.muted;
+    if (this.video() && this.video().video)
+      retVal = this.video().video.muted;
     return retVal;
   }
 
   setVolume(volume: number) {
-    if (this?.video?.video) {
+    if (this?.video().video) {
       this.volume = volume;
-      this.video.video.volume = this.volume;
-      const audioLatencyControl = this.video?.mediaFeeder?.audioStream?.getAudioLatencyControl();
+      this.video().video.volume = this.volume;
+      const audioLatencyControl = this.video()?.mediaFeeder?.audioStream?.getAudioLatencyControl();
       const level = new AudioSettings(volume, this.isMuted(), audioLatencyControl||false);
       NavComponent.setCookie(this.camKey, JSON.stringify(level), 600);
     }
@@ -428,9 +428,9 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
 
   toggleShowAudioControls() {
     if (this.ctrlKeyDown) {
-      this.mute(!this.video?.video?.muted)
+      this.mute(!this.video()?.video?.muted)
       this.showAudioControls = false;
-      this.volume = this.video?.video?.muted ? 0 : this.video.video.volume;
+      this.volume = this.video()?.video?.muted ? 0 : this.video().video.volume;
     } else
       this.showAudioControls = !this.showAudioControls;
   }
@@ -450,17 +450,17 @@ export class RecordingControlComponent implements OnInit, AfterViewInit, OnDestr
     this.initialised = true;
     this.setupRecording();
     this.cd.detectChanges();
-    this.video.video.controls = false;  // Turn off controls to prevent full screen on reorientation to landscape
+    this.video().video.controls = false;  // Turn off controls to prevent full screen on reorientation to landscape
                                         // Also in some browsers (Firefox on Android), having the controls enabled
                                         // prevents pan and pinch zoom from working.
-    this.video.setSize(100, true);
+    this.video().setSize(100, true);
   }
 
   ngOnDestroy(): void {
     document.removeEventListener('click', this.clickHandler);
     window.removeEventListener("keydown", this.keyHandler)
     window.removeEventListener("keyup", this.keyHandler)
-    this.video.video.controls = true; // Enable controls again
+    this.video().video.controls = true; // Enable controls again
   }
 
   protected readonly UtilsService = UtilsService;

@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, viewChild} from '@angular/core';
 import {UtilsService, Version} from "../shared/utils.service";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
@@ -14,7 +14,7 @@ import {HttpErrorResponse} from "@angular/common/http";
   imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class AboutComponent implements OnInit {
-  @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
+  errorReporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   version: string = "Unknown";
   openSourceInfo: string = "Loading...";
 
@@ -32,7 +32,7 @@ export class AboutComponent implements OnInit {
       },
       error:
         (reason: HttpErrorResponse) => {
-          this.errorReporting.errorMessage = reason;
+          this.errorReporting().errorMessage = reason;
         }
     });
     this.utils.getOpenSourceInfo().subscribe({
@@ -40,7 +40,7 @@ export class AboutComponent implements OnInit {
           this.openSourceInfo = info;
         },
         error: reason => {
-          this.errorReporting.errorMessage = reason;
+          this.errorReporting().errorMessage = reason;
         }
       }
     );

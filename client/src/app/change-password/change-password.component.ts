@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, viewChild} from '@angular/core';
 import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
@@ -15,7 +15,7 @@ import {SharedModule} from "../shared/shared.module";
 export class ChangePasswordComponent implements OnInit {
 
   changePasswordForm!: UntypedFormGroup;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
 
   constructor(private utilsService: UtilsService) {
   }
@@ -35,7 +35,7 @@ export class ChangePasswordComponent implements OnInit {
 
     this.utilsService.changePassword(oldPassword.value, newPassword.value, confirmNewPassword.value).subscribe({
       next: () => {
-        this.reporting.successMessage = "Password changed";
+        this.reporting().successMessage = "Password changed";
       },
       error: (reason: HttpErrorResponse) => {
         if (reason.status === 400) {
@@ -43,9 +43,9 @@ export class ChangePasswordComponent implements OnInit {
             if (key === 'oldPassword')
               this.invalidPassword();
           }
-          this.reporting.errorMessage = reason;
+          this.reporting().warningMessage = reason.error+" : "+reason.message;
         } else
-          this.reporting.errorMessage = reason;
+          this.reporting().errorMessage = reason;
       }
     });
   }

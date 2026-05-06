@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnInit, Signal, viewChild} from '@angular/core';
 import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {UtilsService} from '../shared/utils.service';
@@ -19,17 +19,12 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   nvrAccountRegistrationForm!: FormGroup;
   callFailed: boolean = false;
   committed: boolean = false;
-  // errorMessage: string = '';
-  // successMessage: string = '';
-  @ViewChild('username') usernameInput!: ElementRef<HTMLInputElement>;
-
-  // Assigning this here so as not to use ?. in the template when referencing the reporting
-  //  component. Angular 15 complains about ?. when reporting was declared not being null
-  @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
   title!: string;
   buttonTitle!: string;
   error: boolean = false;
 
+  usernameInput: Signal<ElementRef<HTMLInputElement>> = viewChild.required('username');
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
 
   constructor(private utilsService: UtilsService) {
   }
@@ -91,18 +86,18 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
   }
 
   register() {
-    this.reporting.dismiss();
+    this.reporting().dismiss();
 
     this.username = this.getFormControl('username').value;
     this.callFailed = this.committed = false;
     this.utilsService.createOrUpdateLocalNVRAccount(this.username, this.password, this.confirmPassword, this.email, this.confirmEmail, this.updateExisting).subscribe(
       {complete: () => {
         this.utilsService.getHasLocalAccount();
-        this.reporting.successMessage = "Local client account " + (this.updateExisting ? " updated":" created") + " successfully"+ (this.updateExisting?" username now: "+this.username:"");
+        this.reporting().successMessage = "Local client account " + (this.updateExisting ? " updated":" created") + " successfully"+ (this.updateExisting?" username now: "+this.username:"");
         this.committed = true;
       },
       error: (reason) => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
         this.callFailed = true;
       }});
   }
@@ -129,7 +124,7 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
         this.error = false;
       },
       error: (reason) => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
         this.title = "Problem!"
         this.buttonTitle = "Problem!";
         this.error = this.callFailed = true;
@@ -153,7 +148,7 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     // Set the focus to the username input
-    this.usernameInput.nativeElement.focus();
+    this.usernameInput().nativeElement.focus();
   }
 
   protected readonly UtilsService = UtilsService;

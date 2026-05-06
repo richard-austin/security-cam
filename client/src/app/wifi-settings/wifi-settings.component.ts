@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, viewChild} from '@angular/core';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {MatCheckbox, MatCheckboxChange} from '@angular/material/checkbox';
 import {OnDestroy} from '@angular/core';
@@ -22,8 +22,10 @@ import {UtilsService} from "../shared/utils.service";
   imports: [SharedModule, SharedAngularMaterialModule]
 })
 export class WifiSettingsComponent implements OnInit, OnDestroy {
-  @ViewChild('selector') selector!: MatSelect;
-  @ViewChild('wifiStatusCheckbox') wifiStatusCheckbox!: MatCheckbox;
+  selector: Signal<MatSelect> = viewChild.required('selector');
+  wifiStatusCheckbox: Signal<MatCheckbox> = viewChild.required('wifiStatusCheckbox');
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
+
   wifiEnabled: boolean = false;
   currentWifiConnection: CurrentWifiConnection = new CurrentWifiConnection();
   wifiList!: WifiDetails[];
@@ -32,7 +34,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
   needPassword: boolean = false;
   connecting: boolean = false;
 
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+
   enterPasswordForm!: UntypedFormGroup;
   private password: string | undefined;
   isReady: boolean = false;
@@ -46,12 +48,12 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
       next: (result) => {
         this.currentWifiConnection = result;
         this.loading = false;
-        this.selector.value = this.currentWifiConnection.accessPoint;
+        this.selector().value = this.currentWifiConnection.accessPoint;
       },
       error:
         reason => {
           this.loading = false;
-          this.reporting.errorMessage = reason;
+          this.reporting().errorMessage = reason;
         }
     });
   }
@@ -67,7 +69,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
         },
         error:
           reason => {
-            this.reporting.errorMessage = reason;
+            this.reporting().errorMessage = reason;
           }
       });
     }
@@ -93,13 +95,13 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
         },
         error:
           reason => {
-            this.wifiStatusCheckbox.checked = true;
+            this.wifiStatusCheckbox().checked = true;
             this.loading = false;
-            this.reporting.errorMessage = reason;
+            this.reporting().errorMessage = reason;
           }
       });
     } else {
-      this.wifiStatusCheckbox.checked = true;
+      this.wifiStatusCheckbox().checked = true;
       this.loading = false;
     }
   }
@@ -111,10 +113,10 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
       this.password = undefined;
     }
     this.connecting = true;
-    this.wifiUtilsService.setUpWifi(this.selector.value, this.password).subscribe({
+    this.wifiUtilsService.setUpWifi(this.selector().value, this.password).subscribe({
       next: (result) => {
-        this.reporting.successMessage = JSON.parse(result.response)?.message;
-        this.currentWifiConnection.accessPoint = this.selector.value;
+        this.reporting().successMessage = JSON.parse(result.response)?.message;
+        this.currentWifiConnection.accessPoint = this.selector().value;
         this.connecting = false;
         this.needPassword = false;
       },
@@ -127,15 +129,15 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
           if (response.returncode == 4) // nmcli return code 4: "Connection activation failed.",
           {
             if (this.needPassword)
-              this.reporting.warningMessage = 'Incorrect password for ' + this.selector.value + ", Please try again";
+              this.reporting().warningMessage = 'Incorrect password for ' + this.selector().value + ", Please try again";
             else {
-              this.reporting.warningMessage = 'Please enter the password for ' + this.selector.value;
+              this.reporting().warningMessage = 'Please enter the password for ' + this.selector().value;
               this.needPassword = true;
             }
           } else if (response.returncode == 11)
-            this.reporting.warningMessage = response.message;
+            this.reporting().warningMessage = response.message;
         } else {
-          this.reporting.errorMessage = new HttpErrorResponse({error: response.message});
+          this.reporting().errorMessage = new HttpErrorResponse({error: response.message});
         }
       }
     });
@@ -143,13 +145,13 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
 
   onSelectorChange() {
     this.needPassword = false;
-    this.reporting.dismiss();
+    this.reporting().dismiss();
   }
 
   cancelPasswordEntry() {
     this.needPassword = false;
-    this.selector.value = this.currentWifiConnection.accessPoint;
-    this.reporting.dismiss();
+    this.selector().value = this.currentWifiConnection.accessPoint;
+    this.reporting().dismiss();
   }
 
   /**
@@ -200,13 +202,13 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
               });
               this.isReady = true;
             } catch (e: any) {
-              this.reporting.errorMessage = e;
+              this.reporting().errorMessage = e;
             }
           }
           this.isReady = true;
         },
         error: reason => {
-          this.reporting.errorMessage = reason;
+          this.reporting().errorMessage = reason;
         },
         complete: () => {
         }
@@ -225,7 +227,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
         },
       error:
         reason => {
-          this.reporting.errorMessage = reason;
+          this.reporting().errorMessage = reason;
         }
     });
 

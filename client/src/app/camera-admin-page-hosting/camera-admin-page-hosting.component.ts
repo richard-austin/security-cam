@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, Signal, viewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {ActivatedRoute} from '@angular/router';
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -22,7 +22,7 @@ import {MatButton} from "@angular/material/button";
 export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, OnDestroy {
   address!: string;
   cameraName!: string;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   private webAdminPort: number = 80;
   private initialised: boolean = false;
   private tabHandle: Window | null = null;
@@ -85,7 +85,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
           this.tabHandle = window.open('http://' + response.nvrIPAddress + ':' + environment.camAdminHostPort + '/?randomId=' + this.makeId(12), '_blank');
         },
         error: reason => {
-          this.reporting.errorMessage = reason;
+          this.reporting().errorMessage = reason;
         }
       });
     }

@@ -1,9 +1,8 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, viewChild} from '@angular/core';
 import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import {MatCheckboxChange as MatCheckboxChange} from "@angular/material/checkbox";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {UtilsService} from "../shared/utils.service";
-import {timer} from "rxjs";
 
 export class SMTPData {
   auth: boolean = true;
@@ -19,10 +18,10 @@ export class SMTPData {
 }
 
 @Component({
-    selector: 'app-setup-smtpclient',
-    templateUrl: './setup-smtpclient.component.html',
-    styleUrls: ['./setup-smtpclient.component.scss'],
-    standalone: false
+  selector: 'app-setup-smtpclient',
+  templateUrl: './setup-smtpclient.component.html',
+  styleUrls: ['./setup-smtpclient.component.scss'],
+  standalone: false
 })
 export class SetupSMTPClientComponent implements OnInit {
   setupSMTPForm!: FormGroup;
@@ -31,7 +30,7 @@ export class SetupSMTPClientComponent implements OnInit {
   callFailed: boolean = false;
   committed: boolean = false;
 
-  @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
 
   constructor(private utilsService: UtilsService) {
   }
@@ -92,11 +91,11 @@ export class SetupSMTPClientComponent implements OnInit {
     this.callFailed = this.committed = false;
     this.utilsService.setupSMTPClientLocally(this.smtpData).subscribe({
       complete: () => {
-        this.reporting.successMessage = "SMTP settings updated";
+        this.reporting().successMessage = "SMTP settings updated";
         this.committed = true;
       },
       error: (reason) => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
         this.callFailed = true;
       }
     });
@@ -175,14 +174,12 @@ export class SetupSMTPClientComponent implements OnInit {
       },
       error: (reason) => {
         this.setupFormControls();
-        timer(200).subscribe(() => { // Ensure message gets displayed
-          if (reason.status == 400) {
-            this.reporting.warningMessage = reason.error;
-          } else {
-            this.reporting.errorMessage = reason;
-            this.callFailed = true;
-          }
-        })
+        if (reason.status == 400) {
+          this.reporting().warningMessage = reason.error;
+        } else {
+          this.reporting().errorMessage = reason;
+          this.callFailed = true;
+        }
       }
     });
   }

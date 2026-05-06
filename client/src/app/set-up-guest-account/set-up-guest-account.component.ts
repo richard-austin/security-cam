@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, viewChild} from '@angular/core';
 import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {HttpErrorResponse} from "@angular/common/http";
@@ -16,7 +16,7 @@ import {SharedAngularMaterialModule} from "../shared/shared-angular-material/sha
 export class SetUpGuestAccountComponent implements OnInit {
   setupGuestAccountForm!: UntypedFormGroup;
   private originalEnabledState!: boolean
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   private currentEnabledState!: boolean;
 
   constructor(private utilsService: UtilsService) {
@@ -43,7 +43,7 @@ export class SetUpGuestAccountComponent implements OnInit {
 
     this.utilsService.setupGuestAccount(enabled.value, password.value, confirmPassword.value).subscribe({
       complete: () => {
-        this.reporting.successMessage = "Guest account settings changed";
+        this.reporting().successMessage = "Guest account settings changed";
 
         // Clear the password fields
         this.setupGuestAccountForm.controls['password'].setValue('');
@@ -56,9 +56,9 @@ export class SetUpGuestAccountComponent implements OnInit {
               if (key === 'password')
                 this.invalidPassword();
             }
-            this.reporting.errorMessage = reason;
+            this.reporting().errorMessage = reason;
           } else
-            this.reporting.errorMessage = reason;
+            this.reporting().errorMessage = reason;
         }
     });
   }
