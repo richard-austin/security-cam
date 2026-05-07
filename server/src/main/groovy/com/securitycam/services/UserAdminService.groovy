@@ -150,7 +150,8 @@ class UserAdminService {
                 roles.push(role)
 
                 if (cmd.updateExisting) {
-                    def u = userRepository.findByRoles(roles)
+                   // Find user account
+                    def u = userRepository.findByCloudAccountAndUsernameNot(false, "guest")
                     userRepository.delete(u)
                 }
 

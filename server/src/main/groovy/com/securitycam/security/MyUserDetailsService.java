@@ -16,15 +16,9 @@ import java.util.List;
 @Service("userDetailsService")
 public class MyUserDetailsService implements UserDetailsService {
 
-    @Autowired
+    @Autowired  // Tried the injection in constructor alternative to @Autowired (which the warning says is not recommended) but it results in userRepository being null
     private UserRepository userRepository;
 
-//    @Autowired
-//    private LoginAttemptService loginAttemptService;
-//
-    public MyUserDetailsService() {
-        super();
-    }
 
     // API
     @Override

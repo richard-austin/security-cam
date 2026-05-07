@@ -34,7 +34,10 @@ class UserService {
         user.setCloudAccount(accountDto.cloudAccount)
         user.setHeader(accountDto.header)
         user.setEnabled(true)
-        user.setRoles(Collections.singletonList(roleRepository.findById(accountDto.role).get()))
+        Collection<Integer> roleIds = accountDto.roles
+        Collection<Role> roles = new ArrayList<>()
+        roleIds.forEach {   roles.add(roleRepository.findById(it).get())}
+        user.setRoles(roles)
 
         return userRepository.save(user)
     }

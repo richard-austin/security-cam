@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import java.util.Collection;
 
 public class UserDto {
     @NotNull
@@ -46,7 +47,8 @@ public class UserDto {
     }
 
     @Getter
-    private Integer role;
+    @Setter
+    private Collection<Integer> roles;
 
     public @NotNull @Size(min = 5, max = 30) String getUsername() {
         return username;
@@ -57,7 +59,7 @@ public class UserDto {
         return "UserDto [firstName=" +
                 ", email=" +
                 email +
-                ", role=" +
-                role + "]";
+                ", roles=" +
+                roles.toString() + "]";
     }
 }

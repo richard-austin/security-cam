@@ -133,7 +133,7 @@ public class User implements MyUserDetails {
         this.header = header;
     }
 
-    public Collection<GrantedAuthority> getAuthorities() {
+    public @NonNull Collection<GrantedAuthority> getAuthorities() {
         final Collection<GrantedAuthority> retVal = new HashSet<>();
         roles.forEach(role ->
                 retVal.add(new SimpleGrantedAuthority(role.getName())));
@@ -186,10 +186,7 @@ public class User implements MyUserDetails {
             return false;
         }
         final User user = (User) obj;
-        if (!getEmail().equals(user.getEmail())) {
-            return false;
-        }
-        return true;
+        return getEmail().equals(user.getEmail());
     }
 
     @Override

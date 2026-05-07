@@ -40,25 +40,31 @@ class InitialAccountSetup {
     @Bean
     CommandLineRunner run(UserService userService) {
         return (String[] args) -> {
-            if(!userService.roleExists('ROLE_CLIENT'))
+            if (!userService.roleExists('ROLE_CLIENT'))
                 userService.addRole('ROLE_CLIENT')
 
-            if(!userService.roleExists('ROLE_CLOUD'))
+            if (!userService.roleExists('ROLE_CLOUD'))
                 userService.addRole('ROLE_CLOUD')
 
-            if(!userService.roleExists('ROLE_GUEST'))
+            if (!userService.roleExists('ROLE_GUEST'))
                 userService.addRole('ROLE_GUEST')
 
-            if(!userService.userNameExists('cloud')) {
+            if (!userService.userNameExists('cloud')) {
                 Role role = roleRepository.findByName("ROLE_CLOUD")
-                if (role != null)
-                    userService.registerNewUserAccount(new UserDto(username: "cloud", password: "DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU", credentialsNonExpired: true, header: "7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!",  matchingPassword: "password", email: "nonexistent2@hfytrbhxgafdj.com", cloudAccount: true, role: role.getId()))
+                if (role != null) {
+                    Collection<Integer> roles = new ArrayList<>()
+                    roles.add(role.getId() as Integer)
+                    userService.registerNewUserAccount(new UserDto(username: "cloud", password: "DrN3yuFAtSsK2w7AtTf66FFRVveBwtjU", credentialsNonExpired: true, header: "7yk=zJu+@77x@MTJG2HD*YLJgvBthkW!", matchingPassword: "password", email: "nonexistent2@hfytrbhxgafdj.com", cloudAccount: true, roles: roles))
+                }
             }
 
-            if(!userService.userNameExists('guest')) {
+            if (!userService.userNameExists('guest')) {
                 Role role = roleRepository.findByName("ROLE_GUEST")
-                if (role != null)
-                    userService.registerNewUserAccount(new UserDto(username: "guest", password: "", matchingPassword: "", credentialsNonExpired: false, email: "nonexistent@hfytrbhxgafdj.com", cloudAccount: false, header: "", role: role.getId()))
+                if (role != null) {
+                    Collection<Integer> roles = new ArrayList<>()
+                    roles.add(role.getId() as Integer)
+                    userService.registerNewUserAccount(new UserDto(username: "guest", password: "", matchingPassword: "", credentialsNonExpired: false, email: "nonexistent@hfytrbhxgafdj.com", cloudAccount: false, header: "", roles: roles))
+                }
             }
 
             User u = userRepository.findByUsernameNotAndCloudAccount('guest', false)
