@@ -1,11 +1,18 @@
-import {Component, ElementRef, OnInit, Signal, viewChild} from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  ElementRef,
+  inject,
+  OnInit,
+  Signal,
+  viewChild
+} from '@angular/core';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {timer} from 'rxjs';
 import {Subscription} from 'rxjs';
 import {OnDestroy} from '@angular/core';
 import {WifiDetails} from '../shared/wifi-details';
 import {WifiUtilsService} from '../shared/wifi-utils.service';
-import {AfterViewInit} from '@angular/core';
 import {UtilsService} from "../shared/utils.service";
 import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
@@ -16,9 +23,11 @@ import {SharedAngularMaterialModule} from "../shared/shared-angular-material/sha
   styleUrls: ['./get-local-wifi-details.component.scss'],
   imports: [SharedModule, SharedAngularMaterialModule]
 })
-export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class GetLocalWifiDetailsComponent implements OnInit, AfterViewChecked, OnDestroy {
   reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   scrollableContent: Signal<ElementRef<HTMLElement>> = viewChild.required('scrollable_content');
+  private wifiUtilsService: WifiUtilsService = inject(WifiUtilsService);
+  private utils: UtilsService = inject(UtilsService);
 
   wifiDetails!: WifiDetails[];
   displayedColumns: string[] = ["InUse", "Ssid", "Rate", "Signal", "Channel", "Security", "Mode", "Bssid"];
@@ -26,7 +35,7 @@ export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDe
   private wifiEnabled: boolean = true;
   loading: boolean = false;
 
-  constructor(private wifiUtilsService: WifiUtilsService, public utils: UtilsService) {
+  constructor() {
   }
 
   getLocalWifiDetails(): void {
@@ -46,6 +55,12 @@ export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDe
     });
   }
 
+  setScrollWindow() {
+    const sc = this.scrollableContent()?.nativeElement;
+    sc.style = this.utils.getScrollableContentStyle(sc, true);
+  }
+
+
   ngOnInit(): void {
     this.wifiUtilsService.checkWifiStatus().subscribe({
       next: (result) => {
@@ -61,11 +76,12 @@ export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDe
     });
   }
 
+  ngAfterViewChecked(): void {
+    this.setScrollWindow();
+  }
+
   ngOnDestroy(): void {
     if (this.subscription !== undefined)
       this.subscription.unsubscribe();
-  }
-
-  ngAfterViewInit(): void {
   }
 }

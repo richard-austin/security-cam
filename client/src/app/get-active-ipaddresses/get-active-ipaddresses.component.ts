@@ -1,4 +1,12 @@
-import {Component, ElementRef, OnInit, viewChild} from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  viewChild
+} from '@angular/core';
 import {IPDetails} from '../shared/IPDetails';
 import {WifiUtilsService} from '../shared/wifi-utils.service';
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -12,14 +20,19 @@ import {SharedModule} from "../shared/shared.module";
   styleUrls: ['./get-active-ipaddresses.component.scss'],
   imports: [SharedModule, SharedAngularMaterialModule]
 })
-export class GetActiveIPAddressesComponent implements OnInit {
+export class GetActiveIPAddressesComponent implements OnInit, AfterViewChecked, OnDestroy {
   reporting = viewChild.required(ReportingComponent);
   scrollableContent = viewChild.required<ElementRef<HTMLElement>>('scrollable_content');
-
+  private wifiUtilsService: WifiUtilsService = inject(WifiUtilsService);
+  private utils: UtilsService = inject(UtilsService);
   ipDetails!: IPDetails[];
   displayedColumns: string[] = ["IP", "Name", "ConnType", "Device"];
+  constructor() {
+  }
 
-  constructor(private wifiUtilsService: WifiUtilsService, public utils: UtilsService) {
+  setScrollWindow() {
+    const sc = this.scrollableContent()?.nativeElement;
+    sc.style = this.utils.getScrollableContentStyle(sc, true);
   }
 
   ngOnInit(): void {
@@ -31,5 +44,12 @@ export class GetActiveIPAddressesComponent implements OnInit {
         this.reporting().errorMessage = reason;
       }
     });
+  }
+
+  ngAfterViewChecked(): void {
+    this.setScrollWindow();
+  }
+
+  ngOnDestroy() {
   }
 }

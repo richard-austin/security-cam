@@ -1,8 +1,8 @@
 import {
   AfterViewInit,
   ChangeDetectorRef,
-  Component,
-  ElementRef, HostListener,
+  Component, effect, EffectRef,
+  ElementRef,  HostListener, inject,
   isDevMode,
   OnDestroy,
   OnInit, Signal, signal, viewChild,
@@ -64,10 +64,6 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
   schemas: [],
 })
 export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, AfterViewInit, OnDestroy {
-  reporting: Signal<ReportingComponent> = viewChild.required<ReportingComponent>('errorReporting');
-  scrollableContent: Signal<ElementRef<HTMLElement>> = viewChild.required<ElementRef<HTMLElement>>('scrollable_content');
-  recordingSetupComponents: Signal<readonly RecordingSetupComponent[]> = viewChildren(RecordingSetupComponent);
-
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: BeforeUnloadEvent) {
     if (this.dataHasChanged() || this.anyInvalid()) {
@@ -112,12 +108,29 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   checkDeactivate: boolean = false;
   showCameraDeleteConfirm: string = '';
   showStreamDeleteConfirm: string = '';
+  er!: EffectRef;
 
-  constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
+  constructor() {
+      this.er = effect(() => {
+          const scEr = this.scrollableContent();
+          if(scEr !== undefined) {
+            const sc: HTMLElement = scEr.nativeElement;
+            sc.style = this.utils.getScrollableContentStyle(sc);
+          }
+      });
   }
 
   animationEnter = signal('enter-animation');
   animationLeave = signal('leaving-animation');
+
+  reporting: Signal<ReportingComponent> = viewChild.required<ReportingComponent>('errorReporting');
+  scrollableContent: Signal<ElementRef<HTMLElement> | undefined> = viewChild<ElementRef<HTMLElement>>('scrollable_content');
+  recordingSetupComponents: Signal<readonly RecordingSetupComponent[]> = viewChildren(RecordingSetupComponent);
+
+  protected cameraSvc: CameraService = inject(CameraService);
+  private utils: UtilsService = inject(UtilsService);
+  private sanitizer: DomSanitizer = inject(DomSanitizer);
+  private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   validateSampleRate(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -839,12 +852,14 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     });
     this.checkIfOnvifCredentialsPresent();
     this.isGuest = this.utils.isGuestAccount;
+
   }
 
   ngAfterViewInit(): void {
   }
 
   ngOnDestroy() {
+    this.er.destroy();
   }
 
   streamDeleteButtonToolTip(cam: { value: Camera, key: string }, stream: string) {
