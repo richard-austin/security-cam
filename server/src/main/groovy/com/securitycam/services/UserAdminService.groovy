@@ -156,8 +156,10 @@ class UserAdminService {
 
                 ValidatorFactory factory = Validation.buildDefaultValidatorFactory()
                 Validator validator = factory.getValidator()
+                ArrayList<Integer> roleIds = new ArrayList()
+                roles.forEach(r -> roleIds.add(r.getId()))
 
-                var accountDto = new UserDto(username: cmd.username, password: cmd.password, matchingPassword: cmd.confirmPassword, credentialsNonExpired: true, email: cmd.email, cloudAccount: false, role: role.getId())
+                var accountDto = new UserDto(username: cmd.username, password: cmd.password, matchingPassword: cmd.confirmPassword, credentialsNonExpired: true, email: cmd.email, cloudAccount: false, roles: roleIds)
                 Set<ConstraintViolation<UserDto>> violations = validator.validate(accountDto)
                 if (violations.size() == 0)
                     userService.registerNewUserAccount(accountDto)

@@ -10,7 +10,6 @@ import com.securitycam.services.CloudProxyService
 import com.securitycam.services.LogService
 import com.securitycam.services.Sc_processesService
 import com.securitycam.services.UserService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -18,18 +17,25 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class InitialAccountSetup {
 
-    @Autowired
     RoleRepository roleRepository
-    @Autowired
     UserRepository userRepository
-    @Autowired
     LogService logService
-    @Autowired
     Sc_processesService sc_processesService
-    @Autowired
     Config config
-    @Autowired
     CloudProxyService cloudProxyService
+
+    InitialAccountSetup(RoleRepository roleRepository,
+                        UserRepository userRepository,
+                        LogService logService,
+                        Sc_processesService sc_processesService,
+                        Config config,
+                        CloudProxyService cloudProxyService) {
+        this.roleRepository = roleRepository
+        this.userRepository = userRepository
+        this.logService = logService
+        this.config = config
+        this.cloudProxyService = cloudProxyService
+    }
 
     @Bean
     CommandLineRunner run(UserService userService) {

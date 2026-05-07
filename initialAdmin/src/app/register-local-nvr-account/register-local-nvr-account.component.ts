@@ -144,11 +144,12 @@ export class RegisterLocalNvrAccountComponent implements OnInit, AfterViewInit {
     // Ensure camera form controls highlight immediately if invalid
     this.nvrAccountRegistrationForm.markAllAsTouched();
     this.checkForLocalAccount();
+    // Set the focus to the username input
+    this.usernameInput().nativeElement.focus();
+
   }
 
   ngAfterViewInit(): void {
-    // Set the focus to the username input
-    this.usernameInput().nativeElement.focus();
   }
 
   protected readonly UtilsService = UtilsService;
