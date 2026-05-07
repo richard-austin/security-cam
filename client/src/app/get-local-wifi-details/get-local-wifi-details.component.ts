@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, Signal, viewChild} from '@angular/core';
+import {Component, effect, EffectRef, ElementRef, inject, OnInit, Signal, viewChild} from '@angular/core';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {timer} from 'rxjs';
 import {Subscription} from 'rxjs';
@@ -19,14 +19,23 @@ import {SharedAngularMaterialModule} from "../shared/shared-angular-material/sha
 export class GetLocalWifiDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   scrollableContent: Signal<ElementRef<HTMLElement>> = viewChild.required('scrollable_content');
+  private wifiUtilsService: WifiUtilsService = inject(WifiUtilsService);
+  private utils: UtilsService = inject(UtilsService);
+
 
   wifiDetails!: WifiDetails[];
   displayedColumns: string[] = ["InUse", "Ssid", "Rate", "Signal", "Channel", "Security", "Mode", "Bssid"];
   subscription!: Subscription;
   private wifiEnabled: boolean = true;
   loading: boolean = false;
+  er: EffectRef;
 
-  constructor(private wifiUtilsService: WifiUtilsService, public utils: UtilsService) {
+  constructor() {
+    this.er = effect(() => {
+      const scEl = this.scrollableContent();
+      const sc = scEl.nativeElement;
+      sc.style = this.utils.getScrollableContentStyle(sc, true);
+    });
   }
 
   getLocalWifiDetails(): void {

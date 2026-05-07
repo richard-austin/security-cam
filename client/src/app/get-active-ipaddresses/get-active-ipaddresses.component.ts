@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, viewChild} from '@angular/core';
+import {Component, effect, EffectRef, ElementRef, inject, OnInit, viewChild} from '@angular/core';
 import {IPDetails} from '../shared/IPDetails';
 import {WifiUtilsService} from '../shared/wifi-utils.service';
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -15,11 +15,18 @@ import {SharedModule} from "../shared/shared.module";
 export class GetActiveIPAddressesComponent implements OnInit {
   reporting = viewChild.required(ReportingComponent);
   scrollableContent = viewChild.required<ElementRef<HTMLElement>>('scrollable_content');
+  private wifiUtilsService: WifiUtilsService = inject(WifiUtilsService);
+  private utils: UtilsService = inject(UtilsService);
 
   ipDetails!: IPDetails[];
   displayedColumns: string[] = ["IP", "Name", "ConnType", "Device"];
-
-  constructor(private wifiUtilsService: WifiUtilsService, public utils: UtilsService) {
+  er: EffectRef;
+  constructor() {
+    this.er = effect(() => {
+      const scEl = this.scrollableContent();
+      const sc = scEl.nativeElement;
+      sc.style = this.utils.getScrollableContentStyle(sc, true);
+    });
   }
 
   ngOnInit(): void {

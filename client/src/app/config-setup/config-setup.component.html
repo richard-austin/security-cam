@@ -57,7 +57,6 @@ can be found in the LICENSE file at http://angular.io/license -->
 
   @if (!downloading && !updating && !discovering) {
     <mat-card-content #scrollable_content
-      [style]="utils.getScrollableContentStyle(scrollableContent().nativeElement)"
       class="scrollable-content">
       @if (failed.size > 0) {
         <app-onvif-failures (fixUpCamerasData)="FixUpCameraData()" [cameras]="cameras"
