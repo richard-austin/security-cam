@@ -115,12 +115,13 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
 
   deleteDevice(i: number) {
     if(i >= 0 && i < this.tableForms.length) {
-      this.devices.splice(i, 1);
+      const devices = structuredClone(this.devices);
+      devices.splice(i, 1);
       // Renumber the indices
-      this.devices.forEach((device: Device, index: number) => {
+      devices.forEach((device: Device, index: number) => {
         device.id = index;
       });
-      this.devices = [...this.devices];  // Needs to be a new array for the table to reflect the change
+      this.devices = [...devices];  // Needs to be a new array for the table to reflect the change
       this.setUpTableFormControls();
     } else {
       console.log("delete index "+i+" is out of range")
