@@ -81,6 +81,7 @@ export class SetCameraParams {
 }
 
 export class Device {
+  id!: number;
   name!: string;
   ipAddress!: string;
   ipPort!: number;
@@ -340,7 +341,7 @@ export class UtilsService {
   loadAdHocDevices() {
     return this.http.post<Array<Device>>(this._baseUrl.getLink("utils", "loadAdHocDevices"), '', this.httpJSONOptions).pipe(
       tap(devices => {
-        this.adHocDevices = devices;
+        this.adHocDevices = [...devices];
       }),
       catchError((err: HttpErrorResponse) => throwError(() => err))
     );
@@ -351,7 +352,7 @@ export class UtilsService {
     let devices = {adHocDeviceListJSON: adHocDeviceListJSON};
     return this.http.post<any>(this._baseUrl.getLink("utils", "updateAdHocDeviceList"), JSON.stringify(devices), this.httpJSONOptions).pipe(
       tap(devices => {
-        this.adHocDevices = devices;
+        this.adHocDevices = [...devices];
       })
     );
   }

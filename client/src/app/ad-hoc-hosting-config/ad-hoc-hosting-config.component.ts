@@ -48,6 +48,7 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
   downloading: boolean = true;
 
   constructor() {
+    this.devices = [];
   }
 
   setScrollWindow() {
@@ -55,9 +56,7 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
     sc.style = this.utils.getScrollableContentStyle(sc, true);
   }
 
-  protected trackBy: TrackByFunction<Device> = (index: number) => {
-    return index;
-  }
+  protected trackBy: TrackByFunction<Device> = (index: number, dev: Device) =>  dev.id;
 
   dataHasChanged(): boolean {
     return this.devices && objectHash(this.devices) !== this.savedDataHash;
@@ -93,7 +92,10 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
     let list = new BehaviorSubject<Device[]>(this.devices);
     let formGroups  = list.value.map((device: Device) => {
       return new UntypedFormGroup({
-        name: new UntypedFormControl(device.name, [Validators.required, Validators.maxLength(25)]),
+        name: new UntypedFormControl({
+          value: device.name,
+          disabled: false
+        },[Validators.required, Validators.maxLength(25)]),
         ipAddress: new UntypedFormControl({
           value: device.ipAddress,
           disabled: false
@@ -114,6 +116,10 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
   deleteDevice(i: number) {
     if(i >= 0 && i < this.tableForms.length) {
       this.devices.splice(i, 1);
+      // Renumber the indices
+      this.devices.forEach((device: Device, index: number) => {
+        device.id = index;
+      });
       this.devices = [...this.devices];  // Needs to be a new array for the table to reflect the change
       this.setUpTableFormControls();
     } else {
@@ -131,10 +137,13 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
   }
 
   addDevice() {
-    this.devices.push(new Device());
-    this.devices = [...this.devices];
+    const dev = new Device();
+    dev.id = this.devices.length;
+    this.devices.push(dev);
+    this.devices = [...this.devices]; // Needs to be a new array for the table to reflect the change
     this.setUpTableFormControls();
   }
+
   commitConfig() {
     this.utils.updateAdhocDeviceList(JSON.stringify(this.devices)).subscribe({
         next: () => {
@@ -152,8 +161,11 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
 
   ngOnInit(): void {
     this.isGuest = this.utils.isGuestAccount;
-    this.utils.loadAdHocDevices().subscribe({
+   this.utils.loadAdHocDevices().subscribe(  {
       next: (devices: Device[]) => {
+        devices.forEach((device: Device, index: number) => {
+          device.id = index;
+        });
         this.devices = devices;
         this.setUpTableFormControls();
         this.downloading = false;
