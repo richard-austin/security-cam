@@ -2,8 +2,8 @@
   <mat-card>
     <mat-card-title>Ad Hoc Device Admin Hosting</mat-card-title>
     <app-reporting #errorReporting></app-reporting>
-    <mat-card-content>
-      <table mat-table [dataSource]="devices" class="mat-elevation-z8">
+    <mat-card-content #scrollableContent class="scrollable-content">
+      <table mat-table [dataSource]="devices" [trackBy]="trackBy" class="mat-elevation-z8">
         <ng-container matColumnDef="delete">
           <th *matHeaderCellDef mat-header-cell>Delete</th>
           <td *matCellDef="let device; let i = index" mat-cell>

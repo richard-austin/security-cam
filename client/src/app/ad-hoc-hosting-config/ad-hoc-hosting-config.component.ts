@@ -1,4 +1,14 @@
-import {Component, OnInit, Signal, signal, viewChild} from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  ElementRef,
+  inject,
+  OnInit,
+  Signal,
+  signal,
+  TrackByFunction,
+  viewChild
+} from '@angular/core';
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {BehaviorSubject} from "rxjs";
@@ -16,7 +26,7 @@ declare let objectHash: (obj: Object) => string;
   templateUrl: './ad-hoc-hosting-config.component.html',
   styleUrl: './ad-hoc-hosting-config.component.scss',
 })
-export class AdHocHostingConfigComponent implements OnInit {
+export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
   columns: string[] = ['delete', 'devicename', 'ipaddress', 'ipport'];
   footerColumns = ['buttons'];
   devices!: Device[];
@@ -30,11 +40,24 @@ export class AdHocHostingConfigComponent implements OnInit {
   tableForms!: UntypedFormArray
   showDeviceDeleteConfirm: number = -1;
   reporting: Signal<ReportingComponent> = viewChild.required('errorReporting');
-  downloading: boolean = true;
-  constructor(private utils: UtilsService) {
-  }
   animationEnter = signal('enter-animation');
   animationLeave = signal('leaving-animation');
+  scrollableContent = viewChild.required<ElementRef<HTMLDivElement>>('scrollableContent');
+  private utils = inject(UtilsService);
+
+  downloading: boolean = true;
+
+  constructor() {
+  }
+
+  setScrollWindow() {
+    const sc = this.scrollableContent().nativeElement;
+    sc.style = this.utils.getScrollableContentStyle(sc, true);
+  }
+
+  protected trackBy: TrackByFunction<Device> = (index: number) => {
+    return index;
+  }
 
   dataHasChanged(): boolean {
     return this.devices && objectHash(this.devices) !== this.savedDataHash;
@@ -144,6 +167,10 @@ export class AdHocHostingConfigComponent implements OnInit {
         this.downloading = false;
       }
     });
+  }
+
+  ngAfterViewChecked(): void {
+    this.setScrollWindow();
   }
 
   protected readonly UtilsService = UtilsService;
