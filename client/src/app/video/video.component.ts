@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  Component,
+  Component, effect, EffectRef,
   ElementRef, input, InputSignal,
   OnDestroy,
   OnInit, Signal, signal, viewChild,
@@ -33,6 +33,10 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   videoControlsEL: Signal<ElementRef<HTMLDivElement>> = viewChild.required<ElementRef<HTMLDivElement>>('videoControls');
   isLive: InputSignal<boolean> = input<boolean>(false);
+  showAudioControls: WritableSignal<boolean> = signal(false);
+  enterClass = signal('enter-animation');
+  farewell = signal('leaving-animation')
+
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
@@ -44,15 +48,17 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   currentTime: string = "";
   totalTime: string = "";
   sizing!: VideoSizing;
-  showAudioControls: WritableSignal<boolean>;
+
   ctrlKeyDown = false;
   camKey: string = "";
-  enterClass = signal('enter-animation');
-  farewell = signal('leaving-animation')
-
+  er: EffectRef;
   constructor(public utilsService: UtilsService) {
     this.mediaFeeder = new MediaFeeder();
-    this.showAudioControls = signal(false);
+    this.er = effect(() => {
+      if(this.isLive()) {
+        document.addEventListener('click', this.clickHandler);
+      }
+    });
   }
 
   /**
@@ -201,7 +207,6 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    document.addEventListener('click', this.clickHandler);
     window.addEventListener("keydown", this.keyHandler);
     window.addEventListener("keyup", this.keyHandler);
     this.video = this.videoEl().nativeElement;
@@ -227,10 +232,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.mediaFeeder.stop();
-    document.removeEventListener('click', this.clickHandler);
+    if(this.isLive()) {
+      document.removeEventListener('click', this.clickHandler);
+    }
+
     window.removeEventListener("keydown", this.keyHandler)
     window.removeEventListener("keyup", this.keyHandler)
+    this.mediaFeeder.stop();
     // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
     //  ffmpeg to the backchannel device. The problem does not occur when done like this
     let timerSubscription: Subscription = timer(20).subscribe(() => {
@@ -240,6 +248,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     window.screen.orientation.onchange = null;
     this.sizing._destroy();
+    this.er.destroy();
   }
 
   protected readonly MediaFeeder = MediaFeeder;
