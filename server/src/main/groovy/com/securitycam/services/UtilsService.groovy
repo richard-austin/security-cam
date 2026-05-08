@@ -466,7 +466,7 @@ class UtilsService {
         <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
         <hr>
         <h3>typescript v5.9.3</h3>
-        <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
+        <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-0.html" target="_blank">typescript</a>
         <hr>
         <h3>Spring Boot v4.0.1</h3>
         <a href="https://spring.io/projects/spring-boot" target="_blank">Spring Boot</a>

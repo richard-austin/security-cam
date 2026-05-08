@@ -5,13 +5,14 @@ import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {HttpErrorResponse} from "@angular/common/http";
+import {NgOptimizedImage} from "@angular/common";
 
 
 @Component({
   selector: 'app-about',
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.scss'],
-  imports: [SharedModule, SharedAngularMaterialModule]
+  imports: [SharedModule, SharedAngularMaterialModule, NgOptimizedImage]
 })
 export class AboutComponent implements OnInit {
   errorReporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
