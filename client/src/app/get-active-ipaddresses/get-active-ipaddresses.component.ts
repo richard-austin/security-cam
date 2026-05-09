@@ -31,8 +31,8 @@ export class GetActiveIPAddressesComponent implements OnInit, AfterViewChecked, 
   }
 
   setScrollWindow() {
-    const sc = this.scrollableContent()?.nativeElement;
-    sc.style = this.utils.getScrollableContentStyle(sc, true);
+    const sc = this.scrollableContent().nativeElement;
+    this.utils.getScrollableContentStyle(sc, true);
   }
 
   ngOnInit(): void {

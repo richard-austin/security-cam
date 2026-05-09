@@ -110,16 +110,6 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   showStreamDeleteConfirm: string = '';
   er!: EffectRef;
 
-  constructor() {
-      this.er = effect(() => {
-          const scEr = this.scrollableContent();
-          if(scEr !== undefined) {
-            const sc: HTMLElement = scEr.nativeElement;
-            sc.style = this.utils.getScrollableContentStyle(sc);
-          }
-      });
-  }
-
   animationEnter = signal('enter-animation');
   animationLeave = signal('leaving-animation');
 
@@ -131,6 +121,16 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   private utils: UtilsService = inject(UtilsService);
   private sanitizer: DomSanitizer = inject(DomSanitizer);
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
+
+  constructor() {
+    this.er = effect(() => {
+      const scEr = this.scrollableContent();
+      if(scEr !== undefined) {
+        const sc: HTMLElement = scEr.nativeElement;
+        this.utils.getScrollableContentStyle(sc);
+      }
+    });
+  }
 
   validateSampleRate(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {

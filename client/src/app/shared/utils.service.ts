@@ -239,7 +239,7 @@ export class UtilsService {
     return this._messaging.asObservable();
   }
 
-  getScrollableContentStyle(scrollableContent: HTMLElement | null | undefined, setMaxHeight: boolean = false): string {
+  getScrollableContentStyle(scrollableContent: HTMLElement | null | undefined, setMaxHeight: boolean = false): void {
     // Calculated scrollbar height, don't use or we Expression changed after it was checked error will occur
     //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
     const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
@@ -247,9 +247,8 @@ export class UtilsService {
 
     if (scrollableContent !== null && scrollableContent !== undefined) {
       const boundingRect = scrollableContent.getBoundingClientRect()
-      return (setMaxHeight ? 'max-' : '') + `height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
+      scrollableContent.style = (setMaxHeight ? 'max-' : '') + `height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
     }
-    else return ""
   }
 
 

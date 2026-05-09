@@ -2,7 +2,7 @@ import {
   AfterViewChecked,
   Component,
   ElementRef,
-  inject,
+  inject, OnDestroy,
   OnInit,
   Signal,
   signal,
@@ -26,7 +26,7 @@ declare let objectHash: (obj: Object) => string;
   templateUrl: './ad-hoc-hosting-config.component.html',
   styleUrl: './ad-hoc-hosting-config.component.scss',
 })
-export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
+export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked, OnDestroy {
   columns: string[] = ['delete', 'devicename', 'ipaddress', 'ipport'];
   footerColumns = ['buttons'];
   devices!: Device[];
@@ -42,18 +42,13 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
   reporting: Signal<ReportingComponent> = viewChild.required('errorReporting');
   animationEnter = signal('enter-animation');
   animationLeave = signal('leaving-animation');
-  scrollableContent = viewChild.required<ElementRef<HTMLDivElement>>('scrollableContent');
+  scrollableContent = viewChild<ElementRef<HTMLDivElement>>('scrollableContent');
   private utils = inject(UtilsService);
 
   downloading: boolean = true;
 
   constructor() {
     this.devices = [];
-  }
-
-  setScrollWindow() {
-    const sc = this.scrollableContent().nativeElement;
-    sc.style = this.utils.getScrollableContentStyle(sc, true);
   }
 
   protected trackBy: TrackByFunction<Device> = (index: number, dev: Device) =>  dev.id;
@@ -182,8 +177,12 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  ngAfterViewChecked(): void {
-    this.setScrollWindow();
+  ngAfterViewChecked() {
+      const sc = this.scrollableContent() as ElementRef<HTMLElement>;
+      this.utils.getScrollableContentStyle(sc.nativeElement, true);
+  }
+
+  ngOnDestroy() {
   }
 
   protected readonly UtilsService = UtilsService;
