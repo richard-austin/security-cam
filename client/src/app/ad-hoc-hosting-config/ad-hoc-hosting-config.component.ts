@@ -177,9 +177,15 @@ export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked, On
     });
   }
 
+  noCalls = 2;  // Just use setScrollableContentStyle the twice (the values will have settled by the second call)
+                        // prevent unnecessary continuous calls.
+
   ngAfterViewChecked() {
+    if(this.noCalls > 0) {
+      --this.noCalls;
       const sc = this.scrollableContent() as ElementRef<HTMLElement>;
-      this.utils.getScrollableContentStyle(sc.nativeElement, true);
+      this.utils.setScrollableContentStyle(sc.nativeElement, true);
+    }
   }
 
   ngOnDestroy() {

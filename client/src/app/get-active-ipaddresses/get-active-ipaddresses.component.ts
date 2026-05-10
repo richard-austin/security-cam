@@ -30,11 +30,6 @@ export class GetActiveIPAddressesComponent implements OnInit, AfterViewChecked, 
   constructor() {
   }
 
-  setScrollWindow() {
-    const sc = this.scrollableContent().nativeElement;
-    this.utils.getScrollableContentStyle(sc, true);
-  }
-
   ngOnInit(): void {
     this.wifiUtilsService.getActiveIPAddresses().subscribe({
       next: (result) => {
@@ -46,8 +41,15 @@ export class GetActiveIPAddressesComponent implements OnInit, AfterViewChecked, 
     });
   }
 
+  noCalls = 2;  // Just use setScrollableContentStyle the twice (the values will have settled by the second call)
+  // prevent unnecessary continuous calls.
+
   ngAfterViewChecked(): void {
-    this.setScrollWindow();
+    if(this.noCalls > 0) {
+      --this.noCalls;
+      const sc = this.scrollableContent().nativeElement;
+      this.utils.setScrollableContentStyle(sc, true);
+    }
   }
 
   ngOnDestroy() {

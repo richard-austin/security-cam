@@ -127,7 +127,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
       const scEr = this.scrollableContent();
       if(scEr !== undefined) {
         const sc: HTMLElement = scEr.nativeElement;
-        this.utils.getScrollableContentStyle(sc);
+        this.utils.setScrollableContentStyle(sc);
       }
     });
   }

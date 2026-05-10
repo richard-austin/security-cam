@@ -57,7 +57,7 @@ export class GetLocalWifiDetailsComponent implements OnInit, AfterViewChecked, O
 
   setScrollWindow() {
     const sc = this.scrollableContent()?.nativeElement;
-    this.utils.getScrollableContentStyle(sc, true);
+    this.utils.setScrollableContentStyle(sc, true);
   }
 
 
