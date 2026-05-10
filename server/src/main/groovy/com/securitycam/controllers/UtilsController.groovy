@@ -244,7 +244,7 @@ class UtilsController {
             return response.response
     }
 
-    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD'])
+    @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
     @RequestMapping('/loadAdHocDevices')
     def loadAdHocDevices() {
         ObjectCommandResponse devices = utilsService.loadAdHocDevices()
