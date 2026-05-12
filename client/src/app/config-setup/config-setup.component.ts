@@ -1,8 +1,9 @@
 import {
+  AfterViewChecked,
   AfterViewInit,
   ChangeDetectorRef,
-  Component, effect, EffectRef,
-  ElementRef,  HostListener, inject,
+  Component,
+  ElementRef, HostListener, inject,
   isDevMode,
   OnDestroy,
   OnInit, Signal, signal, viewChild,
@@ -63,7 +64,7 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
   ],
   schemas: [],
 })
-export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, AfterViewInit, OnDestroy {
+export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: BeforeUnloadEvent) {
     if (this.dataHasChanged() || this.anyInvalid()) {
@@ -108,7 +109,6 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   checkDeactivate: boolean = false;
   showCameraDeleteConfirm: string = '';
   showStreamDeleteConfirm: string = '';
-  er!: EffectRef;
 
   animationEnter = signal('enter-animation');
   animationLeave = signal('leaving-animation');
@@ -123,13 +123,6 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   constructor() {
-    this.er = effect(() => {
-      const scEr = this.scrollableContent();
-      if(scEr !== undefined) {
-        const sc: HTMLElement = scEr.nativeElement;
-        this.utils.setScrollableContentStyle(sc);
-      }
-    });
   }
 
   validateSampleRate(): ValidatorFn {
@@ -616,18 +609,18 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     })
 
     this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe({
-        complete: () => {
-          this.reporting().successMessage = "Update Cameras Successful!";
-          this.updating = false;
-          // Update the saved data hash
-          this.savedDataHash = objectHash(this.cameras);
-          this.cd.detectChanges();
-        },
-        error: reason => {
-          this.reporting().errorMessage = reason
-          this.updating = false;
-        }
-      });
+      complete: () => {
+        this.reporting().successMessage = "Update Cameras Successful!";
+        this.updating = false;
+        // Update the saved data hash
+        this.savedDataHash = objectHash(this.cameras);
+        this.cd.detectChanges();
+      },
+      error: reason => {
+        this.reporting().errorMessage = reason
+        this.updating = false;
+      }
+    });
   }
 
   /**
@@ -858,8 +851,15 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   ngAfterViewInit(): void {
   }
 
+  ngAfterViewChecked(): void {
+    const scEr = this.scrollableContent();
+    if (scEr !== undefined) {
+      const sc: HTMLElement = scEr.nativeElement;
+      this.utils.setScrollableContentStyle(sc);
+    }
+  }
+
   ngOnDestroy() {
-    this.er.destroy();
   }
 
   streamDeleteButtonToolTip(cam: { value: Camera, key: string }, stream: string) {

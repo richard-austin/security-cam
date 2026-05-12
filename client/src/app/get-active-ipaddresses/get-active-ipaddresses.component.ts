@@ -27,6 +27,7 @@ export class GetActiveIPAddressesComponent implements OnInit, AfterViewChecked, 
   private utils: UtilsService = inject(UtilsService);
   ipDetails!: IPDetails[];
   displayedColumns: string[] = ["IP", "Name", "ConnType", "Device"];
+
   constructor() {
   }
 
@@ -41,15 +42,9 @@ export class GetActiveIPAddressesComponent implements OnInit, AfterViewChecked, 
     });
   }
 
-  noCalls = 2;  // Just use setScrollableContentStyle the twice (the values will have settled by the second call)
-  // prevent unnecessary continuous calls.
-
   ngAfterViewChecked(): void {
-    if(this.noCalls > 0) {
-      --this.noCalls;
-      const sc = this.scrollableContent().nativeElement;
-      this.utils.setScrollableContentStyle(sc, true);
-    }
+    const sc = this.scrollableContent().nativeElement;
+    this.utils.setScrollableContentStyle(sc, true);
   }
 
   ngOnDestroy() {
