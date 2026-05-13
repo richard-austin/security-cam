@@ -2,8 +2,8 @@
 
 deb-systemd-invoke disable nginx.service
 deb-systemd-invoke stop nginx.service
-deb-systemd-invoke disable tomcat10.service
-deb-systemd-invoke stop tomcat10.service
+deb-systemd-invoke disable tomcat11.service
+deb-systemd-invoke stop tomcat11.service
 deb-systemd-invoke disable motion.service
 deb-systemd-invoke stop motion.service
 deb-systemd-invoke disable low-latency-media-server.service

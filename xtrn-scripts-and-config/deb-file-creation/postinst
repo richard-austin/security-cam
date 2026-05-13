@@ -3,18 +3,18 @@
 cp /tmp/motion.conf /etc/motion
 mv /tmp/nginx.conf /etc/nginx
 mv /tmp/chrony.conf /etc/chrony
-mv /tmp/server.xml /var/lib/tomcat10/conf
-mv /tmp/tomcat-users.xml /var/lib/tomcat10/conf
-mv /tmp/server-0.0.1.war /var/lib/tomcat10/webapps/ROOT.war
-mv /tmp/cua.war /var/lib/tomcat10/webapps/cua.war
+mv /tmp/server.xml /var/lib/tomcat11/conf
+mv /tmp/tomcat-users.xml /var/lib/tomcat11/conf
+mv /tmp/server-0.0.1.war /var/lib/tomcat11/webapps/ROOT.war
+mv /tmp/cua.war /var/lib/tomcat11/webapps/cua.war
 # Get the drawdown calculator from the 2.1.0 release area
-wget -O /var/lib/tomcat10/webapps/dc.war https://github.com/richard-austin/drawdown-calculator/releases/download/2.1.0/dc.war
+wget -O /var/lib/tomcat11/webapps/dc.war https://github.com/richard-austin/drawdown-calculator/releases/download/2.1.0/dc.war
 
-rm -rf /var/lib/tomcat10/webapps/ROOT
-rm -rf /var/lib/tomcat10/webapps/cua
+rm -rf /var/lib/tomcat11/webapps/ROOT
+rm -rf /var/lib/tomcat11/webapps/cua
 
 rm -r /tmp/motion.conf
-deb-systemd-invoke stop tomcat10.service  # Stop tomcat before making changes
+deb-systemd-invoke stop tomcat11.service  # Stop tomcat before making changes
 deb-systemd-invoke stop motion  # And motion
 sleep 2
 
@@ -27,7 +27,7 @@ chown -R tomcat:security-cam /etc/security-cam
 chown -R tomcat:security-cam /var/security-cam
 
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
-chown -R tomcat:tomcat /var/lib/tomcat10
+chown -R tomcat:tomcat /var/lib/tomcat11
 
 chmod +r /dev/vcio
 chown root:video /dev/vcio
@@ -53,10 +53,10 @@ EOF
   chmod 400 $KEYSTORE_FILE
 fi
 
-chmod 640 /var/lib/tomcat10/conf/tomcat-users.xml
-chown root:tomcat /var/lib/tomcat10/conf/tomcat-users.xml
-chmod 640 /var/lib/tomcat10/conf/server.xml
-chown root:tomcat /var/lib/tomcat10/conf/server.xml
+chmod 640 /var/lib/tomcat11/conf/tomcat-users.xml
+chown root:tomcat /var/lib/tomcat11/conf/tomcat-users.xml
+chmod 640 /var/lib/tomcat11/conf/server.xml
+chown root:tomcat /var/lib/tomcat11/conf/server.xml
 chown root:root /etc/security-cam/wifi-setup-service/*.py
 
 # Give directories only permission 775
@@ -69,7 +69,7 @@ chown -R tomcat:security-cam /var/log/motion
 chown -R tomcat:security-cam /var/log/security-cam
 chown -R tomcat:security-cam /var/log/camera-recordings-service
 chown -R tomcat:security-cam /var/log/low-latency-media-server
-chown -R tomcat:tomcat /var/log/tomcat10
+chown -R tomcat:tomcat /var/log/tomcat11
 # Make the following scripts executable
 chmod +x /etc/security-cam/install-cert.sh
 chmod +x /etc/security-cam/processmotionrecordings.sh || true
@@ -109,8 +109,8 @@ AddToTomcatUnitFileIfNotPresent() {
 lineToWrite="ReadWritePaths=/var/log/security-cam/"
 lineToWrite2="ReadWritePaths=/etc/security-cam/"
 lineToWrite3="ReadWritePaths=/var/security-cam/"
-lineToWriteUnder="ReadWritePaths=/var/log/tomcat10/"
-unitFile="/usr/lib/systemd/system/tomcat10.service"
+lineToWriteUnder="ReadWritePaths=/var/log/tomcat11/"
+unitFile="/usr/lib/systemd/system/tomcat11.service"
 
 AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
 AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
@@ -140,8 +140,8 @@ deb-systemd-invoke start nginx.service
 deb-systemd-invoke stop chrony
 deb-systemd-invoke start chrony
 
-deb-systemd-invoke enable tomcat10.service
-deb-systemd-invoke start tomcat10.service
+deb-systemd-invoke enable tomcat11.service
+deb-systemd-invoke start tomcat11.service
 
 
 # Generate the product key if it does not already exist

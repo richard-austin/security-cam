@@ -64,8 +64,8 @@ Architecture: arm64
 Maintainer: Richard Austin <richard.david.austin@gmail.com>
 Description: A security camera system accessed through a secure web based interface.
 Depends: openjdk-25-jre-headless (>=25.0.0), openjdk-25-jre-headless (<< 25.9.9),
- tomcat10 (>=10.0.0), tomcat10 (<= 11.0.0),
- tomcat10-admin (>=10.0.0), tomcat10-admin (<= 10.99.99),
+ tomcat11 (>=11.0.0), tomcat11 (<= 12.0.0),
+ tomcat11-admin (>=11.0.0), tomcat11-admin (<= 11.99.99),
  ffmpeg (>=7:8.0.1-3ubuntu2), ffmpeg (<< 7:8.99.99),
  motion (>=4.6), motion(<<5.0.0-0),
  curl (>=8.5.0), curl(<<9.0.0),
