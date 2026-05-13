@@ -1,3 +1,3 @@
 package com.securitycam.enums;
 
-public enum EthernetStatusEnum {connectedViaEthernet, noEthernet, notConnectedViaEthernet, error}
+public enum EthernetStatusEnum {ethernetInUse, noEthernet, ethernetNotInUse, error}

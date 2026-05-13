@@ -2,9 +2,9 @@
   <mat-card>
     <mat-card-title>Wi-Fi Settings</mat-card-title>
     <mat-card-content>
-      @if (ethernetConnectionStatus == 'NOT_CONNECTED_VIA_ETHERNET' && isReady) {
+      @if (ethernetConnectionStatus == 'ETHERNET_NOT_IN_USE' && isReady) {
         <div class="alert-warning-embedded">
-          <b>You have an Ethernet connection, but you are connecting to the NVR through a Wi-Fi ip address or localhost.</b>
+          <b>You have an Ethernet connection, but you are connecting to the NVR through a Wi-Fi LAN address or a public IP via port forwarding.</b>
           <br><br>
           To Ensure you are connecting through the Ethernet IP address, select Get Active Local IP address(es) to find
           the IP address for the Ethernet connection.<br>Enter this address (without the subnet mask)
@@ -32,7 +32,7 @@
           matTooltip="Wi-Fi is currently {{wifiEnabled ? 'enabled' : 'disabled'}}, click to {{wifiEnabled ? 'disable' : 'enable'}}"
           [matTooltipShowDelay]="UtilsService.toolTipDelay"
           matTooltipClass="tooltip"
-          [disabled]="ethernetConnectionStatus != 'CONNECTED_VIA_ETHERNET'"
+          [disabled]="ethernetConnectionStatus != 'ETHERNET_IN_USE'"
           (change)="setWifiStatus($event)">
           {{wifiEnabled ? 'Disable' : 'Enable'}} Wi-Fi
         </mat-checkbox>
@@ -51,7 +51,7 @@
                 </div>
               </mat-label>
             }
-            <mat-select [disabled]="ethernetConnectionStatus != 'CONNECTED_VIA_ETHERNET' || !wifiEnabled"
+            <mat-select [disabled]="ethernetConnectionStatus != 'ETHERNET_IN_USE' || !wifiEnabled"
               (selectionChange)="onSelectorChange()"
               #selector>
               @for (wifi of wifiList; track wifi) {

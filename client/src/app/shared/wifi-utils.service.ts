@@ -40,26 +40,26 @@ export class WifiUtilsService {
   getActiveIPAddresses(): Observable<IPDetails[]> {
     return this.http.post<any>(this._baseUrl.getLink('wifiUtils', 'getActiveIPAddresses'), '', this.httpJSONOptions).pipe(
       map((ocr) => (ocr.responseObject as IPDetails[])),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   getLocalWifiDetails(): Observable<WifiDetails[]> {
     return this.http.post<WifiDetails[]>(this._baseUrl.getLink('wifiUtils', 'scanWifi'), '', this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   checkWifiStatus(): Observable<WifiStatus> {
      return this.http.post<WifiStatus>(this._baseUrl.getLink('wifiUtils', 'checkWifiStatus'), '', this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
-  checkConnectedThroughEthernetNVR(): Observable<EthernetConnectionStatus>
+  checkEthernetInUseNVR(): Observable<EthernetConnectionStatus>
   {
-    return this.http.post<WifiStatus>(this._baseUrl.getLink('wifiUtils', 'checkConnectedThroughEthernetNVR'), '', this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+    return this.http.post<WifiStatus>(this._baseUrl.getLink('wifiUtils', 'checkEthernetInUseNVR'), '', this.httpJSONOptions).pipe(
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -67,7 +67,7 @@ export class WifiUtilsService {
   {
     let param:{status: string, isCloud: boolean} = {status: status, isCloud: false};
     return this.http.post<WifiStatus>(this._baseUrl.getLink('wifiUtils', 'setWifiStatus'), JSON.stringify(param), this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -77,14 +77,14 @@ export class WifiUtilsService {
       param.password = password;
 
     return this.http.post<{response:string}>(this._baseUrl.getLink('wifiUtils', 'setUpWifi'), JSON.stringify(param), this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   getCurrentWifiConnection() : Observable<CurrentWifiConnection>
   {
     return this.http.post<CurrentWifiConnection>(this._baseUrl.getLink('wifiUtils', 'getCurrentWifiConnection'), '', this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 }

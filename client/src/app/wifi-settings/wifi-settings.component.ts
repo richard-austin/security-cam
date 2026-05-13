@@ -78,7 +78,7 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
   setWifiStatus($event: MatCheckboxChange) {
     let status: string = $event.checked ? 'on' : 'off';
     this.loading = true;
-    if (this.ethernetConnectionStatus === 'CONNECTED_VIA_ETHERNET') {
+    if (this.ethernetConnectionStatus === 'ETHERNET_IN_USE') {
       this.wifiUtilsService.setWifiStatus(status).subscribe({
         next: (result) => {
           this.wifiEnabled = result.status === 'on';
@@ -184,20 +184,20 @@ export class WifiSettingsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.isReady = false;
     this.needPassword = false;
-    this.wifiUtilsService.checkConnectedThroughEthernetNVR().subscribe({
+    this.wifiUtilsService.checkEthernetInUseNVR().subscribe({
         next: async (result) => {
           this.ethernetConnectionStatus = result.status;
 
           if (result.status !== 'NO_ETHERNET') {
             // We are overriding the result from the API call from here because that is intended for when the Cloud service is used
-            this.ethernetConnectionStatus = 'NOT_CONNECTED_VIA_ETHERNET';
+            this.ethernetConnectionStatus = 'ETHERNET_NOT_IN_USE';
             try {
               let x: IPDetails[] = await firstValueFrom(this.wifiUtilsService.getActiveIPAddresses());
               x.forEach((details: IPDetails) => {
                 const idxSlash: number = details.ip.indexOf('/');
                 const ip: string = details.ip.substring(0, idxSlash);
                 if (details.cd.con_type === 'ethernet' && ip === window.location.hostname) {
-                  this.ethernetConnectionStatus = 'CONNECTED_VIA_ETHERNET';
+                  this.ethernetConnectionStatus = 'ETHERNET_IN_USE';
                 }
               });
               this.isReady = true;
