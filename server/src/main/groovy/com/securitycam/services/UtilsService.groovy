@@ -483,10 +483,10 @@ class UtilsService {
         <h3>Motion Service v4.7.1 (for motion detection)</h3>
         <a href="https://motion-project.github.io/" target="_blank">Motion Service</a>
         <hr>
-        <h3>nginx v1.28.0 (Reverse proxy)</h3>
+        <h3>nginx v1.28. (Reverse proxy)</h3>
         <a href="https://nginx.org/en/" target="_blank">nginx</a>
         <hr>
-        <h3>Apache Tomcat/10.1.40 (Ubuntu) (Web Server)</h3>
+        <h3>Apache Tomcat/11.0.18-1 (Ubuntu) (Web Server)</h3>
         <a href="https://tomcat.apache.org/" target="_blank">Apache Tomcat</a>
         <hr>
         <h3>libraspberrypi-bin</h3>
