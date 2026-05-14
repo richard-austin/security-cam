@@ -52,11 +52,15 @@ mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
+mkdir -p security-cam_"${VERSION}"_arm64/etc/udev/rules.d
 
 cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-10/conf/server.xml ../apache-tomcat-10/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.0.1.war security-cam_"${VERSION}"_arm64/tmp
 cp ../../initialAdmin/dist/cua.war  security-cam_"${VERSION}"_arm64/tmp
+
+cp ../99-vcio.rules security-cam_"${VERSION}"_arm64/etc/udev/rules.d  # To set permissions of /dev/vcio to enable measure_temp to work for tomcat
+
 cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
 Package: security-cam
 Version: $VERSION

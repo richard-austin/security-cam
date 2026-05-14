@@ -29,8 +29,9 @@ chown -R tomcat:security-cam /var/security-cam
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown -R tomcat:tomcat /var/lib/tomcat11
 
-chmod +r /dev/vcio
-chown root:video /dev/vcio
+# Apply permissions in /etc/udev/rules.d/99-vcio.rules
+udevadm control --reload-rules
+udevadm trigger
 
 # Create the client keystore for connection to the Cloud server via ActiveMQ
 MQ_CREDS_FILE=/var/security-cam/cloud-creds.json
