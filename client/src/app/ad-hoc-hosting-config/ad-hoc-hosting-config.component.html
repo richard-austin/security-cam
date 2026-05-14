@@ -1,9 +1,9 @@
 <div>
   <mat-card>
-    <mat-card-title>Ad Hoc Device Admin Hosting</mat-card-title>
+    <mat-card-title>Ad Hoc Device Hosting Admin</mat-card-title>
     <app-reporting #errorReporting></app-reporting>
-    <mat-card-content>
-      <table mat-table [dataSource]="devices" class="mat-elevation-z8">
+    <mat-card-content #scrollableContent class="scrollable-content">
+      <table mat-table [dataSource]="devices" [trackBy]="trackBy" class="mat-elevation-z8">
         <ng-container matColumnDef="delete">
           <th *matHeaderCellDef mat-header-cell>Delete</th>
           <td *matCellDef="let device; let i = index" mat-cell>
@@ -19,7 +19,7 @@
                    [ngClass]="{'mat-elevation-z15': showDeviceDeleteConfirm===i}">
                 <div>
                 </div>
-                <app-row-delete-confirm [camKey]="i"
+                <app-row-delete-confirm [camKey]="device.name"
                                         [streamKey]="''"
                                         [name]="device.name"
                                         (delete)="deleteDevice(i);toggleDeviceDeleteConfirm(i)"

@@ -7,47 +7,47 @@
         <div>
           <app-ptzbutton matIcon="keyboard_arrow_up"
             ptzBtnMatTooltip="Tilt upward"
-            [reporting]="reporting"
+            [reporting]="reporting()"
             [moveDirection]="eMoveDirections['tiltUp']"
-            [camera]="camera">
+            [camera]="camera()">
           </app-ptzbutton>
         </div>
         <div>
           <app-ptzbutton matIcon="keyboard_arrow_left"
             ptzBtnMatTooltip="Pan left"
-            [reporting]="reporting"
+            [reporting]="reporting()"
             [moveDirection]="eMoveDirections['panLeft']"
-            [camera]="camera">
+            [camera]="camera()">
           </app-ptzbutton>
           <app-ptzbutton matIcon="keyboard_arrow_right"
             ptzBtnMatTooltip="Pan right"
-            [reporting]="reporting"
+            [reporting]="reporting()"
             [moveDirection]="eMoveDirections['panRight']"
-            [camera]="camera">
+            [camera]="camera()">
           </app-ptzbutton>
         </div>
         <div>
           <app-ptzbutton matIcon="keyboard_arrow_down"
             ptzBtnMatTooltip="Tilt downward"
-            [reporting]="reporting"
+            [reporting]="reporting()"
             [moveDirection]="eMoveDirections['tiltDown']"
-            [camera]="camera">
+            [camera]="camera()">
           </app-ptzbutton>
         </div>
         <div>
           <app-ptzbutton matIcon="add_circle_outline"
             ptzBtnMatTooltip="Zoom in"
             [scale]="1"
-            [reporting]="reporting"
+            [reporting]="reporting()"
             [moveDirection]="eMoveDirections['zoomIn']"
-            [camera]="camera">
+            [camera]="camera()">
           </app-ptzbutton>
           <app-ptzbutton matIcon="remove_circle_outline"
             ptzBtnMatTooltip="Zoom out"
             [scale]="1"
-            [reporting]="reporting"
+            [reporting]="reporting()"
             [moveDirection]="eMoveDirections['zoomOut']"
-            [camera]="camera">
+            [camera]="camera()">
           </app-ptzbutton>
         </div>
       </div>
@@ -55,11 +55,11 @@
       <mat-card-subtitle>Presets</mat-card-subtitle>
       <mat-card-subtitle class="smaller-text">{{presetFunctionDescription()}}</mat-card-subtitle>
       <div>
-        @for (l of counter(maxPresets); track l; let i = $index) {
+        @for (l of counter(maxPresets); let i = $index; track i) {
           <app-preset-button
             (click)="presetButtonPressed()"
-            [reporting]="reporting"
-            [camera]="camera"
+            [reporting]="reporting()"
+            [camera]="camera()"
             [presetNumber]="(i+1).toString()"
             [presetInfo]="presetsInfo.presets[i]"
             [operation]="presetOperation()"

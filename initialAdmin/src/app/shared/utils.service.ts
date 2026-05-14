@@ -125,7 +125,7 @@ export class UtilsService {
         updateExisting: updateExisting
       };
     return this.http.post<void>(this._baseUrl.getLink("user", "createOrUpdateAccountLocally"), details, this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -139,13 +139,13 @@ export class UtilsService {
         updateExisting: updateExisting
       };
     return this.http.post<void>(this._baseUrl.getLink("user", "addOrUpdateActiveMQCreds"), details, this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   checkForAccountLocally() : Observable<boolean> {
     return this.http.post<boolean>(this._baseUrl.getLink("user", "checkForAccountLocally"), "", this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -159,7 +159,7 @@ export class UtilsService {
       tap((result) => {
         this._hasActiveMQCreds = result.hasActiveMQCreds;
       }),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() =>err))
     )
   }
 
@@ -190,7 +190,7 @@ export class UtilsService {
             this.sendMessage(new LoggedOutMessage());  // Tell nav component we are logged out
         }
       }),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -201,7 +201,7 @@ export class UtilsService {
       tap((result) => {
         this._hasLocalAccount = result;
       }),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     ).subscribe()
   }
 

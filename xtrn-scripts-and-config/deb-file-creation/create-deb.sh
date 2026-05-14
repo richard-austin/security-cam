@@ -52,24 +52,28 @@ mkdir -p security-cam_"${VERSION}"_arm64/var/log/wifimgr
 mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
+mkdir -p security-cam_"${VERSION}"_arm64/etc/udev/rules.d
 
 cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf security-cam_"${VERSION}"_arm64/tmp
 cp ../apache-tomcat-10/conf/server.xml ../apache-tomcat-10/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
 cp ../../server/build/libs/server-0.0.1.war security-cam_"${VERSION}"_arm64/tmp
 cp ../../initialAdmin/dist/cua.war  security-cam_"${VERSION}"_arm64/tmp
+
+cp ../99-vcio.rules security-cam_"${VERSION}"_arm64/etc/udev/rules.d  # To set permissions of /dev/vcio to enable measure_temp to work for tomcat
+
 cat << EOF > security-cam_"${VERSION}"_arm64/DEBIAN/control
 Package: security-cam
 Version: $VERSION
 Architecture: arm64
 Maintainer: Richard Austin <richard.david.austin@gmail.com>
 Description: A security camera system accessed through a secure web based interface.
-Depends: openjdk-21-jre-headless (>=21.0.0), openjdk-21-jre-headless (<< 21.9.9),
- tomcat10 (>=10.0.0), tomcat10 (<= 11.0.0),
- tomcat10-admin (>=10.0.0), tomcat10-admin (<= 10.99.99),
- ffmpeg (>=7:6.1.1), ffmpeg (<<7:7.99.99),
+Depends: openjdk-25-jre-headless (>=25.0.0), openjdk-25-jre-headless (<< 25.9.9),
+ tomcat11 (>=11.0.0), tomcat11 (<= 12.0.0),
+ tomcat11-admin (>=11.0.0), tomcat11-admin (<= 11.99.99),
+ ffmpeg (>=7:8.0.1-3ubuntu2), ffmpeg (<< 7:8.99.99),
  motion (>=4.6), motion(<<5.0.0-0),
  curl (>=8.5.0), curl(<<9.0.0),
- nginx (>=1.24.0), nginx(<=1.27.99),
+ nginx (>=1.28.0), nginx(<=1.28.99),
  libraspberrypi-bin, chrony,
  network-manager (>= 1.46.0), network-manager (<< 2.0.0),
  moreutils,

@@ -1,19 +1,21 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, viewChild} from '@angular/core';
 import {UtilsService, Version} from "../shared/utils.service";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {BaseUrl} from "../shared/BaseUrl/BaseUrl";
 import {SharedModule} from "../shared/shared.module";
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
+import {HttpErrorResponse} from "@angular/common/http";
+import {NgOptimizedImage} from "@angular/common";
 
 
 @Component({
-    selector: 'app-about',
-    templateUrl: './about.component.html',
-    styleUrls: ['./about.component.scss'],
-    imports: [SharedModule, SharedAngularMaterialModule]
+  selector: 'app-about',
+  templateUrl: './about.component.html',
+  styleUrls: ['./about.component.scss'],
+  imports: [SharedModule, SharedAngularMaterialModule, NgOptimizedImage]
 })
 export class AboutComponent implements OnInit {
-  @ViewChild(ReportingComponent) errorReporting!: ReportingComponent;
+  errorReporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   version: string = "Unknown";
   openSourceInfo: string = "Loading...";
 
@@ -25,15 +27,23 @@ export class AboutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.utils.getVersion().subscribe((version: Version) => {
+    this.utils.getVersion().subscribe({
+      next: (version: Version) => {
         this.version = version.version;
       },
-      reason => this.errorReporting.errorMessage = reason
-      );
-    this.utils.getOpenSourceInfo().subscribe((info: string) => {
-        this.openSourceInfo = info;
-      },
-      reason => this.errorReporting.errorMessage = reason
+      error:
+        (reason: HttpErrorResponse) => {
+          this.errorReporting().errorMessage = reason;
+        }
+    });
+    this.utils.getOpenSourceInfo().subscribe({
+        next: (info: string) => {
+          this.openSourceInfo = info;
+        },
+        error: reason => {
+          this.errorReporting().errorMessage = reason;
+        }
+      }
     );
   }
 }

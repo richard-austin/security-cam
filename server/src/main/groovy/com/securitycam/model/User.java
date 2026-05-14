@@ -7,7 +7,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.jboss.aerogear.security.otp.api.Base32;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -16,6 +19,7 @@ import java.util.HashSet;
 
 @Entity
 @Table(name = "user_account")
+@Setter(AccessLevel.NONE)
 public class User implements MyUserDetails {
 
 //    @Id
@@ -25,6 +29,7 @@ public class User implements MyUserDetails {
 
     @Email
     @Column(unique = true)
+    @Setter(AccessLevel.NONE)
     private String email;
 
     private boolean cloudAccount = false;
@@ -72,6 +77,7 @@ public class User implements MyUserDetails {
         this.credentialsNonExpired = false;
     }
 
+    @Override
     public String getEmail() {
         return email;
     }
@@ -84,8 +90,10 @@ public class User implements MyUserDetails {
         this.username = username;
     }
 
-    public String getUsername() {return username;}
+    @Override
+    public @NonNull String getUsername() {return username;}
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -102,6 +110,7 @@ public class User implements MyUserDetails {
         this.cloudAccount = cloudAccount;
     }
 
+    @Override
     public String getHeader() {
         return header;
     }
@@ -124,7 +133,7 @@ public class User implements MyUserDetails {
         this.header = header;
     }
 
-    public Collection<GrantedAuthority> getAuthorities() {
+    public @NonNull Collection<GrantedAuthority> getAuthorities() {
         final Collection<GrantedAuthority> retVal = new HashSet<>();
         roles.forEach(role ->
                 retVal.add(new SimpleGrantedAuthority(role.getName())));
@@ -140,6 +149,7 @@ public class User implements MyUserDetails {
         this.roles = roles;
     }
 
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -148,13 +158,13 @@ public class User implements MyUserDetails {
         this.enabled = enabled;
     }
 
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
+//    public String getSecret() {
+//        return secret;
+//    }
+//
+//    public void setSecret(String secret) {
+//        this.secret = secret;
+//    }
 
     @Override
     public int hashCode() {
@@ -176,10 +186,7 @@ public class User implements MyUserDetails {
             return false;
         }
         final User user = (User) obj;
-        if (!getEmail().equals(user.getEmail())) {
-            return false;
-        }
-        return true;
+        return getEmail().equals(user.getEmail());
     }
 
     @Override

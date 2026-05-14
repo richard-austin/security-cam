@@ -43,7 +43,7 @@ work for all requirements of this application (hardware GPU decoding required fo
 * NVR includes NTP server for cameras to sync time without the need for them to connect to the internet.
 
 #### Limitations
-* The .deb file produced with ./gradlew buildDebFile is set up to install on a Raspberry pi running Ubuntu 24.04 (Noble Numbat). 
+* The .deb file produced with ./gradlew buildDebFile is set up to install on a Raspberry pi running Ubuntu 26.04 (Resolute Raccoon). 
 Availability of dependencies may prevent installation on other Ubuntu versions.
 * Requires network cameras which provide H264 or H265 (HEVC) video, and optionally audio via RTSP (G711/AAC). *No video transcoding
 is done on the raspberry pi to keep CPU utilisation low*
@@ -61,7 +61,7 @@ There could possibly be compatibility issues with some other camera types.
 * 2 way audio (Onvif profile T) supported on the Reolink Wi-fi doorbell using firmware version v3.0.0.3308_2407315182.
 
 ## Installation
-* Set up Ubuntu 24.04 Server (Noble Numbat) on a Raspberry pi 4 or 5
+* Set up Ubuntu 26.04 Server (Resolute Raccoon) on a Raspberry pi 4 or 5
   * NOTE: You can use the Edit Settings feature of the Raspberry pi Imager to set up the hostname, user account locale and enable ssh for the 
   Raspberry pi, but **DO NOT** set up the Wi-Fi with this facility as the NVRs own Wi-Fi set up utility will then not work. The NVR uses
   nmcli to control the Wi-Fi whereas the Imager will set it up under wpa_supplicant which will make the Wi-Fi device unavailable to nmcli.

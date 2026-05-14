@@ -1,11 +1,10 @@
 import {
   AfterViewInit,
-  Component,
-  ElementRef,
-  Input,
+  Component, effect, EffectRef,
+  ElementRef, input, InputSignal,
   OnDestroy,
-  OnInit, signal,
-  ViewChild
+  OnInit, Signal, signal, viewChild,
+  WritableSignal
 } from '@angular/core';
 import {Camera, Stream} from '../cameras/Camera';
 import {UtilsService} from '../shared/utils.service';
@@ -29,11 +28,15 @@ import {AudioSettings} from "./AudioSettings";
   imports: [SharedModule, SharedAngularMaterialModule, FormsModule, AudioControlComponent]
 })
 export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('video') videoEl!: ElementRef<HTMLVideoElement>;
-  @ViewChild('videoContainer') vcEL!: ElementRef<HTMLDivElement>;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
-  @ViewChild('videoControls') videoControlsEL!: ElementRef<HTMLDivElement>;
-  @Input() isLive: boolean = false;
+  videoEl: Signal<ElementRef<HTMLVideoElement>> = viewChild.required<ElementRef<HTMLVideoElement>>('video');
+  vcEL: Signal<ElementRef<HTMLDivElement>> = viewChild.required<ElementRef<HTMLDivElement>>('videoContainer');
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
+  videoControlsEL: Signal<ElementRef<HTMLDivElement>> = viewChild.required<ElementRef<HTMLDivElement>>('videoControls');
+  isLive: InputSignal<boolean> = input<boolean>(false);
+  showAudioControls: WritableSignal<boolean> = signal(false);
+  enterClass = signal('enter-animation');
+  farewell = signal('leaving-animation')
+
   cam!: Camera;
   stream!: Stream;
   video!: HTMLVideoElement;
@@ -45,14 +48,17 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   currentTime: string = "";
   totalTime: string = "";
   sizing!: VideoSizing;
-  showAudioControls: boolean = false;
+
   ctrlKeyDown = false;
   camKey: string = "";
-  enterClass = signal('enter-animation');
-  farewell = signal('leaving-animation')
-
+  er: EffectRef;
   constructor(public utilsService: UtilsService) {
     this.mediaFeeder = new MediaFeeder();
+    this.er = effect(() => {
+      if(this.isLive()) {
+        document.addEventListener('click', this.clickHandler);
+      }
+    });
   }
 
   /**
@@ -126,9 +132,9 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleShowAudioControls() {
     if (this.ctrlKeyDown) {
       this.toggleMuteAudio();
-      this.showAudioControls = false;
+      this.showAudioControls.set(false);
     } else
-      this.showAudioControls = !this.showAudioControls;
+      this.showAudioControls.set(!this.showAudioControls());
   }
 
   /**
@@ -182,17 +188,17 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     if (ev.currentTarget instanceof ScreenOrientation) {
       if (!this.multi) {
         // Set up VideoTransformations again to take account of viewport dimension changes
-        this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
+        this.vt = new VideoTransformations(this.video, this.vcEL().nativeElement);
         this.vt.reset();  // Clear any pan/zoom
       }
     }
   }
 
   clickHandler = (ev: Event) => {
-    if (this.videoControlsEL) {
-      const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL.nativeElement);
+    if (this.videoControlsEL()) {
+      const inVideoControlDialogue = ev.composedPath().includes(this.videoControlsEL().nativeElement);
       if (!inVideoControlDialogue)
-        this.showAudioControls = false;
+        this.showAudioControls.set(false);
     }
   };
 
@@ -201,23 +207,22 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    document.addEventListener('click', this.clickHandler);
     window.addEventListener("keydown", this.keyHandler);
     window.addEventListener("keyup", this.keyHandler);
+    this.video = this.videoEl().nativeElement;
+    this.vt = new VideoTransformations(this.video, this.vcEL().nativeElement);
   }
 
   ngAfterViewInit(): void {
-    this.video = this.videoEl.nativeElement;
-    this.mediaFeeder.init(this.isLive, this.video, this.reporting);
-    this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting, this.video);
-    this.vt = new VideoTransformations(this.video, this.vcEL.nativeElement);
+    this.mediaFeeder.init(this.isLive(), this.video, this.reporting());
+    this.audioBackchannel = new AudioBackchannel(this.utilsService, this.reporting(), this.video);
     this.video.addEventListener('fullscreenchange', () => {
       this.vt.reset();  // Set to a normal scale for if the mouse wheel was turned while full screen showing
     });
     this.video.ontimeupdate = () => {
       if (this.video.currentTime !== null && !isNaN(this.video.currentTime))
         this.currentTime = new Date(this.video.currentTime * 1000).toISOString().substring(11, 19);
-      if (!this.isLive && this.video.duration !== null && !isNaN(this.video.duration))
+      if (!this.isLive() && this.video.duration !== null && !isNaN(this.video.duration))
         this.totalTime = new Date(this.video.duration * 1000).toISOString().substring(11, 19);
     };
 
@@ -227,10 +232,13 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.mediaFeeder.stop();
-    document.removeEventListener('click', this.clickHandler);
+    if(this.isLive()) {
+      document.removeEventListener('click', this.clickHandler);
+    }
+
     window.removeEventListener("keydown", this.keyHandler)
     window.removeEventListener("keyup", this.keyHandler)
+    this.mediaFeeder.stop();
     // Calling stopAudioOut directly from ngOnDestroy leaves the backchannel in a state where no UDP output ids delivered from
     //  ffmpeg to the backchannel device. The problem does not occur when done like this
     let timerSubscription: Subscription = timer(20).subscribe(() => {
@@ -240,6 +248,7 @@ export class VideoComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     window.screen.orientation.onchange = null;
     this.sizing._destroy();
+    this.er.destroy();
   }
 
   protected readonly MediaFeeder = MediaFeeder;

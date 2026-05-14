@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
 import {BaseUrl} from "./BaseUrl/BaseUrl";
-import {Observable, Subject, throwError} from "rxjs";
+import {firstValueFrom, Observable, Subject, throwError} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
 import {CameraParams, Camera} from "../cameras/Camera";
 import {environment} from "../../environments/environment";
@@ -81,6 +81,7 @@ export class SetCameraParams {
 }
 
 export class Device {
+  id!: number;
   name!: string;
   ipAddress!: string;
   ipPort!: number;
@@ -120,28 +121,28 @@ export class UtilsService {
   getTemperature(): Observable<Temperature> {
     return this.http.post<Temperature>(this._baseUrl.getLink("utils", "getTemperature"), '', this.httpJSONOptions).pipe(
       tap(),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   getVersion(): Observable<Version> {
     return this.http.post<Version>(this._baseUrl.getLink("utils", "getVersion"), '', this.httpJSONOptions).pipe(
       tap(),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   getOpenSourceInfo(): Observable<string> {
     return this.http.post(this._baseUrl.getLink("utils", "getOpenSourceInfo"), '', {responseType: 'text'}).pipe(
       tap(),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   setIp(): Observable<MyIp> {
     return this.http.post<MyIp>(this._baseUrl.getLink("utils", "setIP"), '', this.httpJSONOptions).pipe(
       tap(),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -149,14 +150,14 @@ export class UtilsService {
     let cameraParams: { address: string, uri: string, params: string } = {address: address, uri: uri, params: params};
     return this.http.post<CameraParams>(this._baseUrl.getLink("utils", "cameraParams"), JSON.stringify(cameraParams), this.httpJSONOptions).pipe(
       tap(),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   setCameraParams(cameraParams: SetCameraParams): Observable<CameraParams> {
     return this.http.post<CameraParams>(this._baseUrl.getLink("utils", "setCameraParams"), JSON.stringify(cameraParams), this.httpJSONOptions).pipe(
       tap(),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -168,13 +169,13 @@ export class UtilsService {
     };
     return this.http.post<void>(this._baseUrl.getLink("user", "changePassword"), JSON.stringify(passwordChange), this.httpJSONOptions).pipe(
       tap(),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   getEmail(): Observable<{ email: string }> {
     return this.http.post<{ email: string }>(this._baseUrl.getLink("user", "getEmail"), '', this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -185,7 +186,7 @@ export class UtilsService {
       confirmNewEmail: confirmNewEmail
     };
     return this.http.post<void>(this._baseUrl.getLink("user", "changeEmail"), JSON.stringify(passwordChange), this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -197,7 +198,7 @@ export class UtilsService {
     }
 
     return this.http.post(this._baseUrl.getLink("user", "setupGuestAccount"), JSON.stringify(params), this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError((err)))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     )
   }
 
@@ -206,7 +207,7 @@ export class UtilsService {
    *          This is called from the nav component ngOnInit
    */
   async isGuest(): Promise<GuestStatus> {
-    let retVal: GuestStatus = environment.production ? await this.http.post<GuestStatus>(this._baseUrl.getLink("user", "isGuest"), '', this.httpJSONOptions).toPromise() : new GuestStatus(false)
+    let retVal: GuestStatus = environment.production ? await firstValueFrom(this.http.post<GuestStatus>(this._baseUrl.getLink("user", "isGuest"), '', this.httpJSONOptions)) : new GuestStatus(false)
     this.isGuestAccount = retVal.guestAccount;
     return retVal;
   }
@@ -227,7 +228,7 @@ export class UtilsService {
   }
 
   async guestAccountEnabled(): Promise<GuestAccountStatus> {
-    return await this.http.post<GuestAccountStatus>(this._baseUrl.getLink("user", "guestAccountEnabled"), '', this.httpJSONOptions).toPromise()
+    return await firstValueFrom(this.http.post<GuestAccountStatus>(this._baseUrl.getLink("user", "guestAccountEnabled"), '', this.httpJSONOptions))
   }
 
   sendMessage(message: Message) {
@@ -238,17 +239,16 @@ export class UtilsService {
     return this._messaging.asObservable();
   }
 
-  getScrollableContentStyle(scrollableContent: HTMLElement | null | undefined, setMaxHeight: boolean = false): string {
+  setScrollableContentStyle(scrollableContent: HTMLElement | null | undefined, setMaxHeight: boolean = false): void {
     // Calculated scrollbar height, don't use or we Expression changed after it was checked error will occur
     //   scrollableContent?.offsetHeight - scrollableContent?.clientHeight;
     const scrollbarHeight = 20; //Should be the same as height in ::-webkit-scrollbar
     const extraBit = 13;  // To make browser window vertical scrollbar disappear
 
     if (scrollableContent !== null && scrollableContent !== undefined) {
-      const boundingRect = scrollableContent.getBoundingClientRect()
-      return (setMaxHeight ? 'max-' : '') + `height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
+      const boundingRect = scrollableContent.getBoundingClientRect();
+      scrollableContent.style = (setMaxHeight ? 'max-' : '') + `height: calc(100dvh - ${boundingRect.top + scrollbarHeight + extraBit}px);`
     }
-    else return ""
   }
 
 
@@ -257,13 +257,13 @@ export class UtilsService {
       cam: cam,
       netcam_uri: netcam_uri
     }), this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
   stopAudioOut() {
     return this.http.post<void>(this._baseUrl.getLink("utils", "stopAudioOut"), "", this.httpJSONOptions).pipe(
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -274,7 +274,7 @@ export class UtilsService {
       tap((result) => {
         this.speakActive = result.audioInUse;
       }),
-      catchError((err: HttpErrorResponse) => throwError(err)));
+      catchError((err: HttpErrorResponse) => throwError(() => err)));
   }
 
   /**
@@ -318,7 +318,7 @@ export class UtilsService {
 
   getUserAuthorities(): Observable<{ authority: string }[]> {
     return this.http.post<{ authority: string }[]>(this._baseUrl.getLink('utils', 'getUserAuthorities'), '', this.httpJSONOptions).pipe(
-        catchError((err: HttpErrorResponse) => throwError(err))
+        catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -340,9 +340,9 @@ export class UtilsService {
   loadAdHocDevices() {
     return this.http.post<Array<Device>>(this._baseUrl.getLink("utils", "loadAdHocDevices"), '', this.httpJSONOptions).pipe(
       tap(devices => {
-        this.adHocDevices = devices;
+        this.adHocDevices = [...devices];
       }),
-      catchError((err: HttpErrorResponse) => throwError(err))
+      catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
 
@@ -351,7 +351,7 @@ export class UtilsService {
     let devices = {adHocDeviceListJSON: adHocDeviceListJSON};
     return this.http.post<any>(this._baseUrl.getLink("utils", "updateAdHocDeviceList"), JSON.stringify(devices), this.httpJSONOptions).pipe(
       tap(devices => {
-        this.adHocDevices = devices;
+        this.adHocDevices = [...devices];
       })
     );
   }

@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Signal, viewChild} from '@angular/core';
 import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
 import {UtilsService} from "../shared/utils.service";
 import {ReportingComponent} from "../reporting/reporting.component";
@@ -22,7 +22,7 @@ export class ActivemqCredentialsComponent implements OnInit {
   mqHost: string = "";
   updateExisting: boolean = false;
 
-  @ViewChild(ReportingComponent) reporting: ReportingComponent = new ReportingComponent();
+  reporting: Signal<ReportingComponent> =viewChild.required(ReportingComponent);
 
   constructor(private utilsService: UtilsService) {
   }
@@ -106,7 +106,7 @@ export class ActivemqCredentialsComponent implements OnInit {
   }
 
   register() {
-    this.reporting.dismiss();
+    this.reporting().dismiss();
 
     this.username = this.getFormControl('username').value;
     this.callFailed = this.committed = false;
@@ -114,11 +114,11 @@ export class ActivemqCredentialsComponent implements OnInit {
       {
         complete: () => {
           this.utilsService.getHasLocalAccount();
-          this.reporting.successMessage = "ActiveMQ client credentials " + (this.updateExisting ? " updated" : " created") + " successfully" + (this.updateExisting ? " username now: " + this.username : "");
+          this.reporting().successMessage = "ActiveMQ client credentials " + (this.updateExisting ? " updated" : " created") + " successfully" + (this.updateExisting ? " username now: " + this.username : "");
           this.committed = true;
         },
         error: (reason) => {
-          this.reporting.errorMessage = reason;
+          this.reporting().errorMessage = reason;
           this.callFailed = true;
         }
       });
@@ -136,7 +136,7 @@ export class ActivemqCredentialsComponent implements OnInit {
         this.error = false;
       },
       error: (reason) => {
-        this.reporting.errorMessage = reason;
+        this.reporting().errorMessage = reason;
         this.title = "Problem!"
         this.buttonTitle = "Problem!";
         this.error = this.callFailed = true;

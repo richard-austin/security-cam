@@ -31,11 +31,14 @@ export class AudioBackchannel {
         // Time the response and add this to the audio off delay time, this is a bodge to mitigate cutting the audio
         //  off before outgoing voice message was complete.
         let intervalSubscription: Subscription = interval(1).subscribe(() => ++this.timeForStartAudioOutResponse)
-        this.utilsService.startAudioOut(cam, stream.netcam_uri).subscribe(() => {
-          intervalSubscription.unsubscribe();
-        }, reason => {
-          this.reporting.errorMessage = reason
-          this.stopAudioOut().then();
+        this.utilsService.startAudioOut(cam, stream.netcam_uri).subscribe({
+          complete: () => {
+            intervalSubscription.unsubscribe();
+          },
+          error: reason => {
+            this.reporting.errorMessage = reason
+            this.stopAudioOut().then();
+          }
         });
         this.startAudioOutput();
       } else {
@@ -82,26 +85,26 @@ export class AudioBackchannel {
         //   mimeType,
         // }
 
-       // const ff = navigator.userAgent.search("Firefox");
+        // const ff = navigator.userAgent.search("Firefox");
         // @ts-ignore
         this.recorder = new MediaRecorder(stream);
-          // fires every one second and passes a BlobEvent
-          this.recorder.ondataavailable = (event: any) => {
-            // get the Blob from the event
-            const blob: Blob = event.data;
-            blob.arrayBuffer().then((buff) => {
-              let data = new Uint8Array(buff);
+        // fires every one second and passes a BlobEvent
+        this.recorder.ondataavailable = (event: any) => {
+          // get the Blob from the event
+          const blob: Blob = event.data;
+          blob.arrayBuffer().then((buff) => {
+            let data = new Uint8Array(buff);
 
-              if (data.length > 0) {
-                // and send that blob to the server...
-                this.client.publish({
-                  destination: '/app/audio',
-                  binaryBody: data,
-                  headers: {"content-type": "application/octet-stream"}
-                });
-              }
-            });
-          };
+            if (data.length > 0) {
+              // and send that blob to the server...
+              this.client.publish({
+                destination: '/app/audio',
+                binaryBody: data,
+                headers: {"content-type": "application/octet-stream"}
+              });
+            }
+          });
+        };
 
         this.recorder.onstop = () => {
           this.recorder.ondataavailable = null;
@@ -125,6 +128,7 @@ export class AudioBackchannel {
     }
     return retVal;
   }
+
   getMediaDevices() {
     // Call getUserMedia to make the browser ask the user for permission to access the microphones so that
     //  enumerateDevices can get the microphone list.
@@ -145,7 +149,7 @@ export class AudioBackchannel {
   beginStopAudioOut() {
     // 1000 + timeForStartAudioOutResponse milliseconds delay on stopping to allow for the latency in the audio and prevent
     //  the end of the speech getting cut off
-    let timerSubscription = timer(1000+this.timeForStartAudioOutResponse).subscribe(() => {
+    let timerSubscription = timer(1000 + this.timeForStartAudioOutResponse).subscribe(() => {
       this.video.muted = false;
       this.stopAudioOut().then();
       timerSubscription.unsubscribe();
@@ -155,11 +159,14 @@ export class AudioBackchannel {
   async stopAudioOut() {
     if (!(await this.utilsService.isGuest()).guestAccount) {
       this.recorder?.stop();
-      this.utilsService.stopAudioOut().subscribe(() => {
-        this.client?.deactivate({force: false}).then(() => {
-        });
-      }, reason => {
-        this.reporting.errorMessage = reason;
+      this.utilsService.stopAudioOut().subscribe({
+        complete: () => {
+          this.client?.deactivate({force: false}).then(() => {
+          });
+        },
+        error: reason => {
+          this.reporting.errorMessage = reason;
+        }
       });
       this.audioToggle = false;
     }

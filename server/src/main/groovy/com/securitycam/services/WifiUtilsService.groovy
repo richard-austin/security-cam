@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 //import org.apache.commons.lang.StringUtils
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class WifiUtilsService {
@@ -36,8 +35,8 @@ class WifiUtilsService {
 
     static final ImmutableMap<EthernetStatusEnum, String> ethernetConnectionStatus =
             ImmutableMap.of(
-                    EthernetStatusEnum.connectedViaEthernet, "CONNECTED_VIA_ETHERNET",
-                    EthernetStatusEnum.notConnectedViaEthernet, "NOT_CONNECTED_VIA_ETHERNET",
+                    EthernetStatusEnum.ethernetInUse, "ETHERNET_IN_USE",
+                    EthernetStatusEnum.ethernetNotInUse, "ETHERNET_NOT_IN_USE",
                     EthernetStatusEnum.noEthernet, "NO_ETHERNET")
 
     def scanWifi() {
@@ -73,9 +72,9 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            EthernetStatusEnum connStatus = isConnectedThroughEthernet(cmd.isCloud)
+            EthernetStatusEnum connStatus = isEthernetInUse(cmd.isCloud)
             final int setUpWifiTimeout = 180
-            if (true || connStatus == EthernetStatusEnum.connectedViaEthernet) {
+            if (connStatus == EthernetStatusEnum.ethernetInUse) {
                 RestfulResponse resp = cmd.password != null
                         ?
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
@@ -142,9 +141,9 @@ class WifiUtilsService {
         ObjectCommandResponse result = new ObjectCommandResponse()
 
         try {
-            EthernetStatusEnum status = isConnectedThroughEthernet(cmd.isCloud)
+            EthernetStatusEnum status = isEthernetInUse(cmd.isCloud)
 
-            if (cmd.status != "off" || status == EthernetStatusEnum.connectedViaEthernet) {
+            if (cmd.status != "off" || status == EthernetStatusEnum.ethernetInUse) {
                 final int setwifistatusTimeout = 60
                 RestfulResponse resp =
                         restfulInterfaceService.sendRequest("localhost:8000", "/",
@@ -240,9 +239,9 @@ class WifiUtilsService {
         return result
     }
 
-    ObjectCommandResponse checkConnectedThroughEthernet(boolean isCloud = true) {
+    ObjectCommandResponse checkEthernetInUse(boolean isCloud = true) {
         ObjectCommandResponse result = new ObjectCommandResponse()
-        EthernetStatusEnum es = isConnectedThroughEthernet(isCloud)
+        EthernetStatusEnum es = isEthernetInUse(isCloud)
         if (es != EthernetStatusEnum.error)
             result.responseObject = [status: ethernetConnectionStatus[es]]
         else {
@@ -252,7 +251,7 @@ class WifiUtilsService {
         return result
     }
 
-    private EthernetStatusEnum isConnectedThroughEthernet(boolean isCloud) {
+    private EthernetStatusEnum isEthernetInUse(boolean isCloud) {
         try {
             final int getactiveconnectionsTimeout = 60
             ArrayList<ConnectionDetails> cdList = new ArrayList<>()
@@ -307,10 +306,10 @@ class WifiUtilsService {
             ]
 
             String cloudEtherConn = utilsService.executeLinuxCommand(command)
-            return cloudEtherConn == "" ? EthernetStatusEnum.notConnectedViaEthernet : EthernetStatusEnum.connectedViaEthernet
+            return cloudEtherConn == "" ? EthernetStatusEnum.ethernetNotInUse : EthernetStatusEnum.ethernetInUse
         }
         catch (Exception ex) {
-            logService.cam.error("${ex.getClass().getName()} in checkConnectedThroughEthernet: ${ex.getCause()}-${ex.getMessage()}")
+            logService.cam.error("${ex.getClass().getName()} in checkEthernetInUse: ${ex.getCause()}-${ex.getMessage()}")
             return EthernetStatusEnum.error
         }
     }

@@ -4,6 +4,7 @@
     <mat-card-content>
       <form (ngSubmit)="$event.preventDefault(); formSubmitted()" [formGroup]="changeEmailForm">
         <div>
+          <app-reporting [embedded]="true"></app-reporting>
           <mat-form-field appearance="outline">
             <input matInput type="password" formControlName="password"
               placeholder="Enter password"
@@ -63,4 +64,3 @@
     </mat-card-content>
   </mat-card>
 </div>
-<app-reporting></app-reporting>

@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, input, InputSignal, OnInit} from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
 export enum styles {success, warning, danger}
@@ -16,7 +16,7 @@ export class ReportingComponent implements OnInit {
   validationErrors!: string[];
   showMessageInError: boolean = true;
   showMessageFromMessage: boolean = false;
-  @Input() embedded: boolean = false;
+  embedded: InputSignal<boolean> = input<boolean>(false);
   isHTML: boolean = false;
 
   constructor() {

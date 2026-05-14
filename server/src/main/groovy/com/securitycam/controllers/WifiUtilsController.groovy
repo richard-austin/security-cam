@@ -4,8 +4,6 @@ import com.securitycam.commands.SetUpWifiCommand
 import com.securitycam.commands.SetWifiStatusCommand
 import com.securitycam.enums.PassFail
 import com.securitycam.error.NVRRestMethodException
-import com.securitycam.interfaceobjects.Greeting
-import com.securitycam.interfaceobjects.HelloMessage
 import com.securitycam.interfaceobjects.ObjectCommandResponse
 import com.securitycam.interfaceobjects.WifiConnectResult
 import com.securitycam.services.LogService
@@ -13,25 +11,14 @@ import com.securitycam.services.WifiUtilsService
 import com.securitycam.validators.SetupWifiValidator
 import groovy.json.JsonOutput
 import jakarta.validation.Valid
-import org.opensaml.saml.saml1.core.StatusCode
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.configurationprocessor.json.JSON
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.messaging.handler.annotation.MessageMapping
-import org.springframework.messaging.handler.annotation.Payload
-import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
-import org.springframework.validation.BeanPropertyBindingResult
-import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.servlet.ModelAndView
-import org.springframework.web.util.HtmlUtils
 
 @Controller
 @RequestMapping("/wifiUtils")
@@ -130,28 +117,28 @@ class WifiUtilsController {
     }
 
     @Secured(['ROLE_CLOUD'])
-    @PostMapping("/checkConnectedThroughEthernet")
-    def checkConnectedThroughEthernet() {
-        ObjectCommandResponse result = wifiUtilsService.checkConnectedThroughEthernet()
+    @PostMapping("/checkEthernetInUse")
+    def checkEthernetInUse() {
+        ObjectCommandResponse result = wifiUtilsService.checkEthernetInUse()
         if (result.status == PassFail.PASS) {
             return ResponseEntity.ok(result.responseObject)
         } else {
-            def errMsg = "An error occurred in checkConnectedThroughEthernet:- (${result.error})"
+            def errMsg = "An error occurred in checkEthernetInUse:- (${result.error})"
             logService.cam.error(errMsg)
-            throw new NVRRestMethodException(errMsg, "wifiUtils/checkConnectedThroughEthernet")
+            throw new NVRRestMethodException(errMsg, "wifiUtils/checkEthernetInUse")
         }
     }
 
     @Secured(['ROLE_CLIENT'])
-    @PostMapping("/checkConnectedThroughEthernetNVR")
-    def checkConnectedThroughEthernetNVR() {
-        ObjectCommandResponse result = wifiUtilsService.checkConnectedThroughEthernet(false)
+    @PostMapping("/checkEthernetInUseNVR")
+    def checkEthernetInUseNVR() {
+        ObjectCommandResponse result = wifiUtilsService.checkEthernetInUse(false)
         if (result.status == PassFail.PASS) {
             return ResponseEntity.ok(result.responseObject)
         } else {
-            def errMsg = "An error occurred in checkConnectedThroughEthernetNVR:- (${result.error})"
+            def errMsg = "An error occurred in checkEthernetInUseNVR:- (${result.error})"
             logService.cam.error(errMsg)
-            throw new NVRRestMethodException(errMsg, "wifiUtils/checkConnectedThroughEthernetNVR")
+            throw new NVRRestMethodException(errMsg, "wifiUtils/checkEthernetInUseNVR")
         }
     }
 }

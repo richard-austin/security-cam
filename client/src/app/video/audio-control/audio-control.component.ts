@@ -1,4 +1,9 @@
-import {AfterViewInit, Component, EventEmitter, Input, Output} from '@angular/core';
+import {
+  AfterViewInit,
+  Component, input, InputSignal, OnInit,
+  output,
+  OutputEmitterRef
+} from '@angular/core';
 import {MatCard} from "@angular/material/card";
 import {MatSlider, MatSliderThumb} from "@angular/material/slider";
 import {FormsModule} from "@angular/forms";
@@ -25,14 +30,17 @@ import {UtilsService} from "../../shared/utils.service";
   templateUrl: './audio-control.component.html',
   styleUrl: './audio-control.component.scss'
 })
-class AudioControlComponent implements AfterViewInit {
-  @Output() muteAudio = new EventEmitter<boolean>();
-  @Output() setLevel = new EventEmitter<number>();
-  @Output() setAudioLatencyLimiting = new EventEmitter<boolean>();
-  @Input() mute: boolean = false;
-  @Input() level!: number;
-  @Input() audioLatencyLimiting!: boolean;
+class AudioControlComponent implements OnInit, AfterViewInit {
+  muteAudio: OutputEmitterRef<boolean> = output<boolean>()
+  setLevel = output<number>();
+  setAudioLatencyLimiting: OutputEmitterRef<boolean> =output<boolean>();
+  initialMuteState: InputSignal<boolean> = input<boolean>(false);
+  initialLevel: InputSignal<number> = input.required<number>();
+  audioLatencyLimiting: InputSignal<boolean | undefined> = input<boolean | undefined>(undefined);
   lastLevel!: number;
+
+  mute!: boolean;
+  level!: number;
 
   toggleMuteAudio() {
     this.mute = !this.mute;
@@ -48,20 +56,24 @@ class AudioControlComponent implements AfterViewInit {
     this.setLevel.emit(this.level);
   }
 
-  ngAfterViewInit() {
-    this.lastLevel = this.level;
-  }
-
   zeroTo100(value: number) {
     return `${Math.round(value * 100)}`;
   }
 
   setLatencyLimiting($event: MatCheckboxChange) {
-    this.audioLatencyLimiting = $event.checked;
     this.setAudioLatencyLimiting.emit($event.checked);
   }
 
   protected readonly UtilsService = UtilsService;
+
+  ngOnInit(): void {
+    this.mute = this.initialMuteState();
+    this.lastLevel = this.initialLevel();
+    this.level = this.mute ? 0 : this.lastLevel;
+  }
+
+  ngAfterViewInit() {
+  }
 }
 
 export default AudioControlComponent

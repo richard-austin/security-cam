@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, Signal, viewChild} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {ActivatedRoute} from '@angular/router';
 import {ReportingComponent} from '../reporting/reporting.component';
@@ -6,7 +6,6 @@ import {environment} from '../../environments/environment';
 import {UtilsService} from "../shared/utils.service";
 import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
 import {MatButton} from "@angular/material/button";
-
 
 @Component({
   selector: 'app-camera-admin-page-hosting',
@@ -23,7 +22,7 @@ import {MatButton} from "@angular/material/button";
 export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, OnDestroy {
   address!: string;
   cameraName!: string;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   private webAdminPort: number = 80;
   private initialised: boolean = false;
   private tabHandle: Window | null = null;
@@ -60,7 +59,7 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
       cameraSvc.closeClient().subscribe();
       this.tabHandle?.close();
     };
-   }
+  }
 
   closeAdminPage() {
     window.location.href = '#';
@@ -78,15 +77,17 @@ export class CameraAdminPageHostingComponent implements OnInit, AfterViewInit, O
 
   ngOnInit(): void {
     if (this.address !== undefined) {
-      this.cameraSvc.getHostingAccess(this.address, this.webAdminPort).subscribe((response: {nvrIPAddress: string}) => {
+      this.cameraSvc.getHostingAccess(this.address, this.webAdminPort).subscribe({
+        next: (response: { nvrIPAddress: string }) => {
           if (this.tabHandle)
             this.tabHandle.close();
           // Add the randomID to prevennt caching of the first page which causes problems when switching between devices
           this.tabHandle = window.open('http://' + response.nvrIPAddress + ':' + environment.camAdminHostPort + '/?randomId=' + this.makeId(12), '_blank');
         },
-        reason => {
-          this.reporting.errorMessage = reason;
-        });
+        error: reason => {
+          this.reporting().errorMessage = reason;
+        }
+      });
     }
     this.initialised = true;
   }

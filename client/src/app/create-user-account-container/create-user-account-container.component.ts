@@ -1,4 +1,13 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit, Signal,
+  viewChild,
+  ViewChild
+} from '@angular/core';
 import {fromEvent, merge, Subscription} from 'rxjs';
 
 @Component({
@@ -7,7 +16,7 @@ import {fromEvent, merge, Subscription} from 'rxjs';
     styleUrls: ['./create-user-account-container.component.scss'],
 })
 export class CreateUserAccountContainerComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('cuaframe') cuaframeEl!: ElementRef<HTMLIFrameElement>;
+  cuaframeEl: Signal<ElementRef<HTMLIFrameElement>> = viewChild.required('cuaframe');
   cuaframe!: HTMLIFrameElement;
 
   height!: number;
@@ -20,7 +29,7 @@ export class CreateUserAccountContainerComponent implements OnInit, AfterViewIni
   }
 
   ngAfterViewInit(): void {
-    this.cuaframe = this.cuaframeEl.nativeElement;
+    this.cuaframe = this.cuaframeEl().nativeElement;
     this.height = window.outerHeight - 70;
 
     // Subscribe to mousemove, mousedown and keydown events on the create user account iframe

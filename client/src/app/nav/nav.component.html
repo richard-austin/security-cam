@@ -92,7 +92,7 @@
         }
       </mat-menu>
       <mat-menu #menuAdHocDevices>
-        @for (device of utilsService.adHocDevices; track device) {
+        @for (device of utilsService.adHocDevices; track device.id) {
           <button mat-menu-item
                   [disabled]="isGuest"
                   (click)="adHocDeviceAdmin(device);menuClosed()">

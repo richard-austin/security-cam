@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {Component, input, InputSignal, OnInit, Signal, viewChildren} from '@angular/core';
 import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {Camera} from 'src/app/cameras/Camera';
 import {ReportingComponent} from 'src/app/reporting/reporting.component';
@@ -10,15 +10,16 @@ import {SharedAngularMaterialModule} from "../../shared/shared-angular-material/
 import {MatDivider} from "@angular/material/divider";
 
 @Component({
-    selector: 'app-ptzcontrols',
-    templateUrl: './ptzcontrols.component.html',
-    styleUrls: ['./ptzcontrols.component.scss'],
+  selector: 'app-ptzcontrols',
+  templateUrl: './ptzcontrols.component.html',
+  styleUrls: ['./ptzcontrols.component.scss'],
   imports: [SharedAngularMaterialModule, PTZButtonComponent, MatDivider, PresetButtonComponent, MatSlideToggle]
 })
 export class PTZControlsComponent implements OnInit {
-  @Input() camera!: Camera;
-  @Input() reporting!: ReportingComponent;
-  @ViewChildren(MatSlideToggle) slideToggles!: QueryList<MatSlideToggle>;
+  camera: InputSignal<Camera> = input.required<Camera>();
+  reporting: InputSignal<ReportingComponent> = input.required<ReportingComponent>();
+  slideToggles: Signal<readonly MatSlideToggle[]> = viewChildren(MatSlideToggle);
+
   eMoveDirections: any = eMoveDirections;
   savePreset: boolean = false;
   clearPreset: boolean = false;
@@ -49,7 +50,7 @@ export class PTZControlsComponent implements OnInit {
   }
 
   presetButtonPressed() {
-    this.slideToggles.forEach(slideToggle => {
+    this.slideToggles().forEach(slideToggle => {
       slideToggle.checked = false;
     })
     this.clearPreset = this.savePreset = false;
@@ -69,13 +70,15 @@ export class PTZControlsComponent implements OnInit {
 
   ngOnInit(): void {
     this.isGuest = this.utils.isGuestAccount;
-    this.ptzService.ptzPresetsInfo(new PTZPresetsInfoCommand(this.camera)).subscribe((result) => {
+    this.ptzService.ptzPresetsInfo(new PTZPresetsInfoCommand(this.camera())).subscribe({
+      next: (result) => {
         this.presetsInfo = result;
         this.maxPresets = result.maxPresets > 32 ? 32 : this.presetsInfo.maxPresets;
       },
-      reason => {
-        this.reporting.errorMessage = reason;
-      })
+      error: reason => {
+        this.reporting().errorMessage = reason;
+      }
+    });
   }
 
   protected readonly UtilsService = UtilsService;

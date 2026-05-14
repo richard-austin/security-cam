@@ -1,4 +1,14 @@
-import {Component, OnInit, signal, ViewChild} from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  ElementRef,
+  inject, OnDestroy,
+  OnInit,
+  Signal,
+  signal,
+  TrackByFunction,
+  viewChild
+} from '@angular/core';
 import {SharedAngularMaterialModule} from "../shared/shared-angular-material/shared-angular-material.module";
 import {UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {BehaviorSubject} from "rxjs";
@@ -16,7 +26,7 @@ declare let objectHash: (obj: Object) => string;
   templateUrl: './ad-hoc-hosting-config.component.html',
   styleUrl: './ad-hoc-hosting-config.component.scss',
 })
-export class AdHocHostingConfigComponent implements OnInit {
+export class AdHocHostingConfigComponent implements OnInit, AfterViewChecked, OnDestroy {
   columns: string[] = ['delete', 'devicename', 'ipaddress', 'ipport'];
   footerColumns = ['buttons'];
   devices!: Device[];
@@ -29,12 +39,19 @@ export class AdHocHostingConfigComponent implements OnInit {
 
   tableForms!: UntypedFormArray
   showDeviceDeleteConfirm: number = -1;
-  @ViewChild('errorReporting') reporting!: ReportingComponent;
-  downloading: boolean = true;
-  constructor(private utils: UtilsService) {
-  }
+  reporting: Signal<ReportingComponent> = viewChild.required('errorReporting');
   animationEnter = signal('enter-animation');
   animationLeave = signal('leaving-animation');
+  scrollableContent = viewChild<ElementRef<HTMLDivElement>>('scrollableContent');
+  private utils = inject(UtilsService);
+
+  downloading: boolean = true;
+
+  constructor() {
+    this.devices = [];
+  }
+
+  protected trackBy: TrackByFunction<Device> = (index: number, dev: Device) =>  dev.id;
 
   dataHasChanged(): boolean {
     return this.devices && objectHash(this.devices) !== this.savedDataHash;
@@ -70,7 +87,10 @@ export class AdHocHostingConfigComponent implements OnInit {
     let list = new BehaviorSubject<Device[]>(this.devices);
     let formGroups  = list.value.map((device: Device) => {
       return new UntypedFormGroup({
-        name: new UntypedFormControl(device.name, [Validators.required, Validators.maxLength(25)]),
+        name: new UntypedFormControl({
+          value: device.name,
+          disabled: false
+        },[Validators.required, Validators.maxLength(25)]),
         ipAddress: new UntypedFormControl({
           value: device.ipAddress,
           disabled: false
@@ -90,8 +110,13 @@ export class AdHocHostingConfigComponent implements OnInit {
 
   deleteDevice(i: number) {
     if(i >= 0 && i < this.tableForms.length) {
-      this.devices.splice(i, 1);
-      this.devices = [...this.devices];  // Needs to be a new array for the table to reflect the change
+      const devices = structuredClone(this.devices);
+      devices.splice(i, 1);
+      // Renumber the indices
+      devices.forEach((device: Device, index: number) => {
+        device.id = index;
+      });
+      this.devices = [...devices];  // Needs to be a new array for the table to reflect the change
       this.setUpTableFormControls();
     } else {
       console.log("delete index "+i+" is out of range")
@@ -108,42 +133,62 @@ export class AdHocHostingConfigComponent implements OnInit {
   }
 
   addDevice() {
-    this.devices.push(new Device());
-    this.devices = [...this.devices];
+    const dev = new Device();
+    dev.id = this.devices.length;
+    this.devices.push(dev);
+    this.devices = [...this.devices]; // Needs to be a new array for the table to reflect the change
     this.setUpTableFormControls();
   }
-  commitConfig() {
-    this.utils.updateAdhocDeviceList(JSON.stringify(this.devices)).subscribe(() => {
-        this.reporting.successMessage = "Update ad hoc device list Successful!";
-        this.updating = false;
-        // Update the saved data hash
-        this.savedDataHash = objectHash(this.devices);
-      },
-      reason => {
-        this.reporting.errorMessage = reason
-        this.updating = false;
-      }
-    )
 
+  commitConfig() {
+    this.utils.updateAdhocDeviceList(JSON.stringify(this.devices)).subscribe({
+        next: () => {
+          this.reporting().successMessage = "Update ad hoc device list Successful!";
+          this.updating = false;
+          // Update the saved data hash
+          this.savedDataHash = objectHash(this.devices);
+        },
+        error: reason => {
+          this.reporting().errorMessage = reason
+          this.updating = false;
+        }
+      });
   }
 
   ngOnInit(): void {
     this.isGuest = this.utils.isGuestAccount;
-    this.utils.loadAdHocDevices().subscribe((devices: Device[]) => {
+   this.utils.loadAdHocDevices().subscribe(  {
+      next: (devices: Device[]) => {
+        devices.forEach((device: Device, index: number) => {
+          device.id = index;
+        });
         this.devices = devices;
         this.setUpTableFormControls();
         this.downloading = false;
         this.savedDataHash = objectHash(this.devices);
       },
-      () => {
+      error: () => {
         this.devices = new Array<Device>();
         this.devices.push(new Device());
         this.setUpTableFormControls();
-        this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your ad hoc devices and save it.'});
+        this.reporting().errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your ad hoc devices and save it.'});
         this.downloading = false;
-      });
+      }
+    });
+  }
 
-//    this.devices =  [{name: 'Front Room Switch', ipAddress:'192.168.1.253', ipPort:80}, {name: 'Hall Switch', ipAddress:'192.168.1.232', ipPort:80}];
+  noCalls = 2;  // Just use setScrollableContentStyle the twice (the values will have settled by the second call)
+                        // prevent unnecessary continuous calls.
+
+  ngAfterViewChecked() {
+    if(this.noCalls > 0) {
+      --this.noCalls;
+      const sc = this.scrollableContent() as ElementRef<HTMLElement>;
+      this.utils.setScrollableContentStyle(sc.nativeElement, true);
+    }
+  }
+
+  ngOnDestroy() {
   }
 
   protected readonly UtilsService = UtilsService;

@@ -1,12 +1,13 @@
 import {
+  AfterViewChecked,
   AfterViewInit,
   ChangeDetectorRef,
   Component,
-  ElementRef, HostListener,
+  ElementRef, HostListener, inject,
   isDevMode,
   OnDestroy,
-  OnInit, QueryList, signal,
-  ViewChild, ViewChildren,
+  OnInit, Signal, signal, viewChild,
+  viewChildren,
 } from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, CameraParamSpec, Stream} from "../cameras/Camera";
@@ -58,17 +59,12 @@ export function validateTrueOrFalse(fieldCondition: {}): ValidatorFn {
     AddAsOnvifDeviceComponent,
     KeyValuePipe,
     RecordingSetupComponent,
-    ConfirmCanDeactivateComponent,
     RowDeleteConfirmComponent,
+    ConfirmCanDeactivateComponent,
   ],
   schemas: [],
 })
-export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('errorReporting') reporting!: ReportingComponent;
-  @ViewChild('outputframeid') snapshotImage!: ElementRef<HTMLImageElement>
-  @ViewChild('scrollable_content') scrollableContent!: ElementRef<HTMLElement> | null
-  @ViewChildren(RecordingSetupComponent) recordingSetupComponents!: QueryList<RecordingSetupComponent>
-
+export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: BeforeUnloadEvent) {
     if (this.dataHasChanged() || this.anyInvalid()) {
@@ -114,11 +110,20 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   showCameraDeleteConfirm: string = '';
   showStreamDeleteConfirm: string = '';
 
-  constructor(public cameraSvc: CameraService, public utils: UtilsService, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
-  }
-
   animationEnter = signal('enter-animation');
   animationLeave = signal('leaving-animation');
+
+  reporting: Signal<ReportingComponent> = viewChild.required<ReportingComponent>('errorReporting');
+  scrollableContent: Signal<ElementRef<HTMLElement> | undefined> = viewChild<ElementRef<HTMLElement>>('scrollable_content');
+  recordingSetupComponents: Signal<readonly RecordingSetupComponent[]> = viewChildren(RecordingSetupComponent);
+
+  protected cameraSvc: CameraService = inject(CameraService);
+  private utils: UtilsService = inject(UtilsService);
+  private sanitizer: DomSanitizer = inject(DomSanitizer);
+  private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
+
+  constructor() {
+  }
 
   validateSampleRate(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -232,11 +237,11 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   checkForMaskFileReUse(): boolean {
     const maskFiles: Set<string> = new Set<string>();
     let retVal = false;
-    this.recordingSetupComponents.forEach((r) => {
+    this.recordingSetupComponents().forEach((r) => {
       const maskFileName = r.getMaskFileName();
       if (maskFileName) {
         if (maskFiles.has(maskFileName)) {
-          this.reporting.errorMessage = new HttpErrorResponse({error: "Mask file " + maskFileName + " is already in use"});
+          this.reporting().errorMessage = new HttpErrorResponse({error: "Mask file " + maskFileName + " is already in use"});
           retVal = true;
         } else
           maskFiles.add(maskFileName)
@@ -579,7 +584,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
   commitConfig() {
     this.updating = true;
-    this.reporting.dismiss();
+    this.reporting().dismiss();
     this.FixUpCameraData();
     let cams: Map<string, Camera> = new Map(this.cameras);
     // First convert the map to JSON
@@ -603,18 +608,19 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
       jsonObj[key] = newCam;
     })
 
-    this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe(() => {
-        this.reporting.successMessage = "Update Cameras Successful!";
+    this.cameraSvc.updateCameras(JSON.stringify(jsonObj)).subscribe({
+      complete: () => {
+        this.reporting().successMessage = "Update Cameras Successful!";
         this.updating = false;
         // Update the saved data hash
         this.savedDataHash = objectHash(this.cameras);
         this.cd.detectChanges();
       },
-      reason => {
-        this.reporting.errorMessage = reason
+      error: reason => {
+        this.reporting().errorMessage = reason
         this.updating = false;
       }
-    )
+    });
   }
 
   /**
@@ -632,19 +638,21 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   startOnvifSearch() {
     this.discovering = true;
     this.failed = new Map<string, string>();
-    this.reporting.dismiss();
-    this.cameraSvc.discover().subscribe((result: { cams: Map<string, Camera>, failed: Map<string, string> }) => {
+    this.reporting().dismiss();
+    this.cameraSvc.discover().subscribe({
+      next: (result: { cams: Map<string, Camera>, failed: Map<string, string> }) => {
         this.cameras = result.cams;
         this.discovering = false;
         this.FixUpCameraData();
         this.failed = result.failed;
         if (this.cameras.size == 0)
-          this.reporting.warningMessage = "No cameras were found on this network"
+          this.reporting().warningMessage = "No cameras were found on this network"
       },
-      reason => {
-        this.reporting.errorMessage = reason;
+      error: reason => {
+        this.reporting().errorMessage = reason;
         this.discovering = false;
-      });
+      }
+    });
   }
 
   totalNumberOfStreams(): number {
@@ -663,7 +671,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
       this.snapShotKey = '';
     else if (cam.value.snapshotUri !== '') {
       this.snapShotKey = cam.key;
-      this.cameraSvc.getSnapshot(cam.value).subscribe(result => {
+      this.cameraSvc.getSnapshot(cam.value).subscribe({
+        next: result => {
           if (result !== null && result.body !== null) {
             let ab = result.body.arrayBuffer()
             ab.then((body => {
@@ -672,17 +681,18 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
             }))
           }
         },
-        reason => {
+        error: reason => {
           if (reason.status === 401) {
-            this.reporting.warningMessage =
+            this.reporting().warningMessage =
               `Access to camera snapshot at ${cam.value.snapshotUri} is unauthorised. Please ensure the correct credentials for
               ${cam.key} is set. (Click on the shield icon on this camera row).`;
           } else {
-            this.reporting.errorMessage = reason;
+            this.reporting().errorMessage = reason;
           }
           this.snapshotLoading = false;
           this.snapShotKey = '';
-        })
+        }
+      });
     }
   }
 
@@ -697,12 +707,14 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
   }
 
   checkIfOnvifCredentialsPresent() {
-    this.cameraSvc.haveOnvifCredentials().subscribe(result => {
+    this.cameraSvc.haveOnvifCredentials().subscribe({
+      next: result => {
         this.haveOnvifCredentials = result == "true";
       },
-      () => {
-        this.reporting.errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
-      });
+      error: () => {
+        this.reporting().errorMessage = new HttpErrorResponse({error: "Couldn't determine if camera credentials are set."});
+      }
+    });
   }
 
   allOff() {
@@ -735,8 +747,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
     this.camForRecordingSetup = camForRecordingSetup;
 
     if (this.camForRecordingSetup === camId)
-      this.recordingSetupComponents.forEach((r) => {
-        if (r.camKey === camId)
+      this.recordingSetupComponents().forEach((r) => {
+        if (r.camKey() === camId)
           r.setupData();  // Reload recording setup component from main config data
       });
   }
@@ -756,10 +768,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
   startFindCameraDetails(onvifUrl: string) {
     this.gettingCameraDetails = true;
-    this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe((result: {
-        cam: Camera,
-        failed: Map<string, string>
-      }) => {
+    this.cameraSvc.discoverCameraDetails(onvifUrl).subscribe({
+      next: (result: { cam: Camera, failed: Map<string, string> }) => {
         if (result.failed.size == 1) {
           const fKey = result.failed.keys().next().value;
           if (this.failed === undefined)
@@ -776,10 +786,11 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
         }
         this.gettingCameraDetails = false;
       },
-      reason => {
-        this.reporting.errorMessage = reason;
+      error: reason => {
+        this.reporting().errorMessage = reason;
         this.gettingCameraDetails = false;
-      });
+      }
+    });
   }
 
   /**
@@ -818,23 +829,34 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
 
   ngOnInit(): void {
     // Set up the available streams/cameras for selection by the checkboxes
-    this.cameraSvc.loadCameras().subscribe(cameras => {
+    this.cameraSvc.loadCameras().subscribe({
+      next: cameras => {
         this.cameras = cameras;
-
         this.downloading = false;
         this.FixUpCameraData()
         this.savedDataHash = objectHash(this.cameras);
       },
-      () => {
-        this.createNew();
-        this.reporting.errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
-        this.downloading = false;
-      })
+      error:
+        () => {
+          this.createNew();
+          this.reporting().errorMessage = new HttpErrorResponse({error: 'The configuration file is absent, empty or corrupt. Please set up the configuration for your cameras and save it.'});
+          this.downloading = false;
+        }
+    });
     this.checkIfOnvifCredentialsPresent();
     this.isGuest = this.utils.isGuestAccount;
+
   }
 
   ngAfterViewInit(): void {
+  }
+
+  ngAfterViewChecked(): void {
+    const scEr = this.scrollableContent();
+    if (scEr !== undefined) {
+      const sc: HTMLElement = scEr.nativeElement;
+      this.utils.setScrollableContentStyle(sc);
+    }
   }
 
   ngOnDestroy() {

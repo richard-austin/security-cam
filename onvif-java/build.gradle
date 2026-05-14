@@ -35,30 +35,31 @@ dependencies {
     compileOnly "org.apache.cxf:cxf-rt-ws-security:${project.property('cxfVersion')}"
     implementation "org.apache.cxf:cxf-rt-transports-http:${project.property('cxfVersion')}"
     implementation "org.apache.cxf:cxf-rt-transports-http-jetty:${project.property('cxfVersion')}"
+    implementation "org.apache.cxf:cxf-rt-features-logging:${project.property('cxfVersion')}"
 
     // Required for cxf version > 4.0.1
-    compileOnly 'org.checkerframework:checker-qual:3.48.2'
-    compileOnly 'com.google.errorprone:error_prone_annotations:2.36.0'
-    compileOnly 'com.google.j2objc:j2objc-annotations:3.0.0'
-    testCompileOnly 'org.checkerframework:checker-qual:3.48.2'
-    testCompileOnly 'com.google.errorprone:error_prone_annotations:2.36.0'
-    testCompileOnly 'com.google.j2objc:j2objc-annotations:3.0.0'
+    compileOnly 'org.checkerframework:checker-qual:4.0.0'
+    compileOnly 'com.google.errorprone:error_prone_annotations:2.49.0'
+    compileOnly 'com.google.j2objc:j2objc-annotations:3.1'
+    testCompileOnly 'org.checkerframework:checker-qual:4.0.0'
+    testCompileOnly 'com.google.errorprone:error_prone_annotations:2.49.0'
+    testCompileOnly 'com.google.j2objc:j2objc-annotations:3.1'
 
-    implementation 'org.apache.activemq:activemq-broker:6.1.4'
+    implementation 'org.apache.activemq:activemq-broker:6.2.5'
 
     implementation project(':onvif-ws-client')
 
 
     implementation 'commons-io:commons-io:2.18.0'
     implementation 'commons-codec:commons-codec:1.13'
-    implementation 'org.apache.commons:commons-lang3:3.18.0'
+    implementation 'org.apache.commons:commons-lang3:3.20.0'
 //    compileOnly    'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
     implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
     implementation 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.2'
 
-    implementation 'org.glassfish.hk2:osgi-resource-locator:2.4.0'
-    testImplementation 'org.slf4j:slf4j-simple:1.7.26'
-    testImplementation 'ch.qos.logback:logback-classic:1.5.13'
+    implementation 'org.glassfish.hk2:osgi-resource-locator:3.0.0'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.17'
+    testImplementation 'ch.qos.logback:logback-classic:1.5.32'
 }
 
 

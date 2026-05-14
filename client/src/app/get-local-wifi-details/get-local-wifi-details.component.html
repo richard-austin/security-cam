@@ -4,7 +4,7 @@
       <mat-spinner class="spinner" [diameter]="25"></mat-spinner>
     }</mat-card-title>
 
-    <mat-card-content #scrollable_content class="scrollable-content" [style]="utils.getScrollableContentStyle(scrollableContent?.nativeElement, true)">
+    <mat-card-content #scrollable_content class="scrollable-content">
       <app-reporting [embedded]="true"></app-reporting>
       <table mat-table [dataSource]="wifiDetails" class="mat-elevation-z8">
         <!-- In Use Column -->

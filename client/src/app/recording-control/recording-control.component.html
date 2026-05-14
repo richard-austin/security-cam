@@ -87,8 +87,8 @@
             <div class="audio-controls-dialogue">
               @if (showAudioControls) {
                 <div [animate.enter]="enterClass()" [animate.leave]="farewell()">
-                <app-audio-control [mute]="isMuted()"
-                  (muteAudio)="mute($event)" [level]="volume"
+                <app-audio-control [initialMuteState]="isMuted()"
+                  (muteAudio)="mute($event)" [initialLevel]="volume"
                   (setLevel)="setVolume($event.valueOf())">
                 </app-audio-control>
                 <div>
@@ -108,7 +108,7 @@
             matTooltip="Set full screen"
             [matTooltipShowDelay]="UtilsService.toolTipDelay"
             matTooltipClass="video-buttons-tooltip">
-            <mat-icon (click)="video.setFullScreen()">fullscreen</mat-icon>
+            <mat-icon (click)="video().setFullScreen()">fullscreen</mat-icon>
           </label>
         </div>
         <mat-card class="recording-buttons hide-background mat-elevation-z8">

@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, Signal, viewChild} from '@angular/core';
 import {CloudProxyService, IsMQConnected} from './cloud-proxy.service';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {UtilsService} from '../shared/utils.service';
@@ -19,45 +19,50 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
   cbEnabled: boolean = true;
   isGuest: boolean = true;
   client!: Client;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
   private nvrloginstatusSubscription!: StompSubscription;
 
   constructor(private cpService: CloudProxyService, private utils: UtilsService) {
-    cpService.getStatus().subscribe((status: boolean) => {
+    cpService.getStatus().subscribe({
+      next: (status: boolean) => {
         this.cps = status;
         this.utils.cloudProxyRunning = status;
       },
-      reason => {
-        this.reporting.errorMessage = reason;
-      });
+      error: reason => {
+        this.reporting().errorMessage = reason;
+      }
+    });
   }
 
   stop(): void {
     this.cbEnabled = false;
-    this.cpService.stop().subscribe(() => {
+    this.cpService.stop().subscribe({
+      complete: () => {
         this.cps = this.utils.cloudProxyRunning = false;
         this.cbEnabled = true;
       },
-      (reason) => {
-        this.reporting.errorMessage = reason;
+      error: (reason) => {
+        this.reporting().errorMessage = reason;
         this.cbEnabled = true;
-      });
+      }
+    });
   }
 
   start(): void {
     this.cbEnabled = false;
-    this.cpService.start().subscribe(() => {
-
+    this.cpService.start().subscribe({
+      complete: () => {
+          this.cbEnabled = true;
+          this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
+            this.utils.activeMQTransportActive = status.transportActive;
+            this.cps = this.utils.cloudProxyRunning = true;
+          });
+        },
+      error: (reason) => {
+        this.reporting().errorMessage = reason;
         this.cbEnabled = true;
-        this.cpService.isTransportActive().subscribe((status: IsMQConnected) => {
-          this.utils.activeMQTransportActive = status.transportActive;
-          this.cps = this.utils.cloudProxyRunning = true;
-        });
-      },
-      (reason) => {
-        this.reporting.errorMessage = reason;
-        this.cbEnabled = true;
-      });
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -74,16 +79,16 @@ export class CloudProxyComponent implements OnInit, OnDestroy {
             let msgObj = JSON.parse(message.body);
             switch (msgObj.status) {
               case "working":
-                this.reporting.warningMessage = msgObj.message;
+                this.reporting().warningMessage = msgObj.message;
                 break;
               case "success":
-                this.reporting.successMessage = msgObj.message;
+                this.reporting().successMessage = msgObj.message;
               break;
               case "fail":
-                this.reporting.errorMessage = new HttpErrorResponse({error: msgObj.message});
+                this.reporting().errorMessage = new HttpErrorResponse({error: msgObj.message});
                 break;
               default:
-                this.reporting.errorMessage = new HttpErrorResponse({error: "Unknown message from server"});
+                this.reporting().errorMessage = new HttpErrorResponse({error: "Unknown message from server"});
             }
             if (msgObj.message === 'logoff' && this.isGuest) {
               window.location.href = 'logout';

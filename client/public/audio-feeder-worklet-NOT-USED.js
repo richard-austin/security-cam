@@ -9,16 +9,19 @@
 // Float32 with AAC, and the correct array type must be set up. Additionally a very large amount of attenuation is
 // required (by setting the gain value) for Int16.
 //
-class AudioStream {
+
+// NOT USED !!! See audio-stream.ts
+class AudioStreamXXX {
   gainFactor = 0;
   gain = 0.5;
   muted = false;
   gainNode;
   track;
   underlyingSink = {};
+  ac = null;
 
   constructor(sampleRate) {
-    const ac = new AudioContext({sampleRate: sampleRate, latencyHint: "interactive"});
+    const ac = this.ac = new AudioContext({sampleRate: sampleRate, latencyHint: "interactive"});
     this.gainNode = ac.createGain()
     this.gainNode.connect(ac.destination);
 
@@ -162,8 +165,13 @@ class AudioStream {
               this.array = [];
               this.arrayOffset = 0;
               this.autoLatencyControl = true;
+              this.running = true;
               let lastAutoLatencyControl = this.autoLatencyControl;
               this.port.onmessage = ({data}) => {
+                if (data?.type === 'shutdown') {
+                  this.running = false;
+                  console.log("running = false");
+                } else {
                 this.arrays.push(data);
                 if (this.autoLatencyControl && !lastAutoLatencyControl) {
                   this.port.postMessage("Auto latency control enabled");
@@ -181,6 +189,7 @@ class AudioStream {
                   }
                 }
               }
+              }
               this.emptyArray = new Float32Array(0);
             }
 
@@ -197,7 +206,7 @@ class AudioStream {
                 if (this.array.length > 0)
                   output[i] = this.array[this.arrayOffset++] || 0;
               }
-              return true;
+              return this.running;
             }
           });
         }
@@ -247,7 +256,7 @@ class AudioStream {
   }
 
   getGain() {
-    return !this.muted ? this.gain : 0;
+    return this.gain;
   }
 
   setMuting(muted) {
@@ -275,6 +284,18 @@ class AudioStream {
     const node = this.underlyingSink?.node;
     if (node) {
       return node.parameters.get("autoLatencyControl").value === 1;
+    }
+  }
+
+  terminate() {
+    const node = this.underlyingSink?.node;
+    if (node) {
+      this.gainNode.disconnect();
+      node.port.postMessage({type: "shutdown"});
+      node.disconnect();
+      node.port.close();
+      this.ac.close();
+      console.log("terminating");
     }
   }
 }

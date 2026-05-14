@@ -1,12 +1,12 @@
-<div class="audio-control" [ngStyle]="audioLatencyLimiting === undefined ? {'margin-top': '30px'} : {}">
+<div class="audio-control" [ngStyle]="audioLatencyLimiting() === undefined ? {'margin-top': '30px'} : {}">
   <mat-card>
-    @if(audioLatencyLimiting !== undefined) {
+    @if(audioLatencyLimiting() !== undefined) {
       <div>
         <mat-checkbox
-          matTooltip="{{!audioLatencyLimiting ? 'Check' : 'Uncheck'}} to {{!audioLatencyLimiting ? 'enable' : 'disable'}} audio latency limiting"
+          matTooltip="{{!audioLatencyLimiting() ? 'Check' : 'Uncheck'}} to {{!audioLatencyLimiting() ? 'enable' : 'disable'}} audio latency limiting"
           [matTooltipShowDelay]="UtilsService.toolTipDelay"
           matTooltipClass="tooltip"
-          (change)="setLatencyLimiting($event)" [ngModel]="audioLatencyLimiting" labelPosition="after">Audio latency limiting</mat-checkbox>
+          (change)="setLatencyLimiting($event)" [ngModel]="audioLatencyLimiting()" labelPosition="after">Audio latency limiting</mat-checkbox>
       </div>
     }
     <div>

@@ -2,7 +2,7 @@
 Pre built .deb files for deployment on a Raspberry pi 4 are available in the Releases section.
 The requirements to build the project yourself are detailed below: -
 #### Platform for Development
-* Ubuntu 24.04 (Noble Numbat), or Debian with dpkg version 1.22.06 or later version.
+* Ubuntu 26.04 (Resolute Raccoon), or Debian with dpkg version 1.22.06 or later version.
 * Open JDK version 21
 * git 2.43.0 or later version.
 
@@ -50,7 +50,7 @@ cd xtrn-scripts-and-config/deb-file-creation
 ```
 scp the .deb file to the Raspberry pi
 ## Installation on the Raspberry pi
-The Raspberry pi should be running Ubuntu 24.04 (Noble Numbat) OS.
+The Raspberry pi should be running Ubuntu 26.04 (Resolute Raccoon) OS.
 ```
 sudo apt update
 sudo apt upgrade 

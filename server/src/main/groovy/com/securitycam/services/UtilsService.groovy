@@ -38,7 +38,6 @@ import java.nio.file.*
 import java.nio.file.attribute.GroupPrincipal
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.UserPrincipalLookupService
-import java.util.concurrent.ConcurrentLinkedQueue
 
 class Temperature {
     Temperature(String temp) {
@@ -427,16 +426,16 @@ class UtilsService {
         try {
             @Language("HTML")
             String response = '''
-        <h3>Angular web framework v21.0.0</h3>
+        <h3>Angular web framework v21.2.10</h3>
         <a href="https://angular.io" target="_blank">Angular</a>
         <hr>
-        <h3>Angular Material v21.0.0</h3>
+        <h3>Angular Material v21.2.10</h3>
         <a href="https://material.angular.io/" target="_blank">Angular Material</a>
         <hr>
-        <h3>Angular Forms v21.0.0</h3>
+        <h3>Angular Forms v21.2.10</h3>
         <a href="https://angular.io/guide/forms-overview/" target="_blank">Angular Forms</a>
         <hr>
-        <h3>Stomp.js v7.0.0</h3>
+        <h3>Stomp.js v7.3.0</h3>
         <a href="https://www.npmjs.com/package/@stomp/stompjs" target="_blank">Stomp.js</a>
         <hr>
         <h3>File Saver v2.0.5</h3>
@@ -454,49 +453,49 @@ class UtilsService {
         <h3>rx v4.1.0</h3>
         <a href="https://www.npmjs.com/package/rx" target="_blank">rx</a>
         <hr>
-        <h3>rxjs v6.6.0</h3>
+        <h3>rxjs v7.8.2</h3>
         <a href="https://www.npmjs.com/package/rxjs" target="_blank">rxjs</a>
         <hr>
         <h3>rxjs-observe v2.1.5</h3>
         <a href="https://www.npmjs.com/package/rxjs-observe" target="_blank">rxjs-observ</a>
         <hr>
-        <h3>tslib v2.0.0</h3>
+        <h3>tslib v2.8.1</h3>
         <a href="https://www.npmjs.com/package/tslib" target="_blank">tslib</a>
         <hr>
         <h3>zone.js v0.15.0</h3>
         <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
         <hr>
         <h3>typescript v5.9.3</h3>
-        <a href="https://www.npmjs.com/package/zone.js?activeTab=readme" target="_blank">zone.js</a>
+        <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-0.html" target="_blank">typescript</a>
         <hr>
-        <h3>Spring Boot v3.5.7</h3>
+        <h3>Spring Boot v4.0.1</h3>
         <a href="https://spring.io/projects/spring-boot" target="_blank">Spring Boot</a>
         <hr>
-        <h3>Java OpenJDK v21.0.8</h3>
+        <h3>Java OpenJDK v25.0.2</h3>
         <a href="https://openjdk.org/" target="_blank">Java OpenJDK</a>
         <hr>
-        <h3>ffmpeg v6.1.1</h3>
+        <h3>ffmpeg v8.0.1</h3>
         <a href="https://www.ffmpeg.org/" target="_blank">ffmpeg</a>
         <hr>
         <h3>Onvif for Java</h3>
         <a href="https://github.com/fpompermaier/onvif" target="_blank">Onvif for Java</a>
         <hr>
-        <h3>Motion Service v4.6.0 (for motion detection)</h3>
+        <h3>Motion Service v4.7.1 (for motion detection)</h3>
         <a href="https://motion-project.github.io/" target="_blank">Motion Service</a>
         <hr>
-        <h3>nginx v1.24.0 (Reverse proxy)</h3>
+        <h3>nginx v1.28. (Reverse proxy)</h3>
         <a href="https://nginx.org/en/" target="_blank">nginx</a>
         <hr>
-        <h3>Apache Tomcat/10.1.16 (Ubuntu) (Web Server)</h3>
+        <h3>Apache Tomcat/11.0.18-1 (Ubuntu) (Web Server)</h3>
         <a href="https://tomcat.apache.org/" target="_blank">Apache Tomcat</a>
         <hr>
         <h3>libraspberrypi-bin</h3>
         <a href="https://packages.ubuntu.com/focal-updates/misc/libraspberrypi-bin" target="_blank">libraspberrypi-bin</a>
         <hr>
-        <h3>Chrony v4.5 (NTP Server)</h3>
+        <h3>Chrony v4.8 (NTP Server)</h3>
         <a href="https://chrony-project.org/news.html" target="_blank">Chrony</a>
         <hr>
-        <h3>Ubuntu network-manager v1.46.4</h3>
+        <h3>Ubuntu network-manager v1.54.3</h3>
         <a href="https://ubuntu.com/core/docs/networkmanager" target="_blank">Network Manager</a>
         <hr>
         <h3>wireless-tools v30 (Wireless Tools for Linux)</h3>
@@ -505,7 +504,7 @@ class UtilsService {
         <h3>moreutils</h3>
         <a href="https://ostechnix.com/moreutils-collection-useful-unix-utilities/" target="_blank">Moreutils</a>
         <hr>
-        <h3>Python3 v 3.12.3</h3>
+        <h3>Python3 v3.14.4</h3>
         <a href="https://www.python.org/" target="_blank">Python3</a>
         <hr>
     '''

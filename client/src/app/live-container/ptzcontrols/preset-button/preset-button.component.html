@@ -1,11 +1,11 @@
 <button class="preset-button" mat-mini-fab
         (mousedown)="presetPressed($event)"
         (touchstart)="presetPressed($event)"
-        [color]="operation != 0 ? 'warn' : 'primary'"
-        [disabled]="isGuest">
+        [color]="operation() != 0 ? 'warn' : 'primary'"
+        [disabled]="isGuest()">
   <div>
     {{
-    presetNumber
+    presetNumber()
     }}
   </div>
 </button>

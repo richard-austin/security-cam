@@ -1,24 +1,31 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  OnInit,
+  Signal, viewChild,
+  viewChildren,
+} from '@angular/core';
 import {CameraService} from '../cameras/camera.service';
 import {Camera, Stream} from '../cameras/Camera';
 import {MatCheckboxChange} from '@angular/material/checkbox';
 import {ReportingComponent} from '../reporting/reporting.component';
 import {VideoComponent} from '../video/video.component';
-import { HttpErrorResponse } from '@angular/common/http';
+import {HttpErrorResponse} from '@angular/common/http';
 import {timer} from 'rxjs';
 import {IdleTimeoutStatusMessage, UtilsService} from '../shared/utils.service';
 import {SharedModule} from '../shared/shared.module';
 import {SharedAngularMaterialModule} from '../shared/shared-angular-material/shared-angular-material.module';
 
 @Component({
-    selector: 'app-multi-cam-view',
-    templateUrl: './multi-cam-view.component.html',
-    styleUrls: ['./multi-cam-view.component.scss'],
-    imports: [SharedModule, SharedAngularMaterialModule, VideoComponent],
+  selector: 'app-multi-cam-view',
+  templateUrl: './multi-cam-view.component.html',
+  styleUrls: ['./multi-cam-view.component.scss'],
+  imports: [SharedModule, SharedAngularMaterialModule, VideoComponent],
 })
 export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChildren(VideoComponent) videos!: QueryList<VideoComponent>;
-  @ViewChild(ReportingComponent) reporting!: ReportingComponent;
+  videos: Signal<readonly VideoComponent[]>  = viewChildren(VideoComponent);
+  reporting: Signal<ReportingComponent> = viewChild.required(ReportingComponent);
 
   expandedElement!: Camera | null;
   cameraColumns = ['name', 'expand'];
@@ -34,7 +41,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected streamSelectorStyle(streamSelector: HTMLDivElement, showStreamSelector: boolean): string {
     const maxHeight = streamSelector.scrollHeight;
-    let selectorStyle = ';';
+    let selectorStyle;
     if (showStreamSelector) {
       selectorStyle = 'max-height: ' + maxHeight + 'px; animation: stream-selector-fade-in 0.5s;';
     } else {
@@ -46,18 +53,20 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleStreamSelector() {
     this.showStreamSelector = !this.showStreamSelector;
   }
-  static colsToSize: Map<number, number> = new Map<number, number>([[0,100], [1, 50], [2,33.33], [3, 25]]);
+
+  static colsToSize: Map<number, number> = new Map<number, number>([[0, 100], [1, 50], [2, 33.33], [3, 25]]);
+
   setNumColumns(column: number) {
     this.numColumns = column;
-    this.cameraSvc.numColumns=column;
+    this.cameraSvc.numColumns = column;
     const size = MultiCamViewComponent.colsToSize.get(column);
-    if(typeof size == "number")
-      this.videos.forEach((vid) => vid.changeSize(size));
+    if (typeof size == "number")
+      this.videos().forEach((vid) => vid.changeSize(size));
   }
 
   setupVideo() {
-    this.reporting.dismiss();
-    this.videos.forEach((video) => {
+    this.reporting().dismiss();
+    this.videos().forEach((video) => {
       video.visible = false;
       video.multi = true;
     });
@@ -65,13 +74,13 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.cams.size > 0) {
       this.cams.forEach((cam) => {
         cam.streams.forEach((stream, k) => {
-          let video: VideoComponent | undefined = this.videos?.get(index);
+          let video: VideoComponent | undefined = this.videos()[index];
           if (video !== undefined && stream.defaultOnMultiDisplay) {
             video.setSource(cam, stream);
-            video.setInitialAudioSettings(true,0.4, true, true);
+            video.setInitialAudioSettings(true, 0.4, true, true);
             video.visible = true;
             const size = MultiCamViewComponent.colsToSize.get(this.cameraSvc.numColumns);
-            if(typeof size == "number")
+            if (typeof size == "number")
               video.setSize(size);
             else
               video.setSize(50);
@@ -89,7 +98,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    *                   Show "No camera has been specified" error message.
    */
   showInvalidInput(): void {
-    this.reporting.errorMessage = new HttpErrorResponse({
+    this.reporting().errorMessage = new HttpErrorResponse({
       error: 'No camera has been specified',
       status: 0,
       statusText: '',
@@ -101,12 +110,16 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
    * setUpCameraDetails: Set up the available streams/cameras for selection by the check boxes
    */
   setUpCameraDetails(): void {
-    this.cameraSvc.loadCameras().subscribe(cameras => {
+    this.cameraSvc.loadCameras().subscribe({
+      next: cameras => {
         this.cams = cameras;
-//        this.showSelected();
         timer(100).subscribe(() => this.setupVideo());
       },
-      reason => this.reporting.errorMessage = reason);
+      error:
+        reason => {
+          this.reporting().errorMessage = reason;
+        }
+    });
   }
 
   toggle(el: { key: string, value: Camera }) {
@@ -141,7 +154,7 @@ export class MultiCamViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cams.forEach((cam) => {
         cam.streams.forEach((stream) => {
           if (camera.address === cam.address && stream.selected) {
-            let video: VideoComponent | undefined = this.videos?.get(index);
+            let video: VideoComponent | undefined = this.videos()[index];
             if (video !== undefined) {
               video.setSource(cam, stream);
               video.visible = true;

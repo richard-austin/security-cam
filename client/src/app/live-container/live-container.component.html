@@ -1,7 +1,7 @@
 <div class="flex-container">
   <app-video [isLive]="true"></app-video>
   @if (hasPTZControls()) {
-    <app-ptzcontrols [camera]="camera" [reporting]="reporting"></app-ptzcontrols>
+    <app-ptzcontrols [camera]="camera" [reporting]="reporting()"></app-ptzcontrols>
   }
 </div>
 <app-reporting></app-reporting>

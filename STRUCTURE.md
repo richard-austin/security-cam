@@ -1,6 +1,6 @@
 ## NVR System Structure
 ### Run Time Platform and Installation
-The current build configuration is for Raspberry pi V4 or V5 running headless (server) version of Ubuntu 24.04 (Noble Numbat).
+The current build configuration is for Raspberry pi V4 or V5 running headless (server) version of Ubuntu 26.04 (Resolute Raccoon).
 Installation of the complete system can be done with a .deb file which you can obtain from the latest release in the Releases section or you can build yourself by following the details under the Development section below.
 
 ### Security
@@ -11,7 +11,7 @@ These ports, plus port 80,  are set up for port forwarding on the router when di
 from outside the LAN is required.
 
 ### Tomcat Web Server
-Tomcat 10 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
+Tomcat 11 (https://tomcat.apache.org/) hosts the server (Web Back End) and client (Web Front End) of the NVR, giving access
 to these through port 8080.
 
 ###### nginx makes the web server, media server and other services available through the single port 443
@@ -36,8 +36,8 @@ The Media Server is written in go (golang) and cross-compiled for the ARM 64 arc
 ### ffmpeg
 ffmpeg is used for re-muxing, audio transcoding, camera connectivity and recording.
 
-ffmpeg version 6.1.1-3ubuntu5 is used in the NVR, which is the standard version available on
-Ubuntu 24.04.
+ffmpeg version 8.0.1-3ubuntu5 is used in the NVR, which is the standard version available on
+Ubuntu 26.04.
 See [FFMPEG.md](FFMPEG.md) for more about ffmpeg.
 
 ### Wi-Fi Setup Service

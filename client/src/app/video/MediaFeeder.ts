@@ -3,12 +3,11 @@ import {Camera, Stream} from "../cameras/Camera";
 import {Subscription, timer} from "rxjs";
 import {ReportingComponent} from "../reporting/reporting.component";
 import {NavComponent} from "../nav/nav.component";
-
-declare function initMSTG(): void;
+import {AudioStream} from "./audio-stream";
+import {initMSTG} from "./media-stream-track-generator";
 
 // MediaStreamTrackGenerator not in lib.dom.d.ts
 declare let MediaStreamTrackGenerator: any
-declare let AudioStream: any;
 
 initMSTG();  // Set up MediaStreamTrackGenerator for platforms which don't support it
 
@@ -25,7 +24,7 @@ class MediaFeeder {
   videoWorker!: Worker;
   audioWorker!: Worker;
   // @ts-ignore
-  audioStream: AudioStream;
+  audioStream: AudioStream | undefined;
   muted: boolean = false;
   private audioLatencyControl: boolean = true;
   volume: number = 0.4;
@@ -112,8 +111,7 @@ class MediaFeeder {
         this.audioStream.setAutoLatencyControl(this.audioLatencyControl);
       }
 
-      const audioTrack = this.audioStream?.getTrack();
-      const audioWriter = audioTrack?.writable?.getWriter();
+      const audioWriter: WritableStreamDefaultWriter | undefined = this.audioStream?.getWriter();
 
       this.video.srcObject = new MediaStream([videoTrack]);
       this.video.onloadedmetadata = () => {
@@ -160,7 +158,7 @@ class MediaFeeder {
           this.video.onplaying = () => {
             this.audioWorker.onmessage = async ({data}) => {
               if (!data.warningMessage && !data.closed) {
-                if (!this.video.paused) {
+                if (!this.video.paused && audioWriter) {
                   await audioWriter.write(data);  // Write the decoded audio data to the audio worklet
                   await audioWriter.ready;
                 }
@@ -222,6 +220,7 @@ class MediaFeeder {
       this.videoWorker?.terminate();
       this.audioWorker?.postMessage({close: true})
       this.audioWorker?.terminate();
+      this.audioStream?.terminate();
       this.video.pause();
     }
   }
@@ -236,7 +235,7 @@ class MediaFeeder {
   }
 
   getAudioLatencyControl() {
-    return this.audioStream?.getAudioLatencyControl();
+    return this.audioStream?.getAudioLatencyControl()||false;
   }
 
   set gain(volume: number) {
@@ -245,7 +244,8 @@ class MediaFeeder {
   }
 
   get gain(): number {
-    return this.audioStream?.getGain();
+    const gain= this.audioStream?.getGain();
+    return gain ? gain : 0;
   }
 
   mute(muted: boolean = true) {
@@ -254,7 +254,7 @@ class MediaFeeder {
   }
 
   get isMuted() {
-    return this.audioStream?.isMuted();
+    return this.audioStream?.isMuted()||false;
   }
 
   get hasCam(): boolean {
