@@ -18,7 +18,9 @@ java {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
+
     maven {
         url = uri("https://build.shibboleth.net/maven/releases/")  // For implementation group: 'org.opensaml', name: 'opensaml-xacml-impl', version: '4.3.0'
         //  url = uri("https://company/com/maven2")
@@ -34,7 +36,7 @@ dependencies {
     implementation 'jakarta.jws:jakarta.jws-api:3.0.0'
 
     implementation 'org.apache.commons:commons-lang3:3.18.0'
-    implementation "org.apache.cxf.xjc-utils:cxf-xjc-runtime:${project.property('cxfXjcRuntimeVersion')}"
+    implementation "org.apache.cxf.xjc-utils:cxf-xjc-runtime:${providers.gradleProperty('cxfXjcRuntimeVersion').get()}"
 }
 
 processResources.dependsOn("compileJava")

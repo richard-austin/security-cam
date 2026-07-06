@@ -1,9 +1,11 @@
-//pluginManagement {
-//    repositories {
-//        maven { url "https://plugins.gradle.org/m2/" }
-//        gradlePluginPortal()
-//    }
-//}
+pluginManagement {
+   includeBuild("./go-plugin")
+   includeBuild("./wsdl2java-gradle-plugin")
+    repositories {
+        // maven { url "https://plugins.gradle.org/m2/" }
+        // gradlePluginPortal()
+    }
+}
 
 include 'client', 'server', 'onvif-ws-client', 'onvif-java', 'low-latency-media-server', 'camera-recordings-service', 'wifi-setup-service', 'generateProductKey', 'initialAdmin'
 

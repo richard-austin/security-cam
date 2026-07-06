@@ -1,0 +1,43 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Publish
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+  workflow_run:
+    workflows:
+      - CI
+    branches: main
+    types:
+      - completed
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  publish:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Validate
+      - name: Validate
+        env:
+          GRADLE_PUBLISH_KEY: ${{ secrets.gradlePublishKey }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.gradlePublishSecret }}
+        run: ./gradlew publishPlugins --validate-only
+
+      # Publish the plugin
+      - name: Publish
+        env:
+          GRADLE_PUBLISH_KEY: ${{ secrets.gradlePublishKey }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.gradlePublishSecret }}
+        run: ./gradlew publishPlugins
