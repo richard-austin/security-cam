@@ -1,7 +1,7 @@
-import com.fussionlabs.gradle.tasks.GoTask
+import io.github.richard_austin.tasks.GoTask
 
 plugins {
-    id "com.fussionlabs.gradle.go-plugin" version "$goPluginVersion"
+    id "io.github.richard-austin.go-plugin" version "$goPluginVersion"
 }
 
 go {
