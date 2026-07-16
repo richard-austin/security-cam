@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <annotationProcessing>
-      <profile default="true" name="Default" enabled="true" />
-    </annotationProcessing>
-    <bytecodeTargetLevel target="21" />
+    <bytecodeTargetLevel target="21">
+      <module name="com.github.bjornvester.wsdl2java-gradle-plugin" target="17" />
+      <module name="com.github.bjornvester.wsdl2java-gradle-plugin.main" target="17" />
+      <module name="com.github.bjornvester.wsdl2java-gradle-plugin.test" target="17" />
+      <module name="go-plugin" target="21" />
+      <module name="go-plugin.main" target="21" />
+      <module name="go-plugin.test" target="21" />
+      <module name="wsdl2java-gradle-plugin" target="17" />
+      <module name="wsdl2java-gradle-plugin.main" target="17" />
+      <module name="wsdl2java-gradle-plugin.test" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="security-cam.server" options="-parameters" />
+      <module name="security-cam.server.main" options="-parameters" />
+      <module name="security-cam.server.test" options="-parameters" />
+    </option>
   </component>
 </project>
