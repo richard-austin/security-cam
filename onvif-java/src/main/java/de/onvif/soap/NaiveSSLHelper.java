@@ -19,7 +19,7 @@ import org.apache.cxf.transport.http.HTTPConduit;
 public class NaiveSSLHelper {
   public static void makeWebServiceClientTrustEveryone(Object webServicePort) {
     if (webServicePort instanceof BindingProvider bp) {
-        Map requestContext = bp.getRequestContext();
+        Map<String, Object> requestContext = bp.getRequestContext();
       requestContext.put(JAXWS_SSL_SOCKET_FACTORY, getTrustingSSLSocketFactory());
       requestContext.put(JAXWS_HOSTNAME_VERIFIER, new NaiveHostnameVerifier());
     } else {

@@ -65,7 +65,7 @@ public class PullPointSubscriptionHandler {
      *           change notifications until setTerminate is called. This is a non-blocking call which sets up its own
      *           thread.
      */
-    public void subcribe() {
+    public void subscribe() {
         init(false);
     }
 

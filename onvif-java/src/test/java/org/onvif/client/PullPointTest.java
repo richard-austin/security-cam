@@ -20,7 +20,7 @@ public class PullPointTest implements PullMessagesCallbacks {
     }
     static private PullPointTest theInstance =null;
 
-    public static void main(String[] args) throws IOException {
+    static void main(String[] args) throws IOException {
         if(theInstance == null)
             theInstance = new PullPointTest();
 
@@ -46,7 +46,7 @@ public class PullPointTest implements PullMessagesCallbacks {
         try {
             PullPointSubscriptionHandler ppsh = new PullPointSubscriptionHandler(cam, this);
             ppsh.createPullPointSubscription(("tns1://."));
-            ppsh.subcribe();
+            ppsh.subscribe();
          } catch (Exception e) {
             System.out.println(e.getClass().getName() + " " + e.getMessage());
         }

@@ -83,7 +83,7 @@ class PullPointHandlerContainer implements PullMessagesCallbacks {
         try {
             _pullPointSub = new PullPointSubscriptionHandler(device, this)
             _pullPointSub.createPullPointSubscription(topic)
-            _pullPointSub.subcribe()
+            _pullPointSub.subscribe()
         }
         catch(Exception e) {
             logService.cam.error(e.getClass().getName() + " " + e.getMessage())

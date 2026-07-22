@@ -1,6 +1,4 @@
 pluginManagement {
-   includeBuild("./go-plugin")
-   includeBuild("./wsdl2java-gradle-plugin")
     repositories {
         // maven { url "https://plugins.gradle.org/m2/" }
         // gradlePluginPortal()

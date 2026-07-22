@@ -8,7 +8,7 @@ plugins {
 //    id 'java'
 //    id("java-test-fixtures")
 //    id 'maven-publish'
-    id 'com.github.bjornvester.wsdl2java' version '2.0.2'
+    id 'io.github.richard-austin.wsdl2java' version '2.0.3'
 }
 
 java {
@@ -18,7 +18,6 @@ java {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
 
     maven {
