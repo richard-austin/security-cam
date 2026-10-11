@@ -221,7 +221,7 @@ class UtilsController {
     }
 
     /**
-     * getVersion: Get the version number from application.yml config
+     * getVersion: Get the version number from the version.txt file
      * @return: The version strig
      */
     @Secured(['ROLE_CLIENT', 'ROLE_CLOUD', 'ROLE_GUEST'])
