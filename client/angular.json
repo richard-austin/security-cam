@@ -23,6 +23,9 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "allowedCommonJsDependencies": [
+              "@stomp/stompjs"
+            ],
             "outputPath": {
               "base": "dist/client"
             },
