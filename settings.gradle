@@ -1,6 +1,7 @@
 pluginManagement {
     repositories {
         // maven { url "https://plugins.gradle.org/m2/" }
+       // mavenLocal()
         // gradlePluginPortal()
     }
 }
@@ -12,4 +13,4 @@ plugins {
 
 include 'client', 'server', 'onvif-ws-client', 'onvif-java', 'low-latency-media-server', 'camera-recordings-service', 'wifi-setup-service', 'generateProductKey', 'initialAdmin'
 
-//includeBuild("../dev-work/go-plugin")
+// includeBuild("../dev-work/go-plugin")
