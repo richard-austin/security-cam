@@ -60,14 +60,19 @@ class MediaServer {
                     int audioStreamIndex = grabber.getAudioStream()
 
                     int inputVideoCodecId = grabber.getFormatContext().streams(videoStreamIndex).codecpar().codec_id()
-                    int inputAudioCodecId = grabber.getFormatContext().streams(audioStreamIndex).codecpar().codec_id()
+                    int inputAudioCodecId = audioStreamIndex != -1 ? grabber.getFormatContext().streams(audioStreamIndex).codecpar().codec_id() : -1
                     String inputVideoCodecName = avcodec_get_name(inputVideoCodecId).getString()
-                    inputAudioCodecName = avcodec_get_name(inputAudioCodecId).getString()
+                    if(audioChannels > 0)
+                        inputAudioCodecName = avcodec_get_name(inputAudioCodecId).getString()
+                    else
+                        inputAudioCodecName = "No Audio"
 
                     AVFormatContext inputFormatContext = grabber.getFormatContext()
 
                     videoStreamFile = new FileOutputStream(inputVideoCodecName == "hevc" ? hevcOutput : h264Output)
-                    audioStreamFile = new FileOutputStream(inputAudioCodecName == "aac" ? adtsOutput : pcmOutput)
+
+                    if(audioChannels > 0)
+                        audioStreamFile = new FileOutputStream(inputAudioCodecName == "aac" ? adtsOutput : pcmOutput)
 
 // Find the video stream inside your input format context
                     int videoStreamIndex2 = -1
@@ -175,7 +180,7 @@ class MediaServer {
                                 if (clonedPacket != null) {
                                     if (inputAudioCodecName == "aac")
                                         recordAAC.recordPacket(clonedPacket)
-                                    else if (inputAudioCodecName == 'pcm_alaw')
+                                    else if (audioChannels > 0 && inputAudioCodecName == 'pcm_alaw')
                                         audioStreamFile.write(buffer)
                                     av_packet_free(clonedPacket) // Always free native clones to avoid memory leaks
                                 }

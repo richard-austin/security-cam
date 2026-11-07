@@ -32,9 +32,9 @@ class ApplicationStartup
         sc_processesService.setOnvifService(onvifService)
         sc_processesService.startProcesses()
 
-     //   mediaServer.runStreamingSession("rtsp://admin:R%40nc1dTapsB0ttom@192.168.1.106:554/Preview_01_main")
+        mediaServer.runStreamingSession("rtsp://admin:R%40nc1dTapsB0ttom@192.168.1.106:554/Preview_01_main")
      //   mediaServer.runStreamingSession("rtsp://192.168.1.30:554/11")
-        mediaServer.runStreamingSession("rtsp://192.168.1.22:554/11")
+     //   mediaServer.runStreamingSession("rtsp://192.168.1.30:554/11")
         logService.cam.info("Started NVR Services!!!!!!!!!!!!!!")
     }
 }
