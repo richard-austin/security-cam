@@ -6,7 +6,6 @@ import com.securitycam.commands.SetCameraParamsCommand
 import com.securitycam.commands.SetupSMTPAccountCommand
 import com.securitycam.commands.StartAudioOutCommand
 import com.securitycam.commands.UpdateAdHocDeviceListCommand
-import com.securitycam.commands.UpdateCamerasCommand
 import com.securitycam.enums.PassFail
 import com.securitycam.enums.RestfulResponseStatusEnum
 import com.securitycam.error.NVRRestMethodException
@@ -23,7 +22,6 @@ import com.securitycam.validators.GeneralValidator
 import com.securitycam.validators.SetCameraParamsCommandValidator
 import com.securitycam.validators.SetupSMTPAccountCommandValidator
 import com.securitycam.validators.UpdateAdHocDeviceListCommandValidator
-import com.securitycam.validators.UpdateCamerasCommandValidator
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus

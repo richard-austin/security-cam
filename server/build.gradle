@@ -90,6 +90,7 @@ dependencies {
     implementation 'org.apache.wss4j:wss4j-ws-security-common:3.0.4'
     implementation 'org.opensaml:opensaml-xacml-impl:4.3.0'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation("org.bytedeco:javacv-platform:1.5.14")
 
  //   runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
 }

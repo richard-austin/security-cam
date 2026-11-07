@@ -1,6 +1,7 @@
 package com.securitycam.beans
 
 import com.securitycam.services.LogService
+import com.securitycam.services.MediaServer
 import com.securitycam.services.OnvifService
 import com.securitycam.services.Sc_processesService
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,10 @@ class ApplicationStartup
 
     @Autowired
     LogService logService
+
+    @Autowired
+    MediaServer mediaServer
+
     /**
      * This event is executed as late as conceivably possible to indicate that
      * the application is ready to service requests.
@@ -27,6 +32,9 @@ class ApplicationStartup
         sc_processesService.setOnvifService(onvifService)
         sc_processesService.startProcesses()
 
+        mediaServer.runStreamingSession("rtsp://admin:easypassword@192.168.1.106:554/Preview_01_main")
+     //   mediaServer.runStreamingSession("rtsp://192.168.1.30:554/11")
+     //   mediaServer.runStreamingSession("rtsp://192.168.1.30:554/11")
         logService.cam.info("Started NVR Services!!!!!!!!!!!!!!")
     }
 }
