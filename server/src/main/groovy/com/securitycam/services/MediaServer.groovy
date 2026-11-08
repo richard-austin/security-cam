@@ -10,6 +10,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.FFmpegFrameRecorder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+
 import static org.bytedeco.ffmpeg.global.avcodec.*
 
 import java.util.concurrent.ExecutorService
@@ -23,17 +24,12 @@ class MediaServer {
     ExecutorService mediaThreads = Executors.newFixedThreadPool(40)
 
     void runStreamingSession(String rtspUrl) throws Exception {
-        String hevcOutput = "/home/richard/stream.hevc"
-        String h264Output = "/home/richard/stream.h264"
-        String flvOutput = "/home/richard/stream.flv"
-        String adtsOutput = "/home/richard/stream.adts"
-        String pcmOutput = "/home/richard/stream.alaw"
+        ByteArrayOutputStream flvOutputStream = new ByteArrayOutputStream()
+        ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
 
         mediaThreads.submit(() -> {
             while (true) {
                 // 1. Declare variables here so they are in scope for try, catch, and finally
-                FileOutputStream videoStreamFile = null
-                FileOutputStream audioStreamFile = null
                 FFmpegFrameRecorder recorderFLV = null
                 FFmpegFrameRecorder recordAAC = null
                 String inputAudioCodecName = ""
@@ -69,12 +65,7 @@ class MediaServer {
 
                     AVFormatContext inputFormatContext = grabber.getFormatContext()
 
-                    videoStreamFile = new FileOutputStream(inputVideoCodecName == "hevc" ? hevcOutput : h264Output)
-
-                    if(audioChannels > 0)
-                        audioStreamFile = new FileOutputStream(inputAudioCodecName == "aac" ? adtsOutput : pcmOutput)
-
-// Find the video stream inside your input format context
+                    // Find the video stream inside your input format context
                     int videoStreamIndex2 = -1
                     for (int i = 0; i < inputFormatContext.nb_streams(); i++) {
                         AVStream stream = inputFormatContext.streams(i)
@@ -99,7 +90,7 @@ class MediaServer {
                         // Example: H.264 High Profile (100 -> 0x64), Level 4.1 (41 -> 0x29) -> "avc1.640029"
                     }
 
-                    recorderFLV = new FFmpegFrameRecorder(flvOutput, width, height, audioChannels)
+                    recorderFLV = new FFmpegFrameRecorder(flvOutputStream, width, height, audioChannels)
                     recorderFLV.setFormat("flv")
                     recorderFLV.setVideoCodec(inputVideoCodecId)
                     recorderFLV.setAudioCodec(inputAudioCodecId)
@@ -107,14 +98,16 @@ class MediaServer {
                     recorderFLV.setAudioCodecName("copy")
                     recorderFLV.setOption("flvflags", "no_sequence_end")
                     recorderFLV.setOption("flush_packets", "1")
+                    recorderFLV.setOption("fflags", "nobuffer")
                     recorderFLV.start(inputFormatContext)
 
-                    recordAAC = new FFmpegFrameRecorder(adtsOutput, 0, 0, audioChannels)
+                    recordAAC = new FFmpegFrameRecorder(aacOutputStream, 0, 0, audioChannels)
                     if (inputAudioCodecName == "aac") {
                         recordAAC.setFormat("adts")
                         recordAAC.setAudioCodec(inputAudioCodecId)
                         recordAAC.setAudioCodecName("copy")
                         recordAAC.setOption("flush_packets", "1")
+                        recorderFLV.setOption("fflags", "nobuffer")
                         recordAAC.start(inputFormatContext)
                     }
 
@@ -123,9 +116,9 @@ class MediaServer {
                     logService.cam.info("Routing raw low-latency streams...")
 
 
-// Track the last recorded DTS for each stream index to guarantee monotonic growth
+                    // Track the last recorded DTS for each stream index to guarantee monotonic growth
                     Map<Integer, Long> lastDtsMap = new HashMap<>()
-// Low-Latency Packet Copying Loop
+                    // Low-Latency Packet Copying Loop
                     while ((packet = grabber.grabPacket()) != null) {
                         int streamIndex = packet.stream_index()
 
@@ -178,20 +171,19 @@ class MediaServer {
                                 // 1. Clone the packet so recordAAC doesn't alter the original pointers
                                 AVPacket clonedPacket = av_packet_clone(packet)
                                 if (clonedPacket != null) {
-                                    if (inputAudioCodecName == "aac")
-                                        recordAAC.recordPacket(clonedPacket)
-                                    else if (audioChannels > 0 && inputAudioCodecName == 'pcm_alaw')
-                                        audioStreamFile.write(buffer)
+                                    if(audioChannels > 0) {
+                                        if (inputAudioCodecName == "aac")
+                                            recordAAC.recordPacket(clonedPacket)
+                                        else if (inputAudioCodecName == 'pcm_alaw')
+                                            logService.cam.info("pcm packet len = " + buffer.length)
+                                    }
+
                                     av_packet_free(clonedPacket) // Always free native clones to avoid memory leaks
                                 }
                             } else if (streamIndex == videoStreamIndex) {
-                                if ((packet.flags() & 0x1) != 0)
-                                    logService.cam.info("packet.size " + packet.size() + " flags " + packet.flags())
+                                //if ((packet.flags() & AV_PKT_FLAG_KEY) != 0)
+                                    logService.cam.info("video packet.size " + buffer.length + " flags " + packet.flags())
 
-                                videoStreamFile.write(buffer)
-
-                                // Write raw copy to your backup video file
-                                // videoStreamFile.write(buffer)
                             }
 
                             // 2. RECORD TO FLV ONCE PER VALID PACKET
@@ -202,13 +194,25 @@ class MediaServer {
                             packet.stream_index(origStreamIndex)
 
                             recorderFLV.recordPacket(packet)
+
+                            byte[] array = flvOutputStream.toByteArray()
+
+                            if(array.length > 0) {
+                                logService.cam.info("flv output size = " + flvOutputStream.size())
+                                flvOutputStream.reset()
+                            }
+
+                            if(audioChannels > 0 && inputAudioCodecName == "aac" && aacOutputStream.size() > 0) {
+                                byte[] aacArray = aacOutputStream.toByteArray()
+                                logService.cam.info("aac output size = "+aacArray.length)
+                                aacOutputStream.reset()
+                            }
                         }
                     }
 
                     logService.cam.info("Camera closed the stream sequence gracefully.")
+                    recorderFLV.close()
                     recorderFLV.stop()
-                    videoStreamFile.close()
-                    audioStreamFile.close()
                     if (inputAudioCodecName == "aac")
                         recordAAC.stop()
 
