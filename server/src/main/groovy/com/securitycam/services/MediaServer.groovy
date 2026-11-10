@@ -1,11 +1,18 @@
 package com.securitycam.services
 
+import com.securitycam.beans.MediaStreamHandler
+import com.securitycam.mediaserverutils.CodecStringDiscovery
+import org.bytedeco.ffmpeg.avcodec.AVCodecDescriptor
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
+import org.bytedeco.ffmpeg.avcodec.AVProfile
 import org.bytedeco.ffmpeg.avformat.AVFormatContext
 import org.bytedeco.ffmpeg.avformat.AVStream
+import org.bytedeco.ffmpeg.avutil.AVDictionary
 import org.bytedeco.ffmpeg.global.avutil
+import org.bytedeco.ffmpeg.global.avformat
 import org.bytedeco.javacpp.BytePointer
+import org.bytedeco.javacpp.PointerPointer
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.FFmpegFrameRecorder
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,9 +26,12 @@ import java.util.concurrent.Executors
 @Service
 class MediaServer {
     @Autowired
-    LogService logService
+    private LogService logService
 
     ExecutorService mediaThreads = Executors.newFixedThreadPool(40)
+
+    @Autowired
+    private MediaStreamHandler mediaStreamHandler
 
     void runStreamingSession(String rtspUrl) throws Exception {
         ByteArrayOutputStream flvOutputStream = new ByteArrayOutputStream()
@@ -33,7 +43,7 @@ class MediaServer {
                 FFmpegFrameRecorder recorderFLV = null
                 FFmpegFrameRecorder recordAAC = null
                 String inputAudioCodecName = ""
-
+                avformat.avformat_network_init()
                 // Standard out-of-the-box grabber configuration
                 try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(rtspUrl)) {
                     grabber.setOption("rtsp_transport", "tcp")
@@ -58,13 +68,12 @@ class MediaServer {
                     int inputVideoCodecId = grabber.getFormatContext().streams(videoStreamIndex).codecpar().codec_id()
                     int inputAudioCodecId = audioStreamIndex != -1 ? grabber.getFormatContext().streams(audioStreamIndex).codecpar().codec_id() : -1
                     String inputVideoCodecName = avcodec_get_name(inputVideoCodecId).getString()
-                    if(audioChannels > 0)
+                    if (audioChannels > 0)
                         inputAudioCodecName = avcodec_get_name(inputAudioCodecId).getString()
                     else
                         inputAudioCodecName = "No Audio"
 
                     AVFormatContext inputFormatContext = grabber.getFormatContext()
-
                     // Find the video stream inside your input format context
                     int videoStreamIndex2 = -1
                     for (int i = 0; i < inputFormatContext.nb_streams(); i++) {
@@ -76,18 +85,45 @@ class MediaServer {
                     }
 
                     if (videoStreamIndex2 != -1) {
+                        // 1. CRITICAL STEP: Scan the HEVC container headers to properly initialize codecpar()
+                        // Pass a PointerPointer containing null instead of casting a flat null
                         AVCodecParameters codecParams = inputFormatContext.streams(videoStreamIndex2).codecpar()
 
+                        int codecId = codecParams.codec_id()
                         int profile = codecParams.profile() // The profile integer (e.g., 100 for High, 77 for Main)
                         int level = codecParams.level()     // The level integer (e.g., 41 for Level 4.1)
+                        String profileName = "Unknown"
 
+                        // Safely look up the name mapping via the codec descriptor
+                        AVCodecDescriptor descriptor = avcodec_descriptor_get(codecId)
+                        if (descriptor != null && descriptor.profiles() != null) {
+                            AVProfile profileArray = descriptor.profiles()
+                            int i = 0
+                            while (true) {
+                                AVProfile p = profileArray.position(i)
+                                int currentProfileId = p.profile()
+
+                                if (currentProfileId == -99 || p.name() == null) {
+                                    break // End of array marker
+                                }
+
+                                if (currentProfileId == profile) {
+                                    profileName = p.name().getString()
+                                    break
+                                }
+                                i++
+                            }
+                        }
+
+                        // Fetch the short codec name (e.g., "h264", "aac", "hevc")
+                        BytePointer codecNamePtr = avcodec_get_name(codecId)
+                        String codecName = (codecNamePtr != null) ? codecNamePtr.getString() : "unknown"
+                        String codecString = CodecStringDiscovery.constructCodecString(codecName, profileName, level)
+                        mediaStreamHandler.addStream("cam4-stream1", codecString)
                         logService.cam.info("Input Video Profile: " + profile)
                         logService.cam.info("Input Video Level: " + level)
                         logService.cam.info("video codec " + inputVideoCodecName)
                         logService.cam.info("audio codec: " + inputAudioCodecName)
-
-                        // Now you can map these to your WebCodecs string!
-                        // Example: H.264 High Profile (100 -> 0x64), Level 4.1 (41 -> 0x29) -> "avc1.640029"
                     }
 
                     recorderFLV = new FFmpegFrameRecorder(flvOutputStream, width, height, audioChannels)
@@ -171,7 +207,7 @@ class MediaServer {
                                 // 1. Clone the packet so recordAAC doesn't alter the original pointers
                                 AVPacket clonedPacket = av_packet_clone(packet)
                                 if (clonedPacket != null) {
-                                    if(audioChannels > 0) {
+                                    if (audioChannels > 0) {
                                         if (inputAudioCodecName == "aac")
                                             recordAAC.recordPacket(clonedPacket)
                                         else if (inputAudioCodecName == 'pcm_alaw')
@@ -182,8 +218,9 @@ class MediaServer {
                                 }
                             } else if (streamIndex == videoStreamIndex) {
                                 //if ((packet.flags() & AV_PKT_FLAG_KEY) != 0)
-                                    logService.cam.info("video packet.size " + buffer.length + " flags " + packet.flags())
-
+                                //logService.cam.info("video packet.size " + buffer.length + " flags " + packet.flags())
+                                mediaStreamHandler.sendPacket("cam4-stream1", buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
+                                //   mediaStreamHandler.broadcastPacket("xyz", buffer)
                             }
 
                             // 2. RECORD TO FLV ONCE PER VALID PACKET
@@ -197,14 +234,14 @@ class MediaServer {
 
                             byte[] array = flvOutputStream.toByteArray()
 
-                            if(array.length > 0) {
+                            if (array.length > 0) {
                                 logService.cam.info("flv output size = " + flvOutputStream.size())
                                 flvOutputStream.reset()
                             }
 
-                            if(audioChannels > 0 && inputAudioCodecName == "aac" && aacOutputStream.size() > 0) {
+                            if (audioChannels > 0 && inputAudioCodecName == "aac" && aacOutputStream.size() > 0) {
                                 byte[] aacArray = aacOutputStream.toByteArray()
-                                logService.cam.info("aac output size = "+aacArray.length)
+                                logService.cam.info("aac output size = " + aacArray.length)
                                 aacOutputStream.reset()
                             }
                         }
@@ -231,18 +268,6 @@ class MediaServer {
                     if (recordAAC != null && "aac".equals(inputAudioCodecName)) {
                         try {
                             recordAAC.stop()
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    if (videoStreamFile != null) {
-                        try {
-                            videoStreamFile.close()
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    if (audioStreamFile != null) {
-                        try {
-                            audioStreamFile.close()
                         } catch (Exception ignored) {
                         }
                     }

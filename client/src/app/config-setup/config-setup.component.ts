@@ -396,8 +396,8 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
           stream.audio_encoding = "None";
 
         if (isDevMode()) {  // Development mode
-          stream.media_server_input_uri = "http://localhost:8085/live/stream?suuid=cam" + camNum + "-stream" + streamNum;
-          stream.uri = "ws://localhost:8085/ws/stream?suuid=cam" + camNum + "-stream" + streamNum;
+          stream.media_server_input_uri = "http://localhost:8080/live/stream?suuid=cam" + camNum + "-stream" + streamNum;
+          stream.uri = "ws://localhost:8080/ws/stream?suuid=cam" + camNum + "-stream" + streamNum;
           if (stream.netcam_uri === '')
             stream.netcam_uri = 'rtsp://';
 
