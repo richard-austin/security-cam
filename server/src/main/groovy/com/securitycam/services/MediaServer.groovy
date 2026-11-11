@@ -1,23 +1,19 @@
 package com.securitycam.services
 
 import com.securitycam.beans.MediaStreamHandler
+import com.securitycam.mediaserverutils.AVData
 import com.securitycam.mediaserverutils.CodecStringDiscovery
 import org.bytedeco.ffmpeg.avcodec.AVCodecDescriptor
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avcodec.AVProfile
-import org.bytedeco.ffmpeg.avformat.AVFormatContext
-import org.bytedeco.ffmpeg.avformat.AVStream
-import org.bytedeco.ffmpeg.avutil.AVDictionary
 import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.ffmpeg.global.avformat
 import org.bytedeco.javacpp.BytePointer
-import org.bytedeco.javacpp.PointerPointer
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.FFmpegFrameRecorder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-
 import static org.bytedeco.ffmpeg.global.avcodec.*
 
 import java.util.concurrent.ExecutorService
@@ -38,11 +34,13 @@ class MediaServer {
         ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
 
         mediaThreads.submit(() -> {
+            String inputAudioCodecName = ""
+
             while (true) {
                 // 1. Declare variables here so they are in scope for try, catch, and finally
                 FFmpegFrameRecorder recorderFLV = null
                 FFmpegFrameRecorder recordAAC = null
-                String inputAudioCodecName = ""
+
                 avformat.avformat_network_init()
                 // Standard out-of-the-box grabber configuration
                 try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(rtspUrl)) {
@@ -58,95 +56,31 @@ class MediaServer {
                     grabber.start()
                     logService.cam.info("Connected successfully!")
 
-                    int width = grabber.getImageWidth()
-                    int height = grabber.getImageHeight()
-                    int audioChannels = grabber.getAudioChannels()
+                    final AVData avData = getAVData(grabber)
+                    inputAudioCodecName = avData.inputAudioCodecName
 
-                    int videoStreamIndex = grabber.getVideoStream()
-                    int audioStreamIndex = grabber.getAudioStream()
-
-                    int inputVideoCodecId = grabber.getFormatContext().streams(videoStreamIndex).codecpar().codec_id()
-                    int inputAudioCodecId = audioStreamIndex != -1 ? grabber.getFormatContext().streams(audioStreamIndex).codecpar().codec_id() : -1
-                    String inputVideoCodecName = avcodec_get_name(inputVideoCodecId).getString()
-                    if (audioChannels > 0)
-                        inputAudioCodecName = avcodec_get_name(inputAudioCodecId).getString()
-                    else
-                        inputAudioCodecName = "No Audio"
-
-                    AVFormatContext inputFormatContext = grabber.getFormatContext()
-                    // Find the video stream inside your input format context
-                    int videoStreamIndex2 = -1
-                    for (int i = 0; i < inputFormatContext.nb_streams(); i++) {
-                        AVStream stream = inputFormatContext.streams(i)
-                        if (stream.codecpar().codec_type() == avutil.AVMEDIA_TYPE_VIDEO) {
-                            videoStreamIndex2 = i
-                            break
-                        }
-                    }
-
-                    if (videoStreamIndex2 != -1) {
-                        // 1. CRITICAL STEP: Scan the HEVC container headers to properly initialize codecpar()
-                        // Pass a PointerPointer containing null instead of casting a flat null
-                        AVCodecParameters codecParams = inputFormatContext.streams(videoStreamIndex2).codecpar()
-
-                        int codecId = codecParams.codec_id()
-                        int profile = codecParams.profile() // The profile integer (e.g., 100 for High, 77 for Main)
-                        int level = codecParams.level()     // The level integer (e.g., 41 for Level 4.1)
-                        String profileName = "Unknown"
-
-                        // Safely look up the name mapping via the codec descriptor
-                        AVCodecDescriptor descriptor = avcodec_descriptor_get(codecId)
-                        if (descriptor != null && descriptor.profiles() != null) {
-                            AVProfile profileArray = descriptor.profiles()
-                            int i = 0
-                            while (true) {
-                                AVProfile p = profileArray.position(i)
-                                int currentProfileId = p.profile()
-
-                                if (currentProfileId == -99 || p.name() == null) {
-                                    break // End of array marker
-                                }
-
-                                if (currentProfileId == profile) {
-                                    profileName = p.name().getString()
-                                    break
-                                }
-                                i++
-                            }
-                        }
-
-                        // Fetch the short codec name (e.g., "h264", "aac", "hevc")
-                        BytePointer codecNamePtr = avcodec_get_name(codecId)
-                        String codecName = (codecNamePtr != null) ? codecNamePtr.getString() : "unknown"
-                        String codecString = CodecStringDiscovery.constructCodecString(codecName, profileName, level)
-                        mediaStreamHandler.addStream("cam4-stream1", codecString)
-                        logService.cam.info("Input Video Profile: " + profile)
-                        logService.cam.info("Input Video Level: " + level)
-                        logService.cam.info("video codec " + inputVideoCodecName)
-                        logService.cam.info("audio codec: " + inputAudioCodecName)
-                    }
-
-                    recorderFLV = new FFmpegFrameRecorder(flvOutputStream, width, height, audioChannels)
+                    recorderFLV = new FFmpegFrameRecorder(flvOutputStream, avData.width, avData.height, avData.audioChannels)
                     recorderFLV.setFormat("flv")
-                    recorderFLV.setVideoCodec(inputVideoCodecId)
-                    recorderFLV.setAudioCodec(inputAudioCodecId)
+                    recorderFLV.setVideoCodec(avData.inputVideoCodecId)
+                    recorderFLV.setAudioCodec(avData.inputAudioCodecId)
                     recorderFLV.setVideoCodecName("copy")
                     recorderFLV.setAudioCodecName("copy")
                     recorderFLV.setOption("flvflags", "no_sequence_end")
                     recorderFLV.setOption("flush_packets", "1")
                     recorderFLV.setOption("fflags", "nobuffer")
-                    recorderFLV.start(inputFormatContext)
+                    recorderFLV.start(avData.inputFormatContext)
 
-                    recordAAC = new FFmpegFrameRecorder(aacOutputStream, 0, 0, audioChannels)
+                    recordAAC = new FFmpegFrameRecorder(aacOutputStream, 0, 0, avData.audioChannels)
                     if (inputAudioCodecName == "aac") {
                         recordAAC.setFormat("adts")
-                        recordAAC.setAudioCodec(inputAudioCodecId)
+                        recordAAC.setAudioCodec(avData.inputAudioCodecId)
                         recordAAC.setAudioCodecName("copy")
                         recordAAC.setOption("flush_packets", "1")
                         recorderFLV.setOption("fflags", "nobuffer")
-                        recordAAC.start(inputFormatContext)
+                        recordAAC.start(avData.inputFormatContext)
+                    } else if (avData.inputAudioCodecName == "pcm_alaw") {
+                        mediaStreamHandler.addStream("cam4-stream1a", "")
                     }
-
 
                     AVPacket packet
                     logService.cam.info("Routing raw low-latency streams...")
@@ -203,20 +137,21 @@ class MediaServer {
                             byte[] buffer = new byte[packet.size()]
                             data.get(buffer)
 
-                            if (streamIndex == audioStreamIndex) {
+                            if (streamIndex == avData.audioStreamIndex) {
                                 // 1. Clone the packet so recordAAC doesn't alter the original pointers
                                 AVPacket clonedPacket = av_packet_clone(packet)
                                 if (clonedPacket != null) {
-                                    if (audioChannels > 0) {
-                                        if (inputAudioCodecName == "aac")
+                                    if (avData.audioChannels > 0) {
+                                        if (avData.inputAudioCodecName == "aac")
                                             recordAAC.recordPacket(clonedPacket)
-                                        else if (inputAudioCodecName == 'pcm_alaw')
-                                            logService.cam.info("pcm packet len = " + buffer.length)
+                                        else if (avData.inputAudioCodecName == 'pcm_alaw')
+                                            mediaStreamHandler.sendPacket("cam4-stream1a", buffer)
+                                            //logService.cam.info("pcm packet len = " + buffer.length)
                                     }
 
                                     av_packet_free(clonedPacket) // Always free native clones to avoid memory leaks
                                 }
-                            } else if (streamIndex == videoStreamIndex) {
+                            } else if (streamIndex == avData.videoStreamIndex) {
                                 //if ((packet.flags() & AV_PKT_FLAG_KEY) != 0)
                                 //logService.cam.info("video packet.size " + buffer.length + " flags " + packet.flags())
                                 mediaStreamHandler.sendPacket("cam4-stream1", buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
@@ -235,11 +170,11 @@ class MediaServer {
                             byte[] array = flvOutputStream.toByteArray()
 
                             if (array.length > 0) {
-                                logService.cam.info("flv output size = " + flvOutputStream.size())
+                               // logService.cam.info("flv output size = " + flvOutputStream.size())
                                 flvOutputStream.reset()
                             }
 
-                            if (audioChannels > 0 && inputAudioCodecName == "aac" && aacOutputStream.size() > 0) {
+                            if (avData.audioChannels > 0 && avData.inputAudioCodecName == "aac" && aacOutputStream.size() > 0) {
                                 byte[] aacArray = aacOutputStream.toByteArray()
                                 logService.cam.info("aac output size = " + aacArray.length)
                                 aacOutputStream.reset()
@@ -250,7 +185,7 @@ class MediaServer {
                     logService.cam.info("Camera closed the stream sequence gracefully.")
                     recorderFLV.close()
                     recorderFLV.stop()
-                    if (inputAudioCodecName == "aac")
+                    if (avData.inputAudioCodecName == "aac")
                         recordAAC.stop()
 
                 } catch (Exception e) {
@@ -277,5 +212,53 @@ class MediaServer {
                 Thread.sleep(2000) // Thread will now safely reach here and retry            }
             }
         })
+    }
+
+    AVData getAVData(FFmpegFrameGrabber grabber) {
+        final AVData retVal = new AVData(grabber)
+
+          if (retVal.videoStreamIndex2 != -1) {
+            // 1. CRITICAL STEP: Scan the HEVC container headers to properly initialize codecpar()
+            // Pass a PointerPointer containing null instead of casting a flat null
+            AVCodecParameters codecParams = retVal.inputFormatContext.streams(retVal.videoStreamIndex2).codecpar()
+
+            int codecId = codecParams.codec_id()
+            int profile = codecParams.profile() // The profile integer (e.g., 100 for High, 77 for Main)
+            int level = codecParams.level()     // The level integer (e.g., 41 for Level 4.1)
+            String profileName = "Unknown"
+
+            // Safely look up the name mapping via the codec descriptor
+            AVCodecDescriptor descriptor = avcodec_descriptor_get(codecId)
+            if (descriptor != null && descriptor.profiles() != null) {
+                AVProfile profileArray = descriptor.profiles()
+                int i = 0
+                while (true) {
+                    AVProfile p = profileArray.position(i)
+                    int currentProfileId = p.profile()
+
+                    if (currentProfileId == -99 || p.name() == null) {
+                        break // End of array marker
+                    }
+
+                    if (currentProfileId == profile) {
+                        profileName = p.name().getString()
+                        break
+                    }
+                    i++
+                }
+            }
+
+            // Fetch the short codec name (e.g., "h264", "aac", "hevc")
+            BytePointer codecNamePtr = avcodec_get_name(codecId)
+            String codecName = (codecNamePtr != null) ? codecNamePtr.getString() : "unknown"
+            String codecString = CodecStringDiscovery.constructCodecString(codecName, profileName, level)
+            mediaStreamHandler.addStream("cam4-stream1", codecString)
+            logService.cam.info("Input Video Profile: " + profile)
+            logService.cam.info("Input Video Level: " + level)
+            logService.cam.info("video codec " + retVal.inputVideoCodecName)
+            logService.cam.info("audio codec: " + retVal.inputAudioCodecName)
+        }
+
+        return retVal
     }
 }

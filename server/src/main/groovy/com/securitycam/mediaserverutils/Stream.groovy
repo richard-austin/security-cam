@@ -1,5 +1,6 @@
 package com.securitycam.mediaserverutils
 
+import org.springframework.web.socket.BinaryMessage
 import org.springframework.web.socket.WebSocketSession
 
 class Stream {
@@ -30,11 +31,28 @@ class Stream {
         clients.remove(session)
     }
 
+    /**
+     * put for video
+     * @param pkt
+     * @param isKeyFrame
+     */
     void put(byte[] pkt, boolean isKeyFrame) {
         cache.put(pkt, isKeyFrame)
         clients.forEach { key, client ->
             {
                 client.put(pkt)
+            }
+        }
+    }
+
+    /**
+     * put for audio
+     * @param pkt
+     */
+    void put(byte[] pkt) {
+        clients.forEach { key, client ->
+            {
+                client.putAudio(pkt)
             }
         }
     }

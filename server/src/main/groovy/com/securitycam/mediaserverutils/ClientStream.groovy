@@ -1,5 +1,6 @@
 package com.securitycam.mediaserverutils
 
+import org.springframework.web.socket.BinaryMessage
 import org.springframework.web.socket.WebSocketSession
 
 import java.util.concurrent.ExecutorService
@@ -28,5 +29,9 @@ class ClientStream {
     void close() {
         outputThread.shutdown()
         outputThread.close()
+    }
+
+    void putAudio(byte[] pkt) {
+        session.sendMessage(new BinaryMessage(pkt))
     }
 }

@@ -31,10 +31,17 @@ class MediaStreamHandler extends BinaryWebSocketHandler {
     }
 
     /**
-     * External services call this method to feed media packets into a specific stream.
+     * sendPacket for video
      */
     void sendPacket(String suuid, byte[] packetData, boolean isKeyFrame) {
         streams[suuid].put(packetData, isKeyFrame)
+    }
+
+    /**
+     *   sendPacket for audio
+     */
+    void sendPacket(String suuid, byte[] packetData) {
+        streams[suuid].put(packetData)
     }
 
     @Override

@@ -15,7 +15,6 @@ class GOPCache {
     void put(byte[] packet, boolean isKeyFrame) {
         if (index > 0 || isKeyFrame) {
             if (isKeyFrame) {
-                println("cache length = " + cache.size())
                 index = 0
                 cache.clear()
             }
