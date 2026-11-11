@@ -2,6 +2,7 @@ package com.securitycam.services
 
 import com.securitycam.beans.MediaStreamHandler
 import com.securitycam.mediaserverutils.AVData
+import com.securitycam.mediaserverutils.AudioData
 import com.securitycam.mediaserverutils.CodecStringDiscovery
 import org.bytedeco.ffmpeg.avcodec.AVCodecDescriptor
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
@@ -57,6 +58,8 @@ class MediaServer {
                     logService.cam.info("Connected successfully!")
 
                     final AVData avData = getAVData(grabber)
+                    mediaStreamHandler.addStream("cam4-stream1", avData.codecString)
+
                     inputAudioCodecName = avData.inputAudioCodecName
 
                     recorderFLV = new FFmpegFrameRecorder(flvOutputStream, avData.width, avData.height, avData.audioChannels)
@@ -79,12 +82,14 @@ class MediaServer {
                         recorderFLV.setOption("fflags", "nobuffer")
                         recordAAC.start(avData.inputFormatContext)
                     } else if (avData.inputAudioCodecName == "pcm_alaw") {
-                        mediaStreamHandler.addStream("cam4-stream1a", "")
+                        AudioData ad = new AudioData(avData)
+                        String json = ad.toTextMessage()
+
+                        mediaStreamHandler.addAudioStream("cam4-stream1a", json)
                     }
 
                     AVPacket packet
                     logService.cam.info("Routing raw low-latency streams...")
-
 
                     // Track the last recorded DTS for each stream index to guarantee monotonic growth
                     Map<Integer, Long> lastDtsMap = new HashMap<>()
@@ -152,10 +157,7 @@ class MediaServer {
                                     av_packet_free(clonedPacket) // Always free native clones to avoid memory leaks
                                 }
                             } else if (streamIndex == avData.videoStreamIndex) {
-                                //if ((packet.flags() & AV_PKT_FLAG_KEY) != 0)
-                                //logService.cam.info("video packet.size " + buffer.length + " flags " + packet.flags())
-                                mediaStreamHandler.sendPacket("cam4-stream1", buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
-                                //   mediaStreamHandler.broadcastPacket("xyz", buffer)
+                                 mediaStreamHandler.sendPacket("cam4-stream1", buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
                             }
 
                             // 2. RECORD TO FLV ONCE PER VALID PACKET
@@ -250,9 +252,8 @@ class MediaServer {
 
             // Fetch the short codec name (e.g., "h264", "aac", "hevc")
             BytePointer codecNamePtr = avcodec_get_name(codecId)
-            String codecName = (codecNamePtr != null) ? codecNamePtr.getString() : "unknown"
-            String codecString = CodecStringDiscovery.constructCodecString(codecName, profileName, level)
-            mediaStreamHandler.addStream("cam4-stream1", codecString)
+            retVal.codecName = (codecNamePtr != null) ? codecNamePtr.getString() : "unknown"
+            retVal.codecString = CodecStringDiscovery.constructCodecString(retVal.codecName, profileName, level)
             logService.cam.info("Input Video Profile: " + profile)
             logService.cam.info("Input Video Level: " + level)
             logService.cam.info("video codec " + retVal.inputVideoCodecName)

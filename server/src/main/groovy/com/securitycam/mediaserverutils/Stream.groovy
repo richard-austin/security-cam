@@ -1,7 +1,8 @@
 package com.securitycam.mediaserverutils
 
-import org.springframework.web.socket.BinaryMessage
 import org.springframework.web.socket.WebSocketSession
+
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class Stream {
     String suuid
@@ -10,7 +11,6 @@ class Stream {
     private final String codecString
 
     Map<WebSocketSession, ClientStream> clients
-
     Stream(String suuid, String codecString) {
         this.suuid = suuid
         cache = new GOPCache(gopCacheSize)
@@ -38,8 +38,7 @@ class Stream {
      */
     void put(byte[] pkt, boolean isKeyFrame) {
         cache.put(pkt, isKeyFrame)
-        clients.forEach { key, client ->
-            {
+        clients.forEach { key, client -> {
                 client.put(pkt)
             }
         }
@@ -50,8 +49,7 @@ class Stream {
      * @param pkt
      */
     void put(byte[] pkt) {
-        clients.forEach { key, client ->
-            {
+        clients.forEach { key, client -> {
                 client.putAudio(pkt)
             }
         }

@@ -30,6 +30,11 @@ class MediaStreamHandler extends BinaryWebSocketHandler {
             streams.put(suuid, new Stream(suuid, codecString))
     }
 
+    void addAudioStream(String suuid, String json) {
+        if(!streams.containsKey(suuid))
+            streams.put(suuid, new Stream(suuid, json))
+    }
+
     /**
      * sendPacket for video
      */
@@ -48,8 +53,9 @@ class MediaStreamHandler extends BinaryWebSocketHandler {
     void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         String suuid = getSuuid(session)
         Stream stream = streams.get(suuid)
-        if(stream != null)
+        if(stream != null) {
             stream.removeClient(session)
+        }
     }
 
     private static String getSuuid(WebSocketSession session) {
