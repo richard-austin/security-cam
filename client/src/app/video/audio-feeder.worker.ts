@@ -84,7 +84,7 @@ class AudioWorker {
           this.config.codec = audioInfo.codec_name == "aac" ? "mp4a.40.2" : "alaw";
           this.config.sampleRate = parseInt(audioInfo.sample_rate);
           this.audioDecoder.configure(this.config);
-          console.log('first audio packet with codec data: ' + this.config.codec);
+          console.log('first audio packet with codec data: ' + this.config.codec+" sample rate: "+this.config.sampleRate);
           this.started = true;
         } else
           console.error("No audio codec was found")

@@ -8,7 +8,6 @@ import org.bytedeco.ffmpeg.avcodec.AVCodecDescriptor
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avcodec.AVProfile
-import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.ffmpeg.global.avformat
 import org.bytedeco.javacpp.BytePointer
 import org.bytedeco.javacv.FFmpegFrameGrabber
@@ -51,9 +50,20 @@ class MediaServer {
                     grabber.setOption("stimeout", "5000000")   // Protects RTSP transport stream negotiation
                     grabber.setOption("timeout", "5000000")    // Protects initial socket connection setup
                     grabber.setOption("rw_timeout", "5000000") // Protects blocking read/write IO calls
+                    grabber.setOption("flush_packets", "1")
+                    grabber.setOption("fflags", "nobuffer")
+                    // 2. Disable decoder frame-reordering delays
+                    grabber.setOption("flags", "low_delay")
+
+                    // 3. Prevent multi-threaded decoders from queuing multiple frames internally
+                    grabber.setVideoOption("threads", "1")
+
+// 4. Minimize startup probing delay (adjust upward if stream metadata fails to parse)
+//                    grabber.setOption("probesize", "32");
+//                    grabber.setOption("analyzeduration", "0");
+
 
                     logService.cam.info("Connecting to camera stream...")
-                    // start() is now entirely safe if the camera is dead, the C layer will abort in 5 seconds
                     grabber.start()
                     logService.cam.info("Connected successfully!")
 
@@ -65,6 +75,7 @@ class MediaServer {
                     recorderFLV = new FFmpegFrameRecorder(flvOutputStream, avData.width, avData.height, avData.audioChannels)
                     recorderFLV.setFormat("flv")
                     recorderFLV.setVideoCodec(avData.inputVideoCodecId)
+                    recorderFLV.setSampleRate(avData.sampleRate)
                     recorderFLV.setAudioCodec(avData.inputAudioCodecId)
                     recorderFLV.setVideoCodecName("copy")
                     recorderFLV.setAudioCodecName("copy")
@@ -76,11 +87,15 @@ class MediaServer {
                     recordAAC = new FFmpegFrameRecorder(aacOutputStream, 0, 0, avData.audioChannels)
                     if (inputAudioCodecName == "aac") {
                         recordAAC.setFormat("adts")
+                        recordAAC.setSampleRate(avData.sampleRate)
                         recordAAC.setAudioCodec(avData.inputAudioCodecId)
                         recordAAC.setAudioCodecName("copy")
                         recordAAC.setOption("flush_packets", "1")
                         recorderFLV.setOption("fflags", "nobuffer")
                         recordAAC.start(avData.inputFormatContext)
+                        AudioData ad = new AudioData(avData)
+                        String json = ad.toTextMessage()
+                        mediaStreamHandler.addAudioStream("cam4-stream1a", json)
                     } else if (avData.inputAudioCodecName == "pcm_alaw") {
                         AudioData ad = new AudioData(avData)
                         String json = ad.toTextMessage()
@@ -91,52 +106,9 @@ class MediaServer {
                     AVPacket packet
                     logService.cam.info("Routing raw low-latency streams...")
 
-                    // Track the last recorded DTS for each stream index to guarantee monotonic growth
-                    Map<Integer, Long> lastDtsMap = new HashMap<>()
                     // Low-Latency Packet Copying Loop
                     while ((packet = grabber.grabPacket()) != null) {
                         int streamIndex = packet.stream_index()
-
-                        // 1. FIX TIMESTAMPS FIRST (Before any recording/writing happens)
-                        if (packet.pts() == avutil.AV_NOPTS_VALUE || packet.pts() < 0) {
-                            long currentGrabberTimestamp = grabber.getTimestamp() // Microseconds
-                            packet.pts(currentGrabberTimestamp)
-                            packet.dts(currentGrabberTimestamp)
-                        }
-
-                        // --- NEW: MONOTONIC DTS ENFORCEMENT ---
-                        long currentDts = packet.dts()
-                        if (lastDtsMap.containsKey(streamIndex)) {
-                            long lastDts = lastDtsMap.get(streamIndex)
-                            if (currentDts <= lastDts) {
-                                // Force the timestamp forward by exactly 1 unit to satisfy the muxer
-                                currentDts = lastDts + 1
-                                packet.dts(currentDts)
-
-                                // Adjust PTS to maintain the original delta relationship if it falls behind
-                                if (packet.pts() < currentDts) {
-                                    packet.pts(currentDts)
-                                }
-                            }
-                        }
-                        // Update our tracker with the final chosen timestamp
-                        lastDtsMap.put(streamIndex, currentDts)
-                        // --------------------------------------
-
-                        // ... Rest of your original byte buffer extraction and routing code ...
-                        // 1. FIX TIMESTAMPS FIRST (Before any recording/writing happens)
-                        if (packet.pts() == avutil.AV_NOPTS_VALUE || packet.pts() < 0) {
-                            long currentGrabberTimestamp = grabber.getTimestamp() // Microseconds
-                            packet.pts(currentGrabberTimestamp)
-                            packet.dts(currentGrabberTimestamp)
-                        }
-
-                        // Cache original values for safety
-                        long origPts = packet.pts()
-                        long origDts = packet.dts()
-                        long origDuration = packet.duration()
-                        int origStreamIndex = packet.stream_index()
-
                         BytePointer data = packet.data()
                         if (data != null && packet.size() > 0) {
                             byte[] buffer = new byte[packet.size()]
@@ -147,39 +119,29 @@ class MediaServer {
                                 AVPacket clonedPacket = av_packet_clone(packet)
                                 if (clonedPacket != null) {
                                     if (avData.audioChannels > 0) {
-                                        if (avData.inputAudioCodecName == "aac")
+                                        if (avData.inputAudioCodecName == "aac") {
                                             recordAAC.recordPacket(clonedPacket)
-                                        else if (avData.inputAudioCodecName == 'pcm_alaw')
+                                            byte[] aacArray = aacOutputStream.toByteArray()
+                                            if (aacArray.length > 0)
+                                                mediaStreamHandler.sendPacket("cam4-stream1a", aacArray)
+                                            aacOutputStream.reset()
+                                        } else if (avData.inputAudioCodecName == 'pcm_alaw')
                                             mediaStreamHandler.sendPacket("cam4-stream1a", buffer)
-                                            //logService.cam.info("pcm packet len = " + buffer.length)
+                                        //logService.cam.info("pcm packet len = " + buffer.length)
                                     }
 
                                     av_packet_free(clonedPacket) // Always free native clones to avoid memory leaks
                                 }
                             } else if (streamIndex == avData.videoStreamIndex) {
-                                 mediaStreamHandler.sendPacket("cam4-stream1", buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
+                                mediaStreamHandler.sendPacket("cam4-stream1", buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
                             }
-
-                            // 2. RECORD TO FLV ONCE PER VALID PACKET
-                            // Restore original metadata header values just in case
-                            packet.pts(origPts)
-                            packet.dts(origDts)
-                            packet.duration(origDuration)
-                            packet.stream_index(origStreamIndex)
-
                             recorderFLV.recordPacket(packet)
 
                             byte[] array = flvOutputStream.toByteArray()
 
                             if (array.length > 0) {
-                               // logService.cam.info("flv output size = " + flvOutputStream.size())
+                                // logService.cam.info("flv output size = " + flvOutputStream.size())
                                 flvOutputStream.reset()
-                            }
-
-                            if (avData.audioChannels > 0 && avData.inputAudioCodecName == "aac" && aacOutputStream.size() > 0) {
-                                byte[] aacArray = aacOutputStream.toByteArray()
-                                logService.cam.info("aac output size = " + aacArray.length)
-                                aacOutputStream.reset()
                             }
                         }
                     }
@@ -219,7 +181,7 @@ class MediaServer {
     AVData getAVData(FFmpegFrameGrabber grabber) {
         final AVData retVal = new AVData(grabber)
 
-          if (retVal.videoStreamIndex2 != -1) {
+        if (retVal.videoStreamIndex2 != -1) {
             // 1. CRITICAL STEP: Scan the HEVC container headers to properly initialize codecpar()
             // Pass a PointerPointer containing null instead of casting a flat null
             AVCodecParameters codecParams = retVal.inputFormatContext.streams(retVal.videoStreamIndex2).codecpar()

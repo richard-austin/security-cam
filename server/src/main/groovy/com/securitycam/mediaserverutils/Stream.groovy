@@ -2,18 +2,17 @@ package com.securitycam.mediaserverutils
 
 import org.springframework.web.socket.WebSocketSession
 
-import java.util.concurrent.ConcurrentLinkedQueue
-
 class Stream {
     String suuid
     GOPCache cache
     private final gopCacheSize = 200
     private final String codecString
-
+    private isAudio
     Map<WebSocketSession, ClientStream> clients
-    Stream(String suuid, String codecString) {
+    Stream(String suuid, String codecString, boolean isAudio) {
+        this.isAudio = isAudio
         this.suuid = suuid
-        cache = new GOPCache(gopCacheSize)
+        cache = !isAudio ? new GOPCache(gopCacheSize) : null
         clients = new HashMap<>()
         this.codecString = codecString
     }

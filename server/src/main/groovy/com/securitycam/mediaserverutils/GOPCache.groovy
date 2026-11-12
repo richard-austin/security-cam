@@ -26,13 +26,13 @@ class GOPCache {
         LinkedBlockingQueue<byte[]> q = new LinkedBlockingQueue<byte[]>()
 
         // Send codec string first with 9 prepended
-        byte[] nine = [9]
+
         byte[] codecBytes = codecString.getBytes()
-        byte[] firstPacket = new byte[nine.length + codecBytes.length]
+        byte[] firstPacket = new byte[1 + codecBytes.length]
         firstPacket[0] = 9
 
-        for(int i=nine.length;i<codecBytes.length+nine.length;i++){
-            firstPacket[i] = codecBytes[i-nine.length]
+        for(int i=1;i<codecBytes.length+1;i++){
+            firstPacket[i] = codecBytes[i-1]
         }
         q.put(firstPacket)
 

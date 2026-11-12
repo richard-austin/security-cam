@@ -1,5 +1,7 @@
 package com.securitycam.mediaserverutils
 
+import org.bytedeco.ffmpeg.avcodec.AVCodecContext
+import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avformat.AVFormatContext
 import org.bytedeco.ffmpeg.avformat.AVStream
 import org.bytedeco.javacpp.BytePointer
@@ -35,14 +37,29 @@ class AVData {
         videoStreamIndex = grabber.getVideoStream()
         audioStreamIndex = grabber.getAudioStream()
 
-        inputVideoCodecId = grabber.getFormatContext().streams(videoStreamIndex).codecpar().codec_id()
+        AVFormatContext fmtCtx = grabber.getFormatContext()
+        inputVideoCodecId = fmtCtx.streams(videoStreamIndex).codecpar().codec_id()
         inputAudioCodecId = audioStreamIndex != -1 ? grabber.getFormatContext().streams(audioStreamIndex).codecpar().codec_id() : -1
         inputVideoCodecName = avcodec_get_name(inputVideoCodecId).getString()
         sampleRate = grabber.getSampleRate()
-        int sampleFmt = grabber.getSampleFormat()
-        // 2. Convert the integer ID to a readable string (e.g., "fltp", "s16")
-        BytePointer fmtNamePtr = avutil.av_get_sample_fmt_name(sampleFmt)
-        sampleFormat = (fmtNamePtr != null) ? fmtNamePtr.getString() : "none"
+
+        sampleFormat = "none"
+
+        if (fmtCtx != null) {
+            for (int i = 0; i < fmtCtx.nb_streams(); i++) {
+                AVStream stream = fmtCtx.streams(i)
+                AVCodecParameters codecPar = stream.codecpar()
+
+                if (codecPar != null && codecPar.codec_type() == avutil.AVMEDIA_TYPE_AUDIO) {
+                    int nativeFmt = codecPar.format()
+                    BytePointer fmtPtr = avutil.av_get_sample_fmt_name(nativeFmt)
+                    if (fmtPtr != null) {
+                        sampleFormat = fmtPtr.getString()
+                    }
+                    break
+                }
+            }
+        }
 
         audioChannels = grabber.getAudioChannels()
         audioBitRate = grabber.getAudioBitrate()

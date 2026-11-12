@@ -27,12 +27,12 @@ class MediaStreamHandler extends BinaryWebSocketHandler {
 
     void addStream(String suuid, String codecString) {
         if(!streams.containsKey(suuid))
-            streams.put(suuid, new Stream(suuid, codecString))
+            streams.put(suuid, new Stream(suuid, codecString, false))
     }
 
     void addAudioStream(String suuid, String json) {
         if(!streams.containsKey(suuid))
-            streams.put(suuid, new Stream(suuid, json))
+            streams.put(suuid, new Stream(suuid, json, true))
     }
 
     /**
