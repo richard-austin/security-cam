@@ -133,7 +133,7 @@ class MediaServer {
                                     av_packet_free(clonedPacket) // Always free native clones to avoid memory leaks
                                 }
                             } else if (streamIndex == avData.videoStreamIndex) {
-                                mediaStreamHandler.sendPacket("cam4-stream1", buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
+                                 mediaStreamHandler.sendPacket("cam4-stream1", buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
                             }
                             recorderFLV.recordPacket(packet)
 
