@@ -12,16 +12,19 @@ import org.springframework.stereotype.Component
 @Component
 class ApplicationStartup
         implements ApplicationListener<ApplicationReadyEvent> {
-        @Autowired
-        Sc_processesService sc_processesService
-        @Autowired
-        OnvifService onvifService
 
-    @Autowired
+    Sc_processesService sc_processesService
+    OnvifService onvifService
     LogService logService
-
-    @Autowired
     MediaServer mediaServer
+
+    @Autowired  // Use constructor injection
+    ApplicationStartup(Sc_processesService sc_processesService, OnvifService onvifService, LogService logService, MediaServer mediaServer) {
+        this.sc_processesService = sc_processesService
+        this.onvifService = onvifService
+        this.logService = logService
+        this.mediaServer = mediaServer
+    }
 
     /**
      * This event is executed as late as conceivably possible to indicate that
@@ -31,11 +34,7 @@ class ApplicationStartup
     void onApplicationEvent(final ApplicationReadyEvent event) {
         sc_processesService.setOnvifService(onvifService)
         sc_processesService.startProcesses()
-
-      // mediaServer.runStreamingSession("rtsp://admin:notthepassword@192.168.1.106:554/Preview_01_main")
-       //  mediaServer.runStreamingSession("rtsp://192.168.1.21:554/11")
-        mediaServer.runStreamingSession("rtsp://192.168.1.22:554/11")
-    //    mediaServer.runStreamingSession("rtsp://192.168.1.23:554/11")
+        mediaServer.start()
         logService.cam.info("Started NVR Services!!!!!!!!!!!!!!")
     }
 }

@@ -1,6 +1,11 @@
 package com.securitycam.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.securitycam.beans.MediaStreamHandler
+import com.securitycam.configuration.Config
+import com.securitycam.controllers.Camera
+import com.securitycam.controllers.CameraAdminCredentials
+import com.securitycam.interfaceobjects.Asymmetric
 import com.securitycam.mediaserverutils.AVData
 import com.securitycam.mediaserverutils.AudioData
 import com.securitycam.mediaserverutils.CodecStringDiscovery
@@ -21,22 +26,31 @@ import java.util.concurrent.Executors
 
 @Service
 class MediaServer {
-    @Autowired
-    private LogService logService
 
+
+    private LogService logService
+    private MediaStreamHandler mediaStreamHandler
+    private Config config
+
+    boolean running = true
+    private final configFile = "cameras.json"
     ExecutorService mediaThreads = Executors.newFixedThreadPool(40)
 
     @Autowired
-    private MediaStreamHandler mediaStreamHandler
+    MediaServer(private LogService logService, MediaStreamHandler mediaStreamHandler, Config config) {
+        this.logService = logService
+        this.mediaStreamHandler = mediaStreamHandler
+        this.config = config
+    }
 
-    void runStreamingSession(String rtspUrl) throws Exception {
+    void runStreamingSession(String rtspUrl, String camStreamId) throws Exception {
         ByteArrayOutputStream flvOutputStream = new ByteArrayOutputStream()
         ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
 
         mediaThreads.submit(() -> {
             String inputAudioCodecName = ""
 
-            while (true) {
+            while (running) {
                 // 1. Declare variables here so they are in scope for try, catch, and finally
                 FFmpegFrameRecorder recorderFLV = null
                 FFmpegFrameRecorder recordAAC = null
@@ -68,7 +82,7 @@ class MediaServer {
                     logService.cam.info("Connected successfully!")
 
                     final AVData avData = getAVData(grabber)
-                    mediaStreamHandler.addStream("cam4-stream1", avData.codecString)
+                    mediaStreamHandler.addStream(camStreamId, avData.codecString)
 
                     inputAudioCodecName = avData.inputAudioCodecName
 
@@ -95,12 +109,12 @@ class MediaServer {
                         recordAAC.start(avData.inputFormatContext)
                         AudioData ad = new AudioData(avData)
                         String json = ad.toTextMessage()
-                        mediaStreamHandler.addAudioStream("cam4-stream1a", json)
+                        mediaStreamHandler.addAudioStream(camStreamId + "a", json)
                     } else if (avData.inputAudioCodecName == "pcm_alaw") {
                         AudioData ad = new AudioData(avData)
                         String json = ad.toTextMessage()
 
-                        mediaStreamHandler.addAudioStream("cam4-stream1a", json)
+                        mediaStreamHandler.addAudioStream(camStreamId + "a", json)
                     }
 
                     AVPacket packet
@@ -123,17 +137,17 @@ class MediaServer {
                                             recordAAC.recordPacket(clonedPacket)
                                             byte[] aacArray = aacOutputStream.toByteArray()
                                             if (aacArray.length > 0)
-                                                mediaStreamHandler.sendPacket("cam4-stream1a", aacArray)
+                                                mediaStreamHandler.sendPacket(camStreamId + "a", aacArray)
                                             aacOutputStream.reset()
                                         } else if (avData.inputAudioCodecName == 'pcm_alaw')
-                                            mediaStreamHandler.sendPacket("cam4-stream1a", buffer)
+                                            mediaStreamHandler.sendPacket(camStreamId + "a", buffer)
                                         //logService.cam.info("pcm packet len = " + buffer.length)
                                     }
 
                                     av_packet_free(clonedPacket) // Always free native clones to avoid memory leaks
                                 }
                             } else if (streamIndex == avData.videoStreamIndex) {
-                                 mediaStreamHandler.sendPacket("cam4-stream1", buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
+                                mediaStreamHandler.sendPacket(camStreamId, buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
                             }
                             recorderFLV.recordPacket(packet)
 
@@ -154,6 +168,7 @@ class MediaServer {
 
                 } catch (Exception e) {
                     logService.cam.error("Stream error occurred: " + e.getMessage())
+                    logService.cam.error(e.stackTrace.toString())
                 } finally {
                     logService.cam.info("In finally block")
 
@@ -173,7 +188,7 @@ class MediaServer {
                 }
 
                 logService.cam.info("After finally")
-                Thread.sleep(2000) // Thread will now safely reach here and retry            }
+                Thread.sleep(2000) // Thread will now safely reach here and retry
             }
         })
     }
@@ -223,5 +238,50 @@ class MediaServer {
         }
 
         return retVal
+    }
+
+    void stop() {
+        running = false
+    }
+
+    void start() {
+        try {
+            running = true
+            ObjectMapper mapper = new ObjectMapper()
+            Map<String, Camera> cameras = mapper.readValue(new File("${config.camerasHomeDirectory}/${configFile}"), Map)
+            for (camera in cameras) {
+                def c = camera.value
+                def streams = c.streams
+
+                for (stream in streams) {
+                    def s = stream.value
+                    String uri = s.uri
+                    int index = uri.indexOf("\u003d")
+                    if (index == -1)
+                        index = uri.indexOf("=")
+                    String camStreamId = ""
+                    if (index != -1)
+                        camStreamId = uri.substring(index + "=".length(), uri.length())
+
+                    String netcam_uri = s.netcam_uri
+                    if (c.useRtspAuth) {
+                        Asymmetric crypto = new Asymmetric()
+                        String jsonCreds = crypto.decrypt(c.cred)
+                        if (jsonCreds.length() > 0) {
+                            def creds = mapper.readValue(jsonCreds, CameraAdminCredentials.class)
+                            StringBuilder sb = new StringBuilder(netcam_uri).insert("rtsp://".length(), "${creds.userName}:${creds.password}@")
+                            netcam_uri = sb.toString()
+                        }
+
+                     }
+                    this.runStreamingSession(netcam_uri, camStreamId)
+                }
+            }
+            logService.cam.info("Config file read " + cameras)
+        }
+        catch (Exception ex) {
+            running = false
+            logService.cam.error(ex.getClass().getName() + " in MediaServer.start: " + ex.getMessage())
+        }
     }
 }
