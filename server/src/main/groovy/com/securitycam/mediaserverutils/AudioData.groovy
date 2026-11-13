@@ -23,7 +23,7 @@ class AudioData {
         bit_rate = data.audioBitRate
     }
 
-    String toTextMessage() {
+    String toJSON() {
         String json
 
         try {

@@ -43,7 +43,7 @@ class MediaServer {
         this.config = config
     }
 
-    void runStreamingSession(String rtspUrl, String camStreamId) throws Exception {
+    void runStreamingSession(String rtspUrl, String camStreamId, boolean hasAudio) throws Exception {
         ByteArrayOutputStream flvOutputStream = new ByteArrayOutputStream()
         ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
 
@@ -108,11 +108,11 @@ class MediaServer {
                         recorderFLV.setOption("fflags", "nobuffer")
                         recordAAC.start(avData.inputFormatContext)
                         AudioData ad = new AudioData(avData)
-                        String json = ad.toTextMessage()
+                        String json = ad.toJSON()
                         mediaStreamHandler.addAudioStream(camStreamId + "a", json)
                     } else if (avData.inputAudioCodecName == "pcm_alaw") {
                         AudioData ad = new AudioData(avData)
-                        String json = ad.toTextMessage()
+                        String json = ad.toJSON()
 
                         mediaStreamHandler.addAudioStream(camStreamId + "a", json)
                     }
@@ -128,7 +128,7 @@ class MediaServer {
                             byte[] buffer = new byte[packet.size()]
                             data.get(buffer)
 
-                            if (streamIndex == avData.audioStreamIndex) {
+                            if (hasAudio && streamIndex == avData.audioStreamIndex) {
                                 // 1. Clone the packet so recordAAC doesn't alter the original pointers
                                 AVPacket clonedPacket = av_packet_clone(packet)
                                 if (clonedPacket != null) {
@@ -274,7 +274,7 @@ class MediaServer {
                         }
 
                      }
-                    this.runStreamingSession(netcam_uri, camStreamId)
+                    this.runStreamingSession(netcam_uri, camStreamId, s.audio)
                 }
             }
             logService.cam.info("Config file read " + cameras)
