@@ -32,7 +32,7 @@ class MediaServer {
     private MediaStreamHandler mediaStreamHandler
     private Config config
 
-    boolean running = true
+    boolean running = false
     private final configFile = "cameras.json"
     ExecutorService mediaThreads = Executors.newFixedThreadPool(40)
 
@@ -43,7 +43,7 @@ class MediaServer {
         this.config = config
     }
 
-    void runStreamingSession(String rtspUrl, String camStreamId, boolean hasAudio) throws Exception {
+    void runStreamingSession(String rtspUrl, String camStreamId, boolean hasAudio, String rtspTransport) throws Exception {
         ByteArrayOutputStream flvOutputStream = new ByteArrayOutputStream()
         ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
 
@@ -58,7 +58,7 @@ class MediaServer {
                 avformat.avformat_network_init()
                 // Standard out-of-the-box grabber configuration
                 try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(rtspUrl)) {
-                    grabber.setOption("rtsp_transport", "tcp")
+                    grabber.setOption("rtsp_transport", rtspTransport)
 
                     // CRUCIAL: Set all 3 native timeouts to protect every layer of the C network handshake (Value is in Microseconds)
                     grabber.setOption("stimeout", "5000000")   // Protects RTSP transport stream negotiation
@@ -245,43 +245,46 @@ class MediaServer {
     }
 
     void start() {
-        try {
-            running = true
-            ObjectMapper mapper = new ObjectMapper()
-            Map<String, Camera> cameras = mapper.readValue(new File("${config.camerasHomeDirectory}/${configFile}"), Map)
-            for (camera in cameras) {
-                def c = camera.value
-                def streams = c.streams
+        if(!running) {
+            try {
+                running = true
+                ObjectMapper mapper = new ObjectMapper()
+                Map<String, Camera> cameras = mapper.readValue(new File("${config.camerasHomeDirectory}/${configFile}"), Map)
+                for (camera in cameras) {
+                    def c = camera.value
+                    def streams = c.streams
 
-                for (stream in streams) {
-                    def s = stream.value
-                    String uri = s.uri
-                    int index = uri.indexOf("\u003d")
-                    if (index == -1)
-                        index = uri.indexOf("=")
-                    String camStreamId = ""
-                    if (index != -1)
-                        camStreamId = uri.substring(index + "=".length(), uri.length())
+                    for (stream in streams) {
+                        def s = stream.value
+                        String uri = s.uri
+                        int index = uri.indexOf("\u003d")
+                        if (index == -1)
+                            index = uri.indexOf("=")
+                        String camStreamId = ""
+                        if (index != -1)
+                            camStreamId = uri.substring(index + "=".length(), uri.length())
 
-                    String netcam_uri = s.netcam_uri
-                    if (c.useRtspAuth) {
-                        Asymmetric crypto = new Asymmetric()
-                        String jsonCreds = crypto.decrypt(c.cred)
-                        if (jsonCreds.length() > 0) {
-                            def creds = mapper.readValue(jsonCreds, CameraAdminCredentials.class)
-                            StringBuilder sb = new StringBuilder(netcam_uri).insert("rtsp://".length(), "${creds.userName}:${creds.password}@")
-                            netcam_uri = sb.toString()
+                        String netcam_uri = s.netcam_uri
+                        if (c.useRtspAuth) {
+                            Asymmetric crypto = new Asymmetric()
+                            String jsonCreds = crypto.decrypt(c.cred)
+                            if (jsonCreds.length() > 0) {
+                                def creds = mapper.readValue(jsonCreds, CameraAdminCredentials.class)
+                                StringBuilder sb = new StringBuilder(netcam_uri).insert("rtsp://".length(), "${creds.userName}:${creds.password}@")
+                                netcam_uri = sb.toString()
+                            }
+
                         }
 
-                     }
-                    this.runStreamingSession(netcam_uri, camStreamId, s.audio)
+                        this.runStreamingSession(netcam_uri, camStreamId, s.audio, c.rtspTransport)
+                    }
                 }
+                logService.cam.info("Config file read " + cameras)
             }
-            logService.cam.info("Config file read " + cameras)
-        }
-        catch (Exception ex) {
-            running = false
-            logService.cam.error(ex.getClass().getName() + " in MediaServer.start: " + ex.getMessage())
+            catch (Exception ex) {
+                running = false
+                logService.cam.error(ex.getClass().getName() + " in MediaServer.start: " + ex.getMessage())
+            }
         }
     }
 }
