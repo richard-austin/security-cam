@@ -47,11 +47,11 @@ dependencies {
     implementation 'com.h2database:h2:2.2.224'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-    implementation 'org.springframework.security:spring-security-core:7.0.5'
-    implementation 'org.springframework.security:spring-security-web:7.0.5'
+    implementation 'org.springframework.security:spring-security-core:7.1.1'
+    implementation 'org.springframework.security:spring-security-web:7.1.1'
     implementation 'org.springframework.security:spring-security-config:7.0.5'
     implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
-    implementation 'org.springframework.security:spring-security-crypto:7.0.5'
+    implementation 'org.springframework.security:spring-security-crypto:7.1.1'
     implementation 'org.jboss.aerogear:aerogear-otp-java:1.0.0'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -89,10 +89,10 @@ dependencies {
     compileOnly 'org.apache.commons:commons-lang3:3.18.0'
     implementation 'commons-codec:commons-codec:1.13'
     implementation 'commons-io:commons-io:2.14.0'
-    implementation 'org.apache.activemq:activemq-broker:6.1.4'
+    implementation 'org.apache.activemq:activemq-broker:6.3.3'
 
     // Updated to fix the older version (2.2.3) breaking email
-    implementation 'org.apache.wss4j:wss4j-ws-security-common:3.0.4'
+    implementation 'org.apache.wss4j:wss4j-ws-security-common:4.0.2'
     implementation 'org.opensaml:opensaml-xacml-impl:4.3.0'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation("org.bytedeco:javacv-platform:1.5.14")

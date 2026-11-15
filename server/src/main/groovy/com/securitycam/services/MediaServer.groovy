@@ -9,6 +9,7 @@ import com.securitycam.interfaceobjects.Asymmetric
 import com.securitycam.mediaserverutils.AVData
 import com.securitycam.mediaserverutils.AudioData
 import com.securitycam.mediaserverutils.CodecStringDiscovery
+import com.securitycam.recording.BucketBrigade
 import org.bytedeco.ffmpeg.avcodec.AVCodecDescriptor
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
@@ -47,6 +48,7 @@ class MediaServer {
         ByteArrayOutputStream flvOutputStream = new ByteArrayOutputStream()
         ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
 
+        BucketBrigade bucketBrigade = new BucketBrigade(1500, 7, logService)
         mediaThreads.submit(() -> {
             String inputAudioCodecName = ""
 
@@ -71,11 +73,6 @@ class MediaServer {
 
                     // 3. Prevent multi-threaded decoders from queuing multiple frames internally
                     grabber.setVideoOption("threads", "1")
-
-// 4. Minimize startup probing delay (adjust upward if stream metadata fails to parse)
-//                    grabber.setOption("probesize", "32");
-//                    grabber.setOption("analyzeduration", "0");
-
 
                     logService.cam.info("Connecting to camera stream...")
                     grabber.start()
@@ -149,6 +146,7 @@ class MediaServer {
                             } else if (streamIndex == avData.videoStreamIndex) {
                                 mediaStreamHandler.sendPacket(camStreamId, buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
                             }
+                            bucketBrigade.write(packet, camStreamId)
                             recorderFLV.recordPacket(packet)
 
                             byte[] array = flvOutputStream.toByteArray()
@@ -253,7 +251,7 @@ class MediaServer {
                 for (camera in cameras) {
                     def c = camera.value
                     def streams = c.streams
-
+                    logService.cam.info("Camera "+c.name)
                     for (stream in streams) {
                         def s = stream.value
                         String uri = s.uri
