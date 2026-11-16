@@ -2,30 +2,67 @@ package com.securitycam.recording
 
 import com.securitycam.services.LogService
 import org.bytedeco.ffmpeg.avcodec.AVPacket
+import org.bytedeco.ffmpeg.avformat.AVFormatContext
+import org.bytedeco.ffmpeg.avformat.AVStream
+
+import java.util.concurrent.LinkedBlockingQueue
+
+import static org.bytedeco.ffmpeg.global.avcodec.AV_PKT_FLAG_KEY
+import org.bytedeco.ffmpeg.global.avutil
+
+import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free
 
 class GOPCache {
     LogService logService
-    AVPacket[] packets
-    final int length
+    final AVPacket[] cache
+    final int cacheLength
 
     int packetIndex
+    boolean hasKeyFrame
+    AVFormatContext formatContext
 
-    GOPCache(int length, LogService logService) {
+    GOPCache(int cacheLength, AVFormatContext formatContext, LogService logService) {
         this.logService = logService
-        this.length = length
-        packets = new AVPacket[length]
+        this.formatContext = formatContext
+        this.cacheLength = cacheLength
+        cache = new AVPacket[cacheLength]
         packetIndex = 0
+        hasKeyFrame = false
     }
 
     void write(AVPacket pkt) {
-        if(packetIndex < length)
-            packets[packetIndex++] = pkt
-        else
-            logService.cam.error("GOPCache length exceeded ("+length+")")
+        synchronized (cache) {
+            if (packetIndex < this.cacheLength) {
+                if (hasKeyFrame)
+                    cache[packetIndex++] = pkt     // Only keyFrames at the start
+            } else
+                logService.cam.error("GOPCache length exceeded (" + this.cacheLength + ")")
+        }
     }
 
     void writeKeyFrame(AVPacket pkt) {
-        packetIndex = 0
+        hasKeyFrame = true
+        synchronized (cache) {
+            for (int i = 0; i < packetIndex; ++i)
+                av_packet_free(cache[i])
+            packetIndex = 0
+        }
         write(pkt)
     }
+
+    LinkedBlockingQueue getQueue() {
+        synchronized (cache) {
+            LinkedBlockingQueue<AVPacket> q = new LinkedBlockingQueue<AVPacket>()
+
+            // Put the current gop cache into the queue
+            for (int i = 0; i < packetIndex; ++i) {
+                q.put(cache[i])
+            }
+
+            packetIndex = 0
+            hasKeyFrame = false
+            return q
+        }
+    }
+
 }

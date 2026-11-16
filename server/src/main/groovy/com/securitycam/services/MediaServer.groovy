@@ -9,7 +9,7 @@ import com.securitycam.interfaceobjects.Asymmetric
 import com.securitycam.mediaserverutils.AVData
 import com.securitycam.mediaserverutils.AudioData
 import com.securitycam.mediaserverutils.CodecStringDiscovery
-import com.securitycam.recording.BucketBrigade
+import com.securitycam.recording.Recorder
 import org.bytedeco.ffmpeg.avcodec.AVCodecDescriptor
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
@@ -35,7 +35,7 @@ class MediaServer {
 
     boolean running = false
     private final configFile = "cameras.json"
-    ExecutorService mediaThreads = Executors.newFixedThreadPool(40)
+    ExecutorService mediaThreads
 
     @Autowired
     MediaServer(private LogService logService, MediaStreamHandler mediaStreamHandler, Config config) {
@@ -48,13 +48,16 @@ class MediaServer {
         ByteArrayOutputStream flvOutputStream = new ByteArrayOutputStream()
         ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
 
-        BucketBrigade bucketBrigade = new BucketBrigade(1500, 7, logService)
+        int passes = 0
+        boolean recordStarted = false
+
+        Recorder recorder = null
+
         mediaThreads.submit(() -> {
             String inputAudioCodecName = ""
 
             while (running) {
                 // 1. Declare variables here so they are in scope for try, catch, and finally
-                FFmpegFrameRecorder recorderFLV = null
                 FFmpegFrameRecorder recordAAC = null
 
                 avformat.avformat_network_init()
@@ -83,17 +86,17 @@ class MediaServer {
 
                     inputAudioCodecName = avData.inputAudioCodecName
 
-                    recorderFLV = new FFmpegFrameRecorder(flvOutputStream, avData.width, avData.height, avData.audioChannels)
-                    recorderFLV.setFormat("flv")
-                    recorderFLV.setVideoCodec(avData.inputVideoCodecId)
-                    recorderFLV.setSampleRate(avData.sampleRate)
-                    recorderFLV.setAudioCodec(avData.inputAudioCodecId)
-                    recorderFLV.setVideoCodecName("copy")
-                    recorderFLV.setAudioCodecName("copy")
-                    recorderFLV.setOption("flvflags", "no_sequence_end")
-                    recorderFLV.setOption("flush_packets", "1")
-                    recorderFLV.setOption("fflags", "nobuffer")
-                    recorderFLV.start(avData.inputFormatContext)
+//                    recorderFLV = new FFmpegFrameRecorder(flvOutputStream, avData.width, avData.height, avData.audioChannels)
+//                    recorderFLV.setFormat("flv")
+//                    recorderFLV.setVideoCodec(avData.inputVideoCodecId)
+//                    recorderFLV.setSampleRate(avData.sampleRate)
+//                    recorderFLV.setAudioCodec(avData.inputAudioCodecId)
+//                    recorderFLV.setVideoCodecName("copy")
+//                    recorderFLV.setAudioCodecName("copy")
+//                    recorderFLV.setOption("flvflags", "no_sequence_end")
+//                    recorderFLV.setOption("flush_packets", "1")
+//                    recorderFLV.setOption("fflags", "nobuffer")
+//                    recorderFLV.start(avData.inputFormatContext)
 
                     recordAAC = new FFmpegFrameRecorder(aacOutputStream, 0, 0, avData.audioChannels)
                     if (inputAudioCodecName == "aac") {
@@ -102,7 +105,7 @@ class MediaServer {
                         recordAAC.setAudioCodec(avData.inputAudioCodecId)
                         recordAAC.setAudioCodecName("copy")
                         recordAAC.setOption("flush_packets", "1")
-                        recorderFLV.setOption("fflags", "nobuffer")
+                        recordAAC.setOption("fflags", "nobuffer")
                         recordAAC.start(avData.inputFormatContext)
                         AudioData ad = new AudioData(avData)
                         String json = ad.toJSON()
@@ -113,7 +116,7 @@ class MediaServer {
 
                         mediaStreamHandler.addAudioStream(camStreamId + "a", json)
                     }
-
+                    recorder = new Recorder(7, avData.inputFormatContext, logService)
                     AVPacket packet
                     logService.cam.info("Routing raw low-latency streams...")
 
@@ -146,8 +149,15 @@ class MediaServer {
                             } else if (streamIndex == avData.videoStreamIndex) {
                                 mediaStreamHandler.sendPacket(camStreamId, buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
                             }
-                            bucketBrigade.write(packet, camStreamId)
-                            recorderFLV.recordPacket(packet)
+
+                            if(!recordStarted) {
+                                if(passes++ >= 2000) {
+                                    recorder.start()
+                                    recordStarted = true
+                                }
+                            }
+
+                            recorder.write(packet, camStreamId)
 
                             byte[] array = flvOutputStream.toByteArray()
 
@@ -159,8 +169,6 @@ class MediaServer {
                     }
 
                     logService.cam.info("Camera closed the stream sequence gracefully.")
-                    recorderFLV.close()
-                    recorderFLV.stop()
                     if (avData.inputAudioCodecName == "aac")
                         recordAAC.stop()
 
@@ -170,13 +178,6 @@ class MediaServer {
                 } finally {
                     logService.cam.info("In finally block")
 
-                    // Safely close each resource individually with null checks
-                    if (recorderFLV != null) {
-                        try {
-                            recorderFLV.stop()
-                        } catch (Exception ignored) {
-                        }
-                    }
                     if (recordAAC != null && "aac".equals(inputAudioCodecName)) {
                         try {
                             recordAAC.stop()
@@ -240,12 +241,15 @@ class MediaServer {
 
     void stop() {
         running = false
+        Thread.sleep(2000)
+        mediaThreads.shutdown()
     }
 
     void start() {
         if(!running) {
             try {
                 running = true
+                mediaThreads = Executors.newFixedThreadPool(40)
                 ObjectMapper mapper = new ObjectMapper()
                 Map<String, Camera> cameras = mapper.readValue(new File("${config.camerasHomeDirectory}/${configFile}"), Map)
                 for (camera in cameras) {
