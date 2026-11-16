@@ -5,6 +5,7 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket
 
 import java.util.concurrent.BlockingQueue
 
+import static com.securitycam.recording.deepCopy.freePacket
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free
 
 class PacketQueue {
@@ -35,7 +36,8 @@ class PacketQueue {
     void stop() {
         stopped = true
         while(!q.empty) {
-            av_packet_free(q.take() as AVPacket)
+            def pkt = q.take() as AVPacket
+            freePacket(pkt)
         }
     }
 }

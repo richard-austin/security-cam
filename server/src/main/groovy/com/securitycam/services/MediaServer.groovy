@@ -45,7 +45,6 @@ class MediaServer {
     }
 
     void runStreamingSession(String rtspUrl, String camStreamId, boolean hasAudio, String rtspTransport) throws Exception {
-        ByteArrayOutputStream flvOutputStream = new ByteArrayOutputStream()
         ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
 
         int passes = 0
@@ -86,18 +85,6 @@ class MediaServer {
 
                     inputAudioCodecName = avData.inputAudioCodecName
 
-//                    recorderFLV = new FFmpegFrameRecorder(flvOutputStream, avData.width, avData.height, avData.audioChannels)
-//                    recorderFLV.setFormat("flv")
-//                    recorderFLV.setVideoCodec(avData.inputVideoCodecId)
-//                    recorderFLV.setSampleRate(avData.sampleRate)
-//                    recorderFLV.setAudioCodec(avData.inputAudioCodecId)
-//                    recorderFLV.setVideoCodecName("copy")
-//                    recorderFLV.setAudioCodecName("copy")
-//                    recorderFLV.setOption("flvflags", "no_sequence_end")
-//                    recorderFLV.setOption("flush_packets", "1")
-//                    recorderFLV.setOption("fflags", "nobuffer")
-//                    recorderFLV.start(avData.inputFormatContext)
-
                     recordAAC = new FFmpegFrameRecorder(aacOutputStream, 0, 0, avData.audioChannels)
                     if (inputAudioCodecName == "aac") {
                         recordAAC.setFormat("adts")
@@ -116,7 +103,7 @@ class MediaServer {
 
                         mediaStreamHandler.addAudioStream(camStreamId + "a", json)
                     }
-                    recorder = new Recorder(7, avData.inputFormatContext, logService)
+                    recorder = new Recorder(7, avData, logService)
                     AVPacket packet
                     logService.cam.info("Routing raw low-latency streams...")
 
@@ -159,12 +146,6 @@ class MediaServer {
 
                             recorder.write(packet, camStreamId)
 
-                            byte[] array = flvOutputStream.toByteArray()
-
-                            if (array.length > 0) {
-                                // logService.cam.info("flv output size = " + flvOutputStream.size())
-                                flvOutputStream.reset()
-                            }
                         }
                     }
 

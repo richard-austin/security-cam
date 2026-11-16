@@ -7,6 +7,8 @@ import org.bytedeco.ffmpeg.avformat.AVStream
 
 import java.util.concurrent.LinkedBlockingQueue
 
+import static com.securitycam.recording.deepCopy.deepCopyPacket
+import static com.securitycam.recording.deepCopy.freePacket
 import static org.bytedeco.ffmpeg.global.avcodec.AV_PKT_FLAG_KEY
 import org.bytedeco.ffmpeg.global.avutil
 
@@ -43,8 +45,10 @@ class GOPCache {
     void writeKeyFrame(AVPacket pkt) {
         hasKeyFrame = true
         synchronized (cache) {
-            for (int i = 0; i < packetIndex; ++i)
-                av_packet_free(cache[i])
+            for (int i = 0; i < packetIndex; ++i) {
+                def cachedPkt = cache[i]
+                freePacket(cachedPkt)
+            }
             packetIndex = 0
         }
         write(pkt)
@@ -56,7 +60,9 @@ class GOPCache {
 
             // Put the current gop cache into the queue
             for (int i = 0; i < packetIndex; ++i) {
-                q.put(cache[i])
+                def pkt = cache[i]
+                q.put(deepCopyPacket(pkt))
+                freePacket(pkt)
             }
 
             packetIndex = 0
