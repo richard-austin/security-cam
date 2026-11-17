@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.securitycam.beans.MediaStreamHandler
 import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
+import com.securitycam.controllers.Stream
 import com.securitycam.controllers.CameraAdminCredentials
 import com.securitycam.interfaceobjects.Asymmetric
 import com.securitycam.mediaserverutils.AVData
@@ -31,6 +32,7 @@ class MediaServer {
 
     private LogService logService
     private MediaStreamHandler mediaStreamHandler
+    private RecorderFactory recorders
     private Config config
 
     boolean running = false
@@ -38,22 +40,27 @@ class MediaServer {
     ExecutorService mediaThreads
 
     @Autowired
-    MediaServer(private LogService logService, MediaStreamHandler mediaStreamHandler, Config config) {
+    MediaServer(private LogService logService, RecorderFactory recorders, MediaStreamHandler mediaStreamHandler, Config config) {
         this.logService = logService
+        this.recorders = recorders
         this.mediaStreamHandler = mediaStreamHandler
         this.config = config
     }
 
-    void runStreamingSession(String rtspUrl, String camStreamId, boolean hasAudio, String rtspTransport) throws Exception {
+    void runStreamingSession(String rtspUrl, String cameraName, Camera cam, Stream stream) throws Exception {
         ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
-
-        int passes = 0
-        boolean recordStarted = false
-
-        Recorder recorder = null
+        final boolean hasAudio = stream.audio
+        final String rtspTransport = cam.rtspTransport
 
         mediaThreads.submit(() -> {
             String inputAudioCodecName = ""
+            String uri = stream.uri
+            int index = uri.indexOf("\u003d")
+            if (index == -1)
+                index = uri.indexOf("=")
+            String camStreamId = ""
+            if (index != -1)
+                camStreamId = uri.substring(index + "=".length(), uri.length())
 
             while (running) {
                 // 1. Declare variables here so they are in scope for try, catch, and finally
@@ -103,7 +110,9 @@ class MediaServer {
 
                         mediaStreamHandler.addAudioStream(camStreamId + "a", json)
                     }
-                    recorder = new Recorder(7, avData, logService)
+                    // Add recorder if enabled in the config
+                    recorders.addRecorder(cameraName, cam, stream, avData)
+
                     AVPacket packet
                     logService.cam.info("Routing raw low-latency streams...")
 
@@ -137,15 +146,8 @@ class MediaServer {
                                 mediaStreamHandler.sendPacket(camStreamId, buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
                             }
 
-                            if(!recordStarted) {
-                                if(passes++ >= 2000) {
-                                    recorder.start()
-                                    recordStarted = true
-                                }
-                            }
-
-                            recorder.write(packet, camStreamId)
-
+                            // Write packet to the recorder if there is one for this stream
+                            recorders.write(packet, cameraName)
                         }
                     }
 
@@ -234,18 +236,11 @@ class MediaServer {
                 ObjectMapper mapper = new ObjectMapper()
                 Map<String, Camera> cameras = mapper.readValue(new File("${config.camerasHomeDirectory}/${configFile}"), Map)
                 for (camera in cameras) {
-                    def c = camera.value
+                    Camera c = camera.value as Camera
                     def streams = c.streams
                     logService.cam.info("Camera "+c.name)
                     for (stream in streams) {
-                        def s = stream.value
-                        String uri = s.uri
-                        int index = uri.indexOf("\u003d")
-                        if (index == -1)
-                            index = uri.indexOf("=")
-                        String camStreamId = ""
-                        if (index != -1)
-                            camStreamId = uri.substring(index + "=".length(), uri.length())
+                        Stream s = stream.value
 
                         String netcam_uri = s.netcam_uri
                         if (c.useRtspAuth) {
@@ -259,7 +254,7 @@ class MediaServer {
 
                         }
 
-                        this.runStreamingSession(netcam_uri, camStreamId, s.audio, c.rtspTransport)
+                        this.runStreamingSession(netcam_uri, camera.key as String, c, s)
                     }
                 }
                 logService.cam.info("Config file read " + cameras)

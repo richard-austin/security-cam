@@ -40,7 +40,7 @@ class BucketBrigade {
         gopCache = new GOPCache(300, formatContext, logService)
     }
 
-    AVPacket write(AVPacket pkt, String stream) {
+    AVPacket write(AVPacket pkt, String cameraName) {
         AVPacket delayedPacket = null
         switch (phase) {
             case brigadePhase.eGetSettleStartTime:
@@ -58,7 +58,7 @@ class BucketBrigade {
                     phase = brigadePhase.eRunning
                     indexLimit = inputIndex + 1
                     outputIndex = (inputIndex + 1) % indexLimit
-                    logService.cam.info("Bucket brigade " + stream + " " + length + " = " + indexLimit)
+                    logService.cam.info("Bucket brigade " + cameraName + " " + length + " = " + indexLimit)
                 } else {
                     brigade[inputIndex] = pkt
                     ++inputIndex
