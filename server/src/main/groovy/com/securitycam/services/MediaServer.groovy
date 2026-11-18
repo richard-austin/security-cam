@@ -62,6 +62,8 @@ class MediaServer {
             if (index != -1)
                 camStreamId = uri.substring(index + "=".length(), uri.length())
 
+            final recordingEnabled = stream?.recording?.enabled
+
             while (running) {
                 // 1. Declare variables here so they are in scope for try, catch, and finally
                 FFmpegFrameRecorder recordAAC = null
@@ -111,7 +113,8 @@ class MediaServer {
                         mediaStreamHandler.addAudioStream(camStreamId + "a", json)
                     }
                     // Add recorder if enabled in the config
-                    recorders.addRecorder(cameraName, cam, stream, avData)
+                    if (recordingEnabled)
+                        recorders.addRecorder(cameraName, cam, stream, avData)
 
                     AVPacket packet
                     logService.cam.info("Routing raw low-latency streams...")
@@ -147,7 +150,8 @@ class MediaServer {
                             }
 
                             // Write packet to the recorder if there is one for this stream
-                            recorders.write(packet, cameraName)
+                            if (recordingEnabled)
+                                recorders.write(packet, cameraName)
                         }
                     }
 

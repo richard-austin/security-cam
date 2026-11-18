@@ -6,13 +6,21 @@ import com.securitycam.mediaserverutils.AVData
 import com.securitycam.services.LogService
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avformat.AVFormatContext
+import org.bytedeco.ffmpeg.avformat.AVStream
 import org.bytedeco.javacv.FFmpegFrameRecorder
 
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_copy
+import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_AAC
+import static org.bytedeco.ffmpeg.global.avformat.avformat_alloc_context
+import static org.bytedeco.ffmpeg.global.avformat.avformat_free_context
+import static org.bytedeco.ffmpeg.global.avformat.avformat_new_stream
+import java.time.Instant
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 import static com.securitycam.recording.deepCopy.deepCopyPacket
 import static com.securitycam.recording.deepCopy.freePacket
+
 
 class Recorder {
     LogService logService
@@ -21,9 +29,12 @@ class Recorder {
     ExecutorService recordingThread
     AVData avData
     AVFormatContext formatContext
-    FFmpegFrameRecorder recorderFLV
+    FFmpegFrameRecorder recorderHLS
     Camera camera
+    Stream stream
     boolean running
+    AVFormatContext filteredCtx
+    AudioTranscoder audioTranscoder = null
 
     Recorder(Camera cam, Stream stream, AVData avData, LogService logService) {
         this.avData = avData
@@ -31,9 +42,10 @@ class Recorder {
         this.formatContext = avData.inputFormatContext
         this.logService = logService
         final int preambleTime = stream.preambleTime
-        brigade = new BucketBrigade(1500, preambleTime, formatContext, logService)
+        brigade = new BucketBrigade(2500, preambleTime, formatContext, logService)
         recordingThread = null
         camera = cam
+        this.stream = stream
         running = false
     }
 
@@ -48,47 +60,125 @@ class Recorder {
     }
 
     void start() {
-        if(!running) {
-            running = true
-            recorderFLV = new FFmpegFrameRecorder("/home/richard/recording.flv", avData.width, avData.height, avData.audioChannels)
-            recorderFLV.setFormat("flv")
-            recorderFLV.setVideoCodec(avData.inputVideoCodecId)
-            recorderFLV.setSampleRate(avData.sampleRate)
-            recorderFLV.setAudioCodec(avData.inputAudioCodecId)
-            recorderFLV.setVideoCodecName("copy")
-            recorderFLV.setAudioCodecName("copy")
-            recorderFLV.setOption("flvflags", "no_sequence_end")
-            recorderFLV.setOption("flush_packets", "1")
-            recorderFLV.setOption("fflags", "nobuffer")
+        if (!running) {
+            try {
+                running = true
+                long epochTime = Instant.now().epochSecond
+                final String location = stream?.recording?.location
+                final boolean hasAudio = stream.audio && avData.audioStreamIndex != -1
+                final boolean needsTranscode = hasAudio && avData.inputAudioCodecName?.toLowerCase() != "aac"
+                int channels = hasAudio ? (needsTranscode ? 1 : avData.audioChannels) : 0
 
+                recorderHLS = new FFmpegFrameRecorder(
+                        "/home/richard/${location}/${location}=${epochTime}_.m3u8",
+                        avData.width,
+                        avData.height,
+                        channels
+                )
+                recorderHLS.setFormat("hls")
+                recorderHLS.setVideoCodec(avData.inputVideoCodecId)
+                recorderHLS.setVideoCodecName("copy")
 
-            recorderFLV.start(formatContext)
-            queue = new PacketQueue(brigade.getGopCache())
-            recordingThread = Executors.newSingleThreadExecutor()
-            recordingThread.submit(() -> {
-                for (; ;) {
-                    try {
-                        AVPacket pkt = queue.getNextPacket()
-                        recorderFLV.recordPacket(pkt)
-                        freePacket(pkt) // Not doing anything with it yet
-                    }
-                    catch (Exception ex) {
-                        logService.cam.error(ex.getClass().getName() + " in recording packet handler: " + ex.getMessage())
-                    }
+                if (hasAudio) {
+                    recorderHLS.setSampleRate(needsTranscode ? 44100 : avData.sampleRate)
+                    recorderHLS.setAudioCodec(needsTranscode ? AV_CODEC_ID_AAC : avData.inputAudioCodecId)
+                    recorderHLS.setAudioCodecName("copy") // Always copy because AudioTranscoder outputs encoded AAC packets!
                 }
-            })
+
+                recorderHLS.setOption("level", "3.0")
+                recorderHLS.setOption("start_number", "0")
+                recorderHLS.setOption("hls_time", "3")
+                recorderHLS.setOption("hls_list_size", "0")
+                recorderHLS.setOption("hls_segment_type", "fmp4")
+
+                final fmp4InitFileName = "${stream?.recording?.location}-${epochTime}_.mp4"
+                recorderHLS.setOption("hls_fmp4_init_filename", "${fmp4InitFileName}")
+                recorderHLS.setOption("flush_packets", "1")
+                recorderHLS.setOption("fflags", "nobuffer")
+
+                // Build filteredCtx whenever we strip audio OR transcode audio
+                AVFormatContext contextToUse = avData.inputFormatContext
+                if (!hasAudio || needsTranscode) {
+                    filteredCtx = avformat_alloc_context()
+
+                    // Stream 0: Video
+                    AVStream inVideo = avData.inputFormatContext.streams(avData.videoStreamIndex)
+                    AVStream outVideo = avformat_new_stream(filteredCtx, null)
+                    avcodec_parameters_copy(outVideo.codecpar(), inVideo.codecpar())
+                    outVideo.time_base(inVideo.time_base())
+                    outVideo.r_frame_rate(inVideo.r_frame_rate())
+                    outVideo.avg_frame_rate(inVideo.avg_frame_rate())
+
+                    // Stream 1: Transcoded AAC Audio (only if needsTranscode)
+                    if (needsTranscode) {
+                        AVStream inAudio = avData.inputFormatContext.streams(avData.audioStreamIndex)
+                        audioTranscoder = new AudioTranscoder(inAudio)
+
+                        AVStream outAudio = avformat_new_stream(filteredCtx, null)
+                        audioTranscoder.copyParametersTo(outAudio.codecpar())
+                        outAudio.time_base(inAudio.time_base())
+                    }
+
+                    contextToUse = filteredCtx
+                }
+
+                recorderHLS.start(contextToUse)
+
+                queue = new PacketQueue(brigade.getGopCache())
+                recordingThread = Executors.newSingleThreadExecutor()
+                recordingThread.submit(() -> {
+                    for (; ;) {
+                        try {
+                            AVPacket pkt = queue.getNextPacket()
+                            int idx = pkt.stream_index()
+
+                            if (idx == avData.videoStreamIndex) {
+                                if (filteredCtx != null) {
+                                    pkt.stream_index(0)
+                                }
+                                recorderHLS.recordPacket(pkt)
+                            } else if (hasAudio && idx == avData.audioStreamIndex) {
+                                if (needsTranscode) {
+                                    audioTranscoder.transcode(pkt, 1) { AVPacket aacPkt ->
+                                        recorderHLS.recordPacket(aacPkt)
+                                    }
+                                } else {
+                                    recorderHLS.recordPacket(pkt)
+                                }
+                            }
+                            freePacket(pkt)
+                        }
+                        catch (Exception ex) {
+                            logService.cam.error(ex.getClass().getName() + " in recording packet handler: " + ex.getMessage())
+                        }
+                    }
+                })
+            }
+            catch (Exception ex) {
+                logService.cam.error(ex.getClass().getName() + " in recording packet handler: " + ex.getMessage())
+                stop()
+            }
         }
     }
-
     void stop() {
         if(running) {
             running = false
+            if (audioTranscoder != null) {
+                audioTranscoder.close()
+                audioTranscoder = null
+            }
+
+            if (filteredCtx != null) {
+                avformat_free_context(filteredCtx)
+                filteredCtx = null
+            }
             queue.stop()
             recordingThread.shutdown()
             recordingThread = null
             queue = null
-            recorderFLV.close()
-            recorderFLV.stop()
+            recorderHLS.close()
+            recorderHLS.stop()
+            recorderHLS.release()
         }
     }
 }
