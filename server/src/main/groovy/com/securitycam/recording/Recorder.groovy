@@ -7,10 +7,14 @@ import com.securitycam.services.LogService
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avformat.AVFormatContext
 import org.bytedeco.ffmpeg.avformat.AVStream
+import org.bytedeco.ffmpeg.avutil.AVRational
 import org.bytedeco.javacv.FFmpegFrameRecorder
 
+import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_copy
 import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_AAC
+import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_PCM_ALAW
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context
 import static org.bytedeco.ffmpeg.global.avformat.avformat_alloc_context
 import static org.bytedeco.ffmpeg.global.avformat.avformat_free_context
 import static org.bytedeco.ffmpeg.global.avformat.avformat_new_stream
@@ -20,6 +24,7 @@ import java.util.concurrent.Executors
 
 import static com.securitycam.recording.deepCopy.deepCopyPacket
 import static com.securitycam.recording.deepCopy.freePacket
+import static org.bytedeco.ffmpeg.global.avutil.av_make_q
 
 
 class Recorder {
@@ -67,10 +72,11 @@ class Recorder {
                 final String location = stream?.recording?.location
                 final boolean hasAudio = stream.audio && avData.audioStreamIndex != -1
                 final boolean needsTranscode = hasAudio && avData.inputAudioCodecName?.toLowerCase() != "aac"
+                final int outSampleRate = needsTranscode ? 44100 : avData.sampleRate
                 int channels = hasAudio ? (needsTranscode ? 1 : avData.audioChannels) : 0
 
                 recorderHLS = new FFmpegFrameRecorder(
-                        "/home/richard/${location}/${location}=${epochTime}_.m3u8",
+                        "/home/richard/${location}/${location}-${epochTime}_.m3u8",
                         avData.width,
                         avData.height,
                         channels
@@ -80,9 +86,9 @@ class Recorder {
                 recorderHLS.setVideoCodecName("copy")
 
                 if (hasAudio) {
-                    recorderHLS.setSampleRate(needsTranscode ? 44100 : avData.sampleRate)
+                    recorderHLS.setSampleRate(outSampleRate)
                     recorderHLS.setAudioCodec(needsTranscode ? AV_CODEC_ID_AAC : avData.inputAudioCodecId)
-                    recorderHLS.setAudioCodecName("copy") // Always copy because AudioTranscoder outputs encoded AAC packets!
+                    recorderHLS.setAudioCodecName("copy")
                 }
 
                 recorderHLS.setOption("level", "3.0")
@@ -96,8 +102,10 @@ class Recorder {
                 recorderHLS.setOption("flush_packets", "1")
                 recorderHLS.setOption("fflags", "nobuffer")
 
-                // Build filteredCtx whenever we strip audio OR transcode audio
                 AVFormatContext contextToUse = avData.inputFormatContext
+                AVStream inAudio = hasAudio ? avData.inputFormatContext.streams(avData.audioStreamIndex) : null
+                AVStream outAudio = null
+
                 if (!hasAudio || needsTranscode) {
                     filteredCtx = avformat_alloc_context()
 
@@ -109,20 +117,26 @@ class Recorder {
                     outVideo.r_frame_rate(inVideo.r_frame_rate())
                     outVideo.avg_frame_rate(inVideo.avg_frame_rate())
 
-                    // Stream 1: Transcoded AAC Audio (only if needsTranscode)
+                    // Stream 1: Transcoded AAC Audio
                     if (needsTranscode) {
-                        AVStream inAudio = avData.inputFormatContext.streams(avData.audioStreamIndex)
-                        audioTranscoder = new AudioTranscoder(inAudio)
+                        int inCodecId = avData.inputAudioCodecId // AV_CODEC_ID_PCM_ALAW or AV_CODEC_ID_PCM_MULAW
+                        int inSampleRate = avData.sampleRate ?: 8000
+                        audioTranscoder = new AudioTranscoder(inCodecId, inSampleRate, outSampleRate, channels, 64000)
 
-                        AVStream outAudio = avformat_new_stream(filteredCtx, null)
-                        audioTranscoder.copyParametersTo(outAudio.codecpar())
-                        outAudio.time_base(inAudio.time_base())
+                        // Add Stream 1 to filteredCtx and copy AAC encoder parameters (including extradata!)
+                        outAudio = avformat_new_stream(filteredCtx, null)
+                        avcodec_parameters_from_context(outAudio.codecpar(), audioTranscoder.getEncoderContext())
+                        outAudio.time_base(av_make_q(1, outSampleRate))
                     }
 
                     contextToUse = filteredCtx
                 }
 
                 recorderHLS.start(contextToUse)
+
+                // Capture the actual output stream time_base assigned by the fMP4 muxer after start()
+                final AVRational inAudioTb = inAudio?.time_base()
+                final AVRational outAudioTb = needsTranscode ? outAudio.time_base() : null
 
                 queue = new PacketQueue(brigade.getGopCache())
                 recordingThread = Executors.newSingleThreadExecutor()
@@ -139,10 +153,16 @@ class Recorder {
                                 recorderHLS.recordPacket(pkt)
                             } else if (hasAudio && idx == avData.audioStreamIndex) {
                                 if (needsTranscode) {
-                                    audioTranscoder.transcode(pkt, 1) { AVPacket aacPkt ->
+                                    List<AVPacket> aacPackets = audioTranscoder.transcodePacket(pkt, inAudioTb, outAudioTb)
+                                    aacPackets.each { AVPacket aacPkt ->
+                                        aacPkt.stream_index(1)
                                         recorderHLS.recordPacket(aacPkt)
+                                        av_packet_free(aacPkt)
                                     }
                                 } else {
+                                    if (filteredCtx != null) {
+                                        pkt.stream_index(1)
+                                    }
                                     recorderHLS.recordPacket(pkt)
                                 }
                             }
@@ -160,11 +180,12 @@ class Recorder {
             }
         }
     }
+
     void stop() {
-        if(running) {
+        if (running) {
             running = false
             if (audioTranscoder != null) {
-                audioTranscoder.close()
+                audioTranscoder?.close()
                 audioTranscoder = null
             }
 

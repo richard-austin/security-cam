@@ -2,170 +2,150 @@ package com.securitycam.recording
 
 import org.bytedeco.ffmpeg.avcodec.AVCodec
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext
-import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
-import org.bytedeco.ffmpeg.avformat.AVStream
-import org.bytedeco.ffmpeg.avutil.AVAudioFifo
 import org.bytedeco.ffmpeg.avutil.AVChannelLayout
-import org.bytedeco.ffmpeg.avutil.AVDictionary
 import org.bytedeco.ffmpeg.avutil.AVFrame
 import org.bytedeco.ffmpeg.avutil.AVRational
+import org.bytedeco.ffmpeg.global.avcodec
+import org.bytedeco.ffmpeg.global.avutil
+import org.bytedeco.ffmpeg.global.swresample
 import org.bytedeco.ffmpeg.swresample.SwrContext
+import org.bytedeco.javacpp.BytePointer
+import org.bytedeco.javacpp.PointerPointer
 
-import static org.bytedeco.ffmpeg.global.avcodec.*
-import static org.bytedeco.ffmpeg.global.avutil.*
-import static org.bytedeco.ffmpeg.global.swresample.*
+class AudioTranscoder implements AutoCloseable {
 
-class AudioTranscoder {
-    private AVCodecContext decCtx
-    private AVCodecContext encCtx
+    private AVCodecContext decoderCtx
+    private AVCodecContext encoderCtx
     private SwrContext swrCtx
-    private AVAudioFifo fifo
-
     private AVFrame decodedFrame
     private AVFrame resampledFrame
-    private AVFrame encFrame
-    private AVPacket outPacket
-
-    private AVRational inTimeBase
-    private AVRational encTimeBase
     private long nextPts = 0
     private boolean ptsInitialized = false
 
-    final int outSampleRate = 44100
-    final int outChannels = 1
+    AudioTranscoder(int inputCodecId, int inSampleRate = 8000, int outSampleRate = 44100, int channels = 1, int aacBitrate = 64000) {
+        AVChannelLayout channelLayout = new AVChannelLayout()
+        avutil.av_channel_layout_default(channelLayout, channels)
 
-    AudioTranscoder(AVStream inAudioStream) {
-        inTimeBase = inAudioStream.time_base()
+        // 1. Setup Decoder (alaw / mulaw)
+        AVCodec decoder = avcodec.avcodec_find_decoder(inputCodecId)
+        if (decoder == null) throw new IllegalStateException("Input codec not found")
 
-        // 1. Setup Decoder (e.g., pcm_alaw, pcm_mulaw, g726)
-        AVCodec decoder = avcodec_find_decoder(inAudioStream.codecpar().codec_id())
-        if (decoder == null) {
-            throw new RuntimeException("Unsupported input audio codec")
-        }
-        decCtx = avcodec_alloc_context3(decoder)
-        avcodec_parameters_to_context(decCtx, inAudioStream.codecpar())
-        if (avcodec_open2(decCtx, decoder, (AVDictionary) null) < 0) {
-            throw new RuntimeException("Could not open audio decoder")
-        }
+        decoderCtx = avcodec.avcodec_alloc_context3(decoder)
+        decoderCtx.sample_rate(inSampleRate)
+        avutil.av_channel_layout_copy(decoderCtx.ch_layout(), channelLayout)
+        checkError(avcodec.avcodec_open2(decoderCtx, decoder, (PointerPointer) null), "Could not open decoder")
 
         // 2. Setup AAC Encoder
-        AVCodec encoder = avcodec_find_encoder(AV_CODEC_ID_AAC)
-        if (encoder == null) {
-            throw new RuntimeException("AAC encoder not found")
-        }
-        encCtx = avcodec_alloc_context3(encoder)
-        AVChannelLayout outChLayout = new AVChannelLayout()
-        av_channel_layout_default(outChLayout, outChannels)
+        AVCodec encoder = avcodec.avcodec_find_encoder(avcodec.AV_CODEC_ID_AAC)
+        if (encoder == null) throw new IllegalStateException("AAC encoder not found")
 
-        av_channel_layout_copy(encCtx.ch_layout(), outChLayout)
-        encCtx.sample_rate(outSampleRate)
-        encCtx.sample_fmt(AV_SAMPLE_FMT_FLTP)
-        encCtx.bit_rate(64000)
-        encTimeBase = av_make_q(1, outSampleRate)
-        encCtx.time_base(encTimeBase)
+        encoderCtx = avcodec.avcodec_alloc_context3(encoder)
+        encoderCtx.sample_rate(outSampleRate)
+        avutil.av_channel_layout_copy(encoderCtx.ch_layout(), channelLayout)
+        encoderCtx.sample_fmt(avutil.AV_SAMPLE_FMT_FLTP)
+        encoderCtx.bit_rate(aacBitrate)
+        encoderCtx.time_base(avutil.av_make_q(1, outSampleRate))
 
-        if (avcodec_open2(encCtx, encoder, (AVDictionary) null) < 0) {
-            throw new RuntimeException("Could not open AAC encoder")
-        }
+        // Required for MP4/fMP4 containers so extradata (AudioSpecificConfig) is generated
+        encoderCtx.flags(encoderCtx.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER)
 
-        // 3. Setup Resampler (Input Format -> FLTP 44.1kHz)
+        checkError(avcodec.avcodec_open2(encoderCtx, encoder, (PointerPointer) null), "Could not open AAC encoder")
+
+        // 3. Setup Resampler (Converts S16 @ inSampleRate -> FLTP @ outSampleRate)
         swrCtx = new SwrContext()
-        int ret = swr_alloc_set_opts2(
+        checkError(swresample.swr_alloc_set_opts2(
                 swrCtx,
-                outChLayout,
-                AV_SAMPLE_FMT_FLTP,
-                outSampleRate,
-                decCtx.ch_layout(),
-                decCtx.sample_fmt(),
-                decCtx.sample_rate(),
-                0,
-                null
-        )
-        if (ret < 0 || swr_init(swrCtx) < 0) {
-            throw new RuntimeException("Could not initialize SwrContext")
-        }
-        av_channel_layout_uninit(outChLayout)
+                encoderCtx.ch_layout(), encoderCtx.sample_fmt(), encoderCtx.sample_rate(),
+                decoderCtx.ch_layout(), decoderCtx.sample_fmt(), decoderCtx.sample_rate(),
+                0, null
+        ), "Could not allocate resampler")
+        checkError(swresample.swr_init(swrCtx), "Could not initialize resampler")
 
-        // 4. Setup FIFO & Reusable Frames/Packet
-        fifo = av_audio_fifo_alloc(AV_SAMPLE_FMT_FLTP, outChannels, encCtx.frame_size() * 2)
-        decodedFrame = av_frame_alloc()
+        // 4. Allocate reusable AVFrames
+        decodedFrame = avutil.av_frame_alloc()
+        resampledFrame = avutil.av_frame_alloc()
+        resampledFrame.format(encoderCtx.sample_fmt())
+        avutil.av_channel_layout_copy(resampledFrame.ch_layout(), encoderCtx.ch_layout())
+        resampledFrame.sample_rate(encoderCtx.sample_rate())
+        resampledFrame.nb_samples(encoderCtx.frame_size())
+        checkError(avutil.av_frame_get_buffer(resampledFrame, 0), "Could not allocate resampled frame buffer")
 
-        resampledFrame = av_frame_alloc()
-        resampledFrame.format(AV_SAMPLE_FMT_FLTP)
-        resampledFrame.sample_rate(outSampleRate)
-        av_channel_layout_copy(resampledFrame.ch_layout(), encCtx.ch_layout())
-
-        encFrame = av_frame_alloc()
-        encFrame.nb_samples(encCtx.frame_size())
-        encFrame.format(AV_SAMPLE_FMT_FLTP)
-        encFrame.sample_rate(outSampleRate)
-        av_channel_layout_copy(encFrame.ch_layout(), encCtx.ch_layout())
-        av_frame_get_buffer(encFrame, 0)
-
-        outPacket = av_packet_alloc()
+        channelLayout.close()
     }
 
-    /** Copies AAC encoder parameters onto the output stream's AVCodecParameters */
-    void copyParametersTo(AVCodecParameters destParams) {
-        avcodec_parameters_from_context(destParams, encCtx)
+    AVCodecContext getEncoderContext() {
+        return encoderCtx
     }
 
     /**
-     * Takes one raw camera audio AVPacket and invokes onEncodedPacket(AVPacket)
-     * for each 1024-sample AAC packet produced.
+     * Transcodes an incoming audio AVPacket and aligns timestamps with the input stream's time_base.
      */
-    void transcode(AVPacket inPkt, int outStreamIndex, Closure onEncodedPacket) {
-        if (!ptsInitialized && inPkt.pts() != AV_NOPTS_VALUE) {
-            nextPts = av_rescale_q(inPkt.pts(), inTimeBase, encTimeBase)
+    List<AVPacket> transcodePacket(AVPacket inputPacket, AVRational inputTimeBase, AVRational outputTimeBase) {
+        List<AVPacket> outputPackets = []
+
+        // Anchor initial PTS to the incoming stream's timeline so audio & video stay in sync
+        if (!ptsInitialized && inputPacket.pts() != avutil.AV_NOPTS_VALUE) {
+            nextPts = avutil.av_rescale_q(inputPacket.pts(), inputTimeBase, encoderCtx.time_base())
             ptsInitialized = true
         }
 
-        if (avcodec_send_packet(decCtx, inPkt) < 0) {
-            return
+        if (avcodec.avcodec_send_packet(decoderCtx, inputPacket) < 0) {
+            return outputPackets
         }
 
-        while (avcodec_receive_frame(decCtx, decodedFrame) >= 0) {
-            if (swr_convert_frame(swrCtx, resampledFrame, decodedFrame) >= 0) {
-                int samples = resampledFrame.nb_samples()
-                if (samples > 0) {
-                    av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + samples)
-                    av_audio_fifo_write(fifo, resampledFrame.data(), samples)
-                }
-                av_frame_unref(resampledFrame)
-            }
-            av_frame_unref(decodedFrame)
+        while (avcodec.avcodec_receive_frame(decoderCtx, decodedFrame) >= 0) {
+            swresample.swr_convert(swrCtx, null, 0, decodedFrame.data(), decodedFrame.nb_samples())
 
-            // Pull exact 1024-sample frames for AAC encoding
-            int frameSize = encCtx.frame_size()
-            while (av_audio_fifo_size(fifo) >= frameSize) {
-                av_frame_make_writable(encFrame)
-                av_audio_fifo_read(fifo, encFrame.data(), frameSize)
-                encFrame.pts(nextPts)
-                nextPts += frameSize
+            while (swresample.swr_get_out_samples(swrCtx, 0) >= encoderCtx.frame_size()) {
+                avutil.av_frame_make_writable(resampledFrame)
+                swresample.swr_convert(swrCtx, resampledFrame.data(), encoderCtx.frame_size(), null, 0)
 
-                if (avcodec_send_frame(encCtx, encFrame) >= 0) {
-                    while (avcodec_receive_packet(encCtx, outPacket) >= 0) {
-                        outPacket.stream_index(outStreamIndex)
-                        // Rescale from encoder time_base (1/44100) back to input stream time_base
-                        // because recorderHLS.recordPacket() rescales from input stream time_base!
-                        av_packet_rescale_ts(outPacket, encTimeBase, inTimeBase)
-                        onEncodedPacket(outPacket)
-                        av_packet_unref(outPacket)
-                    }
+                resampledFrame.pts(nextPts)
+                nextPts += encoderCtx.frame_size()
+
+                if (avcodec.avcodec_send_frame(encoderCtx, resampledFrame) >= 0) {
+                    outputPackets.addAll(drainEncoder(outputTimeBase))
                 }
             }
+            avutil.av_frame_unref(decodedFrame)
+        }
+
+        return outputPackets
+    }
+
+    private List<AVPacket> drainEncoder(AVRational outputTimeBase) {
+        List<AVPacket> packets = []
+        while (true) {
+            AVPacket outPkt = avcodec.av_packet_alloc()
+            int ret = avcodec.avcodec_receive_packet(encoderCtx, outPkt)
+            if (ret == avutil.AVERROR_EAGAIN() || ret == avutil.AVERROR_EOF() || ret < 0) {
+                avcodec.av_packet_free(outPkt)
+                break
+            }
+
+            // Rescale PTS/DTS/duration from encoder time_base (1/44100) to muxer stream time_base
+            avcodec.av_packet_rescale_ts(outPkt, encoderCtx.time_base(), outputTimeBase)
+            outPkt.stream_index(1) // Explicitly assign to Stream 1 (Audio)
+            packets.add(outPkt)
+        }
+        return packets
+    }
+
+    private static void checkError(int code, String message) {
+        if (code < 0) {
+            BytePointer errBuf = new BytePointer(256)
+            avutil.av_strerror(code, errBuf, 256)
+            throw new RuntimeException("${message}: ${errBuf.getString()} (${code})")
         }
     }
 
+    @Override
     void close() {
-        if (outPacket != null) av_packet_free(outPacket)
-        if (encFrame != null) av_frame_free(encFrame)
-        if (resampledFrame != null) av_frame_free(resampledFrame)
-        if (decodedFrame != null) av_frame_free(decodedFrame)
-        if (fifo != null) av_audio_fifo_free(fifo)
-        if (swrCtx != null) swr_free(swrCtx)
-        if (encCtx != null) avcodec_free_context(encCtx)
-        if (decCtx != null) avcodec_free_context(decCtx)
+        if (decodedFrame != null) avutil.av_frame_free(decodedFrame)
+        if (resampledFrame != null) avutil.av_frame_free(resampledFrame)
+        if (swrCtx != null) swresample.swr_free(swrCtx)
+        if (decoderCtx != null) avcodec.avcodec_free_context(decoderCtx)
+        if (encoderCtx != null) avcodec.avcodec_free_context(encoderCtx)
     }
 }
