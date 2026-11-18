@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.securitycam.beans.MediaStreamHandler
 import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
+import com.securitycam.controllers.RecordingType
 import com.securitycam.controllers.Stream
 import com.securitycam.controllers.CameraAdminCredentials
 import com.securitycam.interfaceobjects.Asymmetric
@@ -47,10 +48,11 @@ class MediaServer {
         this.config = config
     }
 
-    void runStreamingSession(String rtspUrl, String cameraName, Camera cam, Stream stream) throws Exception {
+    void runStreamingSession(String rtspUrl, String cameraName, Camera cam, String streamName, Stream stream) throws Exception {
         ByteArrayOutputStream aacOutputStream = new ByteArrayOutputStream()
         final boolean hasAudio = stream.audio
         final String rtspTransport = cam.rtspTransport
+        AVData avData = null
 
         mediaThreads.submit(() -> {
             String inputAudioCodecName = ""
@@ -62,7 +64,7 @@ class MediaServer {
             if (index != -1)
                 camStreamId = uri.substring(index + "=".length(), uri.length())
 
-            final recordingEnabled = stream?.recording?.enabled
+            final boolean recordingEnabled = isRecordingEnabled(cam, stream, streamName)
 
             while (running) {
                 // 1. Declare variables here so they are in scope for try, catch, and finally
@@ -89,7 +91,7 @@ class MediaServer {
                     grabber.start()
                     logService.cam.info("Connected successfully!")
 
-                    final AVData avData = getAVData(grabber)
+                    avData = getAVData(grabber)
                     mediaStreamHandler.addStream(camStreamId, avData.codecString)
 
                     inputAudioCodecName = avData.inputAudioCodecName
@@ -161,6 +163,7 @@ class MediaServer {
 
                 } catch (Exception e) {
                     logService.cam.error("Stream error occurred: " + e.getMessage())
+                    recorders.reset(cameraName, cam, stream, avData)
                     logService.cam.error(e.stackTrace.toString())
                 } finally {
                     logService.cam.info("In finally block")
@@ -258,7 +261,7 @@ class MediaServer {
 
                         }
 
-                        this.runStreamingSession(netcam_uri, camera.key as String, c, s)
+                        this.runStreamingSession(netcam_uri, camera.key as String, c, stream.key as String, s)
                     }
                 }
                 logService.cam.info("Config file read " + cameras)
@@ -268,5 +271,30 @@ class MediaServer {
                 logService.cam.error(ex.getClass().getName() + " in MediaServer.start: " + ex.getMessage())
             }
         }
+    }
+
+    boolean isRecordingEnabled(Camera camera, Stream stream, String streamName) {
+        boolean enabled = false
+        switch(camera.recordingType) {
+            case RecordingType.motionService:
+                def streams = camera?.streams
+
+                for(s in streams) {
+                    if(s.value?.motion?.trigger_recording_on == streamName)
+                        enabled = true
+                }
+                break
+            case RecordingType.ftpTriggered:
+                enabled = stream?.recording?.enabled
+                break
+            case RecordingType.pullPointEventTriggered:
+                enabled = stream?.recording?.enabled
+                break
+            default:
+                break
+        }
+        if(enabled)
+            logService.cam.info(camera.name+ " $streamName enabled = $enabled")
+        return enabled
     }
 }

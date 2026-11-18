@@ -169,13 +169,13 @@ class Recorder {
                             freePacket(pkt)
                         }
                         catch (Exception ex) {
-                            logService.cam.error(ex.getClass().getName() + " in recording packet handler: " + ex.getMessage())
+                            logService.cam.error(ex.getClass().getName() + " in recording packet handler loop: " + ex.getMessage())
                         }
                     }
                 })
             }
             catch (Exception ex) {
-                logService.cam.error(ex.getClass().getName() + " in recording packet handler: " + ex.getMessage())
+                logService.cam.error(ex.getClass().getName() + " in Recorder start : " + ex.getMessage())
                 stop()
             }
         }

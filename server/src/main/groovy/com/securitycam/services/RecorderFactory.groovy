@@ -2,7 +2,6 @@ package com.securitycam.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.securitycam.controllers.Camera
-import com.securitycam.controllers.CameraAdminCredentials
 import com.securitycam.controllers.Stream
 import com.securitycam.mediaserverutils.AVData
 import com.securitycam.recording.Recorder
@@ -11,9 +10,7 @@ import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.jackson.autoconfigure.JacksonProperties
 import org.springframework.stereotype.Service
-import tools.jackson.core.JsonParser
 
 @Service
 class RecorderFactory {
@@ -49,6 +46,14 @@ class RecorderFactory {
         server.setExecutor(null) // default executor
         server.start()
         logService.cam.info("Recording trigger Server running on port 8086")
+    }
+
+    void reset(String cameraName, Camera cam, Stream stream, AVData avData) {
+        final recorder = recorders.get(cameraName)
+        if(recorder != null) {
+            recorder.stop()
+        }
+        addRecorder(cameraName, cam, stream, avData)
     }
 
     class MyHandler implements HttpHandler {

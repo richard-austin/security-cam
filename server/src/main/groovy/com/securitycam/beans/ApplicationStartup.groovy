@@ -32,9 +32,9 @@ class ApplicationStartup
      */
     @Override
     void onApplicationEvent(final ApplicationReadyEvent event) {
-        sc_processesService.setOnvifService(onvifService)
-        sc_processesService.startProcesses()
         mediaServer.start()
+   //     sc_processesService.setOnvifService(onvifService)
+   //     sc_processesService.startProcesses()
         logService.cam.info("Started NVR Services!!!!!!!!!!!!!!")
     }
 }
