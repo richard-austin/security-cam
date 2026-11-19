@@ -3,16 +3,11 @@ package com.securitycam.recording
 import com.securitycam.services.LogService
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avformat.AVFormatContext
-import org.bytedeco.ffmpeg.avformat.AVStream
 
 import java.util.concurrent.LinkedBlockingQueue
 
 import static com.securitycam.recording.deepCopy.deepCopyPacket
 import static com.securitycam.recording.deepCopy.freePacket
-import static org.bytedeco.ffmpeg.global.avcodec.AV_PKT_FLAG_KEY
-import org.bytedeco.ffmpeg.global.avutil
-
-import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free
 
 class GOPCache {
     LogService logService
@@ -70,5 +65,4 @@ class GOPCache {
             return q
         }
     }
-
 }

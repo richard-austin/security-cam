@@ -1,5 +1,6 @@
 package com.securitycam.mediaserverutils
 
+import com.securitycam.services.LogService
 import org.springframework.web.socket.BinaryMessage
 import org.springframework.web.socket.WebSocketSession
 
@@ -13,17 +14,19 @@ class ClientStream {
     ExecutorService outputThread = null
     byte[] firstPacket
     boolean firstPacketSent = false
+    LogService logService
 
-    ClientStream(WebSocketSession session, GOPCache cache, String codecString) {
+    ClientStream(WebSocketSession session, GOPCache cache, String codecString, LogService logService) {
+        this.logService = logService
         byte[] codecBytes = codecString.getBytes()
         firstPacket = new byte[1 + codecBytes.length]
         firstPacket[0] = 9
 
-        for(int i=1;i<codecBytes.length+1;i++){
-            firstPacket[i] = codecBytes[i-1]
+        for (int i = 1; i < codecBytes.length + 1; i++) {
+            firstPacket[i] = codecBytes[i - 1]
         }
         this.session = session
-        if(cache != null) {
+        if (cache != null) {
             this.queue = new PacketQueue(cache, codecString)
             outputThread = Executors.newSingleThreadExecutor()
             outputThread.submit(() -> {
@@ -34,6 +37,7 @@ class ClientStream {
                 }
             })
         }
+
     }
 
     void put(byte[] pkt) {
@@ -41,17 +45,22 @@ class ClientStream {
     }
 
     void close() {
-        if(outputThread != null)
+        if (outputThread != null)
             outputThread.shutdown()
     }
 
     void putAudio(byte[] pkt) {
-        if(session.isOpen()) {
-            if (!firstPacketSent) {
-                session.sendMessage(new BinaryMessage(firstPacket))
-                firstPacketSent = true
-            } else
-                session.sendMessage(new BinaryMessage(pkt))
+        try {
+            if (session.isOpen()) {
+                if (!firstPacketSent) {
+                    session.sendMessage(new BinaryMessage(firstPacket))
+                    firstPacketSent = true
+                } else
+                    session.sendMessage(new BinaryMessage(pkt))
+            }
+        }
+        catch (Exception ex) {
+            logService.cam.error("${ex.getClass().getName()} in putAudio: ${ex.getMessage()}")
         }
     }
 }

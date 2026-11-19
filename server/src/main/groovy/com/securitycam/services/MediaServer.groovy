@@ -162,12 +162,10 @@ class MediaServer {
                         recordAAC.stop()
 
                 } catch (Exception e) {
-                    logService.cam.error("Stream error occurred: " + e.getMessage())
+                    logService.cam.error("${e.getClass().getName()} in media server main  loop: " + e.getMessage())
                     recorders.reset(cameraName, cam, stream, avData)
                     logService.cam.error(e.stackTrace.toString())
                 } finally {
-                    logService.cam.info("In finally block")
-
                     if (recordAAC != null && "aac".equals(inputAudioCodecName)) {
                         try {
                             recordAAC.stop()
@@ -175,8 +173,6 @@ class MediaServer {
                         }
                     }
                 }
-
-                logService.cam.info("After finally")
                 Thread.sleep(2000) // Thread will now safely reach here and retry
             }
         })

@@ -72,8 +72,18 @@ class BucketBrigade {
                     outputIndex = (inputIndex + 1) % indexLimit
 
                     final AVPacket outputPacket = delayedPacket
+                    if(outputPacket == null || outputPacket.isNull()) {
+                        logService.cam.error("Output packet was null in the bucket brigade")
+                        break
+                    } else if(formatContext == null || formatContext.isNull()) {
+                        logService.cam.error("formatContext was null in the bucket brigade")
+                        break
+                    }
                     AVStream avStream = formatContext.streams(outputPacket.stream_index())
-                    int codecType = avStream.codecpar().codec_type()
+                    if(avStream == null)
+                        logService.cam.error("avStream is null")
+
+                    int codecType = avStream?.codecpar()?.codec_type()
 
                     final boolean keyFrame = (codecType == avutil.AVMEDIA_TYPE_VIDEO && (outputPacket.flags() & AV_PKT_FLAG_KEY) != 0)
                     if (keyFrame) {

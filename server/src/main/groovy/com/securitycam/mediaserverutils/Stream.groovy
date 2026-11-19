@@ -1,5 +1,6 @@
 package com.securitycam.mediaserverutils
 
+import com.securitycam.services.LogService
 import org.springframework.web.socket.WebSocketSession
 
 class Stream {
@@ -8,8 +9,11 @@ class Stream {
     private final gopCacheSize = 200
     private final String codecString
     private isAudio
+    private LogService logService
+
     Map<WebSocketSession, ClientStream> clients
-    Stream(String suuid, String codecString, boolean isAudio) {
+    Stream(String suuid, String codecString, boolean isAudio, LogService logService) {
+        this.logService = logService
         this.isAudio = isAudio
         this.suuid = suuid
         cache = !isAudio ? new GOPCache(gopCacheSize) : null
@@ -19,7 +23,7 @@ class Stream {
 
     void addClient(WebSocketSession session) {
         if (!clients.containsKey(session)) {
-            clients.put(session, new ClientStream(session, cache, codecString))
+            clients.put(session, new ClientStream(session, cache, codecString, logService))
         }
     }
 

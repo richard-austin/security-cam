@@ -2,6 +2,7 @@ package com.securitycam.recording
 
 import org.bytedeco.ffmpeg.avcodec.AVCodec
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext
+import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avutil.AVChannelLayout
 import org.bytedeco.ffmpeg.avutil.AVFrame
@@ -23,19 +24,24 @@ class AudioTranscoder implements AutoCloseable {
     private long nextPts = 0
     private boolean ptsInitialized = false
 
-    AudioTranscoder(int inputCodecId, int inSampleRate = 8000, int outSampleRate = 44100, int channels = 1, int aacBitrate = 64000) {
+    AudioTranscoder(AVCodecParameters inCodecPar, int outSampleRate = 16000, int channels = 1, int aacBitrate = 64000) {
         AVChannelLayout channelLayout = new AVChannelLayout()
         avutil.av_channel_layout_default(channelLayout, channels)
 
-        // 1. Setup Decoder (alaw / mulaw)
-        AVCodec decoder = avcodec.avcodec_find_decoder(inputCodecId)
+        // 1. Setup Decoder using the stream's actual codec parameters
+        AVCodec decoder = avcodec.avcodec_find_decoder(inCodecPar.codec_id())
         if (decoder == null) throw new IllegalStateException("Input codec not found")
-
         decoderCtx = avcodec.avcodec_alloc_context3(decoder)
-        decoderCtx.sample_rate(inSampleRate)
-        avutil.av_channel_layout_copy(decoderCtx.ch_layout(), channelLayout)
-        checkError(avcodec.avcodec_open2(decoderCtx, decoder, (PointerPointer) null), "Could not open decoder")
+        checkError(avcodec.avcodec_parameters_to_context(decoderCtx, inCodecPar), "Could not copy decoder params")
 
+        // Fallback if container didn't specify sample rate for raw G.711
+        if (decoderCtx.sample_rate() <= 0) {
+            decoderCtx.sample_rate(8000)
+        }
+        if (decoderCtx.ch_layout().nb_channels() <= 0) {
+            avutil.av_channel_layout_copy(decoderCtx.ch_layout(), channelLayout)
+        }
+        checkError(avcodec.avcodec_open2(decoderCtx, decoder, (PointerPointer) null), "Could not open decoder")
         // 2. Setup AAC Encoder
         AVCodec encoder = avcodec.avcodec_find_encoder(avcodec.AV_CODEC_ID_AAC)
         if (encoder == null) throw new IllegalStateException("AAC encoder not found")

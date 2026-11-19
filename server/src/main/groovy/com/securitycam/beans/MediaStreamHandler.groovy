@@ -1,6 +1,8 @@
 package com.securitycam.beans
 
 import com.securitycam.mediaserverutils.Stream
+import com.securitycam.services.LogService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.WebSocketSession
@@ -9,11 +11,13 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class MediaStreamHandler extends BinaryWebSocketHandler {
-
+    LogService logService
     // Global registry mapping suuid -> Set of listening browser sessions
     Map<String, Stream> streams
 
-    MediaStreamHandler() {
+    @Autowired
+    MediaStreamHandler(LogService logService) {
+        this.logService = logService
         streams = new ConcurrentHashMap<>()
     }
 
@@ -27,12 +31,12 @@ class MediaStreamHandler extends BinaryWebSocketHandler {
 
     void addStream(String suuid, String codecString) {
         if(!streams.containsKey(suuid))
-            streams.put(suuid, new Stream(suuid, codecString, false))
+            streams.put(suuid, new Stream(suuid, codecString, false, logService))
     }
 
     void addAudioStream(String suuid, String json) {
         if(!streams.containsKey(suuid))
-            streams.put(suuid, new Stream(suuid, json, true))
+            streams.put(suuid, new Stream(suuid, json, true, logService))
     }
 
     /**
