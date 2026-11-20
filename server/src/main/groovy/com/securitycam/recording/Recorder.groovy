@@ -74,7 +74,7 @@ class Recorder {
                 final String location = stream?.recording?.location
                 final boolean hasAudio = stream.audio && avData.audioStreamIndex != -1
                 final boolean needsTranscode = hasAudio && avData.inputAudioCodecName?.toLowerCase() != "aac"
-                final int outSampleRate = needsTranscode ? 16000 : avData.sampleRate
+                final int outSampleRate = avData.sampleRate
                 int channels = hasAudio ? (needsTranscode ? 1 : avData.audioChannels) : 0
 
                 recorderHLS = new FFmpegFrameRecorder(
