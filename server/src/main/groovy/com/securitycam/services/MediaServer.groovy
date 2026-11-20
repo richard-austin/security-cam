@@ -11,7 +11,6 @@ import com.securitycam.interfaceobjects.Asymmetric
 import com.securitycam.mediaserverutils.AVData
 import com.securitycam.mediaserverutils.AudioData
 import com.securitycam.mediaserverutils.CodecStringDiscovery
-import com.securitycam.recording.Recorder
 import org.bytedeco.ffmpeg.avcodec.AVCodecDescriptor
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
@@ -66,30 +65,34 @@ class MediaServer {
 
             final boolean recordingEnabled = isRecordingEnabled(cam, stream, streamName)
 
+            avformat.avformat_network_init()
+
             while (running) {
                 // 1. Declare variables here so they are in scope for try, catch, and finally
                 FFmpegFrameRecorder recordAAC = null
-
+                boolean started = false
                 avformat.avformat_network_init()
                 // Standard out-of-the-box grabber configuration
-                try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(rtspUrl)) {
-                    grabber.setOption("rtsp_transport", rtspTransport)
+                FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(rtspUrl)
+                grabber.setOption("rtsp_transport", rtspTransport)
 
-                    // CRUCIAL: Set all 3 native timeouts to protect every layer of the C network handshake (Value is in Microseconds)
-                    grabber.setOption("stimeout", "5000000")   // Protects RTSP transport stream negotiation
-                    grabber.setOption("timeout", "5000000")    // Protects initial socket connection setup
-                    grabber.setOption("rw_timeout", "5000000") // Protects blocking read/write IO calls
-                    grabber.setOption("flush_packets", "1")
-                    grabber.setOption("fflags", "nobuffer")
-                    // 2. Disable decoder frame-reordering delays
-                    grabber.setOption("flags", "low_delay")
+                // CRUCIAL: Set all 3 native timeouts to protect every layer of the C network handshake (Value is in Microseconds)
+                grabber.setOption("stimeout", "5000000")   // Protects RTSP transport stream negotiation
+                grabber.setOption("timeout", "5000000")    // Protects initial socket connection setup
+                grabber.setOption("rw_timeout", "5000000") // Protects blocking read/write IO calls
+                grabber.setOption("flush_packets", "1")
+                grabber.setOption("fflags", "nobuffer")
+                // 2. Disable decoder frame-reordering delays
+                grabber.setOption("flags", "low_delay")
 
-                    // 3. Prevent multi-threaded decoders from queuing multiple frames internally
-                    grabber.setVideoOption("threads", "1")
+                // 3. Prevent multi-threaded decoders from queuing multiple frames internally
+                grabber.setVideoOption("threads", "1")
 
+                try {
                     logService.cam.info("Connecting to camera stream...")
                     grabber.start()
                     logService.cam.info("Connected successfully!")
+                    started = true
 
                     avData = getAVData(grabber)
                     mediaStreamHandler.addStream(camStreamId, avData.codecString)
@@ -163,9 +166,14 @@ class MediaServer {
 
                 } catch (Exception e) {
                     logService.cam.error("${e.getClass().getName()} in media server main  loop: " + e.getMessage())
-                    recorders.reset(cameraName, cam, stream, avData)
+                    recorders.closeThisRecorder(cameraName)
                     logService.cam.error(e.stackTrace.toString())
                 } finally {
+                    if (started) {
+                        grabber.close()
+                    } else {
+                        grabber.release()
+                    }
                     if (recordAAC != null && "aac".equals(inputAudioCodecName)) {
                         try {
                             recordAAC.stop()
@@ -173,8 +181,8 @@ class MediaServer {
                         }
                     }
                 }
-                Thread.sleep(2000) // Thread will now safely reach here and retry
-            }
+                    Thread.sleep(2000) // Thread will now safely reach here and retry
+                }
         })
     }
 
@@ -232,7 +240,7 @@ class MediaServer {
     }
 
     void start() {
-        if(!running) {
+        if (!running) {
             try {
                 running = true
                 mediaThreads = Executors.newFixedThreadPool(40)
@@ -241,7 +249,7 @@ class MediaServer {
                 for (camera in cameras) {
                     Camera c = camera.value as Camera
                     def streams = c.streams
-                    logService.cam.info("Camera "+c.name)
+                    logService.cam.info("Camera " + c.name)
                     for (stream in streams) {
                         Stream s = stream.value
 
@@ -271,12 +279,12 @@ class MediaServer {
 
     boolean isRecordingEnabled(Camera camera, Stream stream, String streamName) {
         boolean enabled = false
-        switch(camera.recordingType) {
+        switch (camera.recordingType) {
             case RecordingType.motionService:
                 def streams = camera?.streams
 
-                for(s in streams) {
-                    if(s.value?.motion?.trigger_recording_on == streamName)
+                for (s in streams) {
+                    if (s.value?.motion?.trigger_recording_on == streamName)
                         enabled = true
                 }
                 break
@@ -289,8 +297,8 @@ class MediaServer {
             default:
                 break
         }
-        if(enabled)
-            logService.cam.info(camera.name+ " $streamName enabled = $enabled")
+        if (enabled)
+            logService.cam.info(camera.name + " $streamName enabled = $enabled")
         return enabled
     }
 }

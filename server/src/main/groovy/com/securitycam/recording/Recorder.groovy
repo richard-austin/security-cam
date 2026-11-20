@@ -31,7 +31,7 @@ import static org.bytedeco.ffmpeg.global.avutil.av_make_q
 
 class Recorder {
     LogService logService
-    BucketBrigade brigade
+    BucketBrigade brigade = null
     PacketQueue queue
     ExecutorService recordingThread
     AVData avData

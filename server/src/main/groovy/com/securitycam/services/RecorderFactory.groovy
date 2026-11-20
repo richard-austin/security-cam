@@ -48,12 +48,12 @@ class RecorderFactory {
         logService.cam.info("Recording trigger Server running on port 8086")
     }
 
-    void reset(String cameraName, Camera cam, Stream stream, AVData avData) {
+    void closeThisRecorder(String cameraName) {
         final recorder = recorders.get(cameraName)
         if(recorder != null) {
             recorder.stop()
+            recorders.remove(cameraName)
         }
-        addRecorder(cameraName, cam, stream, avData)
     }
 
     class MyHandler implements HttpHandler {
