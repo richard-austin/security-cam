@@ -13,7 +13,7 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam [:server:bootRun]" uuid="3dc9256d-59b3-46bf-b7d7-17a70f6f7bc8">
+    <data-source source="LOCAL" name="jdbc:h2:/var/security-cam/db/prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE [DEBUG]" group="​security-cam [:server:bootRun]" uuid="d8c9d106-d0c1-429a-8f8a-2c5c5308873c">
       <driver-ref>h2.unified</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>
