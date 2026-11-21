@@ -4,6 +4,7 @@ import org.bytedeco.ffmpeg.avcodec.AVCodec
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
+import org.bytedeco.ffmpeg.avutil.AVAudioFifo
 import org.bytedeco.ffmpeg.avutil.AVChannelLayout
 import org.bytedeco.ffmpeg.avutil.AVFrame
 import org.bytedeco.ffmpeg.avutil.AVRational
@@ -12,6 +13,7 @@ import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.ffmpeg.global.swresample
 import org.bytedeco.ffmpeg.swresample.SwrContext
 import org.bytedeco.javacpp.BytePointer
+import org.bytedeco.javacpp.IntPointer
 import org.bytedeco.javacpp.PointerPointer
 
 class AudioTranscoder implements AutoCloseable {
@@ -23,6 +25,7 @@ class AudioTranscoder implements AutoCloseable {
     private AVFrame resampledFrame
     private long nextPts = 0
     private boolean ptsInitialized = false
+    private AVAudioFifo audioFifo
 
     AudioTranscoder(AVCodecParameters inCodecPar, int outSampleRate = 16000, int channels = 1, int aacBitrate = 64000) {
         AVChannelLayout channelLayout = new AVChannelLayout()
@@ -55,6 +58,12 @@ class AudioTranscoder implements AutoCloseable {
 
         // Required for MP4/fMP4 containers so extradata (AudioSpecificConfig) is generated
         encoderCtx.flags(encoderCtx.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER)
+
+        audioFifo = avutil.av_audio_fifo_alloc(
+                encoderCtx.sample_fmt(),
+                encoderCtx.ch_layout().nb_channels(),
+                1 // Initial capacity; it grows automatically
+        )
 
         checkError(avcodec.avcodec_open2(encoderCtx, encoder, (PointerPointer) null), "Could not open AAC encoder")
 
@@ -101,11 +110,48 @@ class AudioTranscoder implements AutoCloseable {
         }
 
         while (avcodec.avcodec_receive_frame(decoderCtx, decodedFrame) >= 0) {
-            swresample.swr_convert(swrCtx, null, 0, decodedFrame.data(), decodedFrame.nb_samples())
+            // 1. Calculate exact max output samples for this input frame
+            int dstNbSamples = (int) avutil.av_rescale_rnd(
+                    swresample.swr_get_delay(swrCtx, (long) decoderCtx.sample_rate()) + decodedFrame.nb_samples(),
+                    (long) encoderCtx.sample_rate(),
+                    (long) decoderCtx.sample_rate(),
+                    avutil.AV_ROUND_UP
+            )
 
-            while (swresample.swr_get_out_samples(swrCtx, 0) >= encoderCtx.frame_size()) {
+            // 2. Allocate temporary buffer for converted samples
+            def convertedData = new PointerPointer<BytePointer>((long) encoderCtx.ch_layout().nb_channels())
+            avutil.av_samples_alloc(
+                    convertedData,
+                    (IntPointer) null,
+                    encoderCtx.ch_layout().nb_channels(),
+                    dstNbSamples,
+                    encoderCtx.sample_fmt(),
+                    0
+            )
+
+            // 3. Convert in ONE call (preserves FIR filter state)
+            int actualSamples = swresample.swr_convert(
+                    swrCtx,
+                    convertedData,
+                    dstNbSamples,
+                    decodedFrame.data(),
+                    decodedFrame.nb_samples()
+            )
+
+            // 4. Push exact converted samples into the FIFO
+            if (actualSamples > 0) {
+                avutil.av_audio_fifo_write(audioFifo, convertedData, actualSamples)
+            }
+
+            avutil.av_freep(convertedData)
+            avutil.av_frame_unref(decodedFrame)
+
+            // 5. Read fixed-size frames from FIFO for the encoder
+            while (avutil.av_audio_fifo_size(audioFifo) >= encoderCtx.frame_size()) {
                 avutil.av_frame_make_writable(resampledFrame)
-                swresample.swr_convert(swrCtx, resampledFrame.data(), encoderCtx.frame_size(), null, 0)
+                resampledFrame.nb_samples(encoderCtx.frame_size())
+
+                avutil.av_audio_fifo_read(audioFifo, resampledFrame.data(), encoderCtx.frame_size())
 
                 resampledFrame.pts(nextPts)
                 nextPts += encoderCtx.frame_size()
@@ -114,7 +160,6 @@ class AudioTranscoder implements AutoCloseable {
                     outputPackets.addAll(drainEncoder(outputTimeBase))
                 }
             }
-            avutil.av_frame_unref(decodedFrame)
         }
 
         return outputPackets
