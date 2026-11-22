@@ -28,6 +28,7 @@ class AVData {
     int sampleRate
     String sampleFormat
     int audioBitRate
+    double frameRate
 
     AVData(FFmpegFrameGrabber grabber) {
         width = grabber.getImageWidth()
@@ -62,6 +63,7 @@ class AVData {
 
         audioChannels = grabber.getAudioChannels()
         audioBitRate = grabber.getAudioBitrate()
+        frameRate = grabber.getFrameRate()
 
         if (audioChannels > 0)
             inputAudioCodecName = avcodec_get_name(inputAudioCodecId).getString()

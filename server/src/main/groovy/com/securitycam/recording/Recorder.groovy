@@ -5,29 +5,46 @@ import com.securitycam.controllers.Camera
 import com.securitycam.controllers.Stream
 import com.securitycam.mediaserverutils.AVData
 import com.securitycam.services.LogService
+import org.bytedeco.ffmpeg.avcodec.AVCodec
+import org.bytedeco.ffmpeg.avcodec.AVCodecContext
+import org.bytedeco.ffmpeg.avcodec.AVCodecParameters
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avformat.AVFormatContext
 import org.bytedeco.ffmpeg.avformat.AVStream
+import org.bytedeco.ffmpeg.avutil.AVChannelLayout
+import org.bytedeco.ffmpeg.avutil.AVFrame
 import org.bytedeco.ffmpeg.avutil.AVRational
+import org.bytedeco.javacpp.PointerPointer
 import org.bytedeco.javacv.FFmpegFrameRecorder
 
-import java.util.concurrent.TimeUnit
-
-import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free
-import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_copy
-import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_AAC
-import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context
-import static org.bytedeco.ffmpeg.global.avformat.avformat_alloc_context
-import static org.bytedeco.ffmpeg.global.avformat.avformat_free_context
-import static org.bytedeco.ffmpeg.global.avformat.avformat_new_stream
+import java.nio.ByteOrder
+import java.nio.ShortBuffer
 import java.time.Instant
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 import static com.securitycam.recording.deepCopy.deepCopyPacket
 import static com.securitycam.recording.deepCopy.freePacket
+import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_AAC
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_alloc_context3
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_find_decoder
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_free_context
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_open2
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_copy
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_to_context
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_receive_frame
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_send_packet
+import static org.bytedeco.ffmpeg.global.avformat.avformat_alloc_context
+import static org.bytedeco.ffmpeg.global.avformat.avformat_new_stream
+import static org.bytedeco.ffmpeg.global.avutil.AV_NOPTS_VALUE
+import static org.bytedeco.ffmpeg.global.avutil.av_channel_layout_copy
+import static org.bytedeco.ffmpeg.global.avutil.av_channel_layout_default
+import static org.bytedeco.ffmpeg.global.avutil.av_frame_alloc
+import static org.bytedeco.ffmpeg.global.avutil.av_frame_free
+import static org.bytedeco.ffmpeg.global.avutil.av_frame_unref
 import static org.bytedeco.ffmpeg.global.avutil.av_make_q
-
+import static org.bytedeco.ffmpeg.global.avutil.av_rescale_q
 
 class Recorder {
     LogService logService
@@ -39,33 +56,39 @@ class Recorder {
     FFmpegFrameRecorder recorderHLS
     Camera camera
     Stream stream
-    boolean running
-    AVFormatContext filteredCtx
-    AudioTranscoder audioTranscoder = null
+    volatile boolean running
     Config config
+    private AVFormatContext videoOnlyCtx = null
+
+
+    // Lightweight decoder used only when transcoding (e.g. pcm_alaw -> AAC)
+    private AVCodecContext audioDecoderCtx = null
+    private AVFrame decodedAudioFrame = null
 
     Recorder(Camera cam, Stream stream, AVData avData, Config config, LogService logService) {
         this.avData = avData
-        queue = null
+        this.queue = null
         this.formatContext = avData.inputFormatContext
         this.config = config
         this.logService = logService
         final int preambleTime = stream.preambleTime
-        brigade = new BucketBrigade(2500, preambleTime, formatContext, logService)
-        recordingThread = null
-        camera = cam
+        this.brigade = new BucketBrigade(2500, preambleTime, formatContext, logService)
+        this.recordingThread = null
+        this.camera = cam
         this.stream = stream
-        running = false
+        this.running = false
     }
 
     void write(AVPacket packet, String cameraName) {
         AVPacket clonedPacket = deepCopyPacket(packet)
         if (!clonedPacket.isNull()) {
             AVPacket delayedPacket = brigade.write(clonedPacket, cameraName)
-            if (delayedPacket != null && brigade.phase == BucketBrigade.brigadePhase.eRunning && queue != null)
+            if (delayedPacket != null && brigade.phase == BucketBrigade.brigadePhase.eRunning && queue != null) {
                 queue.putPacket(delayedPacket)
-        } else
+            }
+        } else {
             logService.cam.error("Cloned packet isNull in Recorder.write")
+        }
     }
 
     void start() {
@@ -76,8 +99,8 @@ class Recorder {
                 final String location = stream?.recording?.location
                 final boolean hasAudio = stream.audio && avData.audioStreamIndex != -1
                 final boolean needsTranscode = hasAudio && avData.inputAudioCodecName?.toLowerCase() != "aac"
-                final int outSampleRate = avData.sampleRate
-                int channels = hasAudio ? (needsTranscode ? 1 : avData.audioChannels) : 0
+                final int outSampleRate = avData.sampleRate > 0 ? avData.sampleRate : 8000
+                final int channels = hasAudio ? (needsTranscode ? 1 : avData.audioChannels) : 0
 
                 recorderHLS = new FFmpegFrameRecorder(
                         "${config.camerasHomeDirectory}/${location}/${location}-${epochTime}_.m3u8",
@@ -88,58 +111,63 @@ class Recorder {
                 recorderHLS.setFormat("hls")
                 recorderHLS.setVideoCodec(avData.inputVideoCodecId)
                 recorderHLS.setVideoCodecName("copy")
-
-                if (hasAudio) {
-                    recorderHLS.setSampleRate(outSampleRate)
-                    recorderHLS.setAudioCodec(needsTranscode ? AV_CODEC_ID_AAC : avData.inputAudioCodecId)
-                    if (!needsTranscode) {
-                        recorderHLS.setAudioCodecName("copy")
-                    }
+                if (avData.frameRate > 0) {
+                    recorderHLS.setFrameRate(avData.frameRate)
                 }
+
+                // HLS fMP4 muxer options
                 recorderHLS.setOption("level", "3.0")
                 recorderHLS.setOption("start_number", "0")
                 recorderHLS.setOption("hls_time", "3")
                 recorderHLS.setOption("hls_list_size", "0")
                 recorderHLS.setOption("hls_segment_type", "fmp4")
-
-                final fmp4InitFileName = "${stream?.recording?.location}-${epochTime}_.mp4"
-                recorderHLS.setOption("hls_fmp4_init_filename", "${fmp4InitFileName}")
+                recorderHLS.setOption("hls_flags", "independent_segments")
+                final String fmp4InitFileName = "${location}-${epochTime}_.mp4"
+                recorderHLS.setOption("hls_fmp4_init_filename", fmp4InitFileName)
                 recorderHLS.setOption("flush_packets", "1")
                 recorderHLS.setOption("fflags", "nobuffer")
 
-                AVFormatContext contextToUse = avData.inputFormatContext
-                AVStream inAudio = hasAudio ? avData.inputFormatContext.streams(avData.audioStreamIndex) : null
-                AVStream outAudio = null
-
-                if (!hasAudio || needsTranscode) {
-                    filteredCtx = avformat_alloc_context()
-
-                    // Stream 0: Video
-                    AVStream inVideo = avData.inputFormatContext.streams(avData.videoStreamIndex)
-                    AVStream outVideo = avformat_new_stream(filteredCtx, null)
-                    avcodec_parameters_copy(outVideo.codecpar(), inVideo.codecpar())
-                    outVideo.time_base(inVideo.time_base())
-                    outVideo.r_frame_rate(inVideo.r_frame_rate())
-                    outVideo.avg_frame_rate(inVideo.avg_frame_rate())
-
-                    // Stream 1: Transcoded AAC Audio
-
+                if (hasAudio) {
+                    recorderHLS.setSampleRate(outSampleRate)
+                    recorderHLS.setAudioChannels(channels)
                     if (needsTranscode) {
-                        // Pass inAudio.codecpar() directly so the decoder gets the exact sample rate & channels
-                        audioTranscoder = new AudioTranscoder(inAudio.codecpar(), outSampleRate, channels, 64000)
-
-                        outAudio = avformat_new_stream(filteredCtx, null)
-                        avcodec_parameters_from_context(outAudio.codecpar(), audioTranscoder.getEncoderContext())
-                        outAudio.time_base(av_make_q(1, outSampleRate))
+                        // Let FFmpegFrameRecorder natively encode PCM samples -> AAC-LC
+                        recorderHLS.setAudioCodec(AV_CODEC_ID_AAC)
+                        recorderHLS.setAudioBitrate(64000)
+                        recorderHLS.setAudioOption("profile", "aac_low")
+                        initAudioDecoder(avData.inputFormatContext.streams(avData.audioStreamIndex).codecpar(), outSampleRate, channels)
+                    } else {
+                        // Camera already produces AAC: stream-copy directly
+                        recorderHLS.setAudioCodec(avData.inputAudioCodecId)
+                        recorderHLS.setAudioCodecName("copy")
                     }
-                    contextToUse = filteredCtx
                 }
 
-                recorderHLS.start(contextToUse)
+                // Start recorder:
+                // - Pass inputFormatContext when stream-copying all active tracks
+                // - Call no-arg start() when FFmpegFrameRecorder is encoding audio natively
+                if (needsTranscode) {
+                    // Provide a video-only AVFormatContext so recordPacket() can stream-copy video,
+                    // while FFmpegFrameRecorder initializes its own internal AAC encoder for recordSamples()
+                    videoOnlyCtx = avformat_alloc_context()
+                    AVStream inVideoStream = avData.inputFormatContext.streams(avData.videoStreamIndex)
+                    AVStream outVideoStream = avformat_new_stream(videoOnlyCtx, null)
+                    avcodec_parameters_copy(outVideoStream.codecpar(), inVideoStream.codecpar())
+                    outVideoStream.time_base(inVideoStream.time_base())
+                    outVideoStream.r_frame_rate(inVideoStream.r_frame_rate())
+                    outVideoStream.avg_frame_rate(inVideoStream.avg_frame_rate())
 
-                // Capture the actual output stream time_base assigned by the fMP4 muxer after start()
+                    recorderHLS.start(videoOnlyCtx)
+                } else {
+                    recorderHLS.start(avData.inputFormatContext)
+                }
+                final AVStream inVideo = avData.inputFormatContext.streams(avData.videoStreamIndex)
+                final AVStream inAudio = hasAudio ? avData.inputFormatContext.streams(avData.audioStreamIndex) : null
+                final AVRational inVideoTb = inVideo.time_base()
                 final AVRational inAudioTb = inAudio?.time_base()
-                final AVRational outAudioTb = needsTranscode ? outAudio.time_base() : null
+                final AVRational usTb = av_make_q(1, 1_000_000)
+
+                long startTimeUs = AV_NOPTS_VALUE
 
                 queue = new PacketQueue(brigade.getGopCache())
                 recordingThread = Executors.newSingleThreadExecutor()
@@ -148,88 +176,159 @@ class Recorder {
                         while (running) {
                             try {
                                 AVPacket pkt = queue.getNextPacket()
+                                if (pkt == null || pkt.isNull()) continue
+
                                 int idx = pkt.stream_index()
 
+                                // Anchor both video & audio to one shared start timestamp (in microseconds)
+                                if (startTimeUs == AV_NOPTS_VALUE && pkt.pts() != AV_NOPTS_VALUE) {
+                                    AVRational tb = (idx == avData.videoStreamIndex) ? inVideoTb : inAudioTb
+                                    if (tb != null) {
+                                        startTimeUs = av_rescale_q(pkt.pts(), tb, usTb)
+                                    }
+                                }
+
                                 if (idx == avData.videoStreamIndex) {
-                                    if (filteredCtx != null) {
-                                        pkt.stream_index(0)
+                                    if (pkt.pts() != AV_NOPTS_VALUE && startTimeUs != AV_NOPTS_VALUE) {
+                                        long offsetInVideoTb = av_rescale_q(startTimeUs, usTb, inVideoTb)
+                                        long newPts = Math.max(0L, pkt.pts() - offsetInVideoTb)
+                                        long newDts = (pkt.dts() != AV_NOPTS_VALUE)
+                                                ? Math.max(0L, pkt.dts() - offsetInVideoTb)
+                                                : newPts
+                                        if (newDts > newPts) newDts = newPts
+                                        pkt.pts(newPts)
+                                        pkt.dts(newDts)
                                     }
                                     recorderHLS.recordPacket(pkt)
                                 } else if (hasAudio && idx == avData.audioStreamIndex) {
                                     if (needsTranscode) {
-                                        List<AVPacket> aacPackets = audioTranscoder.transcodePacket(pkt, inAudioTb, outAudioTb)
-                                        aacPackets.each { AVPacket aacPkt ->
-                                            aacPkt.stream_index(1)
-                                            recorderHLS.recordPacket(aacPkt)
-                                            av_packet_free(aacPkt)
-                                        }
+                                        decodeAndRecordAudio(pkt, inAudioTb, usTb, startTimeUs, outSampleRate, channels)
                                     } else {
-                                        if (filteredCtx != null) {
-                                            pkt.stream_index(1)
+                                        if (pkt.pts() != AV_NOPTS_VALUE && startTimeUs != AV_NOPTS_VALUE) {
+                                            long offsetInAudioTb = av_rescale_q(startTimeUs, usTb, inAudioTb)
+                                            long newPts = Math.max(0L, pkt.pts() - offsetInAudioTb)
+                                            long newDts = (pkt.dts() != AV_NOPTS_VALUE) ? Math.max(0L, pkt.dts() - offsetInAudioTb)
+                                                    : newPts
+                                            if (newDts > newPts) newDts = newPts
+                                            pkt.pts(newPts)
+                                            pkt.dts(newDts)
                                         }
                                         recorderHLS.recordPacket(pkt)
                                     }
                                 }
                                 freePacket(pkt)
-                            }
-                            catch (Exception ex) {
-                                logService.cam.error(ex.getClass().getName() + " in recording packet handler loop: " + ex.getMessage())
+                            } catch (Exception ex) {
+                                logService.cam.error("${ex.getClass().getName()} in recording packet handler loop: ${ex.getMessage()}")
                             }
                         }
-                    }
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         logService.cam.error("Error in recording loop", ex)
                     } finally {
-                        // Safe: guaranteed no packet is currently being transcoded or recorded
-                        queue?.stop() // Unblock queue.getNextPacket() if it's waiting
+                        queue?.stop()
                         try {
                             recorderHLS?.stop()
                         } catch (Exception ignored) {
                         }
                         try {
-                            recorderHLS.close()
+                            recorderHLS?.close()
                         } catch (Exception ignored) {
                         }
                         try {
                             recorderHLS?.release()
                         } catch (Exception ignored) {
                         }
-                        try {
-                            audioTranscoder?.close()
-                        } catch (Exception ignored) {
-                        }
+                        closeAudioDecoder()
                     }
                 })
-            }
-            catch (Exception ex) {
-                logService.cam.error(ex.getClass().getName() + " in Recorder start : " + ex.getMessage())
+            } catch (Exception ex) {
+                logService.cam.error("${ex.getClass().getName()} in Recorder start: ${ex.getMessage()}")
                 stop()
             }
         }
     }
 
+    private void initAudioDecoder(AVCodecParameters inCodecPar, int defaultSampleRate, int channels) {
+        AVCodec decoder = avcodec_find_decoder(inCodecPar.codec_id())
+        if (decoder == null) {
+            throw new IllegalStateException("Input audio codec decoder not found for codec_id=${inCodecPar.codec_id()}")
+        }
+        audioDecoderCtx = avcodec_alloc_context3(decoder)
+        if (avcodec_parameters_to_context(audioDecoderCtx, inCodecPar) < 0) {
+            throw new IllegalStateException("Could not copy input audio codec parameters")
+        }
+        if (audioDecoderCtx.sample_rate() <= 0) {
+            audioDecoderCtx.sample_rate(defaultSampleRate)
+        }
+        if (audioDecoderCtx.ch_layout().nb_channels() <= 0) {
+            AVChannelLayout chLayout = new AVChannelLayout()
+            av_channel_layout_default(chLayout, channels)
+            av_channel_layout_copy(audioDecoderCtx.ch_layout(), chLayout)
+            chLayout.close()
+        }
+        if (avcodec_open2(audioDecoderCtx, decoder, (PointerPointer) null) < 0) {
+            throw new IllegalStateException("Could not open input audio decoder")
+        }
+        decodedAudioFrame = av_frame_alloc()
+    }
+
+    private void decodeAndRecordAudio(
+            AVPacket pkt,
+            AVRational inAudioTb,
+            AVRational usTb,
+            long startTimeUs,
+            int sampleRate,
+            int channels
+    ) {
+        if (audioDecoderCtx == null || decodedAudioFrame == null) return
+        if (avcodec_send_packet(audioDecoderCtx, pkt) >= 0) {
+            while (avcodec_receive_frame(audioDecoderCtx, decodedAudioFrame) >= 0) {
+                long framePts = decodedAudioFrame.pts() != AV_NOPTS_VALUE
+                        ? decodedAudioFrame.pts()
+                        : decodedAudioFrame.best_effort_timestamp()
+                if (framePts != AV_NOPTS_VALUE && startTimeUs != AV_NOPTS_VALUE) {
+                    long ptsUs = av_rescale_q(framePts, inAudioTb, usTb) - startTimeUs
+                    if (ptsUs >= 0) {
+                        recorderHLS.setTimestamp(ptsUs)
+                        int totalSamples = decodedAudioFrame.nb_samples() * channels
+                        ShortBuffer pcmSamples = decodedAudioFrame.data(0)
+                                .capacity((long) totalSamples * 2L)
+                                .asByteBuffer()
+                                .order(ByteOrder.nativeOrder())
+                                .asShortBuffer()
+                        recorderHLS.recordSamples(sampleRate, channels, pcmSamples)
+                    }
+                }
+                av_frame_unref(decodedAudioFrame)
+            }
+        }
+    }
+
+    private void closeAudioDecoder() {
+        if (decodedAudioFrame != null) {
+            av_frame_free(decodedAudioFrame)
+            decodedAudioFrame = null
+        }
+        if (audioDecoderCtx != null) {
+            avcodec_free_context(audioDecoderCtx)
+            audioDecoderCtx = null
+        }
+    }
     void stop() {
         if (running) {
             running = false
-
             try {
-                // Wait for the packet loop to finish its current packet and exit
-                recordingThread.awaitTermination(5, TimeUnit.SECONDS)
+                recordingThread?.awaitTermination(5, TimeUnit.SECONDS)
             } catch (InterruptedException ignored) {
                 Thread.currentThread().interrupt()
             }
         }
-
-        if (filteredCtx != null) {
-            avformat_free_context(filteredCtx)
-            filteredCtx = null
-        }
         recordingThread = null
         queue = null
-
-        // Delete recordings older than 21 days
+// Delete recordings older than 21 days
         final String location = stream?.recording?.location
-        Process p = Runtime.getRuntime().exec("find ${config.camerasHomeDirectory}/$location -mtime +21 -type f -delete")
-        p.waitFor()
+        if (location) {
+            Process p = Runtime.getRuntime().exec(["find", "${config.camerasHomeDirectory}/${location}", "-mtime", "+21", "-type", "f", "-delete"] as String[])
+            p.waitFor()
+        }
     }
 }
