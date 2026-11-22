@@ -1,5 +1,6 @@
 package com.securitycam.recording
 
+import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
 import com.securitycam.controllers.Stream
 import com.securitycam.mediaserverutils.AVData
@@ -15,7 +16,6 @@ import java.util.concurrent.TimeUnit
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_copy
 import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_AAC
-import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_PCM_ALAW
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context
 import static org.bytedeco.ffmpeg.global.avformat.avformat_alloc_context
 import static org.bytedeco.ffmpeg.global.avformat.avformat_free_context
@@ -42,11 +42,13 @@ class Recorder {
     boolean running
     AVFormatContext filteredCtx
     AudioTranscoder audioTranscoder = null
+    Config config
 
-    Recorder(Camera cam, Stream stream, AVData avData, LogService logService) {
+    Recorder(Camera cam, Stream stream, AVData avData, Config config, LogService logService) {
         this.avData = avData
         queue = null
         this.formatContext = avData.inputFormatContext
+        this.config = config
         this.logService = logService
         final int preambleTime = stream.preambleTime
         brigade = new BucketBrigade(2500, preambleTime, formatContext, logService)
@@ -78,7 +80,7 @@ class Recorder {
                 int channels = hasAudio ? (needsTranscode ? 1 : avData.audioChannels) : 0
 
                 recorderHLS = new FFmpegFrameRecorder(
-                        "/home/richard/${location}/${location}-${epochTime}_.m3u8",
+                        "${config.camerasHomeDirectory}/${location}/${location}-${epochTime}_.m3u8",
                         avData.width,
                         avData.height,
                         channels
@@ -224,5 +226,10 @@ class Recorder {
         }
         recordingThread = null
         queue = null
+
+        // Delete recordings older than 21 days
+        final String location = stream?.recording?.location
+        Process p = Runtime.getRuntime().exec("find ${config.camerasHomeDirectory}/$location -mtime +21 -type f -delete")
+        p.waitFor()
     }
 }

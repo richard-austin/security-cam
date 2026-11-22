@@ -1,6 +1,7 @@
 package com.securitycam.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.securitycam.configuration.Config
 import com.securitycam.controllers.Camera
 import com.securitycam.controllers.Stream
 import com.securitycam.mediaserverutils.AVData
@@ -17,9 +18,11 @@ class RecorderFactory {
     LogService logService
     HttpServer server
     Map<String, Recorder> recorders
+    Config config
 
     @Autowired
-    RecorderFactory(LogService logService) {
+    RecorderFactory(Config config, LogService logService) {
+        this.config = config
         this.logService = logService
         recorders = new HashMap<>()
         startHttpServer()
@@ -29,7 +32,7 @@ class RecorderFactory {
         Recorder recorder = null
 
         if (stream?.recording?.enabled && !recorders.keySet().contains(cameraName)) {
-            recorders.put(cameraName, new Recorder(cam, stream, avData, logService))
+            recorders.put(cameraName, new Recorder(cam, stream, avData, config, logService))
         }
         return recorder
     }

@@ -405,13 +405,13 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
             stream.recording.enabled = true
             stream.recording.recording_input_url = "http://localhost:8085/recording/stream?rsuuid=cam" + camNum + "-stream" + streamNum + "r";
             stream.recording.recording_src_url = "http://localhost:8085/h/stream?rsuuid=cam" + camNum + "-stream" + streamNum + "r";
-            stream.recording.uri = 'http://localhost:8084/recording/rec' + stream.rec_num + '/';
+            stream.recording.uri = 'http://localhost:4200/recording/rec' + stream.rec_num + '/';
             stream.recording.location = 'rec' + stream.rec_num;
             stream.motion.trigger_recording_on = 'none';
           } else if (stream.motion.enabled) {
             stream.recording.enabled = true;
             stream.recording.recording_input_url = "";
-            stream.recording.uri = 'http://localhost:8084/recording/rec' + stream.rec_num + '/';
+            stream.recording.uri = 'http://localhost:4200/recording/rec' + stream.rec_num + '/';
             stream.recording.location = 'rec' + stream.rec_num;
             if (stream.motion.trigger_recording_on !== 'none') {
               let recStreamKey: string = stream.motion.trigger_recording_on;
@@ -422,7 +422,7 @@ export class ConfigSetupComponent implements CanComponentDeactivate, OnInit, Aft
                 recStream.recording.enabled = true;
                 recStream.recording.recording_input_url = "http://localhost:8085/recording/stream?rsuuid=cam" + camNum + "-" + recStreamKey + "r";
                 recStream.recording.recording_src_url = "http://localhost:8085/h/stream?rsuuid=cam" + camNum + "-" + recStreamKey + "r";
-                recStream.recording.uri = 'http://localhost:8084/recording/rec' + recStream.rec_num + '/';
+                recStream.recording.uri = 'http://localhost:4200/recording/rec' + recStream.rec_num + '/';
                 recStream.recording.location = 'rec' + recStream.rec_num;
               }
             }
