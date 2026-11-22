@@ -24,6 +24,10 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+import java.nio.FloatBuffer
+import static org.bytedeco.ffmpeg.global.avutil.AV_SAMPLE_FMT_FLT
+import static org.bytedeco.ffmpeg.global.avutil.AV_SAMPLE_FMT_FLTP
+
 import static com.securitycam.recording.deepCopy.deepCopyPacket
 import static com.securitycam.recording.deepCopy.freePacket
 import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_AAC
@@ -98,7 +102,7 @@ class Recorder {
                 long epochTime = Instant.now().epochSecond
                 final String location = stream?.recording?.location
                 final boolean hasAudio = stream.audio && avData.audioStreamIndex != -1
-                final boolean needsTranscode = hasAudio && avData.inputAudioCodecName?.toLowerCase() != "aac"
+                final boolean needsTranscode = hasAudio // && avData.inputAudioCodecName?.toLowerCase() != "aac"
                 final int outSampleRate = avData.sampleRate > 0 ? avData.sampleRate : 8000
                 final int channels = hasAudio ? (needsTranscode ? 1 : avData.audioChannels) : 0
 
@@ -168,6 +172,8 @@ class Recorder {
                 final AVRational usTb = av_make_q(1, 1_000_000)
 
                 long startTimeUs = AV_NOPTS_VALUE
+                long lastVideoDts = AV_NOPTS_VALUE
+                long lastAudioDts = AV_NOPTS_VALUE
 
                 queue = new PacketQueue(brigade.getGopCache())
                 recordingThread = Executors.newSingleThreadExecutor()
@@ -187,32 +193,69 @@ class Recorder {
                                         startTimeUs = av_rescale_q(pkt.pts(), tb, usTb)
                                     }
                                 }
-
                                 if (idx == avData.videoStreamIndex) {
-                                    if (pkt.pts() != AV_NOPTS_VALUE && startTimeUs != AV_NOPTS_VALUE) {
-                                        long offsetInVideoTb = av_rescale_q(startTimeUs, usTb, inVideoTb)
-                                        long newPts = Math.max(0L, pkt.pts() - offsetInVideoTb)
-                                        long newDts = (pkt.dts() != AV_NOPTS_VALUE)
-                                                ? Math.max(0L, pkt.dts() - offsetInVideoTb)
-                                                : newPts
-                                        if (newDts > newPts) newDts = newPts
-                                        pkt.pts(newPts)
-                                        pkt.dts(newDts)
+                                    // Wait until the first video keyframe so fMP4 starts cleanly on an IDR frame
+                                    if (startTimeUs == AV_NOPTS_VALUE) {
+                                        if ((pkt.flags() & org.bytedeco.ffmpeg.global.avcodec.AV_PKT_FLAG_KEY) == 0) {
+                                            freePacket(pkt)
+                                            continue
+                                        }
+                                        long refTs = (pkt.dts() != AV_NOPTS_VALUE) ? pkt.dts() : pkt.pts()
+                                        if (refTs == AV_NOPTS_VALUE) {
+                                            freePacket(pkt)
+                                            continue
+                                        }
+                                        startTimeUs = av_rescale_q(refTs, inVideoTb, usTb)
                                     }
+
+                                    long offsetInVideoTb = av_rescale_q(startTimeUs, usTb, inVideoTb)
+                                    long newDts = (pkt.dts() != AV_NOPTS_VALUE) ? (pkt.dts() - offsetInVideoTb) : (pkt.pts() - offsetInVideoTb)
+                                    long newPts = (pkt.pts() != AV_NOPTS_VALUE) ? (pkt.pts() - offsetInVideoTb) : newDts
+
+                                    if (newDts < 0) newDts = 0
+                                    if (lastVideoDts != AV_NOPTS_VALUE && newDts <= lastVideoDts) {
+                                        newDts = lastVideoDts + 1
+                                    }
+                                    if (newPts < newDts) {
+                                        newPts = newDts
+                                    }
+                                    lastVideoDts = newDts
+
+                                    pkt.dts(newDts)
+                                    pkt.pts(newPts)
                                     recorderHLS.recordPacket(pkt)
+
                                 } else if (hasAudio && idx == avData.audioStreamIndex) {
+                                    // Drop audio packets prior to the first video keyframe so audio never precedes video
+                                    if (startTimeUs == AV_NOPTS_VALUE) {
+                                        freePacket(pkt)
+                                        continue
+                                    }
+
                                     if (needsTranscode) {
                                         decodeAndRecordAudio(pkt, inAudioTb, usTb, startTimeUs, outSampleRate, channels)
                                     } else {
-                                        if (pkt.pts() != AV_NOPTS_VALUE && startTimeUs != AV_NOPTS_VALUE) {
-                                            long offsetInAudioTb = av_rescale_q(startTimeUs, usTb, inAudioTb)
-                                            long newPts = Math.max(0L, pkt.pts() - offsetInAudioTb)
-                                            long newDts = (pkt.dts() != AV_NOPTS_VALUE) ? Math.max(0L, pkt.dts() - offsetInAudioTb)
-                                                    : newPts
-                                            if (newDts > newPts) newDts = newPts
-                                            pkt.pts(newPts)
-                                            pkt.dts(newDts)
+                                        long offsetInAudioTb = av_rescale_q(startTimeUs, usTb, inAudioTb)
+                                        long refTs = (pkt.dts() != AV_NOPTS_VALUE) ? pkt.dts() : pkt.pts()
+                                        long newDts = (refTs != AV_NOPTS_VALUE) ? (refTs - offsetInAudioTb) : 0L
+                                        long newPts = (pkt.pts() != AV_NOPTS_VALUE) ? (pkt.pts() - offsetInAudioTb) : newDts
+
+                                        // Drop stale pre-keyframe audio packets
+                                        if (newPts < 0) {
+                                            freePacket(pkt)
+                                            continue
                                         }
+                                        if (newDts < 0) newDts = 0
+                                        if (lastAudioDts != AV_NOPTS_VALUE && newDts <= lastAudioDts) {
+                                            newDts = lastAudioDts + 1
+                                        }
+                                        if (newPts < newDts) {
+                                            newPts = newDts
+                                        }
+                                        lastAudioDts = newDts
+
+                                        pkt.dts(newDts)
+                                        pkt.pts(newPts)
                                         recorderHLS.recordPacket(pkt)
                                     }
                                 }
@@ -290,12 +333,23 @@ class Recorder {
                     if (ptsUs >= 0) {
                         recorderHLS.setTimestamp(ptsUs)
                         int totalSamples = decodedAudioFrame.nb_samples() * channels
-                        ShortBuffer pcmSamples = decodedAudioFrame.data(0)
-                                .capacity((long) totalSamples * 2L)
-                                .asByteBuffer()
-                                .order(ByteOrder.nativeOrder())
-                                .asShortBuffer()
-                        recorderHLS.recordSamples(sampleRate, channels, pcmSamples)
+                        int fmt = decodedAudioFrame.format()
+
+                        if (fmt == AV_SAMPLE_FMT_FLTP || fmt == AV_SAMPLE_FMT_FLT) {
+                            FloatBuffer floatSamples = decodedAudioFrame.data(0)
+                                    .capacity((long) totalSamples * 4L)
+                                    .asByteBuffer()
+                                    .order(ByteOrder.nativeOrder())
+                                    .asFloatBuffer()
+                            recorderHLS.recordSamples(sampleRate, channels, floatSamples)
+                        } else {
+                            ShortBuffer pcmSamples = decodedAudioFrame.data(0)
+                                    .capacity((long) totalSamples * 2L)
+                                    .asByteBuffer()
+                                    .order(ByteOrder.nativeOrder())
+                                    .asShortBuffer()
+                            recorderHLS.recordSamples(sampleRate, channels, pcmSamples)
+                        }
                     }
                 }
                 av_frame_unref(decodedAudioFrame)
