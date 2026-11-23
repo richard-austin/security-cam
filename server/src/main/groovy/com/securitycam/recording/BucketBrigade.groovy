@@ -40,6 +40,8 @@ class BucketBrigade {
         gopCache = new GOPCache(800, formatContext, logService)
     }
 
+    def callCount = 0
+
     AVPacket write(AVPacket pkt, String cameraName) {
         AVPacket delayedPacket = null
         switch (phase) {
@@ -73,11 +75,10 @@ class BucketBrigade {
 
                     final AVPacket outputPacket = delayedPacket
                     if(outputPacket == null || outputPacket.isNull()) {
-                        logService.cam.error("Output packet was null in the bucket brigade")
+                        logService.cam.error("Output packet was null in the bucket brigade for $cameraName")
                         break
                     } else if(formatContext == null || formatContext.isNull()) {
-                        logService.cam.error("formatContext was null in the bucket brigade")
-                        break
+                        throw new Exception("formatContext was null in the bucket brigade for $cameraName")
                     }
                     AVStream avStream = formatContext.streams(outputPacket.stream_index())
                     if(avStream == null)
