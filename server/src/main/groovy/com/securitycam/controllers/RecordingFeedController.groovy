@@ -31,7 +31,6 @@ class RecordingFeedController {
         if (controller == 'recording' && location.startsWith("rec")) {
             try {
                 String fileName = sections[sections.length - 1]
-                System.out.println("location = $location, file = $fileName")
                 File file = new File("/var/security-cam/$location/$fileName")
                 byte[] bytes = Files.readAllBytes(file.toPath())
 
