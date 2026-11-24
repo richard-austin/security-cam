@@ -403,7 +403,7 @@ class Recorder {
             @Override
             void run() {
                 recorder.stop()
-                timer.purge()
+                timer?.purge()
                 timer = null
             }
         }

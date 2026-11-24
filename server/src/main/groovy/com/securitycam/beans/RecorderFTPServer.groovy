@@ -1,5 +1,6 @@
 package com.securitycam.beans
 
+import com.securitycam.configuration.Config
 import com.securitycam.interfaceobjects.Asymmetric
 import com.securitycam.services.LogService
 import com.securitycam.services.RecorderFactory
@@ -26,6 +27,11 @@ import org.apache.ftpserver.usermanager.impl.WritePermission
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import org.slf4j.LoggerFactory
+
 import java.util.stream.Stream
 
 
@@ -33,13 +39,17 @@ import java.util.stream.Stream
 class RecorderFTPServer {
     LogService logService
     RecorderFactory recorderFactory
+    Config config
     Map<UUID, String> sessionCameraIds
 
     @Autowired
-    RecorderFTPServer(LogService logService, RecorderFactory recorderFactory) {
+    RecorderFTPServer(LogService logService, RecorderFactory recorderFactory, Config config) {
         this.logService = logService
         this.recorderFactory = recorderFactory
+        this.config = config
         sessionCameraIds = new HashMap<UUID, String>()
+        ((Logger) LoggerFactory.getLogger("org.apache.ftpserver")).setLevel(Level.ERROR)
+        ((Logger) LoggerFactory.getLogger("org.apache.mina")).setLevel(Level.ERROR)
     }
 
     @PostConstruct
@@ -47,11 +57,10 @@ class RecorderFTPServer {
         Asymmetric asym = new Asymmetric()
         FtpServerFactory serverFactory = new FtpServerFactory()
         ListenerFactory factory = new ListenerFactory()
-        factory.setPort(2121)// set the port of the listener (choose your desired port, not 1234)
+        factory.setPort(2121)
         serverFactory.addListener("default", factory.createListener())
         PropertiesUserManagerFactory userManagerFactory = new PropertiesUserManagerFactory()
-        userManagerFactory.setFile(new File("/home/richard/myusers.properties"))
-//choose any. We're telling the FTP-server where to read its user list
+        userManagerFactory.setFile(new File("${config.camerasHomeDirectory}/ftp-server.properties"))
         userManagerFactory.setPasswordEncryptor(new PasswordEncryptor()
         {
             @Override
@@ -64,18 +73,18 @@ class RecorderFTPServer {
                 return passwordToCheck.equals(asym.decrypt(storedPassword))
             }
         })
-//Let's add a user, since our myusers.properties file is empty on our first test run
+        //Add a user, since our ftp-server.properties file is empty on our first test run
         BaseUser user = new BaseUser()
-        // TODO: Set this up during installation
+        // TODO: Set this up during installation, and the installer needs to create an empty ftp-server.properties file at install time
         user.setName("user")
         user.setPassword("12345")
-        user.setHomeDirectory("/home/richard")
+        user.setHomeDirectory("${config.camerasHomeDirectory}")
         List<Authority> authorities = new ArrayList<Authority>()
         authorities.add(new WritePermission())
         user.setAuthorities(authorities)
         UserManager um = userManagerFactory.createUserManager()
         try {
-            um.save(user)//Save the user to the user list on the filesystem
+            um.save(user)
         }
         catch (FtpException ex) {
             logService.cam.error("${ex.getClass().getName()} in FTP server: ${ex.getMessage()}")
@@ -86,19 +95,15 @@ class RecorderFTPServer {
         {
             @Override
             void init(FtpletContext ftpletContext) throws FtpException {
-                //System.out.println("init")
-                //System.out.println("Thread #" + Thread.currentThread().getId())
             }
 
             @Override
             void destroy() {
-                //System.out.println("destroy")
-                //System.out.println("Thread #" + Thread.currentThread().getId())
             }
 
             @Override
             FtpletResult beforeCommand(FtpSession session, FtpRequest request) throws FtpException, IOException {
-                   System.out.println("beforeCommand " + session.getUserArgument() + " : " + session.toString() + " | " + request.getArgument() + " : " + request.getCommand() + " : " + request.getRequestLine())
+                //   System.out.println("beforeCommand " + session.getUserArgument() + " : " + session.toString() + " | " + request.getArgument() + " : " + request.getCommand() + " : " + request.getRequestLine())
                 if (request.command.toLowerCase() == "cwd") {
                     String[] requestParts = request.getArgument().split("/")
                     String cameraName
@@ -106,16 +111,15 @@ class RecorderFTPServer {
                         cameraName = requestParts[0]
                     else if (requestParts.length > 1)
                         cameraName = requestParts[1]
-                    else {
-                        logService.cam.error("Malformed request from ftp client ${request.getArgument()}")
-                        return FtpletResult.DISCONNECT
-                    }
+                    else
+                        return FtpletResult.DEFAULT
+
                     recorderFactory.startFromFtp(cameraName)
                     sessionCameraIds.put(session.sessionId, cameraName)
                 }
-                //System.out.println("Thread #" + Thread.currentThread().getId())
+
                 if (request.hasArgument() && request.argument.contains("camera"))
-                    System.out.println(request.argument)
+                    logService.cam.info("Starting recording on ${request.argument}")
 
                 return FtpletResult.DEFAULT
             }
@@ -124,7 +128,7 @@ class RecorderFTPServer {
 
             @Override
             FtpletResult afterCommand(FtpSession session, FtpRequest request, FtpReply reply) throws FtpException, IOException {
-                 System.out.println("afterCommand " + session.getUserArgument() + " : " + session.toString() + " | " + request.getArgument() + " : " + request.getCommand() + " : " + request.getRequestLine() + " | " + reply.getMessage() + " : " + reply.toString())
+               //  System.out.println("afterCommand " + session.getUserArgument() + " : " + session.toString() + " | " + request.getArgument() + " : " + request.getCommand() + " : " + request.getRequestLine() + " | " + reply.getMessage() + " : " + reply.toString())
                 if (request.command.equalsIgnoreCase("stor") && reply.isPositive()) {
                     final String cameraId = sessionCameraIds[session.sessionId]
 
@@ -148,27 +152,19 @@ class RecorderFTPServer {
 
             @Override
             FtpletResult onConnect(FtpSession session) throws FtpException, IOException {
-                //System.out.println("onConnect " + session.getUserArgument() + " : " + session.toString())
-                //System.out.println("Thread #" + Thread.currentThread().getId())
-
-                //do something
-                return FtpletResult.DEFAULT//...or return accordingly
+                return FtpletResult.DEFAULT
             }
 
             @Override
             FtpletResult onDisconnect(FtpSession session) throws FtpException, IOException {
-                //System.out.println("onDisconnect " + session.getUserArgument() + " : " + session.toString())
-                //System.out.println("Thread #" + Thread.currentThread().getId())
-
-                //do something
-                return FtpletResult.DEFAULT//...or return accordingly
+                return FtpletResult.DEFAULT
             }
         })
         serverFactory.setFtplets(m)
-//Map<String, Ftplet> mappa = serverFactory.getFtplets()
-//System.out.println(mappa.size())
-//System.out.println("Thread #" + Thread.currentThread().getId())
-//System.out.println(mappa.toString())
+        //Map<String, Ftplet> mappa = serverFactory.getFtplets()
+        //System.out.println(mappa.size())
+        //System.out.println("Thread #" + Thread.currentThread().getId())
+        //System.out.println(mappa.toString())
         FtpServer server = serverFactory.createServer()
         try {
             server.start()
