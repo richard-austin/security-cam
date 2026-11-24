@@ -4,9 +4,9 @@ import com.securitycam.services.LogService
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avformat.AVFormatContext
 import org.bytedeco.ffmpeg.avformat.AVStream
-import java.util.concurrent.LinkedBlockingQueue
 import org.bytedeco.ffmpeg.global.avutil
 
+import static com.securitycam.recording.deepCopy.deepCopyPacket
 import static org.bytedeco.ffmpeg.global.avcodec.AV_PKT_FLAG_KEY
 
 class BucketBrigade {
@@ -40,9 +40,7 @@ class BucketBrigade {
         gopCache = new GOPCache(800, formatContext, logService)
     }
 
-    def callCount = 0
-
-    AVPacket write(AVPacket pkt, String cameraName) {
+    AVPacket writeAndGetDelayed(AVPacket pkt, String cameraName) {
         AVPacket delayedPacket = null
         switch (phase) {
             case brigadePhase.eGetSettleStartTime:
@@ -73,7 +71,7 @@ class BucketBrigade {
                     inputIndex = ++inputIndex % indexLimit
                     outputIndex = (inputIndex + 1) % indexLimit
 
-                    final AVPacket outputPacket = delayedPacket
+                    final AVPacket outputPacket = deepCopyPacket(delayedPacket)
                     if(outputPacket == null || outputPacket.isNull()) {
                         logService.cam.error("Output packet was null in the bucket brigade for $cameraName")
                         break
@@ -96,5 +94,4 @@ class BucketBrigade {
         }
         return delayedPacket
     }
-
 }

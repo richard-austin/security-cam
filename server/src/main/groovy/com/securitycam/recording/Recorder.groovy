@@ -87,7 +87,7 @@ class Recorder {
     void write(AVPacket packet, String cameraName) {
         AVPacket clonedPacket = deepCopyPacket(packet)
         if (!clonedPacket.isNull()) {
-            AVPacket delayedPacket = brigade.write(clonedPacket, cameraName)
+            AVPacket delayedPacket = brigade.writeAndGetDelayed(clonedPacket, cameraName)
             if (delayedPacket != null && brigade.phase == BucketBrigade.brigadePhase.eRunning && queue != null) {
                 queue.putPacket(delayedPacket)
             }
@@ -393,5 +393,26 @@ class Recorder {
             Process p = Runtime.getRuntime().exec(["find", "${config.camerasHomeDirectory}/${location}", "-mtime", "+21", "-type", "f", "-delete"] as String[])
             p.waitFor()
         }
+    }
+
+    Timer timer
+
+    void startFromFtp() {
+        def recorder = this
+        TimerTask task = new TimerTask() {
+            @Override
+            void run() {
+                recorder.stop()
+                timer.purge()
+                timer = null
+            }
+        }
+        if (timer != null) {
+            timer.cancel()
+        }
+        timer = new Timer("ftp triggered timer")
+        final minRecordingTime = 30  // Seconds
+        timer.schedule(task, minRecordingTime * 1000)
+        this.start()
     }
 }

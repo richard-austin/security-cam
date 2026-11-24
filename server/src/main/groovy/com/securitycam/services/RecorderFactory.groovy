@@ -102,27 +102,12 @@ class RecorderFactory {
         return isOk
     }
 
-    Timer timer = null
-
     void startFromFtp(String cameraName) {
         if(recorders.containsKey(cameraName)) {
             Recorder recorder = recorders.get(cameraName)
-            TimerTask task = new TimerTask() {
-                @Override
-                void run() {
-                    recorder.stop()
-                    timer = null
-                }
-            }
-            if(timer != null) {
-                timer.cancel()
-            }
-            timer = new Timer("ftp triggered timer")
-            final minRecordingTime = 30  // Seconds
-            timer.schedule(task, minRecordingTime * 1000)
-            recorder.start()
+            recorder.startFromFtp()
         } else {
-            logService.cam.error("$cameraName is not set up for ftp triggered recording")
+            logService.cam.error("$cameraName is not in the recorders list")
         }
     }
 }

@@ -6,7 +6,6 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket
 import java.util.concurrent.BlockingQueue
 
 import static com.securitycam.recording.deepCopy.freePacket
-import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free
 
 class PacketQueue {
     private int index
