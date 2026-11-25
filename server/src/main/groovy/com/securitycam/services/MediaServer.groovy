@@ -21,6 +21,9 @@ import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.FFmpegFrameRecorder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+
+import java.util.concurrent.TimeUnit
+
 import static org.bytedeco.ffmpeg.global.avcodec.*
 
 import java.util.concurrent.ExecutorService
@@ -124,7 +127,7 @@ class MediaServer {
                     logService.cam.info("Routing raw low-latency streams...")
 
                     // Low-Latency Packet Copying Loop
-                    while ((packet = grabber.grabPacket()) != null) {
+                    while (running && (packet = grabber.grabPacket()) != null) {
                         try {
                             int streamIndex = packet.stream_index()
                             BytePointer data = packet.data()
@@ -166,7 +169,6 @@ class MediaServer {
                     logService.cam.info("Camera closed the stream sequence gracefully.")
                 } catch (Exception e) {
                     logService.cam.error("${e.getClass().getName()} in media server main  loop: " + e.getMessage())
-                    recorders.closeThisRecorder(cameraName)
                     logService.cam.error(e.stackTrace.toString())
                 } finally {
                     if (started) {
@@ -174,6 +176,9 @@ class MediaServer {
                     } else {
                         grabber.release()
                     }
+                    try {
+                        recorders.closeThisRecorder(cameraName)
+                    } catch(Exception ignored){}
                     try {
                         if (recordAAC != null && "aac".equals(inputAudioCodecName)) {
                             recordAAC.stop()
@@ -238,6 +243,8 @@ class MediaServer {
         running = false
         Thread.sleep(2000)
         mediaThreads.shutdown()
+        if(!mediaThreads.awaitTermination(5, TimeUnit.SECONDS))
+            mediaThreads.shutdownNow()
     }
 
     void start() {

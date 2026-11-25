@@ -35,8 +35,6 @@ class Sc_processesService {
     }
 
     ArrayList<Process> processes
-    ExecutorService processExecutors
-
     boolean running = false
 
     final int ipCheckTimeout = 1000 * 60 * 15  // 15 minutes time between IP checks
@@ -204,12 +202,18 @@ class Sc_processesService {
             setupIpCheckTimer()
             running = true
             final int startServicesTimeout = 12000
-            processExecutors = Executors.newCachedThreadPool()
-             // Start motion and media servers and reload config to take on any changes
-            RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
-                    "{\"command\": \"start_services\"}",
-                    true, startServicesTimeout)
+            if (environment.getProperty("spring.profiles.active") != "dev") {
+                // Start motion and media servers and reload config to take on any changes
+                RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
+                        "{\"command\": \"start_services\"}",
+                        true, startServicesTimeout)
 
+                if (restResponse.responseCode != 200) {
+                    logService.cam.error("Error starting motion service: ${restResponse.errorMsg}")
+                    response.status = PassFail.FAIL
+                    response.error = restResponse.errorMsg
+                }
+            }
             // Populate the onvif device map so the devices don't have to be created each time a PTZ operation is done
             try {
                 mediaServer.start()
@@ -220,12 +224,6 @@ class Sc_processesService {
                 logService.cam.warn("${ex.getClass().getName()} in populateDeviceMap: ${ex.getMessage()}")
             }
 
-            if (restResponse.responseCode != 200) {
-                logService.cam.error("Error starting motion service: ${restResponse.errorMsg}")
-                response.status = PassFail.FAIL
-                response.error = restResponse.errorMsg
-            }
-            //     Runtime.getRuntime().exec("pkill --signal SIGHUP motion")
 
         }
         catch (Exception ex) {
@@ -244,13 +242,15 @@ class Sc_processesService {
         try {
             running = false
             final int stopServicesTimeout = 15000
-            RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
-                    "{\"command\": \"stop_services\"}",
-                    true, stopServicesTimeout)
-            if (restResponse.responseCode != 200) {
-                logService.cam.error("Error stopping motion service: ${restResponse.errorMsg}")
-                response.status = PassFail.FAIL
-                response.error = restResponse.errorMsg
+            if (environment.getProperty("spring.profiles.active") != "dev") {
+                RestfulResponse restResponse = restfulInterfaceService.sendRequest("localhost:8000", "/",
+                        "{\"command\": \"stop_services\"}",
+                        true, stopServicesTimeout)
+                if (restResponse.responseCode != 200) {
+                    logService.cam.error("Error stopping motion service: ${restResponse.errorMsg}")
+                    response.status = PassFail.FAIL
+                    response.error = restResponse.errorMsg
+                }
             }
 
             mediaServer.stop()
@@ -258,7 +258,6 @@ class Sc_processesService {
 
             ipChangeCheckTimer.cancel()
             ipChangeCheckTimer.purge()
-            processExecutors.shutdownNow()
             processes.forEach(process -> {
                 process.descendants().forEach(desc -> desc.destroy())
                 process.destroy()
