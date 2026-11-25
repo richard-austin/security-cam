@@ -115,7 +115,7 @@ class PullPointHandlerContainer implements PullMessagesCallbacks {
             timer.cancel()
             timer.purge()
             timer = null
-            restfulInterfaceService.sendRequest("localhost:8086", "/", "{\"command\": \"end_recording\", \"camera_name\": \"$camKey\"}\r\n", true, recordingSvcTimout)
+            restfulInterfaceService.sendRequest("localhost:8086", "/", "{\"command\": \"stop_recording\", \"camera_name\": \"$camKey\"}\r\n", true, recordingSvcTimout)
             logService.cam.info("Pull point event triggered recording for $camKey complete")
         }
     }

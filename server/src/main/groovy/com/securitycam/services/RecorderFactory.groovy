@@ -13,6 +13,8 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
+import java.util.concurrent.ConcurrentHashMap
+
 @Service
 class RecorderFactory {
     LogService logService
@@ -24,17 +26,18 @@ class RecorderFactory {
     RecorderFactory(Config config, LogService logService) {
         this.config = config
         this.logService = logService
-        recorders = new HashMap<>()
+        recorders = new ConcurrentHashMap<>()
         startHttpServer()
     }
 
-    Recorder addRecorder(String cameraName, Camera cam, Stream stream, AVData avData) {
-        Recorder recorder = null
+    boolean addRecorder(String cameraName, Camera cam, Stream stream, AVData avData) {
+        boolean retVal = false
 
         if (stream?.recording?.enabled && !recorders.keySet().contains(cameraName)) {
             recorders.put(cameraName, new Recorder(cam, stream, avData, config, logService))
+            retVal = true
         }
-        return recorder
+        return retVal
     }
 
     void write(AVPacket pkt, String cameraName) {
@@ -54,7 +57,7 @@ class RecorderFactory {
     void closeThisRecorder(String cameraName) {
         final recorder = recorders.get(cameraName)
         if(recorder != null) {
-            recorder.stop()
+            recorder.destroy()
             recorders.remove(cameraName)
         }
     }

@@ -95,7 +95,21 @@ dependencies {
     implementation 'org.apache.wss4j:wss4j-ws-security-common:4.0.2'
     implementation 'org.opensaml:opensaml-xacml-impl:4.3.0'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
-    implementation("org.bytedeco:javacv-platform:1.5.14")
+//    implementation("org.bytedeco:javacv-platform:1.5.14")
+    // Pure Java wrappers
+    implementation 'org.bytedeco:javacv:1.5.14'
+
+    // Filtered automatically to ONLY linux-arm64 and linux-x86_64
+    // 1. Base Java classes (no native code)
+    implementation 'org.bytedeco:javacv:1.5.14'
+    implementation 'org.bytedeco:javacpp:1.5.14'
+    implementation 'org.bytedeco:ffmpeg:8.1.2-1.5.14'
+
+    // 2. Native binaries ONLY for Linux arm64 and amd64 (x86_64)
+    runtimeOnly 'org.bytedeco:javacpp:1.5.14:linux-arm64'
+    runtimeOnly 'org.bytedeco:javacpp:1.5.14:linux-x86_64'
+    runtimeOnly 'org.bytedeco:ffmpeg:8.1.2-1.5.14:linux-arm64'
+    runtimeOnly 'org.bytedeco:ffmpeg:8.1.2-1.5.14:linux-x86_64'
 
  //   runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
 }

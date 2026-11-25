@@ -86,10 +86,15 @@ class Recorder {
 
     void write(AVPacket packet, String cameraName) {
         AVPacket clonedPacket = deepCopyPacket(packet)
-        if (!clonedPacket.isNull()) {
+        if (clonedPacket != null && !clonedPacket.isNull()) {
             AVPacket delayedPacket = brigade.writeAndGetDelayed(clonedPacket, cameraName)
-            if (delayedPacket != null && brigade.phase == BucketBrigade.brigadePhase.eRunning && queue != null) {
-                queue.putPacket(delayedPacket)
+            if (delayedPacket != null) {
+                PacketQueue currentQueue = this.queue
+                if (brigade.phase == BucketBrigade.brigadePhase.eRunning && currentQueue != null) {
+                    currentQueue.putPacket(delayedPacket)
+                } else {
+                    freePacket(delayedPacket)
+                }
             }
         } else {
             logService.cam.error("Cloned packet isNull in Recorder.write")
@@ -270,7 +275,7 @@ class Recorder {
                             }
                         }
                     } catch (Exception ex) {
-                        logService.cam.error("Error in recording loop", ex)
+                        logService.cam.error("${ex.getClass().getName()} error in recording loop ${ex.getMessage()}")
                     } finally {
                         queue?.stop()
                         try {
@@ -379,20 +384,32 @@ class Recorder {
     void stop() {
         if (running) {
             running = false
-            try {
-                recordingThread?.awaitTermination(5, TimeUnit.SECONDS)
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt()
+            queue?.stop()
+            if (recordingThread != null) {
+                recordingThread.shutdown()
+                try {
+                    if (!recordingThread.awaitTermination(5, TimeUnit.SECONDS)) {
+                        recordingThread.shutdownNow()
+                    }
+                } catch (InterruptedException ignored) {
+                    recordingThread.shutdownNow()
+                    Thread.currentThread().interrupt()
+                }
+            }
+            recordingThread = null
+            queue = null
+// Delete recordings older than 21 days
+            final String location = stream?.recording?.location
+            if (location) {
+                Process p = Runtime.getRuntime().exec(["find", "${config.camerasHomeDirectory}/${location}", "-mtime", "+21", "-type", "f", "-delete"] as String[])
+                p.waitFor()
             }
         }
-        recordingThread = null
-        queue = null
-// Delete recordings older than 21 days
-        final String location = stream?.recording?.location
-        if (location) {
-            Process p = Runtime.getRuntime().exec(["find", "${config.camerasHomeDirectory}/${location}", "-mtime", "+21", "-type", "f", "-delete"] as String[])
-            p.waitFor()
-        }
+    }
+
+    void destroy() {
+        stop()
+        brigade?.cleanup()
     }
 
     Timer timer

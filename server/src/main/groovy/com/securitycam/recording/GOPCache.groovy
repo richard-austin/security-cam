@@ -13,7 +13,6 @@ class GOPCache {
     LogService logService
     final AVPacket[] cache
     final int cacheLength
-
     int packetIndex
     boolean hasKeyFrame
     AVFormatContext formatContext
@@ -28,41 +27,59 @@ class GOPCache {
     }
 
     void write(AVPacket pkt) {
+        if (pkt == null || pkt.isNull()) return
         synchronized (cache) {
-            if (packetIndex < this.cacheLength) {
-                if (hasKeyFrame)
-                    cache[packetIndex++] = pkt     // Only keyFrames at the start
-            } else
-                logService.cam.error("GOPCache length exceeded (" + this.cacheLength + ")")
+            if (hasKeyFrame && packetIndex < this.cacheLength) {
+                cache[packetIndex++] = pkt
+            } else {
+                if (packetIndex >= this.cacheLength) {
+                    logService.cam.error("GOPCache length exceeded (" + this.cacheLength + ")")
+                }
+                freePacket(pkt)
+            }
         }
     }
 
     void writeKeyFrame(AVPacket pkt) {
-        hasKeyFrame = true
+        if (pkt == null || pkt.isNull()) return
         synchronized (cache) {
             for (int i = 0; i < packetIndex; ++i) {
-                def cachedPkt = cache[i]
-                freePacket(cachedPkt)
+                freePacket(cache[i])
+                cache[i] = null
             }
             packetIndex = 0
+            hasKeyFrame = true
+            cache[packetIndex++] = pkt
         }
-        write(pkt)
     }
 
-    LinkedBlockingQueue getQueue() {
+    LinkedBlockingQueue<AVPacket> getQueue() {
         synchronized (cache) {
             LinkedBlockingQueue<AVPacket> q = new LinkedBlockingQueue<AVPacket>()
-
-            // Put the current gop cache into the queue
             for (int i = 0; i < packetIndex; ++i) {
                 def pkt = cache[i]
-                q.put(deepCopyPacket(pkt))
-                freePacket(pkt)
+                if (pkt != null && !pkt.isNull()) {
+                    q.put(deepCopyPacket(pkt))
+                    freePacket(pkt)
+                }
+                cache[i] = null
             }
-
             packetIndex = 0
             hasKeyFrame = false
             return q
+        }
+    }
+
+    void cleanup() {
+        synchronized (cache) {
+            for (int i = 0; i < packetIndex; ++i) {
+                if (cache[i] != null) {
+                    freePacket(cache[i])
+                    cache[i] = null
+                }
+            }
+            packetIndex = 0
+            hasKeyFrame = false
         }
     }
 }

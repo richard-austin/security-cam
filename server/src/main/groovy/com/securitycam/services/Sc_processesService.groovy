@@ -22,6 +22,7 @@ class Sc_processesService {
 
     LogService logService
     RestfulInterfaceService restfulInterfaceService
+    MediaServer mediaServer
     Config config
     UtilsService utilsService
     Environment environment
@@ -43,9 +44,10 @@ class Sc_processesService {
     Timer ipChangeCheckTimer
 
     @Autowired
-    Sc_processesService(LogService logService, RestfulInterfaceService restfulInterfaceService, Config config, UtilsService utilsService, Environment environment, UserRepository userRepository) {
+    Sc_processesService(LogService logService, RestfulInterfaceService restfulInterfaceService, MediaServer mediaServer, Config config, UtilsService utilsService, Environment environment, UserRepository userRepository) {
         this.logService = logService
         this.restfulInterfaceService = restfulInterfaceService
+        this.mediaServer = mediaServer
         this.config = config
         this.utilsService = utilsService
         this.environment = environment
@@ -210,6 +212,7 @@ class Sc_processesService {
 
             // Populate the onvif device map so the devices don't have to be created each time a PTZ operation is done
             try {
+                mediaServer.start()
                 onvifService.populateDeviceMap()
                 onvifService.startPullPointEventMonitor()
             }
@@ -250,6 +253,7 @@ class Sc_processesService {
                 response.error = restResponse.errorMsg
             }
 
+            mediaServer.stop()
             onvifService.stopPullPointEventMonitor()
 
             ipChangeCheckTimer.cancel()

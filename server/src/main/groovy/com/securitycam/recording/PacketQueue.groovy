@@ -2,41 +2,54 @@ package com.securitycam.recording
 
 import org.bytedeco.ffmpeg.avcodec.AVPacket
 
-
 import java.util.concurrent.BlockingQueue
 
 import static com.securitycam.recording.deepCopy.freePacket
 
 class PacketQueue {
-    private int index
-    private ArrayList<byte[]> cacheSnapshot
-    int cacheLength
-    boolean stopped
+    private static final AVPacket POISON_PILL = new AVPacket()
 
-    BlockingQueue q
+    final int cacheLength
+    private volatile boolean stopped
+    private final BlockingQueue<AVPacket> q
+    private final Object lock = new Object()
 
     PacketQueue(GOPCache src) {
-        stopped = false
+        this.stopped = false
         this.cacheLength = src.cacheLength
-        this.cacheSnapshot = new ArrayList<AVPacket>(src.cacheLength)
-        this.index = 0
         this.q = src.getQueue()
     }
 
-    AVPacket getNextPacket() {
-        return q.take() as AVPacket
+    AVPacket getNextPacket() throws InterruptedException {
+        AVPacket pkt = q.take()
+        if (pkt === POISON_PILL) {
+            return null
+        }
+        return pkt
     }
 
     void putPacket(AVPacket pkt) {
-        if(!stopped)
-            q.put(pkt)
+        if (pkt == null || pkt.isNull()) return
+        synchronized (lock) {
+            if (!stopped) {
+                q.put(pkt)
+            } else {
+                freePacket(pkt)
+            }
+        }
     }
 
     void stop() {
-        stopped = true
-        while(!q.empty) {
-            def pkt = q.take() as AVPacket
-            freePacket(pkt)
+        synchronized (lock) {
+            if (stopped) return
+            stopped = true
+            AVPacket pkt
+            while ((pkt = q.poll()) != null) {
+                if (pkt !== POISON_PILL) {
+                    freePacket(pkt)
+                }
+            }
+            q.offer(POISON_PILL)
         }
     }
 }

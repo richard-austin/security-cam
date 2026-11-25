@@ -17,7 +17,6 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avcodec.AVProfile
 import org.bytedeco.ffmpeg.global.avformat
 import org.bytedeco.javacpp.BytePointer
-import org.bytedeco.javacpp.Pointer
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.FFmpegFrameRecorder
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,6 +45,7 @@ class MediaServer {
         this.recorders = recorders
         this.mediaStreamHandler = mediaStreamHandler
         this.config = config
+        avformat.avformat_network_init()
     }
 
     void runStreamingSession(String rtspUrl, String cameraName, Camera cam, String streamName, Stream stream) throws Exception {
@@ -65,8 +65,6 @@ class MediaServer {
                 camStreamId = uri.substring(index + "=".length(), uri.length())
 
             final boolean recordingEnabled = isRecordingEnabled(cam, stream, streamName)
-
-            avformat.avformat_network_init()
 
             while (running) {
                 // 1. Declare variables here so they are in scope for try, catch, and finally
@@ -127,44 +125,45 @@ class MediaServer {
 
                     // Low-Latency Packet Copying Loop
                     while ((packet = grabber.grabPacket()) != null) {
-                        int streamIndex = packet.stream_index()
-                        BytePointer data = packet.data()
-                        if (data != null && packet.size() > 0) {
-                            byte[] buffer = new byte[packet.size()]
-                            data.get(buffer)
+                        try {
+                            int streamIndex = packet.stream_index()
+                            BytePointer data = packet.data()
+                            if (data != null && packet.size() > 0) {
+                                byte[] buffer = new byte[packet.size()]
+                                data.get(buffer)
 
-                            if (hasAudio && streamIndex == avData.audioStreamIndex) {
-                                // 1. Clone the packet so recordAAC doesn't alter the original pointers
-                                AVPacket clonedPacket = av_packet_clone(packet)
-                                if (clonedPacket != null) {
-                                    if (avData.audioChannels > 0) {
-                                        if (avData.inputAudioCodecName == "aac") {
-                                            recordAAC.recordPacket(clonedPacket)
-                                            byte[] aacArray = aacOutputStream.toByteArray()
-                                            if (aacArray.length > 0)
-                                                mediaStreamHandler.sendPacket(camStreamId + "a", aacArray)
-                                            aacOutputStream.reset()
-                                        } else if (avData.inputAudioCodecName == 'pcm_alaw')
-                                            mediaStreamHandler.sendPacket(camStreamId + "a", buffer)
-                                        //logService.cam.info("pcm packet len = " + buffer.length)
+                                if (hasAudio && streamIndex == avData.audioStreamIndex) {
+                                    // 1. Clone the packet so recordAAC doesn't alter the original pointers
+                                    AVPacket clonedPacket = av_packet_clone(packet)
+                                    if (clonedPacket != null) {
+                                        if (avData.audioChannels > 0) {
+                                            if (avData.inputAudioCodecName == "aac") {
+                                                recordAAC.recordPacket(clonedPacket)
+                                                byte[] aacArray = aacOutputStream.toByteArray()
+                                                if (aacArray.length > 0)
+                                                    mediaStreamHandler.sendPacket(camStreamId + "a", aacArray)
+                                                aacOutputStream.reset()
+                                            } else if (avData.inputAudioCodecName == 'pcm_alaw')
+                                                mediaStreamHandler.sendPacket(camStreamId + "a", buffer)
+                                        }
+
+                                        av_packet_free(clonedPacket) // Always free native clones to avoid memory leaks
                                     }
-
-                                    av_packet_free(clonedPacket) // Always free native clones to avoid memory leaks
+                                } else if (streamIndex == avData.videoStreamIndex) {
+                                    mediaStreamHandler.sendPacket(camStreamId, buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
                                 }
-                            } else if (streamIndex == avData.videoStreamIndex) {
-                                mediaStreamHandler.sendPacket(camStreamId, buffer, (packet.flags() & AV_PKT_FLAG_KEY) != 0)
-                            }
 
-                            // Write packet to the recorder if there is one for this stream
-                            if (recordingEnabled)
-                                recorders.write(packet, cameraName)
+                                // Write packet to the recorder if there is one for this stream
+                                if (recordingEnabled)
+                                    recorders.write(packet, cameraName)
+                            }
+                        }
+                        finally {
+                            av_packet_unref(packet)
                         }
                     }
 
                     logService.cam.info("Camera closed the stream sequence gracefully.")
-                    if (avData.inputAudioCodecName == "aac")
-                        recordAAC.stop()
-
                 } catch (Exception e) {
                     logService.cam.error("${e.getClass().getName()} in media server main  loop: " + e.getMessage())
                     recorders.closeThisRecorder(cameraName)
@@ -175,15 +174,16 @@ class MediaServer {
                     } else {
                         grabber.release()
                     }
-                    if (recordAAC != null && "aac".equals(inputAudioCodecName)) {
-                        try {
+                    try {
+                        if (recordAAC != null && "aac".equals(inputAudioCodecName)) {
                             recordAAC.stop()
-                        } catch (Exception ignored) {
                         }
+                        recordAAC.release()
+                    } catch (Exception ignored) {
                     }
                 }
-                    Thread.sleep(2000) // Thread will now safely reach here and retry
-                }
+            }
+            Thread.sleep(2000) // Thread will now safely reach here and retry
         })
     }
 
@@ -302,4 +302,5 @@ class MediaServer {
             logService.cam.info(camera.name + " $streamName enabled = $enabled")
         return enabled
     }
+
 }
