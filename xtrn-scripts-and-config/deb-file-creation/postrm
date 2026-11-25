@@ -1,6 +1,5 @@
 #!/bin/bash
 
-pushd /etc/security-cam/camera-recordings-service || true
 #sudo -u tomcat bin/pip uninstall -y -r requirements.txt
 sudo -u tomcat rm -rf bin include lib lib64 pyvenv.cfg
 #

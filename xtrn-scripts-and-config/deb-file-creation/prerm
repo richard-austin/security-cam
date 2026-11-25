@@ -6,10 +6,6 @@ deb-systemd-invoke disable tomcat11.service
 deb-systemd-invoke stop tomcat11.service
 deb-systemd-invoke disable motion.service
 deb-systemd-invoke stop motion.service
-deb-systemd-invoke disable low-latency-media-server.service
-deb-systemd-invoke stop low-latency-media-server.service
 
 deb-systemd-invoke stop wifimanagement.service
 deb-systemd-invoke disable wifimanagement.service
-deb-systemd-invoke stop camera-recordings.service
-deb-systemd-invoke disable camera-recordings.service

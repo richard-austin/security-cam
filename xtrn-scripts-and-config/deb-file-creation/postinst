@@ -68,15 +68,12 @@ find /etc/security-cam -type f -print0 | xargs -0 chmod 664
 chgrp -R security-cam /etc/security-cam/
 chown -R tomcat:security-cam /var/log/motion
 chown -R tomcat:security-cam /var/log/security-cam
-chown -R tomcat:security-cam /var/log/camera-recordings-service
-chown -R tomcat:security-cam /var/log/low-latency-media-server
 chown -R tomcat:tomcat /var/log/tomcat11
 # Make the following scripts executable
 chmod +x /etc/security-cam/install-cert.sh
 chmod +x /etc/security-cam/processmotionrecordings.sh || true
 chmod +x /etc/security-cam/productKeyGen.sh || true
 
-pushd /etc/security-cam/camera-recordings-service || true
 sudo -u tomcat python3 -m venv .  # Create Python3 virtual environment
 sudo -u tomcat bin/pip install -r requirements.txt --use-pep517
 
@@ -122,11 +119,9 @@ systemctl daemon-reload  # Register the motion service file change
 # Start the services
 deb-systemd-invoke enable motion.service
 deb-systemd-invoke enable nginx.service
-deb-systemd-invoke enable low-latency-media-server
 
 deb-systemd-invoke enable wifimanagement.service
 deb-systemd-invoke start wifimanagement.service
-deb-systemd-invoke enable camera-recordings.service
 
 CERT_FILE=/etc/nginx/security-cam.crt
 if [ ! -f "$CERT_FILE" ]; then

@@ -17,6 +17,7 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avcodec.AVProfile
 import org.bytedeco.ffmpeg.global.avformat
 import org.bytedeco.javacpp.BytePointer
+import org.bytedeco.javacpp.Pointer
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.FFmpegFrameRecorder
 import org.springframework.beans.factory.annotation.Autowired

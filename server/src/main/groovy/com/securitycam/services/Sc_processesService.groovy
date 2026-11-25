@@ -12,26 +12,20 @@ import groovy.json.JsonSlurper
 import org.springframework.core.env.Environment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.w3._2003._05.soap_envelope.Envelope
+
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 @Service
 class Sc_processesService {
-    @Autowired
+
     LogService logService
-    @Autowired
     RestfulInterfaceService restfulInterfaceService
-    @Autowired
     Config config
-    @Autowired
     UtilsService utilsService
-
-    @Autowired
     Environment environment
-
-    @Autowired
     UserRepository userRepository
-
     OnvifService onvifService
 
     // Set from OnvifService
@@ -48,7 +42,14 @@ class Sc_processesService {
     final int emailTimeout = 1000 * 60 * 60  // 1 Hr between sending repeat emails
     Timer ipChangeCheckTimer
 
-    Sc_processesService() {
+    @Autowired
+    Sc_processesService(LogService logService, RestfulInterfaceService restfulInterfaceService, Config config, UtilsService utilsService, Environment environment, UserRepository userRepository) {
+        this.logService = logService
+        this.restfulInterfaceService = restfulInterfaceService
+        this.config = config
+        this.utilsService = utilsService
+        this.environment = environment
+        this.userRepository = userRepository
         processes = new ArrayList()
     }
 

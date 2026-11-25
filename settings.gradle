@@ -11,6 +11,6 @@ plugins {
 }
 
 
-include 'client', 'server', 'onvif-ws-client', 'onvif-java', 'low-latency-media-server', 'camera-recordings-service', 'wifi-setup-service', 'generateProductKey', 'initialAdmin'
+include 'client', 'server', 'onvif-ws-client', 'onvif-java', 'wifi-setup-service', 'generateProductKey', 'initialAdmin'
 
 // includeBuild("../dev-work/go-plugin")

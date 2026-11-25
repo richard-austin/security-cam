@@ -130,7 +130,7 @@ tasks.register('setVersion', Exec) {
 
 tasks.register('buildDebFile', Exec) {
     group='build'
-    dependsOn([':server:bootWar', ':generateProductKey:uberJar', ':low-latency-media-server:deploy', ':initialAdmin:buildWar'])
+    dependsOn([':server:bootWar', ':generateProductKey:uberJar', ':initialAdmin:buildWar'])
     group = 'build'
     workingDir "$projectDir/../xtrn-scripts-and-config/deb-file-creation"
     commandLine './create-deb.sh'

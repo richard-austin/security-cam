@@ -3,8 +3,6 @@
 export VERSION
 VERSION=$(< ../../server/src/main/resources/version.txt)
 
-rm -r security-cam_*_arm64
-
 mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam
 
 cp ../processmotionrecordings.sh \
@@ -18,18 +16,8 @@ cp ../../wifi-setup-service/*.py security-cam_"${VERSION}"_arm64/etc/security-ca
 cp ../../wifi-setup-service/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/wifi-setup-service
 cp ../install-cert.sh security-cam_"${VERSION}"_arm64/etc/security-cam
 
-mkdir -p security-cam_"${VERSION}"_arm64/etc/low-latency-media-server &&
-cp  ../low-latency-media-server/low-latency-media-server_arm64 security-cam_"${VERSION}"_arm64/etc/low-latency-media-server
-cp  ../low-latency-media-server/config.json security-cam_"${VERSION}"_arm64/etc/low-latency-media-server
-
-mkdir -p security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service &&
-cp  ../../camera-recordings-service/*.py security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service
-cp  ../../camera-recordings-service/requirements.txt security-cam_"${VERSION}"_arm64/etc/security-cam/camera-recordings-service
-
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system
 cp ../wifimanagement.service  security-cam_"${VERSION}"_arm64/lib/systemd/system
-cp ../camera-recordings.service security-cam_"${VERSION}"_arm64/lib/systemd/system
-cp ../low-latency-media-server.service security-cam_"${VERSION}"_arm64/lib/systemd/system
 
 mkdir -p security-cam_"${VERSION}"_arm64/DEBIAN
 cp preinst postinst prerm postrm security-cam_"${VERSION}"_arm64/DEBIAN
@@ -70,7 +58,6 @@ Description: A security camera system accessed through a secure web based interf
 Depends: openjdk-25-jre-headless (>=25.0.0), openjdk-25-jre-headless (<< 25.9.9),
  tomcat11 (>=11.0.0), tomcat11 (<= 12.0.0),
  tomcat11-admin (>=11.0.0), tomcat11-admin (<= 11.99.99),
- ffmpeg (>=7:8.0.1-3ubuntu2), ffmpeg (<< 7:8.99.99),
  motion (>=4.6), motion(<<5.0.0-0),
  curl (>=8.5.0), curl(<<9.0.0),
  nginx (>=1.28.0), nginx(<=1.28.99),
