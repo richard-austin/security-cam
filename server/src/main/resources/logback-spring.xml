@@ -44,9 +44,9 @@
         </encoder>
     </appender>
 
-    <logger name="CAM" level="${nvrLogLevel}">
+    <logger name="CAM" level="${nvrLogLevel}" additivity="false">
         <appender-ref ref="ROLLING_FILE"/>
-        <appender-ref ref="org.springframework.web"/>
+        <appender-ref ref="STDOUT"/> <!-- Optional: include this if you still want CAM logs in the console -->
     </logger>
 
     <logger name="CLOUDPROXY" level="${cloudProxyLogLevel}" additivity="false">
