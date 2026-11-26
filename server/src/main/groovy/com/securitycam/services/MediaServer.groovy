@@ -17,6 +17,7 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket
 import org.bytedeco.ffmpeg.avcodec.AVProfile
 import org.bytedeco.ffmpeg.global.avformat
 import org.bytedeco.javacpp.BytePointer
+import org.bytedeco.javacpp.Pointer
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.FFmpegFrameRecorder
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,7 +41,8 @@ class MediaServer {
 
     boolean running = false
     private final configFile = "cameras.json"
-    ExecutorService mediaThreads
+    private ExecutorService mediaThreads
+    private Timer memoryTrimTimer
 
     @Autowired
     MediaServer(private LogService logService, RecorderFactory recorders, MediaStreamHandler mediaStreamHandler, Config config) {
@@ -49,6 +51,16 @@ class MediaServer {
         this.mediaStreamHandler = mediaStreamHandler
         this.config = config
         avformat.avformat_network_init()
+        memoryTrimTimer = new Timer()
+        TimerTask trimTask = new TimerTask() {
+            @Override
+            void run() {
+                boolean memoryFreed = Pointer.trimMemory()
+                logService.cam.info("Memory freed $memoryFreed")
+            }
+        }
+        // Run trimMemory every 3 minutes
+        memoryTrimTimer.scheduleAtFixedRate(trimTask,3000 * 60, 3000 * 60)
     }
 
     void runStreamingSession(String rtspUrl, String cameraName, Camera cam, String streamName, Stream stream) throws Exception {
