@@ -282,11 +282,7 @@ class Recorder {
                             recorderHLS?.stop()
                         } catch (Exception ignored) {
                         }
-                        try {
-                            recorderHLS?.close()
-                        } catch (Exception ignored) {
-                        }
-                        try {
+                         try {
                             recorderHLS?.release()
                         } catch (Exception ignored) {
                         }
