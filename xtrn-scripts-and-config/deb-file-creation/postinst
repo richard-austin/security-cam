@@ -60,6 +60,9 @@ chmod 640 /var/lib/tomcat11/conf/server.xml
 chown root:tomcat /var/lib/tomcat11/conf/server.xml
 chown root:root /etc/security-cam/wifi-setup-service/*.py
 
+touch /var/security-cam/ftp-server.properties
+chown -R tomcat:security-cam /var/security-cam/ftp-server.properties
+
 # Give directories only permission 775
 find /etc/security-cam -type d -print0 | xargs -0 chmod 775
 # Give files permission 664
