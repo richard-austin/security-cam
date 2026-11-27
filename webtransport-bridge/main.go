@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -19,9 +20,9 @@ import (
 )
 
 const (
-	listenAddr    = ":8443"
+	listenAddr    = ":8080"
 	springBootURL = "ws://127.0.0.1:8080/ws/stream" // Internal Spring Boot 4 WebSocket endpoint
-	allowedOrigin = "https://yourdomain.com"        // Must match your frontend origin
+	allowedOrigin = "https://localhost:8080"        // Must match your frontend origin
 	certFile      = "cert.pem"
 	keyFile       = "key.pem"
 
@@ -92,6 +93,7 @@ func main() {
 			Handler: mux,
 			TLSConfig: &tls.Config{
 				GetCertificate: reloader.getCertificate,
+				NextProtos:     []string{"h3"},
 			},
 			QUICConfig: &quic.Config{
 				EnableStreamResetPartialDelivery: true,
@@ -101,7 +103,9 @@ func main() {
 		},
 		CheckOrigin: func(r *http.Request) bool {
 			origin := r.Header.Get("Origin")
-			return origin == allowedOrigin
+			return origin == allowedOrigin ||
+				strings.HasPrefix(origin, "http://localhost:") ||
+				strings.HasPrefix(origin, "https://localhost:")
 		},
 	}
 
@@ -153,6 +157,8 @@ func handleWebTransport(w http.ResponseWriter, r *http.Request, wtServer *webtra
 		log.Printf("Spring Boot rejected handshake (HTTP %d): %v", status, err)
 		http.Error(w, "Unauthorized", status)
 		return
+	} else {
+		log.Printf("Handshake accepted")
 	}
 
 	// 4. Upgrade HTTP/3 request to WebTransport session

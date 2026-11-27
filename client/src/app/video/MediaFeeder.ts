@@ -151,7 +151,7 @@ class MediaFeeder {
           }
         };
         const h264HwDecode = NavComponent.getCookie("hardwareDecoding");  // Get H264 hardware decoding user preference
-        this.videoWorker.postMessage({url: url, h264HardwareDecoding: h264HwDecode})
+        this.videoWorker.postMessage({url: "https://localhost:8080/webtransport?suuid=cam1-stream1", h264HardwareDecoding: h264HwDecode})
         if (this.stream.audio) {
           // Create a new audio feeder web worker
           this.audioWorker = new Worker(new URL('audio-feeder.worker', import.meta.url));

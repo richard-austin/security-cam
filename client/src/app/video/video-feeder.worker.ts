@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 
 import {timer} from "rxjs";
+import {UniStreamWebTransportClient} from "./BinaryWebTransportClient";
 
 let videoFeeder!: VideoFeeder;
 addEventListener('message', ({data}) => {
@@ -11,7 +12,7 @@ addEventListener('message', ({data}) => {
 
     if (typeof VideoDecoder !== 'undefined') {
       videoFeeder = new VideoFeeder(data.url, h264HardwareDecoding)
-      videoFeeder.setUpWebsocketConnection();
+      videoFeeder.setUpWebTransportConnection();
       videoFeeder.setupDecoder();
     } else {
       let sub = timer(1000).subscribe(() => {
@@ -131,6 +132,55 @@ class VideoFeeder {
       this.decoder.close()
     if (this.ws)
       this.ws.close()
+  }
+
+  onClose(error?: any) {
+    console.log(error)
+  }
+
+  onDatagram(data: Uint8Array) {
+
+  }
+
+  onStreamMessage = (data: Uint8Array)=> {
+    let Utf8ArrayToStr= (array: Uint8Array): string => {
+      let out, i, len;
+      out = '';
+      len = array.length;
+      i = 0;
+      while (i < len) {
+        out += String.fromCharCode(array[i]);
+        ++i;
+      }
+      return out;
+    }
+
+    if (!this.started) {
+      let array = data;
+      if (data instanceof Uint8Array)
+        console.log("array[0] === " + array[0])
+
+      if (array[0] === 9) {
+        let decoded_arr = array.slice(1);
+        this.codec = Utf8ArrayToStr(decoded_arr);
+        this.isHEVC = this.codec.includes("hvc1")
+        console.log('first video packet with codec data: ' + this.codec);
+        this.started = true;
+      } else
+        console.error("No video codec was found")
+    } else {
+      this.processChunk(data.buffer as ArrayBuffer).then();
+    }
+  }
+
+
+  webTransportClient!: UniStreamWebTransportClient
+
+  setUpWebTransportConnection() {
+    this.webTransportClient = new UniStreamWebTransportClient(this.url, this.onStreamMessage)
+    this.webTransportClient.connect("k/lEsq2qbvC+hWNSgMFhoNrqTL9T8I3ggXt8u3hH8Cc=").then(() => {
+      console.log("Connected");
+    });
   }
 
   resetTimeout() {
