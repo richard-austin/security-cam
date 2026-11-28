@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"io"
@@ -28,7 +29,15 @@ const (
 
 	maxFrameSize      = 10 * 1024 * 1024 // 10 MB max message size
 	certCacheDuration = 5 * time.Minute  // Reload certs from disk every 5 mins
+	outboundQueueSize = 5                // Max frames buffered per client before dropping stale frames
 )
+
+var bufferPool = sync.Pool{
+	New: func() any {
+		// Pre-allocate 64KB per buffer to fit typical video frames without resizing
+		return bytes.NewBuffer(make([]byte, 0, 64*1024))
+	},
+}
 
 // certReloader caches the TLS certificate in memory and automatically reloads it
 // when Certbot/Nginx renews the files on disk.
@@ -96,9 +105,12 @@ func main() {
 				NextProtos:     []string{"h3"},
 			},
 			QUICConfig: &quic.Config{
-				EnableStreamResetPartialDelivery: true,
-				MaxIdleTimeout:                   30 * time.Second,
-				KeepAlivePeriod:                  15 * time.Second,
+				MaxIncomingUniStreams:          1000,
+				InitialStreamReceiveWindow:     2 * 1024 * 1024,  // 2 MB
+				MaxStreamReceiveWindow:         6 * 1024 * 1024,  // 6 MB
+				InitialConnectionReceiveWindow: 4 * 1024 * 1024,  // 4 MB
+				MaxConnectionReceiveWindow:     15 * 1024 * 1024, // 15 MB
+				KeepAlivePeriod:                15 * time.Second,
 			},
 		},
 		CheckOrigin: func(r *http.Request) bool {
@@ -173,14 +185,16 @@ func handleWebTransport(w http.ResponseWriter, r *http.Request, wtServer *webtra
 }
 
 func bridgeSession(wtSess *webtransport.Session, wsConn *websocket.Conn) {
-
 	defer wtSess.CloseWithError(0, "session closed")
 	defer wsConn.Close(websocket.StatusNormalClosure, "bridge closed")
 
 	wsConn.SetReadLimit(maxFrameSize)
 	sessCtx := wtSess.Context()
 
-	// Client -> Spring Boot: Forward incoming unidirectional streams
+	// Bounded channel preserves frame order and applies backpressure
+	outbound := make(chan *bytes.Buffer, outboundQueueSize)
+
+	// 1. Client -> Spring Boot: Forward incoming unidirectional streams
 	go func() {
 		for {
 			stream, err := wtSess.AcceptUniStream(sessCtx)
@@ -191,13 +205,70 @@ func bridgeSession(wtSess *webtransport.Session, wsConn *websocket.Conn) {
 		}
 	}()
 
-	// Spring Boot -> Client: Forward each WebSocket message on its own uni-stream
+	// 2. Dedicated Sender Goroutine: Sends frames in strict order and recycles buffers
+	go func() {
+		for {
+			select {
+			case <-sessCtx.Done():
+				return
+			case buf := <-outbound:
+				sendPayloadOverUniStream(sessCtx, wtSess, buf.Bytes())
+				buf.Reset()
+				bufferPool.Put(buf)
+			}
+		}
+	}()
+
+	// 3. Spring Boot -> Bridge: Read into pooled buffers without allocating per frame
 	for {
-		_, payload, err := wsConn.Read(sessCtx)
+		_, reader, err := wsConn.Reader(sessCtx)
 		if err != nil {
 			return
 		}
-		go sendPayloadOverUniStream(sessCtx, wtSess, payload)
+
+		buf := bufferPool.Get().(*bytes.Buffer)
+		buf.Reset()
+
+		if _, err := io.Copy(buf, io.LimitReader(reader, maxFrameSize)); err != nil {
+			buf.Reset()
+			bufferPool.Put(buf)
+			return
+		}
+
+		// Non-blocking send: if the client is lagging and the queue is full,
+		// drop the frame instead of building multi-second latency.
+		select {
+		case outbound <- buf:
+		default:
+			// Optional: never drop your codec header packet (byte 0 == 9)
+			if buf.Len() > 0 && buf.Bytes()[0] == 9 {
+				// Evict oldest queued frame to make room for the codec header
+				select {
+				case stale := <-outbound:
+					stale.Reset()
+					bufferPool.Put(stale)
+				default:
+				}
+				outbound <- buf
+			} else {
+				buf.Reset()
+				bufferPool.Put(buf)
+			}
+		}
+	}
+}
+
+func sendPayloadOverUniStream(ctx context.Context, wtSess *webtransport.Session, payload []byte) {
+	stream, err := wtSess.OpenUniStreamSync(ctx)
+	if err != nil {
+		return
+	}
+	defer stream.Close()
+
+	// Tight deadline ensures a stalled frame aborts quickly instead of blocking the sender loop
+	_ = stream.SetWriteDeadline(time.Now().Add(500 * time.Millisecond))
+	if _, err := stream.Write(payload); err != nil {
+		stream.CancelWrite(0)
 	}
 }
 
@@ -211,20 +282,5 @@ func forwardUniStreamToWS(ctx context.Context, stream *webtransport.ReceiveStrea
 		if err := wsConn.Write(ctx, websocket.MessageBinary, data); err != nil {
 			log.Printf("error forwarding to Spring Boot: %v", err)
 		}
-	}
-}
-
-func sendPayloadOverUniStream(ctx context.Context, wtSess *webtransport.Session, payload []byte) {
-	stream, err := wtSess.OpenUniStreamSync(ctx)
-	if err != nil {
-		return
-	}
-	defer stream.Close() // Sends QUIC FIN so the browser knows the message ended
-
-	// Optional: Cancel retransmission if a single live frame takes > 5 seconds to deliver
-	_ = stream.SetWriteDeadline(time.Now().Add(5 * time.Second))
-
-	if _, err := stream.Write(payload); err != nil {
-		stream.CancelWrite(0)
 	}
 }

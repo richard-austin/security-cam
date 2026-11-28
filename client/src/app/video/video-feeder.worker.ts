@@ -182,7 +182,6 @@ class VideoFeeder {
       console.log("Connected");
     });
   }
-
   resetTimeout() {
     clearTimeout(this.timeout);
     this.timeout = setTimeout(() => {
