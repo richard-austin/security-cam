@@ -39,7 +39,7 @@ class BucketBrigade {
         this.preambleTime = preambleTime
         this.formatContext = formatContext
         indexLimit = length
-        gopCache = new GOPCache(800, formatContext, logService)
+        gopCache = new GOPCache(1200, formatContext, logService)
     }
 
     AVPacket writeAndGetDelayed(AVPacket pkt, String cameraName) {
