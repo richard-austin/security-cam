@@ -41,9 +41,11 @@ mkdir -p security-cam_"${VERSION}"_arm64/tmp
 
 mkdir -p security-cam_"${VERSION}"_arm64/lib/systemd/system/
 mkdir -p security-cam_"${VERSION}"_arm64/etc/udev/rules.d
+mkdir -p security-cam_"${VERSION}"_arm64/etc/systemd/system/tomcat11.service.d
 
 cp -r ../motion/motion.conf ../nginx.conf ../chrony.conf security-cam_"${VERSION}"_arm64/tmp
-cp ../apache-tomcat-10/conf/server.xml ../apache-tomcat-10/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
+cp ../apache-tomcat-11/conf/server.xml ../apache-tomcat-11/conf/tomcat-users.xml security-cam_"${VERSION}"_arm64/tmp
+cp ../apache-tomcat-11/conf/override.conf security-cam_"${VERSION}"_arm64/etc/systemd/system/tomcat11.service.d
 cp ../../server/build/libs/server-0.0.1.war security-cam_"${VERSION}"_arm64/tmp
 cp ../../initialAdmin/dist/cua.war  security-cam_"${VERSION}"_arm64/tmp
 

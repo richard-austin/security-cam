@@ -28,6 +28,7 @@ chown -R tomcat:security-cam /var/security-cam
 
 chown tomcat:security-cam /var/log/security-cam/security-cam.log*  # To prevent access denied errors on first starting tomcat
 chown -R tomcat:tomcat /var/lib/tomcat11
+chown -R tomcat:tomcat /etc/systemd/system/tomcat11.service.d
 
 # Apply permissions in /etc/udev/rules.d/99-vcio.rules
 udevadm control --reload-rules
@@ -89,35 +90,8 @@ popd || true
 
 # Change the motion service user to tomcat
 sed -i 's/User=motion/User=tomcat/' /lib/systemd/system/motion.service
-
-#
-# AddToTomcatUnitFileIfNotPresent: Add ReadWriteFilePaths to the tomcat unit file to enable access to /etc/security-cam
-#                                  and /var/log/security-cam.
-#
-AddToTomcatUnitFileIfNotPresent() {
-  lineToWrite=$1
-  lineToWriteUnder=$2
-  unitFile=$3
-  # Enter lineToWrite after lineToWriteUnder if not already present
-  if ! grep "$lineToWrite" "$unitFile"; then
-    # Add the line after lineToWriteUnder escaping all '/' as the regex is within / delimiters.
-    result=$(awk '/'"${lineToWriteUnder//\//\\/}"'/ { print; print '\""${lineToWrite}"\"'; next }1' "$unitFile")
-    echo "$result" >"$unitFile"
-  fi
-}
-
-# Give tomcat permission to write to some additional directories
-lineToWrite="ReadWritePaths=/var/log/security-cam/"
-lineToWrite2="ReadWritePaths=/etc/security-cam/"
-lineToWrite3="ReadWritePaths=/var/security-cam/"
-lineToWriteUnder="ReadWritePaths=/var/log/tomcat11/"
-unitFile="/usr/lib/systemd/system/tomcat11.service"
-
-AddToTomcatUnitFileIfNotPresent $lineToWrite $lineToWriteUnder $unitFile
-AddToTomcatUnitFileIfNotPresent $lineToWrite2 $lineToWriteUnder $unitFile
-AddToTomcatUnitFileIfNotPresent $lineToWrite3 $lineToWriteUnder $unitFile
-
-systemctl daemon-reload  # Register the motion service file change
+deb-systemd-invoke stop tomcat11.service
+systemctl daemon-reload  # Register the motion service file change and the tomcat 11 override file
 
 # Start the services
 deb-systemd-invoke enable motion.service
